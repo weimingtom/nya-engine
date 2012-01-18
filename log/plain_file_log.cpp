@@ -82,21 +82,26 @@ void plain_file_log::close()
     delete ref;
 }
 
-plain_file_log::plain_file_log(const plain_file_log & from)
-{
-    *this = from;
-}
+//log &plain_file_log::operator << (message_type a) { if(!ref) return *this; *ref << a; return *this; }
+log &plain_file_log::operator << (int a) { if(!ref) return *this; *ref << a; return *this; }
+log &plain_file_log::operator << (const char *a) { if(!ref) return *this; *ref << a; return *this; }
+
+//void level_inc() { if(!ref) return; ref->level_inc(); }
+//void level_dec() { if(!ref) return; ref->level_dec(); }
+    
+plain_file_log::plain_file_log(): ref(0) {}
+
+plain_file_log::plain_file_log(const plain_file_log & from): ref(0) { *this = from; }
 
 plain_file_log & plain_file_log::operator = (const plain_file_log & from)
 {
-    plain_file_log_impl *impl = static_cast<plain_file_log_impl*>(from.ref);
-
     if (this != &from)
     {
         if(ref)
             delete ref;
 
-        ref = new plain_file_log_impl(*impl);
+        if(from.ref)
+            ref = new plain_file_log_impl(*from.ref);
     }
 
     return *this;
