@@ -27,9 +27,9 @@ public:
         ++m_ref_count;
     }
 
-    size_t get_size()
+    size_t get_actual_size()
     {
-        return m_size;
+        return m_data.size();
     }
 
     void add_data(const void*data,size_t size)
@@ -71,14 +71,27 @@ class tmp_buffer_allocator
 public:
     unsigned int allocate(size_t size)
     {
+        int first_free = -1;
         for(int i=0;i<m_buffers.size();++i)
         {
             tmp_buffer & buffer = m_buffers[i];
             if(!buffer.is_used())
             {
-                buffer.allocate(size);
-                return i;
+                if(buffer.get_actual_size()<=size)
+                {
+                    buffer.allocate(size);
+                    return i;
+                }
+
+                if(first_free<0)
+                    first_free = i;
             }
+        }
+
+        if(first_free>=0)
+        {
+            m_buffers[first_free].allocate(size);
+            return first_free;            
         }
 
         m_buffers.push_back(tmp_buffer());
