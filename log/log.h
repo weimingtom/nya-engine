@@ -28,6 +28,8 @@ public:
 	virtual void scope_dec() {}
 };
 
+log &no_log();
+    
 }
 #endif
 
