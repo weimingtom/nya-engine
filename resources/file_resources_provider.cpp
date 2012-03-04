@@ -13,7 +13,7 @@ public:
 	size_t get_size() { return m_size; }
 
 	bool read_all(void*data);
-	bool read_chunk(void *data,size_t offset,size_t size);
+	bool read_chunk(void *data,size_t size,size_t offset);
 
 public:
 	bool open(const char*filename);
@@ -57,7 +57,7 @@ bool file_resource::read_all(void*data)
 	return true;
 }
 
-bool file_resource::read_chunk(void *data,size_t offset,size_t size)
+bool file_resource::read_chunk(void *data,size_t size,size_t offset)
 {
 	if(!data||!m_file)
 		return false;

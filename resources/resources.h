@@ -14,7 +14,7 @@ public:
 	virtual size_t get_size() { return 0; };
 
 	virtual bool read_all(void*data) { return false; };
-	virtual bool read_chunk(void *data, size_t offset, size_t size) { return false; };
+	virtual bool read_chunk(void *data,size_t size,size_t offset=0) { return false; };
 };
 
 class resources_provider
