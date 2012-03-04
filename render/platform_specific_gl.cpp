@@ -1,8 +1,9 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef __APPLE__
-
 #include "platform_specific_gl.h"
+
+#ifndef NO_EXTENSIONS_INIT
+
 #include "render.h"
 #include <string>
 
