@@ -18,12 +18,18 @@ public:
 
     void *get_data(size_t offset=0);
 
+    template<typename t_data>void copy_data(t_data &data,size_t offset=0)
+    {
+        copy_data((void*)&data,sizeof(data),offset);
+    }
+
 public:
     tmp_buffer_ref(size_t size);
     ~tmp_buffer_ref();
 
 private:
     void add_data(void*data,size_t size);
+    void copy_data(void*data,size_t size,size_t offset);
 
 private:
     const unsigned int m_buf_idx;

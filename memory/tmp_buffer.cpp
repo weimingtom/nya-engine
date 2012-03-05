@@ -49,12 +49,17 @@ public:
             --m_ref_count;
     }
 
-    void* get_data(size_t offset)
+    void *get_data(size_t offset)
     {
         if(offset>=m_size)
             return 0;
         
         return &m_data[offset];
+    }
+
+    void copy_data(void *data,size_t size,size_t offset)
+    {
+        memcpy(data,&m_data[offset],size);
     }
 
     tmp_buffer(): m_ref_count(0), m_size(0) {}
@@ -129,6 +134,12 @@ void *tmp_buffer_ref::get_data(size_t offset)
 {
     return get_buffer(m_buf_idx).get_data(offset);
 }
+
+void tmp_buffer_ref::copy_data(void*data,size_t size,size_t offset)
+{
+    get_buffer(m_buf_idx).copy_data(data,size,offset);
+}
+
 
 tmp_buffer_ref::tmp_buffer_ref(size_t size): m_buf_idx(get_allocator().allocate(size)) {}
 

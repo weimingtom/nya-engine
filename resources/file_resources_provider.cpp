@@ -48,7 +48,7 @@ void file_resources_provider::close(resource_data *res)
 
 bool file_resource::read_all(void*data)
 {
-	if(!data||m_file)
+	if(!data||!m_file)
 		return false;
 
 	fseek(m_file,0,SEEK_SET);
