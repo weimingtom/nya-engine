@@ -19,8 +19,8 @@ public:
 		quads
 	};
 
-	void gen_vertex_data(void*data,unsigned int vert_stride,unsigned int vert_count,bool dynamic=false);
-	void gen_index_data(void*data,element_type type,unsigned int faces_count,bool dynamic=false);
+	void gen_vertex_data(const void*data,unsigned int vert_stride,unsigned int vert_count,bool dynamic=false);
+	void gen_index_data(const void*data,element_type type,unsigned int faces_count,bool dynamic=false);
 	void set_tc(unsigned int dimensions,unsigned int offset);
 
 public:

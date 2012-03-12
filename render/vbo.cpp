@@ -100,7 +100,7 @@ void vbo::unbind_tcs()
 
 void vbo::bind()
 {
-	if(m_vertex_id)
+	if(!m_vertex_id)
 		return;
 
 	glEnableClientState(GL_VERTEX_ARRAY);
@@ -188,14 +188,14 @@ void vbo::release()
 	m_vertex_id = m_index_id = 0;
 }
 
-void vbo::gen_vertex_data(void*data,unsigned int vert_stride,unsigned int vert_count,bool dynamic)
+void vbo::gen_vertex_data(const void*data,unsigned int vert_stride,unsigned int vert_count,bool dynamic)
 {
 	if(!check_init_vbo())
 		return;
 
 	const unsigned int size=vert_count*vert_stride;
 	if(size==0)
-		return;
+		return; 
 
 	if(m_vertex_id)
 	    vbo_glDeleteBuffers(1,&m_vertex_id);
@@ -213,17 +213,20 @@ void vbo::gen_vertex_data(void*data,unsigned int vert_stride,unsigned int vert_c
 	m_vertex_stride = vert_stride;
 }
 
-void vbo::gen_index_data(void*data,element_type type,unsigned int faces_count,bool dynamic)
+void vbo::gen_index_data(const void*data,element_type type,unsigned int faces_count,bool dynamic)
 {
 	if(!check_init_vbo())
 		return;
 
-	const unsigned int size=(type==quads?(faces_count*4):(faces_count*3));
+	const unsigned int size=(type==quads?(faces_count*4*sizeof(unsigned int)):(faces_count*3)*sizeof(unsigned int));
     if(size==0)
         return;
 
 	if(m_index_id)
 	    vbo_glDeleteBuffers(1,&m_index_id);
+
+    m_element_count = faces_count;
+    m_element_type = type;
 
 	vbo_glGenBuffers(1,&m_index_id);
 	vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,m_index_id);
