@@ -2,7 +2,6 @@
 
 /*
     ToDo:
-		  bind indices with offset
 		  draw arrays modes (quads, tris)
 		  is_valid function
 		  log
@@ -63,7 +62,7 @@ bool check_init_vbo()
 	return true;
 }
 
-void vbo::bind()
+void vbo::bind(bool indices_bind)
 {
 	bind_verts();
 	bind_normals();
@@ -74,7 +73,8 @@ void vbo::bind()
 		if(m_tcs[i].has)
 			bind_tc(i);
 	}
-	//bind_indices();
+    if(indices_bind)
+        bind_indices();
 }
 
 void vbo::bind_verts()
@@ -177,6 +177,7 @@ void vbo::unbind()
 		m_normals.bind=false;
 	}
 
+    bool has_unbinds=false;
 	for(int i=0;i<VBO_MAX_TEX_COORD;++i)
 	{
 		attribute &tc = m_tcs[i];
@@ -186,8 +187,10 @@ void vbo::unbind()
         vbo_glClientActiveTexture(GL_TEXTURE0_ARB+i);
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
         tc.bind=false;
+        has_unbinds=true;
 	}
-    vbo_glClientActiveTexture(GL_TEXTURE0_ARB);
+    if(has_unbinds)
+        vbo_glClientActiveTexture(GL_TEXTURE0_ARB);
 }
 
 void vbo::draw()
@@ -197,11 +200,16 @@ void vbo::draw()
 
 void vbo::draw(unsigned int n_faces)
 {
+    draw(0,n_faces);
+}
+    
+void vbo::draw(unsigned int offset,unsigned int n_faces)
+{
 	if(!m_vertex_bind)
 		return;
 
-	if(n_faces>m_element_count)
-		n_faces = m_element_count;
+	if(offset+n_faces>m_element_count)
+        return;
 
 	if(m_index_bind)
 	{
@@ -210,24 +218,24 @@ void vbo::draw(unsigned int n_faces)
 		switch(m_element_type)
 		{
 			case triangles:
-				glDrawElements(GL_TRIANGLES,n_faces*3,gl_elem_type,0);
+				glDrawElements(GL_TRIANGLES,n_faces*3,gl_elem_type,(void*)(offset*3*m_element_size));
 			break;
 
 			case triangles_strip:
-				glDrawElements(GL_TRIANGLE_STRIP,n_faces*3,gl_elem_type,0);
+				glDrawElements(GL_TRIANGLE_STRIP,n_faces*3,gl_elem_type,(void*)(offset*3*m_element_size));
 			break;
 
 			case triangles_fan:
-				glDrawElements(GL_TRIANGLE_FAN,n_faces*3,gl_elem_type,0);
+				glDrawElements(GL_TRIANGLE_FAN,n_faces*3,gl_elem_type,(void*)(offset*3*m_element_size));
 			break;
 
 			case quads:
-				glDrawElements(GL_QUADS,n_faces*4,gl_elem_type,0);
+				glDrawElements(GL_QUADS,n_faces*4,gl_elem_type,(void*)(offset*4*m_element_size));
 			break;
 		}
 	}
 	else
-	{
+	{        
         glDrawArrays(GL_TRIANGLES,0,m_verts_count);
 	}
 }

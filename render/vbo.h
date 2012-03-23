@@ -32,12 +32,13 @@ public:
 	void set_colors(unsigned int offset,unsigned int dimension=3);
 
 public:
-	void bind();
+	void bind(bool indices_bind=true);
 	void unbind();
 
 public:    
 	void draw();
 	void draw(unsigned int faces_count);
+	void draw(unsigned int offset,unsigned int faces_count);
 
 public:
 	void bind_verts();

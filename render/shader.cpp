@@ -282,7 +282,7 @@ void shader::set_uniform(unsigned int i,float f0,float f1,float f2,float f3)
 	glUniform4fARB(i,f0,f1,f2,f3);
 }
 
-void shader::set_uniform_array(unsigned int i, float *f, unsigned int count)
+void shader::set_uniform4_array(unsigned int i,const float *f,unsigned int count)
 {
 	glUniform4fvARB(i,count,f);
 }
