@@ -263,7 +263,11 @@ void shader::set_sampler(const char*name,unsigned int layer)
 	if(!m_program||!name)
 		return;
 
-	glUniform1iARB(glGetUniformLocationARB(m_program,name),layer);
+    unsigned int handler = glGetUniformLocationARB(m_program,name);
+    if(!handler)
+        return;
+
+	glUniform1iARB(handler,layer);
 }
 
 unsigned int shader::get_handler(const char *name)
