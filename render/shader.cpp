@@ -10,7 +10,7 @@
 #include "platform_specific_gl.h"
 #include "render.h"
 
-namespace render
+namespace nya_render
 {
 
 #ifndef NO_EXTENSIONS_INIT

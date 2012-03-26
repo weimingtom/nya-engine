@@ -23,7 +23,7 @@
 #endif
 
 #ifndef NO_EXTENSIONS_INIT
-namespace render
+namespace nya_render
 {
 	void *get_extension(const char*ext_name);
 }

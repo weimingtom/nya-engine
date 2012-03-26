@@ -6,12 +6,12 @@
 namespace
 {
 
-resources::file_resources_provider file_res_provider;
-resources::resources_provider *res_provider = &file_res_provider;
+nya_resources::file_resources_provider file_res_provider;
+nya_resources::resources_provider *res_provider = &file_res_provider;
 
 }
 
-namespace resources
+namespace nya_resources
 {
 
 void set_resources_provider(resources_provider *provider)

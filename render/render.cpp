@@ -2,20 +2,20 @@
 
 #include "render.h"
 
-namespace render
+namespace nya_render
 {
 
-log::log *render_log=0;
+nya_log::log *render_log=0;
 
-void set_log(log::log *l)
+void set_log(nya_log::log *l)
 {
 	render_log = l;
 }
 
-log::log &get_log()
+nya_log::log &get_log()
 {
 	if(!render_log)
-		return log::no_log();
+		return nya_log::no_log();
 
 	return *render_log;
 }

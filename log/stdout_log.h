@@ -5,7 +5,7 @@
 
 #include "log.h"
 
-namespace log
+namespace nya_log
 {
 
 class stdout_log: public log

@@ -3,7 +3,7 @@
 #include "file_resources_provider.h"
 #include "stdio.h"
 
-namespace resources
+namespace nya_resources
 {
 
 class file_resource: public resource_data

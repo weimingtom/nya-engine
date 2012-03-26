@@ -3,7 +3,7 @@
 #include "html_log.h"
 #include <stdio.h>
 
-namespace log
+namespace nya_log
 {
 
 const char *html_log_header = 

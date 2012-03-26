@@ -6,7 +6,7 @@
 #include "log.h"
 #include <string>
 
-namespace log
+namespace nya_log
 {
 
 class plain_file_log: public log

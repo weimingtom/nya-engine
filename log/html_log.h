@@ -6,7 +6,7 @@
 #include "log.h"
 #include <string>
 
-namespace log
+namespace nya_log
 {
 
 class html_log: public log

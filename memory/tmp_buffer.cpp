@@ -4,7 +4,7 @@
 
 #include <vector>
 
-namespace memory
+namespace nya_memory
 {
 
 class tmp_buffer

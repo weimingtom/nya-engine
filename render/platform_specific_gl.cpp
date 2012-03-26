@@ -7,7 +7,7 @@
 #include "render.h"
 #include <string>
 
-namespace render
+namespace nya_render
 {
 
 void *get_exact_extension(const char*ext_name)

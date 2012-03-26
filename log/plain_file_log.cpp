@@ -3,7 +3,7 @@
 #include "plain_file_log.h"
 #include <iostream>
 
-namespace log
+namespace nya_log
 {
 
 log & plain_file_log::operator << (int a)

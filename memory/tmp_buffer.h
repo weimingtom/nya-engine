@@ -5,7 +5,7 @@
 
 #include <cstddef>
 
-namespace memory
+namespace nya_memory
 {
 
 class tmp_buffer_ref

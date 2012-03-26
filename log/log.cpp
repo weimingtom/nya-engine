@@ -2,7 +2,7 @@
 
 #include "log.h"
 
-namespace log
+namespace nya_log
 {
 
 log &no_log()

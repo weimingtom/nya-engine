@@ -3,7 +3,7 @@
 #ifndef log_h
 #define log_h
 
-namespace log
+namespace nya_log
 {
 
 enum message_type

@@ -5,7 +5,7 @@
 
 #include "resources.h"
 
-namespace resources
+namespace nya_resources
 {
 
 class file_resources_provider: public resources_provider

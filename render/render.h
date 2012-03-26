@@ -5,11 +5,11 @@
 
 #include "log/log.h"
 
-namespace render
+namespace nya_render
 {
 
-void set_log(log::log *l);
-log::log &get_log();
+void set_log(nya_log::log *l);
+nya_log::log &get_log();
 
 }
 

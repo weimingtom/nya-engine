@@ -5,7 +5,7 @@
 
 #define VBO_MAX_TEX_COORD 16
 
-namespace render
+namespace nya_render
 {
 
 class vbo

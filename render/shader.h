@@ -3,7 +3,7 @@
 #ifndef shader_h
 #define shader_h
 
-namespace render
+namespace nya_render
 {
 
 class shader

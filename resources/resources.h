@@ -5,7 +5,7 @@
 
 #include <cstddef>
 
-namespace resources
+namespace nya_resources
 {
 
 class resource_data

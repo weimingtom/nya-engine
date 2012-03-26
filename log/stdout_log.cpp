@@ -3,7 +3,7 @@
 #include "stdout_log.h"
 #include <stdio.h>
 
-namespace log
+namespace nya_log
 {
 
 log & stdout_log::operator << (int a)

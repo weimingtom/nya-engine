@@ -3,7 +3,7 @@
 
 #include <vector>
 
-namespace memory
+namespace nya_memory
 {
 
 template<typename t_data,int block_count> class pool
