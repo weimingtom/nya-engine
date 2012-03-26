@@ -195,7 +195,7 @@ void shader::add_program(program_type type,const char*code)
 	GLint compiled;
 	glGetObjectParameterivARB(object,GL_OBJECT_COMPILE_STATUS_ARB,&compiled);
 
-	const static char type_str[][12]={"vertex","pixel","geometry","tesselation"};
+	//const static char type_str[][12]={"vertex","pixel","geometry","tesselation"};
 
 	if(!compiled)
 	{

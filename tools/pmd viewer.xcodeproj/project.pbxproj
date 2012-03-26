@@ -1,0 +1,429 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		F261EA56151E698D00C195DA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F261EA55151E698D00C195DA /* Cocoa.framework */; };
+		F261EA60151E698E00C195DA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F261EA5E151E698E00C195DA /* InfoPlist.strings */; };
+		F261EA62151E698E00C195DA /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F261EA61151E698E00C195DA /* main.m */; };
+		F261EA66151E698E00C195DA /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = F261EA64151E698E00C195DA /* Credits.rtf */; };
+		F261EA6C151E698E00C195DA /* PmdDocument.xib in Resources */ = {isa = PBXBuildFile; fileRef = F261EA6A151E698E00C195DA /* PmdDocument.xib */; };
+		F261EA6F151E698E00C195DA /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = F261EA6D151E698E00C195DA /* MainMenu.xib */; };
+		F261EA76151E6FAA00C195DA /* pmd viewer.app in CopyFiles */ = {isa = PBXBuildFile; fileRef = F261EA51151E698D00C195DA /* pmd viewer.app */; };
+		F27142FB151E73BD00DE6B9A /* PmdDocument.mm in Sources */ = {isa = PBXBuildFile; fileRef = F27142F9151E73BD00DE6B9A /* PmdDocument.mm */; };
+		F27142FE151F1CB400DE6B9A /* PmdView.mm in Sources */ = {isa = PBXBuildFile; fileRef = F27142FD151F1CB400DE6B9A /* PmdView.mm */; };
+		F2714300151F1E5600DE6B9A /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F27142FF151F1E5600DE6B9A /* OpenGL.framework */; };
+		F271431B152030E700DE6B9A /* resources.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2714308152030E500DE6B9A /* resources.cpp */; };
+		F271431C152030E700DE6B9A /* file_resources_provider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F271430A152030E500DE6B9A /* file_resources_provider.cpp */; };
+		F271431D152030E700DE6B9A /* render.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F271430C152030E600DE6B9A /* render.cpp */; };
+		F271431E152030E700DE6B9A /* platform_specific_gl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F271430E152030E600DE6B9A /* platform_specific_gl.cpp */; };
+		F271431F152030E700DE6B9A /* shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2714311152030E600DE6B9A /* shader.cpp */; };
+		F2714320152030E700DE6B9A /* vbo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2714313152030E600DE6B9A /* vbo.cpp */; };
+		F2714321152030E700DE6B9A /* tmp_buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2714315152030E600DE6B9A /* tmp_buffer.cpp */; };
+		F2714322152030E700DE6B9A /* stdout_log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2714318152030E600DE6B9A /* stdout_log.cpp */; };
+		F2714323152030E700DE6B9A /* log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F271431A152030E700DE6B9A /* log.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F261EA75151E6FA100C195DA /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /Applications;
+			dstSubfolderSpec = 0;
+			files = (
+				F261EA76151E6FAA00C195DA /* pmd viewer.app in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		F261EA51151E698D00C195DA /* pmd viewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "pmd viewer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F261EA55151E698D00C195DA /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		F261EA58151E698D00C195DA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		F261EA59151E698D00C195DA /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		F261EA5A151E698D00C195DA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		F261EA5D151E698E00C195DA /* pmd viewer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "pmd viewer-Info.plist"; sourceTree = "<group>"; };
+		F261EA5F151E698E00C195DA /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		F261EA61151E698E00C195DA /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		F261EA65151E698E00C195DA /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		F261EA6B151E698E00C195DA /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/PmdDocument.xib; sourceTree = "<group>"; };
+		F261EA6E151E698E00C195DA /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		F27142F9151E73BD00DE6B9A /* PmdDocument.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = PmdDocument.mm; sourceTree = "<group>"; };
+		F27142FA151E73BD00DE6B9A /* PmdDocument.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PmdDocument.h; sourceTree = "<group>"; };
+		F27142FC151F1CB400DE6B9A /* PmdView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PmdView.h; sourceTree = "<group>"; };
+		F27142FD151F1CB400DE6B9A /* PmdView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = PmdView.mm; sourceTree = "<group>"; };
+		F27142FF151F1E5600DE6B9A /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		F2714308152030E500DE6B9A /* resources.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = resources.cpp; path = ../../resources/resources.cpp; sourceTree = "<group>"; };
+		F2714309152030E500DE6B9A /* resources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = resources.h; path = ../../resources/resources.h; sourceTree = "<group>"; };
+		F271430A152030E500DE6B9A /* file_resources_provider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = file_resources_provider.cpp; path = ../../resources/file_resources_provider.cpp; sourceTree = "<group>"; };
+		F271430B152030E500DE6B9A /* file_resources_provider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = file_resources_provider.h; path = ../../resources/file_resources_provider.h; sourceTree = "<group>"; };
+		F271430C152030E600DE6B9A /* render.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = render.cpp; path = ../../render/render.cpp; sourceTree = "<group>"; };
+		F271430D152030E600DE6B9A /* platform_specific_gl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = platform_specific_gl.h; path = ../../render/platform_specific_gl.h; sourceTree = "<group>"; };
+		F271430E152030E600DE6B9A /* platform_specific_gl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = platform_specific_gl.cpp; path = ../../render/platform_specific_gl.cpp; sourceTree = "<group>"; };
+		F271430F152030E600DE6B9A /* vbo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vbo.h; path = ../../render/vbo.h; sourceTree = "<group>"; };
+		F2714310152030E600DE6B9A /* render.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = render.h; path = ../../render/render.h; sourceTree = "<group>"; };
+		F2714311152030E600DE6B9A /* shader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = shader.cpp; path = ../../render/shader.cpp; sourceTree = "<group>"; };
+		F2714312152030E600DE6B9A /* shader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = shader.h; path = ../../render/shader.h; sourceTree = "<group>"; };
+		F2714313152030E600DE6B9A /* vbo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vbo.cpp; path = ../../render/vbo.cpp; sourceTree = "<group>"; };
+		F2714314152030E600DE6B9A /* pool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pool.h; path = ../../memory/pool.h; sourceTree = "<group>"; };
+		F2714315152030E600DE6B9A /* tmp_buffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tmp_buffer.cpp; path = ../../memory/tmp_buffer.cpp; sourceTree = "<group>"; };
+		F2714316152030E600DE6B9A /* tmp_buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tmp_buffer.h; path = ../../memory/tmp_buffer.h; sourceTree = "<group>"; };
+		F2714317152030E600DE6B9A /* log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = log.h; path = ../../log/log.h; sourceTree = "<group>"; };
+		F2714318152030E600DE6B9A /* stdout_log.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = stdout_log.cpp; path = ../../log/stdout_log.cpp; sourceTree = "<group>"; };
+		F2714319152030E700DE6B9A /* stdout_log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stdout_log.h; path = ../../log/stdout_log.h; sourceTree = "<group>"; };
+		F271431A152030E700DE6B9A /* log.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = log.cpp; path = ../../log/log.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F261EA4E151E698D00C195DA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F2714300151F1E5600DE6B9A /* OpenGL.framework in Frameworks */,
+				F261EA56151E698D00C195DA /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F261EA46151E698D00C195DA = {
+			isa = PBXGroup;
+			children = (
+				F2714324152030F000DE6B9A /* nya_engine */,
+				F261EA5B151E698D00C195DA /* pmd viewer */,
+				F261EA54151E698D00C195DA /* Frameworks */,
+				F261EA52151E698D00C195DA /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F261EA52151E698D00C195DA /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F261EA51151E698D00C195DA /* pmd viewer.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F261EA54151E698D00C195DA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F27142FF151F1E5600DE6B9A /* OpenGL.framework */,
+				F261EA55151E698D00C195DA /* Cocoa.framework */,
+				F261EA57151E698D00C195DA /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F261EA57151E698D00C195DA /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F261EA58151E698D00C195DA /* AppKit.framework */,
+				F261EA59151E698D00C195DA /* CoreData.framework */,
+				F261EA5A151E698D00C195DA /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		F261EA5B151E698D00C195DA /* pmd viewer */ = {
+			isa = PBXGroup;
+			children = (
+				F27142F9151E73BD00DE6B9A /* PmdDocument.mm */,
+				F27142FA151E73BD00DE6B9A /* PmdDocument.h */,
+				F261EA6A151E698E00C195DA /* PmdDocument.xib */,
+				F27142FC151F1CB400DE6B9A /* PmdView.h */,
+				F27142FD151F1CB400DE6B9A /* PmdView.mm */,
+				F261EA6D151E698E00C195DA /* MainMenu.xib */,
+				F261EA5C151E698D00C195DA /* Supporting Files */,
+			);
+			path = "pmd viewer";
+			sourceTree = "<group>";
+		};
+		F261EA5C151E698D00C195DA /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				F261EA5D151E698E00C195DA /* pmd viewer-Info.plist */,
+				F261EA5E151E698E00C195DA /* InfoPlist.strings */,
+				F261EA61151E698E00C195DA /* main.m */,
+				F261EA64151E698E00C195DA /* Credits.rtf */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		F2714324152030F000DE6B9A /* nya_engine */ = {
+			isa = PBXGroup;
+			children = (
+				F27143271520313900DE6B9A /* log */,
+				F27143281520315500DE6B9A /* memory */,
+				F27143261520313100DE6B9A /* render */,
+				F27143251520311C00DE6B9A /* resources */,
+			);
+			name = nya_engine;
+			path = "pmd viewer";
+			sourceTree = "<group>";
+		};
+		F27143251520311C00DE6B9A /* resources */ = {
+			isa = PBXGroup;
+			children = (
+				F2714308152030E500DE6B9A /* resources.cpp */,
+				F2714309152030E500DE6B9A /* resources.h */,
+				F271430A152030E500DE6B9A /* file_resources_provider.cpp */,
+				F271430B152030E500DE6B9A /* file_resources_provider.h */,
+			);
+			name = resources;
+			sourceTree = "<group>";
+		};
+		F27143261520313100DE6B9A /* render */ = {
+			isa = PBXGroup;
+			children = (
+				F271430C152030E600DE6B9A /* render.cpp */,
+				F271430D152030E600DE6B9A /* platform_specific_gl.h */,
+				F271430E152030E600DE6B9A /* platform_specific_gl.cpp */,
+				F271430F152030E600DE6B9A /* vbo.h */,
+				F2714310152030E600DE6B9A /* render.h */,
+				F2714311152030E600DE6B9A /* shader.cpp */,
+				F2714312152030E600DE6B9A /* shader.h */,
+				F2714313152030E600DE6B9A /* vbo.cpp */,
+			);
+			name = render;
+			sourceTree = "<group>";
+		};
+		F27143271520313900DE6B9A /* log */ = {
+			isa = PBXGroup;
+			children = (
+				F2714317152030E600DE6B9A /* log.h */,
+				F2714318152030E600DE6B9A /* stdout_log.cpp */,
+				F2714319152030E700DE6B9A /* stdout_log.h */,
+				F271431A152030E700DE6B9A /* log.cpp */,
+			);
+			name = log;
+			sourceTree = "<group>";
+		};
+		F27143281520315500DE6B9A /* memory */ = {
+			isa = PBXGroup;
+			children = (
+				F2714314152030E600DE6B9A /* pool.h */,
+				F2714315152030E600DE6B9A /* tmp_buffer.cpp */,
+				F2714316152030E600DE6B9A /* tmp_buffer.h */,
+			);
+			name = memory;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F261EA50151E698D00C195DA /* pmd viewer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F261EA72151E698E00C195DA /* Build configuration list for PBXNativeTarget "pmd viewer" */;
+			buildPhases = (
+				F261EA4D151E698D00C195DA /* Sources */,
+				F261EA4E151E698D00C195DA /* Frameworks */,
+				F261EA4F151E698D00C195DA /* Resources */,
+				F261EA75151E6FA100C195DA /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "pmd viewer";
+			productName = "pmd viewer";
+			productReference = F261EA51151E698D00C195DA /* pmd viewer.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F261EA48151E698D00C195DA /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = F261EA4B151E698D00C195DA /* Build configuration list for PBXProject "pmd viewer" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = F261EA46151E698D00C195DA;
+			productRefGroup = F261EA52151E698D00C195DA /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F261EA50151E698D00C195DA /* pmd viewer */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F261EA4F151E698D00C195DA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F261EA60151E698E00C195DA /* InfoPlist.strings in Resources */,
+				F261EA66151E698E00C195DA /* Credits.rtf in Resources */,
+				F261EA6C151E698E00C195DA /* PmdDocument.xib in Resources */,
+				F261EA6F151E698E00C195DA /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F261EA4D151E698D00C195DA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F261EA62151E698E00C195DA /* main.m in Sources */,
+				F27142FB151E73BD00DE6B9A /* PmdDocument.mm in Sources */,
+				F27142FE151F1CB400DE6B9A /* PmdView.mm in Sources */,
+				F271431B152030E700DE6B9A /* resources.cpp in Sources */,
+				F271431C152030E700DE6B9A /* file_resources_provider.cpp in Sources */,
+				F271431D152030E700DE6B9A /* render.cpp in Sources */,
+				F271431E152030E700DE6B9A /* platform_specific_gl.cpp in Sources */,
+				F271431F152030E700DE6B9A /* shader.cpp in Sources */,
+				F2714320152030E700DE6B9A /* vbo.cpp in Sources */,
+				F2714321152030E700DE6B9A /* tmp_buffer.cpp in Sources */,
+				F2714322152030E700DE6B9A /* stdout_log.cpp in Sources */,
+				F2714323152030E700DE6B9A /* log.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		F261EA5E151E698E00C195DA /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F261EA5F151E698E00C195DA /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		F261EA64151E698E00C195DA /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F261EA65151E698E00C195DA /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		F261EA6A151E698E00C195DA /* PmdDocument.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F261EA6B151E698E00C195DA /* en */,
+			);
+			name = PmdDocument.xib;
+			sourceTree = "<group>";
+		};
+		F261EA6D151E698E00C195DA /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F261EA6E151E698E00C195DA /* en */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		F261EA70151E698E00C195DA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		F261EA71151E698E00C195DA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		F261EA73151E698E00C195DA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
+				INFOPLIST_FILE = "pmd viewer/pmd viewer-Info.plist";
+				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = ../;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		F261EA74151E698E00C195DA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
+				INFOPLIST_FILE = "pmd viewer/pmd viewer-Info.plist";
+				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = ../;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F261EA4B151E698D00C195DA /* Build configuration list for PBXProject "pmd viewer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F261EA70151E698E00C195DA /* Debug */,
+				F261EA71151E698E00C195DA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F261EA72151E698E00C195DA /* Build configuration list for PBXNativeTarget "pmd viewer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F261EA73151E698E00C195DA /* Debug */,
+				F261EA74151E698E00C195DA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F261EA48151E698D00C195DA /* Project object */;
+}
