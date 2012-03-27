@@ -42,7 +42,6 @@
 
 -(void)reshape
 {
-    printf("reshape\n");
     glViewport( 0,0,[self frame].size.width,[self frame].size.height );     
 	glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -104,6 +103,7 @@
 -(void) dealloc
 {
     m_vbo.release();
+    [super dealloc];
 }
 
 @end

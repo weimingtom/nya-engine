@@ -37,14 +37,14 @@
     return nil;
 }
 
--(nya_log::log&) get_log
+- (nya_log::log&) get_log
 {
     static nya_log::stdout_log log;
     return log;
 }
 
 - (BOOL)readFromURL:(NSURL *)absoluteURL ofType:(NSString *)typeName error:(NSError **)outError
-{    
+{
     nya_log::log &log = [ self get_log ];
     const char*filename=absoluteURL.path.UTF8String;
     log<<"readFromURL: "<<filename<<"\n";
@@ -58,7 +58,6 @@
     }
 
     typedef unsigned int uint;
-    typedef unsigned long ulong;
     typedef unsigned short ushort;
     typedef unsigned char uchar;
 
@@ -153,7 +152,12 @@
 
 - (void)close
 {
-    printf("closed\n");
+    [super close];
+}
+
+-(void) dealloc
+{
+    [super dealloc];
 }
 
 @end
