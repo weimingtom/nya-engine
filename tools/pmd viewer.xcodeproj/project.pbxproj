@@ -14,6 +14,7 @@
 		F261EA6C151E698E00C195DA /* PmdDocument.xib in Resources */ = {isa = PBXBuildFile; fileRef = F261EA6A151E698E00C195DA /* PmdDocument.xib */; };
 		F261EA6F151E698E00C195DA /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = F261EA6D151E698E00C195DA /* MainMenu.xib */; };
 		F261EA76151E6FAA00C195DA /* pmd viewer.app in CopyFiles */ = {isa = PBXBuildFile; fileRef = F261EA51151E698D00C195DA /* pmd viewer.app */; };
+		F2643132152281ED002E2780 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = F2643130152281ED002E2780 /* AppIcon.icns */; };
 		F27142FB151E73BD00DE6B9A /* PmdDocument.mm in Sources */ = {isa = PBXBuildFile; fileRef = F27142F9151E73BD00DE6B9A /* PmdDocument.mm */; };
 		F27142FE151F1CB400DE6B9A /* PmdView.mm in Sources */ = {isa = PBXBuildFile; fileRef = F27142FD151F1CB400DE6B9A /* PmdView.mm */; };
 		F2714300151F1E5600DE6B9A /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F27142FF151F1E5600DE6B9A /* OpenGL.framework */; };
@@ -53,6 +54,7 @@
 		F261EA65151E698E00C195DA /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
 		F261EA6B151E698E00C195DA /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/PmdDocument.xib; sourceTree = "<group>"; };
 		F261EA6E151E698E00C195DA /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		F2643131152281ED002E2780 /* en */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = en; path = en.lproj/AppIcon.icns; sourceTree = "<group>"; };
 		F27142F9151E73BD00DE6B9A /* PmdDocument.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = PmdDocument.mm; sourceTree = "<group>"; };
 		F27142FA151E73BD00DE6B9A /* PmdDocument.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PmdDocument.h; sourceTree = "<group>"; };
 		F27142FC151F1CB400DE6B9A /* PmdView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PmdView.h; sourceTree = "<group>"; };
@@ -133,6 +135,7 @@
 		F261EA5B151E698D00C195DA /* pmd viewer */ = {
 			isa = PBXGroup;
 			children = (
+				F261EA61151E698E00C195DA /* main.m */,
 				F27142F9151E73BD00DE6B9A /* PmdDocument.mm */,
 				F27142FA151E73BD00DE6B9A /* PmdDocument.h */,
 				F261EA6A151E698E00C195DA /* PmdDocument.xib */,
@@ -147,9 +150,9 @@
 		F261EA5C151E698D00C195DA /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				F2643130152281ED002E2780 /* AppIcon.icns */,
 				F261EA5D151E698E00C195DA /* pmd viewer-Info.plist */,
 				F261EA5E151E698E00C195DA /* InfoPlist.strings */,
-				F261EA61151E698E00C195DA /* main.m */,
 				F261EA64151E698E00C195DA /* Credits.rtf */,
 			);
 			name = "Supporting Files";
@@ -266,6 +269,7 @@
 				F261EA66151E698E00C195DA /* Credits.rtf in Resources */,
 				F261EA6C151E698E00C195DA /* PmdDocument.xib in Resources */,
 				F261EA6F151E698E00C195DA /* MainMenu.xib in Resources */,
+				F2643132152281ED002E2780 /* AppIcon.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -324,6 +328,14 @@
 				F261EA6E151E698E00C195DA /* en */,
 			);
 			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+		F2643130152281ED002E2780 /* AppIcon.icns */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F2643131152281ED002E2780 /* en */,
+			);
+			name = AppIcon.icns;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
