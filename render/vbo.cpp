@@ -259,7 +259,7 @@ void vbo::gen_vertex_data(const void*data,unsigned int vert_stride,unsigned int 
 		return;
 
 	const unsigned int size=vert_count*vert_stride;
-	if(size==0)
+	if(size==0||!data)
     {
         m_verts_count=0;
 		return;
@@ -288,7 +288,7 @@ void vbo::gen_index_data(const void*data,element_type type,element_size size,uns
 		return;
 
 	const unsigned int buffer_size=faces_count*size*(type==quads?4:3);
-    if(buffer_size==0)
+    if(buffer_size==0||!data)
 	{
 		m_element_count=0;
         return;
