@@ -3,7 +3,7 @@
 #ifndef texture_h
 #define texture_h
 
-namespace render
+namespace nya_render
 {
 
 class texture

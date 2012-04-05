@@ -4,7 +4,7 @@
 #include "platform_specific_gl.h"
 #include "render.h"
 
-namespace render
+namespace nya_render
 {
 
 void texture::build_texture(void *data,unsigned int width,unsigned int height,color_format format)
