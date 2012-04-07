@@ -26,10 +26,10 @@ public:
 			const long first_idx = block_count * prev_blocks_count;
 			long next_idx = first_idx+1;
 
-			for(int i=0;i<block_count;++i)
+			for(long i=0;i<block_count;++i)
 			{
 				node &n = b->nodes[i];
-				n.block = -1;
+				n.block_idx = -1;
 				n.next_free = next_idx;
 				++next_idx;
 			}
@@ -51,7 +51,7 @@ public:
 		node &n = m_blocks[free_block]->nodes[free_offset];
 		m_free_count = n.next_free;
 
-		n.block = free_block;
+		n.block_idx = free_block;
 		n.next_free = -1;
 
 		++m_used_count;
@@ -65,22 +65,22 @@ public:
 		if (!data)
 			return false;
 
-		node t;
-		const int offset = (int)((char*)&t.data - (char*)&t.block);
-		node &n = *((node *)(((char *)data) - offset));
+		const node t;
+		const int offset = (int)((char*)&t.data - (char*)&t.block_idx);
+        node &n = *((node *)(((char *)data) - offset));
 
-		if (n.block<0 || n.block>=(int)m_blocks.size())
+		if (n.block_idx<0 || n.block_idx>=(long)m_blocks.size())
 			return false;
 
-		const long node_idx = n.block*block_count + 
-					(int)(&n - &(m_blocks[n.block]->nodes[0]));
+		const long node_idx = n.block_idx*block_count +
+					(int)(&n - &(m_blocks[n.block_idx]->nodes[0]));
 
-		if (node_idx<0 || node_idx>=(int)m_blocks.size()*block_count)
+		if (node_idx<0 || node_idx>=(long)m_blocks.size()*block_count)
 			return false;
 
 		data->~t_data();
 
-		n.block = -1;
+		n.block_idx = -1;
 		n.next_free = m_free_count;
 
 		m_free_count = node_idx;
@@ -102,7 +102,7 @@ public:
 			{
 				node & n = m_blocks[i]->nodes[j];
 
-				n.block = -1;
+				n.block_idx = -1;
 				n.next_free = m_free_count;
 
 				m_free_count = node_idx;
@@ -141,7 +141,7 @@ private:
 private:
 	struct node
 	{
-		long block;
+		long block_idx;
 		long next_free;
 		char data[sizeof(t_data)];
 	};
