@@ -65,7 +65,7 @@ public:
 		if (!data)
 			return false;
 
-		const node t;
+        node t;
 		const int offset = (int)((char*)&t.data - (char*)&t.block_idx);
         node &n = *((node *)(((char *)data) - offset));
 
@@ -134,6 +134,7 @@ public:
 			delete m_blocks[i];
 	}
 
+    //non copiable
 private:
 	pool(const pool &);
 	void operator = (const pool &);

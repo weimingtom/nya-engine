@@ -57,6 +57,22 @@
         return NO;
     }
 
+    char path[512];
+    sprintf(path,"%s",filename);
+    const int path_length = (int)strlen(path);
+    for(int i=path_length-1;i>0;--i)
+    {
+        if(path[i]=='\\'||path[i]=='/')
+        {
+            path[i+1]=0;
+            break;
+        }
+    }
+
+    if(chdir(path)!=0)
+        log<<"unable to set path: "<<path<<"\n";
+    
+
     typedef unsigned int uint;
     typedef unsigned short ushort;
     typedef unsigned char uchar;
@@ -134,7 +150,7 @@
         for(int k=0;k<8;++k)
             m_verts[i*8+k]=vertices[i].pos_nor_tc[k];
 
-        m_verts[i*8+7]=1.0f-m_verts[i*8+7];
+        //m_verts[i*8+7]=1.0f-m_verts[i*8+7];
     }
 
     offset+=vcount*sizeof(pmd_vertex);
@@ -143,7 +159,49 @@
     offset+=4;
     m_indices.resize(icount);
     memcpy(&m_indices[0],pmd_buffer.get_data(offset),icount*sizeof(ushort));
-    offset+=icount*sizeof(ushort);  
+    offset+=icount*sizeof(ushort);
+
+#pragma pack(push,1)
+    struct pmd_material
+    {
+        float diffuse[4];
+        float shininess;        
+        float specular[3];
+        float ambient[3];
+        uchar toon_idx;
+        uchar edge_flag;
+        uint ind_count;
+        
+        char tex_name[20];
+    };
+#pragma pack(pop)
+
+    const uint mat_count=*(uint*)pmd_buffer.get_data(offset);
+    offset+=4;
+    
+    m_materials.resize(mat_count);
+    uint face_offset=0;
+    const pmd_material *pmd_materials=(pmd_material*)pmd_buffer.get_data(offset);
+    for(int i=0;i<mat_count;++i)
+    {
+        const pmd_material &from=pmd_materials[i];
+        material &to=m_materials[i];
+        
+        for(int k=0;k<3;++k)
+        {
+            to.diffuse[k]=from.diffuse[k];
+            to.specular[k]=from.specular[k];     
+            to.ambient[k]=from.ambient[k];                    
+        }
+        to.diffuse[3]=from.diffuse[3]; 
+        to.specular[3]=from.shininess;
+        to.face_offset=face_offset;
+        to.face_count=from.ind_count/3;
+        face_offset+=to.face_count;
+        
+        sprintf(to.tex_name,"%s",from.tex_name);
+    }
+    offset+=mat_count*sizeof(pmd_material);        
 
     m_changed=true;
 
@@ -157,6 +215,10 @@
 
 -(void) dealloc
 {
+    m_verts.clear();
+    m_indices.clear();
+    m_materials.clear();
+    
     [super dealloc];
 }
 

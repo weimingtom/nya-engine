@@ -10,7 +10,23 @@
     bool m_changed;
 
     std::vector<float> m_verts;
-    std::vector<int> m_indices;    
+    std::vector<int> m_indices;   
+
+    struct material
+    {
+        float diffuse[4];
+        float specular[4]; //last is shininess
+        float ambient[3];
+        
+        uint face_offset;
+        uint face_count;
+
+        char tex_name[20];
+        uint spmap_idx;
+        uint toon_idx;
+    };
+
+    std::vector<material> m_materials;    
 }
 
 -(nya_log::log&) get_log;

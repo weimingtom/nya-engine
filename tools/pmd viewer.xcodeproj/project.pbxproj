@@ -27,6 +27,7 @@
 		F2714321152030E700DE6B9A /* tmp_buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2714315152030E600DE6B9A /* tmp_buffer.cpp */; };
 		F2714322152030E700DE6B9A /* stdout_log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2714318152030E600DE6B9A /* stdout_log.cpp */; };
 		F2714323152030E700DE6B9A /* log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F271431A152030E700DE6B9A /* log.cpp */; };
+		F2EF8EE41523ACE000EC17A8 /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2EF8EE31523ACE000EC17A8 /* texture.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -79,6 +80,9 @@
 		F2714318152030E600DE6B9A /* stdout_log.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = stdout_log.cpp; path = ../../log/stdout_log.cpp; sourceTree = "<group>"; };
 		F2714319152030E700DE6B9A /* stdout_log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stdout_log.h; path = ../../log/stdout_log.h; sourceTree = "<group>"; };
 		F271431A152030E700DE6B9A /* log.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = log.cpp; path = ../../log/log.cpp; sourceTree = "<group>"; };
+		F2EF8EE21523ACE000EC17A8 /* texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = texture.h; path = ../../render/texture.h; sourceTree = "<group>"; };
+		F2EF8EE31523ACE000EC17A8 /* texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = texture.cpp; path = ../../render/texture.cpp; sourceTree = "<group>"; };
+		F2EF8EE615304ABF00EC17A8 /* shared_resources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = shared_resources.h; path = ../../resources/shared_resources.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -173,6 +177,7 @@
 		F27143251520311C00DE6B9A /* resources */ = {
 			isa = PBXGroup;
 			children = (
+				F2EF8EE615304ABF00EC17A8 /* shared_resources.h */,
 				F2714308152030E500DE6B9A /* resources.cpp */,
 				F2714309152030E500DE6B9A /* resources.h */,
 				F271430A152030E500DE6B9A /* file_resources_provider.cpp */,
@@ -184,6 +189,8 @@
 		F27143261520313100DE6B9A /* render */ = {
 			isa = PBXGroup;
 			children = (
+				F2EF8EE21523ACE000EC17A8 /* texture.h */,
+				F2EF8EE31523ACE000EC17A8 /* texture.cpp */,
 				F271430C152030E600DE6B9A /* render.cpp */,
 				F271430D152030E600DE6B9A /* platform_specific_gl.h */,
 				F271430E152030E600DE6B9A /* platform_specific_gl.cpp */,
@@ -292,6 +299,7 @@
 				F2714321152030E700DE6B9A /* tmp_buffer.cpp in Sources */,
 				F2714322152030E700DE6B9A /* stdout_log.cpp in Sources */,
 				F2714323152030E700DE6B9A /* log.cpp in Sources */,
+				F2EF8EE41523ACE000EC17A8 /* texture.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
