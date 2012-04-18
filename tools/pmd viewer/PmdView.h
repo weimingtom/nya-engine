@@ -23,6 +23,9 @@ class shared_textures_manager: public shared_textures
     NSPoint m_mouse_old;
     float m_rot_x;
     float m_rot_y;
+    float m_scale;
+    float m_pos_x;
+    float m_pos_y;
 
     nya_render::vbo m_vbo;
 

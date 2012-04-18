@@ -51,7 +51,6 @@ bool shared_textures_manager::fill_resource(const char *name,nya_render::texture
 
 bool shared_textures_manager::release_resource(nya_render::texture &res)
 {
-    printf("\nfreed");
     res.release();
 
     return true;
@@ -66,28 +65,61 @@ bool shared_textures_manager::release_resource(nya_render::texture &res)
     m_mouse_old = [self convertPoint: pt fromView: nil];
 }
 
+- (void) rightMouseDown: (NSEvent *) theEvent
+{
+    NSPoint pt = [theEvent locationInWindow];
+    
+    m_mouse_old = [self convertPoint: pt fromView: nil];
+}
+
 - (void) mouseDragged: (NSEvent *) theEvent
 {
     NSPoint pt = [theEvent locationInWindow];
     
     pt = [self convertPoint: pt fromView: nil];
     
-    m_rot_y += ((m_mouse_old.y - pt.y) * 180.0f) / 200.0f;
     m_rot_x -= ((m_mouse_old.x - pt.x) * 180.0f) / 200.0f;
+    m_rot_y += ((m_mouse_old.y - pt.y) * 180.0f) / 200.0f;
     
-    if ( m_rot_x > 360 )
-        m_rot_x -= 360;
+    const float max_angle=360.0f;
     
-    if ( m_rot_x < -360 )
-        m_rot_x += 360;
+    if ( m_rot_x > max_angle )
+        m_rot_x -= max_angle;
     
-    if ( m_rot_y > 360 )
-        m_rot_y -= 360;
+    if ( m_rot_x < -max_angle )
+        m_rot_x += max_angle;
     
-    if ( m_rot_y < -360 )
-        m_rot_y += 360;
+    if ( m_rot_y > max_angle )
+        m_rot_y -= max_angle;
+    
+    if ( m_rot_y < -max_angle )
+        m_rot_y += max_angle;
     
     m_mouse_old = pt;
+    
+    [self setNeedsDisplay: YES];
+}
+
+- (void) rightMouseDragged: (NSEvent *) theEvent
+{
+    NSPoint pt = [theEvent locationInWindow];
+
+    pt = [self convertPoint: pt fromView: nil];
+    
+    m_pos_x += (m_mouse_old.x - pt.x) / 20.0f;
+    m_pos_y -= (m_mouse_old.y - pt.y) / 20.0f;
+   
+    m_mouse_old = pt;
+    
+    [self setNeedsDisplay: YES];
+}
+
+- (void) scrollWheel: (NSEvent*) event
+{
+    m_scale *= ( 1.0 + 0.1 * [event deltaY] );
+    const float min_scale=0.01f;
+    if(m_scale<min_scale)
+        m_scale=min_scale;
     
     [self setNeedsDisplay: YES];
 }
@@ -139,7 +171,7 @@ bool shared_textures_manager::release_resource(nya_render::texture &res)
             view_material & to = m_materials[i];
             to.face_offset = from.face_offset;
             to.face_count = from.face_count;
-            
+
             for(int k=0;k<3;++k)
                 to.color[k]=from.diffuse[k]+from.ambient[k];
             to.color[3]=from.diffuse[3];
@@ -151,10 +183,12 @@ bool shared_textures_manager::release_resource(nya_render::texture &res)
                         from.tex_name[i]=0;
                 
                 printf("\naccessing %s",from.tex_name);
-                
+
                 to.tex = textures_manager.access(from.tex_name);
             }
         }
+
+        m_scale=1.0f;
     }
 
     //glEnable(GL_LIGHTING);
@@ -162,7 +196,7 @@ bool shared_textures_manager::release_resource(nya_render::texture &res)
 
 	glEnable     ( GL_DEPTH_TEST );
 	glDepthFunc(GL_LESS);
-    
+
     glCullFace(GL_BACK);
     glEnable(GL_CULL_FACE);
 
@@ -174,12 +208,13 @@ bool shared_textures_manager::release_resource(nya_render::texture &res)
     glLoadIdentity();
     glRotatef(m_rot_y,1.0f,0.0f,0.0f);    
     glRotatef(m_rot_x+180.0f,0.0f,1.0f,0.0f);
-    glTranslatef(0,-11,0);
+    glScalef(m_scale,m_scale,m_scale);
+    glTranslatef(m_pos_x,-11+m_pos_y,0);
     glEnable(GL_TEXTURE_2D);    
 
 	glColor3f(1,1,1);
     m_vbo.bind();
-    
+
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GEQUAL,0.5f);
     glDisable(GL_CULL_FACE);
@@ -217,7 +252,6 @@ bool shared_textures_manager::release_resource(nya_render::texture &res)
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 
     m_vbo.unbind();
-
 }
 
 -(void) dealloc
