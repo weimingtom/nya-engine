@@ -12,23 +12,26 @@ void texture::build_texture(void *data,unsigned int width,unsigned int height,co
 	if(!data||width==0||height==0)
 		return;
 
+	unsigned int source_format=0;
 	unsigned int gl_format=0;
 
 	switch(format)
 	{
-		case color_rgb: gl_format=GL_RGB; break;
-		case color_rgba: gl_format=GL_RGBA; break;
+		case color_rgb: source_format=GL_RGB8; gl_format=GL_RGB; break;
+		case color_bgr: source_format=GL_RGB8; gl_format=GL_BGR; break;
+		case color_rgba: source_format=GL_RGBA8; gl_format=GL_RGBA; break;
+		case color_bgra: source_format=GL_RGBA8; gl_format=GL_BGRA; break;
 	};
 
-	if(!gl_format)
+	if(!source_format || !gl_format)
 		return;
 
 	if(!m_tex_id)
 	    glGenTextures(1,&m_tex_id);
 
-    glBindTexture(GL_TEXTURE_2D, m_tex_id);
+    glBindTexture(GL_TEXTURE_2D,m_tex_id);
 
-    gluBuild2DMipmaps(GL_TEXTURE_2D,gl_format,width,height,gl_format,GL_UNSIGNED_BYTE,data);
+    gluBuild2DMipmaps(GL_TEXTURE_2D,source_format,width,height,gl_format,GL_UNSIGNED_BYTE,data);
 
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);

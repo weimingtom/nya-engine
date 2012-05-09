@@ -37,8 +37,8 @@ public:
 
 public:    
 	void draw();
-	void draw(unsigned int faces_count);
-	void draw(unsigned int offset,unsigned int faces_count);
+	void draw(unsigned int count); // verts or faces (if has indices) count
+	void draw(unsigned int offset,unsigned int count);
 
 public:
 	void bind_verts();

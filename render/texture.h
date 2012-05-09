@@ -12,7 +12,9 @@ public:
 	enum color_format
 	{
 		color_rgb,
-		color_rgba
+        color_bgr,
+		color_rgba,
+        color_bgra
 	};
 
 	void build_texture(void *data,unsigned int width,unsigned int height,color_format format);

@@ -128,7 +128,7 @@ void vbo::bind_tc(unsigned int tc_idx)
 	if(tc_idx>=VBO_MAX_TEX_COORD)
 		return;
 
-	attribute &tc = m_tcs[tc_idx];
+	attribute &tc=m_tcs[tc_idx];
 
 	if(!tc.has)
 		return;
@@ -180,7 +180,7 @@ void vbo::unbind()
     bool has_unbinds=false;
 	for(int i=0;i<VBO_MAX_TEX_COORD;++i)
 	{
-		attribute &tc = m_tcs[i];
+		attribute &tc=m_tcs[i];
 	    if(!tc.bind)
 	    	continue;
 
@@ -195,48 +195,51 @@ void vbo::unbind()
 
 void vbo::draw()
 {
-    draw(m_element_count);
+    if(m_index_bind)
+        draw(m_element_count);
+    else
+        draw(m_verts_count);
 }
 
-void vbo::draw(unsigned int n_faces)
+void vbo::draw(unsigned int count)
 {
-    draw(0,n_faces);
+    draw(0,count);
 }
     
-void vbo::draw(unsigned int offset,unsigned int n_faces)
+void vbo::draw(unsigned int offset,unsigned int count)
 {
 	if(!m_vertex_bind)
 		return;
 
-	if(offset+n_faces>m_element_count)
-        return;
-
 	if(m_index_bind)
 	{
-		const unsigned int gl_elem_type = ( m_element_size==index4b?GL_UNSIGNED_INT:GL_UNSIGNED_SHORT);
+        if(offset+count>m_element_count)
+            return;
+
+		const unsigned int gl_elem_type=(m_element_size==index4b?GL_UNSIGNED_INT:GL_UNSIGNED_SHORT);
 
 		switch(m_element_type)
 		{
 			case triangles:
-				glDrawElements(GL_TRIANGLES,n_faces*3,gl_elem_type,(void*)(offset*3*m_element_size));
+				glDrawElements(GL_TRIANGLES,count*3,gl_elem_type,(void*)(offset*3*m_element_size));
 			break;
 
 			case triangles_strip:
-				glDrawElements(GL_TRIANGLE_STRIP,n_faces*3,gl_elem_type,(void*)(offset*3*m_element_size));
+				glDrawElements(GL_TRIANGLE_STRIP,count*3,gl_elem_type,(void*)(offset*3*m_element_size));
 			break;
 
 			case triangles_fan:
-				glDrawElements(GL_TRIANGLE_FAN,n_faces*3,gl_elem_type,(void*)(offset*3*m_element_size));
+				glDrawElements(GL_TRIANGLE_FAN,count*3,gl_elem_type,(void*)(offset*3*m_element_size));
 			break;
 
 			case quads:
-				glDrawElements(GL_QUADS,n_faces*4,gl_elem_type,(void*)(offset*4*m_element_size));
+				glDrawElements(GL_QUADS,count*4,gl_elem_type,(void*)(offset*4*m_element_size));
 			break;
 		}
 	}
 	else
-	{        
-        glDrawArrays(GL_TRIANGLES,0,m_verts_count);
+	{
+        glDrawArrays(GL_TRIANGLES,offset,count);
 	}
 }
 
@@ -250,7 +253,7 @@ void vbo::release()
 	if(m_index_id)
 	    vbo_glDeleteBuffers(1,&m_index_id);
 
-	m_vertex_id = m_index_id = 0;
+	m_vertex_id=m_index_id=0;
 }
 
 void vbo::gen_vertex_data(const void*data,unsigned int vert_stride,unsigned int vert_count,bool dynamic)
@@ -259,7 +262,7 @@ void vbo::gen_vertex_data(const void*data,unsigned int vert_stride,unsigned int 
 		return;
 
 	const unsigned int size=vert_count*vert_stride;
-	if(size==0||!data)
+	if(size==0 || !data)
     {
         m_verts_count=0;
 		return;
@@ -278,7 +281,7 @@ void vbo::gen_vertex_data(const void*data,unsigned int vert_stride,unsigned int 
 
 	vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,0);
 
-	m_vertex_stride = vert_stride;
+	m_vertex_stride=vert_stride;
     m_verts_count=vert_count;    
 }
 
@@ -288,7 +291,7 @@ void vbo::gen_index_data(const void*data,element_type type,element_size size,uns
 		return;
 
 	const unsigned int buffer_size=faces_count*size*(type==quads?4:3);
-    if(buffer_size==0||!data)
+    if(buffer_size==0 || !data)
 	{
 		m_element_count=0;
         return;
@@ -300,9 +303,9 @@ void vbo::gen_index_data(const void*data,element_type type,element_size size,uns
 		vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,m_index_id);
 	}
 
-    m_element_count = faces_count;
-    m_element_type = type;
-    m_element_size = size;
+    m_element_count=faces_count;
+    m_element_type=type;
+    m_element_size=size;
 
 	if(dynamic)
 		vbo_glBufferData(GL_ELEMENT_ARRAY_BUFFER_ARB,buffer_size,data,GL_DYNAMIC_DRAW_ARB);
@@ -323,7 +326,7 @@ void vbo::set_tc(unsigned int tc_idx,unsigned int offset,unsigned int dimension)
 	if(tc_idx>=VBO_MAX_TEX_COORD)
 		return;
 
-	attribute &tc = m_tcs[tc_idx];
+	attribute &tc=m_tcs[tc_idx];
 	tc.has=true;
 	tc.offset=offset;
 	tc.dimension=dimension;
