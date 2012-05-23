@@ -1,7 +1,7 @@
 //https://code.google.com/p/nya-engine/
 
 #include "plain_file_log.h"
-#include <iostream>
+#include <stdio.h>
 
 namespace nya_log
 {

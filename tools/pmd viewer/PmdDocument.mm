@@ -50,7 +50,6 @@
     log<<"readFromURL: "<<filename<<"\n";
 
     nya_resources::resource_data *pmd_data = nya_resources::get_resources_provider().access(filename);
-
     if(!pmd_data)
     {
         log<<"Error: unable to open "<<filename<<"\n";
@@ -71,17 +70,17 @@
 
     if(chdir(path)!=0)
         log<<"unable to set path: "<<path<<"\n";
-    
 
     typedef unsigned int uint;
     typedef unsigned short ushort;
     typedef unsigned char uchar;
 
-    nya_memory::tmp_buffer_ref pmd_buffer(pmd_data->get_size());
+    nya_memory::tmp_buffer_scoped pmd_buffer(pmd_data->get_size());
 
     log<<"opened file "<<(int)pmd_data->get_size()<<"bytes\n";
 
     pmd_data->read_all(pmd_buffer.get_data());
+    pmd_data->release();
 
 #pragma pack(push,1)
     struct pmd_header

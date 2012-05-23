@@ -7,7 +7,7 @@
 
 bool shared_textures_manager::fill_resource(const char *name,nya_render::texture &res)
 {
-    printf(" loading tex %s",name);
+    //printf(" loading tex %s",name);
     
     NSString *tex_name = [NSString stringWithCString:name encoding:NSUTF8StringEncoding];
 
@@ -16,7 +16,7 @@ bool shared_textures_manager::fill_resource(const char *name,nya_render::texture
     {
         //[[[[self window] windowController] document] get_log ]
         //<< "unable to load texture: "<<fileName.UTF8String<<"\n";
-        
+        printf("\ntex_load_error1");
         return false;
     }
 
@@ -26,6 +26,7 @@ bool shared_textures_manager::fill_resource(const char *name,nya_render::texture
         //[[[[self window] windowController] document] get_log ]
         //<< "unable to load texture: "<<fileName.UTF8String<<"\n";
         
+        printf("\ntex_load_error2");
         return false;
     }
 
@@ -181,10 +182,11 @@ bool shared_textures_manager::release_resource(nya_render::texture &res)
                 for(int i=0;i<20;++i)
                     if(from.tex_name[i]=='*')
                         from.tex_name[i]=0;
-                
-                printf("\naccessing %s",from.tex_name);
 
                 to.tex = textures_manager.access(from.tex_name);
+                
+                if(!to.tex.is_valid())
+                    printf("\ninvalid texture %s",from.tex_name);
             }
         }
 

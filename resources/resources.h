@@ -11,17 +11,32 @@ namespace nya_resources
 class resource_data
 {
 public:
-	virtual size_t get_size() { return 0; };
+	virtual size_t get_size() const { return 0; };
 
-	virtual bool read_all(void*data) { return false; };
-	virtual bool read_chunk(void *data,size_t size,size_t offset=0) { return false; };
+public:
+	virtual bool read_all(void*data) const { return false; };
+	virtual bool read_chunk(void *data,size_t size,size_t offset=0) const { return false; };
+
+public:
+	virtual void release() {}
+};
+
+class resource_info
+{
+public:
+    //virtual virtual resource_data *access() { return 0; }
+    virtual const char *get_name() const { return ""; };
+    virtual resource_info *get_next() const { return 0; };
 };
 
 class resources_provider
 {
 public:
 	virtual resource_data *access(const char *resource_name) { return 0; };
-	virtual void close(resource_data *res) {};
+	//virtual void free_all{};
+
+public:
+    virtual resource_info *first_res_info() { return 0; }
 };
 
 void set_resources_provider(resources_provider *provider);
