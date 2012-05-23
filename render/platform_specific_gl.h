@@ -7,8 +7,8 @@
 	#include "windows.h"
 	#include "../gl/glew.h"
 	#include "../GL/glext.h"
-	#pragma comment ( lib, "opengl32.lib" )
-	#pragma comment ( lib, "glu32.lib"  )
+//	#pragma comment ( lib, "opengl32.lib" )
+//	#pragma comment ( lib, "glu32.lib"  )
 
 #elif defined __APPLE__
     #include <OpenGL/gl.h>
@@ -25,7 +25,10 @@
 #ifndef NO_EXTENSIONS_INIT
 namespace nya_render
 {
-	void *get_extension(const char*ext_name);
+
+bool has_extension(const char *name);
+void *get_extension(const char*ext_name);
+
 }
 #endif
 

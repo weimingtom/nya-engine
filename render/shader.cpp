@@ -167,6 +167,7 @@ bool check_init_shaders()
     return true;
 }
 
+#include <stdio.h>
 
 void shader::add_program(program_type type,const char*code)
 {
@@ -195,16 +196,15 @@ void shader::add_program(program_type type,const char*code)
 	GLint compiled;
 	glGetObjectParameterivARB(object,GL_OBJECT_COMPILE_STATUS_ARB,&compiled);
 
-	//const static char type_str[][12]={"vertex","pixel","geometry","tesselation"};
+	const static char type_str[][12]={"vertex","pixel","geometry","tesselation"};
 
 	if(!compiled)
 	{
 		GLint length;
 		glGetObjectParameterivARB(object,GL_OBJECT_INFO_LOG_LENGTH_ARB,&length);
-		unsigned char *buf = new unsigned char[length];
-		glGetInfoLogARB(object, length, &length, (GLcharARB*)buf);
-		//LogN(LOG_ERROR,"Can`t compile %s shader (AddShader func)\n Shader error: \n%s\n",
-			//type_str[type],buf);
+        const char *buf=new char[length];
+		glGetInfoLogARB(object,length,&length,(GLcharARB*)buf);
+        get_log()<<"Can`t compile "<<type_str[type]<<" shader: \n"<<buf<<"\n";
 		delete []buf;
 		m_program=0;
 		return;
@@ -215,23 +215,20 @@ void shader::add_program(program_type type,const char*code)
 	if(m_program)
 	{
 		int result=0;
-
 		glLinkProgramARB(m_program);
 		glGetObjectParameterivARB(m_program,GL_OBJECT_LINK_STATUS_ARB,&result);
-
 		if(!result)
 		{
-//			Log("Can`t link %s %s shader",Name.c_str(),type_str[type]);
+			get_log()<<"Can`t link "<<type_str[type]<<" shader\n";
 			m_program=0; //??
 			return;
 		}
 
 		glValidateProgramARB(m_program);
 		glGetObjectParameterivARB(m_program,GL_OBJECT_VALIDATE_STATUS_ARB, &result);
-
 		if(!result)
 		{
-//			Log("Can`t validate %s %s shader",Name.c_str(),type_str[type]);
+			get_log()<<"Can`t validate "<<type_str[type]<<" shader\n";
 			m_program=0; //??
 			return;
 		}
@@ -260,10 +257,10 @@ void shader::unbind()
 
 void shader::set_sampler(const char*name,unsigned int layer)
 {
-	if(!m_program||!name)
+	if(!m_program || !name)
 		return;
 
-    unsigned int handler = glGetUniformLocationARB(m_program,name);
+    unsigned int handler=glGetUniformLocationARB(m_program,name);
     if(!handler)
         return;
 
@@ -288,7 +285,18 @@ void shader::set_uniform(unsigned int i,float f0,float f1,float f2,float f3)
 
 void shader::set_uniform4_array(unsigned int i,const float *f,unsigned int count)
 {
+	if(!check_init_shaders() || !f)
+		return;
+
 	glUniform4fvARB(i,count,f);
+}
+
+void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int count,bool transpose)
+{
+	if(!check_init_shaders() || !f)
+		return;
+
+    glUniformMatrix4fvARB(i,count,transpose,f);
 }
 
 void shader::release()
@@ -298,7 +306,7 @@ void shader::release()
 
 	glUseProgramObjectARB(0);
 
-	for(int i = 0;i<program_types_count;++i)
+	for(int i=0;i<program_types_count;++i)
 	{
 		if(!m_objects[i])
 			continue;

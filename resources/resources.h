@@ -3,6 +3,7 @@
 #ifndef resources_h
 #define resources_h
 
+#include "log/log.h"
 #include <cstddef>
 
 namespace nya_resources
@@ -24,7 +25,7 @@ public:
 class resource_info
 {
 public:
-    //virtual virtual resource_data *access() { return 0; }
+    virtual resource_data *access() { return 0; }
     virtual const char *get_name() const { return ""; };
     virtual resource_info *get_next() const { return 0; };
 };
@@ -42,5 +43,9 @@ public:
 void set_resources_provider(resources_provider *provider);
 resources_provider &get_resources_provider();
 
+void set_log(nya_log::log *l);
+nya_log::log &get_log();
+
 }
 #endif
+

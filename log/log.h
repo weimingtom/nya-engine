@@ -26,10 +26,15 @@ public:
 
 	virtual void scope_inc() {}
 	virtual void scope_dec() {}
+
+	virtual void set_tag(const char* tag) {};
 };
 
 log &no_log();
-    
+
+void set_log(log *l);
+log &get_log(const char *tag=0);
+
 }
 #endif
 

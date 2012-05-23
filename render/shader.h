@@ -29,8 +29,9 @@ public:
 
 public:
 	unsigned int get_handler(const char*name); 	//ToDo: check gl error return value 0 or -1
-	void set_uniform(unsigned int i,float f0,float f1 = 0.0f,float f2 = 0.0f,float f3 = 0.0f);
+	void set_uniform(unsigned int i,float f0,float f1=0.0f,float f2=0.0f,float f3=0.0f);
 	void set_uniform4_array(unsigned int i,const float *f,unsigned int count);
+	void set_uniform16_array(unsigned int i,const float *f,unsigned int count,bool transpose=false);
 
 public:
 	void release();

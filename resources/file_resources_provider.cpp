@@ -44,6 +44,7 @@ public:
     file_resource_info(): next(0) {}
 
 private:
+	resource_data *access();
     const char *get_name() const { return name.c_str(); };
     resource_info *get_next() const { return next; };
 };
@@ -59,14 +60,33 @@ namespace
 namespace nya_resources
 {
 
-resource_data *file_resources_provider::access(const char *resource_name)
+resource_data *file_resource_info::access()
 {
 	file_resource *file = file_resources.allocate();
-	if(!file)
+
+	if(!file->open(name.c_str()))
+	{
+	    get_log()<<"unable to acess file "<<name.c_str()<<"\n";
+	    file_resources.free(file);
 		return 0;
+	}
+
+	return file;
+}
+
+resource_data *file_resources_provider::access(const char *resource_name)
+{
+	if(!resource_name)
+	{
+	    get_log()<<"unable to access file: invalid name\n";
+		return 0;
+	}
+
+	file_resource *file = file_resources.allocate();
 
 	if(!file->open(resource_name))
 	{
+	    get_log()<<"unable to access file: "<<resource_name<<"\n";
 	    file_resources.free(file);
 		return 0;
 	}
@@ -149,13 +169,22 @@ resource_info *file_resources_provider::first_res_info()
 bool file_resource::read_all(void*data) const
 {
 	if(!data||!m_file)
+	{
+        get_log()<<"unable to read file data\n";
 		return false;
+	}
 
 	if(fseek(m_file,0,SEEK_SET)!=0)
-        return false;
+	{
+        get_log()<<"unable to read file data: seek_set failed\n";
+		return false;
+	}
 
 	if(fread(data,1,m_size,m_file)!=m_size)
-        return false;
+	{
+        get_log()<<"unable to read file data: unexpected size of readen data\n";
+		return false;
+	}
 
 	return true;
 }
@@ -163,16 +192,28 @@ bool file_resource::read_all(void*data) const
 bool file_resource::read_chunk(void *data,size_t size,size_t offset) const
 {
 	if(!data||!m_file)
+	{
+        get_log()<<"unable to read file data chunk\n";
 		return false;
+	}
 
 	if(offset+size>m_size||!size)
+	{
+        get_log()<<"unable to read file data chunk: invalid size\n";
 		return false;
+	}
 
 	if(fseek(m_file,offset,SEEK_SET)!=0)
-        return false;
+	{
+        get_log()<<"unable to read file data chunk: seek_set failed\n";
+		return false;
+	}
 
 	if(fread(data,1,size,m_file)!=size)
-        return false;
+ 	{
+        get_log()<<"unable to read file data chunk: unexpected size of readen data\n";
+		return false;
+	}
 
 	return true;
 }

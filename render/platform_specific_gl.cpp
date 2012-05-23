@@ -21,9 +21,9 @@ void *get_exact_extension(const char*ext_name)
 
 void *get_extension(const char*ext_name)
 {
-	if(!ext)
+	if(!ext_name)
 	{
-		get_log()<<log::error_internal<<"invalid extension name\n";
+		get_log()<<nya_log::error_internal<<"invalid extension name\n";
 		return 0;
 	}
 
@@ -41,9 +41,19 @@ void *get_extension(const char*ext_name)
 	const std::string ext_name_ext = std::string(ext_name)+ext;
 	ext = get_exact_extension(ext_name_ext.c_str());
 	if(!ext)
-		get_log()<<log::error<<"unable to initialise extension "<<ext_name<<"\n";
+		get_log()<<nya_log::error<<"unable to initialise extension "<<ext_name<<"\n";
 		
 	return ext;
+}
+
+bool has_extension(const char *name)
+{
+	const char *exts=glGetString(GL_EXTENSIONS);
+	if(!exts)
+		return false;
+
+	if(std::string(exts).find(name)!=std::string::endpos)
+		return true;
 }
 
 }
