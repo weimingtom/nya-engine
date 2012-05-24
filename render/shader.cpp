@@ -172,7 +172,7 @@ void shader::add_program(program_type type,const char*code)
 {
 	if(!code || !code[0])
 	{
-		get_log()<<"Unable to add shader program: invalid code\n"
+		get_log()<<"Unable to add shader program: invalid code\n";
 		return;
 	}
 
@@ -264,20 +264,20 @@ void shader::set_sampler(const char*name,unsigned int layer)
 {
 	if(!name || !name[0])
 	{
-		get_log()<<"Unable to set shader sampler: invalid name\n"
+		get_log()<<"Unable to set shader sampler: invalid name\n";
 		return;
 	}
 
 	if(!m_program)
 	{
-		get_log()<<"Unable to set shader sampler \'"<<name<<"\': invalid program\n"
+		get_log()<<"Unable to set shader sampler \'"<<name<<"\': invalid program\n";
 		return;
 	}
 
     unsigned int handler=glGetUniformLocationARB(m_program,name);
     if(!handler)
 	{
-		get_log()<<"Unable to set shader sampler \'"<<name<<"\': probably not found\n"
+		get_log()<<"Unable to set shader sampler \'"<<name<<"\': probably not found\n";
 		return;
 	}
 
@@ -288,7 +288,7 @@ unsigned int shader::get_handler(const char *name)
 {
 	if(!name || !name[0])
 	{
-		get_log()<<"Unable to set shader handler: invalid name\n"
+		get_log()<<"Unable to set shader handler: invalid name\n";
 		return;
 	}
 

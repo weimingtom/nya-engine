@@ -11,7 +11,7 @@ void texture::build_texture(void *data,unsigned int width,unsigned int height,co
 {
 	if(!data||width==0||height==0)
 	{
-		get_log()<<"Unable to build texture: invalid data/width/height"
+		get_log()<<"Unable to build texture: invalid data/width/height";
 		return;
 	}
 
@@ -28,7 +28,7 @@ void texture::build_texture(void *data,unsigned int width,unsigned int height,co
 
 	if(!source_format || !gl_format)
 	{
-		get_log()<<"Unable to build texture: unsuppored color format"
+		get_log()<<"Unable to build texture: unsuppored color format";
 		return;
 	}
 
