@@ -289,7 +289,7 @@ unsigned int shader::get_handler(const char *name)
 	if(!name || !name[0])
 	{
 		get_log()<<"Unable to set shader handler: invalid name\n";
-		return;
+		return 0;
 	}
 
 	return glGetUniformLocationARB(m_program,name);
