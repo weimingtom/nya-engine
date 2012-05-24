@@ -2,8 +2,8 @@
 
 /*
     ToDo: check if this program already set (less state changes)
-		  check if this program on uniform sets
-		  log
+		  check if this program on uniform and handler sets
+		  more log
 */
 
 #include "shader.h"
@@ -95,7 +95,6 @@ bool check_init_shaders()
 
 #ifndef NO_EXTENSIONS_INIT
     glGenProgramsARB                = (PFNGLGENPROGRAMSARBPROC)               get_extension ( "glGenProgramsARB" );
-
     if(!glGenProgramsARB)
 	{
 		return false;
@@ -171,14 +170,20 @@ bool check_init_shaders()
 
 void shader::add_program(program_type type,const char*code)
 {
-	if(!code)
+	if(!code || !code[0])
+	{
+		get_log()<<"Unable to add shader program: invalid code\n"
 		return;
+	}
 
 	if(!m_program)
 		m_program = glCreateProgramObjectARB();
 
 	if(!m_program)
+	{
+		get_log()<<"Unable to create shader program object\n";
 		return;
+	}
 
 	if(m_objects[type])
 	{
@@ -257,20 +262,35 @@ void shader::unbind()
 
 void shader::set_sampler(const char*name,unsigned int layer)
 {
-	if(!m_program || !name)
+	if(!name || !name[0])
+	{
+		get_log()<<"Unable to set shader sampler: invalid name\n"
 		return;
+	}
+
+	if(!m_program)
+	{
+		get_log()<<"Unable to set shader sampler \'"<<name<<"\': invalid program\n"
+		return;
+	}
 
     unsigned int handler=glGetUniformLocationARB(m_program,name);
     if(!handler)
-        return;
+	{
+		get_log()<<"Unable to set shader sampler \'"<<name<<"\': probably not found\n"
+		return;
+	}
 
 	glUniform1iARB(handler,layer);
 }
 
 unsigned int shader::get_handler(const char *name)
 {
-	if(!m_program||!name)
-		return 0;
+	if(!name || !name[0])
+	{
+		get_log()<<"Unable to set shader handler: invalid name\n"
+		return;
+	}
 
 	return glGetUniformLocationARB(m_program,name);
 }

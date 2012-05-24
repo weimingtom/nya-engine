@@ -10,7 +10,10 @@ namespace nya_render
 void texture::build_texture(void *data,unsigned int width,unsigned int height,color_format format)
 {
 	if(!data||width==0||height==0)
+	{
+		get_log()<<"Unable to build texture: invalid data/width/height"
 		return;
+	}
 
 	unsigned int source_format=0;
 	unsigned int gl_format=0;
@@ -24,7 +27,11 @@ void texture::build_texture(void *data,unsigned int width,unsigned int height,co
 	};
 
 	if(!source_format || !gl_format)
+	{
+		get_log()<<"Unable to build texture: unsuppored color format"
 		return;
+	}
+
 
 	if(!m_tex_id)
 	    glGenTextures(1,&m_tex_id);
