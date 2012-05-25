@@ -22,6 +22,7 @@ public:
 
 public:
     file_resources_provider(): m_entries(0) {}
+    ~file_resources_provider() { clear_entries(); }
 
 private:
     void clear_entries();
