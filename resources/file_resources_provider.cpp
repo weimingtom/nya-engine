@@ -46,6 +46,11 @@ public:
 private:
 	resource_data *access();
     const char *get_name() const { return name.c_str(); };
+    bool check_extension(const char *ext) const
+    {
+        return name.find_last_of(ext)+1 == name.size();
+    }
+
     resource_info *get_next() const { return next; };
 };
 

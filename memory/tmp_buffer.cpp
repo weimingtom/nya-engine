@@ -3,6 +3,7 @@
 #include "tmp_buffer.h"
 #include <memory.h>
 #include <vector>
+#include <list>
 
 namespace nya_memory
 {
@@ -86,44 +87,43 @@ private:
 class tmp_buffer_allocator
 {
 public:
-    unsigned int allocate(size_t size)
+    tmp_buffer *allocate(size_t size)
     {
-        int first_free = -1;
-        for(unsigned int i=0;i<m_buffers.size();++i)
+        tmp_buffer* first_free=0;
+        buffers_list::iterator it=m_buffers.begin();
+        while(it!=m_buffers.end())
         {
-            tmp_buffer & buffer = m_buffers[i];
+            tmp_buffer &buffer = *it;
             if(!buffer.is_used())
             {
                 if(buffer.get_actual_size()<=size)
                 {
                     buffer.allocate(size);
-                    return i;
+                    return &buffer;
                 }
 
-                if(first_free<0)
-                    first_free = i;
+                if(!first_free)
+                    first_free = &buffer;
             }
+
+            ++it;
         }
 
-        if(first_free>=0)
+        if(first_free)
         {
-            m_buffers[first_free].allocate(size);
+            first_free->allocate(size);
             return first_free;
         }
 
         m_buffers.push_back(tmp_buffer());
         m_buffers.back().allocate(size);
 
-        return (unsigned int)(m_buffers.size() - 1);
-    }
-
-    tmp_buffer &get_buffer(unsigned int i)
-    {
-        return m_buffers[i];
+        return &m_buffers.back();
     }
 
 private:
-    std::vector<tmp_buffer> m_buffers;
+    typedef std::list<tmp_buffer> buffers_list;
+    std::list<tmp_buffer> m_buffers;
 };
 
 }
@@ -137,11 +137,6 @@ nya_memory::tmp_buffer_allocator &get_allocator()
     return allocator;
 }
 
-nya_memory::tmp_buffer &get_buffer(unsigned int buf_idx)
-{
-    return get_allocator().get_buffer(buf_idx);
-}
-
 }
 
 namespace nya_memory
@@ -149,71 +144,71 @@ namespace nya_memory
 
 void *tmp_buffer_ref::get_data(size_t offset)
 {
-    if(m_buf_idx<0)
+    if(!m_buf)
         return 0;
 
-    return get_buffer(m_buf_idx).get_data(offset);
+    return m_buf->get_data(offset);
 }
 
 size_t tmp_buffer_ref::get_size() const
 {
-    if(m_buf_idx<0)
+    if(!m_buf)
         return 0;
 
-    return get_buffer(m_buf_idx).get_size();
+    return m_buf->get_size();
 }
 
 bool tmp_buffer_ref::copy_from(void*data,size_t size,size_t offset) const
 {
-    if(m_buf_idx<0)
+    if(!m_buf)
         return false;
 
-    return get_buffer(m_buf_idx).copy_from(data,size,offset);
+    return m_buf->copy_from(data,size,offset);
 }
 
 bool tmp_buffer_ref::copy_to(const void*data,size_t size,size_t offset)
 {
-    if(m_buf_idx<0)
+    if(!m_buf)
         return false;
 
-    return get_buffer(m_buf_idx).copy_to(data,size,offset);
+    return m_buf->copy_to(data,size,offset);
 }
 
 void tmp_buffer_ref::allocate(size_t size)
 {
-    m_buf_idx=get_allocator().allocate(size);
+    m_buf=get_allocator().allocate(size);
 }
 
 void tmp_buffer_ref::free()
 {
-    if(m_buf_idx<0)
+    if(!m_buf)
         return;
 
-    get_buffer(m_buf_idx).free();
-    m_buf_idx=-1;
+    m_buf->free();
+    m_buf=0;
 }
 
 
 void *tmp_buffer_scoped::get_data(size_t offset)
 {
-    return get_buffer(m_buf_idx).get_data(offset);
+    return m_buf->get_data(offset);
 }
 
 bool tmp_buffer_scoped::copy_from(void*data,size_t size,size_t offset) const
 {
-    return get_buffer(m_buf_idx).copy_from(data,size,offset);
+    return m_buf->copy_from(data,size,offset);
 }
 
 bool tmp_buffer_scoped::copy_to(const void*data,size_t size,size_t offset)
 {
-    return get_buffer(m_buf_idx).copy_to(data,size,offset);
+    return m_buf->copy_to(data,size,offset);
 }
 
-tmp_buffer_scoped::tmp_buffer_scoped(size_t size): m_buf_idx(get_allocator().allocate(size)) {}
+tmp_buffer_scoped::tmp_buffer_scoped(size_t size): m_buf(get_allocator().allocate(size)) {}
 
 tmp_buffer_scoped::~tmp_buffer_scoped()
 {
-    get_buffer(m_buf_idx).free();
+    m_buf->free();
 }
 
 }

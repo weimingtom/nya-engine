@@ -27,6 +27,7 @@ class resource_info
 public:
     virtual resource_data *access() { return 0; }
     virtual const char *get_name() const { return ""; };
+    virtual bool check_extension(const char *ext) const { return false; }
     virtual resource_info *get_next() const { return 0; };
 };
 

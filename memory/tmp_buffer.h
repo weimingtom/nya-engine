@@ -10,6 +10,8 @@
 namespace nya_memory
 {
 
+class tmp_buffer;
+
 class tmp_buffer_ref
 {
 public:
@@ -25,10 +27,10 @@ public:
     void free();
 
 public:
-    tmp_buffer_ref(): m_buf_idx(-1) {}
+    tmp_buffer_ref(): m_buf(0) {}
 
 private:
-    int m_buf_idx;
+    tmp_buffer* m_buf;
 };
 
 class tmp_buffer_scoped
@@ -45,7 +47,7 @@ public:
     ~tmp_buffer_scoped();
 
 private:
-    const unsigned int m_buf_idx;
+    tmp_buffer *m_buf;
 };
 
 }

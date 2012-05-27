@@ -13,7 +13,7 @@ public:
 	void set_next(composite_entry_info *next) { m_next=next; }
 
 public:
-    virtual resource_data *access()
+    resource_data *access()
 	{
 		if(!m_info)
 		{
@@ -24,7 +24,7 @@ public:
 		return m_info->access();
 	}
 
-    virtual const char *get_name() const
+    const char *get_name() const
 	{
 		if(!m_info)
 		{
@@ -34,8 +34,19 @@ public:
 
 		return m_info->get_name();
 	}
+    
+    bool check_extension(const char *ext) const
+	{
+		if(!m_info)
+		{
+            get_log()<<"unable to check entry extension: invalid info\n";
+			return 0;
+		}
+        
+		return m_info->check_extension(ext);
+    }
 
-    virtual resource_info *get_next() const { return m_next; };
+    resource_info *get_next() const { return m_next; };
 
 public:
 	composite_entry_info(): m_info(0), m_next(0) {}
