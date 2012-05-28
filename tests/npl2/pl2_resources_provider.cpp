@@ -18,7 +18,7 @@ namespace
         uint offset;
         uint packed_size;
         uint size;
-        uint align_byte;
+        uint align_bytes;
     };
 }
 
