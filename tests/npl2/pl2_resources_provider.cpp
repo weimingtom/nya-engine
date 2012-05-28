@@ -6,21 +6,24 @@
 #include <string>
 #include <memory.h>
 
+namespace
+{
+    typedef unsigned int uint;
+    typedef unsigned short ushort;
+    typedef unsigned char uchar;
+    
+    struct pl2_entry
+    {
+        char name[32];
+        uint offset;
+        uint packed_size;
+        uint size;
+        uint align_byte;
+    };
+}
+
 namespace nya_resources
 {
-
-typedef unsigned int uint;
-typedef unsigned short ushort;
-typedef unsigned char uchar;
-
-struct pl2_entry
-{
-    char name[32];
-    uint offset;
-    uint packed_size;
-    uint size;
-    uint align_byte;
-};
 
 class pl2_resource: public resource_data
 {
