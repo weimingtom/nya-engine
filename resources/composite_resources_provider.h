@@ -10,7 +10,7 @@
 namespace nya_resources
 {
 
-class composite_resources_provider
+class composite_resources_provider: public resources_provider
 {
 public:
 	void add_provider(resources_provider *provider);
