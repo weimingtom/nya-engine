@@ -3,7 +3,7 @@
 #ifndef pl2_resource_provider_h
 #define pl2_resource_provider_h
 
-#include "resources.h"
+#include "resources/resources.h"
 
 namespace nya_resources
 {
