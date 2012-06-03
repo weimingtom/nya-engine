@@ -48,7 +48,12 @@ private:
     const char *get_name() const { return name.c_str(); };
     bool check_extension(const char *ext) const
     {
-        return name.find_last_of(ext)+1 == name.size();
+        if(!ext)
+            return false;
+        
+        std::string ext_str(ext);
+        return (name.size() >= ext_str.size() && 
+                std::equal(name.end()-ext_str.size(),name.end(),ext_str.begin()));
     }
 
     resource_info *get_next() const { return next; };

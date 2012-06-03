@@ -65,7 +65,11 @@ public:
                 return shared_resource_ref();
 
             ir.first->second = holder;
-            fill_resource(name,holder->res);
+            if(!fill_resource(name,holder->res))
+            {
+                m_res_map.erase(ir.first);
+                return shared_resource_ref();
+            }
             holder->ref_count=1;
             holder->map_it=ir.first;
             

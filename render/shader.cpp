@@ -274,8 +274,8 @@ void shader::set_sampler(const char*name,unsigned int layer)
 		return;
 	}
 
-    unsigned int handler=glGetUniformLocationARB(m_program,name);
-    if(!handler)
+    int handler=glGetUniformLocationARB(m_program,name);
+    if(handler<0)
 	{
 		get_log()<<"Unable to set shader sampler \'"<<name<<"\': probably not found\n";
 		return;
@@ -284,7 +284,7 @@ void shader::set_sampler(const char*name,unsigned int layer)
 	glUniform1iARB(handler,layer);
 }
 
-unsigned int shader::get_handler(const char *name)
+int shader::get_handler(const char *name)
 {
 	if(!name || !name[0])
 	{
