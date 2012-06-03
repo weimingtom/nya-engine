@@ -2,7 +2,6 @@
 
 #include "tsb_anim.h"
 #include "memory/tmp_buffer.h"
-#include <stdio.h>
 #include <string.h>
 
 bool tsb_anim::load(nya_resources::resource_data *anim_res)
