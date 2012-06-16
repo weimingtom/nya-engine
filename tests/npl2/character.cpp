@@ -125,7 +125,10 @@ void character::set_anim(const char *anim_name)
         nya_log::get_log()<<"Unable to set character anim: invalid base part\n";
         return;
     }
-    
+
+    if(it->second->models.empty())
+        return;
+
     model_ref m=it->second->models.front();
     if(!m.is_valid())
     {
@@ -182,6 +185,9 @@ float *character::get_buffer(unsigned int frame)
     if(it==m_parts_map.end())
         return 0;
     
+    if(it->second->models.empty())
+        return 0;
+
     model_ref m=it->second->models.front();
     if(!m.is_valid())
         return 0;
@@ -195,6 +201,9 @@ unsigned int character::get_frames_count()
     if(it==m_parts_map.end())
         return 0;
 
+    if(it->second->models.empty())
+        return 0;
+    
     model_ref m=it->second->models.front();
     if(!m.is_valid())
         return 0;
@@ -206,6 +215,9 @@ unsigned int character::get_bones_count()
 {
     parts_map::iterator it=m_parts_map.find("BODY");
     if(it==m_parts_map.end())
+        return 0;
+    
+    if(it->second->models.empty())
         return 0;
     
     model_ref m=it->second->models.front();

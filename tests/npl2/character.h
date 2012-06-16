@@ -20,7 +20,6 @@ public:
 
     void release();
 
-    //CRAP
     float *get_buffer(unsigned int frame);
     unsigned int get_frames_count();
     unsigned int get_bones_count();
