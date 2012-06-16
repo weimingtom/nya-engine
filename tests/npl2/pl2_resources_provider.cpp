@@ -93,6 +93,9 @@ namespace nya_resources
 
 bool pl2_resources_provider::open_archieve(resource_data *archieve_data)
 {
+    if(m_archieve_data)
+        close_archieve();
+
     if(!archieve_data)
         return false;
 
