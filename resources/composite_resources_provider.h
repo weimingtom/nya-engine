@@ -13,21 +13,21 @@ namespace nya_resources
 class composite_resources_provider: public resources_provider
 {
 public:
-	void add_provider(resources_provider *provider);
+    void add_provider(resources_provider *provider);
 
 public:
-	resource_data *access(const char *resource_name);
+    resource_data *access(const char *resource_name);
 
 public:
     resource_info *first_res_info();
 
 public:
-	composite_resources_provider(): m_entries(0) {}
-	~composite_resources_provider();
+    composite_resources_provider(): m_entries(0) {}
+    ~composite_resources_provider();
 
 private:
-	std::map<std::string,resource_info*> m_resources_info;
-	resource_info *m_entries;
+    std::map<std::string,resource_info*> m_resources_info;
+    resource_info *m_entries;
 };
 
 }

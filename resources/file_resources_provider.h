@@ -12,10 +12,10 @@ class file_resource_info;
 class file_resources_provider: public resources_provider
 {
 public:
-	resource_data *access(const char *resource_name);
+    resource_data *access(const char *resource_name);
 
 public:
-	bool set_folder(const char*);
+    bool set_folder(const char*);
 
 public:
     resource_info *first_res_info();

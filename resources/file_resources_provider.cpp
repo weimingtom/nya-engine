@@ -17,21 +17,21 @@ class file_resource: public resource_data
 {
 public:
     bool is_valid() const { return m_file!=0; }
-	size_t get_size() const { return m_size; }
+    size_t get_size() const { return m_size; }
 
-	bool read_all(void*data) const;
-	bool read_chunk(void *data,size_t size,size_t offset) const;
+    bool read_all(void*data) const;
+    bool read_chunk(void *data,size_t size,size_t offset) const;
 
 public:
-	bool open(const char*filename);
-	void release();
+    bool open(const char*filename);
+    void release();
 
-	file_resource(): m_file(0), m_size(0) {}
+    file_resource(): m_file(0), m_size(0) {}
     //~file_resource() { release(); }
 
 private:
-	FILE *m_file;
-	size_t m_size;
+    FILE *m_file;
+    size_t m_size;
 };
 
 struct file_resource_info: public resource_info
@@ -44,7 +44,7 @@ public:
     file_resource_info(): next(0) {}
 
 private:
-	resource_data *access();
+    resource_data *access();
     const char *get_name() const { return name.c_str(); };
     bool check_extension(const char *ext) const
     {
@@ -72,36 +72,36 @@ namespace nya_resources
 
 resource_data *file_resource_info::access()
 {
-	file_resource *file = file_resources.allocate();
+    file_resource *file = file_resources.allocate();
 
-	if(!file->open(name.c_str()))
-	{
-	    get_log()<<"unable to acess file "<<name.c_str()<<"\n";
-	    file_resources.free(file);
-		return 0;
-	}
+    if(!file->open(name.c_str()))
+    {
+        get_log()<<"unable to acess file "<<name.c_str()<<"\n";
+        file_resources.free(file);
+        return 0;
+    }
 
-	return file;
+    return file;
 }
 
 resource_data *file_resources_provider::access(const char *resource_name)
 {
-	if(!resource_name)
-	{
-	    get_log()<<"unable to access file: invalid name\n";
-		return 0;
-	}
+    if(!resource_name)
+    {
+        get_log()<<"unable to access file: invalid name\n";
+        return 0;
+    }
 
-	file_resource *file = file_resources.allocate();
+    file_resource *file = file_resources.allocate();
 
-	if(!file->open(resource_name))
-	{
-	    get_log()<<"unable to access file: "<<resource_name<<"\n";
-	    file_resources.free(file);
-		return 0;
-	}
+    if(!file->open(resource_name))
+    {
+        get_log()<<"unable to access file: "<<resource_name<<"\n";
+        file_resources.free(file);
+        return 0;
+    }
 
-	return file;
+    return file;
 }
 
 bool file_resources_provider::set_folder(const char*name)
@@ -178,72 +178,72 @@ resource_info *file_resources_provider::first_res_info()
 
 bool file_resource::read_all(void*data) const
 {
-	if(!data||!m_file)
-	{
+    if(!data||!m_file)
+    {
         get_log()<<"unable to read file data\n";
-		return false;
-	}
+        return false;
+    }
 
-	if(fseek(m_file,0,SEEK_SET)!=0)
-	{
+    if(fseek(m_file,0,SEEK_SET)!=0)
+    {
         get_log()<<"unable to read file data: seek_set failed\n";
-		return false;
-	}
+        return false;
+    }
 
-	if(fread(data,1,m_size,m_file)!=m_size)
-	{
+    if(fread(data,1,m_size,m_file)!=m_size)
+    {
         get_log()<<"unable to read file data: unexpected size of readen data\n";
-		return false;
-	}
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 bool file_resource::read_chunk(void *data,size_t size,size_t offset) const
 {
-	if(!data||!m_file)
-	{
+    if(!data||!m_file)
+    {
         get_log()<<"unable to read file data chunk\n";
-		return false;
-	}
+        return false;
+    }
 
-	if(offset+size>m_size||!size)
-	{
+    if(offset+size>m_size||!size)
+    {
         get_log()<<"unable to read file data chunk: invalid size\n";
-		return false;
-	}
+        return false;
+    }
 
-	if(fseek(m_file,offset,SEEK_SET)!=0)
-	{
+    if(fseek(m_file,offset,SEEK_SET)!=0)
+    {
         get_log()<<"unable to read file data chunk: seek_set failed\n";
-		return false;
-	}
+        return false;
+    }
 
-	if(fread(data,1,size,m_file)!=size)
- 	{
+    if(fread(data,1,size,m_file)!=size)
+    {
         get_log()<<"unable to read file data chunk: unexpected size of readen data\n";
-		return false;
-	}
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 bool file_resource::open(const char*filename)
 {
-	if(m_file)
-		fclose(m_file);
+    if(m_file)
+        fclose(m_file);
 
     m_size=0;
-	m_file=fopen(filename,"rb");
-	if(!m_file)
-		return false;
-
-	if(fseek(m_file,0,SEEK_END)!=0)
+    m_file=fopen(filename,"rb");
+    if(!m_file)
         return false;
 
-	m_size=ftell(m_file);
+    if(fseek(m_file,0,SEEK_END)!=0)
+        return false;
 
-	return true;
+    m_size=ftell(m_file);
+
+    return true;
 }
 
 void file_resource::release()
@@ -251,7 +251,7 @@ void file_resource::release()
     if(m_file)
         fclose(m_file);
 
-	file_resources.free(this);
+    file_resources.free(this);
 }
 
 }

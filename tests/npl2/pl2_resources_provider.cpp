@@ -28,21 +28,21 @@ namespace nya_resources
 class pl2_resource: public resource_data
 {
 public:
-	size_t get_size() const { return m_data.get_size(); }
+    size_t get_size() const { return m_data.get_size(); }
 
-	bool read_all(void*data) const
-	{
-	    return m_data.copy_from(data,m_data.get_size());
+    bool read_all(void*data) const
+    {
+        return m_data.copy_from(data,m_data.get_size());
     }
 
-	bool read_chunk(void *data,size_t size,size_t offset) const
-	{
-	    return m_data.copy_from(data,size,offset);
-	}
+    bool read_chunk(void *data,size_t size,size_t offset) const
+    {
+        return m_data.copy_from(data,size,offset);
+    }
 
 public:
-	bool decompress(const void*data,size_t packed_size,size_t size);
-	void release() { m_data.free(); }
+    bool decompress(const void*data,size_t packed_size,size_t size);
+    void release() { m_data.free(); }
 
 private:
     nya_memory::tmp_buffer_ref m_data;
@@ -222,6 +222,7 @@ resource_data *pl2_entry_info::access()
     }
 
     pl2_resource *data = pl2_resources.allocate();
+
     if(!data->decompress(packed.get_data(),packed_size,size))
     {
         pl2_resources.free(data);

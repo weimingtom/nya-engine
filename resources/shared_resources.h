@@ -55,7 +55,7 @@ public:
     };
 
 public:
-	shared_resource_ref access(const char*name)
+    shared_resource_ref access(const char*name)
     {
         std::pair<resources_map_iterator,bool> ir = m_res_map.insert(std::make_pair(std::string(name),(res_holder*)0));
         if(ir.second) 
@@ -86,11 +86,11 @@ public:
         }
 
         return shared_resource_ref();
-	}
+    }
 
-	void free(shared_resource_ref&ref)
-	{
-	    if(!ref.m_res_holder)
+    void free(shared_resource_ref&ref)
+    {
+        if(!ref.m_res_holder)
             return;
 
         --ref.m_res_holder->ref_count;
@@ -106,25 +106,25 @@ public:
 
         m_res_map.erase(ref.m_res_holder->map_it);
         m_res_pool.free(ref.m_res_holder);
-	}
+    }
 
-	void should_unload_unused(bool unload)
-	{
+    void should_unload_unused(bool unload)
+    {
         if(unload && unload!=m_should_unload_unused)
             free_unused();
         
-	    m_should_unload_unused=unload;
-	}
+        m_should_unload_unused=unload;
+    }
 
-	void free_unused()
-	{
-	    resources_map_iterator it=m_res_map.begin();
+    void free_unused()
+    {
+        resources_map_iterator it=m_res_map.begin();
 
         while(it!=m_res_map.end())
         {
-	        if(it->second)
-	        {
-	            if(it->second->ref_count>0)
+            if(it->second)
+            {
+                if(it->second->ref_count>0)
                 {
                     ++it;
                     continue;
@@ -132,40 +132,40 @@ public:
 
                 release_resource(it->second->res);
                 m_res_pool.free(it->second);
-	        }
+            }
 
             resources_map_iterator er = it;
             ++it;
 
             m_res_map.erase(er);
-	    }
-	}
+        }
+    }
 
-	void free_all()
-	{
-	    resources_map_iterator it;
-	    for(it=m_res_map.begin();it!=m_res_map.end();++it)
-	    {
-	        if(it->second)
+    void free_all()
+    {
+        resources_map_iterator it;
+        for(it=m_res_map.begin();it!=m_res_map.end();++it)
+        {
+            if(it->second)
                 release_resource(it->second->res);
-	    }
+        }
         
-	    m_res_map.clear();
-	    m_res_pool.clear();
-	}
+        m_res_map.clear();
+        m_res_pool.clear();
+    }
 
-	~shared_resources() 
+    ~shared_resources() 
     {
         unsigned int unreleased_count=0;
-	    resources_map_iterator it;
-	    for(it=m_res_map.begin();it!=m_res_map.end();++it)
-	    {
-	        if(it->second)
+        resources_map_iterator it;
+        for(it=m_res_map.begin();it!=m_res_map.end();++it)
+        {
+            if(it->second)
                 ++unreleased_count;
-	    }
+        }
 
-	    m_res_map.clear();
-	    m_res_pool.clear();
+        m_res_map.clear();
+        m_res_pool.clear();
 
         //if(unreleased_count>0)
         //log unreleased_count
@@ -181,8 +181,8 @@ public:
 
     //non copiable
 private:
-	shared_resources(const shared_resources &);
-	void operator = (const shared_resources &);
+    shared_resources(const shared_resources &);
+    void operator = (const shared_resources &);
 
 private:
     
