@@ -4,7 +4,7 @@
 
 namespace
 {
-	nya_log::log *render_log=0;
+    nya_log::log *render_log=0;
 }
 
 namespace nya_render
@@ -12,7 +12,7 @@ namespace nya_render
 
 void set_log(nya_log::log *l)
 {
-	render_log = l;
+    render_log = l;
 }
 
 nya_log::log &get_log()

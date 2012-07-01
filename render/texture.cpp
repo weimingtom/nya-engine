@@ -9,32 +9,32 @@ namespace nya_render
 
 void texture::build_texture(void *data,unsigned int width,unsigned int height,color_format format)
 {
-	if(!data||width==0||height==0)
-	{
-		get_log()<<"Unable to build texture: invalid data/width/height";
-		return;
-	}
+    if(!data||width==0||height==0)
+    {
+        get_log()<<"Unable to build texture: invalid data/width/height";
+        return;
+    }
 
-	unsigned int source_format=0;
-	unsigned int gl_format=0;
+    unsigned int source_format=0;
+    unsigned int gl_format=0;
 
-	switch(format)
-	{
-		case color_rgb: source_format=GL_RGB8; gl_format=GL_RGB; break;
-		case color_bgr: source_format=GL_RGB8; gl_format=GL_BGR; break;
-		case color_rgba: source_format=GL_RGBA8; gl_format=GL_RGBA; break;
-		case color_bgra: source_format=GL_RGBA8; gl_format=GL_BGRA; break;
-	};
+    switch(format)
+    {
+        case color_rgb: source_format=GL_RGB8; gl_format=GL_RGB; break;
+        case color_bgr: source_format=GL_RGB8; gl_format=GL_BGR; break;
+        case color_rgba: source_format=GL_RGBA8; gl_format=GL_RGBA; break;
+        case color_bgra: source_format=GL_RGBA8; gl_format=GL_BGRA; break;
+    };
 
-	if(!source_format || !gl_format)
-	{
-		get_log()<<"Unable to build texture: unsuppored color format";
-		return;
-	}
+    if(!source_format || !gl_format)
+    {
+        get_log()<<"Unable to build texture: unsuppored color format";
+        return;
+    }
 
 
-	if(!m_tex_id)
-	    glGenTextures(1,&m_tex_id);
+    if(!m_tex_id)
+        glGenTextures(1,&m_tex_id);
 
     glBindTexture(GL_TEXTURE_2D,m_tex_id);
 
@@ -46,20 +46,20 @@ void texture::build_texture(void *data,unsigned int width,unsigned int height,co
 
 void texture::bind()
 {
-	glBindTexture(GL_TEXTURE_2D,m_tex_id);
+    glBindTexture(GL_TEXTURE_2D,m_tex_id);
 }
 
 void texture::unbind()
 {
-	glBindTexture(GL_TEXTURE_2D,0);
+    glBindTexture(GL_TEXTURE_2D,0);
 }
 
 void texture::release()
 {
-	if(!m_tex_id)
-		return;
+    if(!m_tex_id)
+        return;
 
-	glDeleteTextures(1,&m_tex_id);
+    glDeleteTextures(1,&m_tex_id);
 }
 
 }
