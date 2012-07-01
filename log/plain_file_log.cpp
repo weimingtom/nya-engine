@@ -6,14 +6,27 @@
 namespace nya_log
 {
 
-log & plain_file_log::operator << (int a)
+log & plain_file_log::operator << (long int a)
 {
     if(FILE*f = fopen(m_file_name.c_str(),"a+"))
     {
-		for(int i=0;i<m_scope;++i)
-			fprintf(f,"%s",m_scope_tab);
+        for(int i=0;i<m_scope;++i)
+            fprintf(f,"%s",m_scope_tab.c_str());
 
-        fprintf(f,"%i",a);
+        fprintf(f,"%ld",a);
+        fclose(f);
+    }
+    return *this;
+}
+
+log & plain_file_log::operator << (unsigned long int a)
+{
+    if(FILE*f = fopen(m_file_name.c_str(),"a+"))
+    {
+        for(int i=0;i<m_scope;++i)
+            fprintf(f,"%s",m_scope_tab.c_str());
+
+        fprintf(f,"%ld",a);
         fclose(f);
     }
     return *this;
@@ -23,8 +36,8 @@ log & plain_file_log::operator << (float a)
 {
     if(FILE*f = fopen(m_file_name.c_str(),"a+"))
     {
-		for(int i=0;i<m_scope;++i)
-			fprintf(f,"%s",m_scope_tab);
+        for(int i=0;i<m_scope;++i)
+            fprintf(f,"%s",m_scope_tab.c_str());
 
         fprintf(f,"%f",a);
         fclose(f);
@@ -36,8 +49,8 @@ log & plain_file_log::operator << (const char * a)
 {
     if(FILE*f = fopen(m_file_name.c_str(),"a+"))
     {
-		for(int i=0;i<m_scope;++i)
-			fprintf(f,"%s",m_scope_tab);
+        for(int i=0;i<m_scope;++i)
+            fprintf(f,"%s",m_scope_tab.c_str());
 
         fprintf(f,"%s",a);
         fclose(f);
@@ -55,12 +68,12 @@ bool plain_file_log::open(const char*file_name)
     }
 
     m_file_name.clear();
-	return false;
+    return false;
 }
 
 void plain_file_log::close()
 {
-	m_file_name.clear();
+    m_file_name.clear();
 }
 
 }

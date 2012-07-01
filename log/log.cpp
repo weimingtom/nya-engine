@@ -13,8 +13,8 @@ namespace nya_log
 
 log &no_log()
 {
-	static log l;
-	return l;
+    static log l;
+    return l;
 }
 
 void set_log(log *l)

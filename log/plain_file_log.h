@@ -16,21 +16,22 @@ public:
     void close();
 
 public:
-    log &operator << (int a);
+    log &operator << (long int a);
+    log &operator << (unsigned long int a);
     log &operator << (float a);
     log &operator << (const char *a);
 
 public:
-	void scope_inc() { ++m_scope; }
-	void scope_dec() { --m_scope; if(m_scope<0) m_scope=0; }
+    void scope_inc() { ++m_scope; }
+    void scope_dec() { if(m_scope>0) --m_scope; }
 
-	plain_file_log(): m_scope(0), m_scope_tab("  ") {}
-	plain_file_log(const char *scope_tab): m_scope(0), m_scope_tab(scope_tab) {}
+    plain_file_log(): m_scope(0), m_scope_tab("  ") {}
+    plain_file_log(const char *scope_tab): m_scope(0), m_scope_tab(scope_tab) {}
 
 private:
     std::string m_file_name;
-	int m_scope;
-	const char *m_scope_tab;
+    int m_scope;
+    std::string m_scope_tab;
 };
     
 }
