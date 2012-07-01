@@ -4,7 +4,7 @@
 
 namespace
 {
-	nya_log::log *memory_log=0;
+    nya_log::log *memory_log=0;
 }
 
 namespace nya_memory
@@ -12,7 +12,7 @@ namespace nya_memory
 
 void set_log(nya_log::log *l)
 {
-	memory_log=l;
+    memory_log=l;
 }
 
 nya_log::log &get_log()
