@@ -41,9 +41,36 @@ public:
     virtual void remove_widget() {}
 
 public:
+    enum button
+    {
+        left_button,
+        middle_button,
+        right_button
+    };
+
+    virtual void mouse_button(button button,bool pressed);
+    virtual void mouse_move(uint x,uint y);
+    virtual void mouse_left();
+    virtual void mouse_scroll(uint dx,uint dy);
+
+public:
+    struct event
+    {
+        std::string type;
+    };
+
+    virtual void send_event(const char *id,event &e);
+    virtual void process_events(layout &l);
+
+public:
     layout(): m_x(0),m_y(0),m_width(0),m_height(0) {}
 
+    //non copiable
 private:
+	layout(const layout &);
+	void operator = (const layout &);
+
+protected:
     typedef std::list<widget*> widgets_list;
     widgets_list m_widgets;
     int m_x;
@@ -57,7 +84,7 @@ class widget
     friend class layout;
 
 public:
-    virtual void init(const char *id) { if(id) m_id.assign(id); }
+    virtual void set_id(const char *id) { if(id) m_id.assign(id); }
 
     virtual void set_pos(int x,int y)
     {
@@ -97,6 +124,8 @@ public:
     virtual void set_keep_aspect(keep_aspect a) { m_keep_aspect=a; }
 
 protected:
+    virtual const char *get_id() { return m_id.c_str(); }
+
     virtual void get_pos(int &x,int &y)
     {
         x=m_pos_left;
@@ -113,21 +142,42 @@ protected:
     {
         m_parent_pos_x=x;
         m_parent_pos_y=y;
+
+        m_cached_rect=false;
     }
 
     virtual void parent_resized(uint width,uint height)
     {
         m_parent_width=width;
         m_parent_height=height;
+
+        m_cached_rect=false;
     }
 
-    virtual void process_events(const char *id,const char *event) {}
+protected:
+    virtual void on_mouse_over() {}
+    virtual void on_mouse_left() {}
+    virtual void on_mouse_move(uint x,uint y) {}
+    virtual void on_mouse_button(layout::button button,bool pressed) {}
+    virtual void on_mouse_scroll(uint x,uint y) {}
 
+protected:
     virtual void draw(layer &l) {}
+    virtual void process_events(layout &l) {}
+
+protected:
+    virtual void send_event(const char *id,layout::event &e)
+    {
+        if(m_parent)
+            m_parent->send_event(id,e);
+    }
 
 protected:
     virtual rect get_draw_rect()
     {
+        if(m_cached_rect)
+            return m_rect;
+
         int x,y,w,h;
         if(m_align_left)
         {
@@ -189,14 +239,16 @@ protected:
         if(h>ch)
             h=ch;
 
-        rect r;
+        m_rect=rect();
 
-        if(x>0) r.x=x;
-        if(y>0) r.y=y;
-        if(w>0) r.w=w;
-        if(h>0) r.h=h;
+        if(x>0) m_rect.x=x;
+        if(y>0) m_rect.y=y;
+        if(w>0) m_rect.w=w;
+        if(h>0) m_rect.h=h;
 
-        return r;
+        m_cached_rect=true;
+
+        return m_rect;
     }
 
 protected:
@@ -211,16 +263,24 @@ protected:
             m_pos_top=m_parent_height-m_height-m_pos_bottom;
         else if(!m_align_bottom)
             m_center_y=m_parent_height/2-(m_pos_bottom+m_height/2);
+
+        m_cached_rect=false;
     }
 
 public:
     widget(): m_pos_left(0),m_pos_right(0),m_pos_top(0),m_pos_bottom(0),
               m_center_x(0),m_center_y(0),m_width(0),m_height(0),
-              m_parent_pos_x(0),m_parent_pos_y(0),
+              m_parent(0), m_parent_pos_x(0),m_parent_pos_y(0),
               m_parent_width(0),m_parent_height(0),
               m_align_left(true),m_align_right(false),
               m_align_top(false),m_align_bottom(true),
-              m_keep_aspect(none), m_visible(true) {}
+              m_keep_aspect(none),m_visible(true),
+              m_mouse_over(false), m_cached_rect(false) {}
+
+    //non copiable
+private:
+	widget(const widget &);
+	void operator = (const widget &);
 
 protected:
     std::string m_id;
@@ -235,6 +295,8 @@ protected:
     uint m_width;
     uint m_height;
 
+    layout *m_parent;
+
     int m_parent_pos_x;
     int m_parent_pos_y;
     uint m_parent_width;
@@ -248,6 +310,11 @@ protected:
     keep_aspect m_keep_aspect;
 
     bool m_visible;
+    bool m_mouse_over;
+    bool m_mouse_pressed;
+
+    bool m_cached_rect;
+    rect m_rect;
 };
 
 class layer: public layout
@@ -255,17 +322,10 @@ class layer: public layout
 public:
     void draw();
     void resize(uint width,uint height);
-    void mouse_move(uint x,uint y);
+    void process();
 
-    enum mouse_button
-    {
-        left_button,
-        middle_button,
-        right_button
-    };
-
-    void mouse_button(mouse_button button,bool pressed);
-    void mouse_scroll(uint dx,uint dy);
+private:
+    virtual void process_events(layout &l);
 
 public:
     struct color
@@ -315,15 +375,17 @@ public:
     };
 
     void draw_rect(rect &r,rect_style &s);
-
     void set_scissor(rect &r,bool enabled);
+
+    uint get_width() { return m_width; }
+    uint get_height() { return m_height; }
 
 public:
     layer(): m_width(0), m_height(0) {}
 
 private:
-    unsigned int m_width;
-    unsigned int m_height;
+    uint m_width;
+    uint m_height;
 
     //font m_default_font;
 };

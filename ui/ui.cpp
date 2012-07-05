@@ -12,7 +12,7 @@
 
 namespace
 {
-	nya_log::log *ui_log=0;
+    nya_log::log *ui_log=0;
 }
 
 namespace nya_ui
@@ -157,11 +157,44 @@ void layer::draw_rect(rect &r,rect_style &s)
     glDisableClientState(GL_VERTEX_ARRAY);
 }
 
+void layer::process()
+{
+    //process_events(*this);
+    /*
+    for(widgets_list::iterator it=m_widgets.begin();
+        it!=m_widgets.end();++it)
+    {
+        widget *w=*it;
+        w->process_events(*this);
+    }
+    */
+}
+
+void layer::process_events(layout &l)
+{
+    if(&l == this)
+        return;
+
+    layout::process_events(l);
+}
+
+void layout::process_events(layout &l)
+{
+    for(widgets_list::iterator it=m_widgets.begin();
+        it!=m_widgets.end();++it)
+    {
+        widget *w=*it;
+        w->process_events(*this);
+    }
+}
+
 void layout::add_widget(widget &w)
 {
     w.parent_moved(m_x,m_y);
     w.parent_resized(m_width,m_height);
     w.calc_pos_markers();
+
+    w.m_parent=this;
 
     m_widgets.push_back(&w);
 }
@@ -198,6 +231,81 @@ void layout::move(int x,int y)
     for(widgets_list::iterator it=m_widgets.begin();
         it!=m_widgets.end();++it)
         (*it)->parent_moved(m_x,m_y);
+}
+
+void layout::mouse_button(layout::button button,bool pressed)
+{
+    for(widgets_list::iterator it=m_widgets.begin();
+        it!=m_widgets.end();++it)
+    {
+        widget *w=*it;
+        if(w->m_mouse_over && w->m_mouse_pressed!=pressed)
+        {
+            w->on_mouse_button(button,pressed);
+            w->m_mouse_pressed=pressed;
+        }
+    }
+    //get_log()<<"mbutton"<<(int)button<<" "<<(int)pressed<<"\n";
+}
+
+void layout::mouse_move(uint x,uint y)
+{
+    for(widgets_list::iterator it=m_widgets.begin();
+        it!=m_widgets.end();++it)
+    {
+        widget *w=*it;
+        rect r=w->get_draw_rect();
+        if(x>r.x && x<r.x+r.w &&
+           y>r.y && y<r.y+r.h)
+        {
+            if(!w->m_mouse_over)
+            {
+                w->on_mouse_over();
+                w->m_mouse_over=true;
+            }
+
+            w->on_mouse_move(x,y);//x-r.x,y-r.y);
+        }
+        else if(w->m_mouse_over)
+        {
+            w->on_mouse_left();
+            w->m_mouse_over=false;
+            w->m_mouse_pressed=false;
+        }
+    }
+
+    //get_log()<<"mmove "<<(int)x<<" "<<(int)y<<"\n";
+}
+
+void layout::mouse_left()
+{
+    for(widgets_list::iterator it=m_widgets.begin();
+        it!=m_widgets.end();++it)
+    {
+        widget *w=*it;
+        if(w->m_mouse_over)
+        {
+            w->on_mouse_left();
+            w->m_mouse_over=false;
+            w->m_mouse_pressed=false;
+        }
+    }
+}
+
+void layout::mouse_scroll(uint dx,uint dy)
+{
+    for(widgets_list::iterator it=m_widgets.begin();
+        it!=m_widgets.end();++it)
+    {
+        widget *w=*it;
+        if(w->m_mouse_over)
+            w->on_mouse_scroll(dx,dy);
+    }
+}
+
+void layout::send_event(const char *id,event &e)
+{
+    get_log()<<"event: "<<id<<" "<<e.type.c_str()<<"\n";
 }
 
 void set_log(nya_log::log *l)

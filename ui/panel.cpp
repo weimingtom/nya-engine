@@ -1,6 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#include "ui/window.h"
+#include "panel.h"
 
 /*
     ToDo: rect_style customisation
@@ -9,7 +9,7 @@
 namespace nya_ui
 {
 
-void window::draw(layer &layer)
+void panel::draw(layer &layer)
 {
     rect r=get_draw_rect();
     if(!r.w || !r.h)
@@ -27,37 +27,37 @@ void window::draw(layer &layer)
     layout::draw_widgets(layer);
 }
 
-void window::set_pos(int x,int y)
+void panel::set_pos(int x,int y)
 {
     widget::set_pos(x,y);
     update_layout_rect();
 }
 
-void window::set_size(uint width,uint height)
+void panel::set_size(uint width,uint height)
 {
     widget::set_size(width,height);
     update_layout_rect();
 }
 
-void window::parent_resized(uint width,uint height)
+void panel::parent_resized(uint width,uint height)
 {
     widget::parent_resized(width,height);
     update_layout_rect();
 }
 
-void window::parent_moved(int x,int y)
+void panel::parent_moved(int x,int y)
 {
     widget::parent_moved(x,y);
     update_layout_rect();
 }
 
-void window::calc_pos_markers()
+void panel::calc_pos_markers()
 {
     widget::calc_pos_markers();
     update_layout_rect();
 }
 
-void window::update_layout_rect()
+void panel::update_layout_rect()
 {
     rect r=get_draw_rect();
     layout::move(r.x,r.y);
