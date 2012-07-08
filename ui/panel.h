@@ -16,6 +16,7 @@ public:
 
 protected:
     virtual void draw(layer &l);
+    virtual void process_events(layout::event &e);
     virtual void parent_resized(uint width,uint height);
     virtual void parent_moved(int x,int y);
     virtual void calc_pos_markers();
@@ -25,15 +26,18 @@ protected:
     virtual void on_mouse_left() { layout::mouse_left(); }
     virtual void on_mouse_move(uint x,uint y) { layout::mouse_move(x,y); }
 
-    virtual void on_mouse_scroll(uint dx,uint dy) 
-    { 
-        layout::mouse_scroll(dx,dy); 
+    virtual void on_mouse_scroll(uint dx,uint dy)
+    {
+        layout::mouse_scroll(dx,dy);
     }
 
     virtual void on_mouse_button(layout::button button,bool pressed)
     {
         layout::mouse_button(button,pressed);
     }
+
+public:
+    virtual void send_event(event &e) {  widget::send_event(e.sender.c_str(),e); }
 
 protected:
     void update_layout_rect();

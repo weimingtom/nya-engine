@@ -11,9 +11,13 @@
 
 #include <string>
 #include <list>
+#include <deque>
 
 namespace nya_ui
 {
+
+void set_log(nya_log::log *l);
+nya_log::log &get_log();
 
 typedef unsigned int uint;
 
@@ -54,13 +58,24 @@ public:
     virtual void mouse_scroll(uint dx,uint dy);
 
 public:
+    struct event_data {};
+
     struct event
     {
+        std::string sender;
         std::string type;
+
+        event_data *data;
+
+        virtual void free_data() {}
+
+        event(): data(0) {}
     };
 
-    virtual void send_event(const char *id,event &e);
-    virtual void process_events(layout &l);
+public:
+    virtual void send_event(event &e) {}
+
+    virtual void process_events(event &e);
 
 public:
     layout(): m_x(0),m_y(0),m_width(0),m_height(0) {}
@@ -77,6 +92,7 @@ protected:
     int m_y;
     uint m_width;
     uint m_height;
+
 };
 
 class widget
@@ -163,13 +179,16 @@ protected:
 
 protected:
     virtual void draw(layer &l) {}
-    virtual void process_events(layout &l) {}
+    virtual void process_events(layout::event &e) {}
 
 protected:
     virtual void send_event(const char *id,layout::event &e)
     {
-        if(m_parent)
-            m_parent->send_event(id,e);
+        if(!m_parent || !id)
+            return;
+
+        e.sender.assign(id);
+        m_parent->send_event(e);
     }
 
 protected:
@@ -324,8 +343,8 @@ public:
     void resize(uint width,uint height);
     void process();
 
-private:
-    virtual void process_events(layout &l);
+public:
+    virtual void send_event(event &e);
 
 public:
     struct color
@@ -387,11 +406,12 @@ private:
     uint m_width;
     uint m_height;
 
+private:
+    typedef std::deque<event> events_deque;
+    events_deque m_events;
+
     //font m_default_font;
 };
-
-void set_log(nya_log::log *l);
-nya_log::log &get_log();
 
 }
 

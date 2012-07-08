@@ -27,6 +27,11 @@ void panel::draw(layer &layer)
     layout::draw_widgets(layer);
 }
 
+void panel::process_events(layout::event &e)
+{
+    layout::process_events(e);
+}
+
 void panel::set_pos(int x,int y)
 {
     widget::set_pos(x,y);

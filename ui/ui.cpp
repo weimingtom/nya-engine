@@ -159,32 +159,24 @@ void layer::draw_rect(rect &r,rect_style &s)
 
 void layer::process()
 {
-    //process_events(*this);
-    /*
-    for(widgets_list::iterator it=m_widgets.begin();
-        it!=m_widgets.end();++it)
+    for(events_deque::iterator it=m_events.begin();
+        it!=m_events.end();++it)
     {
-        widget *w=*it;
-        w->process_events(*this);
+        //get_log()<<"event: "<<it->sender.c_str()<<" "<<it->type.c_str()<<"\n";
+        layout::process_events(*it);
+        it->free_data();
     }
-    */
+
+    m_events.clear();
 }
 
-void layer::process_events(layout &l)
-{
-    if(&l == this)
-        return;
-
-    layout::process_events(l);
-}
-
-void layout::process_events(layout &l)
+void layout::process_events(layout::event &e)
 {
     for(widgets_list::iterator it=m_widgets.begin();
         it!=m_widgets.end();++it)
     {
         widget *w=*it;
-        w->process_events(*this);
+        w->process_events(e);
     }
 }
 
@@ -273,7 +265,6 @@ void layout::mouse_move(uint x,uint y)
             w->m_mouse_pressed=false;
         }
     }
-
     //get_log()<<"mmove "<<(int)x<<" "<<(int)y<<"\n";
 }
 
@@ -303,9 +294,14 @@ void layout::mouse_scroll(uint dx,uint dy)
     }
 }
 
-void layout::send_event(const char *id,event &e)
+void layer::send_event(event &e)
 {
-    get_log()<<"event: "<<id<<" "<<e.type.c_str()<<"\n";
+    m_events.push_back(e);
+
+    const uint msg_limit=1024;
+
+    if(m_events.size()>msg_limit)
+        m_events.pop_front();
 }
 
 void set_log(nya_log::log *l)
