@@ -68,7 +68,7 @@ bool shared_anims_manager::release_resource(tsb_anim &res)
     return true;
 }
 
-shared_anims_manager &get_anims_manager()
+shared_anims_manager &get_shared_anims()
 {
     static shared_anims_manager manager;
     return manager;

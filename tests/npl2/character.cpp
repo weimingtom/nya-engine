@@ -73,7 +73,7 @@ void character::set_attrib(const char *key,const char *value,int num)
             continue;
         }
 
-        model_ref ref=get_models_manager().access(model_name);
+        model_ref ref=get_shared_models().access(model_name);
         if(!ref.is_valid())
         {
             nya_log::get_log()<<"Unable to set character attribute::Invalid model ref\n";
@@ -92,7 +92,7 @@ void character::set_attrib(const char *key,const char *value,int num)
         if(!model_name||strcmp(model_name,"nil")==0)
             return;
 
-        ref=get_models_manager().access(model_name);
+        ref=get_shared_models().access(model_name);
         if(!ref.is_valid())
             nya_log::get_log()<<"Unable to set character attribute::Invalid model ref\n";
     }
@@ -139,7 +139,7 @@ void character::set_anim(const char *anim_name)
     std::string name(anim_name);
     name.append(".tsb");
 
-    anim_ref a = get_anims_manager().access(name.c_str());
+    anim_ref a = get_shared_anims().access(name.c_str());
     if(!a.is_valid())
     {
         nya_log::get_log()<<"Unable to set character anim: invalid animation\n";

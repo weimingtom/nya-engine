@@ -288,7 +288,7 @@ bool shared_models_manager::release_resource(tmb_model &res)
     return true;
 }
 
-shared_models_manager &get_models_manager()
+shared_models_manager &get_shared_models()
 {
     static shared_models_manager manager;
     return manager;

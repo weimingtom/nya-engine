@@ -68,6 +68,6 @@ class shared_models_manager: public shared_models
     bool release_resource(tmb_model &res);
 };
 
-shared_models_manager &get_models_manager();
+shared_models_manager &get_shared_models();
 
 #endif

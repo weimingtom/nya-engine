@@ -49,6 +49,6 @@ class shared_anims_manager: public shared_anims
     bool release_resource(tsb_anim &res);
 };
 
-shared_anims_manager &get_anims_manager();
+shared_anims_manager &get_shared_anims();
 
 #endif

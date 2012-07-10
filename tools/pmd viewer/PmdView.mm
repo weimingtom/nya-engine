@@ -5,58 +5,6 @@
 #import <OpenGL/gl.h>
 #import <OpenGL/glu.h>
 
-bool shared_textures_manager::fill_resource(const char *name,nya_render::texture &res)
-{
-    //printf(" loading tex %s",name);
-    
-    NSString *tex_name = [NSString stringWithCString:name encoding:NSUTF8StringEncoding];
-
-    NSData * data  = [NSData dataWithContentsOfFile: tex_name];
-    if ( data == nil )
-    {
-        //[[[[self window] windowController] document] get_log ]
-        //<< "unable to load texture: "<<fileName.UTF8String<<"\n";
-        printf("\ntex_load_error1");
-        return false;
-    }
-
-    NSBitmapImageRep * image = [NSBitmapImageRep imageRepWithData: data];
-    if ( image == nil )
-    {
-        //[[[[self window] windowController] document] get_log ]
-        //<< "unable to load texture: "<<fileName.UTF8String<<"\n";
-        
-        printf("\ntex_load_error2");
-        return false;
-    }
-
-    unsigned int    bitsPerPixel = (unsigned int)[image bitsPerPixel];
-
-    nya_render::texture::color_format format;
-
-    if (bitsPerPixel==24)
-        format=nya_render::texture::color_rgb;
-    else if (bitsPerPixel== 32 )
-        format=nya_render::texture::color_rgba;
-    else
-        return false;
-
-    unsigned int width  = (unsigned int)[image pixelsWide];
-    unsigned int height = (unsigned int)[image pixelsHigh];
-    unsigned char * imageData = [image bitmapData];
-
-    res.build_texture(imageData,width,height,format);
-
-    return true;
-}
-
-bool shared_textures_manager::release_resource(nya_render::texture &res)
-{
-    res.release();
-
-    return true;
-}
-
 @implementation PmdView
 
 - (void) mouseDown: (NSEvent *) theEvent
@@ -183,7 +131,7 @@ bool shared_textures_manager::release_resource(nya_render::texture &res)
                     if(from.tex_name[i]=='*')
                         from.tex_name[i]=0;
 
-                to.tex = textures_manager.access(from.tex_name);
+                to.tex = nya_resources::get_shared_textures().access(from.tex_name);
                 
                 if(!to.tex.is_valid())
                     printf("\ninvalid texture %s",from.tex_name);

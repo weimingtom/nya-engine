@@ -27,6 +27,8 @@
 		F2714321152030E700DE6B9A /* tmp_buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2714315152030E600DE6B9A /* tmp_buffer.cpp */; };
 		F2714322152030E700DE6B9A /* stdout_log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2714318152030E600DE6B9A /* stdout_log.cpp */; };
 		F2714323152030E700DE6B9A /* log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F271431A152030E700DE6B9A /* log.cpp */; };
+		F2D3BFA615ABFBFB00AA6A5C /* shared_textures.mm in Sources */ = {isa = PBXBuildFile; fileRef = F2D3BFA315ABFBFB00AA6A5C /* shared_textures.mm */; };
+		F2D3BFAB15ABFC4F00AA6A5C /* memory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2D3BFA915ABFC4F00AA6A5C /* memory.cpp */; };
 		F2EF8EE41523ACE000EC17A8 /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2EF8EE31523ACE000EC17A8 /* texture.cpp */; };
 /* End PBXBuildFile section */
 
@@ -80,6 +82,10 @@
 		F2714318152030E600DE6B9A /* stdout_log.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = stdout_log.cpp; path = ../../log/stdout_log.cpp; sourceTree = "<group>"; };
 		F2714319152030E700DE6B9A /* stdout_log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stdout_log.h; path = ../../log/stdout_log.h; sourceTree = "<group>"; };
 		F271431A152030E700DE6B9A /* log.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = log.cpp; path = ../../log/log.cpp; sourceTree = "<group>"; };
+		F2D3BFA315ABFBFB00AA6A5C /* shared_textures.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = shared_textures.mm; path = ../../resources/shared_textures.mm; sourceTree = "<group>"; };
+		F2D3BFA415ABFBFB00AA6A5C /* shared_textures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = shared_textures.h; path = ../../resources/shared_textures.h; sourceTree = "<group>"; };
+		F2D3BFA915ABFC4F00AA6A5C /* memory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = memory.cpp; path = ../../memory/memory.cpp; sourceTree = "<group>"; };
+		F2D3BFAA15ABFC4F00AA6A5C /* memory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = memory.h; path = ../../memory/memory.h; sourceTree = "<group>"; };
 		F2EF8EE21523ACE000EC17A8 /* texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = texture.h; path = ../../render/texture.h; sourceTree = "<group>"; };
 		F2EF8EE31523ACE000EC17A8 /* texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = texture.cpp; path = ../../render/texture.cpp; sourceTree = "<group>"; };
 		F2EF8EE615304ABF00EC17A8 /* shared_resources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = shared_resources.h; path = ../../resources/shared_resources.h; sourceTree = "<group>"; };
@@ -177,6 +183,8 @@
 		F27143251520311C00DE6B9A /* resources */ = {
 			isa = PBXGroup;
 			children = (
+				F2D3BFA315ABFBFB00AA6A5C /* shared_textures.mm */,
+				F2D3BFA415ABFBFB00AA6A5C /* shared_textures.h */,
 				F2EF8EE615304ABF00EC17A8 /* shared_resources.h */,
 				F2714308152030E500DE6B9A /* resources.cpp */,
 				F2714309152030E500DE6B9A /* resources.h */,
@@ -217,6 +225,8 @@
 		F27143281520315500DE6B9A /* memory */ = {
 			isa = PBXGroup;
 			children = (
+				F2D3BFA915ABFC4F00AA6A5C /* memory.cpp */,
+				F2D3BFAA15ABFC4F00AA6A5C /* memory.h */,
 				F2714314152030E600DE6B9A /* pool.h */,
 				F2714315152030E600DE6B9A /* tmp_buffer.cpp */,
 				F2714316152030E600DE6B9A /* tmp_buffer.h */,
@@ -300,6 +310,8 @@
 				F2714322152030E700DE6B9A /* stdout_log.cpp in Sources */,
 				F2714323152030E700DE6B9A /* log.cpp in Sources */,
 				F2EF8EE41523ACE000EC17A8 /* texture.cpp in Sources */,
+				F2D3BFA615ABFBFB00AA6A5C /* shared_textures.mm in Sources */,
+				F2D3BFAB15ABFC4F00AA6A5C /* memory.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
