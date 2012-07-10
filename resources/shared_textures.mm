@@ -5,11 +5,18 @@
 
 #import <Cocoa/Cocoa.h>
 
+/*
+    ToDo: read files throught resource provider
+*/
+
 namespace nya_resources
 {
 
 bool shared_textures_manager::fill_resource(const char *name,nya_render::texture &res)
 {
+    if(!name)
+        return false;
+
     //printf(" loading tex %s",name);
     
     NSString *tex_name = [NSString stringWithCString:name encoding:NSUTF8StringEncoding];
@@ -19,7 +26,7 @@ bool shared_textures_manager::fill_resource(const char *name,nya_render::texture
     {
         //[[[[self window] windowController] document] get_log ]
         //<< "unable to load texture: "<<fileName.UTF8String<<"\n";
-        get_log()<<"\ntex_load_error1";
+        get_log()<<"tex_load_error1\n";
         return false;
     }
     
@@ -29,7 +36,7 @@ bool shared_textures_manager::fill_resource(const char *name,nya_render::texture
         //[[[[self window] windowController] document] get_log ]
         //<< "unable to load texture: "<<fileName.UTF8String<<"\n";
 
-        get_log()<<"\ntex_load_error2";
+        get_log()<<"tex_load_error2\n";
         return false;
     }
     
