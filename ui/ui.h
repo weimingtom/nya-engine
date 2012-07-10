@@ -82,8 +82,8 @@ public:
 
     //non copiable
 private:
-	layout(const layout &);
-	void operator = (const layout &);
+    layout(const layout &);
+    void operator = (const layout &);
 
 protected:
     typedef std::list<widget*> widgets_list;
@@ -138,6 +138,8 @@ public:
     };
 
     virtual void set_keep_aspect(keep_aspect a) { m_keep_aspect=a; }
+    
+    virtual bool is_visible() { return m_visible; }
 
 protected:
     virtual const char *get_id() { return m_id.c_str(); }
@@ -298,8 +300,8 @@ public:
 
     //non copiable
 private:
-	widget(const widget &);
-	void operator = (const widget &);
+    widget(const widget &);
+    void operator = (const widget &);
 
 protected:
     std::string m_id;
@@ -343,6 +345,9 @@ public:
     void resize(uint width,uint height);
     void process();
 
+private:
+    virtual void process_events(event &e) {}
+    
 public:
     virtual void send_event(event &e);
 

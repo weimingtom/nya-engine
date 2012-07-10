@@ -177,7 +177,7 @@ void shader::add_program(program_type type,const char*code)
     }
 
     if(!m_program)
-        m_program = glCreateProgramObjectARB();
+        m_program=glCreateProgramObjectARB();
 
     if(!m_program)
     {

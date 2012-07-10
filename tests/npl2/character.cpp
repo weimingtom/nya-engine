@@ -4,12 +4,12 @@
 #include "attributes.h"
 #include "tsb_anim.h"
 
-#include "stdio.h" //crap
+#include "string.h"
 
 void character::set_attrib(const char *key,const char *value,int num)
 {
     const int max_models_per_part=10;
-    
+
     if(!key||!value||num>=max_models_per_part)
     {
         nya_log::get_log()<<"Unable to set character attribute: invalid input params\n";
@@ -17,7 +17,7 @@ void character::set_attrib(const char *key,const char *value,int num)
     }
 
       // ToDo: special case - COORDINATE - a whole set
-    
+
       // ToDo: ignore replace in cases of num>=0
 
     parts_map::iterator it=m_parts_map.find(key);
@@ -116,7 +116,7 @@ void character::set_anim(const char *anim_name)
 {
     if(!anim_name)
         return;
-    
+
     nya_log::get_log()<<"Set anim: "<<anim_name<<"\n";
 
     parts_map::iterator it=m_parts_map.find("BODY");
@@ -184,7 +184,7 @@ float *character::get_buffer(unsigned int frame)
     parts_map::iterator it=m_parts_map.find("BODY");
     if(it==m_parts_map.end())
         return 0;
-    
+
     if(it->second->models.empty())
         return 0;
 
@@ -203,7 +203,7 @@ unsigned int character::get_frames_count()
 
     if(it->second->models.empty())
         return 0;
-    
+
     model_ref m=it->second->models.front();
     if(!m.is_valid())
         return 0;
@@ -216,13 +216,13 @@ unsigned int character::get_bones_count()
     parts_map::iterator it=m_parts_map.find("BODY");
     if(it==m_parts_map.end())
         return 0;
-    
+
     if(it->second->models.empty())
         return 0;
-    
+
     model_ref m=it->second->models.front();
     if(!m.is_valid())
         return 0;
-    
+
     return m->get_bones_count();
 }

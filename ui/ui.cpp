@@ -114,7 +114,7 @@ void layer::draw_text(uint x,uint y,const char *text)
     glVertexPointer(2,GL_FLOAT,0,vert_buf.get_data());
     glTexCoordPointer(2,GL_FLOAT,0,vert_buf.get_data(tc_buf_offset));
 
-    glDrawArrays(GL_QUADS,0,str_len*elem_per_char);
+    glDrawArrays(GL_QUADS,0,(GLsizei)str_len*elem_per_char);
 
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
@@ -163,7 +163,8 @@ void layer::process()
         it!=m_events.end();++it)
     {
         //get_log()<<"event: "<<it->sender.c_str()<<" "<<it->type.c_str()<<"\n";
-        layout::process_events(*it);
+        process_events(*it);
+        //layout::process_events(*it);
         it->free_data();
     }
 

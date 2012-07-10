@@ -14,13 +14,11 @@ void button::draw(layer &layer)
     layer::rect_style rs;
 
     if(m_mouse_over)
-        rs.border_color.set(1.0,0.1,0.1,1.0);
+        rs.border_color.set(0.7,0.6,1.0,1.0);
     else
         rs.border_color.set(0.4,0.3,1.0,1.0);
 
     rs.border=true;
-    rs.solid_color.set(0.9,0.9,0.9,0.8);
-    rs.solid=true;
 
     layer.draw_rect(r,rs);
 }

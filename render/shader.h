@@ -3,6 +3,8 @@
 #ifndef shader_h
 #define shader_h
 
+#include "platform_specific_gl.h"
+
 namespace nya_render
 {
 
@@ -44,8 +46,8 @@ public:
     }
 
 private:
-    void* m_program;
-    void* m_objects[program_types_count];
+    GLhandleARB m_program;
+    GLhandleARB m_objects[program_types_count];
 };
 
 }
