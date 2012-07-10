@@ -7,7 +7,7 @@
 namespace nya_render
 {
 
-void texture::build_texture(void *data,unsigned int width,unsigned int height,color_format format)
+void texture::build_texture(const void *data,unsigned int width,unsigned int height,color_format format)
 {
     if(!data||width==0||height==0)
     {

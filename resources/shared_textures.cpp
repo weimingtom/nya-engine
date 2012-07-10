@@ -1,21 +1,12 @@
 //https://code.google.com/p/nya-engine/
 
+// Dependency: libdevil-dev
+
 #include "shared_textures.h"
 #include "resources.h"
+#include "memory/tmp_buffer.h"
 
-#include	<IL/il.h>
-#include	<IL/ilu.h>
-
-/*
-    libdevil1c2 1.7.8.2
-    libdevil-dev 1.7.8-2
-
-    ToDo: read files throught resource provider
- 
-    ILboolean ilLoadL     ( ILenum type, ILvoid * data, ILuint size );
- 
-    IL_TYPE_UNKNOWN
-*/
+#include <IL/il.h>
 
 namespace
 {
@@ -26,22 +17,20 @@ int init_devil()
     if(initialised)
         return true;
 
-    if(ilGetInteger(IL_VERSION_NUM) < IL_VERSION)
+    const int version = ilGetInteger(IL_VERSION_NUM);
+    if(version < IL_VERSION)
     {
-        nya_resources::get_log()<<"Incorrect devil so/dll version. IL_VERSION="<<IL_VERSION<<"\n";
-        return false;
-    }
-
-    if(iluGetInteger(ILU_VERSION_NUM) < ILU_VERSION)
-    {
-        nya_resources::get_log()<<"Incorrect ilu so/dll version. IL_VERSION="<<IL_VERSION<<"\n";
+        nya_resources::get_log()<<"Incorrect devil so/dll version. Current: "
+                                <<version<<" required: "<<IL_VERSION<<"\n";
         return false;
     }
 
     ilInit();
-    iluInit();
-    ilEnable(IL_KEEP_DXTC_DATA);
-    ilSetInteger(IL_KEEP_DXTC_DATA,IL_TRUE);
+
+    ilEnable(IL_ORIGIN_SET);
+    ilOriginFunc(IL_ORIGIN_UPPER_LEFT);
+    //ilEnable(IL_KEEP_DXTC_DATA);
+    //ilSetInteger(IL_KEEP_DXTC_DATA,IL_TRUE);
 
     initialised=true;
 
@@ -56,43 +45,70 @@ namespace nya_resources
 bool shared_textures_manager::fill_resource(const char *name,nya_render::texture &res)
 {
     if(!name)
+    {
+        get_log()<<"unable to load texture: invalid name\n";
         return false;
+    }
 
     if(!init_devil())
+    {
+        get_log()<<"unable to load texture: unable to initialise DevIL\n";
         return false;
+    }
 
     ILuint texId=ilGenImage();
     ilBindImage(texId);
 
-    if(!ilLoadImage(name))
+    nya_resources::resource_data *file_data = nya_resources::get_resources_provider().access(name);
+    if(!file_data)
+    {
+        get_log()<<"unable to load texture: unable to acess resource\n";
+        return false;
+    }
+
+    nya_memory::tmp_buffer_scoped texture_data(file_data->get_size());
+    file_data->read_all(texture_data.get_data());
+    file_data->release();
+
+    if(!ilLoadL(IL_TYPE_UNKNOWN,texture_data.get_data(),(ILuint)file_data->get_size()))
 	{
-        get_log()<<"tex_load_error1\n";
+        get_log()<<"unable to load texture: invalid file\n";
         return false;
 	}
 
-    int  width  = ilGetInteger ( IL_IMAGE_WIDTH      );
-    int  height = ilGetInteger ( IL_IMAGE_HEIGHT     );
-    /*
-    int  depth  = ilGetInteger ( IL_IMAGE_DEPTH      );
-    int  type   = ilGetInteger ( IL_IMAGE_TYPE       );
-    int  fmt    = ilGetInteger ( IL_IMAGE_FORMAT     );
-    int  bpp    = ilGetInteger ( IL_IMAGE_BPP     );
-    int  dxtc   = ilGetInteger ( IL_DXTC_DATA_FORMAT );
-    bool comp   = (dxtc == IL_DXT1) || (dxtc == IL_DXT2) || (dxtc == IL_DXT3) || (dxtc == IL_DXT4) || (dxtc == IL_DXT5);
-    */
+    //int  dxtc   = ilGetInteger ( IL_DXTC_DATA_FORMAT );
+    //bool comp   = (dxtc == IL_DXT1) || (dxtc == IL_DXT2) || (dxtc == IL_DXT3) || (dxtc == IL_DXT4) || (dxtc == IL_DXT5);
 
-    ILubyte *data=ilGetData ();
+    const int width=ilGetInteger(IL_IMAGE_WIDTH);
+    const int height=ilGetInteger(IL_IMAGE_HEIGHT);
+    const ILubyte *data=ilGetData();
 
     nya_render::texture::color_format format;
-    
-    int bpp=ilGetInteger(IL_IMAGE_BPP)*8;
-    
-    if(bpp==24)
-        format=nya_render::texture::color_rgb;
-    else if(bpp==32)
-        format=nya_render::texture::color_rgba;
-    else
-        return false;
+    const int fmt=ilGetInteger(IL_IMAGE_FORMAT);   
+
+    switch(fmt)
+    {
+        case IL_RGB:
+            format=nya_render::texture::color_rgb;
+            break;
+            
+        case IL_RGBA:
+            format=nya_render::texture::color_rgba;
+            break;
+
+        case IL_BGR:
+            format=nya_render::texture::color_bgr;
+            break;
+            
+        case IL_BGRA:
+            format=nya_render::texture::color_bgra;
+            break;
+            
+        default:
+            get_log()<<"unable to load texture: unsupported format\n";
+            ilDeleteImage(texId);
+            return false;
+    }
 
     res.build_texture(data,width,height,format);
 
@@ -103,7 +119,6 @@ bool shared_textures_manager::fill_resource(const char *name,nya_render::texture
 bool shared_textures_manager::release_resource(nya_render::texture &res)
 {
     res.release();
-    
     return true;
 }
 

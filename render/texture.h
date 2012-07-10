@@ -17,7 +17,7 @@ public:
         color_bgra
     };
 
-    void build_texture(void *data,unsigned int width,unsigned int height,color_format format);
+    void build_texture(const void *data,unsigned int width,unsigned int height,color_format format);
 
 public:
     void bind();
