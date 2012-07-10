@@ -2,12 +2,9 @@
 
 #include "shared_textures.h"
 #include "resources.h"
+#include "memory/tmp_buffer.h"
 
 #import <Cocoa/Cocoa.h>
-
-/*
-    ToDo: read files throught resource provider
-*/
 
 namespace nya_resources
 {
@@ -15,55 +12,63 @@ namespace nya_resources
 bool shared_textures_manager::fill_resource(const char *name,nya_render::texture &res)
 {
     if(!name)
-        return false;
-
-    //printf(" loading tex %s",name);
-    
-    NSString *tex_name = [NSString stringWithCString:name encoding:NSUTF8StringEncoding];
-    
-    NSData * data  = [NSData dataWithContentsOfFile: tex_name];
-    if ( data == nil )
     {
-        //[[[[self window] windowController] document] get_log ]
-        //<< "unable to load texture: "<<fileName.UTF8String<<"\n";
-        get_log()<<"tex_load_error1\n";
+        get_log()<<"unable to load texture: invalid name\n";
         return false;
     }
-    
-    NSBitmapImageRep * image = [NSBitmapImageRep imageRepWithData: data];
-    if ( image == nil )
-    {
-        //[[[[self window] windowController] document] get_log ]
-        //<< "unable to load texture: "<<fileName.UTF8String<<"\n";
 
-        get_log()<<"tex_load_error2\n";
+    nya_resources::resource_data *file_data = nya_resources::get_resources_provider().access(name);
+    if(!file_data)
+    {
+        get_log()<<"unable to load texture: unable to acess resource\n";
         return false;
     }
-    
-    unsigned int    bitsPerPixel = (unsigned int)[image bitsPerPixel];
-    
+
+    nya_memory::tmp_buffer_scoped texture_data(file_data->get_size());
+    file_data->read_all(texture_data.get_data());
+    file_data->release();
+
+    NSData * data  = [NSData dataWithBytesNoCopy:texture_data.get_data() 
+                        length: file_data->get_size()freeWhenDone:FALSE];
+    if (data == nil)
+    {
+        get_log()<<"unable to load texture: NSData error\n";
+        return false;
+    }
+
+    NSBitmapImageRep *image=[NSBitmapImageRep imageRepWithData:data];
+    if (image == nil)
+    {
+        get_log()<<"unable to load texture: invalid file\n";
+        return false;
+    }
+
+    unsigned int bpp=(unsigned int)[image bitsPerPixel];
+
     nya_render::texture::color_format format;
-    
-    if (bitsPerPixel==24)
+
+    if(bpp==24)
         format=nya_render::texture::color_rgb;
-    else if (bitsPerPixel== 32 )
+    else if(bpp== 32 )
         format=nya_render::texture::color_rgba;
     else
+    {
+        get_log()<<"unable to load texture: unsupported format\n";
         return false;
-    
-    unsigned int width  = (unsigned int)[image pixelsWide];
-    unsigned int height = (unsigned int)[image pixelsHigh];
-    unsigned char * imageData = [image bitmapData];
-    
-    res.build_texture(imageData,width,height,format);
-    
+    }
+
+    unsigned int width =(unsigned int)[image pixelsWide];
+    unsigned int height=(unsigned int)[image pixelsHigh];
+    unsigned char *image_data=[image bitmapData];
+
+    res.build_texture(image_data,width,height,format);
+
     return true;
 }
 
 bool shared_textures_manager::release_resource(nya_render::texture &res)
 {
     res.release();
-
     return true;
 }
 
