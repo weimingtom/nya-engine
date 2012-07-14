@@ -94,8 +94,8 @@ public:
 
     //non copiable
 private:
-	layout(const layout &);
-	void operator = (const layout &);
+    layout(const layout &);
+    void operator = (const layout &);
 
 protected:
     typedef std::list<widget*> widgets_list;
