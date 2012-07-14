@@ -21,12 +21,24 @@ nya_log::log &get_log();
 
 typedef unsigned int uint;
 
+uint clamp(int v,uint from,uint to);
+
 struct rect
 {
     uint x;
     uint y;
     uint w;
     uint h;
+
+    bool check_point(uint px, uint py)
+    {
+        if(px<x) return false;
+        if(py<y) return false;
+        if(px>x+w) return false;
+        if(py>y+h) return false;
+
+        return true;
+    }
 
     rect(): x(0),y(0),w(0),h(0) {}
     rect(uint x,uint y,uint w,uint h):
@@ -82,8 +94,8 @@ public:
 
     //non copiable
 private:
-    layout(const layout &);
-    void operator = (const layout &);
+	layout(const layout &);
+	void operator = (const layout &);
 
 protected:
     typedef std::list<widget*> widgets_list;
@@ -137,8 +149,9 @@ public:
         from_height
     };
 
-    virtual void set_keep_aspect(keep_aspect a) { m_keep_aspect=a; }
-    
+    virtual void set_keep_aspect(keep_aspect a)
+    { m_keep_aspect=a; calc_pos_markers(); }
+
     virtual bool is_visible() { return m_visible; }
 
 protected:
@@ -175,7 +188,7 @@ protected:
 protected:
     virtual void on_mouse_over() {}
     virtual void on_mouse_left() {}
-    virtual void on_mouse_move(uint x,uint y) {}
+    virtual void on_mouse_move(uint x,uint y,bool inside) {}
     virtual void on_mouse_button(layout::button button,bool pressed) {}
     virtual void on_mouse_scroll(uint x,uint y) {}
 
@@ -300,8 +313,8 @@ public:
 
     //non copiable
 private:
-    widget(const widget &);
-    void operator = (const widget &);
+	widget(const widget &);
+	void operator = (const widget &);
 
 protected:
     std::string m_id;
@@ -347,7 +360,7 @@ public:
 
 private:
     virtual void process_events(event &e) {}
-    
+
 public:
     virtual void send_event(event &e);
 

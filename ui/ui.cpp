@@ -18,6 +18,13 @@ namespace
 namespace nya_ui
 {
 
+uint clamp(int v,uint from,uint to)
+{
+    if(v>(int)to) v=to;
+    if(v<(int)from) v=from;
+    return v;
+}
+
 void layer::draw()
 {
     draw_widgets(*this);
@@ -232,7 +239,8 @@ void layout::mouse_button(layout::button button,bool pressed)
         it!=m_widgets.end();++it)
     {
         widget *w=*it;
-        if(w->m_mouse_over && w->m_mouse_pressed!=pressed)
+        if((w->m_mouse_over || (!pressed && w->m_mouse_pressed))
+            && w->m_mouse_pressed!=pressed)
         {
             w->on_mouse_button(button,pressed);
             w->m_mouse_pressed=pressed;
@@ -247,24 +255,22 @@ void layout::mouse_move(uint x,uint y)
         it!=m_widgets.end();++it)
     {
         widget *w=*it;
-        rect r=w->get_draw_rect();
-        if(x>r.x && x<r.x+r.w &&
-           y>r.y && y<r.y+r.h)
+        bool inside=false;
+        if(w->get_draw_rect().check_point(x,y))
         {
             if(!w->m_mouse_over)
             {
                 w->on_mouse_over();
                 w->m_mouse_over=true;
             }
-
-            w->on_mouse_move(x,y);//x-r.x,y-r.y);
+            inside=true;
         }
         else if(w->m_mouse_over)
         {
             w->on_mouse_left();
             w->m_mouse_over=false;
-            w->m_mouse_pressed=false;
         }
+        w->on_mouse_move(x,y,inside);//x-r.x,y-r.y);
     }
     //get_log()<<"mmove "<<(int)x<<" "<<(int)y<<"\n";
 }
@@ -279,7 +285,6 @@ void layout::mouse_left()
         {
             w->on_mouse_left();
             w->m_mouse_over=false;
-            w->m_mouse_pressed=false;
         }
     }
 }

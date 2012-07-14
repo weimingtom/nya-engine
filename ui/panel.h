@@ -24,7 +24,7 @@ protected:
 protected:
     //virtual void on_mouse_over();
     virtual void on_mouse_left() { layout::mouse_left(); }
-    virtual void on_mouse_move(uint x,uint y) { layout::mouse_move(x,y); }
+    virtual void on_mouse_move(uint x,uint y,bool inside) { layout::mouse_move(x,y); }
 
     virtual void on_mouse_scroll(uint dx,uint dy)
     {
