@@ -64,10 +64,10 @@ public:
         right_button
     };
 
-    virtual void mouse_button(button button,bool pressed);
-    virtual void mouse_move(uint x,uint y);
+    virtual bool mouse_button(button button,bool pressed);
+    virtual bool mouse_move(uint x,uint y);
     virtual void mouse_left();
-    virtual void mouse_scroll(uint dx,uint dy);
+    virtual bool mouse_scroll(uint dx,uint dy);
 
 public:
     struct event_data {};
@@ -188,9 +188,9 @@ protected:
 protected:
     virtual void on_mouse_over() {}
     virtual void on_mouse_left() {}
-    virtual void on_mouse_move(uint x,uint y,bool inside) {}
-    virtual void on_mouse_button(layout::button button,bool pressed) {}
-    virtual void on_mouse_scroll(uint x,uint y) {}
+    virtual bool on_mouse_move(uint x,uint y,bool inside) {}
+    virtual bool on_mouse_button(layout::button button,bool pressed) {}
+    virtual bool on_mouse_scroll(uint x,uint y) {}
 
 protected:
     virtual void draw(layer &l) {}
@@ -354,9 +354,9 @@ protected:
 class layer: public layout
 {
 public:
-    void draw();
-    void resize(uint width,uint height);
-    void process();
+    virtual void draw();
+    virtual void resize(uint width,uint height);
+    virtual void process();
 
 private:
     virtual void process_events(event &e) {}
@@ -393,9 +393,20 @@ public:
         uint char_size;
         uint char_offs;
     };
+    
+    enum font_align
+    {
+        left,
+        right,
+        top,
+        bottom,
+        center
+    };
 
-    void draw_text(uint x,uint y,const char *text);
-    void draw_text(uint x,uint y,const char *text,font &f);
+    virtual void draw_text(uint x,uint y,const char *text
+                   ,font_align aligh_hor=left,font_align aligh_vert=bottom);
+    virtual void draw_text(uint x,uint y,const char *text,font &f
+                   ,font_align aligh_hor=left,font_align aligh_vert=bottom) {}
 
     struct rect_style
     {
@@ -411,11 +422,11 @@ public:
         rect_style(): border(false), solid(false) {}
     };
 
-    void draw_rect(rect &r,rect_style &s);
-    void set_scissor(rect &r,bool enabled);
+    virtual void draw_rect(rect &r,rect_style &s);
+    virtual void set_scissor(rect &r,bool enabled) {}
 
-    uint get_width() { return m_width; }
-    uint get_height() { return m_height; }
+    virtual uint get_width() { return m_width; }
+    virtual uint get_height() { return m_height; }
 
 public:
     layer(): m_width(0), m_height(0) {}

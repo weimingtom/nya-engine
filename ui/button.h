@@ -10,6 +10,15 @@ namespace nya_ui
 
 class button: public widget
 {
+public:
+    virtual void set_text(const char *text)
+    {
+        if(!text)
+            return;
+
+        m_text.assign(text);
+    }
+
 private:
     virtual void draw(layer &l);
 
@@ -27,7 +36,7 @@ private:
         send_event(get_id(),e);
     }
 
-    virtual void on_mouse_button(layout::button button,bool pressed)
+    virtual bool on_mouse_button(layout::button button,bool pressed)
     {
         layout::event e;
 
@@ -37,7 +46,12 @@ private:
             e.type="mouse_left_btn_up";
 
         send_event(get_id(),e);
+        
+        return true;
     }
+
+private:
+    std::string m_text;
 };
 
 }

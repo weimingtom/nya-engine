@@ -24,16 +24,16 @@ protected:
 protected:
     //virtual void on_mouse_over();
     virtual void on_mouse_left() { layout::mouse_left(); }
-    virtual void on_mouse_move(uint x,uint y,bool inside) { layout::mouse_move(x,y); }
+    virtual bool on_mouse_move(uint x,uint y,bool inside) { return layout::mouse_move(x,y); }
 
-    virtual void on_mouse_scroll(uint dx,uint dy)
+    virtual bool on_mouse_scroll(uint dx,uint dy)
     {
-        layout::mouse_scroll(dx,dy);
+        return layout::mouse_scroll(dx,dy);
     }
 
-    virtual void on_mouse_button(layout::button button,bool pressed)
+    virtual bool on_mouse_button(layout::button button,bool pressed)
     {
-        layout::mouse_button(button,pressed);
+        return layout::mouse_button(button,pressed);
     }
 
 public:

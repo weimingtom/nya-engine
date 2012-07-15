@@ -64,21 +64,25 @@ void list::update_rects()
     m_scroll_max=scroll_max;
 }
 
-void list::on_mouse_move(uint x,uint y,bool inside)
+bool list::on_mouse_move(uint x,uint y,bool inside)
 {
+    m_mouse_x=x;
+    m_mouse_y=y;
+
     if(m_scrolling)
     {
         const int new_scroll=m_scroll_max-(m_mouse_y
                 -m_scroll_area_rect.y-m_scroll_rect.h/2);
         m_scroll=clamp(new_scroll,0,m_scroll_max);
         update_rects();
+        
+        return true;
     }
 
-    m_mouse_x=x;
-    m_mouse_y=y;
+    return false;
 }
 
-void list::on_mouse_button(layout::button button,bool pressed)
+bool list::on_mouse_button(layout::button button,bool pressed)
 {
     m_scrolling=false;
 
@@ -107,10 +111,13 @@ void list::on_mouse_button(layout::button button,bool pressed)
 
         m_mouse_hold_y=m_mouse_y;
     }
+    
+    return true;
 }
 
-void list::on_mouse_scroll(uint x,uint y)
+bool list::on_mouse_scroll(uint x,uint y)
 {
+    return true;
 }
 
 }

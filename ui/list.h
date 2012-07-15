@@ -50,9 +50,9 @@ protected:
     virtual void update_rects();
 
 protected:
-    virtual void on_mouse_move(uint x,uint y,bool inside);
-    virtual void on_mouse_button(layout::button button,bool pressed);
-    virtual void on_mouse_scroll(uint x,uint y);
+    virtual bool on_mouse_move(uint x,uint y,bool inside);
+    virtual bool on_mouse_button(layout::button button,bool pressed);
+    virtual bool on_mouse_scroll(uint x,uint y);
 
 protected:
     virtual void parent_moved(int x,int y)

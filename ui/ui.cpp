@@ -38,7 +38,8 @@ void layer::resize(uint width, uint height)
     layout::resize(m_width,m_height);
 }
 
-void layer::draw_text(uint x,uint y,const char *text)
+void layer::draw_text(uint x,uint y,const char *text
+                      ,font_align aligh_hor,font_align aligh_vert)
 {
     if(!text)
         return;
@@ -50,9 +51,9 @@ void layer::draw_text(uint x,uint y,const char *text)
     const size_t str_len=text_str.size();
 
     //font_params
-    const uint font_width=512;
-    const uint font_height=256;
-    const uint char_size=32;
+    const uint font_width=256;
+    const uint font_height=128;
+    const uint char_size=16;
     const uint char_offs=1;
 
     //
@@ -67,13 +68,27 @@ void layer::draw_text(uint x,uint y,const char *text)
     const float offs_h=float(char_offs)/font_height;
 
     float chs=2.0f*font_scale*(char_size-char_offs);
+    
+    
+    const uint char_actual_width=8;//bad magic: should
+    //be font-defined array
 //=====
 
-    float w=chs/m_width;
-    float h=chs/m_height;
+    const float w=chs/m_width;
+    const float h=chs/m_height;
 
     float px=-1.0f+2.0f*x/m_width;
     float py=-1.0f+2.0f*y/m_height;
+
+    if(aligh_hor==center)
+        px-=0.5f*(w*char_actual_width/char_size*(str_len+1));
+    else if(aligh_hor==right)
+        px-=(w*char_actual_width/char_size*str_len);
+
+    if(aligh_vert==center)
+        py-=0.5f*h;
+    else if(aligh_vert==top)
+        py-=h;
 
     const uint elem_per_char=4;
     nya_memory::tmp_buffer_scoped vert_buf(text_str.size()*4*elem_per_char*sizeof(float));
@@ -86,10 +101,10 @@ void layer::draw_text(uint x,uint y,const char *text)
         float *pos=(float*)vert_buf.get_data(buf_offset);
         float *tc=(float*)vert_buf.get_data(tc_buf_offset+buf_offset);
 
-        pos[0]=pos[2]=px+dpos;
-        pos[4]=pos[6]=w+pos[0];
-        pos[1]=pos[7]=py;
-        pos[3]=pos[5]=h+py;
+        pos[6]=pos[4]=px+dpos;
+        pos[2]=pos[0]=w+pos[6];
+        pos[7]=pos[1]=py;
+        pos[5]=pos[3]=h+py;
 
         const uint letter_pos=text_str[i]-32;
         const uint letter_x=(letter_pos)%chars_per_row;
@@ -100,20 +115,16 @@ void layer::draw_text(uint x,uint y,const char *text)
         float tcw=tc_w-offs_w;
         float tch=tc_h-offs_h;
 
-        tc[0]=tc[2]=tcx;
-        tc[4]=tc[6]=tcx+tcw;
-        tc[1]=tc[7]=tcy+tch;
-        tc[3]=tc[5]=tcy;
+        tc[6]=tc[4]=tcx;
+        tc[2]=tc[0]=tcx+tcw;
+        tc[7]=tc[1]=tcy+tch;
+        tc[5]=tc[3]=tcy;
 
-        for(int i=1;i<8;i+=2)
-            tc[i]=1.0f-(tc[i]+offs_h);
+        //for(int i=1;i<8;i+=2)
+        //    tc[i]=1.0f-(tc[i]+offs_h);
 
-        const uint char_actual_width=16;//bad magic: should
-                                        //be font-defined array
         dpos+=w*char_actual_width/char_size;
     }
-
-    glColor4f(1,1,1,1);
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -139,10 +150,10 @@ void layer::draw_rect(rect &r,rect_style &s)
     float py=-1.0f+2.0f*r.y/m_height;
 
     float pos[8];
-    pos[0]=pos[2]=px;
-    pos[1]=pos[7]=py;
-    pos[3]=pos[5]=h+py;
-    pos[4]=pos[6]=w+px;
+    pos[6]=pos[4]=px;
+    pos[7]=pos[1]=py;
+    pos[5]=pos[3]=h+py;
+    pos[2]=pos[0]=w+px;
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glVertexPointer(2,GL_FLOAT,0,pos);
@@ -233,28 +244,41 @@ void layout::move(int x,int y)
         (*it)->parent_moved(m_x,m_y);
 }
 
-void layout::mouse_button(layout::button button,bool pressed)
+bool layout::mouse_button(layout::button button,bool pressed)
 {
+    bool processed=false;
+
     for(widgets_list::iterator it=m_widgets.begin();
         it!=m_widgets.end();++it)
     {
         widget *w=*it;
+        if(!w->is_visible())
+            continue;
+
         if((w->m_mouse_over || (!pressed && w->m_mouse_pressed))
             && w->m_mouse_pressed!=pressed)
         {
             w->on_mouse_button(button,pressed);
             w->m_mouse_pressed=pressed;
+            processed=true;
         }
     }
     //get_log()<<"mbutton"<<(int)button<<" "<<(int)pressed<<"\n";
+    
+    return processed;
 }
 
-void layout::mouse_move(uint x,uint y)
+bool layout::mouse_move(uint x,uint y)
 {
+    bool processed=false;
+
     for(widgets_list::iterator it=m_widgets.begin();
         it!=m_widgets.end();++it)
     {
         widget *w=*it;
+        if(!w->is_visible())
+            continue;
+
         bool inside=false;
         if(w->get_draw_rect().check_point(x,y))
         {
@@ -270,9 +294,12 @@ void layout::mouse_move(uint x,uint y)
             w->on_mouse_left();
             w->m_mouse_over=false;
         }
-        w->on_mouse_move(x,y,inside);//x-r.x,y-r.y);
+        if(w->on_mouse_move(x,y,inside))
+            processed=true;
     }
     //get_log()<<"mmove "<<(int)x<<" "<<(int)y<<"\n";
+    
+    return processed;
 }
 
 void layout::mouse_left()
@@ -289,15 +316,24 @@ void layout::mouse_left()
     }
 }
 
-void layout::mouse_scroll(uint dx,uint dy)
+bool layout::mouse_scroll(uint dx,uint dy)
 {
+    bool processed=false;
     for(widgets_list::iterator it=m_widgets.begin();
         it!=m_widgets.end();++it)
     {
         widget *w=*it;
+        if(!w->is_visible())
+            continue;
+
         if(w->m_mouse_over)
-            w->on_mouse_scroll(dx,dy);
+        {
+            if(w->on_mouse_scroll(dx,dy))
+                processed=true;
+        }
     }
+    
+    return processed;
 }
 
 void layer::send_event(event &e)
