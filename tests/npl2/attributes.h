@@ -38,6 +38,14 @@ public:
 
 public:
     void load(nya_resources::resource_data *data);
+    
+public:
+    void reset_iterator();
+    const char *iterate_next();
+    
+public:
+    void iterate_elements(const char *attrib_group);
+    const char *iterate_next_element();
 
 private:
     struct attributes
@@ -46,9 +54,14 @@ private:
         typedef attrib_parsers_map::iterator attrib_parsers_iterator;
         attrib_parsers_map parsers_map;
     };
+
     typedef std::map<std::string,attributes> attribs_map;
     typedef attribs_map::iterator attribs_iterator;
     attribs_map m_attributes;
+    attribs_iterator m_iterator;
+
+    attributes::attrib_parsers_iterator m_elements_iterator;
+    attributes::attrib_parsers_iterator m_elements_end;
 };
 
 attribute_manager &get_attribute_manager();

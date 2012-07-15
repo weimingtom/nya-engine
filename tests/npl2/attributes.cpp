@@ -175,6 +175,56 @@ void attribute_manager::load(nya_resources::resource_data *data)
     }
 }
 
+void attribute_manager::reset_iterator()
+{
+    m_iterator=m_attributes.begin();
+}
+
+const char *attribute_manager::iterate_next()
+{
+    if(m_iterator==m_attributes.end())
+        return 0;
+    
+    const char *name=m_iterator->first.c_str();
+
+    ++m_iterator;
+
+    return name;
+}
+
+void attribute_manager::iterate_elements(const char *attrib_group)
+{
+    if(!attrib_group)
+    {
+        nya_log::get_log()<<"Unable to iterate attribute elements: invalid attribute group\n";
+        return;
+    }
+
+    attribs_iterator it=m_attributes.find(attrib_group);
+    if(it==m_attributes.end())
+    {
+        nya_log::get_log()<<"Unable to iterate attribute elements "<<attrib_group<<": type not found\n";
+        return;
+    }
+
+    attributes::attrib_parsers_map &a=it->second.parsers_map;
+
+    m_elements_iterator=a.begin();
+    m_elements_end=a.end();
+}
+
+const char *attribute_manager::iterate_next_element()
+{
+    if(m_elements_iterator==m_elements_end)
+        return 0;
+
+    const char *name=m_elements_iterator->first.c_str();
+
+    ++m_elements_iterator;
+
+    return name;
+}
+
 attribute_manager &get_attribute_manager()
 {
     static attribute_manager manager;

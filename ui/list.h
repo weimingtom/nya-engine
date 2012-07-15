@@ -4,6 +4,7 @@
 #define list_h
 
 #include "ui/ui.h"
+#include <vector>
 
 namespace nya_ui
 {
@@ -44,6 +45,19 @@ public:
     {
         m_style=s;
     }
+    
+    virtual void add_element(const char *name)
+    {
+        if(!name)
+            return;
+
+        m_elements.push_back(name);
+    }
+
+    virtual void remove_elements()
+    {
+        m_elements.clear();
+    }
 
 protected:
     virtual void draw(layer &l);
@@ -74,13 +88,14 @@ protected:
     }
 
 public:
-    list(): m_scroll(0), m_scroll_max(0), m_mouse_x(0), m_mouse_y(0),
+    list(): m_scroll(0), m_scroll_abs(0), m_scroll_max(0),  m_mouse_x(0), m_mouse_y(0),
             m_mouse_hold_y(0), m_scrolling(false) {}
 
 protected:
     list_style m_style;
     uint m_scroll;
     uint m_scroll_max;
+    uint m_scroll_abs;
     uint m_mouse_x;
     uint m_mouse_y;
     uint m_mouse_hold_y;
@@ -91,6 +106,10 @@ protected:
     rect m_scroll_area_rect;
     rect m_button_down_rect;
     rect m_button_up_rect;
+    
+protected:
+    typedef std::string element;
+    std::vector<element> m_elements;
 };
 
 }

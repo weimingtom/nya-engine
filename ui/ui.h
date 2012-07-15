@@ -423,7 +423,8 @@ public:
     };
 
     virtual void draw_rect(rect &r,rect_style &s);
-    virtual void set_scissor(rect &r,bool enabled) {}
+    virtual void set_scissor(rect &r);
+    virtual void remove_scissor();
 
     virtual uint get_width() { return m_width; }
     virtual uint get_height() { return m_height; }

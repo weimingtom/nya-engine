@@ -174,6 +174,17 @@ void layer::draw_rect(rect &r,rect_style &s)
 
     glDisableClientState(GL_VERTEX_ARRAY);
 }
+    
+void layer::set_scissor(rect &r)
+{
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(r.x,r.y,r.w,r.h);
+}
+
+void layer::remove_scissor()
+{
+    glDisable(GL_SCISSOR_TEST);
+}
 
 void layer::process()
 {

@@ -17,6 +17,25 @@ void list::draw(layer &layer)
     layer.draw_rect(m_button_up_rect,m_style.button);
     layer.draw_rect(m_button_down_rect,m_style.button);
     layer.draw_rect(m_scroll_rect,m_style.scroll);
+
+    layer.set_scissor(r);
+
+    rect er;
+    er.h=m_style.entry_height;
+    er.w=r.w-m_scroll_area_rect.w;
+    er.x=r.x;
+    long y=r.y+r.h-er.h+(er.h*m_elements.size()-r.h)*m_scroll/m_scroll_max;
+    for(uint i=0;i<m_elements.size();++i,y-=m_style.entry_height)
+    {
+        if(y+er.h<r.y||y>r.y+r.h)
+            continue;
+
+        er.y=(uint)y;
+        layer.draw_rect(er,m_style.entry);
+        layer.draw_text(er.x,er.y+er.h/2,m_elements[i].c_str(),layer::left,layer::center);
+    }
+    
+    layer.remove_scissor();
 }
 
 void list::update_rects()
@@ -76,6 +95,8 @@ bool list::on_mouse_move(uint x,uint y,bool inside)
         m_scroll=clamp(new_scroll,0,m_scroll_max);
         update_rects();
         
+        //m_scroll_abs=(m_style.entry_height*m_elements.size()-r.h)*m_scroll/m_scroll_max;
+        
         return true;
     }
 
@@ -94,19 +115,28 @@ bool list::on_mouse_button(layout::button button,bool pressed)
             m_scrolling=true;
             on_mouse_move(m_mouse_x,m_mouse_y,true);
         }
-
-        if(m_button_up_rect.check_point(m_mouse_x,m_mouse_y))
+        else if(m_button_up_rect.check_point(m_mouse_x,m_mouse_y))
         {
             const int delta=(int)ceilf(m_scroll_max*0.1f);
             m_scroll=clamp(m_scroll-delta,0,m_scroll_max);
             update_rects();
         }
-
-        if(m_button_down_rect.check_point(m_mouse_x,m_mouse_y))
+        else if(m_button_down_rect.check_point(m_mouse_x,m_mouse_y))
         {
             const int delta=(int)ceilf(m_scroll_max*0.1f);
             m_scroll=clamp(m_scroll+delta,0,m_scroll_max);
             update_rects();
+        }
+        else
+        {
+            rect r=get_draw_rect();
+            
+            int scrl=(m_style.entry_height*m_elements.size()-r.h)*m_scroll/m_scroll_max;
+            
+            int num=(r.h-(m_mouse_y-r.y)+scrl)/m_style.entry_height;
+            
+            if(num<m_elements.size())
+                get_log()<<"Elem: "<<num<<" "<<m_elements[num].c_str()<<"\n";
         }
 
         m_mouse_hold_y=m_mouse_y;
