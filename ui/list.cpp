@@ -31,7 +31,12 @@ void list::draw(layer &layer)
             continue;
 
         er.y=(uint)y;
-        layer.draw_rect(er,m_style.entry);
+        
+        if(i==m_selected)
+            layer.draw_rect(er,m_style.entry_selected);
+        else
+            layer.draw_rect(er,m_style.entry);
+
         layer.draw_text(er.x,er.y+er.h/2,m_elements[i].c_str(),layer::left,layer::center);
     }
     
@@ -130,13 +135,22 @@ bool list::on_mouse_button(layout::button button,bool pressed)
         else
         {
             rect r=get_draw_rect();
-            
+
             int scrl=(m_style.entry_height*m_elements.size()-r.h)*m_scroll/m_scroll_max;
-            
+
             int num=(r.h-(m_mouse_y-r.y)+scrl)/m_style.entry_height;
-            
+
             if(num<m_elements.size())
+            {
                 get_log()<<"Elem: "<<num<<" "<<m_elements[num].c_str()<<"\n";
+                layout::event e;
+
+                e.type="select_element";
+
+                send_event(get_id(),e);
+                
+                m_selected=num;
+            }
         }
 
         m_mouse_hold_y=m_mouse_y;
