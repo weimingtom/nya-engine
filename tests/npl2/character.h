@@ -13,6 +13,7 @@ class character
 {
 public:
     void set_attrib(const char *key, const char *value,int num=-1);
+    const char *get_attrib(const char *key);
     void reset_attrib();
     void set_anim(const char *anim_name);
 

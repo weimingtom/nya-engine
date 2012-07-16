@@ -65,11 +65,29 @@ public:
     virtual void remove_elements()
     {
         m_elements.clear();
+        m_scroll=0;
+        m_selected=0;
+        update_rects();
     }
     
     void select_element(uint num)
     {
         m_selected=num;
+    }
+
+    void select_element(const char *name)
+    {
+        if(!name)
+            return;
+        
+        for(uint i=0;i<m_elements.size();++i)
+        {
+            if(m_elements[i]==name)
+            {
+                m_selected=i;
+                break;
+            }
+        }
     }
 
 protected:

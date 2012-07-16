@@ -98,6 +98,15 @@ void character::set_attrib(const char *key,const char *value,int num)
     }
 }
 
+const char *character::get_attrib(const char *key)
+{
+    parts_map::iterator it=m_parts_map.find(key);
+    if(it!=m_parts_map.end() && it->second)
+        return it->second->value.c_str();
+    
+    return 0;
+}
+
 void character::reset_attrib()
 {
     for(parts_list::iterator it=m_parts.begin();
