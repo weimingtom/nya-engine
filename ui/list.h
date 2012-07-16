@@ -36,11 +36,11 @@ struct list_style
         list.border_color.set(0.4,0.3,1.0,1.0);
 
         entry=scroll=scroll_area=button=list;
-        
+
         list.solid=true;
         list.solid_color=list.border_color;
         list.solid_color.a=0.1;
-        
+
         entry_selected=list;
         entry_selected.solid_color.a=0.3;
     }
@@ -53,7 +53,7 @@ public:
     {
         m_style=s;
     }
-    
+
     virtual void add_element(const char *name)
     {
         if(!name)
@@ -69,7 +69,7 @@ public:
         m_selected=0;
         update_rects();
     }
-    
+
     void select_element(uint num)
     {
         m_selected=num;
@@ -79,7 +79,7 @@ public:
     {
         if(!name)
             return;
-        
+
         for(uint i=0;i<m_elements.size();++i)
         {
             if(m_elements[i]==name)
@@ -89,6 +89,15 @@ public:
             }
         }
     }
+
+public:
+    struct event_data: public layout::event_data
+    {
+        std::string element;
+        int idx;
+
+        event_data(): idx(-1) {}
+    };
 
 protected:
     virtual void draw(layer &l);
@@ -120,7 +129,7 @@ protected:
 
 public:
     list(): m_scroll(0), m_scroll_abs(0), m_scroll_max(0),  m_mouse_x(0), m_mouse_y(0),
-            m_mouse_hold_y(0), m_scrolling(false), m_selected(0) {}
+            m_mouse_hold_y(0), m_scrolling(false), m_selected(-1) {}
 
 protected:
     list_style m_style;
@@ -137,11 +146,11 @@ protected:
     rect m_scroll_area_rect;
     rect m_button_down_rect;
     rect m_button_up_rect;
-    
+
 protected:
     typedef std::string element;
     std::vector<element> m_elements;
-    uint m_selected;
+    int m_selected;
 };
 
 }

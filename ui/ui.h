@@ -70,7 +70,10 @@ public:
     virtual bool mouse_scroll(uint dx,uint dy);
 
 public:
-    struct event_data {};
+    struct event_data
+    {
+        virtual void free() {}
+    };
 
     struct event
     {
@@ -79,7 +82,11 @@ public:
 
         event_data *data;
 
-        virtual void free_data() {}
+        virtual void free_data()
+        {
+            if(data)
+                data->free();
+        }
 
         event(): data(0) {}
     };
@@ -393,7 +400,7 @@ public:
         uint char_size;
         uint char_offs;
     };
-    
+
     enum font_align
     {
         left,

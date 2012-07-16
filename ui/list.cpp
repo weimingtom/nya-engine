@@ -1,10 +1,38 @@
 //https://code.google.com/p/nya-engine/
 
 #include "ui/list.h"
+#include "memory/pool.h"
 #include "math.h"
 
 namespace nya_ui
 {
+
+
+struct list_event_data: public list::event_data
+{
+    static event_data *create()
+    {
+        return get_allocator().allocate();
+    }
+
+    void free()
+    {
+        free_element(this);
+    }
+
+private:
+    typedef nya_memory::pool<list_event_data,32> allocator;
+    static allocator &get_allocator()
+    {
+        static nya_memory::pool<list_event_data,32> events;
+        return events;
+    }
+
+    static void free_element(list_event_data *data)
+    {
+        get_allocator().free(data);
+    }
+};
 
 void list::draw(layer &layer)
 {
@@ -31,7 +59,7 @@ void list::draw(layer &layer)
             continue;
 
         er.y=(uint)y;
-        
+
         if(i==m_selected)
             layer.draw_rect(er,m_style.entry_selected);
         else
@@ -39,7 +67,7 @@ void list::draw(layer &layer)
 
         layer.draw_text(er.x,er.y+er.h/2,m_elements[i].c_str(),layer::left,layer::center);
     }
-    
+
     layer.remove_scissor();
 }
 
@@ -99,9 +127,9 @@ bool list::on_mouse_move(uint x,uint y,bool inside)
                 -m_scroll_area_rect.y-m_scroll_rect.h/2);
         m_scroll=clamp(new_scroll,0,m_scroll_max);
         update_rects();
-        
+
         //m_scroll_abs=(m_style.entry_height*m_elements.size()-r.h)*m_scroll/m_scroll_max;
-        
+
         return true;
     }
 
@@ -136,26 +164,32 @@ bool list::on_mouse_button(layout::button button,bool pressed)
         {
             rect r=get_draw_rect();
 
-            int scrl=(m_style.entry_height*m_elements.size()-r.h)*m_scroll/m_scroll_max;
+            int scrl=(int)(m_style.entry_height*m_elements.size()-r.h)*m_scroll/m_scroll_max;
 
             int num=(r.h-(m_mouse_y-r.y)+scrl)/m_style.entry_height;
 
             if(num<m_elements.size())
             {
-                get_log()<<"Elem: "<<num<<" "<<m_elements[num].c_str()<<"\n";
+                //get_log()<<"Elem: "<<num<<" "<<m_elements[num].c_str()<<"\n";
                 layout::event e;
 
                 e.type="select_element";
+                event_data *data=list_event_data::create();
+
+                data->element=m_elements[num];
+                data->idx=num;
+
+                e.data=data;
 
                 send_event(get_id(),e);
-                
+
                 m_selected=num;
             }
         }
 
         m_mouse_hold_y=m_mouse_y;
     }
-    
+
     return true;
 }
 

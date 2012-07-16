@@ -68,8 +68,8 @@ void layer::draw_text(uint x,uint y,const char *text
     const float offs_h=float(char_offs)/font_height;
 
     float chs=2.0f*font_scale*(char_size-char_offs);
-    
-    
+
+
     const uint char_actual_width=8;//bad magic: should
     //be font-defined array
 //=====
@@ -174,7 +174,7 @@ void layer::draw_rect(rect &r,rect_style &s)
 
     glDisableClientState(GL_VERTEX_ARRAY);
 }
-    
+
 void layer::set_scissor(rect &r)
 {
     glEnable(GL_SCISSOR_TEST);
@@ -193,6 +193,7 @@ void layer::process()
     {
         //get_log()<<"event: "<<it->sender.c_str()<<" "<<it->type.c_str()<<"\n";
         process_events(*it);
+
         //layout::process_events(*it);
         it->free_data();
     }
@@ -275,7 +276,7 @@ bool layout::mouse_button(layout::button button,bool pressed)
         }
     }
     //get_log()<<"mbutton"<<(int)button<<" "<<(int)pressed<<"\n";
-    
+
     return processed;
 }
 
@@ -309,7 +310,7 @@ bool layout::mouse_move(uint x,uint y)
             processed=true;
     }
     //get_log()<<"mmove "<<(int)x<<" "<<(int)y<<"\n";
-    
+
     return processed;
 }
 
@@ -343,7 +344,7 @@ bool layout::mouse_scroll(uint dx,uint dy)
                 processed=true;
         }
     }
-    
+
     return processed;
 }
 
