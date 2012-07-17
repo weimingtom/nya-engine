@@ -248,13 +248,17 @@ void tmb_model::apply_anim(tsb_anim *anim)
     }
 
     m_anim_bones.resize(m_frames_count*m_bones_count);
+    
+    int bones_count = m_bones_count;
+    if ( bones_count > anim->get_bones_count() )
+        bones_count = anim->get_bones_count();
 
     for(unsigned int i=0;i<m_frames_count;++i)
     {
         tsb_anim::bone *anim_bones=anim->get_bones(i);
         tmb_model::bone *final_bones=&m_anim_bones[i*m_bones_count];
-
-        for(int k=0;k<m_bones_count;++k)
+        
+        for(int k=0;k<bones_count;++k)
         {
             tsb_anim::bone &a=anim_bones[k];
             tmb_model::bone &b=m_bones[k];
@@ -266,6 +270,11 @@ void tmb_model::apply_anim(tsb_anim *anim)
                                 a.mat[1][x]*b.mat[y][1]+
                                 a.mat[2][x]*b.mat[y][2]+
                                 a.mat[3][x]*b.mat[y][3];
+        }
+
+        for(int k=bones_count;k<m_bones_count;++k)
+        {
+            final_bones[k]=m_bones[k];
         }
     }
 }

@@ -15,10 +15,64 @@ void character::set_attrib(const char *key,const char *value,int num)
         nya_log::get_log()<<"Unable to set character attribute: invalid input params\n";
         return;
     }
+    
+    std::string value_str(value);
+    const char last=value_str[value_str.length()-1];
+    if(last>='A' && last<='D')
+    {
+        value_str.resize(value_str.length()-1);
+        num=last-'A';
+    }
 
       // ToDo: special case - COORDINATE - a whole set
 
       // ToDo: ignore replace in cases of num>=0
+    
+    if(strcmp(key,"COORDINATE")==0)
+    {
+        reset_attrib();
+        
+        attribute *a=get_attribute_manager().get(key,value);
+        if(!a)
+        {
+            nya_log::get_log()<<"Invalid attribute "<<value<<" of type "<<key<<"\n";
+            return;
+        }
+        
+        /*
+        for(int i=0;i<10;++i)
+        {
+            char tmp[255]="COORD_00";
+            tmp[7]=i+'0';
+            
+            nya_log::get_log()<<"COORD_0"<<i<<" is "<<a->get_value(tmp)<<"\n";
+        }
+
+        for(int i=0;i<10;++i)
+        {
+            char tmp[255]="COORD_10";
+            tmp[7]=i+'0';
+            
+            nya_log::get_log()<<"COORD_1"<<i<<" is "<<a->get_value(tmp)<<"\n";
+        }
+        */
+
+        set_attrib("BODY",a->get_value("COORD_00"));
+        set_attrib("EYE",a->get_value("COORD_01")); 
+        set_attrib("UNDER",a->get_value("COORD_02"));
+        set_attrib("UNDER",a->get_value("COORD_03"));
+        set_attrib("SOCKS",a->get_value("COORD_04"));
+        set_attrib("COSTUME",a->get_value("COORD_05"));
+        set_attrib("COSTUME",a->get_value("COORD_06"));
+        set_attrib("HEAD",a->get_value("COORD_07"));
+        set_attrib("FACE",a->get_value("COORD_08"));
+        set_attrib("NECK",a->get_value("COORD_9"));
+        set_attrib("ARM",a->get_value("COORD_10"));
+        set_attrib("SHOES",a->get_value("COORD_11"));
+        set_attrib("HAIR",a->get_value("COORD_12")); 
+        
+        return;
+    }
 
     parts_map::iterator it=m_parts_map.find(key);
     part *p=0;
@@ -52,35 +106,46 @@ void character::set_attrib(const char *key,const char *value,int num)
     attribute *a=get_attribute_manager().get(key,value);
     if(!a)
     {
-        nya_log::get_log()<<"Invalid attribute "<<value<<" of type "<<key<<"\n";
-        return;
+        value=value_str.c_str();
+        a=get_attribute_manager().get(key,value);
+        if(!a)
+        {
+            nya_log::get_log()<<"Invalid attribute "<<value<<" of type "<<key<<"\n";
+            return;
+        }
     }
 
     if(num<0)
-    for(int i=0;i<max_models_per_part;++i)
     {
-        char key[7]="FILE_";
-        key[5]=i+'0';
-        const char *model_name=a->get_value(key);
-        if(!model_name)
+        int max_models=max_models_per_part;
+        if(strcmp(key,"UNDER")==0)
+            max_models=2;
+                
+        for(int i=0;i<max_models;++i)
         {
-            break;
-        }
+            char key[7]="FILE_";
+            key[5]=i+'0';
+            const char *model_name=a->get_value(key);
+            if(!model_name)
+            {
+                break;
+            }
 
-        if(strcmp(model_name,"nil")==0)
-        {
-            p->models.push_back(model_ref());
-            continue;
-        }
+            if(strcmp(model_name,"nil")==0)
+            {
+                p->models.push_back(model_ref());
+                continue;
+            }
 
-        model_ref ref=get_shared_models().access(model_name);
-        if(!ref.is_valid())
-        {
-            nya_log::get_log()<<"Unable to set character attribute::Invalid model ref\n";
-            return;
-        }
+            model_ref ref=get_shared_models().access(model_name);
+            if(!ref.is_valid())
+            {
+                nya_log::get_log()<<"Unable to set character attribute::Invalid model ref\n";
+                return;
+            }
 
-        p->models.push_back(ref);
+            p->models.push_back(ref);
+        }
     }
     else
     {
@@ -96,6 +161,9 @@ void character::set_attrib(const char *key,const char *value,int num)
         if(!ref.is_valid())
             nya_log::get_log()<<"Unable to set character attribute::Invalid model ref\n";
     }
+    
+    if(strcmp(key,"BODY")==0)
+        set_anim(m_anim_name.c_str());
 }
 
 const char *character::get_attrib(const char *key)
@@ -158,6 +226,8 @@ void character::set_anim(const char *anim_name)
     m->apply_anim(a.get());
 
     a.free();
+    
+    m_anim_name.assign(anim_name);
 }
 
 void character::draw(bool use_materials)

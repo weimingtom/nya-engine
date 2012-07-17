@@ -195,6 +195,9 @@ bool list::on_mouse_button(layout::button button,bool pressed)
 
 bool list::on_mouse_scroll(uint x,uint y)
 {
+    const int delta=(int)ceilf(m_scroll_max*0.01f)*y;
+    m_scroll=clamp(m_scroll-delta,0,m_scroll_max);
+    update_rects();
     return true;
 }
 

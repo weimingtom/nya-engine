@@ -44,5 +44,6 @@ private:
     std::map<std::string,part*> m_parts_map;
     typedef std::list<part> parts_list;
     parts_list m_parts;
+    std::string m_anim_name;
 };
 #endif
