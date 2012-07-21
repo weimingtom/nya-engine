@@ -128,7 +128,7 @@ attribute *attribute_manager::get(const char *type,const char *name)
     attributes::attrib_parsers_iterator it2=a.find(name);
     if(it2==a.end())
     {
-        nya_log::get_log()<<"Unable to get attribute "<<name<<": not found\n";
+        //nya_log::get_log()<<"Unable to get attribute "<<name<<": not found\n";
         return 0;
     }
 

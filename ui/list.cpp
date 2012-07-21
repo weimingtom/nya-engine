@@ -42,16 +42,32 @@ void list::draw(layer &layer)
 
     layer.draw_rect(r,m_style.list);
     layer.draw_rect(m_scroll_area_rect,m_style.scroll_area);
-    layer.draw_rect(m_button_up_rect,m_style.button);
-    layer.draw_rect(m_button_down_rect,m_style.button);
-    layer.draw_rect(m_scroll_rect,m_style.scroll);
 
-    layer.set_scissor(r);
+    if(m_button_up_rect.check_point(m_mouse_x,m_mouse_y))
+        layer.draw_rect(m_button_up_rect,m_style.button_up_hl);
+    else
+        layer.draw_rect(m_button_up_rect,m_style.button_up);
+
+    if(m_button_down_rect.check_point(m_mouse_x,m_mouse_y))
+        layer.draw_rect(m_button_down_rect,m_style.button_dn_hl);
+    else
+        layer.draw_rect(m_button_down_rect,m_style.button_dn);
 
     rect er;
     er.h=m_style.entry_height;
     er.w=r.w-m_scroll_area_rect.w;
     er.x=r.x;
+
+    if(er.h*m_elements.size()>r.h)
+    {
+        if(m_scroll_rect.check_point(m_mouse_x,m_mouse_y))
+            layer.draw_rect(m_scroll_rect,m_style.scroll_hl);
+        else
+            layer.draw_rect(m_scroll_rect,m_style.scroll);
+    }
+
+    layer.set_scissor(r);
+
     long y=r.y+r.h-er.h+(er.h*m_elements.size()-r.h)*m_scroll/m_scroll_max;
     for(uint i=0;i<m_elements.size();++i,y-=m_style.entry_height)
     {
@@ -60,7 +76,9 @@ void list::draw(layer &layer)
 
         er.y=(uint)y;
 
-        if(i==m_selected)
+        if(i==m_mover && !m_mouse_pressed)
+            layer.draw_rect(er,m_style.entry_hl);
+        else if(i==m_selected)
             layer.draw_rect(er,m_style.entry_selected);
         else
             layer.draw_rect(er,m_style.entry);
@@ -121,6 +139,51 @@ bool list::on_mouse_move(uint x,uint y,bool inside)
     m_mouse_x=x;
     m_mouse_y=y;
 
+    bool mleft=false;
+    if(inside && x<m_scroll_area_rect.x)
+    {
+        rect r=get_draw_rect();
+
+        int scrl=(int)(m_style.entry_height*m_elements.size()-r.h)*m_scroll/m_scroll_max;
+
+        int num=(r.h-(m_mouse_y-r.y)+scrl)/m_style.entry_height;
+
+        if(num<m_elements.size())
+        {
+            if(num!=m_mover)
+            {
+                //get_log()<<"Mover: "<<num<<" "<<m_elements[num].c_str()<<"\n";
+                layout::event e;
+
+                e.type="mover_element";
+                event_data *data=list_event_data::create();
+
+                data->element=m_elements[num];
+                data->idx=num;
+
+                e.data=data;
+
+                send_event(get_id(),e);
+
+                m_mover=num;
+            }
+        }
+        else
+            mleft=true;
+    }
+    else
+        mleft=true;
+
+    if(mleft && m_mover>=0)
+    {
+        //get_log()<<"Mleft\n";
+        layout::event e;
+        e.type="mleft_elements";
+        send_event(get_id(),e);
+
+        m_mover=-1;
+    }
+
     if(m_scrolling)
     {
         const int new_scroll=m_scroll_max-(m_mouse_y
@@ -142,49 +205,51 @@ bool list::on_mouse_button(layout::button button,bool pressed)
 
     if(pressed)
     {
-        if(m_scroll_rect.check_point(m_mouse_x,m_mouse_y)
-           || m_scroll_area_rect.check_point(m_mouse_x,m_mouse_y))
-        {
-            m_scrolling=true;
-            on_mouse_move(m_mouse_x,m_mouse_y,true);
-        }
-        else if(m_button_up_rect.check_point(m_mouse_x,m_mouse_y))
-        {
-            const int delta=(int)ceilf(m_scroll_max*0.1f);
-            m_scroll=clamp(m_scroll-delta,0,m_scroll_max);
-            update_rects();
-        }
-        else if(m_button_down_rect.check_point(m_mouse_x,m_mouse_y))
-        {
-            const int delta=(int)ceilf(m_scroll_max*0.1f);
-            m_scroll=clamp(m_scroll+delta,0,m_scroll_max);
-            update_rects();
-        }
-        else
-        {
-            rect r=get_draw_rect();
+        rect r=get_draw_rect();
 
-            int scrl=(int)(m_style.entry_height*m_elements.size()-r.h)*m_scroll/m_scroll_max;
-
-            int num=(r.h-(m_mouse_y-r.y)+scrl)/m_style.entry_height;
-
-            if(num<m_elements.size())
+        if(m_style.entry_height*m_elements.size()>r.h)
+        {
+            if(m_scroll_rect.check_point(m_mouse_x,m_mouse_y)
+               || m_scroll_area_rect.check_point(m_mouse_x,m_mouse_y))
             {
-                //get_log()<<"Elem: "<<num<<" "<<m_elements[num].c_str()<<"\n";
-                layout::event e;
-
-                e.type="select_element";
-                event_data *data=list_event_data::create();
-
-                data->element=m_elements[num];
-                data->idx=num;
-
-                e.data=data;
-
-                send_event(get_id(),e);
-
-                m_selected=num;
+                m_scrolling=true;
+                on_mouse_move(m_mouse_x,m_mouse_y,true);
+                return true;
             }
+
+            if(m_button_up_rect.check_point(m_mouse_x,m_mouse_y))
+            {
+                const int delta=(int)ceilf(m_scroll_max*0.1f);
+                m_scroll=clamp(m_scroll-delta,0,m_scroll_max);
+                update_rects();
+                return true;
+            }
+
+            if(m_button_down_rect.check_point(m_mouse_x,m_mouse_y))
+            {
+                const int delta=(int)ceilf(m_scroll_max*0.1f);
+                m_scroll=clamp(m_scroll+delta,0,m_scroll_max);
+                update_rects();
+                return true;
+            }
+        }
+
+        if(m_mover>=0 && m_mover<m_elements.size())
+        {
+            //get_log()<<"Elem: "<<m_mover<<" "<<m_elements[m_mover].c_str()<<"\n";
+            layout::event e;
+
+            e.type="select_element";
+            event_data *data=list_event_data::create();
+
+            data->element=m_elements[m_mover];
+            data->idx=m_mover;
+
+            e.data=data;
+
+            send_event(get_id(),e);
+
+            m_selected=m_mover;
         }
 
         m_mouse_hold_y=m_mouse_y;
@@ -195,9 +260,15 @@ bool list::on_mouse_button(layout::button button,bool pressed)
 
 bool list::on_mouse_scroll(uint x,uint y)
 {
-    const int delta=(int)ceilf(m_scroll_max*0.01f)*y;
-    m_scroll=clamp(m_scroll-delta,0,m_scroll_max);
-    update_rects();
+    rect r=get_draw_rect();
+    
+    if(m_style.entry_height*m_elements.size()>r.h)
+    {
+        const int delta=y;//(int)ceilf(m_scroll_max*0.01f)*y;
+        m_scroll=clamp(m_scroll-delta,0,m_scroll_max);
+        update_rects();
+    }
+
     return true;
 }
 

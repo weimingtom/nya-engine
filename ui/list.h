@@ -6,6 +6,12 @@
 #include "ui/ui.h"
 #include <vector>
 
+/*
+
+    ToDo: use button stile instead of rect style and _hl _pressed stuff
+
+*/
+
 namespace nya_ui
 {
 
@@ -19,10 +25,15 @@ struct list_style
 
     layer::rect_style list;
     layer::rect_style entry;
+    layer::rect_style entry_hl;
     layer::rect_style entry_selected;
     layer::rect_style scroll;
+    layer::rect_style scroll_hl;
     layer::rect_style scroll_area;
-    layer::rect_style button;
+    layer::rect_style button_up;
+    layer::rect_style button_dn;
+    layer::rect_style button_up_hl;
+    layer::rect_style button_dn_hl;
 
     list_style()
     {
@@ -35,14 +46,27 @@ struct list_style
         list.border=true;
         list.border_color.set(0.4,0.3,1.0,1.0);
 
-        entry=scroll=scroll_area=button=list;
+        entry=list;
 
         list.solid=true;
         list.solid_color=list.border_color;
         list.solid_color.a=0.1;
 
+        scroll_area=list;
+        scroll_area.solid_color.a=0.2;
+
+        scroll=list;
+        scroll.solid_color.a=0.5;
+
+        button_up=button_dn=scroll;
+
         entry_selected=list;
+
         entry_selected.solid_color.a=0.3;
+        entry_hl=entry;
+        entry_hl.solid=true;
+        entry_hl.solid_color.set(0.7,0.6,1.0,0.5);
+        scroll_hl=button_dn_hl=button_up_hl=entry_hl;
     }
 };
 
@@ -66,6 +90,7 @@ public:
     {
         m_elements.clear();
         m_scroll=0;
+        m_mover=0;
         m_selected=0;
         update_rects();
     }
@@ -129,7 +154,7 @@ protected:
 
 public:
     list(): m_scroll(0), m_scroll_abs(0), m_scroll_max(0),  m_mouse_x(0), m_mouse_y(0),
-            m_mouse_hold_y(0), m_scrolling(false), m_selected(-1) {}
+            m_mouse_hold_y(0), m_scrolling(false), m_selected(-1), m_mover(-1) {}
 
 protected:
     list_style m_style;
@@ -151,6 +176,7 @@ protected:
     typedef std::string element;
     std::vector<element> m_elements;
     int m_selected;
+    int m_mover;
 };
 
 }
