@@ -8,42 +8,16 @@
 
 void character::set_attrib(const char *key,const char *value,int num)
 {
-    const int max_models_per_part=10;
-    
-    if(!key || num>=max_models_per_part)
+    if(!key || num>=part::max_models_per_part)
     {
         nya_log::get_log()<<"Unable to set character attribute: invalid input params\n";
         return;
     }
 
-    if(!value || strcasecmp(value,"nil")==0)
-    {
-        if(strcmp(key,"BODY")==0)
-            value="imo_bodyA_00";
-        else if(strcmp(key,"EYE")==0)
-            value="imo_eye_00";
-        else if(strcmp(key,"HAIR")==0)
-            value="imo_hairA_00";
-        else
-            return;
-    }
-    
-    std::string value_str(value);
-    const char last=value_str[value_str.length()-1];
-    if(last>='A' && last<='D')
-    {
-        value_str.resize(value_str.length()-1);
-        num=last-'A';
-    }
-
-      // ToDo: special case - COORDINATE - a whole set
-
-      // ToDo: ignore replace in cases of num>=0
-    
     if(strcmp(key,"COORDINATE")==0)
     {
         reset_attrib();
-        
+
         attribute *a=get_attribute_manager().get(key,value);
         if(!a)
         {
@@ -60,53 +34,43 @@ void character::set_attrib(const char *key,const char *value,int num)
         set_attrib("COSTUME",a->get_value("COORD_06"),1);
         set_attrib("HEAD",a->get_value("COORD_07"));
         set_attrib("FACE",a->get_value("COORD_08"));
-        set_attrib("NECK",a->get_value("COORD_9"));
+        set_attrib("NECK",a->get_value("COORD_09"));
         set_attrib("ARM",a->get_value("COORD_10"));
         set_attrib("SHOES",a->get_value("COORD_11"));
         set_attrib("HAIR",a->get_value("COORD_12")); 
-
+        
         return;
     }
 
-    parts_map::iterator it=m_parts_map.find(key);
-    part *p=0;
-    if(it!=m_parts_map.end() && it->second>=0 && it->second<m_parts.size())
+    part_id id=get_part_id(key);
+    if(id==invalid_part)
     {
-        p=&m_parts[it->second];
-        if(p->value.compare(value)==0)
+        nya_log::get_log()<<"Unable to set character attribute: unknown key\n";
+        return;
+    }
+    
+    part &p=m_parts[id];
+
+    if(!value || strcasecmp(value,"nil")==0)
+    {
+        if(id==body)
+            value="imo_bodyA_00";
+        else if(id==eye)
+            value="imo_eye_00";
+        else if(id==hair)
+            value="imo_hairA_00";
+        else
             return;
     }
-    else
-    {
-        m_parts_map[key]=(int)m_parts.size();
-        m_parts.push_back(part());
-        p=&m_parts.back();
-    }
 
-    if(!p)
+    std::string value_str(value);
+    const char last=value_str[value_str.length()-1];
+    if(last>='A' && last<='D')
     {
-        nya_log::get_log()<<"Unable to set character attribute\n";
-        return;
+        value_str.resize(value_str.length()-1);
+        num=last-'A';
     }
-
-    if(!value[0] || strcasecmp(value,"nil")==0)
-    {
-        p->value.assign("nil");
-        if(num<0)
-            p->free_models();
-        else if(num<max_models_per_part)
-            p->models[num].free();
-        return;
-    }
-
-    if(num<0)
-    {
-        p->value.assign(value);
-        p->free_models();
-    }
-    else
-        p->models.resize(max_models_per_part);
-
+    
     attribute *a=get_attribute_manager().get(key,value);
     if(!a)
     {
@@ -114,32 +78,42 @@ void character::set_attrib(const char *key,const char *value,int num)
         a=get_attribute_manager().get(key,value);
         if(!a)
         {
-            nya_log::get_log()<<"Invalid attribute "<<value<<" of type "<<key<<"\n";
-            return;
+            //nya_log::get_log()<<"Invalid attribute "<<value<<" of type "<<key<<"\n";
+            value="nil";
         }
+    }
+
+    if(!value[0] || strcasecmp(value,"nil")==0)
+    {
+        if(num<0)
+            p.free_models();
+        else if(num<part::max_models_per_part)
+        {
+            p.subparts[num].model.free();
+            p.subparts[num].value="nil";
+        }
+        return;
     }
 
     if(num<0)
     {
-        int max_models=max_models_per_part;
-        if(strcmp(key,"UNDER")==0)
-            max_models=2;
-
+        int max_models=part::max_models_per_part;
         for(int i=0;i<max_models;++i)
         {
+            if(p.subparts[i].value==value)
+                continue;
+
+            p.subparts[i].model.free();
+            p.subparts[i].value.assign(value);
+
             char key[7]="FILE_";
             key[5]=i+'0';
             const char *model_name=a->get_value(key);
             if(!model_name)
-            {
                 break;
-            }
 
             if(strcmp(model_name,"nil")==0)
-            {
-                p->models.push_back(model_ref());
                 continue;
-            }
 
             model_ref ref=get_shared_models().access(model_name);
             if(!ref.is_valid())
@@ -148,59 +122,82 @@ void character::set_attrib(const char *key,const char *value,int num)
                 return;
             }
 
-            p->models.push_back(ref);
+            p.subparts[i].model=ref;
         }
     }
-    else
+    else if(p.subparts[num].value!=value)
     {
         char key[7]="FILE_";
         key[5]=num+'0';
-        model_ref &ref=p->models[num];
+        model_ref &ref=p.subparts[num].model;
         ref.free();
         const char *model_name=a->get_value(key);
         if(!model_name||strcmp(model_name,"nil")==0)
             return;
 
+        p.subparts[num].value.assign(value);
+
         ref=get_shared_models().access(model_name);
         if(!ref.is_valid())
             nya_log::get_log()<<"Unable to set character attribute::Invalid model ref\n";
     }
-    
-    if(strcmp(key,"BODY")==0)
+
+    if(id==body && p.subparts[0].model.is_valid())
+    {
+        m_body_blend_group_idx=-1;
+        
         set_anim(m_anim_name.c_str());
+        m_body_group_count=p.subparts[0].model->get_groups_count();
+        for(int i=0;i<m_body_group_count;++i)
+        {
+            const char *name=p.subparts[0].model->get_group_name(i);
+            if(!name)
+                continue;
+            
+            if(strstr(name,"matu"))
+            {
+                m_body_blend_group_idx=i;
+                break;
+            }
+        }
+    }
 }
 
-const char *character::get_attrib(const char *key)
+const char *character::get_attrib(const char *key,int num)
 {
-    parts_map::iterator it=m_parts_map.find(key);
-    if(it!=m_parts_map.end() && it->second>=0 && it->second<m_parts.size())
-        return m_parts[it->second].value.c_str();
+    if(!key)
+        return 0;
+    
+    part_id id=get_part_id(key);
+    if(id==invalid_part)
+        return 0;
+    
+    m_parts[id].subparts[num].value.c_str();
     
     return 0;
 }
 
 void character::copy_attributes(const character &from)
 {
-    for(parts_map::const_iterator it=from.m_parts_map.begin();
-        it!=from.m_parts_map.end();++it)
-    {
-        if(it->second>=0 && it->second<from.m_parts.size())
-            set_attrib(it->first.c_str(),from.m_parts[it->second].value.c_str());
-    }
+    set_attrib("BODY",from.m_parts[body].subparts[0].value.c_str());
+    set_attrib("EYE",from.m_parts[eye].subparts[0].value.c_str()); 
+    set_attrib("UNDER",from.m_parts[under].subparts[0].value.c_str(),0);
+    set_attrib("UNDER",from.m_parts[under].subparts[1].value.c_str(),1);
+    set_attrib("SOCKS",from.m_parts[socks].subparts[0].value.c_str());
+    set_attrib("COSTUME",from.m_parts[costume].subparts[0].value.c_str(),0);
+    set_attrib("COSTUME",from.m_parts[costume].subparts[1].value.c_str(),1);
+    set_attrib("HEAD",from.m_parts[head].subparts[0].value.c_str());
+    set_attrib("FACE",from.m_parts[face].subparts[0].value.c_str());
+    set_attrib("NECK",from.m_parts[neck].subparts[0].value.c_str());
+    set_attrib("ARM",from.m_parts[arm].subparts[0].value.c_str());
+    set_attrib("SHOES",from.m_parts[shoes].subparts[0].value.c_str());
+    set_attrib("HAIR",from.m_parts[hair].subparts[0].value.c_str()); 
 }
 
 void character::reset_attrib()
 {
-    for(parts_vector::iterator it=m_parts.begin();
-        it!=m_parts.end();++it)
-    {
-        for(parts_vector::iterator it=m_parts.begin();
-            it!=m_parts.end();++it)
-            it->free_models();
-    }
-
-    m_parts.clear();
-    m_parts_map.clear();
+    for(int i=0;i<max_parts;++i)
+        m_parts[i].free_models();
 }
 
 void character::set_anim(const char *anim_name)
@@ -212,17 +209,7 @@ void character::set_anim(const char *anim_name)
 
     nya_log::get_log()<<"Set anim: "<<anim_name<<"\n";
 
-    parts_map::iterator it=m_parts_map.find("BODY");
-    if(it==m_parts_map.end())
-    {
-        nya_log::get_log()<<"Unable to set character anim: invalid base part\n";
-        return;
-    }
-
-    if(m_parts[it->second].models.empty())
-        return;
-
-    model_ref m=m_parts[it->second].models.front();
+    model_ref m=m_parts[body].subparts[0].model;
     if(!m.is_valid())
     {
         nya_log::get_log()<<"Unable to set character anim: invalid base part model ref\n";
@@ -246,42 +233,36 @@ void character::set_anim(const char *anim_name)
 
 void character::draw(bool use_materials)
 {
-    for(parts_vector::iterator it=m_parts.begin();
-        it!=m_parts.end();++it)
+    if(!m_parts[body].subparts[0].model.is_valid())
+        return;
+    
+    for(int i=0;i<m_body_group_count;++i)
     {
-        for(unsigned int i=it->models.size();i>0;--i)
-        {
-            model_ref &m=it->models[i-1];
-            if(m.is_valid())
-                m->draw(use_materials);
-        }
+        if(i==m_body_blend_group_idx)
+            continue;
+
+        m_parts[body].subparts[0].model->draw(use_materials,i);
     }
+    
+    m_parts[eye].draw(use_materials);
+    m_parts[hair].draw(use_materials);
+    m_parts[head].draw(use_materials);
+    
+    m_parts[body].subparts[0].model->draw(use_materials,m_body_blend_group_idx);
+    
+    for(int i=face;i<max_parts;++i)
+        m_parts[i].draw(use_materials);
 }
 
 void character::release()
 {
-    for(parts_vector::iterator it=m_parts.begin();
-        it!=m_parts.end();++it)
-    {
-        for(parts_vector::iterator it=m_parts.begin();
-            it!=m_parts.end();++it)
-            it->free_models();
-    }
-
-    m_parts.clear();
-    m_parts_map.clear();
+    for(int i=0;i<max_parts;++i)
+        m_parts[i].free_models();
 }
 
 float *character::get_buffer(unsigned int frame)
 {
-    parts_map::iterator it=m_parts_map.find("BODY");
-    if(it==m_parts_map.end())
-        return 0;
-
-    if(m_parts[it->second].models.empty())
-        return 0;
-
-    model_ref m=m_parts[it->second].models.front();
+    model_ref m=m_parts[body].subparts[0].model;
     if(!m.is_valid())
         return 0;
 
@@ -290,14 +271,7 @@ float *character::get_buffer(unsigned int frame)
 
 unsigned int character::get_frames_count()
 {
-    parts_map::iterator it=m_parts_map.find("BODY");
-    if(it==m_parts_map.end())
-        return 0;
-
-    if(m_parts[it->second].models.empty())
-        return 0;
-
-    model_ref m=m_parts[it->second].models.front();
+    model_ref m=m_parts[body].subparts[0].model;
     if(!m.is_valid())
         return 0;
 
@@ -306,16 +280,45 @@ unsigned int character::get_frames_count()
 
 unsigned int character::get_bones_count()
 {
-    parts_map::iterator it=m_parts_map.find("BODY");
-    if(it==m_parts_map.end())
-        return 0;
-
-    if(m_parts[it->second].models.empty())
-        return 0;
-
-    model_ref m=m_parts[it->second].models.front();
+    model_ref m=m_parts[body].subparts[0].model;
     if(!m.is_valid())
         return 0;
 
     return m->get_bones_count();
 }
+
+character::part_id character::get_part_id(const char *name)
+{
+    if(!name)
+        return invalid_part;
+
+    switch(name[0])
+    {
+        case 'B': return body;
+        case 'E': return eye;
+        case 'U': return under;
+        case 'A': return arm;
+        case 'C': return costume;
+        case 'N': return neck;
+        case 'F': return face;
+
+        case 'H':
+        {
+            if(name[1]=='A')
+                return hair;
+            
+            return head;
+        }
+
+        case 'S':
+        {
+            if(name[1]=='O')
+                return socks;
+            
+            return shoes;
+        }            
+    };
+
+    return invalid_part;
+}
+

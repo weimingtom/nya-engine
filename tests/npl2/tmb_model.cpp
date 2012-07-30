@@ -83,6 +83,8 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
 
     const uint group_count=*(uint*)model_data.get_data(offset);
     offset+=4;
+    
+    m_group_names.resize(group_count);
 
     static std::vector<vertex> vertices;
 
@@ -104,6 +106,10 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
 
         const tmb_group_header *header=(tmb_group_header*)model_data.get_data(offset);
         offset+=sizeof(tmb_group_header);
+        
+        m_group_names[i].assign(header->name);
+        
+        //nya_log::get_log()<<"Group "<<i<<" "<<header->name<<" unknown "<<header->unknown<<"\n";
 
         const uint mat_count=header->mat_bind_count;
         const uint mat_offset=(uint)m_materials.size();
@@ -122,15 +128,16 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
         const tmb_mat_bind *tmb_mat_binds=(tmb_mat_bind*)model_data.get_data(offset);
         offset+=header->mat_bind_count*sizeof(tmb_mat_bind);
         int mat_idx=0;
-        for(int i=0;i<header->mat_bind_count;++i)
+        for(int j=0;j<header->mat_bind_count;++j)
         {
             material &to=m_materials[mat_idx+mat_offset];
-            const tmb_mat_bind &from_bind=tmb_mat_binds[i];
+            const tmb_mat_bind &from_bind=tmb_mat_binds[j];
             if(from_bind.mat_idx>=tmb_mat_count)
                 continue;
 
             const tmb_material &from_mat=tmb_materials[from_bind.mat_idx];
 
+            to.group=i;
             to.vert_offset=from_bind.vert_offset+verts_offset;
             to.vert_count=from_bind.vert_count*3;
             to.tex_idx=from_mat.tex_idx;
@@ -152,10 +159,10 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
         const tmb_vertex *tmb_vertices=(tmb_vertex*)model_data.get_data(offset);
         offset+=verts_count*sizeof(tmb_vertex);
 
-        for(int i=0;i<verts_count;++i)
+        for(int j=0;j<verts_count;++j)
         {
-            const tmb_vertex &from=tmb_vertices[i];
-            vertex &to=vertices[i+verts_offset];
+            const tmb_vertex &from=tmb_vertices[j];
+            vertex &to=vertices[j+verts_offset];
 
             for(int k=0;k<3;++k)
             {
@@ -213,11 +220,16 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
     m_vbo.set_tc(0,6*sizeof(float));
     m_vbo.set_tc(1,8*sizeof(float),4);
     m_vbo.set_tc(2,12*sizeof(float),4);
+    
+    offset+=m_bones_count*sizeof(tmb_bone);
+    uint unknown_count=*(uint*)model_data.get_data(offset);
+    offset+=4;
+    nya_log::get_log()<<"unknown: "<<unknown_count<<"\n";
 
     return true;
 }
 
-void tmb_model::draw(bool use_materials)
+void tmb_model::draw(bool use_materials,int group)
 {
     m_vbo.bind();
     if(!use_materials)
@@ -230,6 +242,10 @@ void tmb_model::draw(bool use_materials)
     for(unsigned int i=0;i<m_materials.size();++i)
     {
         material & mat = m_materials[i];
+
+        if(group>=0 && group!=mat.group)
+            continue;
+
         m_textures[mat.tex_idx].bind();
 
         //glColor4fv(mat.color);
@@ -312,6 +328,8 @@ bool shared_models_manager::fill_resource(const char *name,tmb_model &res)
 
 bool shared_models_manager::release_resource(tmb_model &res)
 {
+    nya_resources::get_log()<<"released\n";
+    
     res.release();
     return true;
 }

@@ -267,6 +267,8 @@ bool list::on_mouse_scroll(uint x,uint y)
         const int delta=y;//(int)ceilf(m_scroll_max*0.01f)*y;
         m_scroll=clamp(m_scroll-delta,0,m_scroll_max);
         update_rects();
+        
+        on_mouse_move(m_mouse_x,m_mouse_y,true);
     }
 
     return true;
