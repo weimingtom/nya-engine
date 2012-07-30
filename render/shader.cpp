@@ -166,10 +166,11 @@ bool check_init_shaders()
     return true;
 }
 
-#include <stdio.h>
-
 void shader::add_program(program_type type,const char*code)
 {
+    if(!check_init_shaders())
+        return;
+
     if(!code || !code[0])
     {
         get_log()<<"Unable to add shader program: invalid code\n";
@@ -286,6 +287,9 @@ void shader::set_sampler(const char*name,unsigned int layer)
 
 int shader::get_handler(const char *name)
 {
+    if(!check_init_shaders())
+        return 0;
+
     if(!name || !name[0])
     {
         get_log()<<"Unable to set shader handler: invalid name\n";
