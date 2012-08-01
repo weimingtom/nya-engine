@@ -78,28 +78,26 @@ void composite_resources_provider::add_provider(resources_provider *provider)
     }
 
     resource_info *entry=provider->first_res_info();
-    composite_entry_info *prev_entry=0;
     while(entry)
     {
-        composite_entry_info *last_entry=entries.allocate();
-
         std::pair<res_info_iterator,bool> ir=m_resources_info.insert(std::make_pair(std::string(entry->get_name()),entry));
         if(!ir.second)
         {
             get_log()<<"unable to add composite provider entry "<<entry->get_name()
                     <<": already exist\n";
-            entries.free(last_entry);
         }
         else
         {
+            composite_entry_info *last_entry=entries.allocate();
+
             last_entry->set_info(entry);
 
-            if(prev_entry)
-                prev_entry->set_next(last_entry);
+            if(m_last_entry)
+                m_last_entry->set_next(last_entry);
             else
                 m_entries=last_entry;
 
-            prev_entry=last_entry;
+            m_last_entry=last_entry;
         }
 
         entry=entry->get_next();
