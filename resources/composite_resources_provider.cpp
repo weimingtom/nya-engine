@@ -31,6 +31,9 @@ public:
             get_log()<<"unable to get entry name: invalid info\n";
             return 0;
         }
+        
+        if(m_ignore_case)
+            return m_lowcase_name.c_str();
 
         return m_info->get_name();
     }
@@ -43,17 +46,29 @@ public:
             return 0;
         }
         
+        if(m_ignore_case)
+        {
+            std::string ext_str(ext);
+            std::transform(ext_str.begin(),ext_str.end(),ext_str.begin(),std::tolower);
+
+            return m_info->check_extension(ext_str.c_str());
+        }
+
         return m_info->check_extension(ext);
     }
 
     resource_info *get_next() const { return m_next; };
 
 public:
-    composite_entry_info(): m_info(0), m_next(0) {}
+    composite_entry_info(): m_info(0), m_next(0), m_ignore_case(false) {}
 
 private:
     resource_info *m_info;
     composite_entry_info *m_next;
+    
+public:
+    std::string m_lowcase_name;
+    bool m_ignore_case;
 };
 
 }
@@ -80,7 +95,19 @@ void composite_resources_provider::add_provider(resources_provider *provider)
     resource_info *entry=provider->first_res_info();
     while(entry)
     {
-        std::pair<res_info_iterator,bool> ir=m_resources_info.insert(std::make_pair(std::string(entry->get_name()),entry));
+        const char *name=entry->get_name();
+        if(!name)
+        {
+            entry=entry->get_next();
+            continue;
+        }
+        
+        std::string name_str(name);
+
+        if(m_ignore_case)
+            std::transform(name_str.begin(),name_str.end(),name_str.begin(),std::tolower);
+
+        std::pair<res_info_iterator,bool> ir=m_resources_info.insert(std::make_pair(name_str,entry));
         if(!ir.second)
         {
             get_log()<<"unable to add composite provider entry "<<entry->get_name()
@@ -91,6 +118,11 @@ void composite_resources_provider::add_provider(resources_provider *provider)
             composite_entry_info *last_entry=entries.allocate();
 
             last_entry->set_info(entry);
+            if(m_ignore_case)
+            {
+                last_entry->m_ignore_case=true;
+                last_entry->m_lowcase_name=name_str;
+            }
 
             if(m_last_entry)
                 m_last_entry->set_next(last_entry);
@@ -111,8 +143,19 @@ resource_data *composite_resources_provider::access(const char *resource_name)
         get_log()<<"unable to access composite entry: invalid name\n";
         return 0;
     }
+    
+    res_info_iterator it;
+    
+    if(m_ignore_case)
+    {
+        std::string res_str(resource_name);
+        std::transform(res_str.begin(),res_str.end(),res_str.begin(),std::tolower);
 
-    res_info_iterator it=m_resources_info.find(resource_name);
+        it=m_resources_info.find(res_str.c_str());
+    }
+    else
+        it=m_resources_info.find(resource_name);
+
     if(it==m_resources_info.end())
     {
         get_log()<<"unable to access composite entry "<<resource_name
@@ -145,6 +188,22 @@ composite_resources_provider::~composite_resources_provider()
         entries.free((composite_entry_info*)entry);
         entry=next_entry;
     }
+}
+    
+void composite_resources_provider::set_ignore_case(bool ignore)
+{
+    if(ignore && !m_ignore_case)
+    {
+        //todo: convert all to lowcase
+        //and set all entries m_ignore_case to true
+    }
+    else if(!ignore && m_ignore_case)
+    {
+        //todo: restore original case
+        //and set all entries m_ignore_case to false
+    }
+
+    m_ignore_case=ignore;
 }
 
 }

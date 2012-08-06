@@ -50,6 +50,8 @@ private:
         
         unsigned int vert_offset;
         unsigned int vert_count;
+        
+        bool cull_face;
 
         unsigned int tex_idx;
     };

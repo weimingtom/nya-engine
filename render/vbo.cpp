@@ -36,6 +36,9 @@ bool check_init_vbo()
     if(initialised)
         return true;
 
+    //if(!has_extension("GL_ARB_vertex_buffer_object"))
+    //    return false;
+
 #ifndef NO_EXTENSIONS_INIT
     vbo_glGenBuffers = (PFNGLGENBUFFERSARBPROC) get_extension("glGenBuffers");
     if(!vbo_glGenBuffers)
@@ -135,7 +138,7 @@ void vbo::bind_tc(unsigned int tc_idx)
 
     tc.bind=true;
 
-    vbo_glClientActiveTexture(GL_TEXTURE0_ARB+tc_idx);    
+    vbo_glClientActiveTexture(GL_TEXTURE0_ARB+tc_idx);
     glTexCoordPointer(tc.dimension,GL_FLOAT,m_vertex_stride,(void *)(tc.offset));
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 }
@@ -205,7 +208,7 @@ void vbo::draw(unsigned int count)
 {
     draw(0,count);
 }
-    
+
 void vbo::draw(unsigned int offset,unsigned int count)
 {
     if(!m_vertex_bind)
@@ -239,6 +242,9 @@ void vbo::draw(unsigned int offset,unsigned int count)
     }
     else
     {
+        if(offset+count>m_verts_count)
+            return;
+
         glDrawArrays(GL_TRIANGLES,offset,count);
     }
 }
@@ -286,7 +292,7 @@ void vbo::gen_vertex_data(const void*data,unsigned int vert_stride,unsigned int 
     vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,0);
 
     m_vertex_stride=vert_stride;
-    m_verts_count=vert_count;    
+    m_verts_count=vert_count;
 }
 
 void vbo::gen_index_data(const void*data,element_type type,element_size size,unsigned int faces_count,bool dynamic)

@@ -3,6 +3,7 @@
 #include "tmb_model.h"
 #include "tsb_anim.h"
 #include "memory/tmp_buffer.h"
+#include "render/platform_specific_gl.h"
 
 #include "string.h"
 #include <vector>
@@ -16,11 +17,14 @@ namespace
         float tc[2];
         float bone_idx[4];
         float bone_weight[4];
+        float color[4];
     };
 }
 
 bool tmb_model::load(nya_resources::resource_data *model_res)
 {
+    release();
+
     if(!model_res)
     {
         nya_log::get_log()<<"Unable to load model: invalid data\n";
@@ -93,6 +97,7 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
     m_vbo.release();
 
     uint verts_offset=0;
+    int mat_offset=0;
     for(int i=0;i<group_count;++i)
     {
         struct tmb_group_header
@@ -100,7 +105,7 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
             char name[32];
             float matrix[4][4];
             uint faces_count;
-            uint unknown;
+            uint cull_face;
             uint mat_bind_count;
         };
 
@@ -112,7 +117,6 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
         //nya_log::get_log()<<"Group "<<i<<" "<<header->name<<" unknown "<<header->unknown<<"\n";
 
         const uint mat_count=header->mat_bind_count;
-        const uint mat_offset=(uint)m_materials.size();
         m_materials.resize(mat_offset+mat_count);
 
         const uint verts_count=header->faces_count*3;
@@ -121,30 +125,33 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
         struct tmb_mat_bind
         {
             uint mat_idx;
-            uint vert_offset;
-            uint vert_count;
+            int vert_offset;
+            int vert_count;
         };
 
         const tmb_mat_bind *tmb_mat_binds=(tmb_mat_bind*)model_data.get_data(offset);
         offset+=header->mat_bind_count*sizeof(tmb_mat_bind);
-        int mat_idx=0;
         for(int j=0;j<header->mat_bind_count;++j)
         {
-            material &to=m_materials[mat_idx+mat_offset];
+            material &to=m_materials[mat_offset];
             const tmb_mat_bind &from_bind=tmb_mat_binds[j];
             if(from_bind.mat_idx>=tmb_mat_count)
                 continue;
 
             const tmb_material &from_mat=tmb_materials[from_bind.mat_idx];
 
+            if(from_bind.vert_count<0 || from_bind.vert_offset<0)
+                continue;
+
             to.group=i;
             to.vert_offset=from_bind.vert_offset+verts_offset;
             to.vert_count=from_bind.vert_count*3;
             to.tex_idx=from_mat.tex_idx;
-            ++mat_idx;
+            to.cull_face=header->cull_face>0;
+            ++mat_offset;
         }
 
-        m_materials.resize(mat_idx+mat_offset);
+        m_materials.resize(mat_offset);
 
         struct tmb_vertex
         {
@@ -172,6 +179,8 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
                          +header->matrix[3][k];
                 
                 to.nor[k]=from.normal[k];
+                
+                to.color[k]=from.color[k]/255.0f;
 
                 if(from.weights[k]>0.01f)
                 {
@@ -184,6 +193,8 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
                     to.bone_weight[k]=0;
                 }
             }
+            
+            to.color[3]=from.color[3]/255.0f;
 
             const float weight3=1.0f-(from.weights[0]+from.weights[1]+from.weights[2]);
             if(weight3>0.01f)
@@ -207,24 +218,25 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
     m_bones_count=*(uint*)model_data.get_data(offset);
     offset+=4;
 
-    struct tmb_bone
+    if(m_bones_count)
     {
-        float mat[16];
-    };
-
-    m_bones.resize(m_bones_count);
-    model_data.copy_from(&m_bones[0],m_bones_count*sizeof(tmb_bone),offset);
+        m_bones.resize(m_bones_count);
+        model_data.copy_from(&m_bones[0],m_bones_count*sizeof(bone),offset);
+    }
+    else
+        m_bones.clear();
 
     m_vbo.gen_vertex_data(&vertices[0],sizeof(vertex),verts_offset);
     m_vbo.set_normals(3*sizeof(float));
     m_vbo.set_tc(0,6*sizeof(float));
     m_vbo.set_tc(1,8*sizeof(float),4);
     m_vbo.set_tc(2,12*sizeof(float),4);
+    m_vbo.set_tc(3,16*sizeof(float),4);
     
-    offset+=m_bones_count*sizeof(tmb_bone);
-    uint unknown_count=*(uint*)model_data.get_data(offset);
-    offset+=4;
-    nya_log::get_log()<<"unknown: "<<unknown_count<<"\n";
+    //offset+=m_bones_count*sizeof(tmb_bone);
+    //uint unknown_count=*(uint*)model_data.get_data(offset);
+    //offset+=4;
+    //nya_log::get_log()<<"unknown: "<<unknown_count<<"\n";
 
     return true;
 }
@@ -245,6 +257,11 @@ void tmb_model::draw(bool use_materials,int group)
 
         if(group>=0 && group!=mat.group)
             continue;
+
+        if(mat.cull_face)
+            glEnable(GL_CULL_FACE);
+        else
+            glDisable(GL_CULL_FACE);
 
         m_textures[mat.tex_idx].bind();
 

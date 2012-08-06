@@ -39,12 +39,14 @@ bool attribute_parser::load(nya_resources::resource_data *data)
             continue;
         }
 
-        if(c<31)
+        if(c=='\r' || c=='\n')
         {
             if(parse_comment||parse_key)
             {
                 parse_comment=false;
                 parse_key=true;
+                key.clear();
+                value.clear();
                 continue;
             }
 
@@ -93,7 +95,7 @@ bool attribute_parser::load(nya_resources::resource_data *data)
             nya_log::get_log()<<"Attribute parser warning: dublicate attribute"
                               <<key.c_str()<<"\n";
     }
-
+    
     return true;
 }
 
