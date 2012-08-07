@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef plain_file_log_h
-#define plain_file_log_h
+#pragma once
 
 #include "log.h"
 #include <string>
@@ -35,4 +34,3 @@ private:
 };
     
 }
-#endif

@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef html_log_h
-#define html_log_h
+#pragma once
 
 #include "log.h"
 #include <string>
@@ -34,6 +33,5 @@ private:
     message_type m_message_type;
     int m_block;
 };
-}
-#endif
 
+}

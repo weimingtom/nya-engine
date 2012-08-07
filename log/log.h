@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef log_h
-#define log_h
+#pragma once
 
 namespace nya_log
 {
@@ -42,4 +41,3 @@ void set_log(log *l);
 log &get_log(const char *tag=0);
 
 }
-#endif
