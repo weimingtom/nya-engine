@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef tmp_buffer_h
-#define tmp_buffer_h
+#pragma once
 
 #include <cstddef>
 
@@ -51,5 +50,3 @@ private:
 };
 
 }
-#endif
-

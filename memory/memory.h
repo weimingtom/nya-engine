@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef memory_h
-#define memory_h
+#pragma once
 
 #include "log/log.h"
 
@@ -12,6 +11,3 @@ void set_log(nya_log::log *l);
 nya_log::log &get_log();
 
 }
-
-#endif
-

@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef pool_h
-#define pool_h
+#pragma once
 
 #include <vector>
 
@@ -159,5 +158,3 @@ private:
 };
 
 }
-
-#endif
