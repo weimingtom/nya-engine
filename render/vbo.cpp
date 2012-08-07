@@ -71,7 +71,7 @@ void vbo::bind(bool indices_bind)
     bind_normals();
     bind_colors();
 
-    for(int i=0;i<VBO_MAX_TEX_COORD;++i)
+    for(int i=0;i<vbo_max_tex_coord;++i)
     {
         if(m_tcs[i].has)
             bind_tc(i);
@@ -128,7 +128,7 @@ void vbo::bind_tc(unsigned int tc_idx)
     if(!m_vertex_bind)
         return;
 
-    if(tc_idx>=VBO_MAX_TEX_COORD)
+    if(tc_idx>=vbo_max_tex_coord)
         return;
 
     attribute &tc=m_tcs[tc_idx];
@@ -181,7 +181,7 @@ void vbo::unbind()
     }
 
     bool has_unbinds=false;
-    for(int i=0;i<VBO_MAX_TEX_COORD;++i)
+    for(int i=0;i<vbo_max_tex_coord;++i)
     {
         attribute &tc=m_tcs[i];
         if(!tc.bind)
@@ -337,7 +337,7 @@ void vbo::set_normals(unsigned int offset)
 
 void vbo::set_tc(unsigned int tc_idx,unsigned int offset,unsigned int dimension)
 {
-    if(tc_idx>=VBO_MAX_TEX_COORD)
+    if(tc_idx>=vbo_max_tex_coord)
         return;
 
     attribute &tc=m_tcs[tc_idx];

@@ -1,9 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef vbo_h
-#define vbo_h
-
-#define VBO_MAX_TEX_COORD 16
+#pragma once
 
 namespace nya_render
 {
@@ -79,10 +76,8 @@ private:
 
     attribute m_colors;
     attribute m_normals;
-    attribute m_tcs[VBO_MAX_TEX_COORD];
+    const static int vbo_max_tex_coord=16;
+    attribute m_tcs[vbo_max_tex_coord];
 };
 
 }
-
-#endif
-

@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef texture_h
-#define texture_h
+#pragma once
 
 namespace nya_render
 {
@@ -34,5 +33,3 @@ private:
 };
 
 }
-
-#endif

@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef shader_h
-#define shader_h
+#pragma once
 
 #include "platform_specific_gl.h"
 
@@ -51,6 +50,4 @@ private:
 };
 
 }
-
-#endif
 

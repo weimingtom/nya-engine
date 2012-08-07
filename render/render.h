@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef render_h
-#define render_h
+#pragma once
 
 #include "log/log.h"
 
@@ -12,5 +11,3 @@ void set_log(nya_log::log *l);
 nya_log::log &get_log();
 
 }
-
-#endif

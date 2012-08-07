@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef platform_specific_gl_h
-#define platform_specific_gl_h
+#pragma once
 
 #ifdef _WIN32
     #include "windows.h"
@@ -30,6 +29,4 @@ bool has_extension(const char *name);
 void *get_extension(const char*ext_name);
 
 }
-#endif
-
 #endif
