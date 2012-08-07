@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef pl2_resource_provider_h
-#define pl2_resource_provider_h
+#pragma once
 
 #include "resources/resources.h"
 
@@ -49,4 +48,3 @@ private:
 };
 
 }
-#endif

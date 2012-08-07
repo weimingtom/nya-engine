@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef attributes_h
-#define attributes_h
+#pragma once
 
 #include "resources/resources.h"
 
@@ -65,4 +64,3 @@ private:
 };
 
 attribute_manager &get_attribute_manager();
-#endif

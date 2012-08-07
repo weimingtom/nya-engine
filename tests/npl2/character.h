@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef character_h
-#define character_h
+#pragma once
 
 #include "tmb_model.h"
 
@@ -86,7 +85,4 @@ private:
     std::string m_anim_name;
     int m_body_group_count;
     int m_body_blend_group_idx;
-    
-    //std::string m_coordinate; //full set value
 };
-#endif

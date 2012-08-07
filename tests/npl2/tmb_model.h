@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef tsb_model_h
-#define tsb_model_h
+#pragma once
 
 #include "render/vbo.h"
 #include "render/texture.h"
@@ -84,5 +83,3 @@ class shared_models_manager: public shared_models
 };
 
 shared_models_manager &get_shared_models();
-
-#endif

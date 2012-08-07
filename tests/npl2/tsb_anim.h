@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef tsb_anim_h
-#define tsb_anim_h
+#pragma once
 
 #include "resources/resources.h"
 #include "resources/shared_resources.h"
@@ -50,5 +49,3 @@ class shared_anims_manager: public shared_anims
 };
 
 shared_anims_manager &get_shared_anims();
-
-#endif
