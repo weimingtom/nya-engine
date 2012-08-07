@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef button_h
-#define button_h
+#pragma once
 
 #include "ui/ui.h"
 
@@ -55,5 +54,3 @@ private:
 };
 
 }
-
-#endif

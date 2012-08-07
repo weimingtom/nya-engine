@@ -4,8 +4,7 @@
     left-bottom alligned
 */
 
-#ifndef ui_h
-#define ui_h
+#pragma once
 
 #include "log/log.h"
 
@@ -195,9 +194,9 @@ protected:
 protected:
     virtual void on_mouse_over() {}
     virtual void on_mouse_left() {}
-    virtual bool on_mouse_move(uint x,uint y,bool inside) {}
-    virtual bool on_mouse_button(layout::button button,bool pressed) {}
-    virtual bool on_mouse_scroll(uint x,uint y) {}
+    virtual bool on_mouse_move(uint x,uint y,bool inside) { return false; }
+    virtual bool on_mouse_button(layout::button button,bool pressed) { return false; }
+    virtual bool on_mouse_scroll(uint x,uint y) { return false; }
 
 protected:
     virtual void draw(layer &l) {}
@@ -451,5 +450,3 @@ private:
 };
 
 }
-
-#endif

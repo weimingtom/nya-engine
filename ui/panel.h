@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef panel_h
-#define panel_h
+#pragma once
 
 #include "ui/ui.h"
 
@@ -44,5 +43,3 @@ protected:
 };
 
 }
-
-#endif

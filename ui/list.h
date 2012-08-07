@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef list_h
-#define list_h
+#pragma once
 
 #include "ui/ui.h"
 #include <vector>
@@ -180,5 +179,3 @@ protected:
 };
 
 }
-
-#endif
