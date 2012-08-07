@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef composite_resource_provider_h
-#define composite_resource_provider_h
+#pragma once
 
 #include "resources.h"
 #include <map>
@@ -37,4 +36,3 @@ private:
 };
 
 }
-#endif

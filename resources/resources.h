@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef resources_h
-#define resources_h
+#pragma once
 
 #include "log/log.h"
 #include <cstddef>
@@ -48,5 +47,3 @@ void set_log(nya_log::log *l);
 nya_log::log &get_log();
 
 }
-#endif
-

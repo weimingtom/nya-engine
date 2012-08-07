@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef shared_textures_h
-#define shared_textures_h
+#pragma once
 
 #include "resources/shared_resources.h"
 #include "render/texture.h"
@@ -19,5 +18,3 @@ namespace nya_resources
 
     shared_textures_manager &get_shared_textures();
 }
-#endif
-

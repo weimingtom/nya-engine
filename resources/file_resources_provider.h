@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef file_resource_provider_h
-#define file_resource_provider_h
+#pragma once
 
 #include "resources.h"
 
@@ -32,4 +31,3 @@ private:
 };
 
 }
-#endif
