@@ -176,7 +176,7 @@ public:
                     it->second->lru_next->lru_prev=it->second->lru_prev;
                 else
                     m_lru_last=it->second->lru_prev;
-                
+
                 if(it->second->lru_prev)
                     it->second->lru_prev->lru_next=it->second->lru_next;
                 else
@@ -222,9 +222,9 @@ private:
     {
         //if(!m_lru_limit)
             return;
-        
+
         get_log()<<m_used_count<<" ";
-        
+
         res_holder *last=m_lru_last;
 
     int test=0;
@@ -264,9 +264,9 @@ private:
             last=prev;
             ++test;
         }
-        
+
         get_log()<<test<<"\n";
-        
+
     }
 
 public:
@@ -293,8 +293,8 @@ private:
     //virtual t_res *get_resource(const res_holder *holder) { return &holder->res; }
 
 public:
-    shared_resources(): m_should_unload_unused(true),m_lru_first(0),m_lru_last(0),
-                        m_used_count(0),m_lru_limit(0) {}
+    shared_resources(): m_lru_first(0),m_lru_last(0),m_used_count(0),m_lru_limit(0)
+                        ,m_should_unload_unused(true) {}
 
     //non copiable
 private:

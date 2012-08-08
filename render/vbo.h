@@ -32,7 +32,7 @@ public:
     void bind(bool indices_bind=true);
     void unbind();
 
-public:    
+public:
     void draw();
     void draw(unsigned int count); // verts or faces (if has indices) count
     void draw(unsigned int offset,unsigned int count);
@@ -76,7 +76,7 @@ private:
 
     attribute m_colors;
     attribute m_normals;
-    const static int vbo_max_tex_coord=16;
+    const static unsigned int vbo_max_tex_coord=16;
     attribute m_tcs[vbo_max_tex_coord];
 };
 

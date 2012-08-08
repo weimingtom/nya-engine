@@ -69,9 +69,9 @@ void list::draw(layer &layer)
     layer.set_scissor(r);
 
     long y=r.y+r.h-er.h+(er.h*m_elements.size()-r.h)*m_scroll/m_scroll_max;
-    for(uint i=0;i<m_elements.size();++i,y-=m_style.entry_height)
+    for(int i=0;i<(int)m_elements.size();++i,y-=m_style.entry_height)
     {
-        if(y+er.h<r.y||y>r.y+r.h)
+        if(y+er.h<r.y||y>(int)(r.y+r.h))
             continue;
 
         er.y=(uint)y;
@@ -148,7 +148,7 @@ bool list::on_mouse_move(uint x,uint y,bool inside)
 
         int num=(r.h-(m_mouse_y-r.y)+scrl)/m_style.entry_height;
 
-        if(num<m_elements.size())
+        if(num<(int)m_elements.size())
         {
             if(num!=m_mover)
             {
@@ -234,7 +234,7 @@ bool list::on_mouse_button(layout::button button,bool pressed)
             }
         }
 
-        if(m_mover>=0 && m_mover<m_elements.size())
+        if(m_mover>=0 && m_mover<(int)m_elements.size())
         {
             //get_log()<<"Elem: "<<m_mover<<" "<<m_elements[m_mover].c_str()<<"\n";
             layout::event e;
@@ -261,13 +261,13 @@ bool list::on_mouse_button(layout::button button,bool pressed)
 bool list::on_mouse_scroll(uint x,uint y)
 {
     rect r=get_draw_rect();
-    
+
     if(m_style.entry_height*m_elements.size()>r.h)
     {
         const int delta=y;//(int)ceilf(m_scroll_max*0.01f)*y;
         m_scroll=clamp(m_scroll-delta,0,m_scroll_max);
         update_rects();
-        
+
         on_mouse_move(m_mouse_x,m_mouse_y,true);
     }
 

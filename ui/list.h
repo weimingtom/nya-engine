@@ -158,8 +158,8 @@ public:
 protected:
     list_style m_style;
     uint m_scroll;
-    uint m_scroll_max;
     uint m_scroll_abs;
+    uint m_scroll_max;
     uint m_mouse_x;
     uint m_mouse_y;
     uint m_mouse_hold_y;

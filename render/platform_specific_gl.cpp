@@ -54,6 +54,8 @@ bool has_extension(const char *name)
 
     if(std::string(exts).find(name)==0)
         return true;
+
+    return false;
 }
 
 }

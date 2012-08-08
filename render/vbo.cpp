@@ -71,7 +71,7 @@ void vbo::bind(bool indices_bind)
     bind_normals();
     bind_colors();
 
-    for(int i=0;i<vbo_max_tex_coord;++i)
+    for(unsigned int i=0;i<vbo_max_tex_coord;++i)
     {
         if(m_tcs[i].has)
             bind_tc(i);
@@ -181,7 +181,7 @@ void vbo::unbind()
     }
 
     bool has_unbinds=false;
-    for(int i=0;i<vbo_max_tex_coord;++i)
+    for(unsigned int i=0;i<vbo_max_tex_coord;++i)
     {
         attribute &tc=m_tcs[i];
         if(!tc.bind)

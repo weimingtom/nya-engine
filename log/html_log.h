@@ -30,8 +30,8 @@ public:
 private:
     std::string m_file_name;
     int m_scope;
-    message_type m_message_type;
     int m_block;
+    message_type m_message_type;
 };
 
 }

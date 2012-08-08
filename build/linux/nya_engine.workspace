@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="Workspace">
+		<Project filename="nya_engine.cbp" />
+		<Project filename="npl2.cbp" active="1">
+			<Depends filename="nya_engine.cbp" />
+		</Project>
+	</Workspace>
+</CodeBlocks_workspace_file>

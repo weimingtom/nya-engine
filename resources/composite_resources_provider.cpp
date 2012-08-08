@@ -2,6 +2,7 @@
 
 #include "composite_resources_provider.h"
 #include "memory/pool.h"
+#include <algorithm>
 
 namespace nya_resources
 {
@@ -31,13 +32,13 @@ public:
             get_log()<<"unable to get entry name: invalid info\n";
             return 0;
         }
-        
+
         if(m_ignore_case)
             return m_lowcase_name.c_str();
 
         return m_info->get_name();
     }
-    
+
     bool check_extension(const char *ext) const
     {
         if(!m_info)
@@ -45,11 +46,12 @@ public:
             get_log()<<"unable to check entry extension: invalid info\n";
             return 0;
         }
-        
+
         if(m_ignore_case)
         {
             std::string ext_str(ext);
-            std::transform(ext_str.begin(),ext_str.end(),ext_str.begin(),std::tolower);
+
+            std::transform(ext_str.begin(),ext_str.end(),ext_str.begin(),::tolower);
 
             return m_info->check_extension(ext_str.c_str());
         }
@@ -65,7 +67,7 @@ public:
 private:
     resource_info *m_info;
     composite_entry_info *m_next;
-    
+
 public:
     std::string m_lowcase_name;
     bool m_ignore_case;
@@ -101,11 +103,11 @@ void composite_resources_provider::add_provider(resources_provider *provider)
             entry=entry->get_next();
             continue;
         }
-        
+
         std::string name_str(name);
 
         if(m_ignore_case)
-            std::transform(name_str.begin(),name_str.end(),name_str.begin(),std::tolower);
+            std::transform(name_str.begin(),name_str.end(),name_str.begin(),::tolower);
 
         std::pair<res_info_iterator,bool> ir=m_resources_info.insert(std::make_pair(name_str,entry));
         if(!ir.second)
@@ -143,13 +145,13 @@ resource_data *composite_resources_provider::access(const char *resource_name)
         get_log()<<"unable to access composite entry: invalid name\n";
         return 0;
     }
-    
+
     res_info_iterator it;
-    
+
     if(m_ignore_case)
     {
         std::string res_str(resource_name);
-        std::transform(res_str.begin(),res_str.end(),res_str.begin(),std::tolower);
+        std::transform(res_str.begin(),res_str.end(),res_str.begin(),::tolower);
 
         it=m_resources_info.find(res_str.c_str());
     }
@@ -178,7 +180,7 @@ resource_info *composite_resources_provider::first_res_info()
 {
     return m_entries;
 }
-    
+
 composite_resources_provider::~composite_resources_provider()
 {
     resource_info *entry=m_entries;
@@ -189,7 +191,7 @@ composite_resources_provider::~composite_resources_provider()
         entry=next_entry;
     }
 }
-    
+
 void composite_resources_provider::set_ignore_case(bool ignore)
 {
     if(ignore && !m_ignore_case)
