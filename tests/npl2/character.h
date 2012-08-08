@@ -21,7 +21,7 @@ public:
 
     void release();
     
-    void copy_attributes(const character &from);
+    void copy_attrib(const character &from);
 
     float *get_buffer(unsigned int frame);
     unsigned int get_frames_count();

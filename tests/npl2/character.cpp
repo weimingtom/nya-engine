@@ -113,13 +113,16 @@ void character::set_attrib(const char *key,const char *value,int num)
                 break;
 
             if(strcmp(model_name,"nil")==0)
+            {
+                //p.subparts[i].model.free();
                 continue;
+            }
 
             model_ref ref=get_shared_models().access(model_name);
             if(!ref.is_valid())
             {
                 nya_log::get_log()<<"Unable to set character attribute::Invalid model ref\n";
-                return;
+                //return;
             }
 
             p.subparts[i].model=ref;
@@ -177,7 +180,7 @@ const char *character::get_attrib(const char *key,int num)
     return 0;
 }
 
-void character::copy_attributes(const character &from)
+void character::copy_attrib(const character &from)
 {
     set_attrib("BODY",from.m_parts[body].subparts[0].value.c_str());
     set_attrib("EYE",from.m_parts[eye].subparts[0].value.c_str()); 
@@ -231,11 +234,13 @@ void character::set_anim(const char *anim_name)
     a.free();
 }
 
+//#include "render/platform_specific_gl.h"
+
 void character::draw(bool use_materials)
 {
     if(!m_parts[body].subparts[0].model.is_valid())
         return;
-    
+
     for(int i=0;i<m_body_group_count;++i)
     {
         if(i==m_body_blend_group_idx)
@@ -243,15 +248,18 @@ void character::draw(bool use_materials)
 
         m_parts[body].subparts[0].model->draw(use_materials,i);
     }
-    
+
     m_parts[eye].draw(use_materials);
     m_parts[hair].draw(use_materials);
     m_parts[head].draw(use_materials);
-    
+
     m_parts[body].subparts[0].model->draw(use_materials,m_body_blend_group_idx);
-    
+
+    //glColor4f(1,1,1,0.7);
     for(int i=face;i<max_parts;++i)
         m_parts[i].draw(use_materials);
+
+    //glColor4f(1,1,1,1);
 }
 
 void character::release()
