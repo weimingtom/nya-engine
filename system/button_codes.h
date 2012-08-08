@@ -7,8 +7,8 @@ namespace nya_system
 
 enum button_code //from X11 codes
 {
-	key_tab =0xff09,
-	key_alt =0xffe9
+    key_tab =0xff09,
+    key_alt =0xffe9
 /*
     #define KEY_TAB 0xff09
     #define KEY_ALT  0xffe9
