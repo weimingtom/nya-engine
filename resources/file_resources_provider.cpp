@@ -1,14 +1,11 @@
 //https://code.google.com/p/nya-engine/
 
 #include "file_resources_provider.h"
-#include <stdio.h>
 #include "memory/pool.h"
-#include <dirent.h>
-#include <string>
 
-#ifdef WIN32
-    #include <sys/stat.h>
-#endif
+#include <stdio.h>
+#include <dirent.h>
+#include <sys/stat.h>
 
 namespace nya_resources
 {
@@ -38,6 +35,7 @@ struct file_resource_info: public resource_info
 {
 public:
     std::string name;
+    std::string path;
     file_resource_info *next;
 
 public:
@@ -50,9 +48,9 @@ private:
     {
         if(!ext)
             return false;
-        
+
         std::string ext_str(ext);
-        return (name.size() >= ext_str.size() && 
+        return (name.size() >= ext_str.size() &&
                 std::equal(name.end()-ext_str.size(),name.end(),ext_str.begin()));
     }
 
@@ -73,10 +71,10 @@ namespace nya_resources
 resource_data *file_resource_info::access()
 {
     file_resource *file = file_resources.allocate();
-
-    if(!file->open(name.c_str()))
+    if(!file->open((path+name).c_str()))
     {
-        get_log()<<"unable to acess file "<<name.c_str()<<"\n";
+        get_log()<<"unable to acess file "<<name.c_str()
+                    <<" at path "<<path.c_str()<<"\n";
         file_resources.free(file);
         return 0;
     }
@@ -94,9 +92,10 @@ resource_data *file_resources_provider::access(const char *resource_name)
 
     file_resource *file = file_resources.allocate();
 
-    if(!file->open(resource_name))
+    if(!file->open((m_path+resource_name).c_str()))
     {
-        get_log()<<"unable to access file: "<<resource_name<<"\n";
+        get_log()<<"unable to access file: "<<resource_name
+                        <<" at path "<<m_path.c_str()<<"\n";
         file_resources.free(file);
         return 0;
     }
@@ -104,11 +103,29 @@ resource_data *file_resources_provider::access(const char *resource_name)
     return file;
 }
 
-bool file_resources_provider::set_folder(const char*name)
+bool file_resources_provider::set_folder(const char*name,bool recursive)
 {
     clear_entries();
 
-    return chdir(name);
+    m_recursive=recursive;
+
+    if(!name)
+    {
+        m_path.erase();
+        return false;
+    }
+
+    struct stat sb;
+
+    if (!name || stat(name,&sb) != 0 || !S_ISDIR(sb.st_mode))
+    {
+        m_path.erase();
+        return false;
+    }
+
+    m_path.assign(name);
+
+    return true;
 }
 
 void file_resources_provider::clear_entries()
@@ -124,23 +141,23 @@ void file_resources_provider::clear_entries()
     m_entries=0;
 }
 
-void enumerate_folder(const char*folder_name,file_resource_info **last)
+void file_resources_provider::enumerate_folder(const char*folder_name,file_resource_info **last)
 {
     if(!folder_name || !last)
         return;
 
     const std::string folder_name_str(folder_name);
 
-    DIR *dirp=opendir(folder_name);
+    DIR *dirp=opendir((m_path+folder_name_str).c_str());
     dirent *dp;
     while((dp=readdir(dirp))!=0)
     {
 #ifdef WIN32
         struct stat stat_buf;
         stat((folder_name_str+"/"+dp->d_name).c_str(),&stat_buf);
-        if((stat_buf.st_mode&S_IFDIR)==S_IFDIR)
+        if((stat_buf.st_mode&S_IFDIR)==S_IFDIR && m_recursive)
 #else
-        if(dp->d_type==DT_DIR)
+        if(dp->d_type==DT_DIR && m_recursive)
 #endif
         {
             std::string dir_name(dp->d_name);
@@ -158,6 +175,9 @@ void enumerate_folder(const char*folder_name,file_resource_info **last)
         entry->name.append(dp->d_name);
         if(entry->name.compare("./")>0)
             entry->name=entry->name.substr(2);
+        //if(entry->name.length()>=2 && entry->name[0]=='.' && entry->name[1]=='/')
+        //    entry->name=entry->name.substr(2);
+        entry->path=m_path;
         entry->next=*last;
         *last=entry;
     }
@@ -235,6 +255,7 @@ bool file_resource::open(const char*filename)
 
     m_size=0;
     m_file=fopen(filename,"rb");
+
     if(!m_file)
         return false;
 

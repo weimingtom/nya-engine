@@ -65,8 +65,10 @@ public:
         glXMakeCurrent(m_dpy,m_win,cx);
         XMapWindow(m_dpy, m_win);
 
+        app.on_resize(w,h);
         app.on_init_splash();
         update_splash(app);
+        app.on_init();
 
         XEvent event;
         while(true)
@@ -77,12 +79,16 @@ public:
                 switch (event.type)
                 {
                     case ConfigureNotify:
-                        glViewport(0,0,event.xconfigure.width,event.xconfigure.height);
-                        app.on_resize(event.xconfigure.width,event.xconfigure.height);
+                    {
+                        w=event.xconfigure.width;
+                        h=event.xconfigure.height;
+                        glViewport(0,0,w,h);
+                        app.on_resize(w,h);
+                    }
                     break;
 
                     case MotionNotify:
-                        app.on_mouse_move(event.xmotion.x,event.xmotion.y);
+                        app.on_mouse_move(event.xmotion.x,h-event.xmotion.y);
                     break;
 
                     case ButtonPress:
