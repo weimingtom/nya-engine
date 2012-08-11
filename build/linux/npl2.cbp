@@ -36,7 +36,26 @@
 			<Add option="-Wall" />
 			<Add directory="../../" />
 		</Compiler>
+		<Linker>
+			<Add library="GL" />
+			<Add library="GLU" />
+			<Add library="IL" />
+		</Linker>
+		<Unit filename="../../tests/npl2/attributes.cpp" />
+		<Unit filename="../../tests/npl2/attributes.h" />
+		<Unit filename="../../tests/npl2/character.cpp" />
+		<Unit filename="../../tests/npl2/character.h" />
 		<Unit filename="../../tests/npl2/npl2.cpp" />
+		<Unit filename="../../tests/npl2/pl2_resources_provider.cpp" />
+		<Unit filename="../../tests/npl2/pl2_resources_provider.h" />
+		<Unit filename="../../tests/npl2/scene.cpp" />
+		<Unit filename="../../tests/npl2/scene.h" />
+		<Unit filename="../../tests/npl2/tmb_model.cpp" />
+		<Unit filename="../../tests/npl2/tmb_model.h" />
+		<Unit filename="../../tests/npl2/tsb_anim.cpp" />
+		<Unit filename="../../tests/npl2/tsb_anim.h" />
+		<Unit filename="../../tests/npl2/ui.cpp" />
+		<Unit filename="../../tests/npl2/ui.h" />
 		<Extensions>
 			<envvars />
 			<code_completion />

@@ -9,7 +9,7 @@
 #include "resources/composite_resources_provider.h"
 #include "pl2_resources_provider.h"
 #include "attributes.h"
-
+#include "scene.h"
 #include "ui.h"
 
 class npl2: public nya_system::app
@@ -31,6 +31,7 @@ private:
 
 	    glClearColor(0,0.3,0.4,1);
 
+        get_scene().init();
 	    m_ui.init();
 	}
 
@@ -43,6 +44,7 @@ private:
 	{
         glClear(GL_COLOR_BUFFER_BIT);
 
+        get_scene().draw();
         m_ui.draw();
 	}
 
@@ -64,6 +66,14 @@ private:
     void on_resize(unsigned int w,unsigned int h)
     {
         nya_log::get_log()<<"on_resize "<<w<<" "<<h<<"\n";
+
+        if(!w || !h)
+            return;
+
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        gluPerspective(25,float(w)/h,5,1500);
+        glTranslatef(0,0,-45);
 
         m_ui.resize(w,h);
     }
