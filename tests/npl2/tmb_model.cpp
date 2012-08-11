@@ -345,7 +345,7 @@ bool shared_models_manager::fill_resource(const char *name,tmb_model &res)
 
 bool shared_models_manager::release_resource(tmb_model &res)
 {
-    nya_resources::get_log()<<"released\n";
+    //nya_resources::get_log()<<"released\n";
     
     res.release();
     return true;

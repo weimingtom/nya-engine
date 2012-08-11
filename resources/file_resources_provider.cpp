@@ -10,24 +10,187 @@
 namespace nya_resources
 {
 
+class file_ref
+{
+public:
+    void init(const char *name)
+    {
+        if(name)
+            m_name.assign(name);
+        else
+            m_name.erase();
+    }
+
+    FILE *access() { return get_lru().access(*this); }
+
+    void free() { get_lru().free(*this); }
+
+    class lru
+    {
+    public:
+        FILE *access(file_ref &ref)
+        {
+            if(ref.m_id>=0)
+            {
+                entry *relink=&m_entries[ref.m_id];
+                if(relink==m_last)
+                {
+                    m_first->prev=relink;
+                    relink->next=m_first;
+                    m_first=relink;
+                    m_last=relink->prev;
+                    m_last->next=0;
+                    relink->prev=0;
+                }
+                else if(relink!=m_first)
+                {
+                    relink->next->prev=relink->prev;
+                    relink->prev->next=relink->next;
+                    relink->next=m_first;
+                    m_first->prev=relink;
+                    m_first=relink;
+                    relink->prev=0;
+                }
+
+                return relink->descriptor;
+            }
+
+              //ToDo: file descriptor share ?
+            FILE *f=fopen(ref.m_name.c_str(),"rb");
+            if(!f)
+                return 0;
+
+            entry *relink=m_last;
+
+            if(relink->descriptor)
+            {
+                fclose(relink->descriptor);
+                relink->descriptor=0;
+            }
+
+            if(relink->ref)
+                relink->ref->m_id=-1;
+
+            relink->descriptor=f;
+            relink->ref=&ref;
+            ref.m_id=relink->id;
+
+            m_first->prev=relink;
+            relink->next=m_first;
+            m_first=relink;
+            m_last=relink->prev;
+            m_last->next=0;
+            relink->prev=0;
+
+            return f;
+        }
+
+        void free(file_ref &ref)
+        {
+            if(ref.m_id<0)
+                return;
+            
+            entry *relink=&m_entries[ref.m_id];
+            ref.m_id=-1;
+
+            if(relink->descriptor)
+            {
+                fclose(relink->descriptor);
+                relink->descriptor=0;
+            }
+
+            if(relink==m_last)
+                return;
+            
+            if(relink==m_first)
+            {
+                m_first=relink->next;
+                m_first->prev=0;
+                m_last->next=relink;
+                relink->prev=m_last;
+                m_last=relink;
+                relink->next=0;
+            }
+            else
+            {
+                relink->next->prev=relink->prev;
+                relink->prev->next=relink->next;
+                relink->prev=m_last;
+                m_last->next=relink;
+                m_last=relink;
+                relink->next=0;
+            }
+        }
+        
+        lru()
+        {
+            for(int i=0;i<max_opened_descriptors-1;++i)
+            {
+                m_entries[i].next=&m_entries[i+1];
+                m_entries[i+1].prev=&m_entries[i];
+                
+                m_entries[i].id=i;
+            }
+
+            m_entries[max_opened_descriptors-1].id=max_opened_descriptors-1;
+
+            m_first=&m_entries[0];
+            m_last=&m_entries[max_opened_descriptors-1];
+        }
+
+    private:
+        struct entry
+        {
+            int id;
+
+            FILE *descriptor;
+            file_ref *ref;
+
+            entry *prev;
+            entry *next;
+
+            entry(): id(-1),descriptor(0),ref(0),
+                     prev(0),next(0) {}
+        };
+
+    private:
+        entry *m_first;
+        entry *m_last;
+
+        const static int max_opened_descriptors=255;
+        entry m_entries[max_opened_descriptors];
+    };
+
+    static lru &get_lru()
+    {
+        static lru cache;
+        return cache;
+    }
+
+    file_ref(): m_id(-1) {}
+
+private:
+    int m_id;
+    std::string m_name;
+};
+
 class file_resource: public resource_data
 {
 public:
-    bool is_valid() const { return m_file!=0; }
-    size_t get_size() const { return m_size; }
+    size_t get_size() { return m_size; }
 
-    bool read_all(void*data) const;
-    bool read_chunk(void *data,size_t size,size_t offset) const;
+    bool read_all(void*data);
+    bool read_chunk(void *data,size_t size,size_t offset);
 
 public:
     bool open(const char*filename);
     void release();
 
-    file_resource(): m_file(0), m_size(0) {}
+    file_resource(): m_size(0) {}
     //~file_resource() { release(); }
 
 private:
-    FILE *m_file;
+    file_ref m_file;
     size_t m_size;
 };
 
@@ -196,21 +359,28 @@ resource_info *file_resources_provider::first_res_info()
     return m_entries;
 }
 
-bool file_resource::read_all(void*data) const
+bool file_resource::read_all(void*data)
 {
-    if(!data||!m_file)
+    if(!data)
     {
-        get_log()<<"unable to read file data\n";
+        get_log()<<"unable to read file data: invalid data pointer\n";
         return false;
     }
 
-    if(fseek(m_file,0,SEEK_SET)!=0)
+    FILE *file=m_file.access();
+    if(!file)
+    {
+        get_log()<<"unable to read file data: no such file\n";
+        return false;
+    }
+
+    if(fseek(file,0,SEEK_SET)!=0)
     {
         get_log()<<"unable to read file data: seek_set failed\n";
         return false;
     }
 
-    if(fread(data,1,m_size,m_file)!=m_size)
+    if(fread(data,1,m_size,file)!=m_size)
     {
         get_log()<<"unable to read file data: unexpected size of readen data\n";
         return false;
@@ -219,11 +389,18 @@ bool file_resource::read_all(void*data) const
     return true;
 }
 
-bool file_resource::read_chunk(void *data,size_t size,size_t offset) const
+bool file_resource::read_chunk(void *data,size_t size,size_t offset)
 {
-    if(!data||!m_file)
+    if(!data)
     {
-        get_log()<<"unable to read file data chunk\n";
+        get_log()<<"unable to read file data chunk: invalid data pointer\n";
+        return false;
+    }
+
+    FILE *file=m_file.access();
+    if(!file)
+    {
+        get_log()<<"unable to read file data: no such file\n";
         return false;
     }
 
@@ -233,13 +410,13 @@ bool file_resource::read_chunk(void *data,size_t size,size_t offset) const
         return false;
     }
 
-    if(fseek(m_file,offset,SEEK_SET)!=0)
+    if(fseek(file,offset,SEEK_SET)!=0)
     {
         get_log()<<"unable to read file data chunk: seek_set failed\n";
         return false;
     }
 
-    if(fread(data,1,size,m_file)!=size)
+    if(fread(data,1,size,file)!=size)
     {
         get_log()<<"unable to read file data chunk: unexpected size of readen data\n";
         return false;
@@ -250,27 +427,29 @@ bool file_resource::read_chunk(void *data,size_t size,size_t offset) const
 
 bool file_resource::open(const char*filename)
 {
-    if(m_file)
-        fclose(m_file);
+    m_file.free();
 
     m_size=0;
-    m_file=fopen(filename,"rb");
 
-    if(!m_file)
+    if(!filename)
         return false;
 
-    if(fseek(m_file,0,SEEK_END)!=0)
+    m_file.init(filename);
+    FILE *file=m_file.access();
+    if(!file)
         return false;
 
-    m_size=ftell(m_file);
+    if(fseek(file,0,SEEK_END)!=0)
+        return false;
+
+    m_size=ftell(file);
 
     return true;
 }
 
 void file_resource::release()
 {
-    if(m_file)
-        fclose(m_file);
+    m_file.free();
 
     file_resources.free(this);
 }

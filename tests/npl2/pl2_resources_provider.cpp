@@ -28,14 +28,14 @@ namespace nya_resources
 class pl2_resource: public resource_data
 {
 public:
-    size_t get_size() const { return m_data.get_size(); }
+    size_t get_size() { return m_data.get_size(); }
 
-    bool read_all(void*data) const
+    bool read_all(void*data)
     {
         return m_data.copy_from(data,m_data.get_size());
     }
 
-    bool read_chunk(void *data,size_t size,size_t offset) const
+    bool read_chunk(void *data,size_t size,size_t offset)
     {
         return m_data.copy_from(data,size,offset);
     }

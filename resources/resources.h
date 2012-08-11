@@ -11,11 +11,11 @@ namespace nya_resources
 class resource_data
 {
 public:
-    virtual size_t get_size() const { return 0; };
+    virtual size_t get_size() { return 0; };
 
 public:
-    virtual bool read_all(void*data) const { return false; };
-    virtual bool read_chunk(void *data,size_t size,size_t offset=0) const { return false; };
+    virtual bool read_all(void*data) { return false; };
+    virtual bool read_chunk(void *data,size_t size,size_t offset=0) { return false; };
 
 public:
     virtual void release() {}

@@ -210,7 +210,7 @@ void character::set_anim(const char *anim_name)
     
     m_anim_name.assign(anim_name);
 
-    nya_log::get_log()<<"Set anim: "<<anim_name<<"\n";
+    //nya_log::get_log()<<"Set anim: "<<anim_name<<"\n";
 
     model_ref m=m_parts[body].subparts[0].model;
     if(!m.is_valid())
