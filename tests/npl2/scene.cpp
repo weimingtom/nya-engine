@@ -60,16 +60,23 @@ void scene::init()
     //get_shared_models().set_lru_limit(20);
     //get_shared_models().should_unload_unused(false);
 
+
     m_anim_list.push_back("event_01");
     m_anim_list.push_back("event_02");
     m_anim_list.push_back("event_03");
     m_anim_list.push_back("event_04");
     m_anim_list.push_back("event_05");
     m_anim_list.push_back("event_06");
-    m_anim_list.push_back("umauma00_F");
+    //m_anim_list.push_back("umauma00_F");
 
     std::vector<char> script_buf;
     std::string script_str;
+    
+    bool anim_ignored=false;
+    std::map<std::string,bool> anim_map;
+    for(size_t i=0;i<m_anim_list.size();++i)
+        anim_map[m_anim_list[i].name[0]]=true;
+    
     nya_resources::resource_info *info=nya_resources::get_resources_provider().first_res_info();
     while(info)
     {
@@ -101,21 +108,29 @@ void scene::init()
                     char num = script_str[pos+3];
                     if(num=='0')
                     {
-                        m_anim_list.push_back(anim_name.c_str());
+                        if(anim_map.find(anim_name)==anim_map.end())
+                        {                        
+                            m_anim_list.push_back(anim_name.c_str());
+                            anim_map[anim_name]=true;
 
-                        nya_log::get_log()<<"anim0: "<<anim_name.c_str()<<"\n";
+                            nya_log::get_log()<<"anim0: "<<anim_name.c_str()<<"\n";
 
-                        size_t loc_pos=script_str.rfind("%mp0,",pos);
-                        if(loc_pos!=std::string::npos)
-                        {
-                            size_t loc_pos2=script_str.find(";",loc_pos);
-                            std::string pos=script_str.substr(loc_pos+5,loc_pos2-(loc_pos+5));
-                            nya_log::get_log()<<"\tpos0: "<<pos.c_str()<<"\n";
+                            size_t loc_pos=script_str.rfind("%mp0,",pos);
+                            if(loc_pos!=std::string::npos)
+                            {
+                                size_t loc_pos2=script_str.find(";",loc_pos);
+                                std::string pos=script_str.substr(loc_pos+5,loc_pos2-(loc_pos+5));
+                                nya_log::get_log()<<"\tpos0: "<<pos.c_str()<<"\n";
+                            }
+                            
+                            anim_ignored=false;
                         }
+                        else
+                            anim_ignored=true;
 
                         last_pos=pos2;
                     }
-                    else if(num<='9')
+                    else if(num<='9' && !anim_ignored)
                     {
                         m_anim_list.back().name[num-'1'+1]=anim_name;
                         if(num=='1')
@@ -467,21 +482,7 @@ void scene::prev_anim()
         m_curr_anim= --m_anim_list.end();
 
 
-    m_imouto.set_anim(m_curr_anim->name[0].c_str());
-    m_anim_time=0;
-
-    std::string bro_anim=m_curr_anim->name[1];
-
-    if(bro_anim.empty())
-    {
-        m_aniki.apply_anim(0);
-        return;
-    }
-
-    bro_anim.append(".tsb");
-
-    anim_ref a=get_shared_anims().access(bro_anim.c_str());
-    m_aniki.apply_anim(a.get());
+    apply_anim();
 }
 
 void scene::next_anim()
@@ -492,26 +493,54 @@ void scene::next_anim()
     if(++m_curr_anim==m_anim_list.end())
         m_curr_anim=m_anim_list.begin();
 
+    apply_anim();
+}
+
+void scene::set_anim(unsigned int num)
+{
+    if(num>=m_anim_list.size())
+        return;
+
+    m_curr_anim=m_anim_list.begin()+num;
+    
+    apply_anim();
+}
+
+const char *scene::get_anim_name(unsigned int num)
+{
+    if(num>=m_anim_list.size())
+        return 0;
+    
+    return m_anim_list[num].name[0].c_str();
+}
+
+unsigned int scene::get_anims_count()
+{
+    return (unsigned int)m_anim_list.size();
+}
+
+void scene::apply_anim()
+{
+    if(m_anim_list.empty() && m_curr_anim!=m_anim_list.end())
+        return;
+
     m_imouto.set_anim(m_curr_anim->name[0].c_str());
     m_anim_time=0;
-
+    
     std::string bro_anim=m_curr_anim->name[1];
-
+    
     if(bro_anim.empty())
     {
         m_aniki.apply_anim(0);
         return;
     }
-
+    
     bro_anim.append(".tsb");
-
+    
     anim_ref a=get_shared_anims().access(bro_anim.c_str());
     m_aniki.apply_anim(a.get());
 }
 
-void scene::set_anim(const char *name)
-{
-}
 
 void scene::release()
 {

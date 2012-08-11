@@ -214,6 +214,9 @@ void ui::init()
     m_anim_lst.set_size(panel_width-offset*2,panel_height-offset*2);
     m_anim_pnl.add_widget(m_anim_lst);
 
+    for(uint i=0;i<get_scene().get_anims_count();++i)
+        m_anim_lst.add_element(get_scene().get_anim_name(i));
+
     m_scenery_pnl.set_align(true,false,true,true);
     m_scenery_pnl.set_pos(offset,panel_pos_y);
     m_scenery_pnl.set_size(panel_width,panel_height);
@@ -344,6 +347,18 @@ void ui::process_events(event &e)
             nya_ui::list::event_data *data=dynamic_cast<nya_ui::list::event_data*>(e.data);
             if(data)
                 get_scene().set_bkg(data->element.c_str());
+        }
+    }
+
+    if(e.sender=="anim_lst")
+    {
+        if(e.type=="select_element")
+        {
+            nya_ui::list::event_data *data=dynamic_cast<nya_ui::list::event_data*>(e.data);
+            if(!data)
+                return;
+            
+            get_scene().set_anim(data->idx);
         }
     }
 

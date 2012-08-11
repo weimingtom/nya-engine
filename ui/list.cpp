@@ -68,7 +68,11 @@ void list::draw(layer &layer)
 
     layer.set_scissor(r);
 
-    long y=r.y+r.h-er.h+(er.h*m_elements.size()-r.h)*m_scroll/m_scroll_max;
+
+    long y=r.y+r.h-er.h;
+    if(m_scroll_max)
+        y+=(er.h*m_elements.size()-r.h)*m_scroll/m_scroll_max;
+
     for(int i=0;i<(int)m_elements.size();++i,y-=m_style.entry_height)
     {
         if(y+er.h<r.y||y>(int)(r.y+r.h))
@@ -144,9 +148,13 @@ bool list::on_mouse_move(uint x,uint y,bool inside)
     {
         rect r=get_draw_rect();
 
-        int scrl=(int)(m_style.entry_height*m_elements.size()-r.h)*m_scroll/m_scroll_max;
+        int scrl=0;
+        if(m_scroll_max>0)
+            scrl=(int)(m_style.entry_height*m_elements.size()-r.h)*m_scroll/m_scroll_max;
 
-        int num=(r.h-(m_mouse_y-r.y)+scrl)/m_style.entry_height;
+        int num=0;
+        if(m_style.entry_height>0)
+            num=(r.h-(m_mouse_y-r.y)+scrl)/m_style.entry_height;
 
         if(num<(int)m_elements.size())
         {

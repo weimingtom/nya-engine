@@ -36,8 +36,13 @@ public:
     void finish_imouto_preview();
     void prev_anim();
     void next_anim();
-    void set_anim(const char *name);
+    void set_anim(unsigned int num);
+    const char *get_anim_name(unsigned int num);
+    unsigned int get_anims_count();
     void release();
+    
+private:
+    void apply_anim();
     
 public:
     scene(): m_sh_mat_uniform(0), m_shbl_mat_uniform(0), m_preview(false), m_anim_time(0), m_has_scenery(false) {}
@@ -67,8 +72,8 @@ private:
         anim_info(const char *n) { if(n) name[0].assign(n); }
     };
 
-    std::list<anim_info> m_anim_list;
-    std::list<anim_info>::iterator m_curr_anim;
+    std::vector<anim_info> m_anim_list;
+    std::vector<anim_info>::iterator m_curr_anim;
 
     float m_anim_time;
 
