@@ -69,7 +69,7 @@ private:
       //ToDo: convert to frames
     unsigned int m_frames_count;
     std::vector<bone> m_anim_bones;
-
+    
 private:
     std::vector<std::string> m_group_names;
 
@@ -79,6 +79,8 @@ public:
         float pos[3];
         float ang[3];
         float scale[3];
+        
+        float color[3];
 
         //std::string name; //ToDo ?
     };

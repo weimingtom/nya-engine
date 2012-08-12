@@ -45,7 +45,7 @@ void texture::build_texture(const void *data,unsigned int width,unsigned int hei
     gluBuild2DMipmaps(GL_TEXTURE_2D,source_format,width,height,gl_format,GL_UNSIGNED_BYTE,data);
 
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_NEAREST);
 }
 
 void texture::bind()

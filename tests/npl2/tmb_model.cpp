@@ -148,6 +148,7 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
             to.vert_count=from_bind.vert_count*3;
             to.tex_idx=from_mat.tex_idx;
             to.cull_face=header->cull_face>0;
+
             ++mat_offset;
         }
 
@@ -194,7 +195,7 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
                 }
             }
             
-            to.color[3]=from.color[3]/255.0f;
+            to.color[3]=1.0f;//from.color[3]/255.0f;
 
             const float weight3=1.0f-(from.weights[0]+from.weights[1]+from.weights[2]);
             if(weight3>0.01f)
@@ -225,6 +226,23 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
     }
     else
         m_bones.clear();
+
+    double average_color[3]={0,0,0};
+    if(!vertices.empty())
+    {
+        double inv_count=1.0/vertices.size();
+        for(uint i=0;i<vertices.size();++i)
+        {
+            for(int j=0;j<3;++j)
+                average_color[j]+=inv_count*vertices[i].color[j];
+        }
+    }
+    
+    for(int j=0;j<3;++j)
+    {
+        average_color[j]*=0.6f;
+        average_color[j]+=0.4f;
+    }
 
     m_vbo.gen_vertex_data(&vertices[0],sizeof(vertex),verts_offset);
     m_vbo.set_normals(3*sizeof(float));
@@ -258,6 +276,8 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
             to.pos[j]=from->pos[j];
             to.ang[j]=from->ang[j];
             to.scale[j]=from->scale[j];
+            
+            to.color[j]=average_color[j];
         }
 
         offset+=40;

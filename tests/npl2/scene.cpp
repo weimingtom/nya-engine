@@ -290,11 +290,11 @@ void scene::init()
                          "{"
                          "  vec4 color=gl_TexCoord[2];"
                          //"  vec4 vcolor=gl_TexCoord[3];"
-                         "  vec4 base=texture2D(base_map,gl_TexCoord[0].xy)*color;"
+                         "  vec4 base=texture2D(base_map,gl_TexCoord[0].xy);"
                          //"  float l=dot(normalize(vec3(0,0,1.0)),normalize(gl_TexCoord[1].xyz));"
                          "  float ls=dot(normalize(vec3(-0.3,0,1.0)),normalize(gl_TexCoord[1].xyz));"
                          //"  gl_FragColor=vec4((0.85+max(0.0,l*0.15))*base.rgb+pow(max(ls,0.0),90.0)*vec3(0.06),base.a);"
-                         "  gl_FragColor=vec4(base.rgb+pow(max(ls,0.0),90.0)*vec3(0.06),base.a);"
+                         "  gl_FragColor=vec4(base.rgb+pow(max(ls,0.0),90.0)*vec3(0.06),base.a)*color;"
                          //"  gl_FragColor=base;"
                          "}");
 
@@ -400,6 +400,14 @@ void scene::draw()
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER,0.2f);
 
+    const tmb_model::locator *scene_loc=0;
+    
+    if(!m_anim_list.empty() && m_curr_anim!=m_anim_list.end())
+        scene_loc=m_bkg_models[0].get_locator(m_curr_anim->loc_idx);
+    
+    if(scene_loc)
+        glColor3f(scene_loc->color[0], scene_loc->color[1], scene_loc->color[2]);
+    
     m_anim_time+=1.0f;
 
     const size_t frames_count=imouto.get_frames_count();
@@ -453,7 +461,7 @@ void scene::draw()
                                            imouto.get_bones_count());
     }
 
-   // imouto.draw(false);
+    imouto.draw(false);
 
     //bro
     if(bro_frames_count)
@@ -474,12 +482,8 @@ void scene::draw()
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 
     glColor4f(1.0f,1.0f,1.0f,1.0f);
-    
-    const tmb_model::locator *scene_loc=0;
-    
-    if(!m_anim_list.empty() && m_curr_anim!=m_anim_list.end())
-        scene_loc=m_bkg_models[0].get_locator(m_curr_anim->loc_idx);
-    
+
+
     glPushMatrix();
     if(scene_loc)
     {
