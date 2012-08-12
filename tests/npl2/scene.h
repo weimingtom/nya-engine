@@ -54,6 +54,7 @@ private:
     unsigned int m_shbl_mat_uniform;
 
     nya_render::shader m_shader_scenery;
+    nya_render::shader m_shader_scenery_anim;
 
 private:
     character m_imouto;
@@ -71,7 +72,7 @@ private:
         int loc_idx;
 
         anim_info(): loc_idx(-1) {}
-        anim_info(const char *n) { if(n) name[0].assign(n); loc_idx=-1; }
+        anim_info(const char *n) { if(n) name[0].assign(n); loc_idx=0; }
     };
 
     std::vector<anim_info> m_anim_list;
@@ -90,6 +91,7 @@ private:
 private:
     const static int max_bkg_models=3;
     tmb_model m_bkg_models[max_bkg_models]; 
+    float m_bkg_models_anim_times[max_bkg_models];
     bool m_has_scenery;
 };
 

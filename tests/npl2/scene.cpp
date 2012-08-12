@@ -170,7 +170,7 @@ void scene::init()
         m_aniki.load(model_res);
         model_res->release();
     }
-
+  
     m_shader_scenery.add_program(nya_render::shader::vertex,
 
                                  "mat3 get_rot(mat4 m)"
@@ -184,25 +184,65 @@ void scene::init()
                                  "  gl_TexCoord[3]=gl_MultiTexCoord3;"
                                  "  gl_TexCoord[2]=gl_Color;"
 
-                                 "  gl_TexCoord[1].xyz=get_rot(gl_ModelViewMatrix)*gl_Normal.xyz;"
+                                 //"  gl_TexCoord[1].xyz=get_rot(gl_ModelViewMatrix)*gl_Normal.xyz;"
 
                                  "  gl_Position=gl_ModelViewProjectionMatrix*gl_Vertex;"
                                  "}");
 
-    m_shader_scenery.add_program(nya_render::shader::pixel,
-                                 "uniform sampler2D base_map;"
-                                 "void main(void)"
+    
+    const char *fprogram=
+    "uniform sampler2D base_map;"
+    "void main(void)"
+    "{"
+    "  vec4 color=gl_TexCoord[2];"
+    "  vec4 vcolor=gl_TexCoord[3];"
+    "  vec4 base=texture2D(base_map,gl_TexCoord[0].xy)*color;"
+
+    //"  float l=dot(normalize(vec3(0,0,1.0)),normalize(gl_TexCoord[1].xyz));"
+    //"  float ls=dot(normalize(vec3(-0.3,0,1.0)),normalize(gl_TexCoord[1].xyz));"
+    //"  gl_FragColor=vec4((0.15+max(0.0,l*0.85))*base.rgb+pow(max(ls,0.0),90.0)*vec3(0.06),base.a);"
+    //"  gl_FragColor=vec4(base.rgb+pow(max(ls,0.0),90.0)*vec3(0.06),base.a);"
+
+    "  gl_FragColor=base*color*vcolor;"
+    //"  gl_FragColor=vcolor;"
+    "}";
+    
+    m_shader_scenery.add_program(nya_render::shader::pixel,fprogram);
+    
+    m_shader_scenery_anim.add_program(nya_render::shader::vertex,
+                                 "uniform mat4 bones[200];"
+
+                                 "mat3 get_rot(mat4 m)"
                                  "{"
-                                 "  vec4 color=gl_TexCoord[2];"
-                                 "  vec4 vcolor=gl_TexCoord[3];"
-                                 "  vec4 base=texture2D(base_map,gl_TexCoord[0].xy)*color;"
-                                 //"  float l=dot(normalize(vec3(0,0,1.0)),normalize(gl_TexCoord[1].xyz));"
-                                 //"  float ls=dot(normalize(vec3(-0.3,0,1.0)),normalize(gl_TexCoord[1].xyz));"
-                                 //"  gl_FragColor=vec4((0.15+max(0.0,l*0.85))*base.rgb+pow(max(ls,0.0),90.0)*vec3(0.06),base.a);"
-                                 //"  gl_FragColor=vec4(base.rgb+pow(max(ls,0.0),90.0)*vec3(0.06),base.a);"
-                                 "  gl_FragColor=base*color*vcolor;"
-                                 //"  gl_FragColor=vcolor;"
+                                 "  return mat3(m[0].xyz,m[1].xyz,m[2].xyz);"
+                                 "}"
+
+                                 "void main()"
+                                 "{"
+                                 "  gl_TexCoord[0]=gl_MultiTexCoord0;"
+                                 "  vec4 bone_idx=gl_MultiTexCoord1;"
+                                 "  vec4 bone_weight=gl_MultiTexCoord2;"
+                                      
+                                 "  mat4 bone0=bones[int(bone_idx.x)]*bone_weight.x;"
+                                 "  mat4 bone1=bones[int(bone_idx.y)]*bone_weight.y;"
+                                 "  mat4 bone2=bones[int(bone_idx.z)]*bone_weight.z;"
+                                 "  mat4 bone3=bones[int(bone_idx.w)]*bone_weight.w;"
+                                  
+                                 "  vec4 pos=bone0*gl_Vertex;"
+                                 "  pos+=bone1*gl_Vertex;"
+                                 "  pos+=bone2*gl_Vertex;"
+                                 "  pos+=bone3*gl_Vertex;"
+
+                                 "  gl_TexCoord[0]=gl_MultiTexCoord0;"
+                                 "  gl_TexCoord[3]=gl_MultiTexCoord3;"
+                                 "  gl_TexCoord[2]=gl_Color;"
+
+                                 //"  gl_TexCoord[1].xyz=get_rot(gl_ModelViewMatrix)*gl_Normal.xyz;"
+
+                                 "  gl_Position=gl_ModelViewProjectionMatrix*pos;"
                                  "}");
+
+    m_shader_scenery_anim.add_program(nya_render::shader::pixel,fprogram);
 
     const char *vprogram=
     "uniform mat4 bones[200];"
@@ -321,6 +361,8 @@ void scene::set_bkg(const char *name)
             anim.release();
             scenery_res->release();
         }
+        
+        m_bkg_models_anim_times[i]=0;
     }
 
     m_has_scenery=true;
@@ -433,14 +475,6 @@ void scene::draw()
 
     glColor4f(1.0f,1.0f,1.0f,1.0f);
     
-    m_shader_scenery.bind();
-    
-    /*
-    m_shader.bind();
-    m_shader.set_uniform16_array(m_sh_mat_uniform,
-                                 m_bkg_models[1].get_buffer(int(m_anim_time)),
-                                 m_bkg_models[1].get_bones_count());
-     */
     const tmb_model::locator *scene_loc=0;
     
     if(!m_anim_list.empty() && m_curr_anim!=m_anim_list.end())
@@ -454,11 +488,34 @@ void scene::draw()
     }
     
     for(int i=0;i<max_bkg_models;++i)
-        m_bkg_models[i].draw(true);
+    {
+        const unsigned int bones_count=m_bkg_models[i].get_bones_count();
+        const unsigned int frames_count=m_bkg_models[i].get_frames_count();
+        
+        if(bones_count && frames_count)
+        {
+            m_bkg_models_anim_times[i]+=1.0f;
+            if(m_bkg_models_anim_times[i]>=frames_count)
+                m_bkg_models_anim_times[i]=0;
+
+            m_shader_scenery_anim.bind();
+            m_shader_scenery_anim.set_uniform16_array(m_sh_mat_uniform,
+                                                      m_bkg_models[i].get_buffer(int(m_bkg_models_anim_times[i])),
+                                                      m_bkg_models[i].get_bones_count());
+
+            m_bkg_models[i].draw(true);
+            
+            m_shader_scenery_anim.unbind();
+        }
+        else
+        {
+            m_shader_scenery.bind();
+            m_bkg_models[i].draw(true);
+            m_shader_scenery.unbind();
+        }
+    }
     
     glPopMatrix();
-    
-    m_shader_scenery.unbind();
 
     glDisable(GL_BLEND);
 
