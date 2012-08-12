@@ -1,0 +1,290 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		F259326B15D85A730092C7D8 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F259326A15D85A730092C7D8 /* Cocoa.framework */; };
+		F259328D15D85B3B0092C7D8 /* npl2-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F259328C15D85B3B0092C7D8 /* npl2-Info.plist */; };
+		F259329D15D85B990092C7D8 /* character.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259328E15D85B990092C7D8 /* character.cpp */; };
+		F259329E15D85B990092C7D8 /* tmb_model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259328F15D85B990092C7D8 /* tmb_model.cpp */; };
+		F259329F15D85B990092C7D8 /* scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259329115D85B990092C7D8 /* scene.cpp */; };
+		F25932A015D85B990092C7D8 /* attributes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259329315D85B990092C7D8 /* attributes.cpp */; };
+		F25932A115D85B990092C7D8 /* ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259329515D85B990092C7D8 /* ui.cpp */; };
+		F25932A215D85B990092C7D8 /* npl2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259329715D85B990092C7D8 /* npl2.cpp */; };
+		F25932A315D85B990092C7D8 /* pl2_resources_provider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259329815D85B990092C7D8 /* pl2_resources_provider.cpp */; };
+		F25932A415D85B990092C7D8 /* tsb_anim.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259329C15D85B990092C7D8 /* tsb_anim.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		F259326615D85A730092C7D8 /* npl2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = npl2.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F259326A15D85A730092C7D8 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		F259326D15D85A730092C7D8 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		F259326E15D85A730092C7D8 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		F259326F15D85A730092C7D8 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		F259328C15D85B3B0092C7D8 /* npl2-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "npl2-Info.plist"; path = "../../tests/npl2/npl2-Info.plist"; sourceTree = "<group>"; };
+		F259328E15D85B990092C7D8 /* character.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = character.cpp; path = ../../../tests/npl2/character.cpp; sourceTree = "<group>"; };
+		F259328F15D85B990092C7D8 /* tmb_model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tmb_model.cpp; path = ../../../tests/npl2/tmb_model.cpp; sourceTree = "<group>"; };
+		F259329015D85B990092C7D8 /* tmb_model.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tmb_model.h; path = ../../../tests/npl2/tmb_model.h; sourceTree = "<group>"; };
+		F259329115D85B990092C7D8 /* scene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scene.cpp; path = ../../../tests/npl2/scene.cpp; sourceTree = "<group>"; };
+		F259329215D85B990092C7D8 /* scene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scene.h; path = ../../../tests/npl2/scene.h; sourceTree = "<group>"; };
+		F259329315D85B990092C7D8 /* attributes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = attributes.cpp; path = ../../../tests/npl2/attributes.cpp; sourceTree = "<group>"; };
+		F259329415D85B990092C7D8 /* attributes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = attributes.h; path = ../../../tests/npl2/attributes.h; sourceTree = "<group>"; };
+		F259329515D85B990092C7D8 /* ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ui.cpp; path = ../../../tests/npl2/ui.cpp; sourceTree = "<group>"; };
+		F259329615D85B990092C7D8 /* character.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = character.h; path = ../../../tests/npl2/character.h; sourceTree = "<group>"; };
+		F259329715D85B990092C7D8 /* npl2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = npl2.cpp; path = ../../../tests/npl2/npl2.cpp; sourceTree = "<group>"; };
+		F259329815D85B990092C7D8 /* pl2_resources_provider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pl2_resources_provider.cpp; path = ../../../tests/npl2/pl2_resources_provider.cpp; sourceTree = "<group>"; };
+		F259329915D85B990092C7D8 /* ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ui.h; path = ../../../tests/npl2/ui.h; sourceTree = "<group>"; };
+		F259329A15D85B990092C7D8 /* pl2_resources_provider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pl2_resources_provider.h; path = ../../../tests/npl2/pl2_resources_provider.h; sourceTree = "<group>"; };
+		F259329B15D85B990092C7D8 /* tsb_anim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tsb_anim.h; path = ../../../tests/npl2/tsb_anim.h; sourceTree = "<group>"; };
+		F259329C15D85B990092C7D8 /* tsb_anim.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tsb_anim.cpp; path = ../../../tests/npl2/tsb_anim.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F259326315D85A730092C7D8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F259326B15D85A730092C7D8 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F259325B15D85A730092C7D8 = {
+			isa = PBXGroup;
+			children = (
+				F259328C15D85B3B0092C7D8 /* npl2-Info.plist */,
+				F259327015D85A730092C7D8 /* npl2 */,
+				F259326915D85A730092C7D8 /* Frameworks */,
+				F259326715D85A730092C7D8 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F259326715D85A730092C7D8 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F259326615D85A730092C7D8 /* npl2.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F259326915D85A730092C7D8 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F259326A15D85A730092C7D8 /* Cocoa.framework */,
+				F259326C15D85A730092C7D8 /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F259326C15D85A730092C7D8 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F259326D15D85A730092C7D8 /* AppKit.framework */,
+				F259326E15D85A730092C7D8 /* CoreData.framework */,
+				F259326F15D85A730092C7D8 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		F259327015D85A730092C7D8 /* npl2 */ = {
+			isa = PBXGroup;
+			children = (
+				F259328E15D85B990092C7D8 /* character.cpp */,
+				F259328F15D85B990092C7D8 /* tmb_model.cpp */,
+				F259329015D85B990092C7D8 /* tmb_model.h */,
+				F259329115D85B990092C7D8 /* scene.cpp */,
+				F259329215D85B990092C7D8 /* scene.h */,
+				F259329315D85B990092C7D8 /* attributes.cpp */,
+				F259329415D85B990092C7D8 /* attributes.h */,
+				F259329515D85B990092C7D8 /* ui.cpp */,
+				F259329615D85B990092C7D8 /* character.h */,
+				F259329715D85B990092C7D8 /* npl2.cpp */,
+				F259329815D85B990092C7D8 /* pl2_resources_provider.cpp */,
+				F259329915D85B990092C7D8 /* ui.h */,
+				F259329A15D85B990092C7D8 /* pl2_resources_provider.h */,
+				F259329B15D85B990092C7D8 /* tsb_anim.h */,
+				F259329C15D85B990092C7D8 /* tsb_anim.cpp */,
+			);
+			path = npl2;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F259326515D85A730092C7D8 /* npl2 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F259328415D85A730092C7D8 /* Build configuration list for PBXNativeTarget "npl2" */;
+			buildPhases = (
+				F259326215D85A730092C7D8 /* Sources */,
+				F259326315D85A730092C7D8 /* Frameworks */,
+				F259326415D85A730092C7D8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = npl2;
+			productName = npl2;
+			productReference = F259326615D85A730092C7D8 /* npl2.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F259325D15D85A730092C7D8 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = F259326015D85A730092C7D8 /* Build configuration list for PBXProject "npl2" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = F259325B15D85A730092C7D8;
+			productRefGroup = F259326715D85A730092C7D8 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F259326515D85A730092C7D8 /* npl2 */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F259326415D85A730092C7D8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F259328D15D85B3B0092C7D8 /* npl2-Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F259326215D85A730092C7D8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F259329D15D85B990092C7D8 /* character.cpp in Sources */,
+				F259329E15D85B990092C7D8 /* tmb_model.cpp in Sources */,
+				F259329F15D85B990092C7D8 /* scene.cpp in Sources */,
+				F25932A015D85B990092C7D8 /* attributes.cpp in Sources */,
+				F25932A115D85B990092C7D8 /* ui.cpp in Sources */,
+				F25932A215D85B990092C7D8 /* npl2.cpp in Sources */,
+				F25932A315D85B990092C7D8 /* pl2_resources_provider.cpp in Sources */,
+				F25932A415D85B990092C7D8 /* tsb_anim.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		F259328215D85A730092C7D8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CONFIGURATION_BUILD_DIR = ../../bin/mac_debug;
+				CONFIGURATION_TEMP_DIR = ../../obj/mac_debug/;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				OBJROOT = ../../obj/;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SYMROOT = ../../bin/;
+				USER_HEADER_SEARCH_PATHS = ../../;
+			};
+			name = Debug;
+		};
+		F259328315D85A730092C7D8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CONFIGURATION_BUILD_DIR = ../../bin/mac_release;
+				CONFIGURATION_TEMP_DIR = ../../obj/mac_release;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				OBJROOT = ../../obj/;
+				SDKROOT = macosx;
+				SYMROOT = ../../bin/;
+				USER_HEADER_SEARCH_PATHS = ../../;
+			};
+			name = Release;
+		};
+		F259328515D85A730092C7D8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "../../tests/npl2/npl2-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		F259328615D85A730092C7D8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "../../tests/npl2/npl2-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F259326015D85A730092C7D8 /* Build configuration list for PBXProject "npl2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F259328215D85A730092C7D8 /* Debug */,
+				F259328315D85A730092C7D8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F259328415D85A730092C7D8 /* Build configuration list for PBXNativeTarget "npl2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F259328515D85A730092C7D8 /* Debug */,
+				F259328615D85A730092C7D8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F259325D15D85A730092C7D8 /* Project object */;
+}
