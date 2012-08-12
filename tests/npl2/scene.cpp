@@ -340,26 +340,8 @@ void scene::draw()
     glEnable(GL_BLEND);
     glDisable(GL_CULL_FACE);
     
-    m_shader_scenery.bind();
-
-    const tmb_model::locator *scene_loc=0;
-
-    if(!m_anim_list.empty() && m_curr_anim!=m_anim_list.end())
-        scene_loc=m_bkg_models[0].get_locator(m_curr_anim->loc_idx);
-
-    glPushMatrix();
-    if(scene_loc)
-    {
-        glRotatef(-scene_loc->ang[1]*180.0f/3.14f,0.0f,1.0f,0.0f);
-        glTranslatef(-scene_loc->pos[0],-scene_loc->pos[1],-scene_loc->pos[2]);
-    }
-
-    for(int i=0;i<max_bkg_models;++i)
-        m_bkg_models[i].draw(true);
-    
-    glPopMatrix();
-
-    m_shader_scenery.unbind();
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER,0.2f);
 
     m_anim_time+=1.0f;
 
@@ -462,9 +444,33 @@ void scene::draw()
     if(frames_count)
         m_shader_black.unbind();
 
-    glDisable(GL_BLEND);
     glCullFace(GL_BACK);
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+
+    glColor4f(1.0f,1.0f,1.0f,1.0f);
+    
+    m_shader_scenery.bind();
+    
+    const tmb_model::locator *scene_loc=0;
+    
+    if(!m_anim_list.empty() && m_curr_anim!=m_anim_list.end())
+        scene_loc=m_bkg_models[0].get_locator(m_curr_anim->loc_idx);
+    
+    glPushMatrix();
+    if(scene_loc)
+    {
+        glRotatef(-scene_loc->ang[1]*180.0f/3.14f,0.0f,1.0f,0.0f);
+        glTranslatef(-scene_loc->pos[0],-scene_loc->pos[1],-scene_loc->pos[2]);
+    }
+    
+    for(int i=0;i<max_bkg_models;++i)
+        m_bkg_models[i].draw(true);
+    
+    glPopMatrix();
+    
+    m_shader_scenery.unbind();
+
+    glDisable(GL_BLEND);
 
     glDisable( GL_DEPTH_TEST );
 }
