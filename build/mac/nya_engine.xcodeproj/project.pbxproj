@@ -51,6 +51,7 @@
 		F259325715D858140092C7D8 /* pool.h in Headers */ = {isa = PBXBuildFile; fileRef = F259322315D858140092C7D8 /* pool.h */; };
 		F259325815D858140092C7D8 /* tmp_buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259322415D858140092C7D8 /* tmp_buffer.cpp */; };
 		F259325915D858140092C7D8 /* tmp_buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = F259322515D858140092C7D8 /* tmp_buffer.h */; };
+		F25932BB15D865BF0092C7D8 /* app.mm in Sources */ = {isa = PBXBuildFile; fileRef = F25932BA15D865BF0092C7D8 /* app.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -99,6 +100,7 @@
 		F259322315D858140092C7D8 /* pool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pool.h; sourceTree = "<group>"; };
 		F259322415D858140092C7D8 /* tmp_buffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tmp_buffer.cpp; sourceTree = "<group>"; };
 		F259322515D858140092C7D8 /* tmp_buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tmp_buffer.h; sourceTree = "<group>"; };
+		F25932BA15D865BF0092C7D8 /* app.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = app.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -187,6 +189,7 @@
 		F259321115D858140092C7D8 /* system */ = {
 			isa = PBXGroup;
 			children = (
+				F25932BA15D865BF0092C7D8 /* app.mm */,
 				F259321315D858140092C7D8 /* app.h */,
 				F259321415D858140092C7D8 /* button_codes.h */,
 				F259321515D858140092C7D8 /* system.cpp */,
@@ -326,6 +329,7 @@
 				F259325315D858140092C7D8 /* stdout_log.cpp in Sources */,
 				F259325515D858140092C7D8 /* memory.cpp in Sources */,
 				F259325815D858140092C7D8 /* tmp_buffer.cpp in Sources */,
+				F25932BB15D865BF0092C7D8 /* app.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
