@@ -24,7 +24,6 @@
 		F259323815D858140092C7D8 /* resources.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259320015D858140092C7D8 /* resources.cpp */; };
 		F259323915D858140092C7D8 /* resources.h in Headers */ = {isa = PBXBuildFile; fileRef = F259320115D858140092C7D8 /* resources.h */; };
 		F259323A15D858140092C7D8 /* shared_resources.h in Headers */ = {isa = PBXBuildFile; fileRef = F259320215D858140092C7D8 /* shared_resources.h */; };
-		F259323B15D858140092C7D8 /* shared_textures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259320315D858140092C7D8 /* shared_textures.cpp */; };
 		F259323C15D858140092C7D8 /* shared_textures.h in Headers */ = {isa = PBXBuildFile; fileRef = F259320415D858140092C7D8 /* shared_textures.h */; };
 		F259323D15D858140092C7D8 /* shared_textures.mm in Sources */ = {isa = PBXBuildFile; fileRef = F259320515D858140092C7D8 /* shared_textures.mm */; };
 		F259323E15D858140092C7D8 /* button.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259320715D858140092C7D8 /* button.cpp */; };
@@ -73,7 +72,6 @@
 		F259320015D858140092C7D8 /* resources.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = resources.cpp; sourceTree = "<group>"; };
 		F259320115D858140092C7D8 /* resources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = resources.h; sourceTree = "<group>"; };
 		F259320215D858140092C7D8 /* shared_resources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shared_resources.h; sourceTree = "<group>"; };
-		F259320315D858140092C7D8 /* shared_textures.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shared_textures.cpp; sourceTree = "<group>"; };
 		F259320415D858140092C7D8 /* shared_textures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shared_textures.h; sourceTree = "<group>"; };
 		F259320515D858140092C7D8 /* shared_textures.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = shared_textures.mm; sourceTree = "<group>"; };
 		F259320715D858140092C7D8 /* button.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = button.cpp; sourceTree = "<group>"; };
@@ -163,7 +161,6 @@
 				F259320015D858140092C7D8 /* resources.cpp */,
 				F259320115D858140092C7D8 /* resources.h */,
 				F259320215D858140092C7D8 /* shared_resources.h */,
-				F259320315D858140092C7D8 /* shared_textures.cpp */,
 				F259320415D858140092C7D8 /* shared_textures.h */,
 				F259320515D858140092C7D8 /* shared_textures.mm */,
 			);
@@ -317,7 +314,6 @@
 				F259323415D858140092C7D8 /* composite_resources_provider.cpp in Sources */,
 				F259323615D858140092C7D8 /* file_resources_provider.cpp in Sources */,
 				F259323815D858140092C7D8 /* resources.cpp in Sources */,
-				F259323B15D858140092C7D8 /* shared_textures.cpp in Sources */,
 				F259323D15D858140092C7D8 /* shared_textures.mm in Sources */,
 				F259323E15D858140092C7D8 /* button.cpp in Sources */,
 				F259324215D858140092C7D8 /* list.cpp in Sources */,

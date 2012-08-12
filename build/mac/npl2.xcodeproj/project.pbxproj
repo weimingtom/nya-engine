@@ -17,7 +17,19 @@
 		F25932A215D85B990092C7D8 /* npl2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259329715D85B990092C7D8 /* npl2.cpp */; };
 		F25932A315D85B990092C7D8 /* pl2_resources_provider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259329815D85B990092C7D8 /* pl2_resources_provider.cpp */; };
 		F25932A415D85B990092C7D8 /* tsb_anim.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259329C15D85B990092C7D8 /* tsb_anim.cpp */; };
+		F25932B515D860A20092C7D8 /* libnya_engine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F25932B415D8608B0092C7D8 /* libnya_engine.a */; };
+		F25932B915D860F60092C7D8 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F25932B815D860F60092C7D8 /* OpenGL.framework */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F25932B315D8608B0092C7D8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F25932AF15D8608B0092C7D8 /* nya_engine.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F25931E215D857C40092C7D8;
+			remoteInfo = nya_engine;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		F259326615D85A730092C7D8 /* npl2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = npl2.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -41,6 +53,8 @@
 		F259329A15D85B990092C7D8 /* pl2_resources_provider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pl2_resources_provider.h; path = ../../../tests/npl2/pl2_resources_provider.h; sourceTree = "<group>"; };
 		F259329B15D85B990092C7D8 /* tsb_anim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tsb_anim.h; path = ../../../tests/npl2/tsb_anim.h; sourceTree = "<group>"; };
 		F259329C15D85B990092C7D8 /* tsb_anim.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tsb_anim.cpp; path = ../../../tests/npl2/tsb_anim.cpp; sourceTree = "<group>"; };
+		F25932AF15D8608B0092C7D8 /* nya_engine.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = nya_engine.xcodeproj; sourceTree = "<group>"; };
+		F25932B815D860F60092C7D8 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,6 +62,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F25932B915D860F60092C7D8 /* OpenGL.framework in Frameworks */,
+				F25932B515D860A20092C7D8 /* libnya_engine.a in Frameworks */,
 				F259326B15D85A730092C7D8 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -58,6 +74,8 @@
 		F259325B15D85A730092C7D8 = {
 			isa = PBXGroup;
 			children = (
+				F25932B815D860F60092C7D8 /* OpenGL.framework */,
+				F25932AF15D8608B0092C7D8 /* nya_engine.xcodeproj */,
 				F259328C15D85B3B0092C7D8 /* npl2-Info.plist */,
 				F259327015D85A730092C7D8 /* npl2 */,
 				F259326915D85A730092C7D8 /* Frameworks */,
@@ -114,6 +132,14 @@
 			path = npl2;
 			sourceTree = "<group>";
 		};
+		F25932B015D8608B0092C7D8 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F25932B415D8608B0092C7D8 /* libnya_engine.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -149,12 +175,28 @@
 			mainGroup = F259325B15D85A730092C7D8;
 			productRefGroup = F259326715D85A730092C7D8 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = F25932B015D8608B0092C7D8 /* Products */;
+					ProjectRef = F25932AF15D8608B0092C7D8 /* nya_engine.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				F259326515D85A730092C7D8 /* npl2 */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		F25932B415D8608B0092C7D8 /* libnya_engine.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libnya_engine.a;
+			remoteRef = F25932B315D8608B0092C7D8 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		F259326415D85A730092C7D8 /* Resources */ = {
