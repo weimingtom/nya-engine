@@ -15,7 +15,7 @@ public:
     const char *get_attrib(const char *key,int num=0);
     void reset_attrib();
     void set_anim(const char *anim_name);
-    const char *get_anim() { return m_anim_name.c_str(); }
+    const char *get_anim() const { return m_anim_name.c_str(); }
 
     void draw(bool use_materials);
 
@@ -23,9 +23,9 @@ public:
     
     void copy_attrib(const character &from);
 
-    float *get_buffer(unsigned int frame);
-    unsigned int get_frames_count();
-    unsigned int get_bones_count();
+    const float *get_buffer(unsigned int frame) const;
+    unsigned int get_frames_count() const;
+    unsigned int get_bones_count() const;
     
     character(): m_body_group_count(0), m_body_blend_group_idx(0) {}
 

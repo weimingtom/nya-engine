@@ -60,7 +60,6 @@ void scene::init()
     //get_shared_models().set_lru_limit(20);
     //get_shared_models().should_unload_unused(false);
 
-
     m_anim_list.push_back("event_01");
     m_anim_list.push_back("event_02");
     m_anim_list.push_back("event_03");
@@ -113,16 +112,20 @@ void scene::init()
                             m_anim_list.push_back(anim_name.c_str());
                             anim_map[anim_name]=true;
 
-                            nya_log::get_log()<<"anim0: "<<anim_name.c_str()<<"\n";
+                            //nya_log::get_log()<<"anim0: "<<anim_name.c_str()<<"\n";
 
                             size_t loc_pos=script_str.rfind("%mp0,",pos);
                             if(loc_pos!=std::string::npos)
                             {
                                 size_t loc_pos2=script_str.find(";",loc_pos);
-                                std::string pos=script_str.substr(loc_pos+5,loc_pos2-(loc_pos+5));
-                                nya_log::get_log()<<"\tpos0: "<<pos.c_str()<<"\n";
+                                if(loc_pos2>(loc_pos+7))
+                                {
+                                    std::string pos=script_str.substr(loc_pos+5,loc_pos2-(loc_pos+5));
+                                    m_anim_list.back().loc_idx=atoi(&pos[pos.length()-2]);
+                                    //nya_log::get_log()<<"\tpos0: "<<pos.c_str()<<" "<<m_anim_list.back().loc_idx<<"\n";
+                                }
                             }
-                            
+
                             anim_ignored=false;
                         }
                         else
@@ -133,6 +136,7 @@ void scene::init()
                     else if(num<='9' && !anim_ignored)
                     {
                         m_anim_list.back().name[num-'1'+1]=anim_name;
+                        /*
                         if(num=='1')
                         {
                             size_t loc_pos=script_str.rfind("%mp1,",pos);
@@ -143,6 +147,7 @@ void scene::init()
                                 nya_log::get_log()<<"\tpos1: "<<pos.c_str()<<"\n";
                             }
                         }
+                        */
                     }
 
                     pos=script_str.find("%mm",pos2);
@@ -292,13 +297,7 @@ void scene::set_bkg(const char *name)
         key[5]='0'+i;
 
         const char *name=atr->get_value(key);
-        if(!name)
-        {
-            nya_log::get_log()<<"invalid scnery file name";
-            continue;
-        }
-
-        if(strcmp(name,"nil")==0)
+        if(!name || strcmp(name,"nil")==0)
             continue;
 
         nya_resources::resource_data *scenery_res = nya_resources::get_resources_provider().access(name);
@@ -340,10 +339,25 @@ void scene::draw()
 
     glEnable(GL_BLEND);
     glDisable(GL_CULL_FACE);
-
+    
     m_shader_scenery.bind();
+
+    const tmb_model::locator *scene_loc=0;
+
+    if(!m_anim_list.empty() && m_curr_anim!=m_anim_list.end())
+        scene_loc=m_bkg_models[0].get_locator(m_curr_anim->loc_idx);
+
+    glPushMatrix();
+    if(scene_loc)
+    {
+        glRotatef(-scene_loc->ang[1]*180.0f/3.14f,0.0f,1.0f,0.0f);
+        glTranslatef(-scene_loc->pos[0],-scene_loc->pos[1],-scene_loc->pos[2]);
+    }
+
     for(int i=0;i<max_bkg_models;++i)
         m_bkg_models[i].draw(true);
+    
+    glPopMatrix();
 
     m_shader_scenery.unbind();
 

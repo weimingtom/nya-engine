@@ -215,13 +215,13 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
         verts_offset+=verts_count;
     }
 
-    m_bones_count=*(uint*)model_data.get_data(offset);
+    uint bones_count=*(uint*)model_data.get_data(offset);
     offset+=4;
 
-    if(m_bones_count)
+    if(bones_count)
     {
-        m_bones.resize(m_bones_count);
-        model_data.copy_from(&m_bones[0],m_bones_count*sizeof(bone),offset);
+        m_bones.resize(bones_count);
+        model_data.copy_from(&m_bones[0],bones_count*sizeof(bone),offset);
     }
     else
         m_bones.clear();
@@ -233,10 +233,37 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
     m_vbo.set_tc(2,12*sizeof(float),4);
     m_vbo.set_tc(3,16*sizeof(float),4);
     
-    //offset+=m_bones_count*sizeof(tmb_bone);
-    //uint unknown_count=*(uint*)model_data.get_data(offset);
-    //offset+=4;
-    //nya_log::get_log()<<"unknown: "<<unknown_count<<"\n";
+    offset+=bones_count*sizeof(bone);
+    uint locators_count=*(uint*)model_data.get_data(offset);
+    offset+=4;
+    //nya_log::get_log()<<"locators: "<<locators_count<<"offset: "<<offset<<"\n";
+
+    struct tmb_locator
+    {
+        char unknown[4];
+        float pos[3];
+        float ang[3];
+        float scale[3];
+    };
+
+    m_locators.resize(locators_count);
+
+    for(int i=0;i<locators_count;++i)
+    {
+        tmb_locator *from=(tmb_locator*)model_data.get_data(offset);
+        locator &to=m_locators[i];
+
+        for(int j=0;j<3;++j)
+        {
+            to.pos[j]=from->pos[j];
+            to.ang[j]=from->ang[j];
+            to.scale[j]=from->scale[j];
+        }
+
+        offset+=40;
+    }
+
+    //nya_log::get_log()<<(const char*)model_data.get_data(offset);
 
     return true;
 }
@@ -279,6 +306,10 @@ void tmb_model::release()
 
     m_textures.clear();
     m_materials.clear();
+    m_group_names.clear();
+    m_locators.clear();
+    m_bones.clear();
+    m_anim_bones.clear();
 }
 
 void tmb_model::apply_anim(tsb_anim *anim)
@@ -296,19 +327,19 @@ void tmb_model::apply_anim(tsb_anim *anim)
         return;
     }
 
-    m_anim_bones.resize(m_frames_count*m_bones_count);
+    m_anim_bones.resize(m_frames_count*m_bones.size());
     
-    int bones_count = m_bones_count;
+    unsigned int bones_count = (unsigned int)m_bones.size();
     if ( bones_count > anim->get_bones_count() )
         bones_count = anim->get_bones_count();
     
-    if(bones_count<m_bones_count)
+    if(bones_count<m_bones.size())
         nya_log::get_log()<<"bones_count<m_bones_count";
 
     for(unsigned int i=0;i<m_frames_count;++i)
     {
         tsb_anim::bone *anim_bones=anim->get_bones(i);
-        tmb_model::bone *final_bones=&m_anim_bones[i*m_bones_count];
+        tmb_model::bone *final_bones=&m_anim_bones[i*m_bones.size()];
         
         for(int k=0;k<bones_count;++k)
         {
@@ -324,7 +355,7 @@ void tmb_model::apply_anim(tsb_anim *anim)
                                 a.mat[3][x]*b.mat[y][3];
         }
 
-        for(int k=bones_count;k<m_bones_count;++k)
+        for(int k=bones_count;k<m_bones.size();++k)
         {
             final_bones[k]=m_bones[k];
         }

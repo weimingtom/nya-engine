@@ -68,8 +68,10 @@ private:
     {
         std::string name[10];
 
-        anim_info() {}
-        anim_info(const char *n) { if(n) name[0].assign(n); }
+        int loc_idx;
+
+        anim_info(): loc_idx(-1) {}
+        anim_info(const char *n) { if(n) name[0].assign(n); loc_idx=-1; }
     };
 
     std::vector<anim_info> m_anim_list;

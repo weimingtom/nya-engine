@@ -109,12 +109,9 @@ void character::set_attrib(const char *key,const char *value,int num)
             char key[7]="FILE_";
             key[5]=i+'0';
             const char *model_name=a->get_value(key);
-            if(!model_name)
-                break;
-
-            if(strcmp(model_name,"nil")==0)
+            if(!model_name || strcmp(model_name,"nil")==0)
             {
-                //p.subparts[i].model.free();
+                p.subparts[i].model.free();
                 continue;
             }
 
@@ -268,7 +265,7 @@ void character::release()
         m_parts[i].free_models();
 }
 
-float *character::get_buffer(unsigned int frame)
+const float *character::get_buffer(unsigned int frame) const
 {
     model_ref m=m_parts[body].subparts[0].model;
     if(!m.is_valid())
@@ -277,7 +274,7 @@ float *character::get_buffer(unsigned int frame)
     return m->get_buffer(frame);
 }
 
-unsigned int character::get_frames_count()
+unsigned int character::get_frames_count() const
 {
     model_ref m=m_parts[body].subparts[0].model;
     if(!m.is_valid())
@@ -286,7 +283,7 @@ unsigned int character::get_frames_count()
     return m->get_frames_count();
 }
 
-unsigned int character::get_bones_count()
+unsigned int character::get_bones_count() const
 {
     model_ref m=m_parts[body].subparts[0].model;
     if(!m.is_valid())
