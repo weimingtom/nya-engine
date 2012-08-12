@@ -25,11 +25,16 @@ public:
 public:
     void release();
 
+    unsigned int get_width() const { return m_width; }
+    unsigned int get_height() const { return m_height; }
+
 public:
-    texture(): m_tex_id(0) {}
+    texture(): m_tex_id(0), m_width(0), m_height(0) {}
 
 private:
     unsigned int m_tex_id;
+    unsigned int m_width;
+    unsigned int m_height;
 };
 
 }

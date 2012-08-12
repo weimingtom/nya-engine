@@ -9,6 +9,8 @@ namespace nya_render
 
 void texture::build_texture(const void *data,unsigned int width,unsigned int height,color_format format)
 {
+    release();
+
     if(!data||width==0||height==0)
     {
         get_log()<<"Unable to build texture: invalid data/width/height";
@@ -32,6 +34,8 @@ void texture::build_texture(const void *data,unsigned int width,unsigned int hei
         return;
     }
 
+    m_width=width;
+    m_height=height;
 
     if(!m_tex_id)
         glGenTextures(1,&m_tex_id);
@@ -60,6 +64,10 @@ void texture::release()
         return;
 
     glDeleteTextures(1,&m_tex_id);
+
+    m_tex_id=0;
+    m_width=0;
+    m_height=0;
 }
 
 }

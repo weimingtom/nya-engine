@@ -70,12 +70,12 @@ void scene::init()
 
     std::vector<char> script_buf;
     std::string script_str;
-    
+
     bool anim_ignored=false;
     std::map<std::string,bool> anim_map;
     for(size_t i=0;i<m_anim_list.size();++i)
         anim_map[m_anim_list[i].name[0]]=true;
-    
+
     nya_resources::resource_info *info=nya_resources::get_resources_provider().first_res_info();
     while(info)
     {
@@ -170,7 +170,6 @@ void scene::init()
         m_aniki.load(model_res);
         model_res->release();
     }
-
 
     m_shader_scenery.add_program(nya_render::shader::vertex,
 
@@ -286,15 +285,13 @@ void scene::set_bkg(const char *name)
     attribute *atr=get_attribute_manager().get("BG",name);
     if(!atr)
         return;
+    
+    //atr->debug_print();
 
-    int to=max_bkg_models;
-    if(to>10)
-        to=10;
-
-    for(int i=0;i<to;++i)
+    for(int i=0;i<max_bkg_models;++i)
     {
         char key[16]="FILE_0";
-        key[5]='0'+i;
+        key[5]='0'+i*2;
 
         const char *name=atr->get_value(key);
         if(!name || strcmp(name,"nil")==0)
@@ -304,6 +301,24 @@ void scene::set_bkg(const char *name)
         if(scenery_res)
         {
             m_bkg_models[i].load(scenery_res);
+            scenery_res->release();
+        }
+
+        ++key[5];
+
+        name=atr->get_value(key);
+        if(!name || strcmp(name,"nil")==0)
+            continue;
+
+        nya_log::get_log()<<"scenery anim: "<<name<<"\n";
+
+        scenery_res = nya_resources::get_resources_provider().access(name);
+        if(scenery_res)
+        {
+            tsb_anim anim;
+            anim.load(scenery_res);
+            m_bkg_models[i].apply_anim(&anim);
+            anim.release();
             scenery_res->release();
         }
     }
@@ -371,38 +386,7 @@ void scene::draw()
         m_aniki.draw(true);
         //glTranslatef(-m_bro_dpos_x,-m_bro_dpos_y,-m_bro_dpos_z);
     }
-    /*
-     struct test_vertex
-     {
-     float pos[3];
-     float bone_idx[3];
-     float bone_weight[3];
-     };
 
-     test_vertex vertices[200];
-     for(int i=0;i<200;++i)
-     {
-     test_vertex &v=vertices[i];
-     v.pos[0]=v.pos[1]=v.pos[2]=0;
-     v.bone_idx[0]=(float)i;
-     v.bone_idx[1]=v.bone_idx[2]=0;
-     v.bone_weight[0]=1.0f;
-     v.bone_weight[1]=v.bone_weight[2]=0;
-     }
-
-     glPointSize(4);
-
-     glEnableClientState(GL_VERTEX_ARRAY);
-     glVertexPointer(3,GL_FLOAT,sizeof(test_vertex),vertices);
-     glClientActiveTexture(GL_TEXTURE1);
-     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-     glTexCoordPointer(3,GL_FLOAT,sizeof(test_vertex),&(vertices[0].bone_idx[0]));
-     glClientActiveTexture(GL_TEXTURE2);
-     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-     glTexCoordPointer(3,GL_FLOAT,sizeof(test_vertex),&(vertices[0].bone_weight[0]));
-     glDrawArrays(GL_POINTS,0,200);
-     glDisableClientState(GL_VERTEX_ARRAY);
-     */
     if(frames_count)
         m_shader.unbind();
 
@@ -427,7 +411,7 @@ void scene::draw()
                                            imouto.get_bones_count());
     }
 
-    imouto.draw(false);
+   // imouto.draw(false);
 
     //bro
     if(bro_frames_count)
@@ -451,6 +435,12 @@ void scene::draw()
     
     m_shader_scenery.bind();
     
+    /*
+    m_shader.bind();
+    m_shader.set_uniform16_array(m_sh_mat_uniform,
+                                 m_bkg_models[1].get_buffer(int(m_anim_time)),
+                                 m_bkg_models[1].get_bones_count());
+     */
     const tmb_model::locator *scene_loc=0;
     
     if(!m_anim_list.empty() && m_curr_anim!=m_anim_list.end())

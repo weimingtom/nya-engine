@@ -111,6 +111,23 @@ const char *attribute_parser::get_value(const char *key)
     return it->second.c_str();
 }
 
+void attribute_parser::debug_print()
+{
+    for(attrib_iterator it=m_attributes.begin();it!=m_attributes.end();
+        ++it)
+    {
+        std::string safe_prnt=it->second;
+        for(int i=0;i<safe_prnt.length();++i)
+        {
+            char &c = safe_prnt[i];
+            if(c<32||c>127)
+                c='?';
+        }
+
+        nya_log::get_log()<<"<"<<it->first.c_str()<<"> = <"<<safe_prnt.c_str()<<"\n";
+    }
+}
+
 attribute *attribute_manager::get(const char *type,const char *name)
 {
     if(!type||!name)

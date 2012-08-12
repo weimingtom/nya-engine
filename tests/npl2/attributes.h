@@ -12,6 +12,7 @@ class attribute
 {
 public:
     virtual const char *get_value(const char *key) { return 0; }
+    virtual void debug_print() {}
 };
 
 class attribute_parser: public attribute
@@ -19,6 +20,7 @@ class attribute_parser: public attribute
 public:
     bool load(nya_resources::resource_data *data);
     const char *get_value(const char *key);
+    void debug_print();
 
 public:
     attribute_parser() {}
