@@ -114,7 +114,7 @@ private:
 
 -(void)initTimer
 {
-    m_animation_timer=[NSTimer timerWithTimeInterval:0.01 target:self 
+    m_animation_timer=[NSTimer timerWithTimeInterval:0.02 target:self 
                                        selector:@selector(animate:) userInfo:nil repeats:YES];
     
     [[self window] setAcceptsMouseMovedEvents:YES];
@@ -145,7 +145,6 @@ private:
     
     [self setNeedsDisplay:YES];
 }
-
 
 - (void)mouseMoved:(NSEvent *)theEvent
 {
