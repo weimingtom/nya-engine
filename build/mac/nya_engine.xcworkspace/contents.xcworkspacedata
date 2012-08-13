@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:pmd viewer.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "group:npl2.xcodeproj">
    </FileRef>
    <FileRef

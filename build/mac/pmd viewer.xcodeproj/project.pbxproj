@@ -1,0 +1,369 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		F261EA56151E698D00C195DA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F261EA55151E698D00C195DA /* Cocoa.framework */; };
+		F2714300151F1E5600DE6B9A /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F27142FF151F1E5600DE6B9A /* OpenGL.framework */; };
+		F28DAD9815D9AF4E0030D67B /* PmdView.mm in Sources */ = {isa = PBXBuildFile; fileRef = F28DAD8F15D9AF4E0030D67B /* PmdView.mm */; };
+		F28DAD9915D9AF4E0030D67B /* PmdDocument.mm in Sources */ = {isa = PBXBuildFile; fileRef = F28DAD9115D9AF4E0030D67B /* PmdDocument.mm */; };
+		F28DAD9A15D9AF4E0030D67B /* PmdDocument.xib in Resources */ = {isa = PBXBuildFile; fileRef = F28DAD9315D9AF4E0030D67B /* PmdDocument.xib */; };
+		F28DAD9B15D9AF4E0030D67B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = F28DAD9515D9AF4E0030D67B /* MainMenu.xib */; };
+		F28DAD9C15D9AF4E0030D67B /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F28DAD9715D9AF4E0030D67B /* main.m */; };
+		F28DADA515D9AF830030D67B /* pmd viewer-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F28DAD9E15D9AF830030D67B /* pmd viewer-Info.plist */; };
+		F28DADA615D9AF830030D67B /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = F28DAD9F15D9AF830030D67B /* AppIcon.icns */; };
+		F28DADA715D9AF830030D67B /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = F28DADA115D9AF830030D67B /* Credits.rtf */; };
+		F28DADA815D9AF830030D67B /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F28DADA315D9AF830030D67B /* InfoPlist.strings */; };
+		F28DADAF15D9AFB50030D67B /* libnya_engine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F28DADAE15D9AFA70030D67B /* libnya_engine.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F28DADAD15D9AFA70030D67B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F28DADA915D9AFA70030D67B /* nya_engine.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F25931E215D857C40092C7D8;
+			remoteInfo = nya_engine;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		F261EA51151E698D00C195DA /* pmd viewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "pmd viewer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F261EA55151E698D00C195DA /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		F261EA58151E698D00C195DA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		F261EA59151E698D00C195DA /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		F261EA5A151E698D00C195DA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		F27142FF151F1E5600DE6B9A /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		F28DAD8F15D9AF4E0030D67B /* PmdView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = PmdView.mm; path = "../../tests/pmd viewer/PmdView.mm"; sourceTree = "<group>"; };
+		F28DAD9015D9AF4E0030D67B /* PmdView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PmdView.h; path = "../../tests/pmd viewer/PmdView.h"; sourceTree = "<group>"; };
+		F28DAD9115D9AF4E0030D67B /* PmdDocument.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = PmdDocument.mm; path = "../../tests/pmd viewer/PmdDocument.mm"; sourceTree = "<group>"; };
+		F28DAD9215D9AF4E0030D67B /* PmdDocument.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PmdDocument.h; path = "../../tests/pmd viewer/PmdDocument.h"; sourceTree = "<group>"; };
+		F28DAD9415D9AF4E0030D67B /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = "../../tests/pmd viewer/en.lproj/PmdDocument.xib"; sourceTree = "<group>"; };
+		F28DAD9615D9AF4E0030D67B /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = "../../tests/pmd viewer/en.lproj/MainMenu.xib"; sourceTree = "<group>"; };
+		F28DAD9715D9AF4E0030D67B /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = "../../tests/pmd viewer/main.m"; sourceTree = "<group>"; };
+		F28DAD9E15D9AF830030D67B /* pmd viewer-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "pmd viewer-Info.plist"; path = "../../tests/pmd viewer/pmd viewer-Info.plist"; sourceTree = "<group>"; };
+		F28DADA015D9AF830030D67B /* en */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = en; path = "../../tests/pmd viewer/en.lproj/AppIcon.icns"; sourceTree = "<group>"; };
+		F28DADA215D9AF830030D67B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = "../../tests/pmd viewer/en.lproj/Credits.rtf"; sourceTree = "<group>"; };
+		F28DADA415D9AF830030D67B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = "../../tests/pmd viewer/en.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		F28DADA915D9AFA70030D67B /* nya_engine.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = nya_engine.xcodeproj; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F261EA4E151E698D00C195DA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F28DADAF15D9AFB50030D67B /* libnya_engine.a in Frameworks */,
+				F2714300151F1E5600DE6B9A /* OpenGL.framework in Frameworks */,
+				F261EA56151E698D00C195DA /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F261EA46151E698D00C195DA = {
+			isa = PBXGroup;
+			children = (
+				F28DADA915D9AFA70030D67B /* nya_engine.xcodeproj */,
+				F28DAD8D15D9AF330030D67B /* pmd viewer */,
+				F261EA54151E698D00C195DA /* Frameworks */,
+				F261EA52151E698D00C195DA /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F261EA52151E698D00C195DA /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F261EA51151E698D00C195DA /* pmd viewer.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F261EA54151E698D00C195DA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F27142FF151F1E5600DE6B9A /* OpenGL.framework */,
+				F261EA55151E698D00C195DA /* Cocoa.framework */,
+				F261EA57151E698D00C195DA /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F261EA57151E698D00C195DA /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F261EA58151E698D00C195DA /* AppKit.framework */,
+				F261EA59151E698D00C195DA /* CoreData.framework */,
+				F261EA5A151E698D00C195DA /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		F28DAD8D15D9AF330030D67B /* pmd viewer */ = {
+			isa = PBXGroup;
+			children = (
+				F28DAD8F15D9AF4E0030D67B /* PmdView.mm */,
+				F28DAD9015D9AF4E0030D67B /* PmdView.h */,
+				F28DAD9115D9AF4E0030D67B /* PmdDocument.mm */,
+				F28DAD9215D9AF4E0030D67B /* PmdDocument.h */,
+				F28DAD9315D9AF4E0030D67B /* PmdDocument.xib */,
+				F28DAD9515D9AF4E0030D67B /* MainMenu.xib */,
+				F28DAD9715D9AF4E0030D67B /* main.m */,
+				F28DAD9D15D9AF6B0030D67B /* Supporting files */,
+			);
+			name = "pmd viewer";
+			sourceTree = "<group>";
+		};
+		F28DAD9D15D9AF6B0030D67B /* Supporting files */ = {
+			isa = PBXGroup;
+			children = (
+				F28DAD9E15D9AF830030D67B /* pmd viewer-Info.plist */,
+				F28DAD9F15D9AF830030D67B /* AppIcon.icns */,
+				F28DADA115D9AF830030D67B /* Credits.rtf */,
+				F28DADA315D9AF830030D67B /* InfoPlist.strings */,
+			);
+			name = "Supporting files";
+			sourceTree = "<group>";
+		};
+		F28DADAA15D9AFA70030D67B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F28DADAE15D9AFA70030D67B /* libnya_engine.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F261EA50151E698D00C195DA /* pmd viewer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F261EA72151E698E00C195DA /* Build configuration list for PBXNativeTarget "pmd viewer" */;
+			buildPhases = (
+				F261EA4D151E698D00C195DA /* Sources */,
+				F261EA4E151E698D00C195DA /* Frameworks */,
+				F261EA4F151E698D00C195DA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "pmd viewer";
+			productName = "pmd viewer";
+			productReference = F261EA51151E698D00C195DA /* pmd viewer.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F261EA48151E698D00C195DA /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = F261EA4B151E698D00C195DA /* Build configuration list for PBXProject "pmd viewer" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = F261EA46151E698D00C195DA;
+			productRefGroup = F261EA52151E698D00C195DA /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = F28DADAA15D9AFA70030D67B /* Products */;
+					ProjectRef = F28DADA915D9AFA70030D67B /* nya_engine.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				F261EA50151E698D00C195DA /* pmd viewer */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		F28DADAE15D9AFA70030D67B /* libnya_engine.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libnya_engine.a;
+			remoteRef = F28DADAD15D9AFA70030D67B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F261EA4F151E698D00C195DA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F28DAD9A15D9AF4E0030D67B /* PmdDocument.xib in Resources */,
+				F28DAD9B15D9AF4E0030D67B /* MainMenu.xib in Resources */,
+				F28DADA515D9AF830030D67B /* pmd viewer-Info.plist in Resources */,
+				F28DADA615D9AF830030D67B /* AppIcon.icns in Resources */,
+				F28DADA715D9AF830030D67B /* Credits.rtf in Resources */,
+				F28DADA815D9AF830030D67B /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F261EA4D151E698D00C195DA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F28DAD9815D9AF4E0030D67B /* PmdView.mm in Sources */,
+				F28DAD9915D9AF4E0030D67B /* PmdDocument.mm in Sources */,
+				F28DAD9C15D9AF4E0030D67B /* main.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		F28DAD9315D9AF4E0030D67B /* PmdDocument.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F28DAD9415D9AF4E0030D67B /* en */,
+			);
+			name = PmdDocument.xib;
+			sourceTree = "<group>";
+		};
+		F28DAD9515D9AF4E0030D67B /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F28DAD9615D9AF4E0030D67B /* en */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+		F28DAD9F15D9AF830030D67B /* AppIcon.icns */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F28DADA015D9AF830030D67B /* en */,
+			);
+			name = AppIcon.icns;
+			sourceTree = "<group>";
+		};
+		F28DADA115D9AF830030D67B /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F28DADA215D9AF830030D67B /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		F28DADA315D9AF830030D67B /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F28DADA415D9AF830030D67B /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		F261EA70151E698E00C195DA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		F261EA71151E698E00C195DA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		F261EA73151E698E00C195DA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
+				INFOPLIST_FILE = "../../tests/pmd viewer/pmd viewer-Info.plist";
+				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = ../../;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		F261EA74151E698E00C195DA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
+				INFOPLIST_FILE = "../../tests/pmd viewer/pmd viewer-Info.plist";
+				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = ../../;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F261EA4B151E698D00C195DA /* Build configuration list for PBXProject "pmd viewer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F261EA70151E698E00C195DA /* Debug */,
+				F261EA71151E698E00C195DA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F261EA72151E698E00C195DA /* Build configuration list for PBXNativeTarget "pmd viewer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F261EA73151E698E00C195DA /* Debug */,
+				F261EA74151E698E00C195DA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F261EA48151E698D00C195DA /* Project object */;
+}
