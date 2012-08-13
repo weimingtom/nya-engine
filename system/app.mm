@@ -25,17 +25,16 @@ public:
 
         [NSApplication sharedApplication];
 
-        NSRect viewRect = NSMakeRect(x,y,w,h);
+        NSRect viewRect=NSMakeRect(x,y,w,h);
 
-        m_window = [[NSWindow alloc] initWithContentRect:viewRect styleMask:NSTitledWindowMask|NSMiniaturizableWindowMask|NSResizableWindowMask|NSClosableWindowMask backing:NSBackingStoreBuffered defer:YES];
+        m_window=[[NSWindow alloc] initWithContentRect:viewRect styleMask:NSTitledWindowMask|NSMiniaturizableWindowMask|NSResizableWindowMask|NSClosableWindowMask backing:NSBackingStoreBuffered defer:YES];
 
         [m_window setTitle:@"Nya engine"];
         [m_window setOpaque:YES];
 
-        //NSWindowController* windowController = 
         [[NSWindowController alloc] initWithWindow:m_window];
 
-        shared_app_delegate *delegate = [[shared_app_delegate alloc] init_with_responder:&app];
+        shared_app_delegate *delegate=[[shared_app_delegate alloc] init_with_responder:&app];
 
         [NSApp setDelegate:delegate];
 
@@ -62,13 +61,13 @@ private:
         NSMenu *appMenu;
         NSMenuItem *menuItem;
         
-        mainMenuBar = [[NSMenu alloc] init];
+        mainMenuBar=[[NSMenu alloc] init];
         
-        appMenu = [[NSMenu alloc] initWithTitle:@"Nya engine"];
-        menuItem = [appMenu addItemWithTitle:@"Quit" action:@selector(terminate:) keyEquivalent:@"q"];
+        appMenu=[[NSMenu alloc] initWithTitle:@"Nya engine"];
+        menuItem=[appMenu addItemWithTitle:@"Quit" action:@selector(terminate:) keyEquivalent:@"q"];
         [menuItem setKeyEquivalentModifierMask:NSCommandKeyMask];
         
-        menuItem = [[NSMenuItem alloc] init];
+        menuItem=[[NSMenuItem alloc] init];
         [menuItem setSubmenu:appMenu];
         
         [mainMenuBar addItem:menuItem];
@@ -113,28 +112,28 @@ private:
     m_app=responder;
 }
 
--(void)animationTimerFired:(NSTimer*)timer 
+-(void)initTimer
 {
-    [self draw];
-    //[self setNeedsDisplay:YES];
+    m_animation_timer=[NSTimer timerWithTimeInterval:0.01 target:self 
+                                       selector:@selector(animate:) userInfo:nil repeats:YES];
+    
+    [[self window] setAcceptsMouseMovedEvents:YES];
+    
+    [[NSRunLoop currentRunLoop] addTimer:m_animation_timer forMode:NSDefaultRunLoopMode];
+    [[NSRunLoop currentRunLoop] addTimer:m_animation_timer forMode:NSEventTrackingRunLoopMode];
 }
 
--(void)draw
+- (void)animate:(id)sender
 {
-    //glClearColor(0,0.6,0.7,1);
-    //glClear(GL_COLOR_BUFFER_BIT);
-    
-    //return;
-    
+    [self setNeedsDisplay:YES];
+}
+
+- (void)drawRect:(NSRect)rect 
+{
     m_app->on_process(0);
     m_app->on_draw();
-
-    [[self openGLContext] flushBuffer];
     
-    if (!m_animation_timer) 
-    {
-        m_animation_timer=[[NSTimer scheduledTimerWithTimeInterval:0.017 target:self selector:@selector(animationTimerFired:) userInfo:nil repeats:YES] retain];
-    }
+    [[self openGLContext] flushBuffer];    
 }
 
 -(void)reshape 
@@ -144,10 +143,60 @@ private:
 
     [[self openGLContext] update];
     
-    [self draw];
+    [self setNeedsDisplay:YES];
 }
 
--(void)dealloc 
+
+- (void)mouseMoved:(NSEvent *)theEvent
+{
+    NSPoint pt=[theEvent locationInWindow];
+    pt=[self convertPoint:pt fromView:nil];
+    
+    m_app->on_mouse_move(pt.x,pt.y);
+}
+
+- (void)mouseDragged:(NSEvent *)theEvent
+{
+    NSPoint pt=[theEvent locationInWindow];
+    pt=[self convertPoint:pt fromView:nil];
+    
+    m_app->on_mouse_move(pt.x,pt.y);
+}
+
+- (void)rightMouseDragged:(NSEvent *)theEvent
+{
+    NSPoint pt=[theEvent locationInWindow];
+    pt=[self convertPoint:pt fromView:nil];
+    
+    m_app->on_mouse_move(pt.x,pt.y);
+}
+
+- (void)mouseDown:(NSEvent *)theEvent
+{
+    m_app->on_mouse_button(nya_system::mouse_left,true);
+}
+
+- (void)mouseUp:(NSEvent *)theEvent
+{
+    m_app->on_mouse_button(nya_system::mouse_left,false);
+}
+
+- (void)rightMouseDown:(NSEvent *)theEvent
+{
+    m_app->on_mouse_button(nya_system::mouse_right,true);
+}
+
+- (void) rightMouseUp: (NSEvent *) theEvent
+{
+    m_app->on_mouse_button(nya_system::mouse_right,false);
+}
+
+- (void)scrollWheel:(NSEvent*)event
+{
+    m_app->on_mouse_scroll(0,[event deltaY]);
+}
+
+-(void)dealloc
 {
     [m_animation_timer release];
     
@@ -186,14 +235,20 @@ private:
 
     NSWindow *window=shared_app::get_window();
 
-    NSOpenGLPixelFormat *format = [[NSOpenGLPixelFormat alloc] initWithAttributes:attrs];
+    NSOpenGLPixelFormat *format=[[NSOpenGLPixelFormat alloc] initWithAttributes:attrs];
     gl_view *view = [[gl_view alloc] initWithFrame:window.frame pixelFormat:format];
     [format release];
 
     [view set_responder:m_app];
+    
+    [view initTimer];
+    
     [window setContentView:view];
 
-    if ([view openGLContext] == nil) 
+    [window makeFirstResponder:view];
+    [window setAcceptsMouseMovedEvents:YES];
+
+    if([view openGLContext]==nil) 
     {
         return;
     }
@@ -208,8 +263,6 @@ private:
     [[view openGLContext] flushBuffer];
 
     m_app->on_init();
-
-    //[view draw];
 }
 
 @end
