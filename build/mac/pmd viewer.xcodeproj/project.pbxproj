@@ -274,6 +274,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CONFIGURATION_BUILD_DIR = ../../bin/mac_debug;
+				CONFIGURATION_TEMP_DIR = ../../obj/mac_debug;
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -290,8 +292,10 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				OBJROOT = ../../obj/;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				SYMROOT = ../../bin/;
 			};
 			name = Debug;
 		};
@@ -300,8 +304,10 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CONFIGURATION_BUILD_DIR = ../../bin/mac_release;
+				CONFIGURATION_TEMP_DIR = ../../obj/mac_release;
 				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -310,7 +316,9 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				OBJROOT = ../../obj/;
 				SDKROOT = macosx;
+				SYMROOT = ../../bin/;
 			};
 			name = Release;
 		};
@@ -323,6 +331,7 @@
 				INFOPLIST_FILE = "../../tests/pmd viewer/pmd viewer-Info.plist";
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SYMROOT = ../../bin/;
 				USER_HEADER_SEARCH_PATHS = ../../;
 				WRAPPER_EXTENSION = app;
 			};
@@ -337,6 +346,7 @@
 				INFOPLIST_FILE = "../../tests/pmd viewer/pmd viewer-Info.plist";
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SYMROOT = ../../bin/;
 				USER_HEADER_SEARCH_PATHS = ../../;
 				WRAPPER_EXTENSION = app;
 			};
