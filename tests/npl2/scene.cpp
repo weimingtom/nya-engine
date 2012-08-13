@@ -387,7 +387,7 @@ void scene::process(unsigned int dt)
 
     const size_t frames_count=imouto.get_frames_count();
     if(m_anim_time>=frames_count)
-        m_anim_time=0;
+        m_anim_time=imouto.get_first_loop_frame();
 
     for(int i=0;i<max_bkg_models;++i)
     {

@@ -340,18 +340,20 @@ void tmb_model::apply_anim(tsb_anim *anim)
     if(!anim)
         return;
 
-    m_frames_count = anim->get_frames_count();
+    m_frames_count=anim->get_frames_count();
     if(!m_frames_count)
     {
         nya_log::get_log()<<"Unable to set empty animation\n";
         return;
     }
+    
+    m_first_loop_frame=anim->get_first_loop_frame();
 
     m_anim_bones.resize(m_frames_count*m_bones.size());
     
-    unsigned int bones_count = (unsigned int)m_bones.size();
-    if ( bones_count > anim->get_bones_count() )
-        bones_count = anim->get_bones_count();
+    unsigned int bones_count=(unsigned int)m_bones.size();
+    if(bones_count>anim->get_bones_count())
+        bones_count=anim->get_bones_count();
     
     if(bones_count<m_bones.size())
         nya_log::get_log()<<"bones_count<m_bones_count";

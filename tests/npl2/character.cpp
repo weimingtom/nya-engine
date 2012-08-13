@@ -283,6 +283,15 @@ unsigned int character::get_frames_count() const
     return m->get_frames_count();
 }
 
+unsigned int character::get_first_loop_frame() const
+{
+    model_ref m=m_parts[body].subparts[0].model;
+    if(!m.is_valid())
+        return 0;
+
+    return m->get_first_loop_frame();
+}
+
 unsigned int character::get_bones_count() const
 {
     model_ref m=m_parts[body].subparts[0].model;

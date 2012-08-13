@@ -28,6 +28,7 @@ public:
 
     unsigned int get_bones_count() { return (unsigned int)m_bones.size(); }
     unsigned int get_frames_count() { return m_frames_count; }
+    unsigned int get_first_loop_frame() { return m_first_loop_frame; }
 
     unsigned int get_groups_count() { return (unsigned int)m_group_names.size(); }
     const char *get_group_name(unsigned int idx)
@@ -68,6 +69,7 @@ private:
 
       //ToDo: convert to frames
     unsigned int m_frames_count;
+    unsigned int m_first_loop_frame;
     std::vector<bone> m_anim_bones;
     
 private:

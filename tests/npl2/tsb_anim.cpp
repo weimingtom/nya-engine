@@ -24,7 +24,7 @@ bool tsb_anim::load(nya_resources::resource_data *anim_res)
         uint pad[3];
         uint bone_count;
         uint frame_count;
-        uint unknown;
+        uint first_loop_frame;
         uint special_count;
     };
 
@@ -37,6 +37,7 @@ bool tsb_anim::load(nya_resources::resource_data *anim_res)
 
     m_bones_count=header->bone_count;
     m_frames_count=header->frame_count;
+    m_first_loop_frame=header->first_loop_frame;
 
     uint size=header->bone_count*header->frame_count;
     m_data.resize(size);

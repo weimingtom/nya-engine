@@ -25,14 +25,16 @@ public:
     }
 
     unsigned int get_bones_count() { return m_bones_count; }
+    unsigned int get_first_loop_frame() { return m_first_loop_frame; }
     unsigned int get_frames_count() { return m_frames_count; }
 
     void release() { m_data.clear(); m_bones_count=m_frames_count=0; }
 
-    tsb_anim(): m_bones_count(0), m_frames_count(0) {}
+    tsb_anim(): m_bones_count(0), m_first_loop_frame(0), m_frames_count(0) {}
 
 private:
     unsigned int m_bones_count;
+    unsigned int m_first_loop_frame;
     unsigned int m_frames_count;
 
 private:
