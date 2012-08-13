@@ -14,7 +14,6 @@
 		F28DAD9A15D9AF4E0030D67B /* PmdDocument.xib in Resources */ = {isa = PBXBuildFile; fileRef = F28DAD9315D9AF4E0030D67B /* PmdDocument.xib */; };
 		F28DAD9B15D9AF4E0030D67B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = F28DAD9515D9AF4E0030D67B /* MainMenu.xib */; };
 		F28DAD9C15D9AF4E0030D67B /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F28DAD9715D9AF4E0030D67B /* main.m */; };
-		F28DADA515D9AF830030D67B /* pmd viewer-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F28DAD9E15D9AF830030D67B /* pmd viewer-Info.plist */; };
 		F28DADA615D9AF830030D67B /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = F28DAD9F15D9AF830030D67B /* AppIcon.icns */; };
 		F28DADA715D9AF830030D67B /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = F28DADA115D9AF830030D67B /* Credits.rtf */; };
 		F28DADA815D9AF830030D67B /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F28DADA315D9AF830030D67B /* InfoPlist.strings */; };
@@ -163,6 +162,9 @@
 /* Begin PBXProject section */
 		F261EA48151E698D00C195DA /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
 			buildConfigurationList = F261EA4B151E698D00C195DA /* Build configuration list for PBXProject "pmd viewer" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
@@ -203,7 +205,6 @@
 			files = (
 				F28DAD9A15D9AF4E0030D67B /* PmdDocument.xib in Resources */,
 				F28DAD9B15D9AF4E0030D67B /* MainMenu.xib in Resources */,
-				F28DADA515D9AF830030D67B /* pmd viewer-Info.plist in Resources */,
 				F28DADA615D9AF830030D67B /* AppIcon.icns in Resources */,
 				F28DADA715D9AF830030D67B /* Credits.rtf in Resources */,
 				F28DADA815D9AF830030D67B /* InfoPlist.strings in Resources */,
