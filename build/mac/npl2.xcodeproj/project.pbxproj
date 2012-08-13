@@ -7,16 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F220566A15D929D100362591 /* npl2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F220565B15D929D100362591 /* npl2.cpp */; };
+		F220566B15D929D100362591 /* character.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F220565C15D929D100362591 /* character.cpp */; };
+		F220566C15D929D100362591 /* tmb_model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F220565D15D929D100362591 /* tmb_model.cpp */; };
+		F220566D15D929D100362591 /* scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F220565F15D929D100362591 /* scene.cpp */; };
+		F220566E15D929D100362591 /* attributes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F220566115D929D100362591 /* attributes.cpp */; };
+		F220566F15D929D100362591 /* ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F220566315D929D100362591 /* ui.cpp */; };
+		F220567015D929D100362591 /* pl2_resources_provider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F220566515D929D100362591 /* pl2_resources_provider.cpp */; };
+		F220567115D929D100362591 /* tsb_anim.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F220566915D929D100362591 /* tsb_anim.cpp */; };
 		F259326B15D85A730092C7D8 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F259326A15D85A730092C7D8 /* Cocoa.framework */; };
-		F259328D15D85B3B0092C7D8 /* npl2-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F259328C15D85B3B0092C7D8 /* npl2-Info.plist */; };
-		F259329D15D85B990092C7D8 /* character.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259328E15D85B990092C7D8 /* character.cpp */; };
-		F259329E15D85B990092C7D8 /* tmb_model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259328F15D85B990092C7D8 /* tmb_model.cpp */; };
-		F259329F15D85B990092C7D8 /* scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259329115D85B990092C7D8 /* scene.cpp */; };
-		F25932A015D85B990092C7D8 /* attributes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259329315D85B990092C7D8 /* attributes.cpp */; };
-		F25932A115D85B990092C7D8 /* ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259329515D85B990092C7D8 /* ui.cpp */; };
-		F25932A215D85B990092C7D8 /* npl2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259329715D85B990092C7D8 /* npl2.cpp */; };
-		F25932A315D85B990092C7D8 /* pl2_resources_provider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259329815D85B990092C7D8 /* pl2_resources_provider.cpp */; };
-		F25932A415D85B990092C7D8 /* tsb_anim.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259329C15D85B990092C7D8 /* tsb_anim.cpp */; };
 		F25932B515D860A20092C7D8 /* libnya_engine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F25932B415D8608B0092C7D8 /* libnya_engine.a */; };
 		F25932B915D860F60092C7D8 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F25932B815D860F60092C7D8 /* OpenGL.framework */; };
 /* End PBXBuildFile section */
@@ -32,27 +31,26 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		F220565B15D929D100362591 /* npl2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = npl2.cpp; path = ../../tests/npl2/npl2.cpp; sourceTree = "<group>"; };
+		F220565C15D929D100362591 /* character.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = character.cpp; path = ../../tests/npl2/character.cpp; sourceTree = "<group>"; };
+		F220565D15D929D100362591 /* tmb_model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tmb_model.cpp; path = ../../tests/npl2/tmb_model.cpp; sourceTree = "<group>"; };
+		F220565E15D929D100362591 /* tmb_model.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tmb_model.h; path = ../../tests/npl2/tmb_model.h; sourceTree = "<group>"; };
+		F220565F15D929D100362591 /* scene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scene.cpp; path = ../../tests/npl2/scene.cpp; sourceTree = "<group>"; };
+		F220566015D929D100362591 /* scene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scene.h; path = ../../tests/npl2/scene.h; sourceTree = "<group>"; };
+		F220566115D929D100362591 /* attributes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = attributes.cpp; path = ../../tests/npl2/attributes.cpp; sourceTree = "<group>"; };
+		F220566215D929D100362591 /* attributes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = attributes.h; path = ../../tests/npl2/attributes.h; sourceTree = "<group>"; };
+		F220566315D929D100362591 /* ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ui.cpp; path = ../../tests/npl2/ui.cpp; sourceTree = "<group>"; };
+		F220566415D929D100362591 /* character.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = character.h; path = ../../tests/npl2/character.h; sourceTree = "<group>"; };
+		F220566515D929D100362591 /* pl2_resources_provider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pl2_resources_provider.cpp; path = ../../tests/npl2/pl2_resources_provider.cpp; sourceTree = "<group>"; };
+		F220566615D929D100362591 /* ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ui.h; path = ../../tests/npl2/ui.h; sourceTree = "<group>"; };
+		F220566715D929D100362591 /* pl2_resources_provider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pl2_resources_provider.h; path = ../../tests/npl2/pl2_resources_provider.h; sourceTree = "<group>"; };
+		F220566815D929D100362591 /* tsb_anim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tsb_anim.h; path = ../../tests/npl2/tsb_anim.h; sourceTree = "<group>"; };
+		F220566915D929D100362591 /* tsb_anim.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tsb_anim.cpp; path = ../../tests/npl2/tsb_anim.cpp; sourceTree = "<group>"; };
 		F259326615D85A730092C7D8 /* npl2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = npl2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F259326A15D85A730092C7D8 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		F259326D15D85A730092C7D8 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		F259326E15D85A730092C7D8 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		F259326F15D85A730092C7D8 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		F259328C15D85B3B0092C7D8 /* npl2-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "npl2-Info.plist"; path = "../../tests/npl2/npl2-Info.plist"; sourceTree = "<group>"; };
-		F259328E15D85B990092C7D8 /* character.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = character.cpp; path = ../../../tests/npl2/character.cpp; sourceTree = "<group>"; };
-		F259328F15D85B990092C7D8 /* tmb_model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tmb_model.cpp; path = ../../../tests/npl2/tmb_model.cpp; sourceTree = "<group>"; };
-		F259329015D85B990092C7D8 /* tmb_model.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tmb_model.h; path = ../../../tests/npl2/tmb_model.h; sourceTree = "<group>"; };
-		F259329115D85B990092C7D8 /* scene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scene.cpp; path = ../../../tests/npl2/scene.cpp; sourceTree = "<group>"; };
-		F259329215D85B990092C7D8 /* scene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scene.h; path = ../../../tests/npl2/scene.h; sourceTree = "<group>"; };
-		F259329315D85B990092C7D8 /* attributes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = attributes.cpp; path = ../../../tests/npl2/attributes.cpp; sourceTree = "<group>"; };
-		F259329415D85B990092C7D8 /* attributes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = attributes.h; path = ../../../tests/npl2/attributes.h; sourceTree = "<group>"; };
-		F259329515D85B990092C7D8 /* ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ui.cpp; path = ../../../tests/npl2/ui.cpp; sourceTree = "<group>"; };
-		F259329615D85B990092C7D8 /* character.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = character.h; path = ../../../tests/npl2/character.h; sourceTree = "<group>"; };
-		F259329715D85B990092C7D8 /* npl2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = npl2.cpp; path = ../../../tests/npl2/npl2.cpp; sourceTree = "<group>"; };
-		F259329815D85B990092C7D8 /* pl2_resources_provider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pl2_resources_provider.cpp; path = ../../../tests/npl2/pl2_resources_provider.cpp; sourceTree = "<group>"; };
-		F259329915D85B990092C7D8 /* ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ui.h; path = ../../../tests/npl2/ui.h; sourceTree = "<group>"; };
-		F259329A15D85B990092C7D8 /* pl2_resources_provider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pl2_resources_provider.h; path = ../../../tests/npl2/pl2_resources_provider.h; sourceTree = "<group>"; };
-		F259329B15D85B990092C7D8 /* tsb_anim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tsb_anim.h; path = ../../../tests/npl2/tsb_anim.h; sourceTree = "<group>"; };
-		F259329C15D85B990092C7D8 /* tsb_anim.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tsb_anim.cpp; path = ../../../tests/npl2/tsb_anim.cpp; sourceTree = "<group>"; };
 		F25932AF15D8608B0092C7D8 /* nya_engine.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = nya_engine.xcodeproj; sourceTree = "<group>"; };
 		F25932B815D860F60092C7D8 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -71,13 +69,33 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		F220567215D929D900362591 /* npl2 */ = {
+			isa = PBXGroup;
+			children = (
+				F220565B15D929D100362591 /* npl2.cpp */,
+				F220565C15D929D100362591 /* character.cpp */,
+				F220565D15D929D100362591 /* tmb_model.cpp */,
+				F220565E15D929D100362591 /* tmb_model.h */,
+				F220565F15D929D100362591 /* scene.cpp */,
+				F220566015D929D100362591 /* scene.h */,
+				F220566115D929D100362591 /* attributes.cpp */,
+				F220566215D929D100362591 /* attributes.h */,
+				F220566315D929D100362591 /* ui.cpp */,
+				F220566415D929D100362591 /* character.h */,
+				F220566515D929D100362591 /* pl2_resources_provider.cpp */,
+				F220566615D929D100362591 /* ui.h */,
+				F220566715D929D100362591 /* pl2_resources_provider.h */,
+				F220566815D929D100362591 /* tsb_anim.h */,
+				F220566915D929D100362591 /* tsb_anim.cpp */,
+			);
+			name = npl2;
+			sourceTree = "<group>";
+		};
 		F259325B15D85A730092C7D8 = {
 			isa = PBXGroup;
 			children = (
-				F25932B815D860F60092C7D8 /* OpenGL.framework */,
 				F25932AF15D8608B0092C7D8 /* nya_engine.xcodeproj */,
-				F259328C15D85B3B0092C7D8 /* npl2-Info.plist */,
-				F259327015D85A730092C7D8 /* npl2 */,
+				F220567215D929D900362591 /* npl2 */,
 				F259326915D85A730092C7D8 /* Frameworks */,
 				F259326715D85A730092C7D8 /* Products */,
 			);
@@ -95,6 +113,7 @@
 			isa = PBXGroup;
 			children = (
 				F259326A15D85A730092C7D8 /* Cocoa.framework */,
+				F25932B815D860F60092C7D8 /* OpenGL.framework */,
 				F259326C15D85A730092C7D8 /* Other Frameworks */,
 			);
 			name = Frameworks;
@@ -108,28 +127,6 @@
 				F259326F15D85A730092C7D8 /* Foundation.framework */,
 			);
 			name = "Other Frameworks";
-			sourceTree = "<group>";
-		};
-		F259327015D85A730092C7D8 /* npl2 */ = {
-			isa = PBXGroup;
-			children = (
-				F259328E15D85B990092C7D8 /* character.cpp */,
-				F259328F15D85B990092C7D8 /* tmb_model.cpp */,
-				F259329015D85B990092C7D8 /* tmb_model.h */,
-				F259329115D85B990092C7D8 /* scene.cpp */,
-				F259329215D85B990092C7D8 /* scene.h */,
-				F259329315D85B990092C7D8 /* attributes.cpp */,
-				F259329415D85B990092C7D8 /* attributes.h */,
-				F259329515D85B990092C7D8 /* ui.cpp */,
-				F259329615D85B990092C7D8 /* character.h */,
-				F259329715D85B990092C7D8 /* npl2.cpp */,
-				F259329815D85B990092C7D8 /* pl2_resources_provider.cpp */,
-				F259329915D85B990092C7D8 /* ui.h */,
-				F259329A15D85B990092C7D8 /* pl2_resources_provider.h */,
-				F259329B15D85B990092C7D8 /* tsb_anim.h */,
-				F259329C15D85B990092C7D8 /* tsb_anim.cpp */,
-			);
-			path = npl2;
 			sourceTree = "<group>";
 		};
 		F25932B015D8608B0092C7D8 /* Products */ = {
@@ -203,7 +200,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F259328D15D85B3B0092C7D8 /* npl2-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -214,14 +210,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F259329D15D85B990092C7D8 /* character.cpp in Sources */,
-				F259329E15D85B990092C7D8 /* tmb_model.cpp in Sources */,
-				F259329F15D85B990092C7D8 /* scene.cpp in Sources */,
-				F25932A015D85B990092C7D8 /* attributes.cpp in Sources */,
-				F25932A115D85B990092C7D8 /* ui.cpp in Sources */,
-				F25932A215D85B990092C7D8 /* npl2.cpp in Sources */,
-				F25932A315D85B990092C7D8 /* pl2_resources_provider.cpp in Sources */,
-				F25932A415D85B990092C7D8 /* tsb_anim.cpp in Sources */,
+				F220566A15D929D100362591 /* npl2.cpp in Sources */,
+				F220566B15D929D100362591 /* character.cpp in Sources */,
+				F220566C15D929D100362591 /* tmb_model.cpp in Sources */,
+				F220566D15D929D100362591 /* scene.cpp in Sources */,
+				F220566E15D929D100362591 /* attributes.cpp in Sources */,
+				F220566F15D929D100362591 /* ui.cpp in Sources */,
+				F220567015D929D100362591 /* pl2_resources_provider.cpp in Sources */,
+				F220567115D929D100362591 /* tsb_anim.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -234,7 +230,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CONFIGURATION_BUILD_DIR = ../../bin/mac_debug;
-				CONFIGURATION_TEMP_DIR = ../../obj/mac_debug/;
+				CONFIGURATION_TEMP_DIR = ../../obj/mac_debug;
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
