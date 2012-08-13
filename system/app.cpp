@@ -1,6 +1,7 @@
 //https://code.google.com/p/nya-engine/
 
 #include "app.h"
+#include "system.h"
 
 #ifdef _WIN32
 
@@ -67,13 +68,16 @@ public:
 
         app.on_resize(w,h);
         app.on_init_splash();
+        m_time=nya_system::get_time();
         update_splash(app);
         app.on_init();
+
+        m_time=nya_system::get_time();
 
         XEvent event;
         while(true)
         {
-            do
+            while(XPending(m_dpy))
             {
                 XNextEvent(m_dpy, &event);
                 switch (event.type)
@@ -92,6 +96,9 @@ public:
                     break;
 
                     case ButtonPress:
+                    {
+                        const int scroll_modifier=16;
+
                         switch (event.xbutton.button)
                         {
                             case 1:
@@ -105,7 +112,24 @@ public:
                             case 3:
                                 app.on_mouse_button(nya_system::mouse_right,true);
                             break;
+
+                            case 4:
+                                app.on_mouse_scroll(0,scroll_modifier);
+                            break;
+
+                            case 5:
+                                app.on_mouse_scroll(0,-scroll_modifier);
+                            break;
+
+                            case 6:
+                                app.on_mouse_scroll(scroll_modifier,0);
+                            break;
+
+                            case 7:
+                                app.on_mouse_scroll(-scroll_modifier,0);
+                            break;
                         }
+                    }
                     break;
 
                     case ButtonRelease:
@@ -126,11 +150,14 @@ public:
                     break;
                 };
             }
-            while(XPending(m_dpy));
 
-            app.on_process(0);  //ToDo: dt
+            unsigned long time=nya_system::get_time();
+            unsigned int dt=(unsigned)(time-m_time);
+            m_time=time;
 
+            app.on_process(dt);
             app.on_draw();
+
             glXSwapBuffers(m_dpy,m_win);
         }
     }
@@ -146,7 +173,11 @@ public:
 
     void update_splash(nya_system::app_responder &app)
     {
-        app.on_splash(0); //ToDo: dt
+        unsigned long time=nya_system::get_time();
+        unsigned int dt=(unsigned)(time-m_time);
+        m_time=time;
+
+        app.on_splash(dt);
         glXSwapBuffers(m_dpy,m_win);
     }
 
@@ -158,11 +189,12 @@ public:
     }
 
 public:
-    shared_app():m_dpy(0),m_win(0){}
+    shared_app():m_dpy(0),m_win(0),m_time(0){}
 
 private:
     Display *m_dpy;
     Window m_win;
+    unsigned long m_time;
 };
 
 }

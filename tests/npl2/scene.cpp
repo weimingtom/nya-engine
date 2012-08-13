@@ -3,10 +3,10 @@
 #include "scene.h"
 #include "attributes.h"
 #include "resources/resources.h"
-
 #include "tsb_anim.h"
 
 #include "string.h"
+#include "stdlib.h"
 
 void viewer_camera::apply()
 {
@@ -112,7 +112,7 @@ void scene::init()
                     if(num=='0')
                     {
                         if(anim_map.find(anim_name)==anim_map.end())
-                        {                        
+                        {
                             m_anim_list.push_back(anim_name.c_str());
                             anim_map[anim_name]=true;
 
@@ -174,7 +174,7 @@ void scene::init()
         m_aniki.load(model_res);
         model_res->release();
     }
-  
+
     m_shader_scenery.add_program(nya_render::shader::vertex,
 
                                  "mat3 get_rot(mat4 m)"
@@ -193,7 +193,7 @@ void scene::init()
                                  "  gl_Position=gl_ModelViewProjectionMatrix*gl_Vertex;"
                                  "}");
 
-    
+
     const char *fprogram=
     "uniform sampler2D base_map;"
     "void main(void)"
@@ -210,9 +210,9 @@ void scene::init()
     "  gl_FragColor=base*color*vcolor;"
     //"  gl_FragColor=vcolor;"
     "}";
-    
+
     m_shader_scenery.add_program(nya_render::shader::pixel,fprogram);
-    
+
     m_shader_scenery_anim.add_program(nya_render::shader::vertex,
                                  "uniform mat4 bones[200];"
 
@@ -226,12 +226,12 @@ void scene::init()
                                  "  gl_TexCoord[0]=gl_MultiTexCoord0;"
                                  "  vec4 bone_idx=gl_MultiTexCoord1;"
                                  "  vec4 bone_weight=gl_MultiTexCoord2;"
-                                      
+
                                  "  mat4 bone0=bones[int(bone_idx.x)]*bone_weight.x;"
                                  "  mat4 bone1=bones[int(bone_idx.y)]*bone_weight.y;"
                                  "  mat4 bone2=bones[int(bone_idx.z)]*bone_weight.z;"
                                  "  mat4 bone3=bones[int(bone_idx.w)]*bone_weight.w;"
-                                  
+
                                  "  vec4 pos=bone0*gl_Vertex;"
                                  "  pos+=bone1*gl_Vertex;"
                                  "  pos+=bone2*gl_Vertex;"
@@ -329,7 +329,7 @@ void scene::set_bkg(const char *name)
     attribute *atr=get_attribute_manager().get("BG",name);
     if(!atr)
         return;
-    
+
     //atr->debug_print();
 
     for(int i=0;i<max_bkg_models;++i)
@@ -365,7 +365,7 @@ void scene::set_bkg(const char *name)
             anim.release();
             scenery_res->release();
         }
-        
+
         m_bkg_models_anim_times[i]=0;
     }
 
@@ -376,9 +376,9 @@ void scene::process(unsigned int dt)
 {
     if(dt>100)
        dt=100;
-    
+
     const float kdt=dt*0.001f;
-    
+
     const float anim_framerate=50.0f;
 
     m_anim_time+=kdt*anim_framerate;
@@ -388,7 +388,7 @@ void scene::process(unsigned int dt)
     const size_t frames_count=imouto.get_frames_count();
     if(m_anim_time>=frames_count)
         m_anim_time=0;
-    
+
     for(int i=0;i<max_bkg_models;++i)
     {
         const unsigned int frames_count=m_bkg_models[i].get_frames_count();
@@ -429,15 +429,15 @@ void scene::draw()
 
     glEnable(GL_BLEND);
     glDisable(GL_CULL_FACE);
-    
+
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER,0.2f);
 
     const tmb_model::locator *scene_loc=0;
-    
+
     if(!m_anim_list.empty() && m_curr_anim!=m_anim_list.end())
         scene_loc=m_bkg_models[0].get_locator(m_curr_anim->loc_idx);
-    
+
     if(scene_loc)
         glColor3f(scene_loc->color[0], scene_loc->color[1], scene_loc->color[2]);
 
@@ -585,7 +585,7 @@ void scene::set_anim(unsigned int num)
         return;
 
     m_curr_anim=m_anim_list.begin()+num;
-    
+
     apply_anim();
 }
 
@@ -593,7 +593,7 @@ const char *scene::get_anim_name(unsigned int num)
 {
     if(num>=m_anim_list.size())
         return 0;
-    
+
     return m_anim_list[num].name[0].c_str();
 }
 
@@ -609,17 +609,17 @@ void scene::apply_anim()
 
     m_imouto.set_anim(m_curr_anim->name[0].c_str());
     m_anim_time=0;
-    
+
     std::string bro_anim=m_curr_anim->name[1];
-    
+
     if(bro_anim.empty())
     {
         m_aniki.apply_anim(0);
         return;
     }
-    
+
     bro_anim.append(".tsb");
-    
+
     anim_ref a=get_shared_anims().access(bro_anim.c_str());
     m_aniki.apply_anim(a.get());
 }
