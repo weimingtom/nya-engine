@@ -27,13 +27,13 @@ public:
 
         NSRect viewRect = NSMakeRect(x,y,w,h);
 
-        NSWindow *window = [[NSWindow alloc] initWithContentRect:viewRect styleMask:NSTitledWindowMask|NSMiniaturizableWindowMask|NSResizableWindowMask|NSClosableWindowMask backing:NSBackingStoreBuffered defer:YES];
+        m_window = [[NSWindow alloc] initWithContentRect:viewRect styleMask:NSTitledWindowMask|NSMiniaturizableWindowMask|NSResizableWindowMask|NSClosableWindowMask backing:NSBackingStoreBuffered defer:YES];
 
-        [window setTitle:@"Nya engine"];
-        [window setOpaque:YES];
+        [m_window setTitle:@"Nya engine"];
+        [m_window setOpaque:YES];
 
         //NSWindowController* windowController = 
-        [[NSWindowController alloc] initWithWindow:window];
+        [[NSWindowController alloc] initWithWindow:m_window];
 
         shared_app_delegate *delegate = [[shared_app_delegate alloc] init_with_responder:&app];
 
@@ -41,7 +41,7 @@ public:
 
         setup_menu();
 
-        [window orderFrontRegardless];
+        [m_window orderFrontRegardless];
         [NSApp run];
     }
 
@@ -54,10 +54,7 @@ public:
     {
     }
 
-    void update_splash(nya_system::app_responder &app)
-    {
-    }
-    
+
 private:
     void setup_menu()
     {
@@ -88,21 +85,84 @@ public:
         return app;
     }
 
+    static NSWindow *get_window()
+    {
+        return get_app().m_window;
+    }
+
 public:
-    shared_app() {}
+    shared_app(): m_window(0) {}
 
 private:
+    NSWindow *m_window;
 };
 
 }
+
+@interface gl_view : NSOpenGLView 
+{
+    NSTimer *m_animation_timer;
+    nya_system::app_responder *m_app;
+}
+@end
+
+@implementation gl_view
+
+-(void)set_responder:(nya_system::app_responder*)responder;
+{
+    m_app=responder;
+}
+
+-(void)animationTimerFired:(NSTimer*)timer 
+{
+    [self draw];
+    //[self setNeedsDisplay:YES];
+}
+
+-(void)draw
+{
+    //glClearColor(0,0.6,0.7,1);
+    //glClear(GL_COLOR_BUFFER_BIT);
+    
+    //return;
+    
+    m_app->on_process(0);
+    m_app->on_draw();
+
+    [[self openGLContext] flushBuffer];
+    
+    if (!m_animation_timer) 
+    {
+        m_animation_timer=[[NSTimer scheduledTimerWithTimeInterval:0.017 target:self selector:@selector(animationTimerFired:) userInfo:nil repeats:YES] retain];
+    }
+}
+
+-(void)reshape 
+{
+    glViewport(0,0,[self frame].size.width,[self frame].size.height);     
+    m_app->on_resize([self frame].size.width,[self frame].size.height);
+
+    [[self openGLContext] update];
+    
+    [self draw];
+}
+
+-(void)dealloc 
+{
+    [m_animation_timer release];
+    
+    [super dealloc];
+}
+
+@end
 
 @implementation shared_app_delegate
 
 -(id)init_with_responder:(nya_system::app_responder*)responder;
 {
-    self = [super init];
+    self=[super init];
     if (self)
-        m_app = responder;
+        m_app=responder;
     
     return self;
 }
@@ -112,8 +172,47 @@ private:
     return YES;
 }
 
-@end
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification 
+{
+    //ToDo: optional multisampling
 
+    NSOpenGLPixelFormatAttribute attrs[] = 
+    {
+        NSOpenGLPFADoubleBuffer,
+        NSOpenGLPFADepthSize, 32,
+        NSOpenGLPFASampleBuffers,1,NSOpenGLPFASamples,4,
+        0
+    };
+
+    NSWindow *window=shared_app::get_window();
+
+    NSOpenGLPixelFormat *format = [[NSOpenGLPixelFormat alloc] initWithAttributes:attrs];
+    gl_view *view = [[gl_view alloc] initWithFrame:window.frame pixelFormat:format];
+    [format release];
+
+    [view set_responder:m_app];
+    [window setContentView:view];
+
+    if ([view openGLContext] == nil) 
+    {
+        return;
+    }
+
+    glEnable(GL_MULTISAMPLE_ARB);
+
+    [view reshape];
+
+    m_app->on_init_splash();
+    m_app->on_splash(0);
+
+    [[view openGLContext] flushBuffer];
+
+    m_app->on_init();
+
+    //[view draw];
+}
+
+@end
 
 namespace nya_system
 {
@@ -134,7 +233,7 @@ void app::set_mouse_pos(int x,int y)
 
 void app::update_splash()
 {
-    shared_app::get_app().update_splash(*this);
+    //shared_app::get_app().update_splash(*this);
 }
 
 void app::finish()

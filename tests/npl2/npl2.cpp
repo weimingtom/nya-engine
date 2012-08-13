@@ -17,11 +17,15 @@ class npl2: public nya_system::app
 private:
 	void on_init_splash()
 	{
+	    nya_log::get_log()<<"on_init_splash\n";
+
 	    glClearColor(0,0.6,0.7,1);
 	}
 
 	void on_splash(unsigned int dt)
 	{
+	    nya_log::get_log()<<"on_splash\n";
+
 	    glClear(GL_COLOR_BUFFER_BIT);
     }
 
@@ -30,6 +34,8 @@ private:
 	    nya_log::get_log()<<"on_init\n";
 
 	    glClearColor(0,0.3,0.4,1);
+        
+        //sleep(2);
 
         get_scene().init();
 	    m_ui.init();
@@ -65,7 +71,7 @@ private:
 
     void on_resize(unsigned int w,unsigned int h)
     {
-        nya_log::get_log()<<"on_resize "<<w<<" "<<h<<"\n";
+        //nya_log::get_log()<<"on_resize "<<w<<" "<<h<<"\n";
 
         if(!w || !h)
             return;
