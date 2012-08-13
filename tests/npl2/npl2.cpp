@@ -36,8 +36,6 @@ private:
 	    nya_log::get_log()<<"on_init\n";
 
 	    glClearColor(0,0.3,0.4,1);
-        
-        //sleep(2);
 
         init_resource_system();
 
@@ -47,6 +45,7 @@ private:
 
 	void on_process(unsigned int dt)
 	{
+        get_scene().process(dt);
 	    m_ui.process();
 	}
 
@@ -83,7 +82,7 @@ private:
         //nya_log::get_log()<<"mmove "<<x<<" "<<y<<"\n";
         
         if(!m_ui.mouse_scroll(dx,dy))
-            get_scene().get_camera().add_scale(dy*0.1f);
+            get_scene().get_camera().add_scale(dy*0.03f);
     }
 
     void on_mouse_button(nya_system::mouse_button button,bool pressed)

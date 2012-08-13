@@ -49,9 +49,13 @@ void viewer_camera::add_pos(float dx,float dy)
 void viewer_camera::add_scale(float ds)
 {
     m_scale *= (1.0f+ds);
-    const float min_scale=0.01f;
+    const float min_scale=0.4f;
     if(m_scale<min_scale)
         m_scale=min_scale;
+
+    const float max_scale=10.0f;
+    if(m_scale>max_scale)
+        m_scale=max_scale;
 }
 
 void scene::init()
@@ -368,6 +372,35 @@ void scene::set_bkg(const char *name)
     m_has_scenery=true;
 }
 
+void scene::process(unsigned int dt)
+{
+    if(dt>100)
+       dt=100;
+    
+    const float kdt=dt*0.001f;
+    
+    const float anim_framerate=50.0f;
+
+    m_anim_time+=kdt*anim_framerate;
+
+    character &imouto=m_preview?m_imouto_preview:m_imouto;
+
+    const size_t frames_count=imouto.get_frames_count();
+    if(m_anim_time>=frames_count)
+        m_anim_time=0;
+    
+    for(int i=0;i<max_bkg_models;++i)
+    {
+        const unsigned int frames_count=m_bkg_models[i].get_frames_count();
+        if(!frames_count)
+            continue;
+
+        m_bkg_models_anim_times[i]+=kdt*anim_framerate;
+        if(m_bkg_models_anim_times[i]>=frames_count)
+            m_bkg_models_anim_times[i]=0;
+    }
+}
+
 void scene::draw()
 {
     if(m_has_scenery)
@@ -407,13 +440,8 @@ void scene::draw()
     
     if(scene_loc)
         glColor3f(scene_loc->color[0], scene_loc->color[1], scene_loc->color[2]);
-    
-    m_anim_time+=1.0f;
 
     const size_t frames_count=imouto.get_frames_count();
-    if(m_anim_time>=frames_count)
-        m_anim_time=0;
-
     if(frames_count)
     {
         m_shader.bind();
@@ -431,10 +459,7 @@ void scene::draw()
         m_shader.set_uniform16_array(m_sh_mat_uniform,
                                      m_aniki.get_buffer(int(m_anim_time)),
                                      m_aniki.get_bones_count());
-
-        //glTranslatef(m_bro_dpos_x,m_bro_dpos_y,m_bro_dpos_z);
         m_aniki.draw(true);
-        //glTranslatef(-m_bro_dpos_x,-m_bro_dpos_y,-m_bro_dpos_z);
     }
 
     if(frames_count)
@@ -469,10 +494,7 @@ void scene::draw()
         m_shader_black.set_uniform16_array(m_shbl_mat_uniform,
                                            m_aniki.get_buffer(int(m_anim_time)),
                                            m_aniki.get_bones_count());
-
-        //glTranslatef(m_bro_dpos_x,m_bro_dpos_y,m_bro_dpos_z);
         m_aniki.draw(false);
-        //glTranslatef(-m_bro_dpos_x,-m_bro_dpos_y,-m_bro_dpos_z);
     }
 
     if(frames_count)
@@ -483,32 +505,25 @@ void scene::draw()
 
     glColor4f(1.0f,1.0f,1.0f,1.0f);
 
-
     glPushMatrix();
     if(scene_loc)
     {
         glRotatef(-scene_loc->ang[1]*180.0f/3.14f,0.0f,1.0f,0.0f);
         glTranslatef(-scene_loc->pos[0],-scene_loc->pos[1],-scene_loc->pos[2]);
     }
-    
+
     for(int i=0;i<max_bkg_models;++i)
     {
         const unsigned int bones_count=m_bkg_models[i].get_bones_count();
         const unsigned int frames_count=m_bkg_models[i].get_frames_count();
-        
+
         if(bones_count && frames_count)
         {
-            m_bkg_models_anim_times[i]+=1.0f;
-            if(m_bkg_models_anim_times[i]>=frames_count)
-                m_bkg_models_anim_times[i]=0;
-
             m_shader_scenery_anim.bind();
             m_shader_scenery_anim.set_uniform16_array(m_sh_mat_uniform,
                                                       m_bkg_models[i].get_buffer(int(m_bkg_models_anim_times[i])),
-                                                      m_bkg_models[i].get_bones_count());
-
+                                                      bones_count);
             m_bkg_models[i].draw(true);
-            
             m_shader_scenery_anim.unbind();
         }
         else
@@ -518,12 +533,9 @@ void scene::draw()
             m_shader_scenery.unbind();
         }
     }
-    
     glPopMatrix();
 
-    glDisable(GL_BLEND);
-
-    glDisable( GL_DEPTH_TEST );
+    glDisable(GL_ALPHA_TEST);
 }
 
 void scene::set_imouto_attr(const char *key,const char *value,int num)

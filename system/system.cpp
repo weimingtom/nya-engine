@@ -70,6 +70,31 @@ const char *get_app_path()
 
     return path;
 }
+    
+#ifdef _WIN32
+
+#include <windows.h>
+#include "time.h"
+    
+#pragma comment ( lib, "WINMM.LIB"  )
+
+unsigned long get_time()
+{
+    return timeGetTime();
+}
+
+#else
+
+#include <sys/time.h>
+
+unsigned long get_time()
+{
+    timeval tim;
+    gettimeofday(&tim, 0);
+    return (tim.tv_sec*1000+(tim.tv_usec/1000));
+}
+
+#endif
 
 }
 

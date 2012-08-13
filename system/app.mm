@@ -1,6 +1,7 @@
 //https://code.google.com/p/nya-engine/
 
 #include "app.h"
+#include "system.h"
 
 #include <Cocoa/Cocoa.h>
 
@@ -102,6 +103,7 @@ private:
 {
     NSTimer *m_animation_timer;
     nya_system::app_responder *m_app;
+    unsigned long m_time;
 }
 @end
 
@@ -114,10 +116,12 @@ private:
 
 -(void)initTimer
 {
-    m_animation_timer=[NSTimer timerWithTimeInterval:0.02 target:self 
+    m_animation_timer=[NSTimer timerWithTimeInterval:0.01 target:self 
                                        selector:@selector(animate:) userInfo:nil repeats:YES];
     
     [[self window] setAcceptsMouseMovedEvents:YES];
+    
+    m_time=nya_system::get_time();
     
     [[NSRunLoop currentRunLoop] addTimer:m_animation_timer forMode:NSDefaultRunLoopMode];
     [[NSRunLoop currentRunLoop] addTimer:m_animation_timer forMode:NSEventTrackingRunLoopMode];
@@ -130,7 +134,11 @@ private:
 
 - (void)drawRect:(NSRect)rect 
 {
-    m_app->on_process(0);
+    unsigned long time=nya_system::get_time();
+    unsigned int dt=(unsigned int)(time-m_time);
+    m_time=time;
+
+    m_app->on_process(dt);
     m_app->on_draw();
     
     [[self openGLContext] flushBuffer];    
@@ -240,8 +248,6 @@ private:
 
     [view set_responder:m_app];
     
-    [view initTimer];
-    
     [window setContentView:view];
 
     [window makeFirstResponder:view];
@@ -262,6 +268,8 @@ private:
     [[view openGLContext] flushBuffer];
 
     m_app->on_init();
+    
+    [view initTimer];
 }
 
 @end

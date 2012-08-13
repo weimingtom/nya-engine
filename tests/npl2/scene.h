@@ -28,6 +28,7 @@ class scene
 {
 public:
     void init();
+    void process(unsigned int dt);
     void draw();
     viewer_camera &get_camera() { return m_camera; }
     void set_bkg(const char *name);
