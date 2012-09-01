@@ -60,7 +60,16 @@ void character::set_attrib(const char *key,const char *value,int num)
         else if(id==hair)
             value="imo_hairA_00";
         else
+        {
+            if(num<0)
+                p.free_models();
+            else if(num<part::max_models_per_part)
+            {
+                p.subparts[num].model.free();
+                p.subparts[num].value="nil";
+            }
             return;
+        }
     }
 
     std::string value_str(value);
