@@ -77,18 +77,18 @@ void layer::draw_text(uint x,uint y,const char *text
     const float w=chs/m_width;
     const float h=chs/m_height;
 
-    float px=-1.0f+2.0f*x/m_width;
-    float py=-1.0f+2.0f*y/m_height;
-
     if(aligh_hor==center)
-        px-=0.5f*(w*char_actual_width/char_size*(str_len+1));
+        x-=0.25f*(chs*char_actual_width/char_size*str_len);
     else if(aligh_hor==right)
-        px-=(w*char_actual_width/char_size*str_len);
+        x-=0.5*(chs*char_actual_width/char_size*str_len);
 
     if(aligh_vert==center)
-        py-=0.5f*h;
+        y-=0.25f*chs;
     else if(aligh_vert==top)
-        py-=h;
+        y-=0.5f*chs;
+
+    float px=-1.0f+2.0f*x/m_width;
+    float py=-1.0f+2.0f*y/m_height;
 
     const uint elem_per_char=4;
     nya_memory::tmp_buffer_scoped vert_buf(text_str.size()*4*elem_per_char*sizeof(float));
@@ -102,7 +102,7 @@ void layer::draw_text(uint x,uint y,const char *text
         float *tc=(float*)vert_buf.get_data(tc_buf_offset+buf_offset);
 
         pos[6]=pos[4]=px+dpos;
-        pos[2]=pos[0]=w+pos[6];
+        pos[2]=pos[0]=pos[6]+w*char_actual_width/char_size;
         pos[7]=pos[1]=py;
         pos[5]=pos[3]=h+py;
 
@@ -111,17 +111,16 @@ void layer::draw_text(uint x,uint y,const char *text
         const uint letter_y=(letter_pos)/chars_per_row;
 
         const float tcx=tc_w*letter_x-offs_w;
-        const float tcy=tc_h*letter_y-offs_h;
+        const float tcy=tc_h*letter_y;
         float tcw=tc_w-offs_w;
         float tch=tc_h-offs_h;
+        
+        const float tc_fix=0.5f*(tc_w-float(char_actual_width)/font_width);
 
-        tc[6]=tc[4]=tcx;
-        tc[2]=tc[0]=tcx+tcw;
+        tc[6]=tc[4]=tcx+tc_fix;
+        tc[2]=tc[0]=tcx+tcw-tc_fix;
         tc[7]=tc[1]=tcy+tch;
         tc[5]=tc[3]=tcy;
-
-        //for(int i=1;i<8;i+=2)
-        //    tc[i]=1.0f-(tc[i]+offs_h);
 
         dpos+=w*char_actual_width/char_size;
     }

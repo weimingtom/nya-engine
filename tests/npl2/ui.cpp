@@ -274,7 +274,8 @@ void ui::draw_text(uint x,uint y,const char *text
     if(!m_font_tex.is_valid())
         return;
 
-    glColor4f(0,0,0,1);
+    //glColor4f(0,0,0,1);
+    glColor4f(1,1,1,1);
 
     m_text_shader.bind();
     m_font_tex->bind();
