@@ -45,6 +45,8 @@
 		<Unit filename="../../tests/npl2/attributes.h" />
 		<Unit filename="../../tests/npl2/character.cpp" />
 		<Unit filename="../../tests/npl2/character.h" />
+		<Unit filename="../../tests/npl2/config.cpp" />
+		<Unit filename="../../tests/npl2/config.h" />
 		<Unit filename="../../tests/npl2/npl2.cpp" />
 		<Unit filename="../../tests/npl2/pl2_resources_provider.cpp" />
 		<Unit filename="../../tests/npl2/pl2_resources_provider.h" />

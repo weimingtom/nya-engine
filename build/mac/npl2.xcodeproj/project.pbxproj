@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F2037A73160136E300C7C104 /* config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2037A72160136E300C7C104 /* config.cpp */; };
 		F220566A15D929D100362591 /* npl2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F220565B15D929D100362591 /* npl2.cpp */; };
 		F220566B15D929D100362591 /* character.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F220565C15D929D100362591 /* character.cpp */; };
 		F220566C15D929D100362591 /* tmb_model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F220565D15D929D100362591 /* tmb_model.cpp */; };
@@ -31,6 +32,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		F2037A71160136E300C7C104 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config.h; path = ../../tests/npl2/config.h; sourceTree = "<group>"; };
+		F2037A72160136E300C7C104 /* config.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = config.cpp; path = ../../tests/npl2/config.cpp; sourceTree = "<group>"; };
 		F220565B15D929D100362591 /* npl2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = npl2.cpp; path = ../../tests/npl2/npl2.cpp; sourceTree = "<group>"; };
 		F220565C15D929D100362591 /* character.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = character.cpp; path = ../../tests/npl2/character.cpp; sourceTree = "<group>"; };
 		F220565D15D929D100362591 /* tmb_model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tmb_model.cpp; path = ../../tests/npl2/tmb_model.cpp; sourceTree = "<group>"; };
@@ -72,6 +75,8 @@
 		F220567215D929D900362591 /* npl2 */ = {
 			isa = PBXGroup;
 			children = (
+				F2037A71160136E300C7C104 /* config.h */,
+				F2037A72160136E300C7C104 /* config.cpp */,
 				F220565B15D929D100362591 /* npl2.cpp */,
 				F220565C15D929D100362591 /* character.cpp */,
 				F220565D15D929D100362591 /* tmb_model.cpp */,
@@ -218,6 +223,7 @@
 				F220566F15D929D100362591 /* ui.cpp in Sources */,
 				F220567015D929D100362591 /* pl2_resources_provider.cpp in Sources */,
 				F220567115D929D100362591 /* tsb_anim.cpp in Sources */,
+				F2037A73160136E300C7C104 /* config.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

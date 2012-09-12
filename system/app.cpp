@@ -3,6 +3,8 @@
 #include "app.h"
 #include "system.h"
 
+#include <string>
+
 #ifdef _WIN32
 
 #include <windows.h>
@@ -62,7 +64,7 @@ public:
                   w,h,0,vi->depth,InputOutput,vi->visual,
                   CWBorderPixel|CWColormap|CWEventMask,&swa);
 
-        XSetStandardProperties(m_dpy,m_win,"main","main",None,0,0,NULL);
+        XSetStandardProperties(m_dpy,m_win,m_title.c_str(),m_title.c_str(),None,0,0,NULL);
         glXMakeCurrent(m_dpy,m_win,cx);
         XMapWindow(m_dpy, m_win);
 
@@ -171,6 +173,22 @@ public:
     {
     }
 
+    void set_title(const char *title)
+    {
+        if(!title)
+        {
+            m_title.clear();
+            return;
+        }
+
+        m_title.assign(title);
+
+        if(!m_dpy || !m_win)
+            return;
+
+        XSetStandardProperties(m_dpy,m_win,title,title,None,0,0,NULL);
+    }
+
     void update_splash(nya_system::app_responder &app)
     {
         unsigned long time=nya_system::get_time();
@@ -189,11 +207,12 @@ public:
     }
 
 public:
-    shared_app():m_dpy(0),m_win(0),m_time(0){}
+    shared_app():m_dpy(0),m_win(0),m_title("Nya engine"),m_time(0) {}
 
 private:
     Display *m_dpy;
     Window m_win;
+    std::string m_title;
     unsigned long m_time;
 };
 
@@ -212,6 +231,11 @@ void app::start_windowed(int x,int y,unsigned int w,unsigned int h)
 void app::start_fullscreen(unsigned int w,unsigned int h)
 {
     shared_app::get_app().start_fullscreen(w,h,*this);
+}
+
+void app::set_title(const char *title)
+{
+    shared_app::get_app().set_title(title);
 }
 
 void app::set_mouse_pos(int x,int y)

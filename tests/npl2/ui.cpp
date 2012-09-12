@@ -42,14 +42,15 @@ void ui::init()
                             "uniform sampler2D base_map;"
                             "void main(void)"
                             "{"
-                            "    vec4 base=texture2D(base_map,gl_TexCoord[0].xy);"
-                            "    gl_FragColor=gl_TexCoord[1]*base;"
+                            //"    vec4 base=texture2D(base_map,gl_TexCoord[0].xy);"
+                            //"    gl_FragColor=gl_TexCoord[1]*base;"
+                              "    gl_FragColor=gl_TexCoord[1];"
                             "}");
 
     m_ui_shader.set_sampler("base_map",0);
 
     m_font_tex=nya_resources::get_shared_textures().access("font.tga");
-    m_ui_tex=nya_resources::get_shared_textures().access("ui.tga");
+    //m_ui_tex=nya_resources::get_shared_textures().access("ui.tga");
 
     const int btn_width=72;
     const int btn_height=22;
@@ -281,7 +282,7 @@ void ui::draw_text(uint x,uint y,const char *text
     m_font_tex->bind();
 
     nya_ui::layer::draw_text(x,y,text,aligh_hor,aligh_vert);
-
+    
     m_font_tex->unbind();
 
     m_text_shader.unbind();
@@ -289,13 +290,13 @@ void ui::draw_text(uint x,uint y,const char *text
 
 void ui::draw_rect(nya_ui::rect &r,rect_style &s)
 {
-    if(!m_ui_tex.is_valid())
-        return;
+    //if(!m_ui_tex.is_valid())
+    //    return;
 
     m_ui_shader.bind();
-    m_ui_tex->bind();
+    //m_ui_tex->bind();
     nya_ui::layer::draw_rect(r,s);
-    m_ui_tex->unbind();
+    //m_ui_tex->unbind();
     m_ui_shader.unbind();
 }
 

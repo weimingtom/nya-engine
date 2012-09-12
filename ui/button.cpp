@@ -21,7 +21,9 @@ void button::draw(layer &layer)
     rs.border=true;
 
     rs.solid_color=rs.border_color;
-    rs.solid_color.a=0.5f;
+    rs.solid_color.g+=0.05f;
+    rs.solid_color.b-=0.1f;
+    rs.solid_color.a=0.8f;
     rs.solid=true;
     
     layer.draw_rect(r,rs);

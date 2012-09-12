@@ -49,22 +49,22 @@ struct list_style
 
         list.solid=true;
         list.solid_color=list.border_color;
-        list.solid_color.a=0.1;
+        list.solid_color.a=0.4;
 
         scroll_area=list;
-        scroll_area.solid_color.a=0.2;
+        scroll_area.solid_color.a=0.5;
 
         scroll=list;
-        scroll.solid_color.a=0.5;
+        scroll.solid_color.a=0.8;
 
         button_up=button_dn=scroll;
 
         entry_selected=list;
 
-        entry_selected.solid_color.a=0.3;
+        entry_selected.solid_color.a=0.6;
         entry_hl=entry;
         entry_hl.solid=true;
-        entry_hl.solid_color.set(0.7,0.6,1.0,0.5);
+        entry_hl.solid_color.set(0.7,0.6,1.0,0.8);
         scroll_hl=button_dn_hl=button_up_hl=entry_hl;
     }
 };

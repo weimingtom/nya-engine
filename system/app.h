@@ -54,6 +54,7 @@ public:
     void start_fullscreen(unsigned int w,unsigned int h);
 
 protected:
+    void set_title(const char *title);
     void limit_framerate(unsigned int fps);
     void set_mouse_pos(int x,int y);
     void update_splash();

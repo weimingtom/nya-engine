@@ -4,6 +4,7 @@
 #include "system.h"
 
 #include <Cocoa/Cocoa.h>
+#include <string>
 
 @interface shared_app_delegate : NSObject <NSApplicationDelegate>
 {
@@ -30,7 +31,8 @@ public:
 
         m_window=[[NSWindow alloc] initWithContentRect:viewRect styleMask:NSTitledWindowMask|NSMiniaturizableWindowMask|NSResizableWindowMask|NSClosableWindowMask backing:NSBackingStoreBuffered defer:YES];
 
-        [m_window setTitle:@"Nya engine"];
+        NSString *title_str=[NSString stringWithCString:m_title.c_str() encoding:NSUTF8StringEncoding];
+        [m_window setTitle:title_str];
         [m_window setOpaque:YES];
 
         [[NSWindowController alloc] initWithWindow:m_window];
@@ -53,7 +55,20 @@ public:
     void finish(nya_system::app_responder &app)
     {
     }
+    
+    void set_title(const char *title)
+    {
+        if(!title)
+            m_title.clear();
+        else
+            m_title.assign(title);
 
+        if(!m_window)
+            return;
+
+        NSString *title_str=[NSString stringWithCString:m_title.c_str() encoding:NSUTF8StringEncoding];
+        [m_window setTitle:title_str];
+    }
 
 private:
     void setup_menu()
@@ -91,10 +106,11 @@ public:
     }
 
 public:
-    shared_app(): m_window(0) {}
+    shared_app(): m_window(0), m_title("Nya engine") {}
 
 private:
     NSWindow *m_window;
+    std::string m_title;
 };
 
 }
@@ -287,6 +303,11 @@ void app::start_fullscreen(unsigned int w,unsigned int h)
     shared_app::get_app().start_fullscreen(w,h,*this);
 }
 
+void app::set_title(const char *title)
+{
+    shared_app::get_app().set_title(title);
+}
+    
 void app::set_mouse_pos(int x,int y)
 {
 }

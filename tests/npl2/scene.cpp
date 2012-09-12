@@ -1,12 +1,15 @@
 //https://code.google.com/p/nya-engine/
 
 #include "scene.h"
+#include "config.h"
 #include "attributes.h"
 #include "resources/resources.h"
 #include "tsb_anim.h"
 
 #include "string.h"
 #include "stdlib.h"
+
+#include <string>
 
 void viewer_camera::apply()
 {
@@ -248,7 +251,7 @@ void scene::init()
 
     m_shader_scenery_anim.add_program(nya_render::shader::pixel,fprogram);
 
-    const char *vprogram=
+    const char *char_vs=
     "uniform mat4 bones[200];"
 
     "mat3 get_rot(mat4 m)"
@@ -262,58 +265,109 @@ void scene::init()
     "  vec4 bone_idx=gl_MultiTexCoord1;"
     "  vec4 bone_weight=gl_MultiTexCoord2;"
 
-    "  mat4 bone0=bones[int(bone_idx.x)]*bone_weight.x;"
-    "  mat4 bone1=bones[int(bone_idx.y)]*bone_weight.y;"
-    "  mat4 bone2=bones[int(bone_idx.z)]*bone_weight.z;"
-    "  mat4 bone3=bones[int(bone_idx.w)]*bone_weight.w;"
+    "  vec4 pos;"
 
-    "  vec4 pos=bone0*gl_Vertex;"
-    "  pos+=bone1*gl_Vertex;"
-    "  pos+=bone2*gl_Vertex;"
-    "  pos+=bone3*gl_Vertex;"
+    "  const float eps=0.01;"
 
-    "  vec3 nor=get_rot(bone0)*gl_Normal.xyz;"
-    "  nor+=get_rot(bone1)*gl_Normal.xyz;"
-    "  nor+=get_rot(bone2)*gl_Normal.xyz;"
-    "  nor+=get_rot(bone3)*gl_Normal.xyz;"
+    //"  if(bone_weight.x>eps)"
+    //"  {"
+    "    mat4 bone=bones[int(bone_idx.x)]*bone_weight.x;"
+    "    pos=bone*gl_Vertex;"
+    //"  }"
+    //"  else"
+    //"    pos=vec4(0,0,0,0);"
+
+    "\n#ifdef specular_enabled\n"
+    "  vec3 nor=get_rot(bone)*gl_Normal.xyz;"
+    "\n#endif\n"
+
+    "  if(bone_weight.y>eps)"
+    "  {"
+    "    mat4 bone=bones[int(bone_idx.y)]*bone_weight.y;"
+    "    pos+=bone*gl_Vertex;"
+
+    "\n  #ifdef specular_enabled\n"
+    "    nor+=get_rot(bone)*gl_Normal.xyz;"
+    "\n  #endif\n"
+
+    "  }"
+
+    "  if(bone_weight.z>eps)"
+    "  {"
+    "    mat4 bone=bones[int(bone_idx.z)]*bone_weight.z;"
+    "    pos+=bone*gl_Vertex;"
+
+    "\n  #ifdef specular_enabled\n"
+    "    nor+=get_rot(bone)*gl_Normal.xyz;"
+    "\n  #endif\n"
+
+    "  }"
+
+    "  if(bone_weight.w>eps)"
+    "  {"
+    "    mat4 bone=bones[int(bone_idx.w)]*bone_weight.w;"
+    "    pos+=bone*gl_Vertex;"
+
+    "\n  #ifdef specular_enabled\n"
+    "    nor+=get_rot(bone)*gl_Normal.xyz;"
+    "\n  #endif\n"
+
+    "  }"
+
+    "\n#ifdef specular_enabled\n"
+    "  gl_TexCoord[1].xyz=get_rot(gl_ModelViewMatrix)*nor;"
+    "\n#endif\n"
 
     "  gl_TexCoord[2]=gl_Color;"
     //"  gl_TexCoord[3]=gl_MultiTexCoord3;"
 
-    "  gl_TexCoord[1].xyz=get_rot(gl_ModelViewMatrix)*nor;"
-
     "  gl_Position=gl_ModelViewProjectionMatrix*pos;"
     "}";
 
-    //for(int i=0;i<128;++i) printf("%c|%i/",i,i);
+    const char *char_ps=
+    "uniform sampler2D base_map;"
+     "void main(void)"
+     "{"
+     "  vec4 color=gl_TexCoord[2];"
+     //"  vec4 vcolor=gl_TexCoord[3];"
+     "  vec4 base=texture2D(base_map,gl_TexCoord[0].xy);"
 
-    m_shader.add_program(nya_render::shader::vertex,vprogram);
-    m_shader.add_program(nya_render::shader::pixel,
-                         "uniform sampler2D base_map;"
-                         "void main(void)"
-                         "{"
-                         "  vec4 color=gl_TexCoord[2];"
-                         //"  vec4 vcolor=gl_TexCoord[3];"
-                         "  vec4 base=texture2D(base_map,gl_TexCoord[0].xy);"
-                         //"  float l=dot(normalize(vec3(0,0,1.0)),normalize(gl_TexCoord[1].xyz));"
-                         "  float ls=dot(normalize(vec3(-0.3,0,1.0)),normalize(gl_TexCoord[1].xyz));"
-                         //"  gl_FragColor=vec4((0.85+max(0.0,l*0.15))*base.rgb+pow(max(ls,0.0),90.0)*vec3(0.06),base.a);"
-                         "  gl_FragColor=vec4(base.rgb+pow(max(ls,0.0),90.0)*vec3(0.06),base.a)*color;"
-                         //"  gl_FragColor=base;"
-                         "}");
+     "\n#ifdef specular_enabled\n"
+     //"  float l=dot(normalize(vec3(0,0,1.0)),normalize(gl_TexCoord[1].xyz));"
+     "  float ls=dot(normalize(vec3(-0.3,0,1.0)),normalize(gl_TexCoord[1].xyz));"
+     //"  gl_FragColor=vec4((0.85+max(0.0,l*0.15))*base.rgb+pow(max(ls,0.0),90.0)*vec3(0.06),base.a);"
+     "  gl_FragColor=vec4(base.rgb+pow(max(ls,0.0),90.0)*vec3(0.06),base.a)*color;"
+     "\n#else\n"
+     "  gl_FragColor=base*color;"
+     "\n#endif\n"
+     //"  gl_FragColor=base;"
+     "}";
+
+    std::string char_vs_str;
+    std::string char_ps_str;
+    if(get_config().specular_enabled)
+    {
+        const char *specular_define="#define specular_enabled\n";
+        char_vs_str.append(specular_define);
+        char_ps_str.append(specular_define);
+    }
+
+    char_vs_str.append(char_vs);
+    char_ps_str.append(char_ps);
+
+    m_shader.add_program(nya_render::shader::vertex,char_vs_str.c_str());
+    m_shader.add_program(nya_render::shader::pixel,char_ps_str.c_str());
 
     m_shader.set_sampler("base_map",0);
     m_sh_mat_uniform=m_shader.get_handler("bones");
 
-    m_shader_black.add_program(nya_render::shader::vertex,vprogram);
+    m_shader_black.add_program(nya_render::shader::vertex,char_vs);
     m_shader_black.add_program(nya_render::shader::pixel,
                                "void main(void)"
                                "{"
                                "  gl_FragColor=vec4(0,0,0,0.3);"
                                "}");
     m_shbl_mat_uniform=m_shader_black.get_handler("bones");
-
-
 
     m_imouto.set_attrib("COORDINATE","ok_vocaloid00");
     m_imouto.set_attrib("BODY","imo_bodyB_00");
@@ -374,8 +428,8 @@ void scene::set_bkg(const char *name)
 
 void scene::process(unsigned int dt)
 {
-    if(dt>100)
-       dt=100;
+    if(dt>3000)
+       dt=3000;
 
     const float kdt=dt*0.001f;
 
@@ -387,7 +441,11 @@ void scene::process(unsigned int dt)
 
     const size_t frames_count=imouto.get_frames_count();
     if(m_anim_time>=frames_count)
-        m_anim_time=imouto.get_first_loop_frame();
+    {
+        m_anim_time-=frames_count-imouto.get_first_loop_frame();
+        if(m_anim_time>=frames_count)
+            m_anim_time=imouto.get_first_loop_frame();
+    }
 
     for(int i=0;i<max_bkg_models;++i)
     {
@@ -396,8 +454,8 @@ void scene::process(unsigned int dt)
             continue;
 
         m_bkg_models_anim_times[i]+=kdt*anim_framerate;
-        if(m_bkg_models_anim_times[i]>=frames_count)
-            m_bkg_models_anim_times[i]=0;
+        while(m_bkg_models_anim_times[i]>=frames_count)
+            m_bkg_models_anim_times[i]-=frames_count;
     }
 }
 
@@ -465,40 +523,43 @@ void scene::draw()
     if(frames_count)
         m_shader.unbind();
 
-    glEnable(GL_CULL_FACE);
-
-    glDisable(GL_TEXTURE_2D);
-
-	glColor4f(0,0,0,0.3f);
-
-    glPolygonMode(GL_BACK,GL_LINE);
-    glCullFace(GL_FRONT);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-
-    //m_scenery.draw(false);
-
-    if(frames_count)
+    if(get_config().wireframe_outline_enabled)
     {
-        m_shader_black.bind();
-        m_shader_black.set_uniform16_array(m_shbl_mat_uniform,
-                                           imouto.get_buffer(int(m_anim_time)),
-                                           imouto.get_bones_count());
+        glEnable(GL_CULL_FACE);
+
+        glDisable(GL_TEXTURE_2D);
+
+        glColor4f(0,0,0,0.3f);
+
+        glPolygonMode(GL_BACK,GL_LINE);
+        glCullFace(GL_FRONT);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+
+        //m_scenery.draw(false);
+
+        if(frames_count)
+        {
+            m_shader_black.bind();
+            m_shader_black.set_uniform16_array(m_shbl_mat_uniform,
+                                               imouto.get_buffer(int(m_anim_time)),
+                                               imouto.get_bones_count());
+        }
+
+        imouto.draw(false);
+
+        //bro
+        if(bro_frames_count)
+        {
+            m_shader_black.set_uniform16_array(m_shbl_mat_uniform,
+                                               m_aniki.get_buffer(int(m_anim_time)),
+                                               m_aniki.get_bones_count());
+            m_aniki.draw(false);
+        }
+
+        if(frames_count)
+            m_shader_black.unbind();
     }
-
-    imouto.draw(false);
-
-    //bro
-    if(bro_frames_count)
-    {
-        m_shader_black.set_uniform16_array(m_shbl_mat_uniform,
-                                           m_aniki.get_buffer(int(m_anim_time)),
-                                           m_aniki.get_bones_count());
-        m_aniki.draw(false);
-    }
-
-    if(frames_count)
-        m_shader_black.unbind();
 
     glCullFace(GL_BACK);
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
