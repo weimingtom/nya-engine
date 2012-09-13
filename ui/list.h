@@ -124,6 +124,9 @@ public:
     };
 
 protected:
+    typedef event_data_allocator<event_data> list_event_data;
+
+protected:
     virtual void draw(layer &l);
     virtual void update_rects();
 

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "log/log.h"
+#include "memory/pool.h"
 
 #include <string>
 #include <list>
@@ -21,6 +22,7 @@ nya_log::log &get_log();
 typedef unsigned int uint;
 
 uint clamp(int v,uint from,uint to);
+float clamp(float v,float from,float to);
 
 struct rect
 {
@@ -447,6 +449,33 @@ private:
     events_deque m_events;
 
     //font m_default_font;
+};
+
+template<typename ev_data>
+struct event_data_allocator: public ev_data
+{
+    static ev_data *create()
+    {
+        return get_allocator().allocate();
+    }
+
+    void free()
+    {
+        free_element(this);
+    }
+
+private:
+    typedef nya_memory::pool<event_data_allocator,32> allocator;
+    static allocator &get_allocator()
+    {
+        static nya_memory::pool<event_data_allocator,32> events;
+        return events;
+    }
+
+    static void free_element(event_data_allocator *data)
+    {
+        get_allocator().free(data);
+    }
 };
 
 }

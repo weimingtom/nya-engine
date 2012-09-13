@@ -34,6 +34,7 @@ public:
     void set_bkg(const char *name);
     void set_imouto_attr(const char *key,const char *value,int num=-1);
     void set_imouto_preview(const char *key,const char *value,int num=-1);
+    void set_part_opacity(const char *key,float value,int num=-1);
     void finish_imouto_preview();
     void prev_anim();
     void next_anim();
@@ -41,10 +42,10 @@ public:
     const char *get_anim_name(unsigned int num);
     unsigned int get_anims_count();
     void release();
-    
+
 private:
     void apply_anim();
-    
+
 public:
     scene(): m_sh_mat_uniform(0), m_shbl_mat_uniform(0), m_preview(false), m_anim_time(0), m_has_scenery(false) {}
 
@@ -91,7 +92,7 @@ private:
 
 private:
     const static int max_bkg_models=3;
-    tmb_model m_bkg_models[max_bkg_models]; 
+    tmb_model m_bkg_models[max_bkg_models];
     float m_bkg_models_anim_times[max_bkg_models];
     bool m_has_scenery;
 };

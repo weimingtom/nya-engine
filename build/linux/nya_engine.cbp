@@ -82,6 +82,8 @@
 		<Unit filename="../../ui/list.h" />
 		<Unit filename="../../ui/panel.cpp" />
 		<Unit filename="../../ui/panel.h" />
+		<Unit filename="../../ui/slider.cpp" />
+		<Unit filename="../../ui/slider.h" />
 		<Unit filename="../../ui/ui.cpp" />
 		<Unit filename="../../ui/ui.h" />
 		<Extensions>

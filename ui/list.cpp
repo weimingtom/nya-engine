@@ -1,38 +1,10 @@
 //https://code.google.com/p/nya-engine/
 
 #include "ui/list.h"
-#include "memory/pool.h"
 #include "math.h"
 
 namespace nya_ui
 {
-
-
-struct list_event_data: public list::event_data
-{
-    static event_data *create()
-    {
-        return get_allocator().allocate();
-    }
-
-    void free()
-    {
-        free_element(this);
-    }
-
-private:
-    typedef nya_memory::pool<list_event_data,32> allocator;
-    static allocator &get_allocator()
-    {
-        static nya_memory::pool<list_event_data,32> events;
-        return events;
-    }
-
-    static void free_element(list_event_data *data)
-    {
-        get_allocator().free(data);
-    }
-};
 
 void list::draw(layer &layer)
 {

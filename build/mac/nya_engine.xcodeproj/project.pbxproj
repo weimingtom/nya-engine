@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F241A70E160292B1004646EB /* slider.h in Headers */ = {isa = PBXBuildFile; fileRef = F241A70A160292B1004646EB /* slider.h */; };
+		F241A70F160292B1004646EB /* slider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F241A70B160292B1004646EB /* slider.cpp */; };
+		F241A710160292B1004646EB /* label.h in Headers */ = {isa = PBXBuildFile; fileRef = F241A70C160292B1004646EB /* label.h */; };
+		F241A711160292B1004646EB /* label.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F241A70D160292B1004646EB /* label.cpp */; };
 		F259322615D858140092C7D8 /* platform_specific_gl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F25931ED15D858140092C7D8 /* platform_specific_gl.cpp */; };
 		F259322715D858140092C7D8 /* platform_specific_gl.h in Headers */ = {isa = PBXBuildFile; fileRef = F25931EE15D858140092C7D8 /* platform_specific_gl.h */; };
 		F259322815D858140092C7D8 /* render.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F25931EF15D858140092C7D8 /* render.cpp */; };
@@ -55,6 +59,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F241A70A160292B1004646EB /* slider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = slider.h; sourceTree = "<group>"; };
+		F241A70B160292B1004646EB /* slider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = slider.cpp; sourceTree = "<group>"; };
+		F241A70C160292B1004646EB /* label.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = label.h; sourceTree = "<group>"; };
+		F241A70D160292B1004646EB /* label.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = label.cpp; sourceTree = "<group>"; };
 		F25931E215D857C40092C7D8 /* libnya_engine.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libnya_engine.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		F25931ED15D858140092C7D8 /* platform_specific_gl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = platform_specific_gl.cpp; sourceTree = "<group>"; };
 		F25931EE15D858140092C7D8 /* platform_specific_gl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = platform_specific_gl.h; sourceTree = "<group>"; };
@@ -173,6 +181,10 @@
 		F259320615D858140092C7D8 /* ui */ = {
 			isa = PBXGroup;
 			children = (
+				F241A70A160292B1004646EB /* slider.h */,
+				F241A70B160292B1004646EB /* slider.cpp */,
+				F241A70C160292B1004646EB /* label.h */,
+				F241A70D160292B1004646EB /* label.cpp */,
 				F259320715D858140092C7D8 /* button.cpp */,
 				F259320815D858140092C7D8 /* button.h */,
 				F259320B15D858140092C7D8 /* list.cpp */,
@@ -259,6 +271,8 @@
 				F259325615D858140092C7D8 /* memory.h in Headers */,
 				F259325715D858140092C7D8 /* pool.h in Headers */,
 				F259325915D858140092C7D8 /* tmp_buffer.h in Headers */,
+				F241A70E160292B1004646EB /* slider.h in Headers */,
+				F241A710160292B1004646EB /* label.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -330,6 +344,8 @@
 				F259325515D858140092C7D8 /* memory.cpp in Sources */,
 				F259325815D858140092C7D8 /* tmp_buffer.cpp in Sources */,
 				F25932BB15D865BF0092C7D8 /* app.mm in Sources */,
+				F241A70F160292B1004646EB /* slider.cpp in Sources */,
+				F241A711160292B1004646EB /* label.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

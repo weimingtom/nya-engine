@@ -6,6 +6,7 @@
 #include "ui/button.h"
 #include "ui/list.h"
 #include "ui/panel.h"
+#include "ui/slider.h"
 
 #include "resources/shared_textures.h"
 #include "render/shader.h"
@@ -27,9 +28,15 @@ private:
     virtual void process_events(event &e);
 
 private:
+    bool is_props_visible();
+
+private:
     nya_ui::panel m_anim_pnl;
     nya_ui::panel m_customize_pnl;
     nya_ui::panel m_scenery_pnl;
+
+    nya_ui::panel m_props_pnl;
+    nya_ui::slider m_opac_slider;
 
     struct customize_btn
     {

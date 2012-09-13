@@ -95,7 +95,7 @@ bool attribute_parser::load(nya_resources::resource_data *data)
             nya_log::get_log()<<"Attribute parser warning: dublicate attribute"
                               <<key.c_str()<<"\n";
     }
-    
+
     return true;
 }
 
@@ -124,7 +124,7 @@ void attribute_parser::debug_print()
                 c='?';
         }
 
-        nya_log::get_log()<<"<"<<it->first.c_str()<<"> = <"<<safe_prnt.c_str()<<"\n";
+        nya_log::get_log()<<"<"<<it->first.c_str()<<"> = <"<<safe_prnt.c_str()<<">\n";
     }
 }
 

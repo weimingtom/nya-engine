@@ -4,6 +4,7 @@
 
 #include "ui/list.h"
 #include "ui/button.h"
+#include "ui/label.h"
 
 #include "attributes.h"
 #include "scene.h"
@@ -199,6 +200,26 @@ void ui::init()
         ++it;
     }
 
+    const int props_width=200;
+    const int props_height=100;
+    m_props_pnl.set_align(false,true,true,false);
+    m_props_pnl.set_pos(get_width()-offset-props_width,get_height()-props_height-offset);
+    m_props_pnl.set_size(props_width,props_height);
+    m_props_pnl.set_visible(false);
+    add_widget(m_props_pnl);
+
+    static nya_ui::label opac_lbl;
+    opac_lbl.set_text("Opacity");
+    opac_lbl.set_pos(0,props_height-btn_height);
+    opac_lbl.set_size(btn_width,btn_height);
+    m_props_pnl.add_widget(opac_lbl);
+
+    const int slider_height=16;
+    const int slider_width=props_width-offset*2;
+    m_opac_slider.set_id("opac_sldr");
+    m_opac_slider.set_pos(offset,props_height-btn_height-slider_height);
+    m_opac_slider.set_size(slider_width,slider_height);
+    m_props_pnl.add_widget(m_opac_slider);
 
     //if(m_imouto)
     //    m_customise_lst.select_element(m_imouto->get_attrib(def_group));
@@ -282,7 +303,7 @@ void ui::draw_text(uint x,uint y,const char *text
     m_font_tex->bind();
 
     nya_ui::layer::draw_text(x,y,text,aligh_hor,aligh_vert);
-    
+
     m_font_tex->unbind();
 
     m_text_shader.unbind();
@@ -298,6 +319,18 @@ void ui::draw_rect(nya_ui::rect &r,rect_style &s)
     nya_ui::layer::draw_rect(r,s);
     //m_ui_tex->unbind();
     m_ui_shader.unbind();
+}
+
+bool ui::is_props_visible()
+{
+    if(!m_customize_pnl.is_visible())
+        return false;
+
+    if(m_customise_group=="BODY" || m_customise_group=="HAIR"
+       || m_customise_group=="EYE" || m_customise_group=="COORDINATE")
+        return false;
+
+    return true;
 }
 
 void ui::process_events(event &e)
@@ -345,7 +378,7 @@ void ui::process_events(event &e)
 
     if(e.sender=="scenery_lst")
     {
-        if(e.type=="select_element")
+        if(e.type=="select_element" && e.data)
         {
             nya_ui::list::event_data *data=dynamic_cast<nya_ui::list::event_data*>(e.data);
             if(data)
@@ -355,24 +388,38 @@ void ui::process_events(event &e)
 
     if(e.sender=="anim_lst")
     {
-        if(e.type=="select_element")
+        if(e.type=="select_element" && e.data)
         {
             nya_ui::list::event_data *data=dynamic_cast<nya_ui::list::event_data*>(e.data);
             if(!data)
                 return;
-            
+
             get_scene().set_anim(data->idx);
         }
+    }
+
+    if(e.sender=="opac_sldr")
+    {
+        if(e.type=="value_changed" && e.data)
+        {
+            nya_ui::slider::event_data *data=dynamic_cast<nya_ui::slider::event_data*>(e.data);
+            if(!data)
+                return;
+
+            get_scene().set_part_opacity(m_customise_group.c_str(),data->value);
+            //nya_log::get_log()<<data->value<<"\n";
+        }
+        //nya_log::get_log()<<e.type.c_str();
+        return;
     }
 
     if(e.type!="mouse_left_btn_down")
         return;
 
-    //nya_log::get_log()<<e.type.c_str();
-
     if(e.sender=="customize_btn")
     {
         m_customize_pnl.set_visible(!m_customize_pnl.is_visible());
+        m_props_pnl.set_visible(is_props_visible());
         m_anim_pnl.set_visible(false);
         m_scenery_pnl.set_visible(false);
         return;
@@ -381,6 +428,7 @@ void ui::process_events(event &e)
     if(e.sender=="anim_btn")
     {
         m_customize_pnl.set_visible(false);
+        m_props_pnl.set_visible(is_props_visible());
         m_anim_pnl.set_visible(!m_anim_pnl.is_visible());
         m_scenery_pnl.set_visible(false);
         return;
@@ -389,6 +437,7 @@ void ui::process_events(event &e)
     if(e.sender=="scenery_btn")
     {
         m_customize_pnl.set_visible(false);
+        m_props_pnl.set_visible(is_props_visible());
         m_anim_pnl.set_visible(false);
         m_scenery_pnl.set_visible(!m_scenery_pnl.is_visible());
         return;
@@ -426,6 +475,7 @@ void ui::process_events(event &e)
             elem=get_attribute_manager().iterate_next_element();
         }
 
+        m_props_pnl.set_visible(is_props_visible());
 
         //ToDo:
         /*

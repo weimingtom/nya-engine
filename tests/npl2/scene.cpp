@@ -496,9 +496,6 @@ void scene::draw()
     if(!m_anim_list.empty() && m_curr_anim!=m_anim_list.end())
         scene_loc=m_bkg_models[0].get_locator(m_curr_anim->loc_idx);
 
-    if(scene_loc)
-        glColor3f(scene_loc->color[0], scene_loc->color[1], scene_loc->color[2]);
-
     const size_t frames_count=imouto.get_frames_count();
     if(frames_count)
     {
@@ -508,7 +505,13 @@ void scene::draw()
                                      imouto.get_bones_count());
     }
 
+    if(scene_loc)
+        imouto.set_color(scene_loc->color[0],scene_loc->color[1],scene_loc->color[2]);
+    
     imouto.draw(true);
+    
+    if(scene_loc)
+        glColor3f(scene_loc->color[0],scene_loc->color[1],scene_loc->color[2]);
 
     //bro
     const size_t bro_frames_count=m_aniki.get_frames_count();
@@ -610,6 +613,11 @@ void scene::set_imouto_preview(const char *key,const char *value,int num)
     m_imouto_preview.set_attrib(key,value,num);
     m_imouto_preview.set_anim(m_imouto.get_anim());
     m_preview=true;
+}
+
+void scene::set_part_opacity(const char *key,float value,int num)
+{
+    m_imouto.set_part_opacity(key,value,num);
 }
 
 void scene::finish_imouto_preview()

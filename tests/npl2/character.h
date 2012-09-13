@@ -16,11 +16,12 @@ public:
     void reset_attrib();
     void set_anim(const char *anim_name);
     const char *get_anim() const { return m_anim_name.c_str(); }
+    void set_part_opacity(const char *key,float value,int num=-1);
 
     void draw(bool use_materials);
 
     void release();
-    
+
     void copy_attrib(const character &from);
 
     const float *get_buffer(unsigned int frame) const;
@@ -28,7 +29,18 @@ public:
     unsigned int get_bones_count() const;
     unsigned int get_first_loop_frame() const;
     
-    character(): m_body_group_count(0), m_body_blend_group_idx(0) {}
+    void set_color(float r,float g,float b)
+    {
+        m_color[0]=r;
+        m_color[1]=g;
+        m_color[2]=b;
+    }
+
+    character(): m_body_group_count(0), m_body_blend_group_idx(0) 
+    { 
+        for(int i=0;i<3;++i)
+            m_color[i]=1.0f;
+    }
 
 private:
     enum part_id
@@ -49,6 +61,8 @@ private:
     };
 
     part_id get_part_id(const char *name);  //unstrict
+    
+    void draw_part(unsigned int idx,bool use_materials);
 
 private:
     struct part
@@ -57,20 +71,13 @@ private:
         {
             std::string value;
             model_ref model;
+            float opacity;
+
+            subpart(): opacity(1.0f) {}
         };
 
         static const int max_models_per_part=4;
         subpart subparts[max_models_per_part];
-        
-        void draw(bool use_materials)
-        {
-            for(int i=2;i>0;--i)
-            {
-                model_ref &m=subparts[i-1].model;
-                if(m.is_valid())
-                    m->draw(use_materials);
-            }
-        }
 
         void free_models()
         {
@@ -86,4 +93,5 @@ private:
     std::string m_anim_name;
     int m_body_group_count;
     int m_body_blend_group_idx;
+    float m_color[3];
 };
