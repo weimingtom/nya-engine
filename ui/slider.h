@@ -33,7 +33,7 @@ class slider: public widget
 {
 public:
     void get_value();
-    void set_value(float value) { m_value=clamp(value,0.0f,1.0f); }
+    void set_value(float value) { m_value=clamp(value,0.0f,1.0f); update_rects(); }
 
     virtual void set_size(uint width,uint height)
     {

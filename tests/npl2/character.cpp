@@ -3,8 +3,9 @@
 #include "character.h"
 #include "attributes.h"
 #include "tsb_anim.h"
-
 #include "string.h"
+
+#include "render/platform_specific_gl.h"
 
 void character::set_attrib(const char *key,const char *value,int num)
 {
@@ -209,7 +210,7 @@ void character::copy_attrib(const character &from)
     set_attrib("ARM",from.m_parts[arm].subparts[0].value.c_str());
     set_attrib("SHOES",from.m_parts[shoes].subparts[0].value.c_str());
     set_attrib("HAIR",from.m_parts[hair].subparts[0].value.c_str());
-    
+
     for(int i=0;i<max_parts;++i)
         for(int j=0;j<2;++j)
             m_parts[i].subparts[j].opacity=from.m_parts[i].subparts[j].opacity;
@@ -256,7 +257,7 @@ void character::set_part_opacity(const char *key,float value,int num)
 {
     if(!key)
         return;
-    
+
     value*=0.7f;
     value+=0.3f;
 
@@ -273,15 +274,37 @@ void character::set_part_opacity(const char *key,float value,int num)
         for(int i=0;i<2;++i)
             p.subparts[i].opacity=value;
     }
-    
+
     if(num>=2)
         return;
-    
+
     p.subparts[num].opacity=value;
 }
 
+float character::get_part_opacity(const char *key,int num)
+{
+    if(!key || num>=2)
+        return -1.0f;
 
-#include "render/platform_specific_gl.h"
+    if(num<0)
+        num=0;
+
+    part_id id=get_part_id(key);
+    if(id==invalid_part)
+    {
+        nya_log::get_log()<<"Unable to set character attribute: unknown key\n";
+        return -1.0f;
+    }
+
+    return m_parts[id].subparts[num].opacity;
+}
+
+void character::reset_parts_opacity()
+{
+    for(int i=0;i<max_parts;++i)
+        for(int j=0;j<2;++j)
+            m_parts[i].subparts[j].opacity=1.0f;
+}
 
 void character::draw(bool use_materials)
 {
@@ -289,7 +312,7 @@ void character::draw(bool use_materials)
         return;
 
     glColor4f(m_color[0],m_color[1],m_color[2],1);
-    
+
     for(int i=0;i<m_body_group_count;++i)
     {
         if(i==m_body_blend_group_idx)

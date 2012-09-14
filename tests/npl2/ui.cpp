@@ -214,7 +214,14 @@ void ui::init()
     opac_lbl.set_size(btn_width,btn_height);
     m_props_pnl.add_widget(opac_lbl);
 
-    const int slider_height=16;
+    static nya_ui::button opac_reset_btn;
+    opac_reset_btn.set_id("opac_reset_btn");
+    opac_reset_btn.set_text("Reset all");
+    opac_reset_btn.set_pos(props_width-(btn_width+offset),props_height-(btn_height+offset)*0.7);
+    opac_reset_btn.set_size(btn_width,btn_height*0.7);
+    m_props_pnl.add_widget(opac_reset_btn);
+
+    const int slider_height=10;
     const int slider_width=props_width-offset*2;
     m_opac_slider.set_id("opac_sldr");
     m_opac_slider.set_pos(offset,props_height-btn_height-slider_height);
@@ -333,6 +340,28 @@ bool ui::is_props_visible()
     return true;
 }
 
+void ui::update_props_panel()
+{
+    const bool visible=is_props_visible();
+
+    m_props_pnl.set_visible(visible);
+
+    if(!visible)
+        return;
+
+    int num=-1;
+    if(m_customise_group=="COSTUME")
+    {
+        if(m_custom_mode==cos_up)
+            num=0;
+        else if(m_custom_mode==cos_dn)
+            num=1;
+    }
+
+    const float value=get_scene().get_part_opacity(m_customise_group.c_str(),num);
+    m_opac_slider.set_value(value);
+}
+
 void ui::process_events(event &e)
 {
     if(e.sender=="customise_lst")
@@ -406,7 +435,16 @@ void ui::process_events(event &e)
             if(!data)
                 return;
 
-            get_scene().set_part_opacity(m_customise_group.c_str(),data->value);
+            int num=-1;
+            if(m_customise_group=="COSTUME")
+            {
+                if(m_custom_mode==cos_up)
+                    num=0;
+                else if(m_custom_mode==cos_dn)
+                    num=1;
+            }
+            
+            get_scene().set_part_opacity(m_customise_group.c_str(),data->value,num);
             //nya_log::get_log()<<data->value<<"\n";
         }
         //nya_log::get_log()<<e.type.c_str();
@@ -416,10 +454,16 @@ void ui::process_events(event &e)
     if(e.type!="mouse_left_btn_down")
         return;
 
+    if(e.sender=="opac_reset_btn")
+    {
+        get_scene().reset_parts_opacity();
+        m_opac_slider.set_value(1.0f);
+    }
+
     if(e.sender=="customize_btn")
     {
         m_customize_pnl.set_visible(!m_customize_pnl.is_visible());
-        m_props_pnl.set_visible(is_props_visible());
+        update_props_panel();
         m_anim_pnl.set_visible(false);
         m_scenery_pnl.set_visible(false);
         return;
@@ -428,7 +472,7 @@ void ui::process_events(event &e)
     if(e.sender=="anim_btn")
     {
         m_customize_pnl.set_visible(false);
-        m_props_pnl.set_visible(is_props_visible());
+        update_props_panel();
         m_anim_pnl.set_visible(!m_anim_pnl.is_visible());
         m_scenery_pnl.set_visible(false);
         return;
@@ -437,7 +481,7 @@ void ui::process_events(event &e)
     if(e.sender=="scenery_btn")
     {
         m_customize_pnl.set_visible(false);
-        m_props_pnl.set_visible(is_props_visible());
+        update_props_panel();
         m_anim_pnl.set_visible(false);
         m_scenery_pnl.set_visible(!m_scenery_pnl.is_visible());
         return;
@@ -475,7 +519,7 @@ void ui::process_events(event &e)
             elem=get_attribute_manager().iterate_next_element();
         }
 
-        m_props_pnl.set_visible(is_props_visible());
+        update_props_panel();
 
         //ToDo:
         /*

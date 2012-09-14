@@ -33,8 +33,11 @@ public:
     viewer_camera &get_camera() { return m_camera; }
     void set_bkg(const char *name);
     void set_imouto_attr(const char *key,const char *value,int num=-1);
+    const char *get_imouto_attr(const char *key,int num=-1);
     void set_imouto_preview(const char *key,const char *value,int num=-1);
     void set_part_opacity(const char *key,float value,int num=-1);
+    float get_part_opacity(const char *key,int num=-1);
+    void reset_parts_opacity();
     void finish_imouto_preview();
     void prev_anim();
     void next_anim();

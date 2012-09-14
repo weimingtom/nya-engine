@@ -507,11 +507,13 @@ void scene::draw()
 
     if(scene_loc)
         imouto.set_color(scene_loc->color[0],scene_loc->color[1],scene_loc->color[2]);
-    
+
     imouto.draw(true);
-    
+
     if(scene_loc)
-        glColor3f(scene_loc->color[0],scene_loc->color[1],scene_loc->color[2]);
+        glColor4f(scene_loc->color[0],scene_loc->color[1],scene_loc->color[2],1.0f);
+    else
+        glColor4f(1.0f,1.0f,1.0f,1.0f);
 
     //bro
     const size_t bro_frames_count=m_aniki.get_frames_count();
@@ -618,6 +620,21 @@ void scene::set_imouto_preview(const char *key,const char *value,int num)
 void scene::set_part_opacity(const char *key,float value,int num)
 {
     m_imouto.set_part_opacity(key,value,num);
+}
+
+const char *scene::get_imouto_attr(const char *key,int num)
+{
+    return m_imouto.get_attrib(key,num);
+}
+
+float scene::get_part_opacity(const char *key,int num)
+{
+    return m_imouto.get_part_opacity(key,num);
+}
+
+void scene::reset_parts_opacity()
+{
+    m_imouto.reset_parts_opacity();
 }
 
 void scene::finish_imouto_preview()

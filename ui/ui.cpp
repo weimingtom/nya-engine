@@ -25,6 +25,13 @@ uint clamp(int v,uint from,uint to)
     return v;
 }
 
+float clamp(float v,float from,float to)
+{
+    if(v>(int)to) v=to;
+    if(v<(int)from) v=from;
+    return v;
+}
+
 void layer::draw()
 {
     draw_widgets(*this);
@@ -114,7 +121,7 @@ void layer::draw_text(uint x,uint y,const char *text
         const float tcy=tc_h*letter_y;
         float tcw=tc_w-offs_w;
         float tch=tc_h-offs_h;
-        
+
         const float tc_fix=0.5f*(tc_w-float(char_actual_width)/font_width);
 
         tc[6]=tc[4]=tcx+tc_fix;

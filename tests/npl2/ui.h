@@ -29,6 +29,7 @@ private:
 
 private:
     bool is_props_visible();
+    void update_props_panel();
 
 private:
     nya_ui::panel m_anim_pnl;

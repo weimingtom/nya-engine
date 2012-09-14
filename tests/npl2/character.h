@@ -12,11 +12,13 @@ class character
 {
 public:
     void set_attrib(const char *key, const char *value,int num=-1);
-    const char *get_attrib(const char *key,int num=0);
+    const char *get_attrib(const char *key,int num=-1);
     void reset_attrib();
     void set_anim(const char *anim_name);
     const char *get_anim() const { return m_anim_name.c_str(); }
     void set_part_opacity(const char *key,float value,int num=-1);
+    float get_part_opacity(const char *key,int num=-1);
+    void reset_parts_opacity();
 
     void draw(bool use_materials);
 
@@ -28,7 +30,7 @@ public:
     unsigned int get_frames_count() const;
     unsigned int get_bones_count() const;
     unsigned int get_first_loop_frame() const;
-    
+
     void set_color(float r,float g,float b)
     {
         m_color[0]=r;
@@ -36,8 +38,8 @@ public:
         m_color[2]=b;
     }
 
-    character(): m_body_group_count(0), m_body_blend_group_idx(0) 
-    { 
+    character(): m_body_group_count(0), m_body_blend_group_idx(0)
+    {
         for(int i=0;i<3;++i)
             m_color[i]=1.0f;
     }
@@ -61,7 +63,7 @@ private:
     };
 
     part_id get_part_id(const char *name);  //unstrict
-    
+
     void draw_part(unsigned int idx,bool use_materials);
 
 private:
