@@ -49,6 +49,12 @@ void character::set_attrib(const char *key,const char *value,int num)
         nya_log::get_log()<<"Unable to set character attribute: unknown key\n";
         return;
     }
+    
+    if(id==under)
+    {
+        if(num==0) set_attrib(key,value,2);
+        if(num==1) set_attrib(key,value,3);
+    }
 
     part &p=m_parts[id];
 
@@ -91,8 +97,8 @@ void character::set_attrib(const char *key,const char *value,int num)
             //nya_log::get_log()<<"Invalid attribute "<<value<<" of type "<<key<<"\n";
             value="nil";
         }
-        else
-            num=last-'A';
+        //else
+        //    num=last-'A';
     }
 
     if(!value[0] || strcasecmp(value,"nil")==0)
@@ -328,7 +334,22 @@ void character::draw(bool use_materials)
     glColor4f(m_color[0],m_color[1],m_color[2],1);
     m_parts[body].subparts[0].model->draw(use_materials,m_body_blend_group_idx);
 
-    for(int i=face;i<max_parts;++i)
+    for(int i=face;i<under;++i)
+        draw_part(i,use_materials);
+    
+    part &p=m_parts[under];
+    for(int i=2;i>0;--i)
+    {
+        model_ref &m=p.subparts[i-1].model;
+        //model_ref &m=p.subparts[2+i-1].model;
+        if(m.is_valid())
+        {
+            glColor4f(m_color[0],m_color[1],m_color[2],p.subparts[i-1].opacity);
+            m->draw(use_materials);
+        }
+    }
+    
+    for(int i=under+1;i<max_parts;++i)
         draw_part(i,use_materials);
 }
 
