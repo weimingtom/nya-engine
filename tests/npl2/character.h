@@ -74,8 +74,9 @@ private:
             std::string value;
             model_ref model;
             float opacity;
+            bool outline;
 
-            subpart(): opacity(1.0f) {}
+            subpart(): opacity(1.0f), outline(true) {}
         };
 
         static const int max_models_per_part=4;

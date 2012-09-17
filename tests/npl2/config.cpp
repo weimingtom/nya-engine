@@ -5,6 +5,8 @@
 #include "string.h"
 #include "stdlib.h"
 
+#include <algorithm>
+
 void bool_from_str(bool &b,const char *str)
 {
     if(!str)
@@ -46,6 +48,62 @@ bool config::load(nya_resources::resource_data *data)
     float_from_str(specular_level,parser.get_value("specular_level"));
 
     return result;
+}
+
+bool outline_ignore_list::should_ignore(const char *name)
+{
+    if(!name)
+        return false;
+    
+    std::string name_str(name);
+    std::transform(name_str.begin(),name_str.end(),name_str.begin(),::tolower);
+    
+    printf("(%s)\n",name_str.c_str());
+
+    ignore_list::iterator it=m_list.find(name_str);
+    if(it!=m_list.end())
+        return true;
+
+    return false;
+}
+
+bool outline_ignore_list::load(nya_resources::resource_data *data)
+{
+    if(!data || data->get_size()==0)
+        return false;
+
+    std::string content;
+    content.resize(data->get_size());
+    data->read_all(&content[0]);
+
+    size_t prev=0;
+    size_t endline=content.find("\n");
+    while(endline!=std::string::npos)
+    {
+        std::string entry=content.substr(prev,endline-prev);
+        std::transform(entry.begin(),entry.end(),entry.begin(),::tolower);
+        m_list[entry]=0;
+        prev=endline+1;
+        endline=content.find("\n",prev);
+    }
+
+    if(prev<content.length()-1)
+    {
+        std::string entry=content.substr(prev,endline);
+        std::transform(entry.begin(),entry.end(),entry.begin(),::tolower);
+        m_list[entry]=0;
+    }
+    
+    for(ignore_list::iterator it=m_list.begin();it!=m_list.end();++it)
+        printf("<%s>\n",it->first.c_str());
+
+    return false;
+}
+
+outline_ignore_list & get_outline_ignore()
+{
+    static outline_ignore_list list;
+    return list;
 }
 
 config &get_config()

@@ -4,6 +4,7 @@
 #include "attributes.h"
 #include "tsb_anim.h"
 #include "string.h"
+#include "config.h"
 
 #include "render/platform_specific_gl.h"
 
@@ -113,6 +114,8 @@ void character::set_attrib(const char *key,const char *value,int num)
         return;
     }
 
+    bool should_outline=!get_outline_ignore().should_ignore(value);
+    
     if(num<0)
     {
         int max_models=part::max_models_per_part;
@@ -125,6 +128,7 @@ void character::set_attrib(const char *key,const char *value,int num)
 
             p.subparts[i].model.free();
             p.subparts[i].value.assign(value);
+            p.subparts[i].outline=should_outline;
 
             char key[7]="FILE_";
             key[5]=i+'0';
@@ -160,6 +164,7 @@ void character::set_attrib(const char *key,const char *value,int num)
             return;
 
         p.subparts[num].value.assign(value);
+        p.subparts[num].outline=should_outline;
 
         ref=get_shared_models().access(model_name);
         if(!ref.is_valid())
@@ -319,12 +324,15 @@ void character::draw(bool use_materials)
 
     glColor4f(m_color[0],m_color[1],m_color[2],1);
 
-    for(int i=0;i<m_body_group_count;++i)
+    if(use_materials || m_parts[body].subparts[0].outline)
     {
-        if(i==m_body_blend_group_idx)
-            continue;
+        for(int i=0;i<m_body_group_count;++i)
+        {
+            if(i==m_body_blend_group_idx)
+                continue;
 
-        m_parts[body].subparts[0].model->draw(use_materials,i);
+            m_parts[body].subparts[0].model->draw(use_materials,i);
+        }
     }
 
     draw_part(eye,use_materials);
@@ -332,7 +340,8 @@ void character::draw(bool use_materials)
     draw_part(head,use_materials);
 
     glColor4f(m_color[0],m_color[1],m_color[2],1);
-    m_parts[body].subparts[0].model->draw(use_materials,m_body_blend_group_idx);
+    if(use_materials || m_parts[body].subparts[0].outline)
+        m_parts[body].subparts[0].model->draw(use_materials,m_body_blend_group_idx);
 
     for(int i=face;i<under;++i)
         draw_part(i,use_materials);
@@ -340,6 +349,9 @@ void character::draw(bool use_materials)
     part &p=m_parts[under];
     for(int i=2;i>0;--i)
     {
+        if(!use_materials && !p.subparts[i-1].outline)
+            continue;
+
         model_ref &m=p.subparts[i-1].model;
         //model_ref &m=p.subparts[2+i-1].model;
         if(m.is_valid())
@@ -361,6 +373,9 @@ void character::draw_part(unsigned int idx,bool use_materials)
     part &p=m_parts[idx];
     for(int i=2;i>0;--i)
     {
+        if(!use_materials && !p.subparts[i-1].outline)
+            continue;
+
         model_ref &m=p.subparts[i-1].model;
         if(m.is_valid())
         {
