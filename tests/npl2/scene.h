@@ -73,11 +73,13 @@ private:
     struct anim_info
     {
         std::string name[10];
+        std::string model_name[10];
 
-        int loc_idx;
+        int loc_idx[10];
 
-        anim_info(): loc_idx(-1) {}
-        anim_info(const char *n) { if(n) name[0].assign(n); loc_idx=0; }
+        anim_info() { for(int i=0;i<10;++i) loc_idx[i]=-1; }
+        anim_info(const char *n) { if(n) name[0].assign(n);
+            for(int i=1;i<10;++i) loc_idx[i]=-1; loc_idx[0]=0; }
     };
 
     std::vector<anim_info> m_anim_list;
@@ -92,6 +94,7 @@ private:
     float m_bro_dpos_z;
     */
     tmb_model m_aniki;
+    tmb_model m_the_third;
 
 private:
     const static int max_bkg_models=3;

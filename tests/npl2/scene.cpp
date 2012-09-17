@@ -128,7 +128,7 @@ void scene::init()
                                 if(loc_pos2>(loc_pos+7))
                                 {
                                     std::string pos=script_str.substr(loc_pos+5,loc_pos2-(loc_pos+5));
-                                    m_anim_list.back().loc_idx=atoi(&pos[pos.length()-2]);
+                                    m_anim_list.back().loc_idx[0]=atoi(&pos[pos.length()-2]);
                                     //nya_log::get_log()<<"\tpos0: "<<pos.c_str()<<" "<<m_anim_list.back().loc_idx<<"\n";
                                 }
                             }
@@ -142,19 +142,29 @@ void scene::init()
                     }
                     else if(num<='9' && !anim_ignored)
                     {
-                        m_anim_list.back().name[num-'1'+1]=anim_name;
-                        /*
-                        if(num=='1')
+                        size_t model_pos=script_str.rfind("%ml",pos);
+                        if(model_pos!=std::string::npos)
                         {
-                            size_t loc_pos=script_str.rfind("%mp1,",pos);
-                            if(loc_pos!=std::string::npos)
+                            char num = script_str[model_pos+3];
+                            size_t model_pos2=script_str.find(";",model_pos);
+                            if(model_pos2>(model_pos+7))
                             {
-                                size_t loc_pos2=script_str.find(";",loc_pos);
-                                std::string pos=script_str.substr(loc_pos+5,loc_pos2-(loc_pos+5));
-                                nya_log::get_log()<<"\tpos1: "<<pos.c_str()<<"\n";
+                                std::string model=script_str.substr(model_pos+5,model_pos2-(model_pos+5));
+                                m_anim_list.back().model_name[num-'1'+1]=model;
                             }
                         }
-                        */
+
+                        m_anim_list.back().name[num-'1'+1]=anim_name;
+
+                        size_t loc_pos=script_str.rfind("%mp",pos);
+                        if(loc_pos!=std::string::npos)
+                        {
+                            char num = script_str[loc_pos+3];
+                            size_t loc_pos2=script_str.find(";",loc_pos);
+                            std::string pos=script_str.substr(loc_pos+5,loc_pos2-(loc_pos+5));
+                            m_anim_list.back().loc_idx[num-'1'+1]=atoi(&pos[pos.length()-2]);
+                            //nya_log::get_log()<<"\tpos: "<<pos.c_str()<<" "<<m_anim_list.back().loc_idx[num-'1'+1]<<"\n";
+                        }
                     }
 
                     pos=script_str.find("%mm",pos2);
@@ -494,7 +504,7 @@ void scene::draw()
     const tmb_model::locator *scene_loc=0;
 
     if(!m_anim_list.empty() && m_curr_anim!=m_anim_list.end())
-        scene_loc=m_bkg_models[0].get_locator(m_curr_anim->loc_idx);
+        scene_loc=m_bkg_models[0].get_locator(m_curr_anim->loc_idx[0]);
 
     const size_t frames_count=imouto.get_frames_count();
     if(frames_count)
@@ -514,6 +524,23 @@ void scene::draw()
         glColor4f(scene_loc->color[0],scene_loc->color[1],scene_loc->color[2],1.0f);
     else
         glColor4f(1.0f,1.0f,1.0f,1.0f);
+    
+    glPushMatrix();/*
+    if(m_curr_anim!=m_anim_list.end() && m_curr_anim->loc_idx[1]!=m_curr_anim->loc_idx[0])
+    {
+        if(scene_loc)
+        {
+            glRotatef(-scene_loc->ang[1]*180.0f/3.14f,0.0f,1.0f,0.0f);
+            glTranslatef(-scene_loc->pos[0],-scene_loc->pos[1],-scene_loc->pos[2]);
+            
+            const tmb_model::locator *bro_loc=m_bkg_models[0].get_locator(m_curr_anim->loc_idx[1]);
+            if(bro_loc)
+            {
+                glRotatef(-bro_loc->ang[1]*180.0f/3.14f,0.0f,1.0f,0.0f);
+                glTranslatef(-bro_loc->pos[0],-bro_loc->pos[1],-bro_loc->pos[2]);
+            }
+        }
+    }*/
 
     //bro
     const size_t bro_frames_count=m_aniki.get_frames_count();
@@ -524,6 +551,37 @@ void scene::draw()
                                      m_aniki.get_bones_count());
         m_aniki.draw(true);
     }
+    glPopMatrix();
+
+    glPushMatrix();/*
+    if(m_curr_anim!=m_anim_list.end() && m_curr_anim->loc_idx[2]!=m_curr_anim->loc_idx[0])
+    {
+        if(scene_loc)
+        {
+            //glTranslatef(scene_loc->pos[0],scene_loc->pos[1],scene_loc->pos[2]);
+            //glRotatef(scene_loc->ang[1]*180.0f/3.14f,0.0f,1.0f,0.0f);
+            glRotatef(-scene_loc->ang[1]*180.0f/3.14f,0.0f,1.0f,0.0f);
+            glTranslatef(-scene_loc->pos[0],-scene_loc->pos[1],-scene_loc->pos[2]);
+
+            const tmb_model::locator *third_loc=m_bkg_models[0].get_locator(m_curr_anim->loc_idx[2]);
+            if(third_loc)
+            {
+                glTranslatef(third_loc->pos[0],third_loc->pos[1],third_loc->pos[2]);
+                glRotatef(third_loc->ang[1]*180.0f/3.14f,0.0f,1.0f,0.0f);
+            }
+        }
+    }*/
+
+    //another bro or item
+    const size_t third_frames_count=m_the_third.get_frames_count();
+    if(third_frames_count)
+    {
+        m_shader.set_uniform16_array(m_sh_mat_uniform,
+                                     m_the_third.get_buffer(int(m_anim_time)),
+                                     m_the_third.get_bones_count());
+        m_the_third.draw(true);
+    }
+    glPopMatrix();
 
     if(frames_count)
         m_shader.unbind();
@@ -553,14 +611,45 @@ void scene::draw()
 
         imouto.draw(false);
 
+        glPushMatrix();/*
+        if(m_curr_anim!=m_anim_list.end() && m_curr_anim->loc_idx[1]!=m_curr_anim->loc_idx[0])
+        {
+            if(scene_loc)
+            {
+                glRotatef(-scene_loc->ang[1]*180.0f/3.14f,0.0f,1.0f,0.0f);
+                glTranslatef(-scene_loc->pos[0],-scene_loc->pos[1],-scene_loc->pos[2]);
+                
+                const tmb_model::locator *bro_loc=m_bkg_models[0].get_locator(m_curr_anim->loc_idx[1]);
+                if(bro_loc)
+                {
+                    glTranslatef(bro_loc->pos[0],bro_loc->pos[1],bro_loc->pos[2]);
+                    glRotatef(bro_loc->ang[1]*180.0f/3.14f,0.0f,1.0f,0.0f);
+                }
+            }
+        }*/
+        
         //bro
+        const size_t bro_frames_count=m_aniki.get_frames_count();
         if(bro_frames_count)
         {
-            m_shader_black.set_uniform16_array(m_shbl_mat_uniform,
-                                               m_aniki.get_buffer(int(m_anim_time)),
-                                               m_aniki.get_bones_count());
+            m_shader.set_uniform16_array(m_sh_mat_uniform,
+                                         m_aniki.get_buffer(int(m_anim_time)),
+                                         m_aniki.get_bones_count());
             m_aniki.draw(false);
         }
+        glPopMatrix();
+
+        /*
+        //another bro or item
+        const size_t third_frames_count=m_the_third.get_frames_count();
+        if(third_frames_count)
+        {
+            m_shader.set_uniform16_array(m_sh_mat_uniform,
+                                         m_the_third.get_buffer(int(m_anim_time)),
+                                         m_the_third.get_bones_count());
+            m_the_third.draw(false);
+        }
+        */
 
         if(frames_count)
             m_shader_black.unbind();
@@ -671,6 +760,14 @@ void scene::set_anim(unsigned int num)
         return;
 
     m_curr_anim=m_anim_list.begin()+num;
+    
+    nya_log::get_log()<<"\nset_anim\n";
+    
+    for(int i=0;i<10;++i)
+    {
+        if(!m_curr_anim->name[i].empty())
+            nya_log::get_log()<<m_curr_anim->name[i].c_str()<<"\n";
+    }
 
     apply_anim();
 }
@@ -695,19 +792,39 @@ void scene::apply_anim()
 
     m_imouto.set_anim(m_curr_anim->name[0].c_str());
     m_anim_time=0;
-
+    
     std::string bro_anim=m_curr_anim->name[1];
-
-    if(bro_anim.empty())
+    if(!bro_anim.empty())
     {
-        m_aniki.apply_anim(0);
-        return;
+        bro_anim.append(".tsb");
+        
+        anim_ref a=get_shared_anims().access(bro_anim.c_str());
+        m_aniki.apply_anim(a.get());
     }
-
-    bro_anim.append(".tsb");
-
-    anim_ref a=get_shared_anims().access(bro_anim.c_str());
-    m_aniki.apply_anim(a.get());
+    else
+        m_aniki.apply_anim(0);
+    
+    std::string third_anim=m_curr_anim->name[2];
+    std::string third_model=m_curr_anim->model_name[2];
+    if(!third_anim.empty() && !third_model.empty())
+    {
+        third_anim.append(".tsb");
+        third_model.append(".tmb");
+        
+        anim_ref a=get_shared_anims().access(third_anim.c_str());
+        m_the_third.release();
+        nya_resources::resource_data *model_res=nya_resources::get_resources_provider().access(third_model.c_str());
+        if(model_res)
+        {
+            m_the_third.load(model_res);
+            model_res->release();
+            m_the_third.apply_anim(a.get());
+        }
+        else
+            m_the_third.release();
+    }
+    else
+        m_the_third.release();
 }
 
 

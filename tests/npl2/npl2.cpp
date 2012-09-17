@@ -240,8 +240,63 @@ nya_log::get_log()<<"Average add archieve time: "<<float(arch_add_time)/arch_cou
 nya_log::get_log()<<"Average attrib time: "<<float(attrib_time)/arch_count<<"\n";
 }
 
+#include "memory/tmp_buffer.h"
+
+void debug_write_data(nya_resources::resource_data *data,const char *name)
+{
+    if(!data)
+        return;
+
+    FILE *out=fopen(name,"wb+");
+    if(!out)
+        return;
+
+    nya_memory::tmp_buffer_scoped buf(data->get_size());
+    data->read_all(buf.get_data());
+    fwrite(buf.get_data(),data->get_size(),1,out);
+    data->release();
+    fclose(out);
+}
+
+void debug_extract_pl2(const char *name)
+{
+    if(!name)
+        return;
+
+    const std::string path=std::string(nya_system::get_app_path())+"add-ons/";
+    
+    nya_resources::file_resources_provider fprov;
+    fprov.set_folder(path.c_str());
+    nya_resources::resource_data *arch_data=fprov.access(name);
+    if(!arch_data)
+        return;
+    
+    nya_resources::pl2_resources_provider arch;
+    arch.open_archieve(arch_data);
+    nya_resources::resource_info *info=arch.first_res_info();
+    while(info)
+    {
+        std::string n=std::string("pl2_out/")+name+"_"+info->get_name();
+        debug_write_data(info->access(),n.c_str());
+
+        info=info->get_next();
+    }
+    
+    std::string n=std::string("pl2_out/")+name+"_"+"attribute.txt";
+    debug_write_data(arch.access_attribute(),n.c_str());
+    
+    arch.close_archieve();
+}
+
 int main(int argc, char **argv)
 {
+    //debug_extract_pl2("sc01.pl2");
+    //debug_extract_pl2("sc01_res.pl2");
+    //debug_extract_pl2("sc02_res.pl2");
+    //debug_extract_pl2("sounds.pl2");
+    //debug_extract_pl2("sc01sm.pl2");
+    //return 0;
+    
     nya_log::get_log()<<"npl2 started from path "<<nya_system::get_app_path()<<"\n";
 
     npl2 app;
