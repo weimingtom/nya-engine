@@ -200,6 +200,20 @@ void ui::init()
         ++it;
     }
 
+    nya_ui::panel_style modal_bg;
+    modal_bg.panel.border=false;
+    modal_bg.panel.solid=true;
+    modal_bg.panel.solid_color.set(0,0,0,0.7);
+
+    m_cos_modal.set_align(true,false,true,true);
+    m_cos_modal.set_pos(offset,panel_pos_y);
+    m_cos_modal.set_size(panel_width,panel_height);
+    m_cos_modal.set_style(modal_bg);
+    m_cos_modal.set_visible(false);
+    add_widget(m_cos_modal);
+
+    //m_under_modal;
+
     const int props_width=200;
     const int props_height=100;
     m_props_pnl.set_align(false,true,true,false);
@@ -443,7 +457,7 @@ void ui::process_events(event &e)
                 else if(m_custom_mode==cos_dn)
                     num=1;
             }
-            
+
             get_scene().set_part_opacity(m_customise_group.c_str(),data->value,num);
             //nya_log::get_log()<<data->value<<"\n";
         }

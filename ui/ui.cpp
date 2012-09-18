@@ -266,14 +266,14 @@ bool layout::mouse_button(layout::button button,bool pressed)
 {
     bool processed=false;
 
-    for(widgets_list::iterator it=m_widgets.begin();
-        it!=m_widgets.end();++it)
+    for(widgets_list::reverse_iterator it=m_widgets.rbegin();
+          it!=m_widgets.rend();++it)
     {
         widget *w=*it;
         if(!w->is_visible())
             continue;
 
-        if((w->m_mouse_over || (!pressed && w->m_mouse_pressed))
+        if(((w->m_mouse_over && !processed) || (!pressed && w->m_mouse_pressed))
             && w->m_mouse_pressed!=pressed)
         {
             w->on_mouse_button(button,pressed);
@@ -290,15 +290,15 @@ bool layout::mouse_move(uint x,uint y)
 {
     bool processed=false;
 
-    for(widgets_list::iterator it=m_widgets.begin();
-        it!=m_widgets.end();++it)
+    for(widgets_list::reverse_iterator it=m_widgets.rbegin();
+          it!=m_widgets.rend();++it)
     {
         widget *w=*it;
         if(!w->is_visible())
             continue;
 
         bool inside=false;
-        if(w->get_draw_rect().check_point(x,y))
+        if(!processed && w->get_draw_rect().check_point(x,y))
         {
             if(!w->m_mouse_over)
             {
@@ -312,7 +312,8 @@ bool layout::mouse_move(uint x,uint y)
             w->on_mouse_left();
             w->m_mouse_over=false;
         }
-        if(w->on_mouse_move(x,y,inside))
+
+        if(!processed && w->on_mouse_move(x,y,inside))
             processed=true;
     }
     //get_log()<<"mmove "<<(int)x<<" "<<(int)y<<"\n";

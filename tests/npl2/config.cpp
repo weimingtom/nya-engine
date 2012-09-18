@@ -54,11 +54,9 @@ bool outline_ignore_list::should_ignore(const char *name)
 {
     if(!name)
         return false;
-    
+
     std::string name_str(name);
     std::transform(name_str.begin(),name_str.end(),name_str.begin(),::tolower);
-    
-    printf("(%s)\n",name_str.c_str());
 
     ignore_list::iterator it=m_list.find(name_str);
     if(it!=m_list.end())
@@ -93,9 +91,6 @@ bool outline_ignore_list::load(nya_resources::resource_data *data)
         std::transform(entry.begin(),entry.end(),entry.begin(),::tolower);
         m_list[entry]=0;
     }
-    
-    for(ignore_list::iterator it=m_list.begin();it!=m_list.end();++it)
-        printf("<%s>\n",it->first.c_str());
 
     return false;
 }

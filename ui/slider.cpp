@@ -82,7 +82,7 @@ bool slider::on_mouse_move(uint x,uint y,bool inside)
         update_rects();
     }
 
-    return true;
+    return inside;
 }
 
 bool slider::on_mouse_button(layout::button button,bool pressed)

@@ -39,6 +39,9 @@ private:
     nya_ui::panel m_props_pnl;
     nya_ui::slider m_opac_slider;
 
+    nya_ui::panel m_cos_modal;
+    nya_ui::panel m_under_modal;
+
     struct customize_btn
     {
         std::string id;
