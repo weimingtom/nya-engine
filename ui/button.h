@@ -23,6 +23,9 @@ private:
 
     virtual void on_mouse_over()
     {
+        if(!has_events())
+            return;
+
         layout::event e;
         e.type="mouse_over";
         send_event(get_id(),e);
@@ -30,6 +33,9 @@ private:
 
     virtual void on_mouse_left()
     {
+        if(!has_events())
+            return;
+
         layout::event e;
         e.type="mouse_left";
         send_event(get_id(),e);
@@ -37,6 +43,9 @@ private:
 
     virtual bool on_mouse_button(layout::button button,bool pressed)
     {
+        if(!has_events())
+            return true;
+
         layout::event e;
 
         if(pressed)
@@ -45,7 +54,7 @@ private:
             e.type="mouse_left_btn_up";
 
         send_event(get_id(),e);
-        
+
         return true;
     }
 

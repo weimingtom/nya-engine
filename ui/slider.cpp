@@ -70,15 +70,19 @@ bool slider::on_mouse_move(uint x,uint y,bool inside)
 
     if(m_value!=last_value)
     {
-        layout::event e;
+        if(has_events())
+        {
+            layout::event e;
 
-        e.type="value_changed";
-        event_data *data=slider_event_data::create();
+            e.type="value_changed";
+            event_data *data=slider_event_data::create();
 
-        data->value=m_value;
-        e.data=data;
+            data->value=m_value;
+            e.data=data;
 
-        send_event(get_id(),e);
+            send_event(get_id(),e);
+        }
+
         update_rects();
     }
 

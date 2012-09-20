@@ -112,7 +112,6 @@ protected:
     int m_y;
     uint m_width;
     uint m_height;
-
 };
 
 class widget
@@ -138,7 +137,16 @@ public:
         calc_pos_markers();
     }
 
-    virtual void set_visible(bool visible) { m_visible=visible; }
+    virtual void set_visible(bool visible)
+    {
+        if(m_mouse_over)
+        {
+            on_mouse_left();
+            m_mouse_over=false;
+        }
+
+        m_visible=visible;
+    }
 
     virtual void set_align(bool left,bool right,bool top,bool bottom)
     {
@@ -212,6 +220,11 @@ protected:
 
         e.sender.assign(id);
         m_parent->send_event(e);
+    }
+
+    virtual bool has_events()
+    {
+        return !m_id.empty();
     }
 
 protected:

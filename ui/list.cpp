@@ -132,18 +132,21 @@ bool list::on_mouse_move(uint x,uint y,bool inside)
         {
             if(num!=m_mover)
             {
-                //get_log()<<"Mover: "<<num<<" "<<m_elements[num].c_str()<<"\n";
-                layout::event e;
+                if(has_events())
+                {
+                    //get_log()<<"Mover: "<<num<<" "<<m_elements[num].c_str()<<"\n";
+                    layout::event e;
 
-                e.type="mover_element";
-                event_data *data=list_event_data::create();
+                    e.type="mover_element";
+                    event_data *data=list_event_data::create();
 
-                data->element=m_elements[num];
-                data->idx=num;
+                    data->element=m_elements[num];
+                    data->idx=num;
 
-                e.data=data;
+                    e.data=data;
 
-                send_event(get_id(),e);
+                    send_event(get_id(),e);
+                }
 
                 m_mover=num;
             }
@@ -156,10 +159,13 @@ bool list::on_mouse_move(uint x,uint y,bool inside)
 
     if(mleft && m_mover>=0)
     {
-        //get_log()<<"Mleft\n";
-        layout::event e;
-        e.type="mleft_elements";
-        send_event(get_id(),e);
+        if(has_events())
+        {
+            //get_log()<<"Mleft\n";
+            layout::event e;
+            e.type="mleft_elements";
+            send_event(get_id(),e);
+        }
 
         m_mover=-1;
     }
@@ -216,18 +222,21 @@ bool list::on_mouse_button(layout::button button,bool pressed)
 
         if(m_mover>=0 && m_mover<(int)m_elements.size())
         {
-            //get_log()<<"Elem: "<<m_mover<<" "<<m_elements[m_mover].c_str()<<"\n";
-            layout::event e;
+            if(has_events())
+            {
+                //get_log()<<"Elem: "<<m_mover<<" "<<m_elements[m_mover].c_str()<<"\n";
+                layout::event e;
 
-            e.type="select_element";
-            event_data *data=list_event_data::create();
+                e.type="select_element";
+                event_data *data=list_event_data::create();
 
-            data->element=m_elements[m_mover];
-            data->idx=m_mover;
+                data->element=m_elements[m_mover];
+                data->idx=m_mover;
 
-            e.data=data;
+                e.data=data;
 
-            send_event(get_id(),e);
+                send_event(get_id(),e);
+            }
 
             m_selected=m_mover;
         }

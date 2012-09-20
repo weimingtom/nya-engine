@@ -37,6 +37,15 @@ protected:
     virtual void parent_moved(int x,int y);
     virtual void calc_pos_markers();
 
+public:
+    virtual void add_widget(widget &w)
+    {
+        if(&w==this)
+            return;
+
+        layout::add_widget(w);
+    }
+
 protected:
     //virtual void on_mouse_over();
     virtual void on_mouse_left() { layout::mouse_left(); }
