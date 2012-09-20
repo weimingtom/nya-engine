@@ -30,6 +30,7 @@ private:
 private:
     bool is_props_visible();
     void update_props_panel();
+    void modal(bool enabled,int x,int y);
 
 private:
     nya_ui::panel m_anim_pnl;
@@ -40,7 +41,7 @@ private:
     nya_ui::slider m_opac_slider;
 
     nya_ui::panel m_cos_modal;
-    nya_ui::panel m_under_modal;
+    nya_ui::panel m_mod_box;
 
     struct customize_btn
     {

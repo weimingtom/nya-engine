@@ -103,7 +103,7 @@ void ui::init()
     m_customize_pnl.set_visible(false);
     add_widget(m_customize_pnl);
 
-    const uint buttons_pnl_h=(btn_height+offset)*5;
+    const uint buttons_pnl_h=(btn_height+offset)*4;
 
     m_customise_lst.set_align(true,false,true,true);
     m_customise_lst.set_id("customise_lst");
@@ -162,44 +162,6 @@ void ui::init()
         ++it;
     }
 
-    if(it<max_customize_btns-1)
-    {
-        m_customize_btns[it].id.assign("COS_UP");
-        nya_ui::button &btn=m_customize_btns[it].btn;
-        btn.set_id("COS_UP");
-        btn.set_text("COS:UP");
-
-        uint x=it%3;
-        uint y=it/3;
-
-        uint cust_btn_width=btn_width-4;
-
-        btn.set_pos(offset+(cust_btn_width+offset)*x,buttons_pnl_h+offset-(btn_height+offset)*(y+1));
-        btn.set_size(cust_btn_width,btn_height);
-        m_customize_pnl.add_widget(btn);
-
-        ++it;
-    }
-
-    if(it<max_customize_btns-1)
-    {
-        m_customize_btns[it].id.assign("COS_DN");
-        nya_ui::button &btn=m_customize_btns[it].btn;
-        btn.set_id("COS_DN");
-        btn.set_text("COS:DN");
-
-        uint x=it%3;
-        uint y=it/3;
-
-        uint cust_btn_width=btn_width-4;
-
-        btn.set_pos(offset+(cust_btn_width+offset)*x,buttons_pnl_h+offset-(btn_height+offset)*(y+1));
-        btn.set_size(cust_btn_width,btn_height);
-        m_customize_pnl.add_widget(btn);
-
-        ++it;
-    }
-
     nya_ui::panel_style modal_bg;
     modal_bg.panel.border=false;
     modal_bg.panel.solid=true;
@@ -212,7 +174,35 @@ void ui::init()
     m_cos_modal.set_visible(false);
     add_widget(m_cos_modal);
 
-    //m_under_modal;
+    const int modal_box_width=btn_width+offset*2;
+    const int modal_box_height=btn_height*3+offset*4;
+
+    nya_ui::panel_style mod_box_bg;
+    mod_box_bg.panel.solid=true;
+    mod_box_bg.panel.solid_color=mod_box_bg.panel.border_color;
+    mod_box_bg.panel.solid_color.a=0.3;
+
+    m_mod_box.set_pos(20,40);
+    m_mod_box.set_style(mod_box_bg);
+    m_mod_box.set_size(modal_box_width,modal_box_height);
+    m_cos_modal.add_widget(m_mod_box);
+
+    static nya_ui::button cos_mod_btn[3];
+    for(int i=0;i<3;++i)
+    {
+        nya_ui::button &btn=cos_mod_btn[i];
+        btn.set_pos(offset,(offset+btn_height)*i+offset);
+        btn.set_size(btn_width,btn_height);
+        m_mod_box.add_widget(btn);
+
+        std::string id("cos_mod_btn");
+        id.push_back('0'+i);
+        btn.set_id(id.c_str());
+    }
+
+    cos_mod_btn[2].set_text("TOP");
+    cos_mod_btn[1].set_text("BOTTOM");
+    cos_mod_btn[0].set_text("BOTH");
 
     const int props_width=200;
     const int props_height=100;
@@ -376,6 +366,16 @@ void ui::update_props_panel()
     m_opac_slider.set_value(value);
 }
 
+void ui::modal(bool enabled,int x,int y)
+{
+    m_cos_modal.set_visible(enabled);
+
+    const int offset=6;
+
+    if(enabled)
+        m_mod_box.set_pos(x-offset,y-offset);
+}
+
 void ui::process_events(event &e)
 {
     if(e.sender=="customise_lst")
@@ -450,7 +450,7 @@ void ui::process_events(event &e)
                 return;
 
             int num=-1;
-            if(m_customise_group=="COSTUME")
+            if(m_customise_group=="COSTUME" || m_customise_group=="UNDER")
             {
                 if(m_custom_mode==cos_up)
                     num=0;
@@ -468,10 +468,32 @@ void ui::process_events(event &e)
     if(e.type!="mouse_left_btn_down")
         return;
 
+    if(e.sender=="cos_mod_btn0")
+    {
+        m_custom_mode=none;
+        modal(false,0,0);
+        return;
+    }
+
+    if(e.sender=="cos_mod_btn1")
+    {
+        m_custom_mode=cos_dn;
+        modal(false,0,0);
+        return;
+    }
+
+    if(e.sender=="cos_mod_btn2")
+    {
+        m_custom_mode=cos_up;
+        modal(false,0,0);
+        return;
+    }
+
     if(e.sender=="opac_reset_btn")
     {
         get_scene().reset_parts_opacity();
         m_opac_slider.set_value(1.0f);
+        return;
     }
 
     if(e.sender=="customize_btn")
@@ -480,6 +502,7 @@ void ui::process_events(event &e)
         update_props_panel();
         m_anim_pnl.set_visible(false);
         m_scenery_pnl.set_visible(false);
+        modal(false,0,0);
         return;
     }
 
@@ -489,6 +512,7 @@ void ui::process_events(event &e)
         update_props_panel();
         m_anim_pnl.set_visible(!m_anim_pnl.is_visible());
         m_scenery_pnl.set_visible(false);
+        modal(false,0,0);
         return;
     }
 
@@ -498,6 +522,7 @@ void ui::process_events(event &e)
         update_props_panel();
         m_anim_pnl.set_visible(false);
         m_scenery_pnl.set_visible(!m_scenery_pnl.is_visible());
+        modal(false,0,0);
         return;
     }
 
@@ -512,16 +537,21 @@ void ui::process_events(event &e)
         if(e.sender!="BODY" && e.sender!="HAIR" && e.sender!="EYE" && e.sender!="COORDINATE")
             m_customise_lst.add_element("none");
 
-        if(e.sender=="COS_UP")
-            m_custom_mode=cos_up;
-
-        if(e.sender=="COS_DN")
-            m_custom_mode=cos_dn;
-
         m_customise_group=e.sender;
-
-        if(m_custom_mode==cos_up || m_custom_mode==cos_dn)
-            m_customise_group.assign("COSTUME");
+        
+        if(m_customise_group=="COSTUME" || m_customise_group=="UNDER")
+        {
+            for(int i=0;i<max_customize_btns;++i)
+            {
+                if(m_customize_btns[i].id==m_customise_group)
+                {
+                    int x,y;
+                    m_customize_btns[i].btn.get_pos(x,y);
+                    modal(true,x,y);
+                    break;
+                }
+            }
+        }
 
         get_attribute_manager().iterate_elements(m_customise_group.c_str());
 

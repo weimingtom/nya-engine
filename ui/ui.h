@@ -170,7 +170,6 @@ public:
 
     virtual bool is_visible() { return m_visible; }
 
-protected:
     virtual const char *get_id() { return m_id.c_str(); }
 
     virtual void get_pos(int &x,int &y)
@@ -184,7 +183,8 @@ protected:
         width=m_width;
         height=m_height;
     }
-
+    
+protected:
     virtual void parent_moved(int x,int y)
     {
         m_parent_pos_x=x;
