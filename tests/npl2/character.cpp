@@ -50,7 +50,7 @@ void character::set_attrib(const char *key,const char *value,int num)
         nya_log::get_log()<<"Unable to set character attribute: unknown key\n";
         return;
     }
-    
+
     if(id==under)
     {
         if(num==0) set_attrib(key,value,2);
@@ -115,7 +115,7 @@ void character::set_attrib(const char *key,const char *value,int num)
     }
 
     bool should_outline=!get_outline_ignore().should_ignore(value);
-    
+
     if(num<0)
     {
         int max_models=part::max_models_per_part;
@@ -194,16 +194,17 @@ void character::set_attrib(const char *key,const char *value,int num)
 
 const char *character::get_attrib(const char *key,int num)
 {
-    if(!key)
+    if(!key || num>=2)
         return 0;
 
     part_id id=get_part_id(key);
     if(id==invalid_part)
         return 0;
 
-    m_parts[id].subparts[num].value.c_str();
+    if(num<0)
+        num=0;
 
-    return 0;
+    return m_parts[id].subparts[num].value.c_str();
 }
 
 void character::copy_attrib(const character &from)
@@ -345,7 +346,7 @@ void character::draw(bool use_materials)
 
     for(int i=face;i<under;++i)
         draw_part(i,use_materials);
-    
+
     part &p=m_parts[under];
     for(int i=2;i>0;--i)
     {
@@ -360,7 +361,7 @@ void character::draw(bool use_materials)
             m->draw(use_materials);
         }
     }
-    
+
     for(int i=under+1;i<max_parts;++i)
         draw_part(i,use_materials);
 }

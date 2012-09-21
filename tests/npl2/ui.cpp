@@ -472,6 +472,11 @@ void ui::process_events(event &e)
     {
         m_custom_mode=none;
         modal(false,0,0);
+    
+        const char *atr=get_scene().get_imouto_attr(m_customise_group.c_str());
+        if(atr)
+            m_customise_lst.select_element(atr);
+        
         return;
     }
 
@@ -479,6 +484,11 @@ void ui::process_events(event &e)
     {
         m_custom_mode=cos_dn;
         modal(false,0,0);
+        
+        const char *atr=get_scene().get_imouto_attr(m_customise_group.c_str(),1);
+        if(atr)
+            m_customise_lst.select_element(atr);
+        
         return;
     }
 
@@ -486,6 +496,11 @@ void ui::process_events(event &e)
     {
         m_custom_mode=cos_up;
         modal(false,0,0);
+
+        const char *atr=get_scene().get_imouto_attr(m_customise_group.c_str(),0);
+        if(atr)
+            m_customise_lst.select_element(atr);
+        
         return;
     }
 
@@ -564,19 +579,17 @@ void ui::process_events(event &e)
         }
 
         update_props_panel();
+        
+        int num=-1;
 
-        //ToDo:
-        /*
-         if(m_imouto)
-         {
-         if(m_custom_mode==cos_up)
-         m_customise_lst.select_element(m_imouto->get_attrib(m_customise_group.c_str(),0));
-         else if(m_custom_mode==cos_dn)
-         m_customise_lst.select_element(m_imouto->get_attrib(m_customise_group.c_str(),1));
-         else
-         m_customise_lst.select_element(m_imouto->get_attrib(m_customise_group.c_str()));
-         }
-         */
+        if(m_custom_mode==cos_up)
+            num=0;
+        else if(m_custom_mode==cos_dn)
+            num=1;
+
+        const char *atr=get_scene().get_imouto_attr(m_customise_group.c_str(),num);
+        if(atr)
+            m_customise_lst.select_element(atr);
 
         return;
     }

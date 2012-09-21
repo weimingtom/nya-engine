@@ -7,7 +7,7 @@
 
 /*
 
-    ToDo: use button stile instead of rect style and _hl _pressed stuff
+    ToDo: use button and slider style instead of rect style and _hl _pressed stuff
 
 */
 
@@ -75,6 +75,8 @@ public:
     virtual void set_style(list_style &s)
     {
         m_style=s;
+
+        update_rects();
     }
 
     virtual void add_element(const char *name)
@@ -83,6 +85,8 @@ public:
             return;
 
         m_elements.push_back(name);
+
+        update_rects();
     }
 
     virtual void remove_elements()
@@ -97,6 +101,10 @@ public:
     void select_element(uint num)
     {
         m_selected=num;
+        unsigned int scrl=m_scroll_max*m_selected/((int)m_elements.size()-m_scroll_max/m_style.entry_height);
+        m_scroll=clamp(scrl,0,m_scroll_max);
+
+        update_rects();
     }
 
     void select_element(const char *name)
@@ -108,7 +116,7 @@ public:
         {
             if(m_elements[i]==name)
             {
-                m_selected=i;
+                select_element(i);
                 break;
             }
         }
@@ -155,13 +163,12 @@ protected:
     }
 
 public:
-    list(): m_scroll(0), m_scroll_abs(0), m_scroll_max(0),  m_mouse_x(0), m_mouse_y(0),
+    list(): m_scroll(0), m_scroll_max(0),  m_mouse_x(0), m_mouse_y(0),
             m_mouse_hold_y(0), m_scrolling(false), m_selected(-1), m_mover(-1) {}
 
 protected:
     list_style m_style;
     uint m_scroll;
-    uint m_scroll_abs;
     uint m_scroll_max;
     uint m_mouse_x;
     uint m_mouse_y;
