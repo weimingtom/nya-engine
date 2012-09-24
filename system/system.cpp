@@ -5,6 +5,9 @@
 #ifdef __APPLE__
     #include <mach-o/dyld.h>
     #include <string>
+#elif defined _WIN32
+    #include <windows.h>
+    #include <string.h>
 #else
     #include <unistd.h>
 #endif
@@ -53,6 +56,12 @@ const char *get_app_path()
             path[p2+1]='\0';
         else
             path[0]='\0';
+#elif defined _WIN32
+        GetModuleFileName(0,path,max_path);
+
+        char *last_slash = strrchr(path,'\\');
+        if(last_slash)
+        *last_slash = 0;
 #else
         readlink("/proc/self/exe",path,max_path);
 
@@ -70,12 +79,11 @@ const char *get_app_path()
 
     return path;
 }
-    
+
 #ifdef _WIN32
 
-#include <windows.h>
 #include "time.h"
-    
+
 #pragma comment ( lib, "WINMM.LIB"  )
 
 unsigned long get_time()

@@ -4,11 +4,9 @@
 
 #ifdef _WIN32
     #include "windows.h"
-    #include "../gl/glew.h"
-    #include "../GL/glext.h"
-//    #pragma comment ( lib, "opengl32.lib" )
-//    #pragma comment ( lib, "glu32.lib"  )
-
+    #include <gl/gl.h>
+    #include <gl/glu.h>
+    #include <gl/glext.h>
 #elif defined __APPLE__
     #include <OpenGL/gl.h>
     #include <OpenGL/glu.h>
