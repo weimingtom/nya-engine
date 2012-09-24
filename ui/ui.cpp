@@ -273,12 +273,13 @@ bool layout::mouse_button(layout::button button,bool pressed)
         if(!w->is_visible())
             continue;
 
-        if(((w->m_mouse_over && !processed) || (!pressed && w->m_mouse_pressed))
+        if(((w->m_mouse_over && !processed) || !pressed)
             && w->m_mouse_pressed!=pressed)
         {
             w->on_mouse_button(button,pressed);
             w->m_mouse_pressed=pressed;
-            processed=true;
+            if(pressed)
+                processed=true;
         }
     }
     //get_log()<<"mbutton"<<(int)button<<" "<<(int)pressed<<"\n";

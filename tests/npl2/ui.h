@@ -23,6 +23,9 @@ public:
                    ,font_align aligh_hor=left,font_align aligh_vert=bottom);
 
     void draw_rect(nya_ui::rect &r,rect_style &s);
+    
+public:
+    ui(): m_under_top(false),m_under_bottom(false) {}
 
 private:
     virtual void process_events(event &e);
@@ -39,6 +42,10 @@ private:
 
     nya_ui::panel m_props_pnl;
     nya_ui::slider m_opac_slider;
+    
+    nya_ui::panel m_under_pnl;
+    bool m_under_top;
+    bool m_under_bottom;
 
     nya_ui::panel m_cos_modal;
     nya_ui::panel m_mod_box;

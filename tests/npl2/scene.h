@@ -38,6 +38,7 @@ public:
     void set_part_opacity(const char *key,float value,int num=-1);
     float get_part_opacity(const char *key,int num=-1);
     void reset_parts_opacity();
+    void set_imo_under_state(bool top,bool bottom);
     void finish_imouto_preview();
     void prev_anim();
     void next_anim();

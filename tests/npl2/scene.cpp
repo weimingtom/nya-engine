@@ -379,8 +379,7 @@ void scene::init()
                                "}");
     m_shbl_mat_uniform=m_shader_black.get_handler("bones");
 
-    m_imouto.set_attrib("COORDINATE","ok_vocaloid00");
-    m_imouto.set_attrib("BODY","imo_bodyB_00");
+    m_imouto.set_attrib("COORDINATE","fudan05");
 }
 
 void scene::set_bkg(const char *name)
@@ -704,6 +703,11 @@ void scene::set_imouto_preview(const char *key,const char *value,int num)
     m_imouto_preview.set_attrib(key,value,num);
     m_imouto_preview.set_anim(m_imouto.get_anim());
     m_preview=true;
+}
+
+void scene::set_imo_under_state(bool top,bool bottom)
+{
+    m_imouto.set_under_state(top,bottom);
 }
 
 void scene::set_part_opacity(const char *key,float value,int num)

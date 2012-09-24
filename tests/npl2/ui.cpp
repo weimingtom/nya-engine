@@ -131,7 +131,7 @@ void ui::init()
 
     }
 
-    const char *def_group=atr;
+    //const char *def_group=atr;
 
     while(atr && it<max_customize_btns)
     {
@@ -214,23 +214,53 @@ void ui::init()
 
     static nya_ui::label opac_lbl;
     opac_lbl.set_text("Opacity");
-    opac_lbl.set_pos(0,props_height-btn_height);
+    opac_lbl.set_pos(0,props_height-btn_height-offset);
     opac_lbl.set_size(btn_width,btn_height);
     m_props_pnl.add_widget(opac_lbl);
 
     static nya_ui::button opac_reset_btn;
     opac_reset_btn.set_id("opac_reset_btn");
     opac_reset_btn.set_text("Reset all");
-    opac_reset_btn.set_pos(props_width-(btn_width+offset),props_height-(btn_height+offset)*0.7);
-    opac_reset_btn.set_size(btn_width,btn_height*0.7);
+    opac_reset_btn.set_pos(props_width-(btn_width+offset),props_height-(btn_height+offset));
+    opac_reset_btn.set_size(btn_width,btn_height);
     m_props_pnl.add_widget(opac_reset_btn);
 
     const int slider_height=10;
     const int slider_width=props_width-offset*2;
+    const int slider_y=props_height-btn_height-slider_height-offset*2;
     m_opac_slider.set_id("opac_sldr");
-    m_opac_slider.set_pos(offset,props_height-btn_height-slider_height);
+    m_opac_slider.set_pos(offset,slider_y);
     m_opac_slider.set_size(slider_width,slider_height);
     m_props_pnl.add_widget(m_opac_slider);
+
+    nya_ui::panel_style under_pnl_style;
+    under_pnl_style.panel.border=false;
+    const int under_pnl_height=slider_y;
+    m_under_pnl.set_pos(0,0);
+    m_under_pnl.set_size(props_width,under_pnl_height);
+    m_under_pnl.set_style(under_pnl_style);
+    m_under_pnl.set_visible(false);
+    m_props_pnl.add_widget(m_under_pnl);
+
+    static nya_ui::label under_lbl;
+    under_lbl.set_text("Under toggle");
+    under_lbl.set_pos(0,btn_height+offset*1.5);
+    under_lbl.set_size(btn_width*1.5,btn_height);
+    m_under_pnl.add_widget(under_lbl);
+
+    static nya_ui::button under_top;
+    under_top.set_id("under_top");
+    under_top.set_text("Top");
+    under_top.set_pos(offset,offset);
+    under_top.set_size(btn_width,btn_height);
+    m_under_pnl.add_widget(under_top);
+
+    static nya_ui::button under_btm;
+    under_btm.set_id("under_btm");
+    under_btm.set_text("Bottom");
+    under_btm.set_pos(offset*2+btn_width,offset);
+    under_btm.set_size(btn_width,btn_height);
+    m_under_pnl.add_widget(under_btm);
 
     //if(m_imouto)
     //    m_customise_lst.select_element(m_imouto->get_attrib(def_group));
@@ -352,9 +382,13 @@ void ui::update_props_panel()
 
     if(!visible)
         return;
+    
+    bool under=(m_customise_group=="UNDER");
+    
+    m_under_pnl.set_visible(under);
 
     int num=-1;
-    if(m_customise_group=="COSTUME")
+    if(m_customise_group=="COSTUME" || under)
     {
         if(m_custom_mode==cos_up)
             num=0;
@@ -467,6 +501,20 @@ void ui::process_events(event &e)
 
     if(e.type!="mouse_left_btn_down")
         return;
+    
+    if(e.sender=="under_top")
+    {
+        m_under_top=!m_under_top;
+        get_scene().set_imo_under_state(m_under_top,m_under_bottom);
+        return;
+    }
+
+    if(e.sender=="under_btm")
+    {
+        m_under_bottom=!m_under_bottom;
+        get_scene().set_imo_under_state(m_under_top,m_under_bottom);
+        return;
+    }
 
     if(e.sender=="cos_mod_btn0")
     {

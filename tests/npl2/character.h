@@ -19,6 +19,11 @@ public:
     void set_part_opacity(const char *key,float value,int num=-1);
     float get_part_opacity(const char *key,int num=-1);
     void reset_parts_opacity();
+    void set_under_state(bool top,bool bottom)
+    {
+        m_under_state[0]=top;
+        m_under_state[1]=bottom;
+    }
 
     void draw(bool use_materials);
 
@@ -38,10 +43,13 @@ public:
         m_color[2]=b;
     }
 
-    character(): m_body_group_count(0), m_body_blend_group_idx(0)
+    character(): m_body_group_count(0),m_body_blend_group_idx(0)
     {
         for(int i=0;i<3;++i)
             m_color[i]=1.0f;
+
+        m_under_state[0]=m_under_state[1]=false;
+        m_under_count=2;
     }
 
 private:
@@ -97,4 +105,7 @@ private:
     int m_body_group_count;
     int m_body_blend_group_idx;
     float m_color[3];
+    bool m_under_top;
+    bool m_under_state[2];
+    int m_under_count;
 };

@@ -55,6 +55,9 @@ void character::set_attrib(const char *key,const char *value,int num)
     {
         if(num==0) set_attrib(key,value,2);
         if(num==1) set_attrib(key,value,3);
+
+        if(num==3 || num<0)
+            m_under_count=2;
     }
 
     part &p=m_parts[id];
@@ -139,6 +142,12 @@ void character::set_attrib(const char *key,const char *value,int num)
                 continue;
             }
 
+            //crunch
+            if(id==under && strstr(model_name,"HC."))
+                m_under_count=1;
+ 
+            nya_log::get_log()<<"model "<<i<<" "<<model_name<<"\n";
+
             model_ref ref=get_shared_models().access(model_name);
             if(!ref.is_valid())
             {
@@ -158,13 +167,17 @@ void character::set_attrib(const char *key,const char *value,int num)
         key[5]=num+'0';
         model_ref &ref=p.subparts[num].model;
         ref.free();
+        
+        p.subparts[num].value.assign(value);
+        p.subparts[num].outline=should_outline;
 
         const char *model_name=a->get_value(key);
         if(!model_name||strcmp(model_name,"nil")==0)
             return;
-
-        p.subparts[num].value.assign(value);
-        p.subparts[num].outline=should_outline;
+        
+        //crunch
+        if(id==under && strstr(model_name,"HC."))
+            m_under_count=1;
 
         ref=get_shared_models().access(model_name);
         if(!ref.is_valid())
@@ -199,7 +212,15 @@ const char *character::get_attrib(const char *key,int num)
 
     part_id id=get_part_id(key);
     if(id==invalid_part)
+    {
+        if(strcmp(key,"COORDINATE")==0)
+        {
+            //ToDo
+            return 0;
+        }
+
         return 0;
+    }
 
     if(num<0)
         num=0;
@@ -226,6 +247,10 @@ void character::copy_attrib(const character &from)
     for(int i=0;i<max_parts;++i)
         for(int j=0;j<2;++j)
             m_parts[i].subparts[j].opacity=from.m_parts[i].subparts[j].opacity;
+    
+    m_under_state[0]=from.m_under_state[0];
+    m_under_state[1]=from.m_under_state[1];   
+    m_under_count=from.m_under_count;
 }
 
 void character::reset_attrib()
@@ -348,13 +373,16 @@ void character::draw(bool use_materials)
         draw_part(i,use_materials);
 
     part &p=m_parts[under];
-    for(int i=2;i>0;--i)
+    for(int i=m_under_count;i>0;--i)
     {
         if(!use_materials && !p.subparts[i-1].outline)
             continue;
 
-        model_ref &m=p.subparts[i-1].model;
-        //model_ref &m=p.subparts[2+i-1].model;
+        int mode=m_under_state[i-1]?m_under_count:0;
+        if(m_under_count==1 && m_under_state[1])
+            mode+=2;
+
+        model_ref &m=p.subparts[mode+i-1].model;
         if(m.is_valid())
         {
             glColor4f(m_color[0],m_color[1],m_color[2],p.subparts[i-1].opacity);
