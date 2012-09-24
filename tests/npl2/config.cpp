@@ -46,6 +46,7 @@ bool config::load(nya_resources::resource_data *data)
     bool_from_str(wireframe_outline_enabled,parser.get_value("wireframe_outline_enabled"));
     bool_from_str(specular_enabled,parser.get_value("specular_enabled"));
     float_from_str(specular_level,parser.get_value("specular_level"));
+    int_from_str(antialiasing,parser.get_value("antialiasing"));
 
     return result;
 }

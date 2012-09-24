@@ -12,10 +12,11 @@ struct config
     bool wireframe_outline_enabled;
     bool specular_enabled;
     float specular_level;
+    int antialiasing;
 
 public:
     config(): wireframe_outline_enabled(true),specular_enabled(true),
-              specular_level(0.06) {}
+              specular_level(0.06),antialiasing(4) {}
 
 public:
     bool load(nya_resources::resource_data *data);

@@ -63,6 +63,19 @@ void layer::draw_text(uint x,uint y,const char *text
     const uint char_size=16;
     const uint char_offs=1;
 
+    const uint char_actual_width=8;//bad magic: should
+    uint char_widths[128-32]; //be font-defined array
+    for(int i=0;i<128-32;++i)
+    {
+        char c=i+32;
+        if(c=='i'||c=='j' || c=='l')
+            char_widths[i]=5;
+        else if(c=='m')
+            char_widths[i]=10;
+        else
+            char_widths[i]=char_actual_width;
+    }
+
     //
     const float font_scale=1.0f;
 
@@ -76,9 +89,6 @@ void layer::draw_text(uint x,uint y,const char *text
 
     float chs=2.0f*font_scale*(char_size-char_offs);
 
-
-    const uint char_actual_width=8;//bad magic: should
-    //be font-defined array
 //=====
 
     const float w=chs/m_width;
@@ -108,12 +118,19 @@ void layer::draw_text(uint x,uint y,const char *text
         float *pos=(float*)vert_buf.get_data(buf_offset);
         float *tc=(float*)vert_buf.get_data(tc_buf_offset+buf_offset);
 
+        const char c=text_str[i];
+
+        if(c<32 || c>127)
+            continue;
+
+        const uint char_width=char_widths[c-32];
+
         pos[6]=pos[4]=px+dpos;
-        pos[2]=pos[0]=pos[6]+w*char_actual_width/char_size;
+        pos[2]=pos[0]=pos[6]+w*char_width/char_size;
         pos[7]=pos[1]=py;
         pos[5]=pos[3]=h+py;
 
-        const uint letter_pos=text_str[i]-32;
+        const uint letter_pos=c-32;
         const uint letter_x=(letter_pos)%chars_per_row;
         const uint letter_y=(letter_pos)/chars_per_row;
 
@@ -122,14 +139,14 @@ void layer::draw_text(uint x,uint y,const char *text
         float tcw=tc_w-offs_w;
         float tch=tc_h-offs_h;
 
-        const float tc_fix=0.5f*(tc_w-float(char_actual_width)/font_width);
+        const float tc_fix=0.5f*(tc_w-float(char_width)/font_width);
 
         tc[6]=tc[4]=tcx+tc_fix;
         tc[2]=tc[0]=tcx+tcw-tc_fix;
         tc[7]=tc[1]=tcy+tch;
         tc[5]=tc[3]=tcy;
 
-        dpos+=w*char_actual_width/char_size;
+        dpos+=w*char_width/char_size;
     }
 
     glEnableClientState(GL_VERTEX_ARRAY);
