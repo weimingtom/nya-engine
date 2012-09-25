@@ -183,7 +183,7 @@ namespace
 class shared_app
 {
 public:
-    void start_windowed(int x,int y,unsigned int w,unsigned int h,nya_system::app_responder &app)
+    void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing,nya_system::app_responder &app)
     {
         if(m_dpy)
             return;
@@ -197,7 +197,16 @@ public:
             return;
 
         static int dbl_buf[]={GLX_RGBA,GLX_DEPTH_SIZE,16,GLX_DOUBLEBUFFER,None};
-        XVisualInfo *vi=glXChooseVisual(m_dpy, DefaultScreen(m_dpy),dbl_buf);
+
+        static int dbl_buf_aniso[]={GLX_RGBA,GLX_DEPTH_SIZE,16,GLX_DOUBLEBUFFER,
+                    GLX_SAMPLE_BUFFERS_ARB,1,GLX_SAMPLES_ARB,antialiasing,None};
+
+        XVisualInfo *vi=0;
+        if(antialiasing>0)
+            vi=glXChooseVisual(m_dpy,DefaultScreen(m_dpy),dbl_buf_aniso);
+        else
+            vi=glXChooseVisual(m_dpy,DefaultScreen(m_dpy),dbl_buf);
+
         if(!vi)
             return;
 
@@ -223,6 +232,9 @@ public:
         XSetStandardProperties(m_dpy,m_win,m_title.c_str(),m_title.c_str(),None,0,0,NULL);
         glXMakeCurrent(m_dpy,m_win,cx);
         XMapWindow(m_dpy, m_win);
+
+        if(antialiasing>0)
+            glEnable(GL_MULTISAMPLE_ARB);
 
         app.on_resize(w,h);
         app.on_init_splash();
@@ -379,9 +391,9 @@ private:
 namespace nya_system
 {
 
-void app::start_windowed(int x,int y,unsigned int w,unsigned int h)
+void app::start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing)
 {
-    shared_app::get_app().start_windowed(x,y,w,h,*this);
+    shared_app::get_app().start_windowed(x,y,w,h,antialiasing,*this);
 }
 
 void app::start_fullscreen(unsigned int w,unsigned int h)

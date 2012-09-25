@@ -40,13 +40,6 @@ private:
 
         init_resource_system();
 
-        nya_resources::resource_data *cfg=nya_resources::get_resources_provider().access("npl2.cfg");
-        if(cfg)
-        {
-            get_config().load(cfg);
-            cfg->release();
-        }
-
         nya_resources::resource_data *outline_cfg=nya_resources::get_resources_provider().access("outline_ignore_list.txt");
         if(outline_cfg)
         {
@@ -271,13 +264,13 @@ void debug_extract_pl2(const char *name)
         return;
 
     const std::string path=std::string(nya_system::get_app_path())+"add-ons/";
-    
+
     nya_resources::file_resources_provider fprov;
     fprov.set_folder(path.c_str());
     nya_resources::resource_data *arch_data=fprov.access(name);
     if(!arch_data)
         return;
-    
+
     nya_resources::pl2_resources_provider arch;
     arch.open_archieve(arch_data);
     nya_resources::resource_info *info=arch.first_res_info();
@@ -288,10 +281,10 @@ void debug_extract_pl2(const char *name)
 
         info=info->get_next();
     }
-    
+
     std::string n=std::string("pl2_out/")+name+"_"+"attribute.txt";
     debug_write_data(arch.access_attribute(),n.c_str());
-    
+
     arch.close_archieve();
 }
 
@@ -303,11 +296,23 @@ int main(int argc, char **argv)
     //debug_extract_pl2("sounds.pl2");
     //debug_extract_pl2("sc01sm.pl2");
     //return 0;
-    
+
     nya_log::get_log()<<"npl2 started from path "<<nya_system::get_app_path()<<"\n";
 
+    const std::string config_path=std::string(nya_system::get_app_path())+"npl2.cfg";
+    nya_resources::resource_data *cfg=
+    nya_resources::get_resources_provider().access(config_path.c_str());
+    if(cfg)
+    {
+        get_config().load(cfg);
+        cfg->release();
+        nya_log::get_log()<<"config loaded, starting\n";
+    }
+    else
+        nya_log::get_log()<<"unable to load config\n";
+
     npl2 app;
-    app.start_windowed(100,100,640,480);
+    app.start_windowed(100,100,640,480,get_config().antialiasing);
 
     return 0;
 }

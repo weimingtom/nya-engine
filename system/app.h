@@ -50,7 +50,7 @@ protected:
     virtual void on_resize(unsigned int w,unsigned int h) {}
 
 public:
-    void start_windowed(int x,int y,unsigned int w,unsigned int h);
+    void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing);
     void start_fullscreen(unsigned int w,unsigned int h);
 
 protected:

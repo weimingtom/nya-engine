@@ -9,9 +9,10 @@
 @interface shared_app_delegate : NSObject <NSApplicationDelegate>
 {
     nya_system::app_responder *m_app;
+    int m_antialiasing;
 }
 
--(id)init_with_responder:(nya_system::app_responder*)responder;
+-(id)init_with_responder:(nya_system::app_responder*)responder antialiasing:(int)aa;
 
 @end
 
@@ -21,7 +22,7 @@ namespace
 class shared_app
 {
 public:
-    void start_windowed(int x,int y,unsigned int w,unsigned int h,nya_system::app_responder &app)
+    void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing,nya_system::app_responder &app)
     {
         [[NSAutoreleasePool alloc] init];
 
@@ -37,7 +38,7 @@ public:
 
         [[NSWindowController alloc] initWithWindow:m_window];
 
-        shared_app_delegate *delegate=[[shared_app_delegate alloc] init_with_responder:&app];
+        shared_app_delegate *delegate=[[shared_app_delegate alloc] init_with_responder:&app antialiasing:antialiasing];
 
         [NSApp setDelegate:delegate];
 
@@ -125,7 +126,7 @@ private:
 
 @implementation gl_view
 
--(void)set_responder:(nya_system::app_responder*)responder;
+-(void)set_responder:(nya_system::app_responder*)responder
 {
     m_app=responder;
 }
@@ -230,11 +231,14 @@ private:
 
 @implementation shared_app_delegate
 
--(id)init_with_responder:(nya_system::app_responder*)responder;
+-(id)init_with_responder:(nya_system::app_responder*)responder  antialiasing:(int)aa
 {
     self=[super init];
     if (self)
+    {
         m_app=responder;
+        m_antialiasing=aa;
+    }
     
     return self;
 }
@@ -252,13 +256,26 @@ private:
     {
         NSOpenGLPFADoubleBuffer,
         NSOpenGLPFADepthSize, 32,
-        NSOpenGLPFASampleBuffers,1,NSOpenGLPFASamples,4,
+        0
+    };
+    
+    NSOpenGLPixelFormatAttribute attrs_aniso[] = 
+    {
+        NSOpenGLPFADoubleBuffer,
+        NSOpenGLPFADepthSize, 32,
+        NSOpenGLPFASampleBuffers,1,NSOpenGLPFASamples,m_antialiasing,
         0
     };
 
     NSWindow *window=shared_app::get_window();
 
-    NSOpenGLPixelFormat *format=[[NSOpenGLPixelFormat alloc] initWithAttributes:attrs];
+    NSOpenGLPixelFormat *format=0;
+    
+    if(m_antialiasing>0)
+        format=[[NSOpenGLPixelFormat alloc] initWithAttributes:attrs_aniso];
+    else
+        format=[[NSOpenGLPixelFormat alloc] initWithAttributes:attrs];
+
     gl_view *view = [[gl_view alloc] initWithFrame:window.frame pixelFormat:format];
     [format release];
 
@@ -274,7 +291,8 @@ private:
         return;
     }
 
-    glEnable(GL_MULTISAMPLE_ARB);
+    if(m_antialiasing)
+        glEnable(GL_MULTISAMPLE_ARB);
 
     [view reshape];
 
@@ -293,9 +311,9 @@ private:
 namespace nya_system
 {
 
-void app::start_windowed(int x,int y,unsigned int w,unsigned int h)
+void app::start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing)
 {
-    shared_app::get_app().start_windowed(x,y,w,h,*this);
+    shared_app::get_app().start_windowed(x,y,w,h,antialiasing,*this);
 }
 
 void app::start_fullscreen(unsigned int w,unsigned int h)
