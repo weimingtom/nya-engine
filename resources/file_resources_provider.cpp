@@ -89,7 +89,7 @@ public:
         {
             if(ref.m_id<0)
                 return;
-            
+
             entry *relink=&m_entries[ref.m_id];
             ref.m_id=-1;
 
@@ -101,7 +101,7 @@ public:
 
             if(relink==m_last)
                 return;
-            
+
             if(relink==m_first)
             {
                 m_first=relink->next;
@@ -121,14 +121,14 @@ public:
                 relink->next=0;
             }
         }
-        
+
         lru()
         {
             for(int i=0;i<max_opened_descriptors-1;++i)
             {
                 m_entries[i].next=&m_entries[i+1];
                 m_entries[i+1].prev=&m_entries[i];
-                
+
                 m_entries[i].id=i;
             }
 
@@ -278,15 +278,29 @@ bool file_resources_provider::set_folder(const char*name,bool recursive)
         return false;
     }
 
-    struct stat sb;
+    m_path.assign(name);
+    if(m_path.empty())
+        return true;
 
-    if (!name || stat(name,&sb) != 0 || !S_ISDIR(sb.st_mode))
+    if(m_path[m_path.length()-1]=='/')
+        m_path.resize(m_path.length()-1);
+
+    struct stat sb;
+    if(stat(m_path.c_str(),&sb)==-1)
     {
+        get_log()<<"unable to set folder: invalid path "<<name<<"\n";
         m_path.erase();
         return false;
     }
 
-    m_path.assign(name);
+    if(!S_ISDIR(sb.st_mode))
+    {
+        get_log()<<"unable to set folder: specified path is not a directory "<<name<<"\n";
+        m_path.erase();
+        return false;
+    }
+
+    m_path.push_back('/');
 
     return true;
 }
@@ -312,6 +326,12 @@ void file_resources_provider::enumerate_folder(const char*folder_name,file_resou
     const std::string folder_name_str(folder_name);
 
     DIR *dirp=opendir((m_path+folder_name_str).c_str());
+    if(!dirp)
+    {
+        nya_log::get_log()<<"unable to enumerate folder "<<(m_path+folder_name_str).c_str()<<"\n";
+        return;
+    }
+
     dirent *dp;
     while((dp=readdir(dirp))!=0)
     {

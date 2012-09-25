@@ -8,6 +8,7 @@
 #ifdef _WIN32
 
 #include <windows.h>
+#include <windowsx.h>
 
 namespace
 {
@@ -15,7 +16,7 @@ namespace
 class shared_app
 {
 public:
-    void start_windowed(int x,int y,unsigned int w,unsigned int h,nya_system::app_responder &app)
+    void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing,nya_system::app_responder &app)
     {
         m_instance=GetModuleHandle(NULL);
         if(!m_instance)
@@ -36,8 +37,7 @@ public:
         if(!RegisterClass(&wc))
             return;
 
-        RECT rect;
-        SetRect(&rect,x,y,w,h);
+        RECT rect = {x,y,x+w,y+h};
         AdjustWindowRect(&rect,WS_OVERLAPPEDWINDOW,false);
 
         m_hwnd = CreateWindow(TEXT("nya_engine"),
@@ -49,6 +49,8 @@ public:
 
         if(!m_hwnd)
             return;
+
+        SetWindowLongPtr(m_hwnd,GWL_USERDATA,(LONG)&app);
 
         ShowWindow(m_hwnd,SW_SHOW);
 
@@ -117,6 +119,67 @@ public:
 
     static LRESULT CALLBACK wnd_proc(HWND hwnd,UINT message,WPARAM wparam,LPARAM lparam)
     {
+        nya_system::app_responder *app=(nya_system::app_responder*)GetWindowLongPtr(hwnd,GWL_USERDATA);
+        if(!app)
+            return DefWindowProc(hwnd,message,wparam,lparam );
+
+        switch(message)
+        {
+            case WM_SIZE:
+            {
+                RECT rc;
+                GetClientRect(hwnd,&rc);
+
+                app->on_resize(rc.right-rc.left,rc.bottom-rc.top);
+            }
+            break;
+
+            case WM_MOUSEWHEEL:
+            {
+                const int x=GET_X_LPARAM(wparam);
+                const int y=GET_Y_LPARAM(wparam);
+
+                app->on_mouse_scroll(x/60,y/60);
+            }
+            break;
+
+            case WM_MOUSEMOVE:
+            {
+                const int x=LOWORD(lparam);
+                const int y=HIWORD(lparam);
+
+                RECT rc;
+                GetClientRect(hwnd,&rc);
+
+                app->on_mouse_move(x,rc.bottom+rc.top-y);
+            }
+            break;
+
+            case WM_LBUTTONDOWN:
+            {
+                app->on_mouse_button(nya_system::mouse_left,true);
+            }
+            break;
+
+            case WM_LBUTTONUP:
+            {
+                app->on_mouse_button(nya_system::mouse_left,false);
+            }
+            break;
+
+            case WM_RBUTTONDOWN:
+            {
+                app->on_mouse_button(nya_system::mouse_right,true);
+            }
+            break;
+
+            case WM_RBUTTONUP:
+            {
+                app->on_mouse_button(nya_system::mouse_right,false);
+            }
+            break;
+        };
+
         return DefWindowProc(hwnd,message,wparam,lparam );
     }
 

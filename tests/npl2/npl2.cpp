@@ -88,8 +88,6 @@ nya_log::get_log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n"
 
     void on_mouse_move(int x,int y)
     {
-        //nya_log::get_log()<<"mmove "<<x<<" "<<y<<"\n";
-
         if(m_mouse_drag.left)
         {
             get_scene().get_camera().add_rot(((x-m_mouse_drag.last_x)*180.0f)/200.0f,
@@ -108,16 +106,12 @@ nya_log::get_log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n"
 
     void on_mouse_scroll(int dx,int dy)
     {
-        //nya_log::get_log()<<"mmove "<<x<<" "<<y<<"\n";
-
         if(!m_ui.mouse_scroll(dx,dy))
             get_scene().get_camera().add_scale(dy*0.03f);
     }
 
     void on_mouse_button(nya_system::mouse_button button,bool pressed)
     {
-        nya_log::get_log()<<"on_mouse_button "<<(int)button<<" "<<(int)pressed<<"\n";
-
         if(button==nya_system::mouse_left)
         {
             if(!m_ui.mouse_button(nya_ui::layout::left_button,pressed) || !pressed)
