@@ -44,7 +44,6 @@ const char *get_app_path()
     static bool has_path=false;
     if(!has_path)
     {
-
 #ifdef __APPLE__
         uint32_t path_length=max_path;
         _NSGetExecutablePath(path,&path_length);
@@ -58,10 +57,15 @@ const char *get_app_path()
             path[0]='\0';
 #elif defined _WIN32
         GetModuleFileName(0,path,max_path);
+        for(int i=0;i<max_path;++i)
+        {
+            if(path[i]=='\\')
+                path[i]='/';
+        }
 
-        char *last_slash = strrchr(path,'\\');
+        char *last_slash = strrchr(path,'/');
         if(last_slash)
-        *last_slash = 0;
+            *(last_slash+1) = 0;
 #else
         readlink("/proc/self/exe",path,max_path);
 

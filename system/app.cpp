@@ -9,6 +9,162 @@
 
 #include <windows.h>
 
+namespace
+{
+
+class shared_app
+{
+public:
+    void start_windowed(int x,int y,unsigned int w,unsigned int h,nya_system::app_responder &app)
+    {
+        m_instance=GetModuleHandle(NULL);
+        if(!m_instance)
+            return;
+
+        WNDCLASS wc;
+        wc.cbClsExtra=0;
+        wc.cbWndExtra=0;
+        wc.hbrBackground=(HBRUSH)GetStockObject(BLACK_BRUSH);
+        wc.hCursor=LoadCursor(NULL,IDC_ARROW);
+        wc.hIcon=LoadIcon(NULL,IDI_APPLICATION);
+        wc.hInstance=m_instance;
+        wc.lpfnWndProc=wnd_proc;
+        wc.lpszClassName=TEXT("nya_engine");
+        wc.lpszMenuName=0;
+        wc.style=CS_HREDRAW|CS_VREDRAW|CS_OWNDC;
+
+        if(!RegisterClass(&wc))
+            return;
+
+        RECT rect;
+        SetRect(&rect,x,y,w,h);
+        AdjustWindowRect(&rect,WS_OVERLAPPEDWINDOW,false);
+
+        m_hwnd = CreateWindow(TEXT("nya_engine"),
+                          TEXT("nya_engine"),
+                          WS_OVERLAPPEDWINDOW,
+                          rect.left,rect.top,
+                          rect.right-rect.left,rect.bottom-rect.top,
+                          NULL,NULL,m_instance, NULL);
+
+        if(!m_hwnd)
+            return;
+
+        ShowWindow(m_hwnd,SW_SHOW);
+
+        m_hdc=GetDC(m_hwnd);
+
+        PIXELFORMATDESCRIPTOR pfd={0};
+        pfd.nSize=sizeof(PIXELFORMATDESCRIPTOR);
+        pfd.nVersion=1;
+        pfd.dwFlags=PFD_SUPPORT_OPENGL|PFD_DOUBLEBUFFER|PFD_DRAW_TO_WINDOW;
+        pfd.iPixelType=PFD_TYPE_RGBA;
+        pfd.cColorBits=24;
+        pfd.cAlphaBits=8;
+        pfd.cDepthBits=32;
+
+        int pf=ChoosePixelFormat(m_hdc,&pfd);
+        if(!pf)
+            return;
+
+        if(!SetPixelFormat(m_hdc,pf,&pfd))
+            return;
+
+        m_hglrc=wglCreateContext(m_hdc);
+        wglMakeCurrent(m_hdc,m_hglrc);
+
+        app.on_resize(w,h);
+        app.on_init_splash();
+        m_time=nya_system::get_time();
+        update_splash(app);
+        app.on_init();
+
+        m_time=nya_system::get_time();
+
+        MSG msg;
+        while(true)
+        {
+            if(PeekMessage(&msg,NULL,0,0,PM_REMOVE))
+            {
+                if(msg.message==WM_QUIT)
+                    break;
+
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
+            else
+            {
+                unsigned long time=nya_system::get_time();
+                unsigned int dt=(unsigned)(time-m_time);
+                m_time=time;
+
+                app.on_process(dt);
+                app.on_draw();
+
+                SwapBuffers(m_hdc);
+            }
+        }
+    }
+
+    void start_fullscreen(unsigned int w,unsigned int h,nya_system::app_responder &app)
+    {
+        //ToDo
+    }
+
+    void finish(nya_system::app_responder &app)
+    {
+    }
+
+    static LRESULT CALLBACK wnd_proc(HWND hwnd,UINT message,WPARAM wparam,LPARAM lparam)
+    {
+        return DefWindowProc(hwnd,message,wparam,lparam );
+    }
+
+    void set_title(const char *title)
+    {
+        if(!title)
+        {
+            m_title.clear();
+            return;
+        }
+
+        m_title.assign(title);
+
+        //ToDo
+    }
+
+    void update_splash(nya_system::app_responder &app)
+    {
+        unsigned long time=nya_system::get_time();
+        unsigned int dt=(unsigned)(time-m_time);
+        m_time=time;
+
+        app.on_splash(dt);
+        SwapBuffers(m_hdc);
+    }
+
+public:
+    static shared_app &get_app()
+    {
+        static shared_app app;
+        return app;
+    }
+
+public:
+    shared_app():m_hdc(0),m_title("Nya engine"),m_time(0) {}
+
+private:
+    HINSTANCE m_instance;
+    HWND m_hwnd;
+    HDC m_hdc;
+    HGLRC m_hglrc;
+
+    std::string m_title;
+    unsigned long m_time;
+};
+
+}
+
 #else
 
 //  fullscreen:
