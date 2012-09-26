@@ -157,7 +157,7 @@ public:
         entry *m_first;
         entry *m_last;
 
-        const static int max_opened_descriptors=255;
+        const static int max_opened_descriptors=64;
         entry m_entries[max_opened_descriptors];
     };
 
