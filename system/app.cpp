@@ -9,6 +9,8 @@
 
 #include <windows.h>
 #include <windowsx.h>
+#include "render/platform_specific_gl.h"
+#include <gl/wglext.h>
 
 namespace
 {
@@ -50,8 +52,6 @@ public:
         if(!m_hwnd)
             return;
 
-        SetWindowLongPtr(m_hwnd,GWL_USERDATA,(LONG)&app);
-
         ShowWindow(m_hwnd,SW_SHOW);
 
         m_hdc=GetDC(m_hwnd);
@@ -63,7 +63,7 @@ public:
         pfd.iPixelType=PFD_TYPE_RGBA;
         pfd.cColorBits=24;
         pfd.cAlphaBits=8;
-        pfd.cDepthBits=32;
+        pfd.cDepthBits=24;
 
         int pf=ChoosePixelFormat(m_hdc,&pfd);
         if(!pf)
@@ -73,7 +73,103 @@ public:
             return;
 
         m_hglrc=wglCreateContext(m_hdc);
+        if(!m_hglrc)
+            return;
+
         wglMakeCurrent(m_hdc,m_hglrc);
+
+        if(antialiasing>0)
+        {
+            if(!nya_render::has_extension("GL_ARB_multisample"))
+            {
+                //antialiasing=0;
+                nya_system::get_log()<<"GL_ARB_multisample not found\n";
+            }
+        }
+
+        PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB=0;
+        if(antialiasing>0)
+        {
+            wglChoosePixelFormatARB =
+            (PFNWGLCHOOSEPIXELFORMATARBPROC)nya_render::get_extension("wglChoosePixelFormatARB");
+            if(!wglChoosePixelFormatARB)
+            {
+                antialiasing=0;
+                nya_system::get_log()<<"wglChoosePixelFormatARB not found\n";
+            }
+        }
+
+        UINT num_aa_formats=0;
+        int aa_pf=0;
+
+        if(antialiasing>0)
+        {
+            int iAttributes[] = { WGL_DRAW_TO_WINDOW_ARB,GL_TRUE,
+            WGL_SUPPORT_OPENGL_ARB,GL_TRUE,
+            WGL_ACCELERATION_ARB,WGL_FULL_ACCELERATION_ARB,
+            WGL_COLOR_BITS_ARB,24,
+            WGL_ALPHA_BITS_ARB,8,
+            WGL_DEPTH_BITS_ARB,24,
+            WGL_STENCIL_BITS_ARB,0,
+            WGL_DOUBLE_BUFFER_ARB,GL_TRUE,
+            WGL_SAMPLE_BUFFERS_ARB,GL_TRUE,
+            WGL_SAMPLES_ARB,antialiasing,
+            0,0};
+
+            nya_system::get_log()<<"antialiasing init\n";
+
+            if(!wglChoosePixelFormatARB(m_hdc,iAttributes,0,1,&aa_pf,&num_aa_formats))
+            {
+                nya_system::get_log()<<"wglChoosePixelFormatARB failed\n";
+                antialiasing=0;
+            }
+        }
+
+        if(antialiasing>0)
+        {
+            wglMakeCurrent (m_hdc, 0);
+            wglDeleteContext(m_hglrc);
+            ReleaseDC(m_hwnd,m_hdc);
+            DestroyWindow (m_hwnd);
+
+            m_hwnd = CreateWindow(TEXT("nya_engine"),
+                          TEXT("nya_engine"),
+                          WS_OVERLAPPEDWINDOW,
+                          rect.left,rect.top,
+                          rect.right-rect.left,rect.bottom-rect.top,
+                          NULL,NULL,m_instance, NULL);
+
+            ShowWindow(m_hwnd,SW_SHOW);
+            m_hdc=GetDC(m_hwnd);
+
+            if(num_aa_formats>=1 && SetPixelFormat(m_hdc,aa_pf,&pfd))
+            {
+                nya_system::get_log()<<"antialiasiing is set\n";
+            }
+            else
+            {
+                antialiasing=0;
+                nya_system::get_log()<<"unable to set antialiasiing "<<aa_pf<<" "<<num_aa_formats<<"\n";
+
+                int pf=ChoosePixelFormat(m_hdc,&pfd);
+                if(!pf)
+                    return;
+
+                if(!SetPixelFormat(m_hdc,pf,&pfd))
+                    return;
+            }
+
+            m_hglrc=wglCreateContext(m_hdc);
+            if(!m_hglrc)
+                return;
+
+            wglMakeCurrent(m_hdc,m_hglrc);
+        }
+
+        if(antialiasing>0)
+            glEnable(GL_MULTISAMPLE_ARB);
+
+        SetWindowLongPtr(m_hwnd,GWL_USERDATA,(LONG)&app);
 
         app.on_resize(w,h);
         app.on_init_splash();
@@ -84,7 +180,7 @@ public:
         m_time=nya_system::get_time();
 
         MSG msg;
-        while(true)
+        while(m_hwnd)
         {
             if(PeekMessage(&msg,NULL,0,0,PM_REMOVE))
             {
@@ -106,6 +202,8 @@ public:
                 SwapBuffers(m_hdc);
             }
         }
+
+        finish(app);
     }
 
     void start_fullscreen(unsigned int w,unsigned int h,nya_system::app_responder &app)
@@ -115,8 +213,20 @@ public:
 
     void finish(nya_system::app_responder &app)
     {
+        if(!m_hwnd)
+            return;
+
+        app.on_free();
+
+        wglMakeCurrent (m_hdc, 0);
+        wglDeleteContext(m_hglrc);
+        ReleaseDC(m_hwnd,m_hdc);
+        DestroyWindow (m_hwnd);
+
+        m_hwnd=0;
     }
 
+private:
     static LRESULT CALLBACK wnd_proc(HWND hwnd,UINT message,WPARAM wparam,LPARAM lparam)
     {
         nya_system::app_responder *app=(nya_system::app_responder*)GetWindowLongPtr(hwnd,GWL_USERDATA);
@@ -131,6 +241,12 @@ public:
                 GetClientRect(hwnd,&rc);
 
                 app->on_resize(rc.right-rc.left,rc.bottom-rc.top);
+            }
+            break;
+
+            case WM_CLOSE:
+            {
+                get_app().finish(*app);
             }
             break;
 
@@ -183,6 +299,7 @@ public:
         return DefWindowProc(hwnd,message,wparam,lparam );
     }
 
+public:
     void set_title(const char *title)
     {
         if(!title)

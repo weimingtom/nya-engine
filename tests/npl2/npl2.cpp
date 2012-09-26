@@ -1,6 +1,7 @@
 //https://code.google.com/p/nya-engine/
 
 #include "log/log.h"
+#include "log/plain_file_log.h"
 #include "system/app.h"
 #include "system/system.h"
 #include "render/platform_specific_gl.h"
@@ -88,6 +89,8 @@ nya_log::get_log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n"
 
     void on_mouse_move(int x,int y)
     {
+        //nya_log::get_log()<<"mmove "<<x<<" "<<y<<"\n";
+
         if(m_mouse_drag.left)
         {
             get_scene().get_camera().add_rot(((x-m_mouse_drag.last_x)*180.0f)/200.0f,
@@ -191,6 +194,7 @@ unsigned long attrib_time=0;
 
 unsigned long t0=nya_system::get_time();
 
+        //nya_log::get_log()<<arch_name.c_str()<<"\n";
         prov->open_archieve(arch_info->access());
 
 unsigned long t1=nya_system::get_time();
@@ -291,6 +295,12 @@ int main(int argc, char **argv)
     //debug_extract_pl2("sc01sm.pl2");
     //return 0;
 
+    const std::string log_file_name=std::string(nya_system::get_app_path())+"log.txt";
+    nya_log::plain_file_log log;
+    log.open(log_file_name.c_str());
+
+    nya_log::set_log(&log);
+
     nya_log::get_log()<<"npl2 started from path "<<nya_system::get_app_path()<<"\n";
 
     const std::string config_path=std::string(nya_system::get_app_path())+"npl2.cfg";
@@ -307,6 +317,8 @@ int main(int argc, char **argv)
 
     npl2 app;
     app.start_windowed(100,100,640,480,get_config().antialiasing);
+
+    log.close();
 
     return 0;
 }

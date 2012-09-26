@@ -52,10 +52,10 @@ bool has_extension(const char *name)
     if(!exts)
         return false;
 
-    if(std::string(exts).find(name)==0)
-        return true;
+    if(std::string(exts).find(name)==std::string::npos)
+        return false;
 
-    return false;
+    return true;
 }
 
 }
