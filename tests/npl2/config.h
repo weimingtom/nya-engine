@@ -16,7 +16,7 @@ struct config
 
 public:
     config(): wireframe_outline_enabled(true),specular_enabled(true),
-              specular_level(0.06),antialiasing(0) {}
+              specular_level(0.06),antialiasing(4) {}
 
 public:
     bool load(nya_resources::resource_data *data);
