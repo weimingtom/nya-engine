@@ -370,32 +370,55 @@ public:
 
         m_dpy=XOpenDisplay(NULL);
         if(!m_dpy)
+        {
+            nya_system::get_log()<<"unable to open x display\n";
             return;
+        }
 
         int dummy;
         if(!glXQueryExtension(m_dpy,&dummy,&dummy))
+        {
+            nya_system::get_log()<<"unable to querry glx extension\n";
             return;
+        }
 
-        static int dbl_buf[]={GLX_RGBA,GLX_DEPTH_SIZE,16,GLX_DOUBLEBUFFER,None};
+        static int dbl_buf[]={GLX_RGBA,GLX_DEPTH_SIZE,24,GLX_DOUBLEBUFFER,None};
 
-        static int dbl_buf_aniso[]={GLX_RGBA,GLX_DEPTH_SIZE,16,GLX_DOUBLEBUFFER,
-                    GLX_SAMPLE_BUFFERS_ARB,1,GLX_SAMPLES_ARB,antialiasing,None};
+        static int dbl_buf_aniso[]={GLX_RGBA,GLX_DEPTH_SIZE,24,GLX_DOUBLEBUFFER,
+                        GLX_SAMPLE_BUFFERS_ARB,1,GLX_SAMPLES,antialiasing,None};
 
         XVisualInfo *vi=0;
         if(antialiasing>0)
+        {
             vi=glXChooseVisual(m_dpy,DefaultScreen(m_dpy),dbl_buf_aniso);
-        else
+            if(!vi)
+            {
+                nya_system::get_log()<<"unable to set antialising\n";
+                antialiasing=0;
+            }
+        }
+
+        if(antialiasing<=0)
             vi=glXChooseVisual(m_dpy,DefaultScreen(m_dpy),dbl_buf);
 
         if(!vi)
+        {
+            nya_system::get_log()<<"unable to choose glx visual\n";
             return;
+        }
 
         if(vi->c_class!=TrueColor)
+        {
+            nya_system::get_log()<<"device does not support TrueColor\n";
             return;
+        }
 
-        GLXContext cx=glXCreateContext(m_dpy,vi,None,GL_TRUE);
-        if(!cx)
+        m_cx=glXCreateContext(m_dpy,vi,None,GL_TRUE);
+        if(!m_cx)
+        {
+            nya_system::get_log()<<"unable to ceate glx context\n";
             return;
+        }
 
         Colormap cmap=XCreateColormap(m_dpy,RootWindow(m_dpy,vi->screen),vi->visual,AllocNone);
 
@@ -410,8 +433,8 @@ public:
                   CWBorderPixel|CWColormap|CWEventMask,&swa);
 
         XSetStandardProperties(m_dpy,m_win,m_title.c_str(),m_title.c_str(),None,0,0,NULL);
-        glXMakeCurrent(m_dpy,m_win,cx);
-        XMapWindow(m_dpy, m_win);
+        glXMakeCurrent(m_dpy,m_win,m_cx);
+        XMapWindow(m_dpy,m_win);
 
         if(antialiasing>0)
             glEnable(GL_MULTISAMPLE_ARB);
@@ -510,6 +533,8 @@ public:
 
             glXSwapBuffers(m_dpy,m_win);
         }
+
+        finish(app);
     }
 
     void start_fullscreen(unsigned int w,unsigned int h,nya_system::app_responder &app)
@@ -519,6 +544,20 @@ public:
 
     void finish(nya_system::app_responder &app)
     {
+        if(!m_dpy || !m_cx)
+            return;
+
+        app.on_free();
+
+        if(!glXMakeCurrent(m_dpy,None,NULL))
+        {
+            nya_system::get_log()<<"Could not release drawing context.\n";
+            return;
+        }
+
+        glXDestroyContext(m_dpy,m_cx);
+        m_cx=0;
+        m_dpy=0;
     }
 
     void set_title(const char *title)
@@ -560,6 +599,7 @@ public:
 private:
     Display *m_dpy;
     Window m_win;
+    GLXContext m_cx;
     std::string m_title;
     unsigned long m_time;
 };

@@ -344,7 +344,7 @@ void file_resources_provider::enumerate_folder(const char*folder_name,file_resou
 #endif
         {
             std::string dir_name(dp->d_name);
-            if(dir_name=="."||dir_name=="..")
+            if(dir_name[0]=='.')
                 continue;
 
             enumerate_folder((folder_name_str+"/"+
