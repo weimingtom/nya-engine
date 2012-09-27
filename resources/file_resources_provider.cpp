@@ -325,7 +325,14 @@ void file_resources_provider::enumerate_folder(const char*folder_name,file_resou
 
     const std::string folder_name_str(folder_name);
 
-    DIR *dirp=opendir((m_path+folder_name_str).c_str());
+    std::string first_dir=(m_path+folder_name_str);
+    if(first_dir.empty())
+        return;
+
+    if(first_dir[0]=='.')
+        return;
+
+    DIR *dirp=opendir(first_dir.c_str());
     if(!dirp)
     {
         nya_log::get_log()<<"unable to enumerate folder "<<(m_path+folder_name_str).c_str()<<"\n";
