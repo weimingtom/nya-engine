@@ -12,7 +12,9 @@ bool tsb_anim::load(nya_resources::resource_data *anim_res)
         return false;
     }
 
-    nya_memory::tmp_buffer_scoped anim_data(anim_res->get_size());
+    const size_t size=anim_res->get_size();
+  
+    nya_memory::tmp_buffer_scoped anim_data(size);
     anim_res->read_all(anim_data.get_data());
     anim_res->release();
 
@@ -28,6 +30,9 @@ bool tsb_anim::load(nya_resources::resource_data *anim_res)
         uint special_count;
     };
 
+    if(sizeof(tsb_header)>=size)
+        return false;
+
     tsb_header *header=(tsb_header*)anim_data.get_data();
     if(strncmp(header->magic,"TSB0",4)!=0)
     {
@@ -39,9 +44,9 @@ bool tsb_anim::load(nya_resources::resource_data *anim_res)
     m_frames_count=header->frame_count;
     m_first_loop_frame=header->first_loop_frame;
 
-    uint size=header->bone_count*header->frame_count;
-    m_data.resize(size);
-    if(!anim_data.copy_from(&m_data[0],size*sizeof(bone),sizeof(tsb_header)))
+    uint bones_size=header->bone_count*header->frame_count;
+    m_data.resize(bones_size);
+    if(!anim_data.copy_from(&m_data[0],bones_size*sizeof(bone),sizeof(tsb_header)))
     {
         nya_resources::get_log()<<"Unable to load tsb animation file\n";
         return false;

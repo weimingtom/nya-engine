@@ -11,9 +11,22 @@ void texture::build_texture(const void *data,unsigned int width,unsigned int hei
 {
     release();
 
-    if(!data||width==0||height==0)
+    if(!data || width==0 || height==0)
     {
-        get_log()<<"Unable to build texture: invalid data/width/height";
+        get_log()<<"Unable to build texture: invalid data/width/height\n";
+        return;
+    }
+
+    if(!m_max_tex_size)
+    {
+        GLint texSize;
+        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &texSize);
+        m_max_tex_size=texSize;
+    }
+
+    if(width>m_max_tex_size || height>m_max_tex_size)
+    {
+        get_log()<<"Unable to build texture: width or height is too high, maximum is "<<m_max_tex_size<<"\n";
         return;
     }
 
@@ -30,7 +43,7 @@ void texture::build_texture(const void *data,unsigned int width,unsigned int hei
 
     if(!source_format || !gl_format)
     {
-        get_log()<<"Unable to build texture: unsuppored color format";
+        get_log()<<"Unable to build texture: unsuppored color format\n";
         return;
     }
 

@@ -29,12 +29,13 @@ public:
     unsigned int get_height() const { return m_height; }
 
 public:
-    texture(): m_tex_id(0), m_width(0), m_height(0) {}
+    texture(): m_tex_id(0), m_width(0), m_height(0), m_max_tex_size(0) {}
 
 private:
     unsigned int m_tex_id;
     unsigned int m_width;
     unsigned int m_height;
+    unsigned int m_max_tex_size;
 };
 
 }

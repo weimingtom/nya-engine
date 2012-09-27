@@ -30,6 +30,8 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
         nya_log::get_log()<<"Unable to load model: invalid data\n";
         return false;
     }
+    
+    const size_t size=model_res->get_size();
 
     nya_memory::tmp_buffer_scoped model_data(model_res->get_size());
     model_res->read_all(model_data.get_data());
@@ -67,10 +69,16 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
                                     header->height,nya_render::texture::color_bgra);
 
         offset+=header->width*header->height*4;
+        
+        if(offset>=size)
+            return false;
     }
 
     const uint tmb_mat_count=*(uint*)model_data.get_data(offset);
     offset+=4;
+
+    if(offset>=size)
+        return false;
 
     struct tmb_material
     {
@@ -84,10 +92,16 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
 
     const tmb_material *tmb_materials=(tmb_material*)model_data.get_data(offset);
     offset+=tmb_mat_count*sizeof(tmb_material);
+    
+    if(offset>=size)
+        return false;
 
     const uint group_count=*(uint*)model_data.get_data(offset);
     offset+=4;
     
+    if(offset>=size)
+        return false;
+
     m_group_names.resize(group_count);
 
     static std::vector<vertex> vertices;
@@ -112,8 +126,11 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
         const tmb_group_header *header=(tmb_group_header*)model_data.get_data(offset);
         offset+=sizeof(tmb_group_header);
         
+        if(offset>=size)
+            return false;
+
         m_group_names[i].assign(header->name);
-        
+
         //nya_log::get_log()<<"Group "<<i<<" "<<header->name<<" unknown "<<header->unknown<<"\n";
 
         const uint mat_count=header->mat_bind_count;
@@ -131,6 +148,10 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
 
         const tmb_mat_bind *tmb_mat_binds=(tmb_mat_bind*)model_data.get_data(offset);
         offset+=header->mat_bind_count*sizeof(tmb_mat_bind);
+
+        if(offset>=size)
+            return false;
+
         for(int j=0;j<header->mat_bind_count;++j)
         {
             material &to=m_materials[mat_offset];
@@ -166,6 +187,9 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
 
         const tmb_vertex *tmb_vertices=(tmb_vertex*)model_data.get_data(offset);
         offset+=verts_count*sizeof(tmb_vertex);
+        
+        if(offset>=size)
+            return false;
 
         for(int j=0;j<verts_count;++j)
         {
@@ -178,9 +202,9 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
                          +header->matrix[1][k]*from.pos[1]
                          +header->matrix[2][k]*from.pos[2]
                          +header->matrix[3][k];
-                
+
                 to.nor[k]=from.normal[k];
-                
+
                 to.color[k]=from.color[k]/255.0f;
 
                 if(from.weights[k]>0.01f)
@@ -194,7 +218,7 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
                     to.bone_weight[k]=0;
                 }
             }
-            
+
             to.color[3]=1.0f;//from.color[3]/255.0f;
 
             const float weight3=1.0f-(from.weights[0]+from.weights[1]+from.weights[2]);
@@ -212,12 +236,15 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
             to.tc[0]=from.tc[0];
             to.tc[1]=from.tc[1];
         }
-        
+
         verts_offset+=verts_count;
     }
 
     uint bones_count=*(uint*)model_data.get_data(offset);
     offset+=4;
+    
+    if(offset>=size)
+        return false;
 
     if(bones_count)
     {
@@ -237,7 +264,7 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
                 average_color[j]+=inv_count*vertices[i].color[j];
         }
     }
-    
+
     for(int j=0;j<3;++j)
     {
         average_color[j]*=0.6f;
@@ -250,11 +277,14 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
     m_vbo.set_tc(1,8*sizeof(float),4);
     m_vbo.set_tc(2,12*sizeof(float),4);
     m_vbo.set_tc(3,16*sizeof(float),4);
-    
+
     offset+=bones_count*sizeof(bone);
     uint locators_count=*(uint*)model_data.get_data(offset);
     offset+=4;
     //nya_log::get_log()<<"locators: "<<locators_count<<"offset: "<<offset<<"\n";
+    
+    if(offset>=size)
+        return false;
 
     struct tmb_locator
     {
@@ -268,6 +298,9 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
 
     for(int i=0;i<locators_count;++i)
     {
+        if(offset>=size)
+            return false;
+
         tmb_locator *from=(tmb_locator*)model_data.get_data(offset);
         locator &to=m_locators[i];
 
@@ -276,7 +309,7 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
             to.pos[j]=from->pos[j];
             to.ang[j]=from->ang[j];
             to.scale[j]=from->scale[j];
-            
+
             to.color[j]=average_color[j];
         }
 
@@ -284,6 +317,30 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
     }
 
     //nya_log::get_log()<<(const char*)model_data.get_data(offset);
+
+    /*
+    for(unsigned int i=0;i<m_materials.size();++i)
+    {
+        material & mat = m_materials[i];
+
+        int max_bones=0;
+
+        for(int j=mat.vert_offset;j<mat.vert_offset+mat.vert_count;++j)
+        {
+            if(max_bones==4)
+                break;
+
+            for(int k=max_bones;k<4;++k)
+                if(vertices[j].bone_weight[k]>0)
+                    max_bones=k+1;
+        }
+
+        nya_log::get_log()<<"max_bones: "<<max_bones<<"in group "<<i<<"vertices "<<mat.vert_count<<"\n";
+
+        //glColor4fv(mat.color);
+        //m_vbo.draw(mat.vert_offset,mat.vert_count);
+    }
+    */
 
     return true;
 }
@@ -346,15 +403,15 @@ void tmb_model::apply_anim(tsb_anim *anim)
         nya_log::get_log()<<"Unable to set empty animation\n";
         return;
     }
-    
+
     m_first_loop_frame=anim->get_first_loop_frame();
 
     m_anim_bones.resize(m_frames_count*m_bones.size());
-    
+
     unsigned int bones_count=(unsigned int)m_bones.size();
     if(bones_count>anim->get_bones_count())
         bones_count=anim->get_bones_count();
-    
+
     if(bones_count<m_bones.size())
         nya_log::get_log()<<"bones_count<m_bones_count";
 
@@ -362,7 +419,7 @@ void tmb_model::apply_anim(tsb_anim *anim)
     {
         tsb_anim::bone *anim_bones=anim->get_bones(i);
         tmb_model::bone *final_bones=&m_anim_bones[i*m_bones.size()];
-        
+
         for(int k=0;k<bones_count;++k)
         {
             tsb_anim::bone &a=anim_bones[k];
@@ -391,7 +448,7 @@ bool shared_models_manager::fill_resource(const char *name,tmb_model &res)
         nya_resources::get_log()<<"Unable to access model: invalid name\n";
         return false;
     }
-    
+
     nya_resources::resource_data *data = nya_resources::get_resources_provider().access(name);
     return res.load(data);
 }
@@ -399,7 +456,7 @@ bool shared_models_manager::fill_resource(const char *name,tmb_model &res)
 bool shared_models_manager::release_resource(tmb_model &res)
 {
     //nya_resources::get_log()<<"released\n";
-    
+
     res.release();
     return true;
 }
