@@ -53,8 +53,10 @@ public:
     void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing);
     void start_fullscreen(unsigned int w,unsigned int h);
 
-protected:
+public:
     void set_title(const char *title);
+
+protected:
     void limit_framerate(unsigned int fps);
     void set_mouse_pos(int x,int y);
     void update_splash();

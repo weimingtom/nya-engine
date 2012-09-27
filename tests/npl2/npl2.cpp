@@ -142,6 +142,108 @@ nya_log::get_log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n"
 	void on_free() { nya_log::get_log()<<"on_free\n"; }
 
 private:
+    void init_resource_system()
+    {
+        static bool init=false;
+        if(init)
+            return;
+
+        init=true;
+
+        const std::string path=std::string(nya_system::get_app_path())+"add-ons/";
+
+        static nya_resources::composite_resources_provider cprov;
+        cprov.set_ignore_case(true);
+
+        static nya_resources::file_resources_provider fprov;
+        fprov.set_folder(path.c_str());
+
+        const unsigned long time_start=nya_system::get_time();
+        unsigned int arch_count=0;
+        unsigned long arch_open_time=0;
+        unsigned long arch_add_time=0;
+        unsigned long attrib_time=0;
+
+        nya_resources::resource_info *arch_info=fprov.first_res_info();
+        static nya_memory::pool<nya_resources::pl2_resources_provider,32> pl2_providers;
+        while(arch_info)
+        {
+            std::string arch_name(arch_info->get_name());
+            size_t pos=arch_name.find_last_of(".");
+            if(pos==std::string::npos||arch_name.substr(pos)!=".pl2")
+            {
+                arch_info=arch_info->get_next();
+                continue;
+            }
+
+            nya_resources::pl2_resources_provider *prov=pl2_providers.allocate();
+
+            unsigned long t0=nya_system::get_time();
+
+            //nya_log::get_log()<<arch_name.c_str()<<"\n";
+            prov->open_archieve(arch_info->access());
+
+            unsigned long t1=nya_system::get_time();
+
+            cprov.add_provider(prov);
+
+            unsigned long t2=nya_system::get_time();
+
+            nya_resources::resource_data *attrib=prov->access_attribute();
+            if(attrib)
+            {
+                get_attribute_manager().load(attrib);
+                attrib->release();
+            }
+
+            unsigned long t3=nya_system::get_time();
+
+            //nya_resources::get_log()<<arch_name.c_str()<<"\n";
+            arch_info=arch_info->get_next();
+
+            arch_open_time+=t1-t0;
+            arch_add_time+=t2-t1;
+            attrib_time+=t3-t2;
+            ++arch_count;
+
+            /*
+            static unsigned long last_name_update_time=t3;
+            static unsigned int name_update_timer=0;
+
+            unsigned long dt=t3-last_name_update_time;
+            last_name_update_time=t3;
+
+            name_update_timer+=dt;
+            if(name_update_timer>1000)
+            {
+                char name[255];
+                sprintf(name,"npl2 %d archieves opened",arch_count);
+                set_title(name);
+
+                name_update_timer%=1000;
+            }
+            */
+        }
+
+        nya_log::get_log()<<"Archieves ("<<arch_count<<")"<<"and attribs load time: "<<nya_system::get_time()-time_start<<"\n";
+
+        cprov.add_provider(&fprov);
+
+        static nya_resources::file_resources_provider fprov2;
+        fprov2.set_folder(nya_system::get_app_path(),false);
+
+        cprov.add_provider(&fprov2);
+
+        nya_resources::set_resources_provider(&cprov);
+
+        nya_log::get_log()<<"Total res system init time: "<<nya_system::get_time()-time_start<<"\n";
+        nya_log::get_log()<<"Average open archieve time: "<<float(arch_open_time)/arch_count<<"\n";
+        nya_log::get_log()<<"Average add archieve time: "<<float(arch_add_time)/arch_count<<"\n";
+        nya_log::get_log()<<"Average attrib time: "<<float(attrib_time)/arch_count<<"\n";
+    }
+
+
+private:
     ui m_ui;
 
     struct mouse_drag
@@ -155,88 +257,6 @@ private:
                     ,last_x(0),last_y(0) {}
     } m_mouse_drag;
 };
-
-void init_resource_system()
-{
-    static bool init=false;
-    if(init)
-        return;
-
-    init=true;
-
-    const std::string path=std::string(nya_system::get_app_path())+"add-ons/";
-
-    static nya_resources::composite_resources_provider cprov;
-    cprov.set_ignore_case(true);
-
-    static nya_resources::file_resources_provider fprov;
-    fprov.set_folder(path.c_str());
-
-const unsigned long time_start=nya_system::get_time();
-unsigned int arch_count=0;
-unsigned long arch_open_time=0;
-unsigned long arch_add_time=0;
-unsigned long attrib_time=0;
-
-    nya_resources::resource_info *arch_info=fprov.first_res_info();
-    static nya_memory::pool<nya_resources::pl2_resources_provider,32> pl2_providers;
-    while(arch_info)
-    {
-        std::string arch_name(arch_info->get_name());
-        size_t pos=arch_name.find_last_of(".");
-        if(pos==std::string::npos||arch_name.substr(pos)!=".pl2")
-        {
-            arch_info=arch_info->get_next();
-            continue;
-        }
-
-        nya_resources::pl2_resources_provider *prov=pl2_providers.allocate();
-
-unsigned long t0=nya_system::get_time();
-
-        //nya_log::get_log()<<arch_name.c_str()<<"\n";
-        prov->open_archieve(arch_info->access());
-
-unsigned long t1=nya_system::get_time();
-
-        cprov.add_provider(prov);
-
-unsigned long t2=nya_system::get_time();
-
-        nya_resources::resource_data *attrib=prov->access_attribute();
-        if(attrib)
-        {
-            get_attribute_manager().load(attrib);
-            attrib->release();
-        }
-
-unsigned long t3=nya_system::get_time();
-
-        //nya_resources::get_log()<<arch_name.c_str()<<"\n";
-        arch_info=arch_info->get_next();
-
-arch_open_time+=t1-t0;
-arch_add_time+=t2-t1;
-attrib_time+=t3-t2;
-++arch_count;
-    }
-
-nya_log::get_log()<<"Archieves ("<<arch_count<<")"<<"and attribs load time: "<<nya_system::get_time()-time_start<<"\n";
-
-    cprov.add_provider(&fprov);
-
-    static nya_resources::file_resources_provider fprov2;
-    fprov2.set_folder(nya_system::get_app_path(),false);
-
-    cprov.add_provider(&fprov2);
-
-    nya_resources::set_resources_provider(&cprov);
-
-nya_log::get_log()<<"Total res system init time: "<<nya_system::get_time()-time_start<<"\n";
-nya_log::get_log()<<"Average open archieve time: "<<float(arch_open_time)/arch_count<<"\n";
-nya_log::get_log()<<"Average add archieve time: "<<float(arch_add_time)/arch_count<<"\n";
-nya_log::get_log()<<"Average attrib time: "<<float(attrib_time)/arch_count<<"\n";
-}
 
 #include "memory/tmp_buffer.h"
 
@@ -316,6 +336,7 @@ int main(int argc, char **argv)
         nya_log::get_log()<<"unable to load config\n";
 
     npl2 app;
+    app.set_title("Loading, please wait...");
     app.start_windowed(100,100,640,480,get_config().antialiasing);
 
     log.close();

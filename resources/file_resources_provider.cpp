@@ -279,11 +279,12 @@ bool file_resources_provider::set_folder(const char*name,bool recursive)
     }
 
     m_path.assign(name);
+
+    while(!m_path.empty() && m_path[m_path.length()-1]=='/')
+        m_path.resize(m_path.length()-1);
+
     if(m_path.empty())
         return true;
-
-    if(m_path[m_path.length()-1]=='/')
-        m_path.resize(m_path.length()-1);
 
     struct stat sb;
     if(stat(m_path.c_str(),&sb)==-1)
@@ -323,7 +324,10 @@ void file_resources_provider::enumerate_folder(const char*folder_name,file_resou
     if(!folder_name || !last)
         return;
 
-    const std::string folder_name_str(folder_name);
+    std::string folder_name_str(folder_name);
+
+    while(!folder_name_str.empty() && folder_name_str[folder_name_str.length()-1]=='/')
+        folder_name_str.resize(folder_name_str.length()-1);
 
     std::string first_dir=(m_path+folder_name_str);
     if(first_dir.empty())
@@ -331,6 +335,9 @@ void file_resources_provider::enumerate_folder(const char*folder_name,file_resou
 
     if(first_dir[0]=='.')
         return;
+
+    while(!first_dir.empty() && first_dir[first_dir.length()-1]=='/')
+        first_dir.resize(first_dir.length()-1);
 
     DIR *dirp=opendir(first_dir.c_str());
     if(!dirp)
@@ -342,31 +349,38 @@ void file_resources_provider::enumerate_folder(const char*folder_name,file_resou
     dirent *dp;
     while((dp=readdir(dirp))!=0)
     {
+        if(dp->d_name[0]=='.')
+            continue;
 #ifdef WIN32
+        std::string name=folder_name_str+"/"+dp->d_name;
+
         struct stat stat_buf;
-        stat((folder_name_str+"/"+dp->d_name).c_str(),&stat_buf);
+        if(!stat(name.c_str(),&stat_buf))
+        {
+            nya_log::get_log()<<"unable to read "<<name.c_str()<<"\n";
+            continue;
+        }
+
         if((stat_buf.st_mode&S_IFDIR)==S_IFDIR && m_recursive)
 #else
         if(dp->d_type==DT_DIR && m_recursive)
 #endif
         {
-            std::string dir_name(dp->d_name);
-            if(dir_name[0]=='.')
-                continue;
-
             enumerate_folder((folder_name_str+"/"+
-                            dir_name).c_str(),last);
+                            dp->d_name).c_str(),last);
             continue;
         }
 
         file_resource_info *entry=entries.allocate();
-        entry->name=folder_name_str;
-        entry->name.push_back('/');
+
+        if(!folder_name_str.empty() && folder_name_str != ".")
+        {
+            entry->name=folder_name_str;
+            entry->name.push_back('/');
+        }
+
         entry->name.append(dp->d_name);
-        if(entry->name.compare("./")>0)
-            entry->name=entry->name.substr(2);
-        //if(entry->name.length()>=2 && entry->name[0]=='.' && entry->name[1]=='/')
-        //    entry->name=entry->name.substr(2);
+
         entry->path=m_path;
         entry->next=*last;
         *last=entry;
@@ -380,7 +394,8 @@ resource_info *file_resources_provider::first_res_info()
         return m_entries;
 
     file_resource_info *last=0;
-    enumerate_folder(".",&last);
+    enumerate_folder(m_path.empty()?".":"",&last);
+
     m_entries=last;
 
     return m_entries;

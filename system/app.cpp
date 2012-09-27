@@ -169,6 +169,8 @@ public:
         if(antialiasing>0)
             glEnable(GL_MULTISAMPLE_ARB);
 
+        SetWindowText(m_hwnd,m_title.c_str());
+
         SetWindowLongPtr(m_hwnd,GWL_USERDATA,(LONG)&app);
 
         app.on_resize(w,h);
@@ -310,7 +312,8 @@ public:
 
         m_title.assign(title);
 
-        //ToDo
+        if(m_hwnd)
+            SetWindowText(m_hwnd,title);
     }
 
     void update_splash(nya_system::app_responder &app)
