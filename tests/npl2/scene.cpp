@@ -187,6 +187,41 @@ void scene::init()
         m_aniki.load(model_res);
         model_res->release();
     }
+    
+    const char *uber_vs=
+    "uniform mat4 bones[200];"
+    
+    "void main()"
+    "{"
+    "  gl_TexCoord[0]=gl_MultiTexCoord0;"
+    "  vec4 bone_idx=gl_MultiTexCoord1;"
+    "  vec4 bone_weight=gl_MultiTexCoord2;"
+
+    "  const float eps=0.01;"
+    
+    "  mat4 bone=bones[int(bone_idx.x)]*bone_weight.x;"
+    
+    "  if(bone_weight.y>eps)"
+    "    bone+=bones[int(bone_idx.y)]*bone_weight.y;"
+    
+    "  if(bone_weight.z>eps)"
+    "    bone+=bones[int(bone_idx.z)]*bone_weight.z;"
+    
+    "  if(bone_weight.w>eps)"
+    "    bone+=bones[int(bone_idx.w)]*bone_weight.w;"
+    
+    "\n#ifdef specular_enabled\n"
+    "  gl_TexCoord[1]=gl_ModelViewMatrix*bone*vec4(gl_Normal.xyz,0);"
+    "\n#endif\n"
+    
+    "  gl_TexCoord[2]=gl_Color;"
+    
+    "\n#ifdef vcolor_enabled\n"
+    "  gl_TexCoord[3]=gl_MultiTexCoord3;"
+    "\n#endif\n"
+
+    "  gl_Position=gl_ModelViewProjectionMatrix*bone*gl_Vertex;"
+    "}";
 
     m_shader_scenery.add_program(nya_render::shader::vertex,
 
@@ -226,74 +261,13 @@ void scene::init()
 
     m_shader_scenery.add_program(nya_render::shader::pixel,fprogram);
 
-    m_shader_scenery_anim.add_program(nya_render::shader::vertex,
-                                 "uniform mat4 bones[200];"
+    std::string scenery_anim_vs_str;
+    scenery_anim_vs_str.append("#define vcolor_enabled\n");
+    scenery_anim_vs_str.append(uber_vs);
 
-                                 "mat3 get_rot(mat4 m)"
-                                 "{"
-                                 "  return mat3(m[0].xyz,m[1].xyz,m[2].xyz);"
-                                 "}"
-
-                                 "void main()"
-                                 "{"
-                                 "  gl_TexCoord[0]=gl_MultiTexCoord0;"
-                                 "  vec4 bone_idx=gl_MultiTexCoord1;"
-                                 "  vec4 bone_weight=gl_MultiTexCoord2;"
-
-                                 "  mat4 bone0=bones[int(bone_idx.x)]*bone_weight.x;"
-                                 "  mat4 bone1=bones[int(bone_idx.y)]*bone_weight.y;"
-                                 "  mat4 bone2=bones[int(bone_idx.z)]*bone_weight.z;"
-                                 "  mat4 bone3=bones[int(bone_idx.w)]*bone_weight.w;"
-
-                                 "  vec4 pos=bone0*gl_Vertex;"
-                                 "  pos+=bone1*gl_Vertex;"
-                                 "  pos+=bone2*gl_Vertex;"
-                                 "  pos+=bone3*gl_Vertex;"
-
-                                 "  gl_TexCoord[0]=gl_MultiTexCoord0;"
-                                 "  gl_TexCoord[3]=gl_MultiTexCoord3;"
-                                 "  gl_TexCoord[2]=gl_Color;"
-
-                                 //"  gl_TexCoord[1].xyz=get_rot(gl_ModelViewMatrix)*gl_Normal.xyz;"
-
-                                 "  gl_Position=gl_ModelViewProjectionMatrix*pos;"
-                                 "}");
+    m_shader_scenery_anim.add_program(nya_render::shader::vertex,scenery_anim_vs_str.c_str());
 
     m_shader_scenery_anim.add_program(nya_render::shader::pixel,fprogram);
-
-    const char *char_vs=
-    "uniform mat4 bones[200];"
-
-    "void main()"
-    "{"
-    "  gl_TexCoord[0]=gl_MultiTexCoord0;"
-    "  vec4 bone_idx=gl_MultiTexCoord1;"
-    "  vec4 bone_weight=gl_MultiTexCoord2;"
-
-    "  vec4 pos;"
-
-    "  const float eps=0.01;"
-
-    "  mat4 bone=bones[int(bone_idx.x)]*bone_weight.x;"
-
-    "  if(bone_weight.y>eps)"
-    "    bone+=bones[int(bone_idx.y)]*bone_weight.y;"
-
-    "  if(bone_weight.z>eps)"
-    "    bone+=bones[int(bone_idx.z)]*bone_weight.z;"
-
-    "  if(bone_weight.w>eps)"
-    "    bone+=bones[int(bone_idx.w)]*bone_weight.w;"
-
-    "\n#ifdef specular_enabled\n"
-    "  gl_TexCoord[1]=gl_ModelViewMatrix*bone*vec4(gl_Normal.xyz,0);"
-    "\n#endif\n"
-
-    "  gl_TexCoord[2]=gl_Color;"
-    //"  gl_TexCoord[3]=gl_MultiTexCoord3;"
-
-    "  gl_Position=gl_ModelViewProjectionMatrix*bone*gl_Vertex;"
-    "}";
 
     const char *char_ps=
     "uniform sampler2D base_map;"
@@ -319,11 +293,12 @@ void scene::init()
     if(get_config().specular_enabled)
     {
         const char *specular_define="#define specular_enabled\n";
+
         char_vs_str.append(specular_define);
         char_ps_str.append(specular_define);
     }
 
-    char_vs_str.append(char_vs);
+    char_vs_str.append(uber_vs);
     char_ps_str.append(char_ps);
 
     m_shader.add_program(nya_render::shader::vertex,char_vs_str.c_str());
@@ -332,7 +307,7 @@ void scene::init()
     m_shader.set_sampler("base_map",0);
     m_sh_mat_uniform=m_shader.get_handler("bones");
 
-    m_shader_black.add_program(nya_render::shader::vertex,char_vs);
+    m_shader_black.add_program(nya_render::shader::vertex,uber_vs);
     m_shader_black.add_program(nya_render::shader::pixel,
                                "void main(void)"
                                "{"
