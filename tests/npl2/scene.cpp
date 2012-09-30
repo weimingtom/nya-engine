@@ -264,11 +264,6 @@ void scene::init()
     const char *char_vs=
     "uniform mat4 bones[200];"
 
-    "mat3 get_rot(mat4 m)"
-    "{"
-    "  return mat3(m[0].xyz,m[1].xyz,m[2].xyz);"
-    "}"
-
     "void main()"
     "{"
     "  gl_TexCoord[0]=gl_MultiTexCoord0;"
@@ -279,59 +274,25 @@ void scene::init()
 
     "  const float eps=0.01;"
 
-    //"  if(bone_weight.x>eps)"
-    //"  {"
-    "    mat4 bone=bones[int(bone_idx.x)]*bone_weight.x;"
-    "    pos=bone*gl_Vertex;"
-    //"  }"
-    //"  else"
-    //"    pos=vec4(0,0,0,0);"
-
-    "\n#ifdef specular_enabled\n"
-    "  vec3 nor=get_rot(bone)*gl_Normal.xyz;"
-    "\n#endif\n"
+    "  mat4 bone=bones[int(bone_idx.x)]*bone_weight.x;"
 
     "  if(bone_weight.y>eps)"
-    "  {"
-    "    mat4 bone=bones[int(bone_idx.y)]*bone_weight.y;"
-    "    pos+=bone*gl_Vertex;"
-
-    "\n  #ifdef specular_enabled\n"
-    "    nor+=get_rot(bone)*gl_Normal.xyz;"
-    "\n  #endif\n"
-
-    "  }"
+    "    bone+=bones[int(bone_idx.y)]*bone_weight.y;"
 
     "  if(bone_weight.z>eps)"
-    "  {"
-    "    mat4 bone=bones[int(bone_idx.z)]*bone_weight.z;"
-    "    pos+=bone*gl_Vertex;"
-
-    "\n  #ifdef specular_enabled\n"
-    "    nor+=get_rot(bone)*gl_Normal.xyz;"
-    "\n  #endif\n"
-
-    "  }"
+    "    bone+=bones[int(bone_idx.z)]*bone_weight.z;"
 
     "  if(bone_weight.w>eps)"
-    "  {"
-    "    mat4 bone=bones[int(bone_idx.w)]*bone_weight.w;"
-    "    pos+=bone*gl_Vertex;"
-
-    "\n  #ifdef specular_enabled\n"
-    "    nor+=get_rot(bone)*gl_Normal.xyz;"
-    "\n  #endif\n"
-
-    "  }"
+    "    bone+=bones[int(bone_idx.w)]*bone_weight.w;"
 
     "\n#ifdef specular_enabled\n"
-    "  gl_TexCoord[1].xyz=get_rot(gl_ModelViewMatrix)*nor;"
+    "  gl_TexCoord[1]=gl_ModelViewMatrix*bone*vec4(gl_Normal.xyz,0);"
     "\n#endif\n"
 
     "  gl_TexCoord[2]=gl_Color;"
     //"  gl_TexCoord[3]=gl_MultiTexCoord3;"
 
-    "  gl_Position=gl_ModelViewProjectionMatrix*pos;"
+    "  gl_Position=gl_ModelViewProjectionMatrix*bone*gl_Vertex;"
     "}";
 
     const char *char_ps=
