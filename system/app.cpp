@@ -242,7 +242,11 @@ private:
                 RECT rc;
                 GetClientRect(hwnd,&rc);
 
-                app->on_resize(rc.right-rc.left,rc.bottom-rc.top);
+                const int w=rc.right-rc.left;
+                const int h=rc.bottom-rc.top;
+
+                glViewport(0,0,w,h);
+                app->on_resize(w,h);
             }
             break;
 

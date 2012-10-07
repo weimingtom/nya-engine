@@ -117,7 +117,7 @@ void attribute_parser::debug_print()
         ++it)
     {
         std::string safe_prnt=it->second;
-        for(int i=0;i<safe_prnt.length();++i)
+        for(size_t i=0;i<safe_prnt.length();++i)
         {
             char &c = safe_prnt[i];
             if(c<32||c>127)
@@ -169,7 +169,7 @@ void attribute_manager::load(nya_resources::resource_data *data)
         nya_log::get_log()<<"Unable to load attribute: invalid type\n";
         return;
     }
-    
+
     std::string type_str(type);
     if(type_str=="ARCHIVE")
         return;
@@ -203,7 +203,7 @@ const char *attribute_manager::iterate_next()
 {
     if(m_iterator==m_attributes.end())
         return 0;
-    
+
     const char *name=m_iterator->first.c_str();
 
     ++m_iterator;

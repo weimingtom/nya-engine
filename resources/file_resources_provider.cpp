@@ -4,8 +4,18 @@
 #include "memory/pool.h"
 
 #include <stdio.h>
-#include <dirent.h>
+
+#ifdef WIN32
+	#include <io.h>
+#else
+	#include <dirent.h>
+#endif
+
 #include <sys/stat.h>
+
+#ifndef S_ISDIR
+	#define	S_ISDIR(m)	(((m) & S_IFMT) == S_IFDIR)
+#endif
 
 namespace nya_resources
 {
@@ -194,7 +204,7 @@ private:
     size_t m_size;
 };
 
-struct file_resource_info: public resource_info
+class file_resource_info: public resource_info
 {
 public:
     std::string name;
@@ -339,25 +349,38 @@ void file_resources_provider::enumerate_folder(const char*folder_name,file_resou
     while(!first_dir.empty() && first_dir[first_dir.length()-1]=='/')
         first_dir.resize(first_dir.length()-1);
 
+#ifdef WIN32
+	_finddata_t data;
+	intptr_t hdl=_findfirst((first_dir + "/*").c_str(),&data);
+    if(!hdl)
+#else
     DIR *dirp=opendir(first_dir.c_str());
     if(!dirp)
+#endif
     {
         nya_log::get_log()<<"unable to enumerate folder "<<(m_path+folder_name_str).c_str()<<"\n";
         return;
     }
 
-    dirent *dp;
-    while((dp=readdir(dirp))!=0)
-    {
-        if(dp->d_name[0]=='.')
-            continue;
 #ifdef WIN32
-        std::string name=folder_name_str+"/"+dp->d_name;
+	for(intptr_t it=hdl;it>=0;it=_findnext(hdl,&data))
+	{
+		const char *name=data.name;
+#else
+    while(dirent *dp=readdir(dirp))
+    {
+		const char *name=dp->d_name;
+#endif
+        if(name[0]=='.')
+            continue;
+
+#ifdef WIN32
+        std::string name_str=folder_name_str+"/"+name;
 
         struct stat stat_buf;
-        if(!stat(name.c_str(),&stat_buf))
+        if(!stat(name_str.c_str(),&stat_buf))
         {
-            nya_log::get_log()<<"unable to read "<<name.c_str()<<"\n";
+            nya_log::get_log()<<"unable to read "<<name_str.c_str()<<"\n";
             continue;
         }
 
@@ -366,8 +389,7 @@ void file_resources_provider::enumerate_folder(const char*folder_name,file_resou
         if(dp->d_type==DT_DIR && m_recursive)
 #endif
         {
-            enumerate_folder((folder_name_str+"/"+
-                            dp->d_name).c_str(),last);
+            enumerate_folder((folder_name_str+"/"+name).c_str(),last);
             continue;
         }
 
@@ -379,13 +401,17 @@ void file_resources_provider::enumerate_folder(const char*folder_name,file_resou
             entry->name.push_back('/');
         }
 
-        entry->name.append(dp->d_name);
+        entry->name.append(name);
 
         entry->path=m_path;
         entry->next=*last;
         *last=entry;
     }
+#ifdef WIN32
+    _findclose(hdl);
+#else
     closedir(dirp);
+#endif
 }
 
 resource_info *file_resources_provider::first_res_info()
@@ -452,7 +478,7 @@ bool file_resource::read_chunk(void *data,size_t size,size_t offset)
         return false;
     }
 
-    if(fseek(file,offset,SEEK_SET)!=0)
+    if(fseek(file,(long)offset,SEEK_SET)!=0)
     {
         get_log()<<"unable to read file data chunk: seek_set failed\n";
         return false;

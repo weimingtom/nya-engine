@@ -203,6 +203,38 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="resources"
+			>
+			<File
+				RelativePath="..\..\resources\composite_resources_provider.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\resources\composite_resources_provider.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\resources\file_resources_provider.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\resources\file_resources_provider.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\resources\resources.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\resources\resources.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\resources\shared_resources.h"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>
