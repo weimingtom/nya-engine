@@ -1,0 +1,7 @@
+obj/
+bin/
+*.pbxuser
+*.xcuserstate
+*.suo
+*.ncb
+*.vcproj.*.vn.user
