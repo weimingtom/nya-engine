@@ -48,7 +48,7 @@ private:
     nya_memory::tmp_buffer_ref m_data;
 };
 
-struct pl2_entry_info: public resource_info
+class pl2_entry_info: public resource_info
 {
 public:
     std::string name;
