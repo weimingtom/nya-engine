@@ -51,7 +51,8 @@ private:
     void apply_anim();
 
 public:
-    scene(): m_sh_mat_uniform(0), m_shbl_mat_uniform(0), m_preview(false), m_anim_time(0), m_has_scenery(false) {}
+    scene(): m_sh_mat_uniform(0), m_shbl_mat_uniform(0), m_shsc_mat_uniform(0),
+        m_preview(false), m_anim_time(0), m_has_scenery(false) {}
 
 private:
     nya_render::shader m_shader;
@@ -61,6 +62,8 @@ private:
 
     nya_render::shader m_shader_scenery;
     nya_render::shader m_shader_scenery_anim;
+    unsigned int m_shsc_mat_uniform;
+
 
 private:
     character m_imouto;

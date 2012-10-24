@@ -268,6 +268,8 @@ void scene::init()
     m_shader_scenery_anim.add_program(nya_render::shader::vertex,scenery_anim_vs_str.c_str());
 
     m_shader_scenery_anim.add_program(nya_render::shader::pixel,fprogram);
+    
+    m_shsc_mat_uniform=m_shader_scenery_anim.get_handler("bones");
 
     const char *char_ps=
     "uniform sampler2D base_map;"
@@ -567,7 +569,7 @@ void scene::draw()
         const size_t bro_frames_count=m_aniki.get_frames_count();
         if(bro_frames_count)
         {
-            m_shader.set_uniform16_array(m_sh_mat_uniform,
+            m_shader.set_uniform16_array(m_shbl_mat_uniform,
                                          m_aniki.get_buffer(int(m_anim_time)),
                                          m_aniki.get_bones_count());
             m_aniki.draw(false);
@@ -610,7 +612,7 @@ void scene::draw()
         if(bones_count && frames_count)
         {
             m_shader_scenery_anim.bind();
-            m_shader_scenery_anim.set_uniform16_array(m_sh_mat_uniform,
+            m_shader_scenery_anim.set_uniform16_array(m_shsc_mat_uniform,
                                                       m_bkg_models[i].get_buffer(int(m_bkg_models_anim_times[i])),
                                                       bones_count);
             m_bkg_models[i].draw(true);
