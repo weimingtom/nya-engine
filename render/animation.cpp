@@ -36,7 +36,7 @@ animation::bone animation::get_bone(int idx,unsigned int time,bool looped) const
     for(unsigned int i=frames_count;i>0;--i)
     {
         const frame &prev=seq.frames[i-1];
-        if(prev.time<time)
+        if(prev.time<=time)
         {
             bone b;
 

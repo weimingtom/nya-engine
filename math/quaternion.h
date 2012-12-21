@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "vector.h"
+
 namespace nya_math
 {
 
@@ -20,13 +22,16 @@ struct quat
 	    this->z=z; this->w=w;
     }
 
+    quat(vec3 euler);
+
 	quat(const float *q) { x=q[0]; y=q[1]; z=q[2]; w=q[3]; }
 
 	quat operator - () const { return quat(-x,-y,-z,-w); }
+
+	vec3 get_euler();
 
 public:
     static quat slerp(const quat &from,const quat &to,float t);
 };
 
 }
-
