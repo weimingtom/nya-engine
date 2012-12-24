@@ -49,7 +49,7 @@ quat quat::slerp(const quat &q1,const quat &q2,float t)
                 scale0*q1.w+scale1*p1[3]);
 }
 
-vec3 quat::get_euler()
+vec3 quat::get_euler() const
 {
     const float x2=x+x;
     const float y2=y+y;
@@ -72,7 +72,7 @@ vec3 quat::get_euler()
 
     if(ang>=M_PI_2)
     {
-		return vec3(atan2f(xy2-wz2,1.0f-xx2+zz2),ang,0.0f);
+        return vec3(atan2f(xy2-wz2,1.0f-xx2+zz2),ang,0.0f);
     }
 
     if(ang> -M_PI_2)
@@ -88,7 +88,6 @@ vec3 quat::get_euler()
     return vec3(-atan2f(xy2-wz2,1.0f-xx2+zz2),ang,0.0f);
 }
 
-
 quat::quat(vec3 euler)
 {
     euler*=0.5f;
@@ -102,10 +101,67 @@ quat::quat(vec3 euler)
     const float sin_z=sinf(euler.z);
     const float cos_z=cosf(euler.z);
 
-	x=sin_x*cos_y*cos_z - cos_x*sin_y*sin_z;
-	y=cos_x*sin_y*cos_z + sin_x*cos_y*sin_z;
-	z=cos_x*cos_y*sin_z - sin_x*sin_y*cos_z;
-	w=cos_x*cos_y*cos_z + sin_x*sin_y*sin_z;
+    x=sin_x*cos_y*cos_z - cos_x*sin_y*sin_z;
+    y=cos_x*sin_y*cos_z + sin_x*cos_y*sin_z;
+    z=cos_x*cos_y*sin_z - sin_x*sin_y*cos_z;
+    w=cos_x*cos_y*cos_z + sin_x*sin_y*sin_z;
+}
+
+quat::quat(vec3 axis,float angle)
+{
+    if(fabsf(angle)<0.0001f)
+    {
+        quat();
+        return;
+    }
+
+    angle*=0.5f;
+    const float sin_a=sinf(angle);
+
+    x=axis.x*sin_a;
+    y=axis.y*sin_a;
+    z=axis.z*sin_a;
+    w=cosf(angle);
+}
+
+quat quat::limit_angle(float from,float to)
+{
+    vec3 ang=get_euler();
+
+    if(ang.x<from)
+        ang.x=from;
+    if(ang.x>to)
+        ang.x=to;
+
+    ang.y=0.0f;
+    ang.z=0.0f;
+
+    nya_math::quat out(ang);
+
+    return *this=quat(ang);
+}
+
+quat quat::normalize()
+{
+    const float len=sqrtf(x*x+y*y+z*z+w*w);
+    if(len>0.00001f)
+    {
+        const float len_inv=1.0f/len;
+        x*=len_inv;
+        y*=len_inv;
+        z*=len_inv;
+        w*=len_inv;
+    }
+
+    return *this;
+}
+
+quat quat::operator * (const quat &q) const
+{
+    return quat(w*q.x + x*q.w + y*q.z - z*q.y,
+                w*q.y - x*q.z + y*q.w + z*q.x,
+                w*q.z + x*q.y - y*q.x + z*q.w,
+                w*q.w - x*q.x - y*q.y - z*q.z);
 }
 
 

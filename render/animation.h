@@ -15,17 +15,17 @@ namespace nya_render
 class animation
 {
 public:
-	struct bone
-	{
-		nya_math::vec3 pos;
-		nya_math::quat rot;
-	};
+    struct bone
+    {
+        nya_math::vec3 pos;
+        nya_math::quat rot;
+    };
 
 public:
-	//unsigned int get_frames_count() const; //?
-	unsigned int get_duration() const { return m_duration; }
+    //unsigned int get_frames_count() const; //?
+    unsigned int get_duration() const { return m_duration; }
     int get_bone_idx(const char *name) const; //< 0 if invalid
-	bone get_bone(int idx,unsigned int time,bool looped=true) const;
+    bone get_bone(int idx,unsigned int time,bool looped=true) const;
 
 public:
     int add_bone(const char *name); //create or return existing
