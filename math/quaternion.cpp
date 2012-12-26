@@ -8,66 +8,66 @@ namespace nya_math
 
 quat quat::slerp(const quat &q1,const quat &q2,float t)
 {
-    float p1[4];
-    float omega,cosom,sinom,scale0,scale1;
-
-    cosom=q1.x*q2.x+q1.y*q2.y+q1.z*q2.z+q1.w*q2.w;
-
-    if(cosom<0.0)
-    {
-        cosom= -cosom;
-        p1[0]= -q2.x;
-        p1[1]= -q2.y;
-        p1[2]= -q2.z;
-        p1[3]= -q2.w;
-    }
-    else
-    {
-        p1[0]=q2.x;
-        p1[1]=q2.y;
-        p1[2]=q2.z;
-        p1[3]=q2.w;
-    }
-
     const float eps=0.001f;
-    if ((1.0-cosom)>eps)
+    float scale0,scale1;
+
+    const float cosom=q1.v*q2.v+q1.w*q2.w;
+    if(cosom<0.0f)
     {
-        omega=acosf(cosom);
-        sinom=sinf(omega);
-        scale0=sinf((1.0f-t)*omega)/sinom;
-        scale1=sinf(t*omega)/sinom;
+        if (1.0f+cosom>eps)
+        {
+            const float omega=acosf(-cosom);
+            const float sinom_inv=1.0f/sinf(omega);
+            scale0=sinf((1.0f-t)*omega)*sinom_inv;
+            scale1=-sinf(t*omega)*sinom_inv;
+        }
+        else
+        {
+            scale0=1.0f-t;
+            scale1=-t;
+        }
     }
     else
     {
-        scale0=1.0f-t;
-        scale1=t;
+        if (1.0f-cosom>eps)
+        {
+            const float omega=acosf(cosom);
+            const float sinom_inv=1.0f/sinf(omega);
+            scale0=sinf((1.0f-t)*omega)*sinom_inv;
+            scale1=sinf(t*omega)*sinom_inv;
+        }
+        else
+        {
+            scale0=1.0f-t;
+            scale1=t;
+        }
     }
 
-    return quat(scale0*q1.x+scale1*p1[0],
-                scale0*q1.y+scale1*p1[1],
-                scale0*q1.z+scale1*p1[2],
-                scale0*q1.w+scale1*p1[3]);
+    return quat(scale0*q1.v.x+scale1*q2.v.x,
+                scale0*q1.v.y+scale1*q2.v.y,
+                scale0*q1.v.z+scale1*q2.v.z,
+                scale0*q1.w+scale1*q2.w);
 }
 
 vec3 quat::get_euler() const
 {
-    const float x2=x+x;
-    const float y2=y+y;
-    const float z2=z+z;
-    const float xz2=x*z2;
+    const float x2=v.x+v.x;
+    const float y2=v.y+v.y;
+    const float z2=v.z+v.z;
+    const float xz2=v.x*z2;
     const float wy2=w*y2;
 
     float temp=wy2-xz2;
     if(temp>=1.0f)
         temp=1.0f;
     else if(temp<=-1.0f)
-        temp=-1.f;
+        temp=-1.0f;
 
     const float ang=asinf(temp);
 
-    const float xx2=x*x2;
-    const float xy2=x*y2;
-    const float zz2=z*z2;
+    const float xx2=v.x*x2;
+    const float xy2=v.x*y2;
+    const float zz2=v.z*z2;
     const float wz2=w*z2;
 
     if(ang>=M_PI_2)
@@ -77,9 +77,9 @@ vec3 quat::get_euler() const
 
     if(ang> -M_PI_2)
     {
-        const float yz2=y*z2;
+        const float yz2=v.y*z2;
         const float wx2=w*x2;
-        const float yy2=y*y2;
+        const float yy2=v.y*y2;
 
         return vec3(atan2f(yz2+wx2,1.0f-xx2+yy2),ang,
                     atan2f(xy2+wz2,1.0f-yy2+zz2));
@@ -101,10 +101,10 @@ quat::quat(vec3 euler)
     const float sin_z=sinf(euler.z);
     const float cos_z=cosf(euler.z);
 
-    x=sin_x*cos_y*cos_z - cos_x*sin_y*sin_z;
-    y=cos_x*sin_y*cos_z + sin_x*cos_y*sin_z;
-    z=cos_x*cos_y*sin_z - sin_x*sin_y*cos_z;
-    w=cos_x*cos_y*cos_z + sin_x*sin_y*sin_z;
+    v.x=sin_x*cos_y*cos_z - cos_x*sin_y*sin_z;
+    v.y=cos_x*sin_y*cos_z + sin_x*cos_y*sin_z;
+    v.z=cos_x*cos_y*sin_z - sin_x*sin_y*cos_z;
+    w  =cos_x*cos_y*cos_z + sin_x*sin_y*sin_z;
 }
 
 quat::quat(vec3 axis,float angle)
@@ -116,11 +116,8 @@ quat::quat(vec3 axis,float angle)
     }
 
     angle*=0.5f;
-    const float sin_a=sinf(angle);
 
-    x=axis.x*sin_a;
-    y=axis.y*sin_a;
-    z=axis.z*sin_a;
+    v=axis*sinf(angle);
     w=cosf(angle);
 }
 
@@ -136,20 +133,16 @@ quat quat::limit_angle(float from,float to)
     ang.y=0.0f;
     ang.z=0.0f;
 
-    nya_math::quat out(ang);
-
     return *this=quat(ang);
 }
 
 quat quat::normalize()
 {
-    const float len=sqrtf(x*x+y*y+z*z+w*w);
+    const float len=sqrtf(v*v+w*w);
     if(len>0.00001f)
     {
         const float len_inv=1.0f/len;
-        x*=len_inv;
-        y*=len_inv;
-        z*=len_inv;
+        v*=len_inv;
         w*=len_inv;
     }
 
@@ -158,12 +151,21 @@ quat quat::normalize()
 
 quat quat::operator * (const quat &q) const
 {
-    return quat(w*q.x + x*q.w + y*q.z - z*q.y,
-                w*q.y - x*q.z + y*q.w + z*q.x,
-                w*q.z + x*q.y - y*q.x + z*q.w,
-                w*q.w - x*q.x - y*q.y - z*q.z);
+    return quat(w*q.v.x + v.x*q.w   + v.y*q.v.z - v.z*q.v.y,
+                w*q.v.y - v.x*q.v.z + v.y*q.w   + v.z*q.v.x,
+                w*q.v.z + v.x*q.v.y - v.y*q.v.x + v.z*q.w,
+                w*q.w   - v.x*q.v.x - v.y*q.v.y - v.z*q.v.z);
 }
 
+vec3 quat::rotate(const vec3 &vec) const
+{
+    return vec+vec3::cross(v,vec3::cross(v,vec)+vec*w)*2.0f;
+}
+
+vec3 quat::rotate_inv(const vec3 &vec) const
+{
+    return vec+vec3::cross(vec3::cross(vec,v)+vec*w,v)*2.0f;
+}
 
 }
 

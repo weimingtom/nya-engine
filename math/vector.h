@@ -20,7 +20,9 @@ struct vec3
     vec3 operator + (const vec3 &v) const { return vec3(x+v.x,y+v.y,z+v.z);	}
     vec3 operator - (const vec3 &v) const { return vec3(x-v.x,y-v.y,z-v.z);	}
 
-    float operator * (const vec3 &v) const { return x*v.x+y*v.y+z*v.z;	}
+    float operator * (const vec3 &v) const { return x*v.x+y*v.y+z*v.z; }
+
+    vec3 operator * (const float a) const { return vec3(x*a,y*a,z*a); }
 
     vec3 operator - () const { return vec3(-x,-y,-z); }
 
@@ -37,7 +39,7 @@ struct vec3
         return *this*=(1.0f/len);
     }
 
-    static vec3 cross(vec3 a,vec3 b) const
+    static vec3 cross(vec3 a,vec3 b)
     {
         return vec3(a.y*b.z - a.z*b.y,
                     a.z*b.x - a.x*b.z,
