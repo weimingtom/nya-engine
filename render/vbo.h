@@ -12,8 +12,7 @@ public:
     {
         triangles,
         triangles_strip,
-        triangles_fan,
-        quads
+        triangles_fan
     };
 
     enum element_size
@@ -23,7 +22,8 @@ public:
     };
 
     void gen_vertex_data(const void*data,unsigned int vert_stride,unsigned int vert_count,bool dynamic=false);
-    void gen_index_data(const void*data,element_type type,element_size size,unsigned int faces_count,bool dynamic=false);
+    void gen_index_data(const void*data,element_size size,unsigned int faces_count,bool dynamic=false);
+    void set_element_type(element_type type) { m_element_type = type; }
     void set_normals(unsigned int offset);
     void set_tc(unsigned int tc_idx,unsigned int offset,unsigned int dimension=2);
     void set_colors(unsigned int offset,unsigned int dimension=3);
@@ -48,7 +48,8 @@ public:
     void release();
 
 public:
-    vbo(): m_element_count(0), m_vertex_id(0), m_index_id(0), m_verts_count(0), m_vertex_bind(false), m_index_bind(false) {}
+    vbo(): m_element_type(triangles), m_element_count(0), m_vertex_id(0), m_index_id(0),
+           m_verts_count(0), m_vertex_bind(false), m_index_bind(false) {}
 
 private:
     element_type m_element_type;

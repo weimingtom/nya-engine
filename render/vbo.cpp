@@ -2,7 +2,6 @@
 
 /*
     ToDo:
-          draw arrays modes (quads, tris)
           is_valid function
           log
           gl functions in anonymous namespace
@@ -17,11 +16,27 @@ namespace nya_render
 {
 
 #ifdef NO_EXTENSIONS_INIT
-    #define vbo_glGenBuffers    glGenBuffers
-    #define vbo_glBindBuffer    glBindBuffer
-    #define vbo_glBufferData    glBufferData
-    #define vbo_glDeleteBuffers    glDeleteBuffers
-    #define vbo_glClientActiveTexture    glClientActiveTexture
+    #define vbo_glGenBuffers glGenBuffers
+    #define vbo_glBindBuffer glBindBuffer
+    #define vbo_glBufferData glBufferData
+    #define vbo_glDeleteBuffers glDeleteBuffers
+    #define vbo_glClientActiveTexture glClientActiveTexture
+
+    #ifndef GL_ARRAY_BUFFER_ARB
+        #define GL_ARRAY_BUFFER_ARB GL_ARRAY_BUFFER
+    #endif
+
+    #ifndef GL_DYNAMIC_DRAW_ARB
+        #define GL_DYNAMIC_DRAW_ARB GL_DYNAMIC_DRAW
+    #endif
+
+    #ifndef GL_STATIC_DRAW_ARB
+        #define GL_STATIC_DRAW_ARB GL_STATIC_DRAW
+    #endif
+
+    #ifndef GL_ELEMENT_ARRAY_BUFFER_ARB
+        #define GL_ELEMENT_ARRAY_BUFFER_ARB GL_ELEMENT_ARRAY_BUFFER
+    #endif
 #else
     PFNGLGENBUFFERSARBPROC vbo_glGenBuffers;
     PFNGLBINDBUFFERARBPROC vbo_glBindBuffer;
@@ -85,14 +100,17 @@ void vbo::bind_verts()
     if(!m_vertex_id)
         return;
 
-    m_vertex_bind=true;
-
-    glEnableClientState(GL_VERTEX_ARRAY);
     vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,m_vertex_id);
 
-    const int element_dimensions=(m_element_type==quads)?4:3;
+#ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+    glEnableVertexAttribArray(vertex_attribute);
+    glVertexAttribPointer(vertex_attribute,3,GL_FLOAT,0,m_vertex_stride,(void *)0);
+#else
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3,GL_FLOAT,m_vertex_stride,(void *)0);
+#endif
 
-    glVertexPointer(element_dimensions,GL_FLOAT,m_vertex_stride,(void *)0);
+    m_vertex_bind=true;
 }
 
 void vbo::bind_normals()
@@ -103,10 +121,15 @@ void vbo::bind_normals()
     if(!m_normals.has)
         return;
 
-    m_normals.bind=true;
-
-    glNormalPointer(GL_FLOAT,m_vertex_stride,(void *)(m_normals.offset));
+#ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+    glEnableVertexAttribArray(normal_attribute);
+    glVertexAttribPointer(normal_attribute,3,GL_FLOAT,1,m_vertex_stride,(void *)(m_normals.offset));
+#else
     glEnableClientState(GL_NORMAL_ARRAY);
+    glNormalPointer(GL_FLOAT,m_vertex_stride,(void *)(m_normals.offset));
+#endif
+
+    m_normals.bind=true;
 }
 
 void vbo::bind_colors()
@@ -117,10 +140,15 @@ void vbo::bind_colors()
     if(!m_colors.has)
         return;
 
-    m_colors.bind=true;
-
-    glColorPointer(m_colors.dimension,GL_FLOAT,m_vertex_stride,(void *)(m_colors.offset));
+#ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+    glEnableVertexAttribArray(color_attribute);
+    glVertexAttribPointer(color_attribute,m_colors.dimension,GL_FLOAT,0,m_vertex_stride,(void *)(m_colors.offset));
+#else
     glEnableClientState(GL_COLOR_ARRAY);
+    glColorPointer(m_colors.dimension,GL_FLOAT,m_vertex_stride,(void *)(m_colors.offset));
+#endif
+
+    m_colors.bind=true;
 }
 
 void vbo::bind_tc(unsigned int tc_idx)
@@ -136,11 +164,16 @@ void vbo::bind_tc(unsigned int tc_idx)
     if(!tc.has)
         return;
 
-    tc.bind=true;
-
+#ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+    glEnableVertexAttribArray(tc0_attribute+tc_idx);
+    glVertexAttribPointer(tc0_attribute+tc_idx,tc.dimension,GL_FLOAT,0,m_vertex_stride,(void *)(tc.offset));
+#else
     vbo_glClientActiveTexture(GL_TEXTURE0_ARB+tc_idx);
     glTexCoordPointer(tc.dimension,GL_FLOAT,m_vertex_stride,(void *)(tc.offset));
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+#endif
+
+    tc.bind=true;
 }
 
 void vbo::bind_indices()
@@ -157,8 +190,13 @@ void vbo::unbind()
 {
     if(m_vertex_bind)
     {
+        
+#ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+        glDisableVertexAttribArray(vertex_attribute);
+#else
         glDisableClientState(GL_VERTEX_ARRAY);
         vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,0);
+#endif
         m_vertex_bind=false;
     }
 
@@ -170,30 +208,50 @@ void vbo::unbind()
 
     if(m_colors.bind)
     {
+
+#ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+        glDisableVertexAttribArray(color_attribute);
+#else
         glDisableClientState(GL_COLOR_ARRAY);
+#endif
         m_colors.bind=false;
     }
 
     if(m_normals.bind)
     {
+
+#ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+        glDisableVertexAttribArray(normal_attribute);
+#else
         glDisableClientState(GL_NORMAL_ARRAY);
+#endif
         m_normals.bind=false;
     }
 
+#ifndef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
     bool has_unbinds=false;
+#endif
+
     for(unsigned int i=0;i<vbo_max_tex_coord;++i)
     {
         attribute &tc=m_tcs[i];
         if(!tc.bind)
             continue;
 
+#ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+        glDisableVertexAttribArray(tc0_attribute+i);
+#else
         vbo_glClientActiveTexture(GL_TEXTURE0_ARB+i);
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-        tc.bind=false;
         has_unbinds=true;
+#endif
+        tc.bind=false;
     }
+
+#ifndef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
     if(has_unbinds)
         vbo_glClientActiveTexture(GL_TEXTURE0_ARB);
+#endif
 }
 
 void vbo::draw()
@@ -214,6 +272,16 @@ void vbo::draw(unsigned int offset,unsigned int count)
     if(!m_vertex_bind)
         return;
 
+    unsigned int gl_elem;
+
+    switch(m_element_type)
+    {
+        case triangles: gl_elem=GL_TRIANGLES; break;
+        case triangles_strip: gl_elem=GL_TRIANGLE_STRIP; break;
+        case triangles_fan: gl_elem=GL_TRIANGLE_FAN; break;
+        default: return;
+    }
+
     if(m_index_bind)
     {
         if(offset+count>m_element_count)
@@ -221,31 +289,14 @@ void vbo::draw(unsigned int offset,unsigned int count)
 
         const unsigned int gl_elem_type=(m_element_size==index4b?GL_UNSIGNED_INT:GL_UNSIGNED_SHORT);
 
-        switch(m_element_type)
-        {
-            case triangles:
-                glDrawElements(GL_TRIANGLES,count*3,gl_elem_type,(void*)(offset*3*m_element_size));
-            break;
-
-            case triangles_strip:
-                glDrawElements(GL_TRIANGLE_STRIP,count*3,gl_elem_type,(void*)(offset*3*m_element_size));
-            break;
-
-            case triangles_fan:
-                glDrawElements(GL_TRIANGLE_FAN,count*3,gl_elem_type,(void*)(offset*3*m_element_size));
-            break;
-
-            case quads:
-                glDrawElements(GL_QUADS,count*4,gl_elem_type,(void*)(offset*4*m_element_size));
-            break;
-        }
+        glDrawElements(gl_elem,count*3,gl_elem_type,(void*)(offset*3*m_element_size));
     }
     else
     {
         if(offset+count>m_verts_count)
             return;
 
-        glDrawArrays(GL_TRIANGLES,offset,count);
+        glDrawArrays(gl_elem,offset,count);
     }
 }
 
@@ -284,10 +335,7 @@ void vbo::gen_vertex_data(const void*data,unsigned int vert_stride,unsigned int 
         vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,m_vertex_id);
     }
 
-    if(dynamic)
-        vbo_glBufferData(GL_ARRAY_BUFFER_ARB,size,data,GL_DYNAMIC_DRAW_ARB);
-    else
-        vbo_glBufferData(GL_ARRAY_BUFFER_ARB,size,data,GL_STATIC_DRAW_ARB);
+    vbo_glBufferData(GL_ARRAY_BUFFER_ARB,size,data,dynamic?GL_DYNAMIC_DRAW_ARB:GL_STATIC_DRAW_ARB);
 
     vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,0);
 
@@ -295,7 +343,7 @@ void vbo::gen_vertex_data(const void*data,unsigned int vert_stride,unsigned int 
     m_verts_count=vert_count;
 }
 
-void vbo::gen_index_data(const void*data,element_type type,element_size size,unsigned int faces_count,bool dynamic)
+void vbo::gen_index_data(const void*data,element_size size,unsigned int faces_count,bool dynamic)
 {
     if(!check_init_vbo())
     {
@@ -303,7 +351,7 @@ void vbo::gen_index_data(const void*data,element_type type,element_size size,uns
         return;
     }
 
-    const unsigned int buffer_size=faces_count*size*(type==quads?4:3);
+    const unsigned int buffer_size=faces_count*size*3;
     if(buffer_size==0 || !data)
     {
         get_log()<<"Unable to gen indexes: invalid data\n";
@@ -318,13 +366,9 @@ void vbo::gen_index_data(const void*data,element_type type,element_size size,uns
     }
 
     m_element_count=faces_count;
-    m_element_type=type;
     m_element_size=size;
 
-    if(dynamic)
-        vbo_glBufferData(GL_ELEMENT_ARRAY_BUFFER_ARB,buffer_size,data,GL_DYNAMIC_DRAW_ARB);
-    else
-        vbo_glBufferData(GL_ELEMENT_ARRAY_BUFFER_ARB,buffer_size,data,GL_STATIC_DRAW_ARB);
+    vbo_glBufferData(GL_ELEMENT_ARRAY_BUFFER_ARB,buffer_size,data,dynamic?GL_DYNAMIC_DRAW_ARB:GL_STATIC_DRAW_ARB);
 
     vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,0);
 }

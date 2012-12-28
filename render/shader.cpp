@@ -10,6 +10,8 @@
 #include "platform_specific_gl.h"
 #include "render.h"
 
+#include <string>
+
 namespace nya_render
 {
 
@@ -85,6 +87,50 @@ namespace nya_render
     PFNGLGETACTIVEATTRIBARBPROC glGetActiveAttribARB = NULL;
     PFNGLGETATTRIBLOCATIONARBPROC glGetAttribLocationARB = NULL;
     PFNGLGETVERTEXATTRIBFVARBPROC glGetVertexAttribfvARB = NULL;
+#endif
+
+#ifdef OPENGL_ES
+    #define glCreateProgramObjectARB glCreateProgram
+    #define glUseProgramObjectARB glUseProgram
+    #define glLinkProgramARB glLinkProgram
+    #define glValidateProgramARB glValidateProgram
+
+    #define glCreateShaderObjectARB glCreateShader
+    #define glDeleteObjectARB glDeleteShader
+    #define glAttachObjectARB glAttachShader
+    #define glDetachObjectARB glDetachShader
+    #define glShaderSourceARB glShaderSource
+    #define glCompileShaderARB glCompileShader
+    #define glGetInfoLogARB glGetShaderInfoLog
+
+    #define glGetUniformLocationARB glGetUniformLocation
+    #define glUniform1iARB glUniform1i
+    #define glUniform4fARB glUniform4f
+    #define glUniform4fvARB glUniform4fv
+    #define glUniformMatrix4fvARB glUniformMatrix4fv
+
+    #ifndef GL_VERTEX_SHADER_ARB
+        #define GL_VERTEX_SHADER_ARB GL_VERTEX_SHADER
+    #endif
+
+    #ifndef GL_FRAGMENT_SHADER_ARB
+        #define GL_FRAGMENT_SHADER_ARB GL_FRAGMENT_SHADER
+    #endif
+    
+    #ifndef GL_ARB_shader_objects
+        #define GL_OBJECT_COMPILE_STATUS_ARB GL_COMPILE_STATUS
+        #define GL_OBJECT_INFO_LOG_LENGTH_ARB GL_INFO_LOG_LENGTH
+        #define GL_OBJECT_LINK_STATUS_ARB GL_LINK_STATUS
+        #define GL_OBJECT_VALIDATE_STATUS_ARB GL_VALIDATE_STATUS
+    #endif
+    
+    #define SUPPORT_OLD_SHADERS
+
+    #define glGetObjectParam glGetProgramiv
+    #define glGetShaderParam glGetShaderiv
+#else
+    #define glGetObjectParam glGetObjectParameterivARB
+    #define glGetShaderParam glGetObjectParameterivARB
 #endif
 
 bool check_init_shaders()
@@ -189,8 +235,129 @@ void shader::add_program(program_type type,const char*code)
     if(m_objects[type])
     {
         glDetachObjectARB(m_program,m_objects[type]);
+        glDeleteObjectARB(m_objects[type]);
         m_objects[type]=0;
     }
+
+#ifdef SUPPORT_OLD_SHADERS
+    std::string code_str(code);
+    std::string code_final;
+
+    if(type==vertex)
+    {
+        const char *attribute_names[]={"nyaVertex","nyaNormal","nyaColor","nyaMultiTexCoord"};
+
+        bool used_attribs[max_attributes]={false};
+        for(size_t gl=code_str.find("gl_");gl!=std::string::npos;gl=code_str.find("gl_",gl+8))
+        {
+            if(code_str.size()<=gl+8)
+                break;
+
+            bool replace=false;
+
+            switch(code_str[gl+3])
+            {
+                case 'V':
+                    if(code_str.compare(gl+3,6,"Vertex")==0)
+                    {
+                        used_attribs[vertex_attribute]=true;
+                        replace=true;
+                    }
+                    break;
+
+                case 'N':
+                    if(code_str.compare(gl+3,6,"Normal")==0)
+                    {
+                        used_attribs[normal_attribute]=true;
+                        replace=true;
+                    }
+                    break;
+
+                case 'C':
+                    if(code_str.compare(gl+3,5,"Color")==0)
+                    {
+                        used_attribs[color_attribute]=true;
+                        replace=true;
+                    }
+                    break;
+
+                case 'M':
+                    if(code_str.compare(gl+3,13,"MultiTexCoord")==0)
+                    {
+                        if(code_str.size()<=gl+17)
+                            break;
+
+                        char n0=code_str[gl+16];
+                        char n1=code_str[gl+17];
+
+                        if(n0<'0' || n0>'9')
+                            break;
+
+                        int idx=n0-'0';
+                        if(n1>'0' && n1<='9')
+                            idx=idx*10+n1-'0';
+
+                        if(tc0_attribute+idx>=max_attributes)
+                            break;
+
+                        used_attribs[tc0_attribute+idx]=true;
+                        replace=true;
+                    }
+                    break;
+
+                //case 'T':     //ToDo: gl_TexCoord[] variables
+                //break;
+            }
+
+            if(replace)
+            {
+                code_str[gl]='n';
+                code_str[gl+1]='y';
+                code_str[gl+2]='a';
+            }
+        }
+
+        for(int i=0;i<tc0_attribute;++i)
+        {
+            if(!used_attribs[i])
+                continue;
+
+            code_final.append("attribute vec4 ");
+            code_final.append(attribute_names[i]);
+            code_final.append(";\n");
+
+            glBindAttribLocation(m_program,i,attribute_names[i]);
+        }
+
+        for(int i=tc0_attribute;i<max_attributes;++i)
+        {
+            if(!used_attribs[i])
+                continue;
+
+            std::string attrib_name(attribute_names[tc0_attribute]);
+            int idx=i-tc0_attribute;
+            if(idx>=10)
+            {
+                int h=idx/10;
+                attrib_name+=char('0'+h);
+                idx-=h*10;
+            }
+            attrib_name+=char('0'+idx);
+
+            code_final.append("attribute vec4 ");
+            code_final.append(attrib_name);
+            code_final.append(";\n");
+
+            glBindAttribLocation(m_program,i,attrib_name.c_str());
+        }
+    }
+
+    code_final.append(code_str);
+
+    code=code_final.c_str();
+
+    //get_log()<<code<<"\n";
+#endif
 
     GLenum gl_type=GL_VERTEX_SHADER_ARB;
     if(type==pixel)                                    //ToDo: switch and all cases
@@ -200,41 +367,79 @@ void shader::add_program(program_type type,const char*code)
     glShaderSourceARB(object,1,&code,0);
     glCompileShaderARB(object);
     GLint compiled;
-    glGetObjectParameterivARB(object,GL_OBJECT_COMPILE_STATUS_ARB,&compiled);
+    glGetShaderParam(object,GL_OBJECT_COMPILE_STATUS_ARB,&compiled);
 
     const static char type_str[][12]={"vertex","pixel","geometry","tesselation"};
 
     if(!compiled)
     {
-        GLint length;
-        glGetObjectParameterivARB(object,GL_OBJECT_INFO_LOG_LENGTH_ARB,&length);
-        const char *buf=new char[length];
-        glGetInfoLogARB(object,length,&length,(GLcharARB*)buf);
-        get_log()<<"Can`t compile "<<type_str[type]<<" shader: \n"<<buf<<"\n";
-        delete []buf;
+        GLint log_len=0;
+        get_log()<<"Can`t compile "<<type_str[type]<<" shader: \n";
+        glGetShaderParam(object,GL_OBJECT_INFO_LOG_LENGTH_ARB,&log_len);
+        if(log_len>0)
+        {
+            GLchar *buf=new GLchar[log_len];
+            glGetInfoLogARB(object,log_len,&log_len,buf);
+            get_log()<<buf<<"\n";
+            delete []buf;
+        }
+
         m_program=0;
         return;
     }
     glAttachObjectARB(m_program,object);
-    glDeleteObjectARB(object);
 
+#ifdef OPENGL_ES
+    m_objects[type]=object;
+
+    if(m_program && m_objects[vertex] && m_objects[pixel])
+#else
     if(m_program)
+#endif
     {
-        int result=0;
+        GLint result=0;
         glLinkProgramARB(m_program);
-        glGetObjectParameterivARB(m_program,GL_OBJECT_LINK_STATUS_ARB,&result);
+        glGetObjectParam(m_program,GL_OBJECT_LINK_STATUS_ARB,&result);
         if(!result)
         {
+#ifdef OPENGL_ES
+            get_log()<<"Can`t link shader\n";
+#else
             get_log()<<"Can`t link "<<type_str[type]<<" shader\n";
+#endif
+            GLint log_len=0;
+            glGetObjectParam(m_program,GL_OBJECT_INFO_LOG_LENGTH_ARB,&log_len);
+            if (log_len>0)
+            {
+                GLchar *log = new GLchar[log_len];
+                glGetInfoLogARB(m_program,log_len,&log_len,log);
+                get_log()<<log<<"\n";
+                delete(log);
+            }
+
             m_program=0; //??
             return;
         }
 
+        result=0;
         glValidateProgramARB(m_program);
-        glGetObjectParameterivARB(m_program,GL_OBJECT_VALIDATE_STATUS_ARB, &result);
+        glGetObjectParam(m_program,GL_OBJECT_VALIDATE_STATUS_ARB,&result);
         if(!result)
         {
+#ifdef OPENGL_ES
+            get_log()<<"Can`t validate shader\n";
+#else
             get_log()<<"Can`t validate "<<type_str[type]<<" shader\n";
+#endif
+            GLint log_len=0;
+            glGetObjectParam(m_program,GL_OBJECT_INFO_LOG_LENGTH_ARB,&log_len);
+            if (log_len>0)
+            {
+                GLchar *log = new GLchar[log_len];
+                glGetInfoLogARB(m_program,log_len,&log_len,log);
+                get_log()<<log<<"\n";
+                delete(log);
+            }
             m_program=0; //??
             return;
         }
@@ -336,6 +541,7 @@ void shader::release()
             continue;
 
         glDetachObjectARB(m_program,m_objects[i]);
+        glDeleteObjectARB(m_objects[i]);
         m_objects[i]=0;
     }
 

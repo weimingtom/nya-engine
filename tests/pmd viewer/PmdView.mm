@@ -111,7 +111,7 @@
         if(doc->m_indices.empty())
             return;
 
-        m_vbo.gen_index_data(&doc->m_indices[0],nya_render::vbo::triangles,nya_render::vbo::index2b,(unsigned int)doc->m_indices.size()/3);
+        m_vbo.gen_index_data(&doc->m_indices[0],nya_render::vbo::index2b,(unsigned int)doc->m_indices.size()/3);
 
         m_materials.resize(doc->m_materials.size());
         for(unsigned int i=0;i<doc->m_materials.size();++i)

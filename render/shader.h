@@ -4,6 +4,10 @@
 
 #include "platform_specific_gl.h"
 
+#ifdef OPENGL_ES
+    #define GLhandleARB GLuint
+#endif
+
 namespace nya_render
 {
 
