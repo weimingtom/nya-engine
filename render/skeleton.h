@@ -43,8 +43,8 @@ private:
         nya_math::vec3 pos_org;
         nya_math::vec3 offset;
 
-		nya_math::vec3	pos;
-		nya_math::quat	rot;
+        nya_math::vec3	pos;
+        nya_math::quat	rot;
 
         int parent;
     };
