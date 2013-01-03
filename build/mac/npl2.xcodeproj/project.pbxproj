@@ -22,6 +22,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		F2238749168DF58F000C28DE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F25932AF15D8608B0092C7D8 /* nya_engine.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F23AB544168DBA16004B116E;
+			remoteInfo = nya_engine_ios;
+		};
 		F25932B315D8608B0092C7D8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F25932AF15D8608B0092C7D8 /* nya_engine.xcodeproj */;
@@ -138,6 +145,7 @@
 			isa = PBXGroup;
 			children = (
 				F25932B415D8608B0092C7D8 /* libnya_engine.a */,
+				F223874A168DF58F000C28DE /* libnya_engine_ios.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -191,6 +199,13 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		F223874A168DF58F000C28DE /* libnya_engine_ios.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libnya_engine_ios.a;
+			remoteRef = F2238749168DF58F000C28DE /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		F25932B415D8608B0092C7D8 /* libnya_engine.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
