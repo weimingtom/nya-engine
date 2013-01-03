@@ -13,18 +13,21 @@
 
 #include "math/matrix.h"
 
-void viewer_camera::apply()
+const nya_math::mat4 &viewer_camera::get_matrix()
 {
-    nya_math::mat4 mat;
+    if(!m_recalc_mat)
+        return m_mat;
 
-    mat.scale(m_scale);
-    mat.translate(m_pos_x,m_pos_y,0);
-    mat.rotate(m_rot_y,1,0,0);
-    mat.rotate(m_rot_x,0,1,0);
-    mat.translate(0,-8,0);
+    m_mat.identity();
+    m_mat.scale(m_scale);
+    m_mat.translate(m_pos_x,m_pos_y,0);
+    m_mat.rotate(m_rot_y,1,0,0);
+    m_mat.rotate(m_rot_x,0,1,0);
+    m_mat.translate(0,-8,0);
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrixf(mat.m[0]);
+    m_recalc_mat=false;
+
+    return m_mat;
 }
 
 void viewer_camera::add_rot(float dx,float dy)
@@ -45,6 +48,8 @@ void viewer_camera::add_rot(float dx,float dy)
 
     if ( m_rot_y < -max_angle )
         m_rot_y += max_angle;
+    
+    m_recalc_mat=true;
 
 }
 
@@ -52,6 +57,8 @@ void viewer_camera::add_pos(float dx,float dy)
 {
     m_pos_x+=dx;
     m_pos_y+=dy;
+    
+    m_recalc_mat=true;
 }
 
 void viewer_camera::add_scale(float ds)
@@ -64,6 +71,8 @@ void viewer_camera::add_scale(float ds)
     const float max_scale=10.0f;
     if(m_scale>max_scale)
         m_scale=max_scale;
+    
+    m_recalc_mat=true;
 }
 
 void scene::init()
@@ -422,7 +431,8 @@ void scene::draw()
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    m_camera.apply();
+    glMatrixMode(GL_MODELVIEW);
+    glLoadMatrixf(m_camera.get_matrix().m[0]);
 
 	glEnable     ( GL_DEPTH_TEST );
 	glDepthFunc(GL_LESS);
@@ -466,8 +476,8 @@ void scene::draw()
         glColor4f(scene_loc->color[0],scene_loc->color[1],scene_loc->color[2],1.0f);
     else
         glColor4f(1.0f,1.0f,1.0f,1.0f);
-    
-    glPushMatrix();/*
+    /*
+    glPushMatrix();
     if(m_curr_anim!=m_anim_list.end() && m_curr_anim->loc_idx[1]!=m_curr_anim->loc_idx[0])
     {
         if(scene_loc)
@@ -492,10 +502,10 @@ void scene::draw()
                                      m_aniki.get_buffer(int(m_anim_time)),
                                      m_aniki.get_bones_count());
         m_aniki.draw(true);
-    }
+    }/*
     glPopMatrix();
 
-    glPushMatrix();/*
+    glPushMatrix();
     if(m_curr_anim!=m_anim_list.end() && m_curr_anim->loc_idx[2]!=m_curr_anim->loc_idx[0])
     {
         if(scene_loc)
@@ -523,7 +533,7 @@ void scene::draw()
                                      m_the_third.get_bones_count());
         m_the_third.draw(true);
     }
-    glPopMatrix();
+    //glPopMatrix();
 
     if(frames_count)
         m_shader.unbind();
@@ -553,7 +563,8 @@ void scene::draw()
 
         imouto.draw(false);
 
-        glPushMatrix();/*
+        /*
+        glPushMatrix();
         if(m_curr_anim!=m_anim_list.end() && m_curr_anim->loc_idx[1]!=m_curr_anim->loc_idx[0])
         {
             if(scene_loc)
@@ -579,7 +590,7 @@ void scene::draw()
                                          m_aniki.get_bones_count());
             m_aniki.draw(false);
         }
-        glPopMatrix();
+        //glPopMatrix();
 
         /*
         //another bro or item
@@ -602,11 +613,15 @@ void scene::draw()
 
     glColor4f(1.0f,1.0f,1.0f,1.0f);
 
-    glPushMatrix();
     if(scene_loc)
     {
-        glRotatef(-scene_loc->ang[1]*180.0f/3.14f,0.0f,1.0f,0.0f);
-        glTranslatef(-scene_loc->pos[0],-scene_loc->pos[1],-scene_loc->pos[2]);
+        nya_math::mat4 mat=m_camera.get_matrix();
+
+        mat.rotate(-scene_loc->ang[1]*180.0f/3.14f,0,1,0);
+        mat.translate(-scene_loc->pos[0],-scene_loc->pos[1],-scene_loc->pos[2]);
+
+        glMatrixMode(GL_MODELVIEW);
+        glLoadMatrixf(mat.m[0]);
     }
 
     for(int i=0;i<max_bkg_models;++i)
@@ -630,7 +645,6 @@ void scene::draw()
             m_shader_scenery.unbind();
         }
     }
-    glPopMatrix();
 
     glDisable(GL_ALPHA_TEST);
 }

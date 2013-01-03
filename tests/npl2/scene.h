@@ -8,13 +8,15 @@
 class viewer_camera
 {
 public:
-    void apply();
     void add_rot(float dx,float dy);
     void add_pos(float dx,float dy);
     void add_scale(float ds);
 
 public:
-    viewer_camera(): m_rot_x(0), m_rot_y(0), m_scale(1.0f), m_pos_x(0), m_pos_y(0) {}
+    const nya_math::mat4 &get_matrix();
+
+public:
+    viewer_camera(): m_rot_x(0), m_rot_y(0), m_scale(1.0f), m_pos_x(0), m_pos_y(0), m_recalc_mat(true) {}
 
 private:
     float m_rot_x;
@@ -22,6 +24,9 @@ private:
     float m_scale;
     float m_pos_x;
     float m_pos_y;
+
+    bool m_recalc_mat;
+    nya_math::mat4 m_mat;
 };
 
 class scene
