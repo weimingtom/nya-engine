@@ -6,6 +6,7 @@
 #include "render/texture.h"
 #include "resources/resources.h"
 #include "resources/shared_resources.h"
+#include "math/matrix.h"
 
 class tsb_anim;
 
@@ -23,7 +24,7 @@ public:
         if(m_bones.empty() || !m_frames_count)
             return 0;
 
-        return (float*)&m_anim_bones[m_bones.size()*(frame % m_frames_count)];
+        return m_anim_bones[m_bones.size()*(frame % m_frames_count)].m[0];
     }
 
     unsigned int get_bones_count() { return (unsigned int)m_bones.size(); }
@@ -60,17 +61,12 @@ private:
     std::vector<material> m_materials;
 
 private:
-    struct bone
-    {
-        float mat[4][4];
-    };
-
-    std::vector<bone> m_bones;
+    std::vector<nya_math::mat4> m_bones;
 
       //ToDo: convert to frames
     unsigned int m_frames_count;
     unsigned int m_first_loop_frame;
-    std::vector<bone> m_anim_bones;
+    std::vector<nya_math::mat4> m_anim_bones;
     
 private:
     std::vector<std::string> m_group_names;

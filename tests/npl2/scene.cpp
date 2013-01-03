@@ -11,15 +11,20 @@
 
 #include <string>
 
+#include "math/matrix.h"
+
 void viewer_camera::apply()
 {
+    nya_math::mat4 mat;
+
+    mat.scale(m_scale);
+    mat.translate(m_pos_x,m_pos_y,0);
+    mat.rotate(m_rot_y,1,0,0);
+    mat.rotate(m_rot_x,0,1,0);
+    mat.translate(0,-8,0);
+
     glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glScalef(m_scale,m_scale,m_scale);
-    glTranslatef(m_pos_x,m_pos_y,0);
-    glRotatef(m_rot_y,1.0f,0.0f,0.0f);
-    glRotatef(m_rot_x,0.0f,1.0f,0.0f);
-    glTranslatef(0,-8,0);
+    glLoadMatrixf(mat.m[0]);
 }
 
 void viewer_camera::add_rot(float dx,float dy)
@@ -196,7 +201,7 @@ void scene::init()
     "  gl_TexCoord[0]=gl_MultiTexCoord0;"
     "  vec4 bone_idx=gl_MultiTexCoord1;"
     "  vec4 bone_weight=gl_MultiTexCoord2;"
-
+    
     "  const float eps=0.01;"
     
     "  mat4 bone=bones[int(bone_idx.x)]*bone_weight.x;"
@@ -219,7 +224,7 @@ void scene::init()
     "\n#ifdef vcolor_enabled\n"
     "  gl_TexCoord[3]=gl_MultiTexCoord3;"
     "\n#endif\n"
-
+    
     "  gl_Position=gl_ModelViewProjectionMatrix*bone*gl_Vertex;"
     "}";
 
@@ -469,7 +474,7 @@ void scene::draw()
         {
             glRotatef(-scene_loc->ang[1]*180.0f/3.14f,0.0f,1.0f,0.0f);
             glTranslatef(-scene_loc->pos[0],-scene_loc->pos[1],-scene_loc->pos[2]);
-            
+
             const tmb_model::locator *bro_loc=m_bkg_models[0].get_locator(m_curr_anim->loc_idx[1]);
             if(bro_loc)
             {

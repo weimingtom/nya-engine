@@ -168,4 +168,3 @@ vec3 quat::rotate_inv(const vec3 &vec) const
 }
 
 }
-

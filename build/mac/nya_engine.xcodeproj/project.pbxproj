@@ -124,6 +124,10 @@
 		F2F0A0AE1695A794007245BC /* bezier.h in Headers */ = {isa = PBXBuildFile; fileRef = F2F0A0A51695A794007245BC /* bezier.h */; };
 		F2F0A0AF1695A794007245BC /* bezier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2F0A0A61695A794007245BC /* bezier.cpp */; };
 		F2F0A0B01695A794007245BC /* bezier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2F0A0A61695A794007245BC /* bezier.cpp */; };
+		F2F0A0B31695F809007245BC /* matrix.h in Headers */ = {isa = PBXBuildFile; fileRef = F2F0A0B11695F809007245BC /* matrix.h */; };
+		F2F0A0B41695F809007245BC /* matrix.h in Headers */ = {isa = PBXBuildFile; fileRef = F2F0A0B11695F809007245BC /* matrix.h */; };
+		F2F0A0B51695F809007245BC /* matrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2F0A0B21695F809007245BC /* matrix.cpp */; };
+		F2F0A0B61695F809007245BC /* matrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2F0A0B21695F809007245BC /* matrix.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -192,6 +196,8 @@
 		F2F0A0A41695A794007245BC /* quaternion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = quaternion.cpp; path = ../../math/quaternion.cpp; sourceTree = "<group>"; };
 		F2F0A0A51695A794007245BC /* bezier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bezier.h; path = ../../math/bezier.h; sourceTree = "<group>"; };
 		F2F0A0A61695A794007245BC /* bezier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = bezier.cpp; path = ../../math/bezier.cpp; sourceTree = "<group>"; };
+		F2F0A0B11695F809007245BC /* matrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = matrix.h; path = ../../math/matrix.h; sourceTree = "<group>"; };
+		F2F0A0B21695F809007245BC /* matrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = matrix.cpp; path = ../../math/matrix.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -352,6 +358,8 @@
 		F2F0A0A11695A77C007245BC /* math */ = {
 			isa = PBXGroup;
 			children = (
+				F2F0A0B21695F809007245BC /* matrix.cpp */,
+				F2F0A0B11695F809007245BC /* matrix.h */,
 				F2F0A0A21695A794007245BC /* vector.h */,
 				F2F0A0A31695A794007245BC /* quaternion.h */,
 				F2F0A0A41695A794007245BC /* quaternion.cpp */,
@@ -402,6 +410,7 @@
 				F2F0A0A81695A794007245BC /* vector.h in Headers */,
 				F2F0A0AA1695A794007245BC /* quaternion.h in Headers */,
 				F2F0A0AE1695A794007245BC /* bezier.h in Headers */,
+				F2F0A0B41695F809007245BC /* matrix.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -443,6 +452,7 @@
 				F2F0A0A71695A794007245BC /* vector.h in Headers */,
 				F2F0A0A91695A794007245BC /* quaternion.h in Headers */,
 				F2F0A0AD1695A794007245BC /* bezier.h in Headers */,
+				F2F0A0B31695F809007245BC /* matrix.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -531,6 +541,7 @@
 				F2F0A0A01695A758007245BC /* animation.cpp in Sources */,
 				F2F0A0AC1695A794007245BC /* quaternion.cpp in Sources */,
 				F2F0A0B01695A794007245BC /* bezier.cpp in Sources */,
+				F2F0A0B61695F809007245BC /* matrix.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -567,6 +578,7 @@
 				F2F0A09F1695A758007245BC /* animation.cpp in Sources */,
 				F2F0A0AB1695A794007245BC /* quaternion.cpp in Sources */,
 				F2F0A0AF1695A794007245BC /* bezier.cpp in Sources */,
+				F2F0A0B51695F809007245BC /* matrix.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

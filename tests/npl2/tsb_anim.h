@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "math/matrix.h"
 #include "resources/resources.h"
 #include "resources/shared_resources.h"
 #include <vector>
@@ -10,13 +11,8 @@ class tsb_anim
 {
 public:
     bool load(nya_resources::resource_data *data);
-    
-    struct bone
-    {
-        float mat[4][4];
-    };
 
-    bone *get_bones(unsigned int frame)
+    nya_math::mat4 *get_bones(unsigned int frame)
     {
         if(!m_bones_count || frame>=m_frames_count)
             return 0;
@@ -38,7 +34,7 @@ private:
     unsigned int m_frames_count;
 
 private:
-    std::vector<bone> m_data;
+    std::vector<nya_math::mat4> m_data;
 };
 
 typedef nya_resources::shared_resources<tsb_anim,8> shared_anims;

@@ -249,7 +249,7 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
     if(bones_count)
     {
         m_bones.resize(bones_count);
-        model_data.copy_from(&m_bones[0],bones_count*sizeof(bone),offset);
+        model_data.copy_from(&m_bones[0],bones_count*sizeof(nya_math::mat4),offset);
     }
     else
         m_bones.clear();
@@ -278,7 +278,7 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
     m_vbo.set_tc(2,12*sizeof(float),4);
     m_vbo.set_tc(3,16*sizeof(float),4);
 
-    offset+=bones_count*sizeof(bone);
+    offset+=bones_count*sizeof(nya_math::mat4);
     uint locators_count=*(uint*)model_data.get_data(offset);
     offset+=4;
     //nya_log::get_log()<<"locators: "<<locators_count<<"offset: "<<offset<<"\n";
@@ -417,27 +417,14 @@ void tmb_model::apply_anim(tsb_anim *anim)
 
     for(unsigned int i=0;i<m_frames_count;++i)
     {
-        tsb_anim::bone *anim_bones=anim->get_bones(i);
-        tmb_model::bone *final_bones=&m_anim_bones[i*m_bones.size()];
+        nya_math::mat4 *anim_bones=anim->get_bones(i);
+        nya_math::mat4 *final_bones=&m_anim_bones[i*m_bones.size()];
 
         for(int k=0;k<bones_count;++k)
-        {
-            tsb_anim::bone &a=anim_bones[k];
-            tmb_model::bone &b=m_bones[k];
-            tmb_model::bone &f=final_bones[k];
-
-            for(int x=0;x<4;++x)
-                for(int y=0;y<4;++y)
-                    f.mat[y][x]=a.mat[0][x]*b.mat[y][0]+
-                                a.mat[1][x]*b.mat[y][1]+
-                                a.mat[2][x]*b.mat[y][2]+
-                                a.mat[3][x]*b.mat[y][3];
-        }
+            final_bones[k]=m_bones[k]*anim_bones[k];
 
         for(int k=bones_count;k<m_bones.size();++k)
-        {
             final_bones[k]=m_bones[k];
-        }
     }
 }
 
