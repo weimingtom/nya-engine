@@ -18,8 +18,8 @@
         float specular[4]; //last is shininess
         float ambient[3];
         
-        uint face_offset;
-        uint face_count;
+        uint ind_offset;
+        uint ind_count;
 
         char tex_name[20];
         uint spmap_idx;

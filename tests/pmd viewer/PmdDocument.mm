@@ -48,7 +48,7 @@
     nya_log::log &log = [ self get_log ];
     const char*filename=absoluteURL.path.UTF8String;
     log<<"readFromURL: "<<filename<<"\n";
-
+    
     nya_resources::resource_data *pmd_data = nya_resources::get_resources_provider().access(filename);
     if(!pmd_data)
     {
@@ -179,7 +179,7 @@
     offset+=4;
     
     m_materials.resize(mat_count);
-    uint face_offset=0;
+    uint ind_offset=0;
     const pmd_material *pmd_materials=(pmd_material*)pmd_buffer.get_data(offset);
     for(int i=0;i<mat_count;++i)
     {
@@ -194,9 +194,9 @@
         }
         to.diffuse[3]=from.diffuse[3]; 
         to.specular[3]=from.shininess;
-        to.face_offset=face_offset;
-        to.face_count=from.ind_count/3;
-        face_offset+=to.face_count;
+        to.ind_offset=ind_offset;
+        to.ind_count=from.ind_count;
+        ind_offset+=to.ind_count;
         
         sprintf(to.tex_name,"%s",from.tex_name);
     }

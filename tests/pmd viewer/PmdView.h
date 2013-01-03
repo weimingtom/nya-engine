@@ -22,8 +22,8 @@
 
     struct view_material
     {
-        unsigned int face_offset;
-        unsigned int face_count;
+        unsigned int ind_offset;
+        unsigned int ind_count;
 
         float color[4];
 

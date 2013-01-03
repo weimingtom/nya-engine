@@ -4,6 +4,7 @@
 
 #ifdef __APPLE__
     #include <mach-o/dyld.h>
+    #include "TargetConditionals.h"
     #include <string>
 #elif defined _WIN32
     #include <windows.h>
@@ -50,7 +51,13 @@ const char *get_app_path()
 
         std::string path_str(path);
         size_t p=path_str.rfind(".app");
+
+    #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+        size_t p2=path_str.find("/",p);
+    #else
         size_t p2=path_str.rfind("/",p);
+    #endif
+
         if(p2!=std::string::npos)
             path[p2+1]='\0';
         else

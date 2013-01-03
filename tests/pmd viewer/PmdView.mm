@@ -111,15 +111,15 @@
         if(doc->m_indices.empty())
             return;
 
-        m_vbo.gen_index_data(&doc->m_indices[0],nya_render::vbo::index2b,(unsigned int)doc->m_indices.size()/3);
+        m_vbo.gen_index_data(&doc->m_indices[0],nya_render::vbo::index2b,(unsigned int)doc->m_indices.size());
 
         m_materials.resize(doc->m_materials.size());
         for(unsigned int i=0;i<doc->m_materials.size();++i)
         {
             material & from = doc->m_materials[i];
             view_material & to = m_materials[i];
-            to.face_offset = from.face_offset;
-            to.face_count = from.face_count;
+            to.ind_offset = from.ind_offset;
+            to.ind_count = from.ind_count;
 
             for(int k=0;k<3;++k)
                 to.color[k]=from.diffuse[k]+from.ambient[k];
@@ -177,7 +177,7 @@
             mat.tex->bind();
 
         glColor4fv(mat.color);
-        m_vbo.draw(mat.face_offset,mat.face_count); 
+        m_vbo.draw(mat.ind_offset,mat.ind_count); 
         
         if(mat.tex.is_valid())
             mat.tex->unbind();        

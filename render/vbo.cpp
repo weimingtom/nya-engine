@@ -289,7 +289,7 @@ void vbo::draw(unsigned int offset,unsigned int count)
 
         const unsigned int gl_elem_type=(m_element_size==index4b?GL_UNSIGNED_INT:GL_UNSIGNED_SHORT);
 
-        glDrawElements(gl_elem,count*3,gl_elem_type,(void*)(offset*3*m_element_size));
+        glDrawElements(gl_elem,count,gl_elem_type,(void*)(offset*m_element_size));
     }
     else
     {
@@ -343,7 +343,7 @@ void vbo::gen_vertex_data(const void*data,unsigned int vert_stride,unsigned int 
     m_verts_count=vert_count;
 }
 
-void vbo::gen_index_data(const void*data,element_size size,unsigned int faces_count,bool dynamic)
+void vbo::gen_index_data(const void*data,element_size size,unsigned int elements_count,bool dynamic)
 {
     if(!check_init_vbo())
     {
@@ -351,7 +351,7 @@ void vbo::gen_index_data(const void*data,element_size size,unsigned int faces_co
         return;
     }
 
-    const unsigned int buffer_size=faces_count*size*3;
+    const unsigned int buffer_size=elements_count*size;
     if(buffer_size==0 || !data)
     {
         get_log()<<"Unable to gen indexes: invalid data\n";
@@ -365,7 +365,7 @@ void vbo::gen_index_data(const void*data,element_size size,unsigned int faces_co
         vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,m_index_id);
     }
 
-    m_element_count=faces_count;
+    m_element_count=elements_count;
     m_element_size=size;
 
     vbo_glBufferData(GL_ELEMENT_ARRAY_BUFFER_ARB,buffer_size,data,dynamic?GL_DYNAMIC_DRAW_ARB:GL_STATIC_DRAW_ARB);
