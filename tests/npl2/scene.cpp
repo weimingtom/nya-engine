@@ -5,6 +5,7 @@
 #include "attributes.h"
 #include "resources/resources.h"
 #include "tsb_anim.h"
+#include "render/render.h"
 
 #include "string.h"
 #include "stdlib.h"
@@ -431,8 +432,7 @@ void scene::draw()
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrixf(m_camera.get_matrix().m[0]);
+    nya_render::set_modelview_matrix(m_camera.get_matrix());
 
 	glEnable     ( GL_DEPTH_TEST );
 	glDepthFunc(GL_LESS);
@@ -620,8 +620,7 @@ void scene::draw()
         mat.rotate(-scene_loc->ang[1]*180.0f/3.14f,0,1,0);
         mat.translate(-scene_loc->pos[0],-scene_loc->pos[1],-scene_loc->pos[2]);
 
-        glMatrixMode(GL_MODELVIEW);
-        glLoadMatrixf(mat.m[0]);
+        nya_render::set_modelview_matrix(mat);
     }
 
     for(int i=0;i<max_bkg_models;++i)

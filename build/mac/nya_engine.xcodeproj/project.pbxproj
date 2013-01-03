@@ -18,6 +18,10 @@
 		F22ADA0516946EC000B01B4A /* mesh.h in Headers */ = {isa = PBXBuildFile; fileRef = F22AD9FD16946EC000B01B4A /* mesh.h */; };
 		F22ADA311694C15100B01B4A /* memory_reader.h in Headers */ = {isa = PBXBuildFile; fileRef = F22ADA301694C15100B01B4A /* memory_reader.h */; };
 		F22ADA321694C15100B01B4A /* memory_reader.h in Headers */ = {isa = PBXBuildFile; fileRef = F22ADA301694C15100B01B4A /* memory_reader.h */; };
+		F23997921696406D00170768 /* transform.h in Headers */ = {isa = PBXBuildFile; fileRef = F23997901696406C00170768 /* transform.h */; };
+		F23997931696406D00170768 /* transform.h in Headers */ = {isa = PBXBuildFile; fileRef = F23997901696406C00170768 /* transform.h */; };
+		F23997941696406D00170768 /* transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F23997911696406C00170768 /* transform.cpp */; };
+		F23997951696406D00170768 /* transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F23997911696406C00170768 /* transform.cpp */; };
 		F23AB50C168DBA16004B116E /* platform_specific_gl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F25931ED15D858140092C7D8 /* platform_specific_gl.cpp */; };
 		F23AB50D168DBA16004B116E /* render.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F25931EF15D858140092C7D8 /* render.cpp */; };
 		F23AB511168DBA16004B116E /* composite_resources_provider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F25931FC15D858140092C7D8 /* composite_resources_provider.cpp */; };
@@ -136,6 +140,8 @@
 		F22AD9FC16946EC000B01B4A /* scene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scene.h; path = ../../scene/scene.h; sourceTree = "<group>"; };
 		F22AD9FD16946EC000B01B4A /* mesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mesh.h; path = ../../scene/mesh.h; sourceTree = "<group>"; };
 		F22ADA301694C15100B01B4A /* memory_reader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = memory_reader.h; sourceTree = "<group>"; };
+		F23997901696406C00170768 /* transform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = transform.h; sourceTree = "<group>"; };
+		F23997911696406C00170768 /* transform.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = transform.cpp; sourceTree = "<group>"; };
 		F23AB544168DBA16004B116E /* libnya_engine_ios.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libnya_engine_ios.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		F241A70A160292B1004646EB /* slider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = slider.h; sourceTree = "<group>"; };
 		F241A70B160292B1004646EB /* slider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = slider.cpp; sourceTree = "<group>"; };
@@ -268,6 +274,8 @@
 				F2F0A0951695A757007245BC /* skeleton.h */,
 				F25931F515D858140092C7D8 /* texture.cpp */,
 				F25931F615D858140092C7D8 /* texture.h */,
+				F23997911696406C00170768 /* transform.cpp */,
+				F23997901696406C00170768 /* transform.h */,
 				F25931F915D858140092C7D8 /* vbo.cpp */,
 				F25931FA15D858140092C7D8 /* vbo.h */,
 			);
@@ -411,6 +419,7 @@
 				F2F0A0AA1695A794007245BC /* quaternion.h in Headers */,
 				F2F0A0AE1695A794007245BC /* bezier.h in Headers */,
 				F2F0A0B41695F809007245BC /* matrix.h in Headers */,
+				F23997931696406D00170768 /* transform.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -453,6 +462,7 @@
 				F2F0A0A91695A794007245BC /* quaternion.h in Headers */,
 				F2F0A0AD1695A794007245BC /* bezier.h in Headers */,
 				F2F0A0B31695F809007245BC /* matrix.h in Headers */,
+				F23997921696406D00170768 /* transform.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -542,6 +552,7 @@
 				F2F0A0AC1695A794007245BC /* quaternion.cpp in Sources */,
 				F2F0A0B01695A794007245BC /* bezier.cpp in Sources */,
 				F2F0A0B61695F809007245BC /* matrix.cpp in Sources */,
+				F23997951696406D00170768 /* transform.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -579,6 +590,7 @@
 				F2F0A0AB1695A794007245BC /* quaternion.cpp in Sources */,
 				F2F0A0AF1695A794007245BC /* bezier.cpp in Sources */,
 				F2F0A0B51695F809007245BC /* matrix.cpp in Sources */,
+				F23997941696406D00170768 /* transform.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
