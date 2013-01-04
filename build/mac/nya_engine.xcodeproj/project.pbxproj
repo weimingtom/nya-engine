@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		F22082C6168DE9D200454C62 /* shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F25931F115D858140092C7D8 /* shader.cpp */; };
+		F2221A5C1696F49600640820 /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F25931F515D858140092C7D8 /* texture.cpp */; };
 		F22AD9FE16946EC000B01B4A /* mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F22AD9FA16946EC000B01B4A /* mesh.cpp */; };
 		F22AD9FF16946EC000B01B4A /* mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F22AD9FA16946EC000B01B4A /* mesh.cpp */; };
 		F22ADA0016946EC000B01B4A /* scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F22AD9FB16946EC000B01B4A /* scene.cpp */; };
@@ -531,6 +532,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F2221A5C1696F49600640820 /* texture.cpp in Sources */,
 				F22082C6168DE9D200454C62 /* shader.cpp in Sources */,
 				F2AB83DE168DC6C000C23817 /* vbo.cpp in Sources */,
 				F23AB50C168DBA16004B116E /* platform_specific_gl.cpp in Sources */,

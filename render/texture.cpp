@@ -35,10 +35,10 @@ void texture::build_texture(const void *data,unsigned int width,unsigned int hei
 
     switch(format)
     {
-        case color_rgb: source_format=GL_RGB8; gl_format=GL_RGB; break;
-        case color_bgr: source_format=GL_RGB8; gl_format=GL_BGR; break;
-        case color_rgba: source_format=GL_RGBA8; gl_format=GL_RGBA; break;
-        case color_bgra: source_format=GL_RGBA8; gl_format=GL_BGRA; break;
+        case color_rgb: source_format=GL_RGB; gl_format=GL_RGB; break;
+        //case color_bgr: source_format=GL_RGB; gl_format=GL_BGR; break;
+        case color_rgba: source_format=GL_RGBA; gl_format=GL_RGBA; break;
+        case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; break;
     };
 
     if(!source_format || !gl_format)
@@ -55,7 +55,20 @@ void texture::build_texture(const void *data,unsigned int width,unsigned int hei
 
     glBindTexture(GL_TEXTURE_2D,m_tex_id);
 
-    gluBuild2DMipmaps(GL_TEXTURE_2D,source_format,width,height,gl_format,GL_UNSIGNED_BYTE,data);
+    /*
+     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+    */
+
+#ifdef GL_GENERATE_MIPMAP
+    glTexParameteri(GL_TEXTURE_2D,GL_GENERATE_MIPMAP,GL_TRUE);
+#endif
+
+    glTexImage2D(GL_TEXTURE_2D,0,source_format,width,height,0,gl_format,GL_UNSIGNED_BYTE,data);
+
+#ifndef GL_GENERATE_MIPMAP
+    glGenerateMipmap(GL_TEXTURE_2D);
+#endif
 
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_NEAREST);

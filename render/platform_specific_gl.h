@@ -5,7 +5,6 @@
 #ifdef _WIN32
     #include <windows.h>
     #include <gl/gl.h>
-    #include <gl/glu.h>
     #include <gl/glext.h>
 #elif defined __APPLE__
     #include "TargetConditionals.h"
@@ -16,7 +15,6 @@
         #define OPENGL_ES
     #else
         #include <OpenGL/gl.h>
-        #include <OpenGL/glu.h>
         #include <OpenGL/glext.h>
     #endif
 
@@ -24,7 +22,6 @@
 #else
     #include <GL/glx.h>
     #include <GL/gl.h>
-    #include <GL/glu.h>
     #include <GL/glext.h>
 #endif
 

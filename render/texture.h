@@ -11,7 +11,7 @@ public:
     enum color_format
     {
         color_rgb,
-        color_bgr,
+        //color_bgr,
         color_rgba,
         color_bgra
     };
