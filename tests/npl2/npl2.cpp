@@ -4,6 +4,8 @@
 #include "log/plain_file_log.h"
 #include "system/app.h"
 #include "system/system.h"
+#include "render/render.h"
+
 #include "render/platform_specific_gl.h"
 #include "resources/resources.h"
 #include "resources/file_resources_provider.h"
@@ -131,10 +133,10 @@ nya_log::get_log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n"
         if(!w || !h)
             return;
 
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        gluPerspective(25,float(w)/h,5,1500);
-        glTranslatef(0,0,-45);
+        nya_math::mat4 proj;
+        proj.perspective(25,float(w)/h,5,1500);
+        proj.translate(0,0,-45);        
+        nya_render::set_projection_matrix(proj);
 
         m_ui.resize(w,h);
     }
