@@ -12,6 +12,10 @@
 
 #include <string>
 
+#ifdef SUPPORT_OLD_SHADERS
+    #include "transform.h"
+#endif
+
 namespace nya_render
 {
 
@@ -123,8 +127,6 @@ namespace nya_render
         #define GL_OBJECT_LINK_STATUS_ARB GL_LINK_STATUS
         #define GL_OBJECT_VALIDATE_STATUS_ARB GL_VALIDATE_STATUS
     #endif
-    
-    #define SUPPORT_OLD_SHADERS
 
     #define glGetObjectParam glGetProgramiv
     #define glGetShaderParam glGetShaderiv
@@ -248,6 +250,10 @@ void shader::add_program(program_type type,const char*code)
         const char *attribute_names[]={"nyaVertex","nyaNormal","nyaColor","nyaMultiTexCoord"};
 
         bool used_attribs[max_attributes]={false};
+        m_mat_mvp=-1;
+        m_mat_mv=-1;
+        m_mat_p=-1;
+
         for(size_t gl=code_str.find("gl_");gl!=std::string::npos;gl=code_str.find("gl_",gl+8))
         {
             if(code_str.size()<=gl+8)
@@ -303,6 +309,21 @@ void shader::add_program(program_type type,const char*code)
                         used_attribs[tc0_attribute+idx]=true;
                         replace=true;
                     }
+                    else if(code_str.size()>gl+16 && code_str.compare(gl+3,16,"ProjectionMatrix")==0)
+                    {
+                        m_mat_p=1;
+                        replace=true;
+                    }
+                    else if(code_str.size()>gl+15 && code_str.compare(gl+3,15,"ModelViewMatrix")==0)
+                    {
+                        m_mat_mv=1;
+                        replace=true;
+                    }
+                    else if(code_str.size()>gl+25 && code_str.compare(gl+3,25,"ModelViewProjectionMatrix")==0)
+                    {
+                        m_mat_mvp=1;
+                        replace=true;
+                    }
                     break;
 
                 //case 'T':     //ToDo: gl_TexCoord[] variables
@@ -316,6 +337,13 @@ void shader::add_program(program_type type,const char*code)
                 code_str[gl+2]='a';
             }
         }
+
+        if(m_mat_mvp>0)
+            code_final.append("uniform mat4 nyaModelViewProjectionMatrix;");
+        if(m_mat_mv>0)
+            code_final.append("uniform mat4 nyaModelViewMatrix;");
+        if(m_mat_p>0)
+            code_final.append("uniform mat4 nyaProjectionMatrix;");
 
         for(int i=0;i<tc0_attribute;++i)
         {
@@ -443,6 +471,16 @@ void shader::add_program(program_type type,const char*code)
             m_program=0; //??
             return;
         }
+
+#ifdef SUPPORT_OLD_SHADERS
+
+        if(m_mat_mvp>=0)
+            m_mat_mvp=get_handler("nyaModelViewProjectionMatrix");
+        if(m_mat_mv>=0)
+            m_mat_mv=get_handler("nyaModelViewMatrix");
+        if(m_mat_p>=0)
+            m_mat_p=get_handler("nyaProjectionMatrix");
+#endif
     }
 
     m_objects[type]=object;
@@ -456,6 +494,15 @@ void shader::bind()
         return;
 
     glUseProgramObjectARB(m_program);
+
+#ifdef SUPPORT_OLD_SHADERS
+    if(m_mat_mvp>=0)
+        glUniformMatrix4fvARB(m_mat_mvp,1,false,transform::get().get_modelviewprojection_matrix().m[0]);
+    if(m_mat_mv>=0)
+        glUniformMatrix4fvARB(m_mat_mv,1,false,transform::get().get_modelview_matrix().m[0]);
+    if(m_mat_p>=0)
+        glUniformMatrix4fvARB(m_mat_p,1,false,transform::get().get_projection_matrix().m[0]);
+#endif
 }
 
 void shader::unbind()

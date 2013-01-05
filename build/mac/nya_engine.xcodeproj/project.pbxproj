@@ -110,6 +110,7 @@
 		F259325815D858140092C7D8 /* tmp_buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259322415D858140092C7D8 /* tmp_buffer.cpp */; };
 		F259325915D858140092C7D8 /* tmp_buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = F259322515D858140092C7D8 /* tmp_buffer.h */; };
 		F25932BB15D865BF0092C7D8 /* app.mm in Sources */ = {isa = PBXBuildFile; fileRef = F25932BA15D865BF0092C7D8 /* app.mm */; };
+		F2A1356F16973394006DCC1B /* app.mm in Sources */ = {isa = PBXBuildFile; fileRef = F25932BA15D865BF0092C7D8 /* app.mm */; };
 		F2AB83DE168DC6C000C23817 /* vbo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F25931F915D858140092C7D8 /* vbo.cpp */; };
 		F2F0A0991695A758007245BC /* skeleton.h in Headers */ = {isa = PBXBuildFile; fileRef = F2F0A0951695A757007245BC /* skeleton.h */; };
 		F2F0A09A1695A758007245BC /* skeleton.h in Headers */ = {isa = PBXBuildFile; fileRef = F2F0A0951695A757007245BC /* skeleton.h */; };
@@ -532,6 +533,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F2A1356F16973394006DCC1B /* app.mm in Sources */,
 				F2221A5C1696F49600640820 /* texture.cpp in Sources */,
 				F22082C6168DE9D200454C62 /* shader.cpp in Sources */,
 				F2AB83DE168DC6C000C23817 /* vbo.cpp in Sources */,

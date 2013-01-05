@@ -8,6 +8,10 @@
     #define GLhandleARB GLuint
 #endif
 
+#ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+    #define SUPPORT_OLD_SHADERS
+#endif
+
 namespace nya_render
 {
 
@@ -46,11 +50,24 @@ public:
     {
         for(int i = 0;i<program_types_count;++i)
             m_objects[i]=0;
+
+#ifdef SUPPORT_OLD_SHADERS
+        m_mat_mvp=-1;
+        m_mat_mv=-1;
+        m_mat_p=-1;
+#endif
     }
 
 private:
     GLhandleARB m_program;
     GLhandleARB m_objects[program_types_count];
+    
+#ifdef SUPPORT_OLD_SHADERS
+private:
+    int m_mat_mvp;
+    int m_mat_mv;
+    int m_mat_p;
+#endif
 };
 
 }

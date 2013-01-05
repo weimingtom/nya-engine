@@ -5,7 +5,7 @@
 #include "math/matrix.h"
 #include "platform_specific_gl.h"
 
-#ifdef OPENGL_ES
+#ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
     #define MANUAL_MATRICES_ASSIGN
 #endif
 
