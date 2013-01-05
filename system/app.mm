@@ -141,9 +141,43 @@ namespace
     [self.window addSubview:self.viewController.view];
     
     [self.window makeKeyAndVisible];
-    
+
     return YES;
 }
+-(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    nya_system::app_responder *responder=shared_app::get_app().get_responder();
+    if(!responder)
+        return;
+
+    CGPoint tappedPt = [[touches anyObject] locationInView: self.viewController.view];
+    responder->on_mouse_move(tappedPt.x,self.viewController.view.bounds.size.height-tappedPt.y);
+    responder->on_mouse_button(nya_system::mouse_left,true);
+};
+
+-(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    nya_system::app_responder *responder=shared_app::get_app().get_responder();
+    if(!responder)
+        return;
+
+    //UITouch *touchSample = [[event allTouches] anyObject];
+    //int count=[touchSample tapCount];
+    
+    CGPoint tappedPt = [[touches anyObject] locationInView: self.viewController.view];
+    responder->on_mouse_move(tappedPt.x,self.viewController.view.bounds.size.height-tappedPt.y);
+};
+
+-(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    nya_system::app_responder *responder=shared_app::get_app().get_responder();
+    if(!responder)
+        return;
+
+    CGPoint tappedPt = [[touches anyObject] locationInView: self.viewController.view];
+    responder->on_mouse_move(tappedPt.x,self.viewController.view.bounds.size.height-tappedPt.y);
+    responder->on_mouse_button(nya_system::mouse_left,false);
+};
 
 - (void)applicationWillResignActive:(UIApplication *)application
 {
