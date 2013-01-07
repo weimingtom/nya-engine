@@ -14,7 +14,7 @@ public:
     {
         t a;
         size_t size=sizeof(t);
-        if(m_offset+size>=m_size)
+        if(m_offset+size>m_size)
         {
             m_offset=m_size;
             memset(&a,0,size);
