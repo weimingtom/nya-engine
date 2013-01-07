@@ -2,43 +2,42 @@
 
 #pragma once
 
-#include "resources/shared_resources.h"
+#include "shared_resources.h"
+#include "material.h"
 #include "render/vbo.h"
 
 namespace nya_scene
 {
 
-class mesh
+struct shared_mesh
+{
+    nya_render::vbo vbo;
+
+    struct group
+    {
+        material mat;
+    
+    };
+
+    std::vector<group> groups;
+
+    bool release()
+    {
+        vbo.release();
+        return true;
+    }
+};
+
+class mesh: public scene_shared<shared_mesh>
 {
 public:
-    bool load(const char *name);
     void draw();
-    void unload();
+
+private:
+    static bool load_pmd(shared_mesh &res,size_t data_size,const void*data);
 
 public:
-    struct shared_mesh
-    {
-        nya_render::vbo vbo;
-    };
-
-private:
-    typedef nya_resources::shared_resources<shared_mesh,8> shared_meshes;
-    typedef shared_meshes::shared_resource_ref shared_mesh_ref;
-
-    class shared_meshes_manager: public shared_meshes
-    {
-        bool fill_resource(const char *name,shared_mesh &res);
-        bool release_resource(shared_mesh &res);
-    };
-
-    shared_meshes_manager &get_shared_meshes()
-    {
-        static shared_meshes_manager manager;
-        return manager;
-    }
-
-private:
-    shared_mesh_ref m_shared_mesh_ref;
+    mesh() { register_load_function(load_pmd); }
 };
 
 }

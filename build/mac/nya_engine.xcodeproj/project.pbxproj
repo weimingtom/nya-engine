@@ -7,6 +7,24 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F20E2D7E16999B7000395A1B /* material.h in Headers */ = {isa = PBXBuildFile; fileRef = F20E2D7616999B7000395A1B /* material.h */; };
+		F20E2D7F16999B7000395A1B /* material.h in Headers */ = {isa = PBXBuildFile; fileRef = F20E2D7616999B7000395A1B /* material.h */; };
+		F20E2D8016999B7000395A1B /* shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F20E2D7716999B7000395A1B /* shader.cpp */; };
+		F20E2D8116999B7000395A1B /* shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F20E2D7716999B7000395A1B /* shader.cpp */; };
+		F20E2D8216999B7000395A1B /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F20E2D7816999B7000395A1B /* texture.cpp */; };
+		F20E2D8316999B7000395A1B /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F20E2D7816999B7000395A1B /* texture.cpp */; };
+		F20E2D8416999B7000395A1B /* material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F20E2D7916999B7000395A1B /* material.cpp */; };
+		F20E2D8516999B7000395A1B /* material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F20E2D7916999B7000395A1B /* material.cpp */; };
+		F20E2D8616999B7000395A1B /* camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F20E2D7A16999B7000395A1B /* camera.cpp */; };
+		F20E2D8716999B7000395A1B /* camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F20E2D7A16999B7000395A1B /* camera.cpp */; };
+		F20E2D8816999B7000395A1B /* texture.h in Headers */ = {isa = PBXBuildFile; fileRef = F20E2D7B16999B7000395A1B /* texture.h */; };
+		F20E2D8916999B7000395A1B /* texture.h in Headers */ = {isa = PBXBuildFile; fileRef = F20E2D7B16999B7000395A1B /* texture.h */; };
+		F20E2D8A16999B7000395A1B /* shader.h in Headers */ = {isa = PBXBuildFile; fileRef = F20E2D7C16999B7000395A1B /* shader.h */; };
+		F20E2D8B16999B7000395A1B /* shader.h in Headers */ = {isa = PBXBuildFile; fileRef = F20E2D7C16999B7000395A1B /* shader.h */; };
+		F20E2D8C16999B7000395A1B /* camera.h in Headers */ = {isa = PBXBuildFile; fileRef = F20E2D7D16999B7000395A1B /* camera.h */; };
+		F20E2D8D16999B7000395A1B /* camera.h in Headers */ = {isa = PBXBuildFile; fileRef = F20E2D7D16999B7000395A1B /* camera.h */; };
+		F20E2D901699A0C800395A1B /* shared_resources.h in Headers */ = {isa = PBXBuildFile; fileRef = F20E2D8F1699A0C800395A1B /* shared_resources.h */; };
+		F20E2D911699A0C800395A1B /* shared_resources.h in Headers */ = {isa = PBXBuildFile; fileRef = F20E2D8F1699A0C800395A1B /* shared_resources.h */; };
 		F22082C6168DE9D200454C62 /* shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F25931F115D858140092C7D8 /* shader.cpp */; };
 		F2221A5C1696F49600640820 /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F25931F515D858140092C7D8 /* texture.cpp */; };
 		F22AD9FE16946EC000B01B4A /* mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F22AD9FA16946EC000B01B4A /* mesh.cpp */; };
@@ -137,6 +155,15 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F20E2D7616999B7000395A1B /* material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = material.h; path = ../../scene/material.h; sourceTree = "<group>"; };
+		F20E2D7716999B7000395A1B /* shader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = shader.cpp; path = ../../scene/shader.cpp; sourceTree = "<group>"; };
+		F20E2D7816999B7000395A1B /* texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = texture.cpp; path = ../../scene/texture.cpp; sourceTree = "<group>"; };
+		F20E2D7916999B7000395A1B /* material.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = material.cpp; path = ../../scene/material.cpp; sourceTree = "<group>"; };
+		F20E2D7A16999B7000395A1B /* camera.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = camera.cpp; path = ../../scene/camera.cpp; sourceTree = "<group>"; };
+		F20E2D7B16999B7000395A1B /* texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = texture.h; path = ../../scene/texture.h; sourceTree = "<group>"; };
+		F20E2D7C16999B7000395A1B /* shader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = shader.h; path = ../../scene/shader.h; sourceTree = "<group>"; };
+		F20E2D7D16999B7000395A1B /* camera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = camera.h; path = ../../scene/camera.h; sourceTree = "<group>"; };
+		F20E2D8F1699A0C800395A1B /* shared_resources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = shared_resources.h; path = ../../scene/shared_resources.h; sourceTree = "<group>"; };
 		F22AD9FA16946EC000B01B4A /* mesh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mesh.cpp; path = ../../scene/mesh.cpp; sourceTree = "<group>"; };
 		F22AD9FB16946EC000B01B4A /* scene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scene.cpp; path = ../../scene/scene.cpp; sourceTree = "<group>"; };
 		F22AD9FC16946EC000B01B4A /* scene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scene.h; path = ../../scene/scene.h; sourceTree = "<group>"; };
@@ -229,10 +256,19 @@
 		F22AD9F816946E9200B01B4A /* scene */ = {
 			isa = PBXGroup;
 			children = (
+				F20E2D7A16999B7000395A1B /* camera.cpp */,
+				F20E2D7D16999B7000395A1B /* camera.h */,
+				F20E2D7916999B7000395A1B /* material.cpp */,
+				F20E2D7616999B7000395A1B /* material.h */,
 				F22AD9FA16946EC000B01B4A /* mesh.cpp */,
 				F22AD9FD16946EC000B01B4A /* mesh.h */,
+				F20E2D7716999B7000395A1B /* shader.cpp */,
+				F20E2D7C16999B7000395A1B /* shader.h */,
+				F20E2D8F1699A0C800395A1B /* shared_resources.h */,
 				F22AD9FB16946EC000B01B4A /* scene.cpp */,
 				F22AD9FC16946EC000B01B4A /* scene.h */,
+				F20E2D7816999B7000395A1B /* texture.cpp */,
+				F20E2D7B16999B7000395A1B /* texture.h */,
 			);
 			name = scene;
 			sourceTree = "<group>";
@@ -422,6 +458,11 @@
 				F2F0A0AE1695A794007245BC /* bezier.h in Headers */,
 				F2F0A0B41695F809007245BC /* matrix.h in Headers */,
 				F23997931696406D00170768 /* transform.h in Headers */,
+				F20E2D7F16999B7000395A1B /* material.h in Headers */,
+				F20E2D8916999B7000395A1B /* texture.h in Headers */,
+				F20E2D8B16999B7000395A1B /* shader.h in Headers */,
+				F20E2D8D16999B7000395A1B /* camera.h in Headers */,
+				F20E2D911699A0C800395A1B /* shared_resources.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -465,6 +506,11 @@
 				F2F0A0AD1695A794007245BC /* bezier.h in Headers */,
 				F2F0A0B31695F809007245BC /* matrix.h in Headers */,
 				F23997921696406D00170768 /* transform.h in Headers */,
+				F20E2D7E16999B7000395A1B /* material.h in Headers */,
+				F20E2D8816999B7000395A1B /* texture.h in Headers */,
+				F20E2D8A16999B7000395A1B /* shader.h in Headers */,
+				F20E2D8C16999B7000395A1B /* camera.h in Headers */,
+				F20E2D901699A0C800395A1B /* shared_resources.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -557,6 +603,10 @@
 				F2F0A0B01695A794007245BC /* bezier.cpp in Sources */,
 				F2F0A0B61695F809007245BC /* matrix.cpp in Sources */,
 				F23997951696406D00170768 /* transform.cpp in Sources */,
+				F20E2D8116999B7000395A1B /* shader.cpp in Sources */,
+				F20E2D8316999B7000395A1B /* texture.cpp in Sources */,
+				F20E2D8516999B7000395A1B /* material.cpp in Sources */,
+				F20E2D8716999B7000395A1B /* camera.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -595,6 +645,10 @@
 				F2F0A0AF1695A794007245BC /* bezier.cpp in Sources */,
 				F2F0A0B51695F809007245BC /* matrix.cpp in Sources */,
 				F23997941696406D00170768 /* transform.cpp in Sources */,
+				F20E2D8016999B7000395A1B /* shader.cpp in Sources */,
+				F20E2D8216999B7000395A1B /* texture.cpp in Sources */,
+				F20E2D8416999B7000395A1B /* material.cpp in Sources */,
+				F20E2D8616999B7000395A1B /* camera.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

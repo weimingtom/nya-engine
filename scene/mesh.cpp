@@ -5,10 +5,10 @@
 #include "memory/tmp_buffer.h"
 #include "memory/memory_reader.h"
 
-namespace
+namespace nya_scene
 {
 
-bool load_pmd(nya_scene::mesh::shared_mesh &res,size_t data_size,const void*data)
+bool mesh::load_pmd(shared_mesh &res,size_t data_size,const void*data)
 {
     if(!data)
         return false;
@@ -60,70 +60,14 @@ bool load_pmd(nya_scene::mesh::shared_mesh &res,size_t data_size,const void*data
     return true;
 }
 
-}
-
-namespace nya_scene
-{
-
-bool mesh::load(const char *name)
-{
-    unload();
-
-    if(!name)
-        return false;
-
-    m_shared_mesh_ref=get_shared_meshes().access(name);
-
-    return true;
-}
-
 void mesh::draw()
 {
-    if(!m_shared_mesh_ref.is_valid())
+    if(!m_shared.is_valid())
         return;
 
-    m_shared_mesh_ref->vbo.bind();
-    m_shared_mesh_ref->vbo.draw();
-    m_shared_mesh_ref->vbo.unbind();
-}
-
-void mesh::unload()
-{
-    if(m_shared_mesh_ref.is_valid())
-        m_shared_mesh_ref.free();
-}
-
-bool mesh::shared_meshes_manager::fill_resource(const char *name,shared_mesh &res)
-{
-    if(!name)
-    {
-        nya_resources::get_log()<<"unable to load mesh: invalid name\n";
-        return false;
-    }
-
-    nya_resources::resource_data *file_data=nya_resources::get_resources_provider().access(name);
-    if(!file_data)
-    {
-        nya_resources::get_log()<<"unable to load mesh: unable to acess resource\n";
-        return false;
-    }
-
-    const size_t data_size=file_data->get_size();
-    nya_memory::tmp_buffer_scoped mesh_data(data_size);
-    file_data->read_all(mesh_data.get_data());
-    file_data->release();
-
-    if(load_pmd(res,data_size,mesh_data.get_data()))
-        return true;
-
-    return false;
-}
-
-bool mesh::shared_meshes_manager::release_resource(shared_mesh &res)
-{
-    res.vbo.release();
-
-    return true;
+    m_shared->vbo.bind();
+    m_shared->vbo.draw();
+    m_shared->vbo.unbind();
 }
 
 }

@@ -12,14 +12,15 @@ class memory_reader
 public:
     template <typename t> t read()
     {
+        t a;
         size_t size=sizeof(t);
         if(m_offset+size>=m_size)
         {
             m_offset=m_size;
-            return 0;
+            memset(&a,0,size);
+            return a;
         }
 
-        t a;
         memcpy(&a,m_data+m_offset,size);
         m_offset+=size;
 
@@ -51,6 +52,8 @@ public:
     }
 
     void skip(size_t offset) { m_offset+=offset; }
+
+    bool seek(size_t offset) { m_offset=offset; return offset<m_size; }
 
     size_t get_offset() { return m_offset; }
 
