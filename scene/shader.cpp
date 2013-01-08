@@ -9,22 +9,19 @@ bool shader::load_nya_shader(shared_shader &res,size_t data_size,const void*data
 {
     const char *vs = 
     "varying vec4 colorVarying;"
-
-    "uniform vec4 translate;"
-
     "void main()"
-    "{ gl_Position = gl_ModelViewProjectionMatrix*gl_Vertex;"// gl_Position.y += sin(translate.x) / 2.0; gl_Position.xyz*=0.3;"
-    "  colorVarying = gl_Normal*0.5+vec4(0.5); gl_MultiTexCoord0; gl_MultiTexCoord5; gl_MultiTexCoord14; gl_Normal; }";
-
-    //const char *vs = "void main() { gl_Position=vec4(0.0,0.0,0.0,1.0); }";
+    "{ "
+	"colorVarying = vec4(gl_Normal.xyz*0.5+vec3(0.5),1.0);"// gl_MultiTexCoord0; gl_MultiTexCoord5; gl_MultiTexCoord14; gl_Normal;"
+	"gl_Position = gl_ModelViewProjectionMatrix*gl_Vertex;}";
 
     res.shdr.add_program(nya_render::shader::vertex,vs);
 
     const char *ps = 
-    "varying lowp vec4 colorVarying;"
-    "void main() { gl_FragColor = colorVarying*1.4; }";
-    
-    //        const char *ps = "void main() { gl_FragColor=vec4(1.0,0.0,0.0,1.0); }";
+#ifdef OPENGL_ES
+    "precision mediump float;\n"
+#endif
+    "varying vec4 colorVarying;"
+    "void main() { gl_FragColor = colorVarying; }";
 
     res.shdr.add_program(nya_render::shader::pixel,ps);
 

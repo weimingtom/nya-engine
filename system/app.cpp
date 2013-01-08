@@ -212,6 +212,8 @@ public:
     void start_fullscreen(unsigned int w,unsigned int h,nya_system::app_responder &app)
     {
         //ToDo
+
+		start_windowed(0,0,w,h,0,app);
     }
 
     void finish(nya_system::app_responder &app)
