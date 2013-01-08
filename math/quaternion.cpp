@@ -1,6 +1,7 @@
 //https://code.google.com/p/nya-engine/
 
 #include "quaternion.h"
+#include "constants.h"
 #include <math.h>
 
 namespace nya_math
@@ -70,12 +71,12 @@ vec3 quat::get_euler() const
     const float zz2=v.z*z2;
     const float wz2=w*z2;
 
-    if(ang>=M_PI_2)
+    if(ang>=constants::pi_2)
     {
         return vec3(atan2f(xy2-wz2,1.0f-xx2+zz2),ang,0.0f);
     }
 
-    if(ang> -M_PI_2)
+    if(ang> -constants::pi_2)
     {
         const float yz2=v.y*z2;
         const float wx2=w*x2;

@@ -1,6 +1,7 @@
 //https://code.google.com/p/nya-engine/
 
 #include "skeleton.h"
+#include "math/constants.h"
 
 namespace nya_render
 {
@@ -146,7 +147,7 @@ void skeleton::update()
                 nya_math::quat rot(axis,ang);
 
                 if(k.links[l].limit)
-                    rot.limit_angle(-M_PI,-0.002f);
+					rot.limit_angle(-nya_math::constants::pi,-0.002f);
 
                 rot.normalize();
 

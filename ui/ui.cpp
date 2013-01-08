@@ -95,14 +95,14 @@ void layer::draw_text(uint x,uint y,const char *text
     const float h=chs/m_height;
 
     if(aligh_hor==center)
-        x-=0.25f*(chs*char_actual_width/char_size*str_len);
+        x-=int(0.25f*(chs*char_actual_width/char_size*str_len));
     else if(aligh_hor==right)
-        x-=0.5*(chs*char_actual_width/char_size*str_len);
+        x-=int(0.5f*(chs*char_actual_width/char_size*str_len));
 
     if(aligh_vert==center)
-        y-=0.25f*chs;
+        y-=int(0.25f*chs);
     else if(aligh_vert==top)
-        y-=0.5f*chs;
+        y-=int(0.5f*chs);
 
     float px=-1.0f+2.0f*x/m_width;
     float py=-1.0f+2.0f*y/m_height;

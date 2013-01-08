@@ -18,13 +18,13 @@ struct slider_style
     {
         area.border=true;
         area.solid=true;
-        area.border_color.set(0.4,0.3,1.0,1.0);
+        area.border_color.set(0.4f,0.3f,1.0f,1.0f);
         area.solid_color=area.border_color;
-        area.solid_color.a=0.2;
+        area.solid_color.a=0.2f;
         slider=area;
-        slider.solid_color.a=0.5;
+        slider.solid_color.a=0.5f;
         slider_hl=slider;
-        slider_hl.solid_color.set(0.7,0.6,1.0,0.5);
+        slider_hl.solid_color.set(0.7f,0.6f,1.0f,0.5f);
         size=10;
     }
 };

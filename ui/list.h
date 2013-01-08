@@ -43,28 +43,28 @@ struct list_style
         entry_height=18;
 
         list.border=true;
-        list.border_color.set(0.4,0.3,1.0,1.0);
+        list.border_color.set(0.4f,0.3f,1.0f,1.0f);
 
         entry=list;
 
         list.solid=true;
         list.solid_color=list.border_color;
-        list.solid_color.a=0.4;
+        list.solid_color.a=0.4f;
 
         scroll_area=list;
-        scroll_area.solid_color.a=0.5;
+        scroll_area.solid_color.a=0.5f;
 
         scroll=list;
-        scroll.solid_color.a=0.8;
+        scroll.solid_color.a=0.8f;
 
         button_up=button_dn=scroll;
 
         entry_selected=list;
 
-        entry_selected.solid_color.a=0.6;
+        entry_selected.solid_color.a=0.6f;
         entry_hl=entry;
         entry_hl.solid=true;
-        entry_hl.solid_color.set(0.7,0.6,1.0,0.8);
+        entry_hl.solid_color.set(0.7f,0.6f,1.0f,0.8f);
         scroll_hl=button_dn_hl=button_up_hl=entry_hl;
     }
 };

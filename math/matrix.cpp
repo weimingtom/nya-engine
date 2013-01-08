@@ -1,6 +1,7 @@
 //https://code.google.com/p/nya-engine/
 
 #include "matrix.h"
+#include "constants.h"
 #include <math.h>
 
 namespace nya_math
@@ -28,7 +29,7 @@ mat4 &mat4::translate(float x,float y,float z)
 mat4 &mat4::rotate(float angle,float x,float y,float z)
 {
     const float mag=sqrtf(x*x+y*y+z*z);
-    const float ang_rad=-angle*M_PI/180.0f;
+    const float ang_rad=-angle*constants::pi/180.0f;
     const float sin_a=sinf(ang_rad);
     const float cos_a=cosf(ang_rad);
 
@@ -71,7 +72,7 @@ mat4 &mat4::rotate(float angle,float x,float y,float z)
     
 mat4 &mat4::perspective(float fov,float aspect,float near,float far)
 {
-    const float h=tanf(fov*M_PI/360.0f)*near;
+	const float h=tanf(fov*constants::pi/360.0f)*near;
     const float w=h*aspect;
 
     return frustrum(-w,w,-h,h,near,far);

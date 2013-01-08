@@ -63,7 +63,7 @@ const char *get_app_path()
         else
             path[0]='\0';
 #elif defined _WIN32
-        GetModuleFileName(0,path,max_path);
+        GetModuleFileNameA(0,path,max_path);
         for(int i=0;i<max_path;++i)
         {
             if(path[i]=='\\')

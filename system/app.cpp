@@ -7,6 +7,7 @@
 
 #ifdef _WIN32
 
+#define _WIN32_WINDOWS 0x501
 #include <windows.h>
 #include <windowsx.h>
 #include "render/platform_specific_gl.h"
@@ -169,7 +170,7 @@ public:
         if(antialiasing>0)
             glEnable(GL_MULTISAMPLE_ARB);
 
-        SetWindowText(m_hwnd,m_title.c_str());
+        SetWindowTextA(m_hwnd,m_title.c_str());
 
         SetWindowLongPtr(m_hwnd,GWL_USERDATA,(LONG)&app);
 
@@ -317,7 +318,7 @@ public:
         m_title.assign(title);
 
         if(m_hwnd)
-            SetWindowText(m_hwnd,title);
+            SetWindowTextA(m_hwnd,title);
     }
 
     void update_splash(nya_system::app_responder &app)

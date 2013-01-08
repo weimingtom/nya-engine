@@ -14,9 +14,9 @@ void button::draw(layer &layer)
     layer::rect_style rs;
 
     if(m_mouse_over && !m_mouse_pressed)
-        rs.border_color.set(0.7,0.6,1.0,1.0);
+        rs.border_color.set(0.7f,0.6f,1.0f,1.0f);
     else
-        rs.border_color.set(0.4,0.3,1.0,1.0);
+        rs.border_color.set(0.4f,0.3f,1.0f,1.0f);
 
     rs.border=true;
 

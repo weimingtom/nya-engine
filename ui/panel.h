@@ -13,7 +13,7 @@ struct panel_style
 
     panel_style()
     {
-        panel.border_color.set(0.4,0.3,1.0,1.0);
+        panel.border_color.set(0.4f,0.3f,1.0f,1.0f);
         panel.border=true;
     }
 };

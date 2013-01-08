@@ -26,12 +26,12 @@ void slider::update_rects()
     if(m_vertical)
     {
         m_slider_rect.h=m_style.size;
-        m_slider_rect.y=r.y+(r.h-m_style.size)*m_value;
+        m_slider_rect.y=r.y+int((r.h-m_style.size)*m_value);
     }
     else
     {
         m_slider_rect.w=m_style.size;
-        m_slider_rect.x=r.x+(r.w-m_style.size)*m_value;
+        m_slider_rect.x=r.x+int((r.w-m_style.size)*m_value);
     }
 }
 
@@ -47,7 +47,7 @@ bool slider::on_mouse_move(uint x,uint y,bool inside)
             if(r.h<1)
                 return false;
 
-            const float new_value=clamp((y-r.y),0,r.h);
+            const float new_value=float(clamp((y-r.y),0,r.h));
             m_value=new_value/r.h;
         }
 
@@ -61,7 +61,7 @@ bool slider::on_mouse_move(uint x,uint y,bool inside)
             if(r.w<1)
                 return false;
 
-            const float new_value=clamp((x-r.x),0,r.w);
+            const float new_value=float(clamp((x-r.x),0,r.w));
             m_value=new_value/r.w;
         }
 
