@@ -12,14 +12,21 @@ namespace nya_scene
 
 class material
 {
+    friend class mesh;
+
 public:
     const char *get_name() { return m_name.c_str(); }
     int get_textures_count() { return m_textures.size(); }
     texture &get_texture();
     const char *get_texture_semantic();
-
+    
 public:
     bool set_texture(const texture &tex,const char *semantic);
+    bool set_shader(const shader &shdr);
+
+private:
+    void set();
+    void unset();
 
 public:
     material() {}

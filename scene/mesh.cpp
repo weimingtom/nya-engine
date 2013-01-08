@@ -2,6 +2,8 @@
 
 #include "mesh.h"
 #include "scene.h"
+#include "camera.h"
+#include "render/render.h"
 #include "memory/tmp_buffer.h"
 #include "memory/memory_reader.h"
 
@@ -65,8 +67,24 @@ void mesh::draw()
     if(!m_shared.is_valid())
         return;
 
+    nya_math::mat4 mat=get_camera().get_view_matrix();
+    mat.translate(m_pos.x,m_pos.y,m_pos.z);
+    mat.rotate(m_rot.x,0,1,0);
+    mat.rotate(m_rot.z,0,0,1);
+    mat.rotate(m_rot.y,1,0,0);
+
+    nya_render::set_modelview_matrix(mat);
+
     m_shared->vbo.bind();
-    m_shared->vbo.draw();
+
+    for(size_t i=0;i<m_shared->groups.size();++i)
+    {
+        shared_mesh::group &g=m_shared->groups[i];
+        g.mat.set();
+        m_shared->vbo.draw(g.offset,g.count);
+        g.mat.unset();
+    }
+
     m_shared->vbo.unbind();
 }
 

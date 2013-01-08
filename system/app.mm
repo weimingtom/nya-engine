@@ -87,11 +87,11 @@ namespace
                 UIApplicationMain(0,nil, nil, NSStringFromClass([shared_app_delegate class]));
             }
         }
-        
+
         void finish(nya_system::app_responder &app)
         {
         }
-        
+
         void set_title(const char *title)
         {
             if(!title)
@@ -121,7 +121,7 @@ namespace
 
     public:
         shared_app():m_responder(0),m_title("Nya engine") {}
-        
+
     private:        
         nya_system::app_responder *m_responder;
         std::string m_title;
@@ -136,10 +136,10 @@ namespace
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    
+
     self.viewController = [view_controller alloc];
     [self.window addSubview:self.viewController.view];
-    
+
     [self.window makeKeyAndVisible];
 
     return YES;
@@ -235,26 +235,26 @@ namespace
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
+
     if (!self.context) {
         EAGLContext *aContext = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
         if (!aContext)
             NSLog(@"Failed to create ES2 context");
         else if (![EAGLContext setCurrentContext:aContext])
             NSLog(@"Failed to set ES context current");
-        
+
         self.context = aContext;
 
         animating = NO;
         m_time=nya_system::get_time();
         animationFrameInterval = 1;
         self.displayLink = nil;
-        
+
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillResignActive:) name:UIApplicationWillResignActiveNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminateActive:) name:UIApplicationWillTerminateNotification object:nil];
     }
-    
+
     [(EAGLView *)self.view setContext:context];
     [(EAGLView *)self.view setFramebuffer];
 
@@ -297,7 +297,7 @@ namespace
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    
+
     // Tear down context.
     if ([EAGLContext currentContext] == context)
         [EAGLContext setCurrentContext:nil];
@@ -312,21 +312,21 @@ namespace
 - (void)viewWillAppear:(BOOL)animated
 {
     [self startAnimation];
-    
+
     [super viewWillAppear:animated];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
 {
     [self stopAnimation];
-    
+
     [super viewWillDisappear:animated];
 }
 
 - (void)viewDidUnload
 {
 	[super viewDidUnload];
-    
+
     // Tear down context.
     if ([EAGLContext currentContext] == context)
         [EAGLContext setCurrentContext:nil];
@@ -346,7 +346,7 @@ namespace
 	 */
     if (frameInterval >= 1) {
         animationFrameInterval = frameInterval;
-        
+
         if (animating) {
             [self stopAnimation];
             [self startAnimation];
@@ -361,7 +361,7 @@ namespace
         [aDisplayLink setFrameInterval:animationFrameInterval];
         [aDisplayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
         self.displayLink = aDisplayLink;
-        
+
         animating = YES;
     }
 }
@@ -425,18 +425,18 @@ namespace
             [scaleInvocation setTarget: [UIScreen mainScreen]];
             [scaleInvocation setSelector: scaleSelector];
             [scaleInvocation invoke];
-            
+
             NSInteger returnLength = [[scaleInvocation methodSignature] methodReturnLength];
             if (returnLength == sizeof(float))
                 [scaleInvocation getReturnValue: &screenScale];
-            
+
             typedef void (*CC_CONTENT_SCALE)(id, SEL, float);
             CC_CONTENT_SCALE method = (CC_CONTENT_SCALE) [self methodForSelector: setContentScaleSelector];
             method(self, setContentScaleSelector, screenScale);	
         }
-        
+
         CAEAGLLayer *eaglLayer = (CAEAGLLayer *)self.layer;
-        
+
         eaglLayer.opaque = TRUE;
         eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
                                         [NSNumber numberWithBool:FALSE], kEAGLDrawablePropertyRetainedBacking,
@@ -455,9 +455,9 @@ namespace
 {
     if (context != newContext) {
         [self deleteFramebuffer];
-        
+
         context = newContext;
-        
+
         [EAGLContext setCurrentContext:nil];
     }
 }
@@ -467,28 +467,28 @@ namespace
     if (context && !defaultFramebuffer) 
     {
         [EAGLContext setCurrentContext:context];
-        
+
         glGenFramebuffers(1, &defaultFramebuffer);
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebuffer);
-        
+
         glGenRenderbuffers(1, &colorRenderbuffer);
         glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
-        
+
         glGenRenderbuffers(1, &depthRenderbuffer);
         glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
-        
+
         glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
-        
+
         [context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer *)self.layer];
         glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &framebufferWidth);
         glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &framebufferHeight);
-        
+
         glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, framebufferWidth, framebufferHeight);
-        
+
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorRenderbuffer);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
-        
+
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             NSLog(@"Failed to make complete framebuffer object %x", glCheckFramebufferStatus(GL_FRAMEBUFFER));
     }
@@ -499,12 +499,12 @@ namespace
     if (context) 
     {
         [EAGLContext setCurrentContext:context];
-        
+
         if (defaultFramebuffer) {
             glDeleteFramebuffers(1, &defaultFramebuffer);
             defaultFramebuffer = 0;
         }
-        
+
         if (colorRenderbuffer) {
             glDeleteRenderbuffers(1, &colorRenderbuffer);
             colorRenderbuffer = 0;
@@ -534,16 +534,16 @@ namespace
 - (BOOL)presentFramebuffer
 {
     BOOL success = FALSE;
-    
+
     if (context) 
     {
         [EAGLContext setCurrentContext:context];
-        
+
         glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
-        
+
         success = [context presentRenderbuffer:GL_RENDERBUFFER];
     }
-    
+
     return success;
 }
 
@@ -609,7 +609,7 @@ public:
     void finish(nya_system::app_responder &app)
     {
     }
-    
+
     void set_title(const char *title)
     {
         if(!title)
@@ -744,7 +744,7 @@ private:
 {
     NSPoint pt=[event locationInWindow];
     pt=[self convertPoint:pt fromView:nil];
-    
+
     m_app->on_mouse_move(pt.x,pt.y);
 }
 
@@ -792,7 +792,7 @@ private:
         m_app=responder;
         m_antialiasing=aa;
     }
-    
+
     return self;
 }
 
@@ -803,8 +803,6 @@ private:
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification 
 {
-    //ToDo: optional multisampling
-
     NSOpenGLPixelFormatAttribute attrs[] = 
     {
         NSOpenGLPFADoubleBuffer,
@@ -878,7 +876,7 @@ void app::set_title(const char *title)
 {
     shared_app::get_app().set_title(title);
 }
-    
+
 void app::set_mouse_pos(int x,int y)
 {
 }
