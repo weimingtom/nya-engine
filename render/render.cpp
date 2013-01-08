@@ -29,7 +29,6 @@ nya_log::log &get_log()
     return *render_log;
 }
 
-
 void set_projection_matrix(const nya_math::mat4 &mat)
 {
     transform::get().set_projection_matrix(mat);

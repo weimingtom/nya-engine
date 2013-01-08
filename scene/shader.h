@@ -11,9 +11,13 @@ namespace nya_scene
 struct shared_shader
 {
     nya_render::shader shdr;
+    std::string vertex;
+    std::string pixel;
 
     bool release()
     {
+        vertex.clear();
+        pixel.clear();
         shdr.release();
         return true;
     }
