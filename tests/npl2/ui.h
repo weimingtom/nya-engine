@@ -18,6 +18,7 @@ class ui: public nya_ui::layer
 public:
     void init();
     void draw();
+    void release();
 
     void draw_text(uint x,uint y,const char *text
                    ,font_align aligh_hor=left,font_align aligh_vert=bottom);
@@ -77,7 +78,6 @@ private:
 
 private:
     nya_resources::texture_ref m_font_tex;
-    nya_resources::texture_ref m_ui_tex;
     nya_render::shader m_ui_shader;
     nya_render::shader m_text_shader;
 };

@@ -26,7 +26,6 @@ void material::set_shader(const shader &shdr)
     m_shader.unload();
 
     m_shader=shdr;
-    m_shader.ref_count_inc();
 
     for(size_t i=0;i<m_textures.size();++i)
         m_textures[i].slot=m_shader.get_texture_slot(m_textures[i].semantic.c_str());
@@ -45,13 +44,11 @@ void material::set_texture(const texture &tex,const char *semantic)
 
         t.tex.unload();
         t.tex=tex;
-        t.tex.ref_count_inc();
         return;
     }
 
     m_textures.resize(m_textures.size()+1);
     m_textures.back().tex=tex;
-    m_textures.back().tex.ref_count_inc();
     m_textures.back().semantic.assign(semantic);
     m_textures.back().slot=m_shader.get_texture_slot(semantic);
 }

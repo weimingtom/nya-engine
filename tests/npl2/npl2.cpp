@@ -14,7 +14,14 @@
 #include "pl2_resources_provider.h"
 #include "attributes.h"
 #include "scene.h"
-#include "ui.h"
+
+#ifdef OPENGL_ES
+    #define NO_UI
+#endif
+
+#ifndef NO_UI
+    #include "ui.h"
+#endif
 
 #include "stdio.h"
 
@@ -56,14 +63,17 @@ const unsigned long time_start=nya_system::get_time();
 
 nya_log::get_log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n";
 
+#ifndef NO_UI
 	    m_ui.init();
+#endif
 	}
 
 	void on_process(unsigned int dt)
 	{
         get_scene().process(dt);
+#ifndef NO_UI
 	    m_ui.process();
-
+#endif
 	    static unsigned int fps_counter=0;
 	    static unsigned int fps_update_timer=0;
 
@@ -75,6 +85,8 @@ nya_log::get_log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n"
             char name[255];
             sprintf(name,"npl2 %d fps",fps_counter);
             set_title(name);
+            
+            //nya_log::get_log()<<name<<"\n";
 
             fps_update_timer%=1000;
             fps_counter=0;
@@ -86,7 +98,9 @@ nya_log::get_log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n"
         glClear(GL_COLOR_BUFFER_BIT);
 
         get_scene().draw();
+#ifndef NO_UI
         m_ui.draw();
+#endif
 	}
 
     void on_mouse_move(int x,int y)
@@ -102,8 +116,10 @@ nya_log::get_log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n"
         {
             get_scene().get_camera().add_pos((x-m_mouse_drag.last_x)/20.0f,(y-m_mouse_drag.last_y)/20.0f);
         }
+#ifndef NO_UI
         else
             m_ui.mouse_move(x,y);
+#endif
 
         m_mouse_drag.last_x=x;
         m_mouse_drag.last_y=y;
@@ -111,7 +127,9 @@ nya_log::get_log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n"
 
     void on_mouse_scroll(int dx,int dy)
     {
+#ifndef NO_UI
         if(!m_ui.mouse_scroll(dx,dy))
+#endif
             get_scene().get_camera().add_scale(dy*0.03f);
     }
 
@@ -119,7 +137,14 @@ nya_log::get_log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n"
     {
         if(button==nya_system::mouse_left)
         {
+#ifndef NO_UI
             if(!m_ui.mouse_button(nya_ui::layout::left_button,pressed) || !pressed)
+#else
+            if(pressed)
+                get_scene().set_anim(1);
+            else
+                get_scene().set_anim(0);
+#endif
                 m_mouse_drag.left=pressed;
         }
         else if(button==nya_system::mouse_right)
@@ -135,13 +160,20 @@ nya_log::get_log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n"
 
         nya_math::mat4 proj;
         proj.perspective(25,float(w)/h,5,1500);
-        proj.translate(0,0,-45);        
         nya_render::set_projection_matrix(proj);
 
+#ifndef NO_UI
         m_ui.resize(w,h);
+#endif
     }
 
-	void on_free() { nya_log::get_log()<<"on_free\n"; }
+	void on_free() 
+    {
+        nya_log::get_log()<<"on_free\n";
+        
+        get_scene().release();
+        m_ui.release();
+    }
 
 private:
     void init_resource_system()
@@ -244,9 +276,10 @@ private:
         nya_log::get_log()<<"Average attrib time: "<<float(attrib_time)/arch_count<<"\n";
     }
 
-
 private:
+#ifndef NO_UI
     ui m_ui;
+#endif
 
     struct mouse_drag
     {
@@ -321,7 +354,7 @@ int main(int argc, char **argv)
     nya_log::plain_file_log log;
     log.open(log_file_name.c_str());
 
-    nya_log::set_log(&log);
+    //nya_log::set_log(&log);
 
     nya_log::get_log()<<"npl2 started from path "<<nya_system::get_app_path()<<"\n";
 

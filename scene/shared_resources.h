@@ -120,9 +120,6 @@ private:
         static std::string prefix;
         return prefix;
     }
-    
-protected:
-    void ref_count_inc() { m_shared.ref_cont_inc(); }
 
 protected:
     shared_resource_ref m_shared;

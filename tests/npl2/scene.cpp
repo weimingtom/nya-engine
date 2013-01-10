@@ -20,6 +20,7 @@ const nya_math::mat4 &viewer_camera::get_matrix()
         return m_mat;
 
     m_mat.identity();
+    m_mat.translate(0,0,-45);
     m_mat.scale(m_scale);
     m_mat.translate(m_pos_x,m_pos_y,0);
     m_mat.rotate(m_rot_y,1,0,0);
@@ -203,67 +204,94 @@ void scene::init()
         model_res->release();
     }
     
+#ifdef OPENGL_ES
+    const char *precision="precision mediump float;\n";
+#else
+    const char *precision="";
+#endif
+
     const char *uber_vs=
     "uniform mat4 bones[200];"
-    
+
+    "varying vec4 tc;"
+    "varying vec4 normal;"
+    "varying vec4 color;"
+    "varying vec4 vcolor;"
+
     "void main()"
     "{"
-    "  gl_TexCoord[0]=gl_MultiTexCoord0;"
+    "  tc=gl_MultiTexCoord0;"
     "  vec4 bone_idx=gl_MultiTexCoord1;"
     "  vec4 bone_weight=gl_MultiTexCoord2;"
-    
+
     "  const float eps=0.01;"
-    
+
     "  mat4 bone=bones[int(bone_idx.x)]*bone_weight.x;"
-    
+
     "  if(bone_weight.y>eps)"
     "    bone+=bones[int(bone_idx.y)]*bone_weight.y;"
-    
+
     "  if(bone_weight.z>eps)"
     "    bone+=bones[int(bone_idx.z)]*bone_weight.z;"
-    
+
     "  if(bone_weight.w>eps)"
     "    bone+=bones[int(bone_idx.w)]*bone_weight.w;"
-    
+
     "\n#ifdef specular_enabled\n"
-    "  gl_TexCoord[1]=gl_ModelViewMatrix*bone*vec4(gl_Normal.xyz,0);"
+    "  normal=gl_ModelViewMatrix*bone*vec4(gl_Normal.xyz,0);"
     "\n#endif\n"
-    
-    "  gl_TexCoord[2]=gl_Color;"
-    
+
+#ifdef OPENGL_ES
+    "color=vec4(1.0);"
+#else
+    "  color=gl_Color;"
+#endif
+
     "\n#ifdef vcolor_enabled\n"
-    "  gl_TexCoord[3]=gl_MultiTexCoord3;"
+    "  vcolor=gl_MultiTexCoord3;"
     "\n#endif\n"
     
     "  gl_Position=gl_ModelViewProjectionMatrix*bone*gl_Vertex;"
     "}";
 
-    m_shader_scenery.add_program(nya_render::shader::vertex,
-
+    const char *vprogram=
                                  "mat3 get_rot(mat4 m)"
                                  "{"
                                  "  return mat3(m[0].xyz,m[1].xyz,m[2].xyz);"
                                  "}"
 
+                                 "varying vec4 tc;"
+                                 "varying vec4 normal;"
+                                 "varying vec4 color;"
+                                 "varying vec4 vcolor;"
+
                                  "void main()"
                                  "{"
-                                 "  gl_TexCoord[0]=gl_MultiTexCoord0;"
-                                 "  gl_TexCoord[3]=gl_MultiTexCoord3;"
-                                 "  gl_TexCoord[2]=gl_Color;"
+                                 "  tc=gl_MultiTexCoord0;"
+                                 "  vcolor=gl_MultiTexCoord3;"
 
-                                 //"  gl_TexCoord[1].xyz=get_rot(gl_ModelViewMatrix)*gl_Normal.xyz;"
+#ifdef OPENGL_ES
+                                 "color=vec4(1.0);"
+#else
+                                 "  color=gl_Color;"
+#endif
+
+                                 //"  normal.xyz=get_rot(gl_ModelViewMatrix)*gl_Normal.xyz;"
 
                                  "  gl_Position=gl_ModelViewProjectionMatrix*gl_Vertex;"
-                                 "}");
-
-
+                                 "}";
+    
     const char *fprogram=
     "uniform sampler2D base_map;"
+
+    "varying vec4 tc;"
+    "varying vec4 normal;"
+    "varying vec4 color;"
+    "varying vec4 vcolor;"
+    
     "void main(void)"
     "{"
-    "  vec4 color=gl_TexCoord[2];"
-    "  vec4 vcolor=gl_TexCoord[3];"
-    "  vec4 base=texture2D(base_map,gl_TexCoord[0].xy)*color;"
+    "  vec4 base=texture2D(base_map,tc.xy)*color;"
 
     //"  float l=dot(normalize(vec3(0,0,1.0)),normalize(gl_TexCoord[1].xyz));"
     //"  float ls=dot(normalize(vec3(-0.3,0,1.0)),normalize(gl_TexCoord[1].xyz));"
@@ -274,29 +302,51 @@ void scene::init()
     //"  gl_FragColor=vcolor;"
     "}";
 
-    m_shader_scenery.add_program(nya_render::shader::pixel,fprogram);
+    
+    std::string scenery_vs_str;
+    std::string scenery_ps_str;
+    
+    scenery_vs_str.append(precision);
+    scenery_vs_str.append(vprogram);
+
+    scenery_ps_str.append(precision);
+    scenery_ps_str.append(fprogram);
+
+    m_shader_scenery.add_program(nya_render::shader::vertex,scenery_vs_str.c_str());
+    m_shader_scenery.add_program(nya_render::shader::pixel,scenery_ps_str.c_str());
 
     std::string scenery_anim_vs_str;
+    std::string scenery_anim_ps_str;
+
+    scenery_anim_vs_str.append(precision);
+
     scenery_anim_vs_str.append("#define vcolor_enabled\n");
     scenery_anim_vs_str.append(uber_vs);
 
-    m_shader_scenery_anim.add_program(nya_render::shader::vertex,scenery_anim_vs_str.c_str());
+    scenery_anim_ps_str.append(precision);
+    scenery_anim_ps_str.append(fprogram);
 
-    m_shader_scenery_anim.add_program(nya_render::shader::pixel,fprogram);
-    
+    m_shader_scenery_anim.add_program(nya_render::shader::vertex,scenery_anim_vs_str.c_str());
+    m_shader_scenery_anim.add_program(nya_render::shader::pixel,scenery_anim_ps_str.c_str());
+
     m_shsc_mat_uniform=m_shader_scenery_anim.get_handler("bones");
 
     const char *char_ps=
     "uniform sampler2D base_map;"
+    
+    "varying vec4 tc;"
+    "varying vec4 normal;"
+    "varying vec4 color;"
+    "varying vec4 vcolor;"
+
      "void main(void)"
      "{"
-     "  vec4 color=gl_TexCoord[2];"
      //"  vec4 vcolor=gl_TexCoord[3];"
-     "  vec4 base=texture2D(base_map,gl_TexCoord[0].xy);"
+     "  vec4 base=texture2D(base_map,tc.xy);"
 
      "\n#ifdef specular_enabled\n"
      //"  float l=dot(normalize(vec3(0,0,1.0)),normalize(gl_TexCoord[1].xyz));"
-     "  float ls=dot(normalize(vec3(-0.3,0,1.0)),normalize(gl_TexCoord[1].xyz));"
+     "  float ls=dot(normalize(vec3(-0.3,0,1.0)),normalize(normal.xyz));"
      //"  gl_FragColor=vec4((0.85+max(0.0,l*0.15))*base.rgb+pow(max(ls,0.0),90.0)*vec3(0.06),base.a);"
      "  gl_FragColor=vec4(base.rgb+pow(max(ls,0.0),90.0)*vec3(0.06),base.a)*color;"
      "\n#else\n"
@@ -307,10 +357,13 @@ void scene::init()
 
     std::string char_vs_str;
     std::string char_ps_str;
+    
+    char_vs_str.append(precision);
+    char_ps_str.append(precision);
+    
     if(get_config().specular_enabled)
     {
         const char *specular_define="#define specular_enabled\n";
-
         char_vs_str.append(specular_define);
         char_ps_str.append(specular_define);
     }
@@ -324,6 +377,7 @@ void scene::init()
     m_shader.set_sampler("base_map",0);
     m_sh_mat_uniform=m_shader.get_handler("bones");
 
+#ifndef OPENGL_ES
     m_shader_black.add_program(nya_render::shader::vertex,uber_vs);
     m_shader_black.add_program(nya_render::shader::pixel,
                                "void main(void)"
@@ -331,8 +385,12 @@ void scene::init()
                                "  gl_FragColor=vec4(0,0,0,0.3);"
                                "}");
     m_shbl_mat_uniform=m_shader_black.get_handler("bones");
+#endif
 
     m_imouto.set_attrib("COORDINATE","fudan05");
+    //m_imouto.set_attrib("COORDINATE","zok_panya00");
+    //set_bkg("room_office_000");
+    m_camera.add_rot(0,10);
 }
 
 void scene::set_bkg(const char *name)
@@ -434,7 +492,7 @@ void scene::draw()
 
     nya_render::set_modelview_matrix(m_camera.get_matrix());
 
-	glEnable     ( GL_DEPTH_TEST );
+	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
     glCullFace(GL_BACK);
@@ -443,15 +501,15 @@ void scene::draw()
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     glLineWidth(1.0f);
 
-    glEnable(GL_TEXTURE_2D);
-
-	glColor4f(1,1,1,1);
-
     glEnable(GL_BLEND);
     glDisable(GL_CULL_FACE);
 
+#ifndef OPENGL_ES
+    glColor4f(1,1,1,1);
+
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER,0.2f);
+#endif
 
     const tmb_model::locator *scene_loc=0;
 
@@ -472,10 +530,13 @@ void scene::draw()
 
     imouto.draw(true);
 
+#ifndef OPENGL_ES
     if(scene_loc)
         glColor4f(scene_loc->color[0],scene_loc->color[1],scene_loc->color[2],1.0f);
     else
         glColor4f(1.0f,1.0f,1.0f,1.0f);
+#endif
+
     /*
     glPushMatrix();
     if(m_curr_anim!=m_anim_list.end() && m_curr_anim->loc_idx[1]!=m_curr_anim->loc_idx[0])
@@ -538,6 +599,7 @@ void scene::draw()
     if(frames_count)
         m_shader.unbind();
 
+#ifndef OPENGL_ES
     if(get_config().wireframe_outline_enabled)
     {
         glEnable(GL_CULL_FACE);
@@ -612,6 +674,7 @@ void scene::draw()
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 
     glColor4f(1.0f,1.0f,1.0f,1.0f);
+#endif
 
     if(scene_loc)
     {
@@ -645,7 +708,9 @@ void scene::draw()
         }
     }
 
+#ifndef OPENGL_ES
     glDisable(GL_ALPHA_TEST);
+#endif
 }
 
 void scene::set_imouto_attr(const char *key,const char *value,int num)
@@ -763,7 +828,7 @@ void scene::apply_anim()
     }
     else
         m_aniki.apply_anim(0);
-    
+
     std::string third_anim=m_curr_anim->name[2];
     std::string third_model=m_curr_anim->model_name[2];
     if(!third_anim.empty() && !third_model.empty())
@@ -787,17 +852,19 @@ void scene::apply_anim()
         m_the_third.release();
 }
 
-
 void scene::release()
 {
     for(int i=0;i<max_bkg_models;++i)
         m_bkg_models[i].release();
 
     m_imouto.release();
+    m_imouto_preview.release();
     m_aniki.release();
 
     m_shader.release();
     m_shader_scenery.release();
+
+    get_shared_anims().free_all();
 }
 
 scene &get_scene()

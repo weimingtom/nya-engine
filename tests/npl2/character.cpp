@@ -146,7 +146,7 @@ void character::set_attrib(const char *key,const char *value,int num)
             if(id==under && strstr(model_name,"HC."))
                 m_under_count=1;
  
-            nya_log::get_log()<<"model "<<i<<" "<<model_name<<"\n";
+            //nya_log::get_log()<<"model "<<i<<" "<<model_name<<"\n";
 
             model_ref ref=get_shared_models().access(model_name);
             if(!ref.is_valid())
@@ -348,7 +348,9 @@ void character::draw(bool use_materials)
     if(!m_parts[body].subparts[0].model.is_valid())
         return;
 
+#ifndef OPENGL_ES
     glColor4f(m_color[0],m_color[1],m_color[2],1);
+#endif
 
     if(use_materials || m_parts[body].subparts[0].outline)
     {
@@ -365,7 +367,10 @@ void character::draw(bool use_materials)
     draw_part(hair,use_materials);
     draw_part(head,use_materials);
 
+#ifndef OPENGL_ES
     glColor4f(m_color[0],m_color[1],m_color[2],1);
+#endif
+
     if(use_materials || m_parts[body].subparts[0].outline)
         m_parts[body].subparts[0].model->draw(use_materials,m_body_blend_group_idx);
 
@@ -385,7 +390,9 @@ void character::draw(bool use_materials)
         model_ref &m=p.subparts[mode+i-1].model;
         if(m.is_valid())
         {
+#ifndef OPENGL_ES
             glColor4f(m_color[0],m_color[1],m_color[2],p.subparts[i-1].opacity);
+#endif
             m->draw(use_materials);
         }
     }
@@ -408,7 +415,9 @@ void character::draw_part(unsigned int idx,bool use_materials)
         model_ref &m=p.subparts[i-1].model;
         if(m.is_valid())
         {
+#ifndef OPENGL_ES
             glColor4f(m_color[0],m_color[1],m_color[2],p.subparts[i-1].opacity);
+#endif
             m->draw(use_materials);
         }
     }

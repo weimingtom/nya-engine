@@ -643,3 +643,10 @@ void ui::process_events(event &e)
     }
 }
 
+void ui::release()
+{
+    m_font_tex.free();
+    m_ui_shader.release();
+    m_text_shader.release();
+}
+

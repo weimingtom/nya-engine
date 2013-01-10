@@ -33,12 +33,6 @@ public:
         t_res *operator -> () { return m_res; }
         const t_res *operator -> () const { return m_res; };
 
-        void ref_cont_inc()
-        {
-            if(m_creator)
-                m_creator->res_ref_count_inc(*this);
-        }
-
         void free()
         {
             if(m_creator)
@@ -52,9 +46,38 @@ public:
     public:
         shared_resource_ref(): m_res(0), m_res_holder(0), m_creator(0) {}
 
+        shared_resource_ref(const shared_resource_ref &ref)
+        {
+            m_res=ref.m_res;
+            m_res_holder=ref.m_res_holder;
+            m_creator=ref.m_creator;
+
+            ref_count_inc();
+        }
+
+        shared_resource_ref &operator=(const shared_resource_ref &ref) 
+        {
+            m_res=ref.m_res;
+            m_res_holder=ref.m_res_holder;
+            m_creator=ref.m_creator;
+
+            ref_count_inc();
+
+            return *this;
+        }
+
+        ~shared_resource_ref() { free(); }
+
     private:
         shared_resource_ref(t_res*res,res_holder*holder,t_creator *creator):
-                                    m_res(res),m_res_holder(holder),m_creator(creator) {}
+        m_res(res),m_res_holder(holder),m_creator(creator) {}
+
+    private:        
+        void ref_count_inc()
+        {
+            if(m_creator)
+                m_creator->res_ref_count_inc(*this);
+        }
 
     private:
         t_res *m_res;
@@ -221,7 +244,8 @@ public:
         m_res_map.clear();
         m_res_pool.clear();
 
-        m_lru_first=m_lru_last=m_used_count=0;
+        m_lru_first=m_lru_last=0;
+        m_used_count=0;
     }
 
       // note: lru removes only unused resources
@@ -234,10 +258,10 @@ public:
 private:
     void free_lru()
     {
+        //get_log()<<(unsigned int)m_used_count<<" ";
+
         //if(!m_lru_limit)
             return;
-
-        get_log()<<(unsigned int)m_used_count<<" ";
 
         res_holder *last=m_lru_last;
 
@@ -291,14 +315,17 @@ public:
         for(it=m_res_map.begin();it!=m_res_map.end();++it)
         {
             if(it->second)
+            {
+                get_log()<<"warning: unreleased resource: "<<it->first.c_str()<<"\n";
                 ++unreleased_count;
+            }
         }
+
+        if(unreleased_count)
+            get_log()<<"warning: unreleased resources count: "<<unreleased_count<<"\n";
 
         m_res_map.clear();
         m_res_pool.clear();
-
-        //if(unreleased_count>0)
-        //log unreleased_count
     }
 
 private:

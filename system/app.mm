@@ -300,7 +300,13 @@ namespace
 
     // Tear down context.
     if ([EAGLContext currentContext] == context)
+    {
+        nya_system::app_responder *responder=shared_app::get_app().get_responder();
+        if(responder)
+            responder->on_free();
+        
         [EAGLContext setCurrentContext:nil];
+    }
 }
 
 - (void)didReceiveMemoryWarning
@@ -604,6 +610,8 @@ public:
     void start_fullscreen(unsigned int w,unsigned int h,nya_system::app_responder &app)
     {
         //ToDo
+
+        start_windowed(0,0,w,h,0,app);
     }
 
     void finish(nya_system::app_responder &app)
@@ -853,6 +861,11 @@ private:
     m_app->on_init();
 
     [view initTimer];
+}
+
+- (void)applicationWillTerminate:(NSNotification *)aNotification
+{
+    m_app->on_free();
 }
 
 @end
