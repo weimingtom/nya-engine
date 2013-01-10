@@ -13,7 +13,8 @@ public:
         color_rgb,
         //color_bgr,
         color_rgba,
-        color_bgra
+        color_bgra,
+        color_r
     };
 
     void build_texture(const void *data,unsigned int width,unsigned int height,color_format format);

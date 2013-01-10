@@ -96,6 +96,8 @@ bool shader::load_nya_shader(shared_shader &res,size_t data_size,const void*data
     res.shdr.add_program(nya_render::shader::vertex,res.vertex.c_str());
     res.shdr.add_program(nya_render::shader::pixel,res.pixel.c_str());
 
+    res.shdr.set_sampler("base_map",0); //ToDo
+
     return true;
 }
 

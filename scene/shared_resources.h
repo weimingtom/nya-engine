@@ -12,23 +12,29 @@ template<typename t>
 class scene_shared
 {
 public:
-    bool load(const char *name)
+    virtual bool load(const char *name)
     {
         unload();
 
         if(!name)
             return false;
 
-        m_shared=get_shared_resources().access(name);
+        if(get_resources_prefix().empty())
+            m_shared=get_shared_resources().access(name);
+        else
+            m_shared=get_shared_resources().access((get_resources_prefix()+name).c_str());
 
-        return true;
+        return m_shared.is_valid();
     }
 
-    void unload()
+    virtual void unload()
     {
         if(m_shared.is_valid())
             m_shared.free();
     }
+
+public:
+    static void set_resources_prefix(const char *prefix) { get_resources_prefix().assign(prefix?prefix:""); }
 
 public:
     typedef bool (*load_function)(t &sh,size_t data_size,const void*data);
@@ -62,7 +68,7 @@ private:
             nya_resources::resource_data *file_data=nya_resources::get_resources_provider().access(name);
             if(!file_data)
             {
-                nya_resources::get_log()<<"unable to load scene resource: unable to acess resource\n";
+                nya_resources::get_log()<<"unable to load scene resource: unable to access resource\n";
                 return false;
             }
 
@@ -107,6 +113,16 @@ private:
         static load_functions functions;
         return functions;
     }
+
+private:
+    static std::string &get_resources_prefix()
+    {
+        static std::string prefix;
+        return prefix;
+    }
+    
+protected:
+    void ref_count_inc() { m_shared.ref_cont_inc(); }
 
 protected:
     shared_resource_ref m_shared;

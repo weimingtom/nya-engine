@@ -33,6 +33,12 @@ public:
         t_res *operator -> () { return m_res; }
         const t_res *operator -> () const { return m_res; };
 
+        void ref_cont_inc()
+        {
+            if(m_creator)
+                m_creator->res_ref_count_inc(*this);
+        }
+
         void free()
         {
             if(m_creator)
@@ -148,6 +154,14 @@ public:
         //ToDo: unlink from lru list
 
         --m_used_count;
+    }
+
+    void res_ref_count_inc(shared_resource_ref&ref)
+    {
+        if(!ref.m_res_holder)
+            return;
+
+        ++ref.m_res_holder->ref_count;
     }
 
     void should_unload_unused(bool unload)

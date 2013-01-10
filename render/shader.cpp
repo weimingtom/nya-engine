@@ -245,8 +245,6 @@ void shader::add_program(program_type type,const char*code)
     std::string code_str(code);
     std::string code_final;
 
-    code_final.append("precision mediump float;\n");
-
     if(type==vertex)
     {
         const char *attribute_names[]={"nyaVertex","nyaNormal","nyaColor","nyaMultiTexCoord"};
@@ -382,6 +380,7 @@ void shader::add_program(program_type type,const char*code)
         }
     }
 
+    code_final.append("precision mediump float;\n");
     code_final.append(code_str);
 
     code=code_final.c_str();

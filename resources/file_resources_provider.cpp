@@ -265,7 +265,14 @@ resource_data *file_resources_provider::access(const char *resource_name)
 
     file_resource *file = file_resources.allocate();
 
-    if(!file->open((m_path+resource_name).c_str()))
+    std::string file_name=m_path+resource_name;
+    for(int i=m_path.size();i<file_name.size();++i)
+    {
+        if(file_name[i]=='\\')
+            file_name[i]='/';
+    }
+
+    if(!file->open(file_name.c_str()))
     {
         get_log()<<"unable to access file: "<<resource_name
                         <<" at path "<<m_path.c_str()<<"\n";
@@ -289,6 +296,11 @@ bool file_resources_provider::set_folder(const char*name,bool recursive)
     }
 
     m_path.assign(name);
+    for(int i=0;i<m_path.size();++i)
+    {
+        if(m_path[i]=='\\')
+            m_path[i]='/';
+    }
 
     while(!m_path.empty() && m_path[m_path.length()-1]=='/')
         m_path.resize(m_path.length()-1);

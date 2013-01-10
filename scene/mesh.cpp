@@ -62,6 +62,17 @@ bool mesh::load_pmd(shared_mesh &res,size_t data_size,const void*data)
     return true;
 }
 
+void mesh::unload()
+{
+    scene_shared::unload();
+
+    for(size_t i=0;i<m_replaced_materials.size();++i)
+        m_replaced_materials[i].release();
+
+    m_replaced_materials.clear();
+    m_replaced_materials_idx.clear();
+}
+
 void mesh::draw()
 {
     if(!m_shared.is_valid())

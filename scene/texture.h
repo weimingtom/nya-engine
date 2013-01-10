@@ -21,8 +21,14 @@ struct shared_texture
 
 class texture: public scene_shared<shared_texture>
 {
+    friend class material;
+
 private:
-    static bool load_tga(shared_texture &res,size_t data_size,const void*data) { return true; }
+    static bool load_tga(shared_texture &res,size_t data_size,const void*data);
+
+private:
+    void set(int slot=0);
+    void unset();
 
 public:
     texture() { register_load_function(load_tga); }

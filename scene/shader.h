@@ -34,6 +34,9 @@ private:
     void set();
     void unset();
 
+private:
+    int get_texture_slot(const char *semantic) { return 0; } //ToDo
+
 public:
     shader() { register_load_function(load_nya_shader); }
 };

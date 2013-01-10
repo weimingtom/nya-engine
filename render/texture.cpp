@@ -39,6 +39,7 @@ void texture::build_texture(const void *data,unsigned int width,unsigned int hei
         //case color_bgr: source_format=GL_RGB; gl_format=GL_BGR; break;
         case color_rgba: source_format=GL_RGBA; gl_format=GL_RGBA; break;
         case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; break;
+        case color_r: source_format=GL_LUMINANCE; gl_format=GL_LUMINANCE; break;
     };
 
     if(!source_format || !gl_format)
