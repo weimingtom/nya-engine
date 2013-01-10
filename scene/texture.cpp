@@ -96,7 +96,7 @@ bool texture::load_tga(shared_texture &res,size_t data_size,const void*data)
 
         const unsigned char *cur=(unsigned char *)reader.get_data();
 
-        for(int i=0;i<color_data_size;) 
+        for(size_t i=0;i<color_data_size;) 
         {
             if(*cur & 0x80)
             {

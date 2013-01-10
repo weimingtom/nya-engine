@@ -266,7 +266,7 @@ resource_data *file_resources_provider::access(const char *resource_name)
     file_resource *file = file_resources.allocate();
 
     std::string file_name=m_path+resource_name;
-    for(int i=m_path.size();i<file_name.size();++i)
+    for(size_t i=m_path.size();i<file_name.size();++i)
     {
         if(file_name[i]=='\\')
             file_name[i]='/';
@@ -296,7 +296,7 @@ bool file_resources_provider::set_folder(const char*name,bool recursive)
     }
 
     m_path.assign(name);
-    for(int i=0;i<m_path.size();++i)
+    for(size_t i=0;i<m_path.size();++i)
     {
         if(m_path[i]=='\\')
             m_path[i]='/';

@@ -13,11 +13,11 @@ namespace nya_scene
 class material
 {
     friend class mesh;
-    friend class shared_mesh;
+    friend struct shared_mesh;
 
 public:
     const char *get_name() { return m_name.c_str(); }
-    int get_textures_count() { return m_textures.size(); }
+    int get_textures_count() { return (int)m_textures.size(); }
     texture &get_texture();
     const char *get_texture_semantic();
 
@@ -33,7 +33,7 @@ private:
     void set();
     void unset();
 
-private:
+public:
     material() {}
     //material(const char *name,const shader &shader);
 
