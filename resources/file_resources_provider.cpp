@@ -246,7 +246,7 @@ resource_data *file_resource_info::access()
     file_resource *file = file_resources.allocate();
     if(!file->open((path+name).c_str()))
     {
-        get_log()<<"unable to acess file "<<name.c_str()
+        get_log()<<"unable to access file "<<name.c_str()
                     <<" at path "<<path.c_str()<<"\n";
         file_resources.free(file);
         return 0;
@@ -274,7 +274,7 @@ resource_data *file_resources_provider::access(const char *resource_name)
 
     if(!file->open(file_name.c_str()))
     {
-        get_log()<<"unable to access file: "<<resource_name
+        get_log()<<"unable to access file: "<<file_name.c_str()+m_path.size()
                         <<" at path "<<m_path.c_str()<<"\n";
         file_resources.free(file);
         return 0;

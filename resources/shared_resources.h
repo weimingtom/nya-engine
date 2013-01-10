@@ -237,7 +237,7 @@ private:
         //if(!m_lru_limit)
             return;
 
-        get_log()<<m_used_count<<" ";
+        get_log()<<(unsigned int)m_used_count<<" ";
 
         res_holder *last=m_lru_last;
 
