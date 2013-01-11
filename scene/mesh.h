@@ -48,8 +48,8 @@ public:
 
 public:
     int get_materials_count();
-    const material *get_material(int idx);
-    material *modify_material(int idx);
+    const material &get_material(int idx);
+    void set_material(const material &mat,int idx);
 
 private:
     static bool load_pmd(shared_mesh &res,size_t data_size,const void*data);

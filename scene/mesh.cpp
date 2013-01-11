@@ -88,15 +88,79 @@ void mesh::draw()
 
     m_shared->vbo.bind();
 
-    for(size_t i=0;i<m_shared->groups.size();++i)
+    if(m_replaced_materials_idx.empty())
     {
-        shared_mesh::group &g=m_shared->groups[i];
-        g.mat.set();
-        m_shared->vbo.draw(g.offset,g.count);
-        g.mat.unset();
+        for(size_t i=0;i<m_shared->groups.size();++i)
+        {
+            shared_mesh::group &g=m_shared->groups[i];
+            g.mat.set();
+            m_shared->vbo.draw(g.offset,g.count);
+            g.mat.unset();
+        }
+    }
+    else
+    {
+        for(size_t i=0;i<m_shared->groups.size();++i)
+        {
+            shared_mesh::group &g=m_shared->groups[i];
+            const int rep_idx=m_replaced_materials_idx[i];
+            if(rep_idx>=0)
+            {
+                m_replaced_materials[rep_idx].set();
+                m_shared->vbo.draw(g.offset,g.count);
+                m_replaced_materials[rep_idx].unset();
+            }
+            else
+            {
+                g.mat.set();
+                m_shared->vbo.draw(g.offset,g.count);
+                g.mat.unset();
+            }
+        }
     }
 
     m_shared->vbo.unbind();
+}
+
+int mesh::get_materials_count()
+{
+    if(!m_shared.is_valid())
+        return 0;
+
+    return (int)m_shared->groups.size();
+}
+
+const material &mesh::get_material(int idx)
+{
+    if(!m_shared.is_valid() || idx<0 || idx>=(int)m_shared->groups.size())
+    {
+        const static material empty;
+        return empty;
+    }
+
+    if(!m_replaced_materials.empty())
+        return m_replaced_materials[m_replaced_materials_idx[idx]];
+
+    return m_shared->groups[idx].mat;
+}
+
+void mesh::set_material(const material &mat,int idx)
+{
+    if(!m_shared.is_valid() || idx<0 || idx>=(int)m_shared->groups.size())
+        return;
+
+    if(m_replaced_materials_idx.empty())
+        m_replaced_materials_idx.resize(m_shared->groups.size(),-1);
+
+    if(m_replaced_materials_idx[idx]>=0)
+    {
+        m_replaced_materials[m_replaced_materials_idx[idx]]=mat;
+        return;
+    }
+
+    m_replaced_materials_idx[idx]=(int)m_replaced_materials.size();
+    m_replaced_materials.resize(m_replaced_materials.size()+1);
+    m_replaced_materials.back()=mat;
 }
 
 }

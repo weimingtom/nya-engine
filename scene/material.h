@@ -21,7 +21,7 @@ public:
     texture &get_texture();
     const char *get_texture_semantic();
 
-private:
+public:
     void release();
 
 public:
@@ -35,7 +35,6 @@ private:
 
 public:
     material() {}
-    //material(const char *name,const shader &shader);
 
 private:
     std::string m_name;
