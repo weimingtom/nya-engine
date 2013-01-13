@@ -10,6 +10,8 @@ bool shader::load_nya_shader(shared_shader &res,size_t data_size,const void*data
 {
     const char *text=(const char*)data;
 
+    std::map<std::string,std::string> samplers;
+
     for(size_t i=0;i<data_size-1;++i)
     {
         if(text[i]!='@')
@@ -29,6 +31,30 @@ bool shader::load_nya_shader(shared_shader &res,size_t data_size,const void*data
 
                     res.vertex.append(&text[begin],i-begin);
                     res.pixel.append(&text[begin],i-begin);
+                    --i;
+                }
+                break;
+                
+            case 's':
+                if(i+8<data_size && strncmp(&text[i],"sampler",7)==0)
+                {
+                    size_t begin=i+8;
+                    for(i=begin;i<data_size;++i)
+                        if(text[i]==' ' || text[i]=='\t')
+                            break;
+
+                    std::string sampler_name(&text[begin],i-begin);
+
+                    while(i<data_size && (text[i]==' ' || text[i]=='\t')) ++i;
+
+                    for(begin=i;i<data_size;++i)
+                        if(text[i]=='\n' || text[i]=='\r'
+                           || text[i]==' ' || text[i]=='\t')
+                            break;
+
+                    std::string sampler_semantic=std::string(&text[begin],i-begin);
+                    samplers[sampler_semantic]=sampler_name;
+                    res.samplers[sampler_semantic]=-1;
                     --i;
                 }
                 break;
@@ -96,7 +122,13 @@ bool shader::load_nya_shader(shared_shader &res,size_t data_size,const void*data
     res.shdr.add_program(nya_render::shader::vertex,res.vertex.c_str());
     res.shdr.add_program(nya_render::shader::pixel,res.pixel.c_str());
 
-    res.shdr.set_sampler("base_map",0); //ToDo
+    int sampler_idx=0;
+    for(shared_shader::samplers_map::iterator it=res.samplers.begin();
+        it!=res.samplers.end();++it)
+    {
+        res.shdr.set_sampler(samplers[it->first].c_str(),sampler_idx);
+        ++sampler_idx;
+    }
 
     return true;
 }
@@ -115,6 +147,18 @@ void shader::unset()
         return;
 
     m_shared->shdr.unbind();
+}
+
+int shader::get_texture_slot(const char *semantic)
+{
+    if(!semantic || !m_shared.is_valid())
+        return 0;
+
+    shared_shader::samplers_map::iterator it=m_shared->samplers.find(semantic);
+    if(it==m_shared->samplers.end())
+        return 0;
+
+    return it->second;
 }
 
 }

@@ -14,6 +14,9 @@ struct shared_shader
     std::string vertex;
     std::string pixel;
 
+    typedef std::map<std::string,int> samplers_map;
+    samplers_map samplers;
+
     bool release()
     {
         vertex.clear();
@@ -35,7 +38,7 @@ private:
     void unset();
 
 private:
-    int get_texture_slot(const char *semantic) { return 0; } //ToDo
+    int get_texture_slot(const char *semantic);
 
 public:
     shader() { register_load_function(load_nya_shader); }
