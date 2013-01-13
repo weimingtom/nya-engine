@@ -22,8 +22,6 @@ struct vec3
 
     float operator * (const vec3 &v) const { return x*v.x+y*v.y+z*v.z; }
 
-    vec3 operator * (const float a) const { return vec3(x*a,y*a,z*a); }
-
     vec3 operator - () const { return vec3(-x,-y,-z); }
 
     vec3 operator *= (const float a) { x*=a; y*=a; z*=a; return *this; }
@@ -47,5 +45,8 @@ struct vec3
                     a.x*b.y - a.y*b.x);
     }
 };
+
+inline vec3 operator * ( float a, const vec3& v ) { return vec3(v.x*a,v.y*a,v.z*a); }
+inline vec3 operator * ( const vec3& v, float a ) { return vec3(v.x*a,v.y*a,v.z*a); }
 
 }
