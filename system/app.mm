@@ -23,6 +23,7 @@
 
     BOOL animating;
     unsigned long m_time;
+    float m_scale;
 
     NSInteger animationFrameInterval;
     __weak CADisplayLink *displayLink;
@@ -30,7 +31,7 @@
 
 @property (readonly, nonatomic, getter=isAnimating) BOOL animating;
 @property (nonatomic) NSInteger animationFrameInterval;
-
+- (float)getScale;
 - (void)startAnimation;
 - (void)stopAnimation;
 @end
@@ -45,6 +46,7 @@
 @interface EAGLView : UIView {
     GLint framebufferWidth;
     GLint framebufferHeight;
+    float m_scale;
     
     GLuint defaultFramebuffer, colorRenderbuffer, depthRenderbuffer;
 }
@@ -52,6 +54,7 @@
 @property (strong, nonatomic) EAGLContext *context;
 
 - (void)setFramebuffer;
+- (float)getScale;
 - (BOOL)presentFramebuffer;
 
 @end
@@ -137,21 +140,25 @@ namespace
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
 
-    self.viewController = [view_controller alloc];
-    [self.window addSubview:self.viewController.view];
+    self.viewController = [[view_controller alloc] init];
+    [self.window setRootViewController:self.viewController];
+    [self.viewController release];
 
     [self.window makeKeyAndVisible];
 
     return YES;
 }
+
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
     nya_system::app_responder *responder=shared_app::get_app().get_responder();
     if(!responder)
         return;
 
+    const float scale=[self.viewController getScale];
+
     CGPoint tappedPt = [[touches anyObject] locationInView: self.viewController.view];
-    responder->on_mouse_move(tappedPt.x,self.viewController.view.bounds.size.height-tappedPt.y);
+    responder->on_mouse_move(tappedPt.x*scale,(self.viewController.view.bounds.size.height-tappedPt.y)*scale);
     responder->on_mouse_button(nya_system::mouse_left,true);
 };
 
@@ -164,8 +171,10 @@ namespace
     //UITouch *touchSample = [[event allTouches] anyObject];
     //int count=[touchSample tapCount];
     
+    const float scale=[self.viewController getScale];
+
     CGPoint tappedPt = [[touches anyObject] locationInView: self.viewController.view];
-    responder->on_mouse_move(tappedPt.x,self.viewController.view.bounds.size.height-tappedPt.y);
+    responder->on_mouse_move(tappedPt.x*scale,(self.viewController.view.bounds.size.height-tappedPt.y)*scale);
 };
 
 -(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
@@ -173,9 +182,11 @@ namespace
     nya_system::app_responder *responder=shared_app::get_app().get_responder();
     if(!responder)
         return;
+    
+    const float scale=[self.viewController getScale];
 
     CGPoint tappedPt = [[touches anyObject] locationInView: self.viewController.view];
-    responder->on_mouse_move(tappedPt.x,self.viewController.view.bounds.size.height-tappedPt.y);
+    responder->on_mouse_move(tappedPt.x*scale,(self.viewController.view.bounds.size.height-tappedPt.y)*scale);
     responder->on_mouse_button(nya_system::mouse_left,false);
 };
 
@@ -229,8 +240,46 @@ namespace
 
 - (void)loadView 
 {
-    self.view = [[EAGLView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    EAGLView *view=[[EAGLView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+
+    self.view = view;
+    m_scale = [view getScale];
 }
+
+- (float)getScale
+{
+    return m_scale;
+}
+
+static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientation orientation) 
+{
+	switch (orientation) 
+    {
+		case UIInterfaceOrientationPortrait:           return @"UIInterfaceOrientationPortrait";
+		case UIInterfaceOrientationPortraitUpsideDown: return @"UIInterfaceOrientationPortraitUpsideDown";
+		case UIInterfaceOrientationLandscapeLeft:      return @"UIInterfaceOrientationLandscapeLeft";
+		case UIInterfaceOrientationLandscapeRight:     return @"UIInterfaceOrientationLandscapeRight";
+	}
+	return @"Unexpected";
+}
+
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation 
+{
+    return [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"UISupportedInterfaceOrientations"] indexOfObject:NSStringFromUIInterfaceOrientation(interfaceOrientation)] != NSNotFound;
+}
+
+//iOS 6:
+
+- (BOOL)shouldAutorotate 
+{
+    return YES;
+}
+/*
+- (NSUInteger)supportedInterfaceOrientations 
+{
+    return UIInterfaceOrientationMaskAll;
+}
+*/
 
 - (void)viewDidLoad
 {
@@ -249,7 +298,7 @@ namespace
         m_time=nya_system::get_time();
         animationFrameInterval = 1;
         self.displayLink = nil;
-
+        
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillResignActive:) name:UIApplicationWillResignActiveNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminateActive:) name:UIApplicationWillTerminateNotification object:nil];
@@ -419,13 +468,13 @@ namespace
 - (id)initWithFrame:(CGRect)frame 
 {
     if ((self = [super initWithFrame:frame])) 
-    {        
+    {   
+        m_scale=1.0f;
         SEL scaleSelector = NSSelectorFromString(@"scale");
         SEL setContentScaleSelector = NSSelectorFromString(@"setContentScaleFactor:");
         SEL getContentScaleSelector = NSSelectorFromString(@"contentScaleFactor");
         if ([self respondsToSelector: getContentScaleSelector] && [self respondsToSelector: setContentScaleSelector])
         {
-            float screenScale = 1.0f;
             NSMethodSignature *scaleSignature = [UIScreen instanceMethodSignatureForSelector: scaleSelector];
             NSInvocation *scaleInvocation = [NSInvocation invocationWithMethodSignature: scaleSignature];
             [scaleInvocation setTarget: [UIScreen mainScreen]];
@@ -434,11 +483,11 @@ namespace
 
             NSInteger returnLength = [[scaleInvocation methodSignature] methodReturnLength];
             if (returnLength == sizeof(float))
-                [scaleInvocation getReturnValue: &screenScale];
+                [scaleInvocation getReturnValue: &m_scale];
 
             typedef void (*CC_CONTENT_SCALE)(id, SEL, float);
             CC_CONTENT_SCALE method = (CC_CONTENT_SCALE) [self methodForSelector: setContentScaleSelector];
-            method(self, setContentScaleSelector, screenScale);	
+            method(self, setContentScaleSelector, m_scale);
         }
 
         CAEAGLLayer *eaglLayer = (CAEAGLLayer *)self.layer;
@@ -468,6 +517,11 @@ namespace
     }
 }
 
+- (float)getScale
+{
+    return m_scale;
+}
+
 - (void)createFramebuffer
 {
     if (context && !defaultFramebuffer) 
@@ -491,9 +545,11 @@ namespace
 
         glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, framebufferWidth, framebufferHeight);
+        //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8_OES, framebufferWidth, framebufferHeight);
 
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorRenderbuffer);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
+        //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
 
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             NSLog(@"Failed to make complete framebuffer object %x", glCheckFramebufferStatus(GL_FRAMEBUFFER));
