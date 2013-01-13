@@ -5,9 +5,9 @@
 #include "math/matrix.h"
 #include "platform_specific_gl.h"
 
-//#ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+#ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
     #define MANUAL_MATRICES_ASSIGN
-//#endif
+#endif
 
 namespace nya_render
 {
