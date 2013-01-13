@@ -152,11 +152,11 @@ void shader::unset()
 int shader::get_texture_slot(const char *semantic)
 {
     if(!semantic || !m_shared.is_valid())
-        return 0;
+        return -1;
 
     shared_shader::samplers_map::iterator it=m_shared->samplers.find(semantic);
     if(it==m_shared->samplers.end())
-        return 0;
+        return -1;
 
     return it->second;
 }

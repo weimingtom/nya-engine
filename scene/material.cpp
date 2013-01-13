@@ -10,7 +10,12 @@ void material::set()
     m_shader.set();
 
     for(size_t i=0;i<m_textures.size();++i)
+    {
+        if(m_textures[i].slot<0)
+            continue;
+
         m_textures[i].tex.set(m_textures[i].slot);
+    }
 }
 
 void material::unset()
@@ -18,7 +23,12 @@ void material::unset()
     m_shader.unset();
 
     for(size_t i=0;i<m_textures.size();++i)
+    {
+        if(m_textures[i].slot<0)
+            continue;
+
         m_textures[i].tex.unset();
+    }
 }
 
 void material::set_shader(const shader &shdr) 
