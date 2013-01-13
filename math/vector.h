@@ -30,13 +30,14 @@ struct vec3
 
     float length() const { return sqrtf(x*x+y*y+z*z); }
 
-    vec3 normalize()
+    vec3 &normalize()
     {
         float len=length();
         if(len<0.00001f)
             return *this;
 
-        return *this*=(1.0f/len);
+        *this *=(1.0f/len);
+        return *this;
     }
 
     static vec3 cross(vec3 a,vec3 b)
