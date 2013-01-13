@@ -203,12 +203,6 @@ void scene::init()
         m_aniki.load(model_res);
         model_res->release();
     }
-    
-#ifdef OPENGL_ES
-    const char *precision="precision mediump float;\n";
-#else
-    const char *precision="";
-#endif
 
     const char *uber_vs=
     "uniform mat4 bones[200];"
@@ -302,28 +296,15 @@ void scene::init()
     //"  gl_FragColor=vcolor;"
     "}";
 
-    
-    std::string scenery_vs_str;
-    std::string scenery_ps_str;
-    
-    scenery_vs_str.append(precision);
-    scenery_vs_str.append(vprogram);
-
-    scenery_ps_str.append(precision);
-    scenery_ps_str.append(fprogram);
-
-    m_shader_scenery.add_program(nya_render::shader::vertex,scenery_vs_str.c_str());
-    m_shader_scenery.add_program(nya_render::shader::pixel,scenery_ps_str.c_str());
+    m_shader_scenery.add_program(nya_render::shader::vertex,vprogram);
+    m_shader_scenery.add_program(nya_render::shader::pixel,fprogram);
 
     std::string scenery_anim_vs_str;
     std::string scenery_anim_ps_str;
 
-    scenery_anim_vs_str.append(precision);
-
     scenery_anim_vs_str.append("#define vcolor_enabled\n");
     scenery_anim_vs_str.append(uber_vs);
 
-    scenery_anim_ps_str.append(precision);
     scenery_anim_ps_str.append(fprogram);
 
     m_shader_scenery_anim.add_program(nya_render::shader::vertex,scenery_anim_vs_str.c_str());
@@ -357,10 +338,7 @@ void scene::init()
 
     std::string char_vs_str;
     std::string char_ps_str;
-    
-    char_vs_str.append(precision);
-    char_ps_str.append(precision);
-    
+
     if(get_config().specular_enabled)
     {
         const char *specular_define="#define specular_enabled\n";

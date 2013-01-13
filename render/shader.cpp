@@ -12,9 +12,7 @@
 
 #include <string>
 
-#ifdef SUPPORT_OLD_SHADERS
-    #include "transform.h"
-#endif
+#include "transform.h"
 
 namespace nya_render
 {
@@ -241,15 +239,15 @@ void shader::add_program(program_type type,const char*code)
         m_objects[type]=0;
     }
 
-#ifdef SUPPORT_OLD_SHADERS
     std::string code_str(code);
     std::string code_final;
 
     if(type==vertex)
     {
+#ifdef SUPPORT_OLD_SHADERS
         const char *attribute_names[]={"nyaVertex","nyaNormal","nyaColor","nyaMultiTexCoord"};
-
         bool used_attribs[max_attributes]={false};
+#endif
         m_mat_mvp=-1;
         m_mat_mv=-1;
         m_mat_p=-1;
@@ -263,6 +261,7 @@ void shader::add_program(program_type type,const char*code)
 
             switch(code_str[gl+3])
             {
+#ifdef SUPPORT_OLD_SHADERS
                 case 'V':
                     if(code_str.compare(gl+3,6,"Vertex")==0)
                     {
@@ -286,8 +285,10 @@ void shader::add_program(program_type type,const char*code)
                         replace=true;
                     }
                     break;
-
+#endif
                 case 'M':
+
+#ifdef SUPPORT_OLD_SHADERS
                     if(code_str.compare(gl+3,13,"MultiTexCoord")==0)
                     {
                         if(code_str.size()<=gl+17)
@@ -309,7 +310,9 @@ void shader::add_program(program_type type,const char*code)
                         used_attribs[tc0_attribute+idx]=true;
                         replace=true;
                     }
-                    else if(code_str.size()>gl+16 && code_str.compare(gl+3,16,"ProjectionMatrix")==0)
+                    else 
+#endif
+                        if(code_str.size()>gl+16 && code_str.compare(gl+3,16,"ProjectionMatrix")==0)
                     {
                         m_mat_p=1;
                         replace=true;
@@ -345,6 +348,7 @@ void shader::add_program(program_type type,const char*code)
         if(m_mat_p>0)
             code_final.append("uniform mat4 nyaProjectionMatrix;");
 
+#ifdef SUPPORT_OLD_SHADERS
         for(int i=0;i<tc0_attribute;++i)
         {
             if(!used_attribs[i])
@@ -378,15 +382,17 @@ void shader::add_program(program_type type,const char*code)
 
             glBindAttribLocation(m_program,i,attrib_name.c_str());
         }
+#endif
     }
 
+#ifdef OPENGL_ES
     code_final.append("precision mediump float;\n");
+#endif
     code_final.append(code_str);
 
     code=code_final.c_str();
 
     //get_log()<<code<<"\n";
-#endif
 
     GLenum gl_type=GL_VERTEX_SHADER_ARB;
     if(type==pixel)                                    //ToDo: switch and all cases
@@ -473,15 +479,12 @@ void shader::add_program(program_type type,const char*code)
             return;
         }
 
-#ifdef SUPPORT_OLD_SHADERS
-
         if(m_mat_mvp>=0)
             m_mat_mvp=get_handler("nyaModelViewProjectionMatrix");
         if(m_mat_mv>=0)
             m_mat_mv=get_handler("nyaModelViewMatrix");
         if(m_mat_p>=0)
             m_mat_p=get_handler("nyaProjectionMatrix");
-#endif
     }
 
     m_objects[type]=object;
@@ -496,14 +499,12 @@ void shader::bind()
 
     glUseProgramObjectARB(m_program);
 
-#ifdef SUPPORT_OLD_SHADERS
     if(m_mat_mvp>=0)
         glUniformMatrix4fvARB(m_mat_mvp,1,false,transform::get().get_modelviewprojection_matrix().m[0]);
     if(m_mat_mv>=0)
         glUniformMatrix4fvARB(m_mat_mv,1,false,transform::get().get_modelview_matrix().m[0]);
     if(m_mat_p>=0)
         glUniformMatrix4fvARB(m_mat_p,1,false,transform::get().get_projection_matrix().m[0]);
-#endif
 }
 
 void shader::unbind()

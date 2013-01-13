@@ -62,12 +62,10 @@ private:
     GLhandleARB m_program;
     GLhandleARB m_objects[program_types_count];
 
-#ifdef SUPPORT_OLD_SHADERS
 private:
     int m_mat_mvp;
     int m_mat_mv;
     int m_mat_p;
-#endif
 };
 
 }
