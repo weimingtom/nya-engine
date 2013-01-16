@@ -21,7 +21,10 @@ public:
 
 public:
     void bind();
-    void unbind();
+    static void unbind();
+    
+public:
+    static void select_multitex_slot(unsigned int idx);
 
 public:
     void release();

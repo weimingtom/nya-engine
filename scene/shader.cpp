@@ -127,6 +127,7 @@ bool shader::load_nya_shader(shared_shader &res,size_t data_size,const void*data
         it!=res.samplers.end();++it)
     {
         res.shdr.set_sampler(samplers[it->first].c_str(),sampler_idx);
+        it->second=sampler_idx;
         ++sampler_idx;
     }
 

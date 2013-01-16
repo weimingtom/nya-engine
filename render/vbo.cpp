@@ -47,9 +47,10 @@ namespace nya_render
 
 bool check_init_vbo()
 {
-    static bool initialised = false;
+    static bool initialised=false;
+    static bool failed=true;
     if(initialised)
-        return true;
+        return !failed;
 
     //if(!has_extension("GL_ARB_vertex_buffer_object"))
     //    return false;
@@ -77,6 +78,8 @@ bool check_init_vbo()
 #endif
 
     initialised=true;
+    failed=false;
+
     return true;
 }
 

@@ -133,11 +133,12 @@ bool texture::load_tga(shared_texture &res,size_t data_size,const void*data)
 
 void texture::set(int slot)
 {
-    //ToDo: slot
+    m_last_slot=slot;
 
     if(!m_shared.is_valid())
         return;
 
+    nya_render::texture::select_multitex_slot(slot);
     m_shared->tex.bind();
 }
 
@@ -146,6 +147,7 @@ void texture::unset()
     if(!m_shared.is_valid())
         return;
 
+    nya_render::texture::select_multitex_slot(m_last_slot);
     m_shared->tex.unbind();
 }
 

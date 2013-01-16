@@ -84,6 +84,30 @@ void texture::unbind()
 {
     glBindTexture(GL_TEXTURE_2D,0);
 }
+    
+void texture::select_multitex_slot(unsigned int idx)
+{
+#if defined(OPENGL_ES)
+    glActiveTexture(GL_TEXTURE0+idx);
+#elif defined(NO_EXTENSIONS_INIT)
+    glClientActiveTexture(GL_TEXTURE0+idx);
+#else
+    static PFNGLCLIENTACTIVETEXTUREARBPROC tex_glClientActiveTextureARB=0;
+
+    static bool initialised=false;
+    if(tex_glClientActiveTextureARB!=0)
+    {
+        tex_glClientActiveTextureARB(GL_TEXTURE0_ARB+idx);
+        return;
+    }
+
+    if(initialised)
+        return;
+
+    tex_glClientActiveTextureARB=(PFNGLCLIENTACTIVETEXTUREARBPROC)get_extension("glClientActiveTexture");
+    initialised=true;
+#endif
+}
 
 void texture::release()
 {

@@ -31,7 +31,7 @@ public:
 
 public:
     void bind();
-    void unbind();
+    static void unbind();
 
 public:
     void set_sampler(const char*name,unsigned int layer);

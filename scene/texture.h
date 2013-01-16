@@ -31,7 +31,10 @@ private:
     void unset();
 
 public:
-    texture() { register_load_function(load_tga); }
+    texture():m_last_slot(0) { register_load_function(load_tga); }
+
+private:
+    int m_last_slot;
 };
 
 }

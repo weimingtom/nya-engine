@@ -137,9 +137,10 @@ namespace nya_render
 
 bool check_init_shaders()
 {
-    static bool initialised = false;
+    static bool initialised=false;
+    static bool failed=true;
     if(initialised)
-        return true;
+        return !failed;
 
 #ifndef NO_EXTENSIONS_INIT
     glGenProgramsARB                = (PFNGLGENPROGRAMSARBPROC)               get_extension ( "glGenProgramsARB" );
@@ -210,6 +211,7 @@ bool check_init_shaders()
     glGetAttribLocationARB    = (PFNGLGETATTRIBLOCATIONARBPROC)    get_extension ( "glGetAttribLocationARB"  );
     glGetVertexAttribfvARB    = (PFNGLGETVERTEXATTRIBFVARBPROC)    get_extension ( "glGetVertexAttribfvARB"  );
 #endif
+    failed=false;
     initialised=true;
     return true;
 }

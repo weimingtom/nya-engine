@@ -54,6 +54,7 @@ void material::set_texture(const texture &tex,const char *semantic)
 
         t.tex.unload();
         t.tex=tex;
+        t.slot=m_shader.get_texture_slot(semantic);
         return;
     }
 
