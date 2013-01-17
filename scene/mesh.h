@@ -48,6 +48,7 @@ public:
 
     void set_pos(float x,float y,float z) { m_pos.x=x; m_pos.y=y; m_pos.z=z; }
     void set_rot(float yaw,float pitch,float roll) { m_rot.x=yaw; m_rot.y=pitch; m_rot.z=roll; }
+    void set_scale(float sx,float sy,float sz) { m_scale.x=sx; m_scale.y=sy; m_scale.z=sz; }
 
 public:
     int get_materials_count();
@@ -61,11 +62,12 @@ private:
     static bool load_pmd(shared_mesh &res,size_t data_size,const void*data);
 
 public:
-    mesh() { register_load_function(load_pmd); }
+    mesh():m_scale(nya_math::vec3(1.0f,1.0f,1.0f)) { register_load_function(load_pmd); }
 
 private:
     nya_math::vec3 m_pos;
     nya_math::vec3 m_rot;
+    nya_math::vec3 m_scale;
 
 private:
     std::vector<int> m_replaced_materials_idx;

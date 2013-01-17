@@ -79,6 +79,7 @@ void mesh::draw()
         return;
 
     nya_math::mat4 mat=get_camera().get_view_matrix();
+    mat.scale(m_scale.x,m_scale.y,m_scale.z);
     mat.translate(m_pos.x,m_pos.y,m_pos.z);
     mat.rotate(m_rot.x,0,1,0);
     mat.rotate(m_rot.z,0,0,1);
