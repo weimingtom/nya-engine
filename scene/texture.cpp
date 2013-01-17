@@ -7,6 +7,17 @@
 namespace nya_scene
 {
 
+void rgb_to_bgr(unsigned char *data,size_t data_size)
+{
+    unsigned char *data2=data+2;
+    for(int i=0;i<data_size;i+=3)
+    {
+        unsigned char tmp=data[i];
+        data[i]=data2[i];
+        data2[i]=tmp;
+    }
+}
+
 bool texture::load_tga(shared_texture &res,size_t data_size,const void*data) 
 {
     if(!data)
@@ -118,12 +129,18 @@ bool texture::load_tga(shared_texture &res,size_t data_size,const void*data)
             }
         }
 
+        if(color_format==nya_render::texture::color_rgb)
+            rgb_to_bgr((unsigned char*)reader.get_data(),color_data_size);
+
         res.tex.build_texture(color_data.get_data(),width,height,color_format);
     }
     else
     {
         if(!reader.check_remained(color_data_size))
             return false;
+
+        if(color_format==nya_render::texture::color_rgb)
+            rgb_to_bgr((unsigned char*)reader.get_data(),color_data_size);
 
         res.tex.build_texture(reader.get_data(),width,height,color_format);
     }
