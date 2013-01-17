@@ -57,6 +57,14 @@ public:
 
     size_t get_offset() { return m_offset; }
 
+    size_t get_remained()
+    {
+        if(m_offset>=m_size)
+            return 0;
+
+        return m_size-m_offset;
+    }
+
     const void *get_data() 
     {
         if(m_offset>=m_size)

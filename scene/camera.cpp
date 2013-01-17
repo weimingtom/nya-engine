@@ -44,9 +44,9 @@ nya_math::mat4 &camera::get_view_matrix()
         m_recalc_view=false;
 
         m_view.identity();
-        m_view.rotate(m_rot.y,1,0,0);
-        m_view.rotate(m_rot.x,0,1,0);
         m_view.rotate(m_rot.z,0,0,1);
+        m_view.rotate(m_rot.x,1,0,0);
+        m_view.rotate(m_rot.y,0,1,0);
         m_view.translate(-m_pos.x,-m_pos.y,-m_pos.z);
     }
 

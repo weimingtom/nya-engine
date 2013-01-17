@@ -47,7 +47,7 @@ public:
     void draw();
 
     void set_pos(float x,float y,float z) { m_pos.x=x; m_pos.y=y; m_pos.z=z; }
-    void set_rot(float yaw,float pitch,float roll) { m_rot.x=yaw; m_rot.y=pitch; m_rot.z=roll; }
+    void set_rot(float yaw,float pitch,float roll) { m_rot.y=yaw; m_rot.x=pitch; m_rot.z=roll; }
     void set_scale(float sx,float sy,float sz) { m_scale.x=sx; m_scale.y=sy; m_scale.z=sz; }
 
 public:
