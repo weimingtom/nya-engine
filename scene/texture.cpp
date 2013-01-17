@@ -130,7 +130,7 @@ bool texture::load_tga(shared_texture &res,size_t data_size,const void*data)
         }
 
         if(color_format==nya_render::texture::color_rgb)
-            rgb_to_bgr((unsigned char*)reader.get_data(),color_data_size);
+            rgb_to_bgr((unsigned char*)color_data.get_data(),color_data_size);
 
         res.tex.build_texture(color_data.get_data(),width,height,color_format);
     }
