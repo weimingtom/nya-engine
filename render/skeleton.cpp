@@ -39,6 +39,22 @@ int skeleton::add_bone(const char *name,const nya_math::vec3 &pos,int parent)
     return bone_idx;
 }
 
+nya_math::vec3 skeleton::get_bone_pos(int idx) const
+{
+    if(idx<0 || idx>=(int)m_bones.size())
+        return nya_math::vec3();
+
+    return m_bones[idx].pos;
+}
+
+nya_math::quat skeleton::get_bone_rot(int idx) const
+{
+    if(idx<0 || idx>=(int)m_bones.size())
+        return nya_math::vec3();
+
+    return m_bones[idx].rot;
+}
+
 int skeleton::add_ik(int target_bone_idx,int effect_bone_idx,int count,float fact)
 {
     if(target_bone_idx<0 || target_bone_idx>=(int)m_bones.size())

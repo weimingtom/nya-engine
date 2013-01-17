@@ -163,4 +163,15 @@ void mesh::set_material(const material &mat,int idx)
     m_replaced_materials.back()=mat;
 }
 
+const nya_render::skeleton &mesh::get_skeleton()
+{
+    if(!m_shared.is_valid())
+    {
+        static nya_render::skeleton empty;
+        return empty;
+    }
+
+    return m_shared->skeleton;
+}
+
 }

@@ -5,6 +5,7 @@
 #include "shared_resources.h"
 #include "material.h"
 #include "render/vbo.h"
+#include "render/skeleton.h"
 #include "math/vector.h"
 
 namespace nya_scene
@@ -34,6 +35,8 @@ struct shared_mesh
         vbo.release();
         return true;
     }
+
+    nya_render::skeleton skeleton;
 };
 
 class mesh: public scene_shared<shared_mesh>
@@ -50,6 +53,9 @@ public:
     int get_materials_count();
     const material &get_material(int idx);
     void set_material(const material &mat,int idx);
+
+public:
+    const nya_render::skeleton &get_skeleton();
 
 private:
     static bool load_pmd(shared_mesh &res,size_t data_size,const void*data);

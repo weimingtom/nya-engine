@@ -17,7 +17,10 @@ class skeleton
 public:
     int get_bone_idx(const char *name) const; //< 0 if invalid
     nya_math::vec3 transform(int bone_idx,nya_math::vec3 point) const;
-    int get_bones_count() const { return m_bones.size(); }
+    int get_bones_count() const { return (int)m_bones.size(); }
+
+    nya_math::vec3 get_bone_pos(int idx) const;
+    nya_math::quat get_bone_rot(int idx) const;
 
     void set_bone_transform(int bone_idx,const nya_math::vec3 &pos,
                                                 const nya_math::quat &rot);
