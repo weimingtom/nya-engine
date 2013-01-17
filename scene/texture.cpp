@@ -10,7 +10,7 @@ namespace nya_scene
 void rgb_to_bgr(unsigned char *data,size_t data_size)
 {
     unsigned char *data2=data+2;
-    for(int i=0;i<data_size;i+=3)
+    for(size_t i=0;i<data_size;i+=3)
     {
         unsigned char tmp=data[i];
         data[i]=data2[i];
