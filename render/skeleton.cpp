@@ -39,6 +39,18 @@ int skeleton::add_bone(const char *name,const nya_math::vec3 &pos,int parent)
     return bone_idx;
 }
 
+int skeleton::get_bone_idx(const char *name) const
+{
+    if(!name)
+        return -1;
+
+    index_map::const_iterator it=m_bones_map.find(name);
+    if(it==m_bones_map.end())
+        return -1;
+
+    return (int)it->second;
+}
+
 nya_math::vec3 skeleton::get_bone_pos(int idx) const
 {
     if(idx<0 || idx>=(int)m_bones.size())
