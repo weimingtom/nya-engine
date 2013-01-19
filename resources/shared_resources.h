@@ -34,7 +34,7 @@ public:
             if(!m_creator)
                 return 0;
 
-            m_creator->get_res_name(*this);
+            return m_creator->get_res_name(*this);
         }
 
         void free()
