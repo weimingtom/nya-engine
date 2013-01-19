@@ -247,7 +247,7 @@ void character::copy_attrib(const character &from)
     for(int i=0;i<max_parts;++i)
         for(int j=0;j<2;++j)
             m_parts[i].subparts[j].opacity=from.m_parts[i].subparts[j].opacity;
-    
+
     m_under_state[0]=from.m_under_state[0];
     m_under_state[1]=from.m_under_state[1];   
     m_under_count=from.m_under_count;
@@ -285,7 +285,7 @@ void character::set_anim(const char *anim_name)
         return;
     }
 
-    m->apply_anim(a.const_get());
+    m_anim.apply_anim(*m.const_get(),*a.const_get());
 
     a.free();
 }
@@ -427,42 +427,6 @@ void character::release()
 {
     for(int i=0;i<max_parts;++i)
         m_parts[i].free_models();
-}
-
-const float *character::get_buffer(unsigned int frame) const
-{
-    model_ref m=m_parts[body].subparts[0].model;
-    if(!m.is_valid())
-        return 0;
-
-    return m->get_buffer(frame);
-}
-
-unsigned int character::get_frames_count() const
-{
-    model_ref m=m_parts[body].subparts[0].model;
-    if(!m.is_valid())
-        return 0;
-
-    return m->get_frames_count();
-}
-
-unsigned int character::get_first_loop_frame() const
-{
-    model_ref m=m_parts[body].subparts[0].model;
-    if(!m.is_valid())
-        return 0;
-
-    return m->get_first_loop_frame();
-}
-
-unsigned int character::get_bones_count() const
-{
-    model_ref m=m_parts[body].subparts[0].model;
-    if(!m.is_valid())
-        return 0;
-
-    return m->get_bones_count();
 }
 
 character::part_id character::get_part_id(const char *name)

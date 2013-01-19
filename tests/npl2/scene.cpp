@@ -411,6 +411,8 @@ void scene::set_bkg(const char *name)
         char key[16]="FILE_0";
         key[5]='0'+i*2;
 
+        m_bkg_anims[i].clear();
+
         const char *name=atr->get_value(key);
         if(!name || strcmp(name,"nil")==0)
             continue;
@@ -435,7 +437,7 @@ void scene::set_bkg(const char *name)
         {
             tsb_anim anim;
             anim.load(scenery_res);
-            m_bkg_models[i].apply_anim(&anim);
+            m_bkg_anims[i].apply_anim(m_bkg_models[i],anim);
             anim.release();
             scenery_res->release();
         }
@@ -469,7 +471,7 @@ void scene::process(unsigned int dt)
 
     for(int i=0;i<max_bkg_models;++i)
     {
-        const unsigned int frames_count=m_bkg_models[i].get_frames_count();
+        const unsigned int frames_count=m_bkg_anims[i].get_frames_count();
         if(!frames_count)
             continue;
 
@@ -556,12 +558,12 @@ void scene::draw()
     }*/
 
     //bro
-    const size_t bro_frames_count=m_aniki.get_frames_count();
+    const size_t bro_frames_count=m_aniki_anim.get_frames_count();
     if(bro_frames_count)
     {
         m_shader.set_uniform16_array(m_sh_mat_uniform,
-                                     m_aniki.get_buffer(int(m_anim_time)),
-                                     m_aniki.get_bones_count());
+                                     m_aniki_anim.get_buffer(int(m_anim_time)),
+                                     m_aniki_anim.get_bones_count());
         m_aniki.draw(true);
     }/*
     glPopMatrix();
@@ -586,12 +588,12 @@ void scene::draw()
     }*/
 
     //another bro or item
-    const size_t third_frames_count=m_the_third.get_frames_count();
+    const size_t third_frames_count=m_the_third_anim.get_frames_count();
     if(third_frames_count)
     {
         m_shader.set_uniform16_array(m_sh_mat_uniform,
-                                     m_the_third.get_buffer(int(m_anim_time)),
-                                     m_the_third.get_bones_count());
+                                     m_the_third_anim.get_buffer(int(m_anim_time)),
+                                     m_the_third_anim.get_bones_count());
         m_the_third.draw(true);
     }
     //glPopMatrix();
@@ -644,12 +646,12 @@ void scene::draw()
         }*/
         
         //bro
-        const size_t bro_frames_count=m_aniki.get_frames_count();
+        const size_t bro_frames_count=m_aniki_anim.get_frames_count();
         if(bro_frames_count)
         {
             m_shader.set_uniform16_array(m_shbl_mat_uniform,
-                                         m_aniki.get_buffer(int(m_anim_time)),
-                                         m_aniki.get_bones_count());
+                                         m_aniki_anim.get_buffer(int(m_anim_time)),
+                                         m_aniki_anim.get_bones_count());
             m_aniki.draw(false);
         }
         //glPopMatrix();
@@ -689,13 +691,13 @@ void scene::draw()
     for(int i=0;i<max_bkg_models;++i)
     {
         const unsigned int bones_count=m_bkg_models[i].get_bones_count();
-        const unsigned int frames_count=m_bkg_models[i].get_frames_count();
+        const unsigned int frames_count=m_bkg_anims[i].get_frames_count();
 
         if(bones_count && frames_count)
         {
             m_shader_scenery_anim.bind();
             m_shader_scenery_anim.set_uniform16_array(m_shsc_mat_uniform,
-                                                      m_bkg_models[i].get_buffer(int(m_bkg_models_anim_times[i])),
+                                                      m_bkg_anims[i].get_buffer(int(m_bkg_models_anim_times[i])),
                                                       bones_count);
             m_bkg_models[i].draw(true);
             m_shader_scenery_anim.unbind();
@@ -817,17 +819,17 @@ void scene::apply_anim()
 
     m_imouto.set_anim(m_curr_anim->name[0].c_str());
     m_anim_time=0;
-    
+
     std::string bro_anim=m_curr_anim->name[1];
     if(!bro_anim.empty())
     {
         bro_anim.append(".tsb");
-        
+
         anim_ref a=get_shared_anims().access(bro_anim.c_str());
-        m_aniki.apply_anim(a.const_get());
+        m_aniki_anim.apply_anim(m_aniki,*a.const_get());
     }
     else
-        m_aniki.apply_anim(0);
+        m_aniki_anim.clear();
 
     std::string third_anim=m_curr_anim->name[2];
     std::string third_model=m_curr_anim->model_name[2];
@@ -843,10 +845,13 @@ void scene::apply_anim()
         {
             m_the_third.load(model_res);
             model_res->release();
-            m_the_third.apply_anim(a.const_get());
+            m_the_third_anim.apply_anim(m_the_third,*a.const_get());
         }
         else
+        {
             m_the_third.release();
+            m_the_third_anim.clear();
+        }
     }
     else
         m_the_third.release();

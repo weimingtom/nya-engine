@@ -14,33 +14,21 @@ class tmb_model
 {
 public:
     bool load(nya_resources::resource_data *data);
-    void draw(bool use_materials,int group=-1);
     void release();
 
-    void apply_anim(const tsb_anim *anim);
+    void draw(bool use_materials,int group=-1) const;
 
-    const float *get_buffer(unsigned int frame) const
-    {
-        if(m_bones.empty() || !m_frames_count)
-            return 0;
+    unsigned int get_bones_count() const { return (unsigned int)m_bones.size(); }
+    const nya_math::mat4 &get_bone(int idx) const { return m_bones[idx]; }
 
-        return m_anim_bones[m_bones.size()*(frame % m_frames_count)].m[0];
-    }
-
-    unsigned int get_bones_count() { return (unsigned int)m_bones.size(); }
-    unsigned int get_frames_count() { return m_frames_count; }
-    unsigned int get_first_loop_frame() { return m_first_loop_frame; }
-
-    unsigned int get_groups_count() { return (unsigned int)m_group_names.size(); }
-    const char *get_group_name(unsigned int idx)
+    unsigned int get_groups_count() const { return (unsigned int)m_group_names.size(); }
+    const char *get_group_name(unsigned int idx) const
     { 
         if(idx>=m_group_names.size())
             return 0;
 
         return m_group_names[idx].c_str();
     }
-
-    tmb_model(): m_frames_count(0) {}
 
 private:
     nya_render::vbo m_vbo;
@@ -63,11 +51,6 @@ private:
 private:
     std::vector<nya_math::mat4> m_bones;
 
-      //ToDo: convert to frames
-    unsigned int m_frames_count;
-    unsigned int m_first_loop_frame;
-    std::vector<nya_math::mat4> m_anim_bones;
-    
 private:
     std::vector<std::string> m_group_names;
 

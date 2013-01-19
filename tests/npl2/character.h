@@ -3,6 +3,7 @@
 #pragma once
 
 #include "tmb_model.h"
+#include "animation.h"
 
 #include <string>
 #include <map>
@@ -31,11 +32,10 @@ public:
 
     void copy_attrib(const character &from);
 
-    const float *get_buffer(unsigned int frame) const;
-    unsigned int get_frames_count() const;
-    unsigned int get_bones_count() const;
-    unsigned int get_first_loop_frame() const;
-
+    const float *get_buffer(unsigned int frame) const { return m_anim.get_buffer(frame); }
+    unsigned int get_frames_count() const { return m_anim.get_frames_count(); }
+    unsigned int get_bones_count() const { return m_anim.get_bones_count(); }
+    unsigned int get_first_loop_frame() const { return m_anim.get_first_loop_frame(); }
     void set_color(float r,float g,float b)
     {
         m_color[0]=r;
@@ -108,4 +108,6 @@ private:
     bool m_under_top;
     bool m_under_state[2];
     int m_under_count;
+
+    applied_animation m_anim;
 };

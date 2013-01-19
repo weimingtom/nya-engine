@@ -19,6 +19,7 @@
 		F259326B15D85A730092C7D8 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F259326A15D85A730092C7D8 /* Cocoa.framework */; };
 		F25932B515D860A20092C7D8 /* libnya_engine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F25932B415D8608B0092C7D8 /* libnya_engine.a */; };
 		F25932B915D860F60092C7D8 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F25932B815D860F60092C7D8 /* OpenGL.framework */; };
+		F2D7D32616AAED9700C7DEE5 /* animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2D7D32516AAED9700C7DEE5 /* animation.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,6 +64,8 @@
 		F259326F15D85A730092C7D8 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		F25932AF15D8608B0092C7D8 /* nya_engine.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = nya_engine.xcodeproj; sourceTree = "<group>"; };
 		F25932B815D860F60092C7D8 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		F2D7D32416AAED9700C7DEE5 /* animation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = animation.h; path = ../../tests/npl2/animation.h; sourceTree = "<group>"; };
+		F2D7D32516AAED9700C7DEE5 /* animation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = animation.cpp; path = ../../tests/npl2/animation.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +85,8 @@
 		F220567215D929D900362591 /* npl2 */ = {
 			isa = PBXGroup;
 			children = (
+				F2D7D32516AAED9700C7DEE5 /* animation.cpp */,
+				F2D7D32416AAED9700C7DEE5 /* animation.h */,
 				F2037A71160136E300C7C104 /* config.h */,
 				F2037A72160136E300C7C104 /* config.cpp */,
 				F220565B15D929D100362591 /* npl2.cpp */,
@@ -239,6 +244,7 @@
 				F220567015D929D100362591 /* pl2_resources_provider.cpp in Sources */,
 				F220567115D929D100362591 /* tsb_anim.cpp in Sources */,
 				F2037A73160136E300C7C104 /* config.cpp in Sources */,
+				F2D7D32616AAED9700C7DEE5 /* animation.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

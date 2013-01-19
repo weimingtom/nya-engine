@@ -103,11 +103,14 @@ private:
     float m_bro_dpos_z;
     */
     tmb_model m_aniki;
+    applied_animation m_aniki_anim;
     tmb_model m_the_third;
+    applied_animation m_the_third_anim;
 
 private:
     const static int max_bkg_models=3;
     tmb_model m_bkg_models[max_bkg_models];
+    applied_animation m_bkg_anims[max_bkg_models];
     float m_bkg_models_anim_times[max_bkg_models];
     bool m_has_scenery;
 };

@@ -26,11 +26,7 @@ public:
 
     public:
         bool is_valid() const { return m_res!=0; }
-
-        //t_res *get() { return m_res; }
         const t_res *const_get() const { return m_res; }
-
-        t_res *operator -> () { return m_res; }
         const t_res *operator -> () const { return m_res; };
 
         void free()
@@ -79,10 +75,19 @@ public:
                 m_creator->res_ref_count_inc(*this);
         }
 
-    private:
+    protected:
         t_res *m_res;
+
+    private:
         res_holder *m_res_holder;
         t_creator *m_creator;
+    };
+
+    class shared_resource_mutable_ref: public shared_resource_ref
+    {
+    public:
+        t_res *get() { return this->m_res; }
+        t_res *operator -> () { return this->m_res; }
     };
 
 public:
@@ -247,14 +252,14 @@ public:
         m_lru_first=m_lru_last=0;
         m_used_count=0;
     }
-
+    /* //ToDo
       // note: lru removes only unused resources
     void set_lru_limit(size_t limit)
     {
         m_lru_limit=limit;
         free_lru();
     }
-
+     */
 private:
     void free_lru()
     {

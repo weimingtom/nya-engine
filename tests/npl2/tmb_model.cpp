@@ -345,7 +345,7 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
     return true;
 }
 
-void tmb_model::draw(bool use_materials,int group)
+void tmb_model::draw(bool use_materials,int group) const
 {
     m_vbo.bind();
     if(!use_materials)
@@ -357,7 +357,7 @@ void tmb_model::draw(bool use_materials,int group)
 
     for(unsigned int i=0;i<m_materials.size();++i)
     {
-        material & mat = m_materials[i];
+        const material & mat = m_materials[i];
 
         if(group>=0 && group!=mat.group)
             continue;
@@ -386,46 +386,6 @@ void tmb_model::release()
     m_group_names.clear();
     m_locators.clear();
     m_bones.clear();
-    m_anim_bones.clear();
-}
-
-void tmb_model::apply_anim(const tsb_anim *anim)
-{
-    m_frames_count=0;
-    m_anim_bones.clear();
-
-    if(!anim)
-        return;
-
-    m_frames_count=anim->get_frames_count();
-    if(!m_frames_count)
-    {
-        nya_log::get_log()<<"Unable to set empty animation\n";
-        return;
-    }
-
-    m_first_loop_frame=anim->get_first_loop_frame();
-
-    m_anim_bones.resize(m_frames_count*m_bones.size());
-
-    unsigned int bones_count=(unsigned int)m_bones.size();
-    if(bones_count>anim->get_bones_count())
-        bones_count=anim->get_bones_count();
-
-    if(bones_count<m_bones.size())
-        nya_log::get_log()<<"bones_count<m_bones_count";
-
-    for(unsigned int i=0;i<m_frames_count;++i)
-    {
-        const nya_math::mat4 *anim_bones=anim->get_bones(i);
-        nya_math::mat4 *final_bones=&m_anim_bones[i*m_bones.size()];
-
-        for(int k=0;k<bones_count;++k)
-            final_bones[k]=m_bones[k]*anim_bones[k];
-
-        for(int k=bones_count;k<m_bones.size();++k)
-            final_bones[k]=m_bones[k];
-    }
 }
 
 bool shared_models_manager::fill_resource(const char *name,tmb_model &res)
