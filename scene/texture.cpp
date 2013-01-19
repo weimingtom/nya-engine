@@ -148,7 +148,7 @@ bool texture::load_tga(shared_texture &res,size_t data_size,const void*data)
     return true;
 }
 
-void texture::set(int slot)
+void texture::set(int slot) const
 {
     m_last_slot=slot;
 
@@ -159,7 +159,7 @@ void texture::set(int slot)
     m_shared->tex.bind();
 }
 
-void texture::unset()
+void texture::unset() const
 {
     if(!m_shared.is_valid())
         return;

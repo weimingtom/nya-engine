@@ -12,7 +12,7 @@ class tsb_anim
 public:
     bool load(nya_resources::resource_data *data);
 
-    nya_math::mat4 *get_bones(unsigned int frame)
+    const nya_math::mat4 *get_bones(unsigned int frame) const
     {
         if(!m_bones_count || frame>=m_frames_count)
             return 0;
@@ -20,9 +20,9 @@ public:
         return &m_data[m_bones_count*(frame % m_frames_count)];
     }
 
-    unsigned int get_bones_count() { return m_bones_count; }
-    unsigned int get_first_loop_frame() { return m_first_loop_frame; }
-    unsigned int get_frames_count() { return m_frames_count; }
+    unsigned int get_bones_count() const { return m_bones_count; }
+    unsigned int get_first_loop_frame() const { return m_first_loop_frame; }
+    unsigned int get_frames_count() const { return m_frames_count; }
 
     void release() { m_data.clear(); m_bones_count=m_frames_count=0; }
 

@@ -30,7 +30,7 @@ public:
     void add_program(program_type type,const char*code);
 
 public:
-    void bind();
+    void bind() const;
     static void unbind();
 
 public:

@@ -27,7 +27,7 @@ public:
     public:
         bool is_valid() const { return m_res!=0; }
 
-        t_res *get() { return m_res; }
+        //t_res *get() { return m_res; }
         const t_res *const_get() const { return m_res; }
 
         t_res *operator -> () { return m_res; }

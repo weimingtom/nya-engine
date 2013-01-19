@@ -17,7 +17,7 @@ public:
     void draw(bool use_materials,int group=-1);
     void release();
 
-    void apply_anim(tsb_anim *anim);
+    void apply_anim(const tsb_anim *anim);
 
     const float *get_buffer(unsigned int frame) const
     {

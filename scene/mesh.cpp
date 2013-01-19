@@ -93,7 +93,7 @@ void mesh::draw()
     {
         for(size_t i=0;i<m_shared->groups.size();++i)
         {
-            shared_mesh::group &g=m_shared->groups[i];
+            const shared_mesh::group &g=m_shared->groups[i];
             g.mat.set();
             m_shared->vbo.draw(g.offset,g.count);
             g.mat.unset();
@@ -103,7 +103,7 @@ void mesh::draw()
     {
         for(size_t i=0;i<m_shared->groups.size();++i)
         {
-            shared_mesh::group &g=m_shared->groups[i];
+            const shared_mesh::group &g=m_shared->groups[i];
             const int rep_idx=m_replaced_materials_idx[i];
             if(rep_idx>=0)
             {

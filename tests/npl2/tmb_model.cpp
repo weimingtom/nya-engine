@@ -389,7 +389,7 @@ void tmb_model::release()
     m_anim_bones.clear();
 }
 
-void tmb_model::apply_anim(tsb_anim *anim)
+void tmb_model::apply_anim(const tsb_anim *anim)
 {
     m_frames_count=0;
     m_anim_bones.clear();
@@ -417,7 +417,7 @@ void tmb_model::apply_anim(tsb_anim *anim)
 
     for(unsigned int i=0;i<m_frames_count;++i)
     {
-        nya_math::mat4 *anim_bones=anim->get_bones(i);
+        const nya_math::mat4 *anim_bones=anim->get_bones(i);
         nya_math::mat4 *final_bones=&m_anim_bones[i*m_bones.size()];
 
         for(int k=0;k<bones_count;++k)

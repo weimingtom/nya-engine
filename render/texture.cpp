@@ -75,7 +75,7 @@ void texture::build_texture(const void *data,unsigned int width,unsigned int hei
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_NEAREST);
 }
 
-void texture::bind()
+void texture::bind() const
 {
     glBindTexture(GL_TEXTURE_2D,m_tex_id);
 }

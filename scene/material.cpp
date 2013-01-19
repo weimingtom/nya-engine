@@ -5,7 +5,7 @@
 namespace nya_scene
 {
 
-void material::set()
+void material::set() const
 {
     m_shader.set();
 
@@ -18,7 +18,7 @@ void material::set()
     }
 }
 
-void material::unset()
+void material::unset() const
 {
     m_shader.unset();
 

@@ -30,8 +30,8 @@ public:
     void set_shader(const shader &shdr);
 
 private:
-    void set();
-    void unset();
+    void set() const;
+    void unset() const;
 
 public:
     material() {}

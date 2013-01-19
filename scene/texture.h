@@ -27,14 +27,14 @@ private:
     static bool load_tga(shared_texture &res,size_t data_size,const void*data);
 
 private:
-    void set(int slot=0);
-    void unset();
+    void set(int slot=0) const;
+    void unset() const;
 
 public:
     texture():m_last_slot(0) { register_load_function(load_tga); }
 
 private:
-    int m_last_slot;
+    mutable int m_last_slot;
 };
 
 }

@@ -37,7 +37,7 @@ void camera::set_rot(float yaw,float pitch,float roll)
     m_recalc_view=true;
 }
 
-nya_math::mat4 &camera::get_view_matrix()
+const nya_math::mat4 &camera::get_view_matrix() const
 {
     if(m_recalc_view)
     {

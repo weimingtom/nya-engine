@@ -285,7 +285,7 @@ void character::set_anim(const char *anim_name)
         return;
     }
 
-    m->apply_anim(a.get());
+    m->apply_anim(a.const_get());
 
     a.free();
 }

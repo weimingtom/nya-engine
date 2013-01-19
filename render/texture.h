@@ -20,7 +20,7 @@ public:
     void build_texture(const void *data,unsigned int width,unsigned int height,color_format format);
 
 public:
-    void bind();
+    void bind() const;
     static void unbind();
     
 public:

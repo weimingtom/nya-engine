@@ -824,7 +824,7 @@ void scene::apply_anim()
         bro_anim.append(".tsb");
         
         anim_ref a=get_shared_anims().access(bro_anim.c_str());
-        m_aniki.apply_anim(a.get());
+        m_aniki.apply_anim(a.const_get());
     }
     else
         m_aniki.apply_anim(0);
@@ -843,7 +843,7 @@ void scene::apply_anim()
         {
             m_the_third.load(model_res);
             model_res->release();
-            m_the_third.apply_anim(a.get());
+            m_the_third.apply_anim(a.const_get());
         }
         else
             m_the_third.release();

@@ -6,6 +6,7 @@
           log
           gl functions in anonymous namespace
           advanced is_supported function (public)
+          cache states, static unbind
 */
 
 #include "vbo.h"
@@ -83,7 +84,7 @@ bool check_init_vbo()
     return true;
 }
 
-void vbo::bind(bool indices_bind)
+void vbo::bind(bool indices_bind) const
 {
     bind_verts();
     bind_normals();
@@ -98,7 +99,7 @@ void vbo::bind(bool indices_bind)
         bind_indices();
 }
 
-void vbo::bind_verts()
+void vbo::bind_verts() const
 {
     if(!m_vertex_id)
         return;
@@ -116,7 +117,7 @@ void vbo::bind_verts()
     m_vertex_bind=true;
 }
 
-void vbo::bind_normals()
+void vbo::bind_normals() const
 {
     if(!m_vertex_bind)
         return;
@@ -135,7 +136,7 @@ void vbo::bind_normals()
     m_normals.bind=true;
 }
 
-void vbo::bind_colors()
+void vbo::bind_colors() const
 {
     if(!m_vertex_bind)
         return;
@@ -154,7 +155,7 @@ void vbo::bind_colors()
     m_colors.bind=true;
 }
 
-void vbo::bind_tc(unsigned int tc_idx)
+void vbo::bind_tc(unsigned int tc_idx) const
 {
     if(!m_vertex_bind)
         return;
@@ -162,7 +163,7 @@ void vbo::bind_tc(unsigned int tc_idx)
     if(tc_idx>=vbo_max_tex_coord)
         return;
 
-    attribute &tc=m_tcs[tc_idx];
+    const attribute &tc=m_tcs[tc_idx];
 
     if(!tc.has)
         return;
@@ -179,7 +180,7 @@ void vbo::bind_tc(unsigned int tc_idx)
     tc.bind=true;
 }
 
-void vbo::bind_indices()
+void vbo::bind_indices() const
 {
     if(!m_index_id)
         return;
@@ -189,7 +190,7 @@ void vbo::bind_indices()
     vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,m_index_id);
 }
 
-void vbo::unbind()
+void vbo::unbind() const
 {
     if(m_vertex_bind)
     {
@@ -237,7 +238,7 @@ void vbo::unbind()
 
     for(unsigned int i=0;i<vbo_max_tex_coord;++i)
     {
-        attribute &tc=m_tcs[i];
+        const attribute &tc=m_tcs[i];
         if(!tc.bind)
             continue;
 
@@ -257,7 +258,7 @@ void vbo::unbind()
 #endif
 }
 
-void vbo::draw()
+void vbo::draw() const
 {
     if(m_index_bind)
         draw(m_element_count);
@@ -265,12 +266,12 @@ void vbo::draw()
         draw(m_verts_count);
 }
 
-void vbo::draw(unsigned int count)
+void vbo::draw(unsigned int count) const
 {
     draw(0,count);
 }
 
-void vbo::draw(unsigned int offset,unsigned int count)
+void vbo::draw(unsigned int offset,unsigned int count) const
 {
     if(!m_vertex_bind)
         return;

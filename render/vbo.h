@@ -29,20 +29,20 @@ public:
     void set_colors(unsigned int offset,unsigned int dimension=3);
 
 public:
-    void bind(bool indices_bind=true);
-    void unbind();
+    void bind(bool indices_bind=true) const;
+    void unbind() const;
 
 public:
-    void draw();
-    void draw(unsigned int count); // verts or faces (if has indices) count
-    void draw(unsigned int offset,unsigned int count);
+    void draw() const;
+    void draw(unsigned int count) const; // verts or faces (if has indices) count
+    void draw(unsigned int offset,unsigned int count) const;
 
 public:
-    void bind_verts();
-    void bind_normals();
-    void bind_colors();
-    void bind_tc(unsigned int tc);
-    void bind_indices();
+    void bind_verts() const;
+    void bind_normals() const;
+    void bind_colors() const;
+    void bind_tc(unsigned int tc) const;
+    void bind_indices() const;
 
 public:
     void release();
@@ -62,13 +62,13 @@ private:
 
     unsigned int m_vertex_stride;
 
-    bool m_vertex_bind;
-    bool m_index_bind;
+    mutable bool m_vertex_bind;
+    mutable bool m_index_bind;
 
     struct attribute
     {
         bool has;
-        bool bind;
+        mutable bool bind;
         short dimension;
         unsigned int offset;
 

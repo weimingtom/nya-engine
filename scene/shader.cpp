@@ -134,7 +134,7 @@ bool shader::load_nya_shader(shared_shader &res,size_t data_size,const void*data
     return true;
 }
 
-void shader::set()
+void shader::set() const
 {
     if(!m_shared.is_valid())
         return;
@@ -142,7 +142,7 @@ void shader::set()
     m_shared->shdr.bind();
 }
 
-void shader::unset()
+void shader::unset() const
 {
     if(!m_shared.is_valid())
         return;
@@ -155,7 +155,7 @@ int shader::get_texture_slot(const char *semantic)
     if(!semantic || !m_shared.is_valid())
         return -1;
 
-    shared_shader::samplers_map::iterator it=m_shared->samplers.find(semantic);
+    shared_shader::samplers_map::const_iterator it=m_shared->samplers.find(semantic);
     if(it==m_shared->samplers.end())
         return -1;
 

@@ -16,8 +16,8 @@ public:
     void set_rot(float yaw,float pitch,float roll);
 
 public:
-    nya_math::mat4 &get_proj_matrix() { return m_proj; }
-    nya_math::mat4 &get_view_matrix();
+    const nya_math::mat4 &get_proj_matrix() const { return m_proj; }
+    const nya_math::mat4 &get_view_matrix() const;
 
 public:
     camera(): m_recalc_view(true) {}
@@ -26,10 +26,10 @@ private:
     nya_math::vec3 m_pos;
     nya_math::vec3 m_rot;
 
-    nya_math::mat4 m_proj;
-    nya_math::mat4 m_view;
+    mutable nya_math::mat4 m_proj;
+    mutable nya_math::mat4 m_view;
 
-    bool m_recalc_view;
+    mutable bool m_recalc_view;
 };
 
 void set_camera(camera &cam);

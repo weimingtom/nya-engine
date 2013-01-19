@@ -491,7 +491,7 @@ void shader::add_program(program_type type,const char*code)
     //glUseProgramObjectARB(0);
 }
 
-void shader::bind()
+void shader::bind() const
 {
     if(!m_program)
         return;
