@@ -25,7 +25,7 @@ int skeleton::add_bone(const char *name,const nya_math::vec3 &pos,int parent)
     m_rot_tr.resize(bone_idx+1);
 
     bone &b=m_bones[bone_idx];
-    b.pos_org=pos;
+    b.pos=b.pos_org=pos;
     b.parent=parent;
 
     if(parent>=0)
@@ -35,6 +35,8 @@ int skeleton::add_bone(const char *name,const nya_math::vec3 &pos,int parent)
     }
     else
         b.offset=pos;
+
+    update_bone(bone_idx);
 
     return bone_idx;
 }
