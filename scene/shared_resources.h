@@ -33,7 +33,7 @@ public:
             m_shared.free();
     }
 
-    const char get_name() const { return m_shared.get_name(); }
+    const char *get_name() const { return m_shared.get_name(); }
 
 public:
     static void set_resources_prefix(const char *prefix) { get_resources_prefix().assign(prefix?prefix:""); }
