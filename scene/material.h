@@ -16,17 +16,17 @@ class material
     friend struct shared_mesh;
 
 public:
-    const char *get_name() { return m_name.c_str(); }
-    int get_textures_count() { return (int)m_textures.size(); }
-    texture &get_texture();
-    const char *get_texture_semantic();
+    const char *get_name() const { return m_name.c_str(); }
+    int get_textures_count() const { return (int)m_textures.size(); }
+    const texture &get_texture(int idx) const;
+    const char *get_texture_semantics(int idx) const;
 
 public:
     void release();
 
 public:
     void set_name(const char*name) { m_name.assign(name?name:""); }
-    void set_texture(const texture &tex,const char *semantic);
+    void set_texture(const texture &tex,const char *semantics);
     void set_shader(const shader &shdr);
 
 private:
@@ -43,7 +43,7 @@ private:
 
     struct material_texture
     {
-        std::string semantic;
+        std::string semantics;
         int slot;
         texture tex;
     };

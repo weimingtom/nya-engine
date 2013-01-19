@@ -29,6 +29,14 @@ public:
         const t_res *const_get() const { return m_res; }
         const t_res *operator -> () const { return m_res; };
 
+        const char *get_name() const
+        {
+            if(!m_creator)
+                return 0;
+
+            m_creator->get_res_name(*this);
+        }
+
         void free()
         {
             if(m_creator)
@@ -179,6 +187,15 @@ public:
         holder->map_it=m_res_map.end();
 
         return shared_resource_mutable_ref(&(holder->res),holder,this);
+    }
+
+    const char *get_res_name(const shared_resource_ref&ref)
+    {
+        if(!ref.m_holder)
+            return 0;
+
+        if(ref.m_holder->map_it!=m_res_map.end())
+            return ref.m_holder->map_it->first.c_str();
     }
 
     void free(shared_resource_ref&ref)

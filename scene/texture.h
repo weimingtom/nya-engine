@@ -11,7 +11,7 @@ namespace nya_scene
 struct shared_texture
 {
     nya_render::texture tex;
-    
+
     bool release()
     {
         tex.release();

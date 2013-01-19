@@ -150,12 +150,12 @@ void shader::unset() const
     m_shared->shdr.unbind();
 }
 
-int shader::get_texture_slot(const char *semantic)
+int shader::get_texture_slot(const char *semantics)
 {
-    if(!semantic || !m_shared.is_valid())
+    if(!semantics || !m_shared.is_valid())
         return -1;
 
-    shared_shader::samplers_map::const_iterator it=m_shared->samplers.find(semantic);
+    shared_shader::samplers_map::const_iterator it=m_shared->samplers.find(semantics);
     if(it==m_shared->samplers.end())
         return -1;
 
