@@ -64,11 +64,11 @@ public:
 
         ~shared_resource_ref() { free(); }
 
-    private:
+    protected:
         shared_resource_ref(t_res*res,res_holder*holder,t_creator *creator):
         m_res(res),m_res_holder(holder),m_creator(creator) {}
 
-    private:        
+    private:
         void ref_count_inc()
         {
             if(m_creator)
@@ -85,9 +85,18 @@ public:
 
     class shared_resource_mutable_ref: public shared_resource_ref
     {
+        template<typename,int> friend class shared_resources;
+
     public:
         t_res *get() { return this->m_res; }
         t_res *operator -> () { return this->m_res; }
+
+    public:
+        shared_resource_mutable_ref() { shared_resource_ref(); }
+
+    private:
+        shared_resource_mutable_ref(t_res*res,res_holder*holder,t_creator *creator)
+        { *(shared_resource_ref*)this=shared_resource_ref(res,holder,creator); }
     };
 
 public:
@@ -160,6 +169,18 @@ public:
         return shared_resource_ref();
     }
 
+    shared_resource_mutable_ref create()
+    {
+        res_holder *holder=m_res_pool.allocate();
+        if(!holder)
+            return shared_resource_mutable_ref();
+
+        holder->ref_count=1;
+        holder->map_it=m_res_map.end();
+
+        return shared_resource_mutable_ref(&(holder->res),holder,this);
+    }
+
     void free(shared_resource_ref&ref)
     {
         if(!ref.m_res_holder)
@@ -176,7 +197,9 @@ public:
         if(ref.m_res)
             release_resource(*ref.m_res);
 
-        m_res_map.erase(ref.m_res_holder->map_it);
+        if(ref.m_res_holder->map_it!=m_res_map.end())
+            m_res_map.erase(ref.m_res_holder->map_it);
+
         m_res_pool.free(ref.m_res_holder);
 
         //ToDo: unlink from lru list
