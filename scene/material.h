@@ -26,7 +26,7 @@ public:
 
 public:
     void set_name(const char*name) { m_name.assign(name?name:""); }
-    void set_texture(const texture &tex,const char *semantics);
+    void set_texture(const char *semantics,const texture &tex);
     void set_shader(const shader &shdr);
 
 private:

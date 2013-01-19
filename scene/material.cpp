@@ -41,7 +41,7 @@ void material::set_shader(const shader &shdr)
         m_textures[i].slot=m_shader.get_texture_slot(m_textures[i].semantics.c_str());
 }
 
-void material::set_texture(const texture &tex,const char *semantics)
+void material::set_texture(const char *semantics,const texture &tex)
 {
     if(!semantics)
         return;
