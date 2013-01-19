@@ -53,7 +53,7 @@ public:
 public:
     int get_materials_count();
     const material &get_material(int idx);
-    void set_material(const material &mat,int idx);
+    void set_material(int idx,const material &mat);
 
 public:
     const nya_render::skeleton &get_skeleton();

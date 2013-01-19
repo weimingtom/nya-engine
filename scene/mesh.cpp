@@ -145,7 +145,7 @@ const material &mesh::get_material(int idx)
     return m_shared->groups[idx].mat;
 }
 
-void mesh::set_material(const material &mat,int idx)
+void mesh::set_material(int idx,const material &mat)
 {
     if(!m_shared.is_valid() || idx<0 || idx>=(int)m_shared->groups.size())
         return;
