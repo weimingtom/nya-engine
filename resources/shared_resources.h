@@ -194,8 +194,10 @@ public:
         if(!ref.m_res_holder)
             return 0;
 
-        if(ref.m_res_holder->map_it!=m_res_map.end())
-            return ref.m_res_holder->map_it->first.c_str();
+        if(ref.m_res_holder->map_it==m_res_map.end())
+            return 0;
+
+        return ref.m_res_holder->map_it->first.c_str();
     }
 
     void free(shared_resource_ref&ref)
