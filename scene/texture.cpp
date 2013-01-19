@@ -168,4 +168,20 @@ void texture::unset() const
     m_shared->tex.unbind();
 }
 
+void texture::build(const void *data,unsigned int width,unsigned int height,color_format format)
+{
+    unload();
+
+    if(!data)
+        return;
+
+    shared_resources::shared_resource_mutable_ref ref=get_shared_resources().create();
+    if(!ref.is_valid())
+        return;
+
+    ref->tex.build_texture(data,width,height,format);
+
+    m_shared=ref;
+}
+
 }

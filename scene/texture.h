@@ -31,6 +31,10 @@ private:
     void unset() const;
 
 public:
+    typedef nya_render::texture::color_format color_format;
+    void build(const void *data,unsigned int width,unsigned int height,color_format format);
+
+public:
     texture():m_last_slot(0) { register_load_function(load_tga); }
 
 private:

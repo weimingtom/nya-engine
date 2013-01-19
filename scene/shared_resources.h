@@ -51,7 +51,7 @@ public:
         get_load_functions().push_back(function);
     }
 
-private:
+protected:
     typedef nya_resources::shared_resources<t,8> shared_resources;
     typedef typename shared_resources::shared_resource_ref shared_resource_ref;
 
