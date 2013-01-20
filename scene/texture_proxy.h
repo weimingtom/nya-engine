@@ -16,6 +16,14 @@ public:
     {
         if(!m_ref)
             return 0;
+        
+        return &m_ref->tex;
+    };
+
+    texture *operator -> ()
+    {
+        if(!m_ref)
+            return 0;
 
         return &m_ref->tex;
     };

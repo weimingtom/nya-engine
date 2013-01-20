@@ -46,25 +46,29 @@ void material::set_texture(const char *semantics,const texture &tex)
     if(!semantics)
         return;
 
+    set_texture(semantics,texture_proxy(tex));
+}
+
+void material::set_texture(const char *semantics,const texture_proxy &proxy)
+{
+    if(!semantics)
+        return;
+
     for(size_t i=0;i<m_textures.size();++i)
     {
         material_texture &t=m_textures[i];
         if(t.semantics!=semantics)
             continue;
-
-        t.proxy=texture_proxy(tex);
+        
+        t.proxy=proxy;
         t.slot=m_shader.get_texture_slot(semantics);
         return;
     }
 
     m_textures.resize(m_textures.size()+1);
-    m_textures.back().proxy=texture_proxy(tex);
+    m_textures.back().proxy=proxy;
     m_textures.back().semantics.assign(semantics);
     m_textures.back().slot=m_shader.get_texture_slot(semantics);
-}
-
-void material::set_texture(const char *semantics,const texture_proxy &proxy)
-{
 }
 
 const char *material::get_texture_name(int idx) const
