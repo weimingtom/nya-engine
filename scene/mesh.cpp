@@ -140,7 +140,11 @@ const material &mesh::get_material(int idx)
     }
 
     if(!m_replaced_materials.empty())
-        return m_replaced_materials[m_replaced_materials_idx[idx]];
+    {
+        const int replace_idx=m_replaced_materials_idx[idx];
+        if(replace_idx>=0)
+            return m_replaced_materials[replace_idx];
+    }
 
     return m_shared->groups[idx].mat;
 }
