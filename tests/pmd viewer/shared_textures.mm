@@ -1,7 +1,7 @@
 //https://code.google.com/p/nya-engine/
 
 #include "shared_textures.h"
-#include "resources.h"
+#include "resources/resources.h"
 #include "memory/tmp_buffer.h"
 
 #import <Cocoa/Cocoa.h>

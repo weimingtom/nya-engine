@@ -8,7 +8,7 @@
 #include "ui/panel.h"
 #include "ui/slider.h"
 
-#include "resources/shared_textures.h"
+#include "shared_textures.h"
 #include "render/shader.h"
 
 typedef nya_ui::uint uint;

@@ -18,6 +18,7 @@
 		F28DADA715D9AF830030D67B /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = F28DADA115D9AF830030D67B /* Credits.rtf */; };
 		F28DADA815D9AF830030D67B /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F28DADA315D9AF830030D67B /* InfoPlist.strings */; };
 		F28DADAF15D9AFB50030D67B /* libnya_engine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F28DADAE15D9AFA70030D67B /* libnya_engine.a */; };
+		F2D7D35216AB558E00C7DEE5 /* shared_textures.mm in Sources */ = {isa = PBXBuildFile; fileRef = F2D7D35116AB558E00C7DEE5 /* shared_textures.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +57,8 @@
 		F28DADA215D9AF830030D67B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = "../../tests/pmd viewer/en.lproj/Credits.rtf"; sourceTree = "<group>"; };
 		F28DADA415D9AF830030D67B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = "../../tests/pmd viewer/en.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		F28DADA915D9AFA70030D67B /* nya_engine.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = nya_engine.xcodeproj; sourceTree = "<group>"; };
+		F2D7D35016AB558E00C7DEE5 /* shared_textures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = shared_textures.h; path = "../../tests/pmd viewer/shared_textures.h"; sourceTree = "<group>"; };
+		F2D7D35116AB558E00C7DEE5 /* shared_textures.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = shared_textures.mm; path = "../../tests/pmd viewer/shared_textures.mm"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,6 +116,8 @@
 		F28DAD8D15D9AF330030D67B /* pmd viewer */ = {
 			isa = PBXGroup;
 			children = (
+				F2D7D35016AB558E00C7DEE5 /* shared_textures.h */,
+				F2D7D35116AB558E00C7DEE5 /* shared_textures.mm */,
 				F28DAD8F15D9AF4E0030D67B /* PmdView.mm */,
 				F28DAD9015D9AF4E0030D67B /* PmdView.h */,
 				F28DAD9115D9AF4E0030D67B /* PmdDocument.mm */,
@@ -236,6 +241,7 @@
 				F28DAD9815D9AF4E0030D67B /* PmdView.mm in Sources */,
 				F28DAD9915D9AF4E0030D67B /* PmdDocument.mm in Sources */,
 				F28DAD9C15D9AF4E0030D67B /* main.m in Sources */,
+				F2D7D35216AB558E00C7DEE5 /* shared_textures.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -20,6 +20,7 @@
 		F25932B515D860A20092C7D8 /* libnya_engine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F25932B415D8608B0092C7D8 /* libnya_engine.a */; };
 		F25932B915D860F60092C7D8 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F25932B815D860F60092C7D8 /* OpenGL.framework */; };
 		F2D7D32616AAED9700C7DEE5 /* animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2D7D32516AAED9700C7DEE5 /* animation.cpp */; };
+		F2D7D35716AB55F600C7DEE5 /* shared_textures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2D7D35516AB55F600C7DEE5 /* shared_textures.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,6 +67,8 @@
 		F25932B815D860F60092C7D8 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		F2D7D32416AAED9700C7DEE5 /* animation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = animation.h; path = ../../tests/npl2/animation.h; sourceTree = "<group>"; };
 		F2D7D32516AAED9700C7DEE5 /* animation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = animation.cpp; path = ../../tests/npl2/animation.cpp; sourceTree = "<group>"; };
+		F2D7D35316AB55F600C7DEE5 /* shared_textures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = shared_textures.h; path = ../../tests/npl2/shared_textures.h; sourceTree = "<group>"; };
+		F2D7D35516AB55F600C7DEE5 /* shared_textures.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = shared_textures.cpp; path = ../../tests/npl2/shared_textures.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,6 +88,8 @@
 		F220567215D929D900362591 /* npl2 */ = {
 			isa = PBXGroup;
 			children = (
+				F2D7D35316AB55F600C7DEE5 /* shared_textures.h */,
+				F2D7D35516AB55F600C7DEE5 /* shared_textures.cpp */,
 				F2D7D32516AAED9700C7DEE5 /* animation.cpp */,
 				F2D7D32416AAED9700C7DEE5 /* animation.h */,
 				F2037A71160136E300C7C104 /* config.h */,
@@ -245,6 +250,7 @@
 				F220567115D929D100362591 /* tsb_anim.cpp in Sources */,
 				F2037A73160136E300C7C104 /* config.cpp in Sources */,
 				F2D7D32616AAED9700C7DEE5 /* animation.cpp in Sources */,
+				F2D7D35716AB55F600C7DEE5 /* shared_textures.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

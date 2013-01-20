@@ -4,7 +4,7 @@
 
 #include "render/vbo.h"
 #include "render/texture.h"
-#include "resources/shared_textures.h"
+#include "shared_textures.h"
 //#include "render/shader.h"
 
 #include <vector>

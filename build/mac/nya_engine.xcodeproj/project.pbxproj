@@ -62,7 +62,6 @@
 		F23AB52C168DBA16004B116E /* file_resources_provider.h in Headers */ = {isa = PBXBuildFile; fileRef = F25931FF15D858140092C7D8 /* file_resources_provider.h */; };
 		F23AB52D168DBA16004B116E /* resources.h in Headers */ = {isa = PBXBuildFile; fileRef = F259320115D858140092C7D8 /* resources.h */; };
 		F23AB52E168DBA16004B116E /* shared_resources.h in Headers */ = {isa = PBXBuildFile; fileRef = F259320215D858140092C7D8 /* shared_resources.h */; };
-		F23AB52F168DBA16004B116E /* shared_textures.h in Headers */ = {isa = PBXBuildFile; fileRef = F259320415D858140092C7D8 /* shared_textures.h */; };
 		F23AB530168DBA16004B116E /* button.h in Headers */ = {isa = PBXBuildFile; fileRef = F259320815D858140092C7D8 /* button.h */; };
 		F23AB531168DBA16004B116E /* list.h in Headers */ = {isa = PBXBuildFile; fileRef = F259320C15D858140092C7D8 /* list.h */; };
 		F23AB532168DBA16004B116E /* panel.h in Headers */ = {isa = PBXBuildFile; fileRef = F259320E15D858140092C7D8 /* panel.h */; };
@@ -100,8 +99,6 @@
 		F259323815D858140092C7D8 /* resources.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259320015D858140092C7D8 /* resources.cpp */; };
 		F259323915D858140092C7D8 /* resources.h in Headers */ = {isa = PBXBuildFile; fileRef = F259320115D858140092C7D8 /* resources.h */; };
 		F259323A15D858140092C7D8 /* shared_resources.h in Headers */ = {isa = PBXBuildFile; fileRef = F259320215D858140092C7D8 /* shared_resources.h */; };
-		F259323C15D858140092C7D8 /* shared_textures.h in Headers */ = {isa = PBXBuildFile; fileRef = F259320415D858140092C7D8 /* shared_textures.h */; };
-		F259323D15D858140092C7D8 /* shared_textures.mm in Sources */ = {isa = PBXBuildFile; fileRef = F259320515D858140092C7D8 /* shared_textures.mm */; };
 		F259323E15D858140092C7D8 /* button.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259320715D858140092C7D8 /* button.cpp */; };
 		F259323F15D858140092C7D8 /* button.h in Headers */ = {isa = PBXBuildFile; fileRef = F259320815D858140092C7D8 /* button.h */; };
 		F259324215D858140092C7D8 /* list.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259320B15D858140092C7D8 /* list.cpp */; };
@@ -198,8 +195,6 @@
 		F259320015D858140092C7D8 /* resources.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = resources.cpp; sourceTree = "<group>"; };
 		F259320115D858140092C7D8 /* resources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = resources.h; sourceTree = "<group>"; };
 		F259320215D858140092C7D8 /* shared_resources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shared_resources.h; sourceTree = "<group>"; };
-		F259320415D858140092C7D8 /* shared_textures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shared_textures.h; sourceTree = "<group>"; };
-		F259320515D858140092C7D8 /* shared_textures.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = shared_textures.mm; sourceTree = "<group>"; };
 		F259320715D858140092C7D8 /* button.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = button.cpp; sourceTree = "<group>"; };
 		F259320815D858140092C7D8 /* button.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = button.h; sourceTree = "<group>"; };
 		F259320B15D858140092C7D8 /* list.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = list.cpp; sourceTree = "<group>"; };
@@ -337,8 +332,6 @@
 				F259320015D858140092C7D8 /* resources.cpp */,
 				F259320115D858140092C7D8 /* resources.h */,
 				F259320215D858140092C7D8 /* shared_resources.h */,
-				F259320415D858140092C7D8 /* shared_textures.h */,
-				F259320515D858140092C7D8 /* shared_textures.mm */,
 			);
 			name = resources;
 			path = ../../resources;
@@ -439,7 +432,6 @@
 				F23AB52C168DBA16004B116E /* file_resources_provider.h in Headers */,
 				F23AB52D168DBA16004B116E /* resources.h in Headers */,
 				F23AB52E168DBA16004B116E /* shared_resources.h in Headers */,
-				F23AB52F168DBA16004B116E /* shared_textures.h in Headers */,
 				F23AB530168DBA16004B116E /* button.h in Headers */,
 				F23AB531168DBA16004B116E /* list.h in Headers */,
 				F23AB532168DBA16004B116E /* panel.h in Headers */,
@@ -488,7 +480,6 @@
 				F259323715D858140092C7D8 /* file_resources_provider.h in Headers */,
 				F259323915D858140092C7D8 /* resources.h in Headers */,
 				F259323A15D858140092C7D8 /* shared_resources.h in Headers */,
-				F259323C15D858140092C7D8 /* shared_textures.h in Headers */,
 				F259323F15D858140092C7D8 /* button.h in Headers */,
 				F259324315D858140092C7D8 /* list.h in Headers */,
 				F259324515D858140092C7D8 /* panel.h in Headers */,
@@ -633,7 +624,6 @@
 				F259323415D858140092C7D8 /* composite_resources_provider.cpp in Sources */,
 				F259323615D858140092C7D8 /* file_resources_provider.cpp in Sources */,
 				F259323815D858140092C7D8 /* resources.cpp in Sources */,
-				F259323D15D858140092C7D8 /* shared_textures.mm in Sources */,
 				F259323E15D858140092C7D8 /* button.cpp in Sources */,
 				F259324215D858140092C7D8 /* list.cpp in Sources */,
 				F259324415D858140092C7D8 /* panel.cpp in Sources */,
