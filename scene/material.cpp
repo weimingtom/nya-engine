@@ -11,8 +11,15 @@ void material::set() const
 
     for(size_t i=0;i<m_textures.size();++i)
     {
-        if(m_textures[i].slot<0 || !m_textures[i].proxy.is_valid())
+        if(m_textures[i].slot<0)
             continue;
+
+        if(!m_textures[i].proxy.is_valid())
+        {
+            nya_render::texture::select_multitex_slot(m_textures[i].slot);
+            nya_render::texture::unbind();
+            continue;
+        }
 
         m_textures[i].proxy->set(m_textures[i].slot);
     }
