@@ -16,12 +16,15 @@ struct shared_shader
 
     typedef std::map<std::string,int> samplers_map;
     samplers_map samplers;
+    int samplers_count;
 
     bool release()
     {
         vertex.clear();
         pixel.clear();
         shdr.release();
+        samplers.clear();
+        samplers_count=0;
         return true;
     }
 };
@@ -38,7 +41,8 @@ private:
     void unset() const;
 
 private:
-    int get_texture_slot(const char *semantic);
+    int get_texture_slot(const char *semantic) const;
+    int get_texture_slots_count() const;
 
 public:
     shader() { register_load_function(load_nya_shader); }

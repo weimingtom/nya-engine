@@ -122,13 +122,13 @@ bool shader::load_nya_shader(shared_shader &res,size_t data_size,const void*data
     res.shdr.add_program(nya_render::shader::vertex,res.vertex.c_str());
     res.shdr.add_program(nya_render::shader::pixel,res.pixel.c_str());
 
-    int sampler_idx=0;
+    res.samplers_count=0;
     for(shared_shader::samplers_map::iterator it=res.samplers.begin();
         it!=res.samplers.end();++it)
     {
-        res.shdr.set_sampler(samplers[it->first].c_str(),sampler_idx);
-        it->second=sampler_idx;
-        ++sampler_idx;
+        res.shdr.set_sampler(samplers[it->first].c_str(),res.samplers_count);
+        it->second=res.samplers_count;
+        ++res.samplers_count;
     }
 
     return true;
@@ -150,7 +150,7 @@ void shader::unset() const
     m_shared->shdr.unbind();
 }
 
-int shader::get_texture_slot(const char *semantics)
+int shader::get_texture_slot(const char *semantics) const
 {
     if(!semantics || !m_shared.is_valid())
         return -1;
@@ -160,6 +160,14 @@ int shader::get_texture_slot(const char *semantics)
         return -1;
 
     return it->second;
+}
+
+int shader::get_texture_slots_count() const
+{
+    if(!m_shared.is_valid())
+        return 0;
+
+    return m_shared->samplers_count;
 }
 
 }
