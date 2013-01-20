@@ -43,7 +43,7 @@ public:
 
     texture_proxy(): m_ref(0) {}
 
-    texture_proxy(const texture &tex)
+    explicit texture_proxy(const texture &tex)
     {
         m_ref=new ref;
         m_ref->count=1;
