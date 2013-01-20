@@ -4,6 +4,7 @@
 
 #include "shader.h"
 #include "texture.h"
+#include "texture_proxy.h"
 #include <string>
 #include <vector>
 
@@ -18,7 +19,7 @@ class material
 public:
     const char *get_name() const { return m_name.c_str(); }
     int get_textures_count() const { return (int)m_textures.size(); }
-    const texture &get_texture(int idx) const;
+    const char *get_texture_name(int idx) const;
     const char *get_texture_semantics(int idx) const;
 
 public:
@@ -27,6 +28,7 @@ public:
 public:
     void set_name(const char*name) { m_name.assign(name?name:""); }
     void set_texture(const char *semantics,const texture &tex);
+    void set_texture(const char *semantics,const texture_proxy &proxy);
     void set_shader(const shader &shdr);
 
 private:
@@ -45,7 +47,7 @@ private:
     {
         std::string semantics;
         int slot;
-        texture tex;
+        texture_proxy proxy;
     };
 
     std::vector<material_texture> m_textures;

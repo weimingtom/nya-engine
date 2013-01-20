@@ -11,10 +11,10 @@ void material::set() const
 
     for(size_t i=0;i<m_textures.size();++i)
     {
-        if(m_textures[i].slot<0)
+        if(m_textures[i].slot<0 || !m_textures[i].proxy.is_valid())
             continue;
 
-        m_textures[i].tex.set(m_textures[i].slot);
+        m_textures[i].proxy->set(m_textures[i].slot);
     }
 }
 
@@ -24,10 +24,10 @@ void material::unset() const
 
     for(size_t i=0;i<m_textures.size();++i)
     {
-        if(m_textures[i].slot<0)
+        if(m_textures[i].slot<0 || !m_textures[i].proxy.is_valid())
             continue;
 
-        m_textures[i].tex.unset();
+        m_textures[i].proxy->unset();
     }
 }
 
@@ -52,27 +52,30 @@ void material::set_texture(const char *semantics,const texture &tex)
         if(t.semantics!=semantics)
             continue;
 
-        t.tex.unload();
-        t.tex=tex;
+        t.proxy=texture_proxy(tex);
         t.slot=m_shader.get_texture_slot(semantics);
         return;
     }
 
     m_textures.resize(m_textures.size()+1);
-    m_textures.back().tex=tex;
+    m_textures.back().proxy=texture_proxy(tex);
     m_textures.back().semantics.assign(semantics);
     m_textures.back().slot=m_shader.get_texture_slot(semantics);
 }
 
-const texture &material::get_texture(int idx) const
+void material::set_texture(const char *semantics,const texture_proxy &proxy)
+{
+}
+
+const char *material::get_texture_name(int idx) const
 {
     if(idx<0 || idx>=(int)m_textures.size())
-    {
-        const static texture empty;
-        return empty;
-    }
+        return 0;
+    
+    if(!m_textures[idx].proxy.is_valid())
+        return 0;
 
-    return m_textures[idx].tex;
+    return m_textures[idx].proxy->get_name();
 }
 
 const char *material::get_texture_semantics(int idx) const
@@ -86,7 +89,7 @@ const char *material::get_texture_semantics(int idx) const
 void material::release()
 {
     for(size_t i=0;i<m_textures.size();++i)
-        m_textures[i].tex.unload();
+        m_textures[i].proxy.free();
 
     m_textures.clear();
     m_shader.unload();

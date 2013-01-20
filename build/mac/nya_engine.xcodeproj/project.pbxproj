@@ -131,6 +131,8 @@
 		F2BFD31F169C195D00ED4A9E /* constants.h in Headers */ = {isa = PBXBuildFile; fileRef = F2BFD31D169C195C00ED4A9E /* constants.h */; };
 		F2BFD321169C1AF400ED4A9E /* constants.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2BFD320169C1AF400ED4A9E /* constants.cpp */; };
 		F2BFD322169C1AF400ED4A9E /* constants.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2BFD320169C1AF400ED4A9E /* constants.cpp */; };
+		F2D7D35D16AC1EF600C7DEE5 /* texture_proxy.h in Headers */ = {isa = PBXBuildFile; fileRef = F2D7D35B16AC1EF400C7DEE5 /* texture_proxy.h */; };
+		F2D7D35E16AC1EF600C7DEE5 /* texture_proxy.h in Headers */ = {isa = PBXBuildFile; fileRef = F2D7D35B16AC1EF400C7DEE5 /* texture_proxy.h */; };
 		F2F0A0991695A758007245BC /* skeleton.h in Headers */ = {isa = PBXBuildFile; fileRef = F2F0A0951695A757007245BC /* skeleton.h */; };
 		F2F0A09A1695A758007245BC /* skeleton.h in Headers */ = {isa = PBXBuildFile; fileRef = F2F0A0951695A757007245BC /* skeleton.h */; };
 		F2F0A09B1695A758007245BC /* skeleton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2F0A0961695A757007245BC /* skeleton.cpp */; };
@@ -223,6 +225,7 @@
 		F25932BA15D865BF0092C7D8 /* app.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = app.mm; sourceTree = "<group>"; };
 		F2BFD31D169C195C00ED4A9E /* constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = constants.h; path = ../../math/constants.h; sourceTree = "<group>"; };
 		F2BFD320169C1AF400ED4A9E /* constants.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = constants.cpp; path = ../../math/constants.cpp; sourceTree = "<group>"; };
+		F2D7D35B16AC1EF400C7DEE5 /* texture_proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = texture_proxy.h; path = ../../scene/texture_proxy.h; sourceTree = "<group>"; };
 		F2F0A0951695A757007245BC /* skeleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = skeleton.h; sourceTree = "<group>"; };
 		F2F0A0961695A757007245BC /* skeleton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = skeleton.cpp; sourceTree = "<group>"; };
 		F2F0A0971695A758007245BC /* animation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animation.h; sourceTree = "<group>"; };
@@ -270,6 +273,7 @@
 				F22AD9FC16946EC000B01B4A /* scene.h */,
 				F20E2D7816999B7000395A1B /* texture.cpp */,
 				F20E2D7B16999B7000395A1B /* texture.h */,
+				F2D7D35B16AC1EF400C7DEE5 /* texture_proxy.h */,
 			);
 			name = scene;
 			sourceTree = "<group>";
@@ -464,6 +468,7 @@
 				F20E2D8D16999B7000395A1B /* camera.h in Headers */,
 				F20E2D911699A0C800395A1B /* shared_resources.h in Headers */,
 				F2BFD31F169C195D00ED4A9E /* constants.h in Headers */,
+				F2D7D35E16AC1EF600C7DEE5 /* texture_proxy.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -512,6 +517,7 @@
 				F20E2D8C16999B7000395A1B /* camera.h in Headers */,
 				F20E2D901699A0C800395A1B /* shared_resources.h in Headers */,
 				F2BFD31E169C195D00ED4A9E /* constants.h in Headers */,
+				F2D7D35D16AC1EF600C7DEE5 /* texture_proxy.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
