@@ -31,7 +31,7 @@ struct blend
     static void disable();
 
 private:
-    static unsigned int gl_mode(mode &m);
+    static unsigned int gl_mode(mode m);
 };
 
 struct zwrite

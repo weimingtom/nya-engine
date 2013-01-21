@@ -39,7 +39,7 @@ void set_modelview_matrix(const nya_math::mat4 &mat)
     transform::get().set_modelview_matrix(mat);
 }
 
-unsigned int blend::gl_mode(mode &m)
+unsigned int blend::gl_mode(mode m)
 {
     switch(m)
     {

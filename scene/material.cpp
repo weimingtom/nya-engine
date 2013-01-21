@@ -116,7 +116,7 @@ void material::set_blend(bool enabled,blend_mode src,blend_mode dst)
 {
     m_blend=enabled;
     m_blend_src=src;
-    m_blend_src=dst;
+    m_blend_dst=dst;
 }
 
 const char *material::get_texture_name(int idx) const
