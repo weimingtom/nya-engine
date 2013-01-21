@@ -46,8 +46,13 @@ unsigned int blend::gl_mode(mode m)
         case zero: return GL_ZERO;
         case one: return GL_ONE;
         case src_color: return GL_SRC_COLOR;
+        case inv_src_color: return GL_ONE_MINUS_SRC_COLOR;
         case src_alpha: return GL_SRC_ALPHA;
         case inv_src_alpha: return GL_ONE_MINUS_SRC_ALPHA;
+        case dst_color: return GL_DST_COLOR;
+        case inv_dst_color: return GL_ONE_MINUS_DST_COLOR;
+        case dst_alpha: return GL_DST_ALPHA;
+        case inv_dst_alpha: return GL_ONE_MINUS_DST_ALPHA;
     }
 
     return GL_ZERO;

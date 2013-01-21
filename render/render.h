@@ -21,10 +21,13 @@ struct blend
         zero,
         one,
         src_color,
+        inv_src_color,
         src_alpha,
-        inv_src_alpha
-
-        //ToDo
+        inv_src_alpha,
+        dst_color,
+        inv_dst_color,
+        dst_alpha,
+        inv_dst_alpha
     };
 
     static void enable(mode src,mode dst);
