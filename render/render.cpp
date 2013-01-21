@@ -39,5 +39,39 @@ void set_modelview_matrix(const nya_math::mat4 &mat)
     transform::get().set_modelview_matrix(mat);
 }
 
+unsigned int blend::gl_mode(mode &m)
+{
+    switch(m)
+    {
+        case zero: return GL_ZERO;
+        case one: return GL_ONE;
+        case src_color: return GL_SRC_COLOR;
+        case src_alpha: return GL_SRC_ALPHA;
+        case inv_src_alpha: return GL_ONE_MINUS_SRC_ALPHA;
+    }
+
+    return GL_ZERO;
 }
 
+void blend::enable(blend::mode src,blend::mode dst)
+{
+    glEnable(GL_BLEND);
+    glBlendFunc(gl_mode(src),gl_mode(dst));
+}
+
+void blend::disable()
+{
+    glDisable(GL_BLEND);
+}
+
+void zwrite::enable()
+{
+    glDepthMask(true);
+}
+
+void zwrite::disable()
+{
+    glDepthMask(false);
+}
+
+}

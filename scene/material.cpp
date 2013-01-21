@@ -9,6 +9,16 @@ void material::set() const
 {
     m_shader.set();
 
+    if(m_blend)
+        nya_render::blend::enable(m_blend_src,m_blend_dst);
+    else
+        nya_render::blend::disable();
+
+    if(m_zwrite)
+        nya_render::zwrite::enable();
+    else
+        nya_render::zwrite::disable();
+
     for(size_t i=0;i<m_textures.size();++i)
     {
         if(m_textures[i].slot<0)
@@ -36,6 +46,12 @@ void material::unset() const
 {
     m_shader.unset();
 
+    if(m_blend)
+        nya_render::blend::disable();
+
+    if(!m_zwrite)
+        nya_render::zwrite::enable();
+
     for(size_t i=0;i<m_textures.size();++i)
     {
         if(m_textures[i].slot<0 || !m_textures[i].proxy.is_valid())
@@ -51,7 +67,7 @@ void material::set_shader(const shader &shdr)
 
     m_shader=shdr;
 
-    for(size_t i=0;i<m_shader.get_texture_slots_count();++i)
+    for(int i=0;i<m_shader.get_texture_slots_count();++i)
         m_invalid_slots[i]=true;
 
     for(size_t i=0;i<m_textures.size();++i)
@@ -94,6 +110,13 @@ void material::set_texture(const char *semantics,const texture_proxy &proxy)
     invalid_slots::iterator it=m_invalid_slots.find(m_textures.back().slot);
     if(it!=m_invalid_slots.end())
         m_invalid_slots.erase(it);
+}
+
+void material::set_blend(bool enabled,blend_mode src,blend_mode dst)
+{
+    m_blend=enabled;
+    m_blend_src=src;
+    m_blend_src=dst;
 }
 
 const char *material::get_texture_name(int idx) const
