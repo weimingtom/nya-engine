@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "vector.h"
+
 namespace nya_math
 {
 
@@ -22,5 +24,8 @@ struct mat4
 
     mat4() { identity(); }
 };
+
+vec3 operator * (const mat4 &m,const vec3 &v);
+vec3 operator * (const vec3 &v,const mat4 &m);
 
 }

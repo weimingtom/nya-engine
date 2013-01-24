@@ -39,7 +39,7 @@ public:
     static void set_resources_prefix(const char *prefix) { get_resources_prefix().assign(prefix?prefix:""); }
 
 public:
-    typedef bool (*load_function)(t &sh,size_t data_size,const void*data);
+    typedef bool (*load_function)(t &sh,size_t data_size,const void*data,const char *name);
 
     static void register_load_function(load_function function)
     {
@@ -70,7 +70,7 @@ protected:
             nya_resources::resource_data *file_data=nya_resources::get_resources_provider().access(name);
             if(!file_data)
             {
-                nya_resources::get_log()<<"unable to load scene resource: unable to access resource\n";
+                nya_resources::get_log()<<"unable to load scene resource: unable to access resource "<<name<<"\n";
                 return false;
             }
 
@@ -81,11 +81,11 @@ protected:
 
             for(size_t i=0;i<m_loader.get_load_functions().size();++i)
             {
-                if(m_loader.get_load_functions()[i](res,data_size,res_data.get_data()))
+                if(m_loader.get_load_functions()[i](res,data_size,res_data.get_data(),name))
                     return true;
             }
 
-            nya_resources::get_log()<<"unable to load scene resource: unknown format\n";
+            nya_resources::get_log()<<"unable to load scene resource: unknown format in "<<name<<"\n";
 
             return false;
         }

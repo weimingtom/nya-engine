@@ -10,7 +10,7 @@
 namespace nya_scene
 {
 
-bool mesh::load_pmd(shared_mesh &res,size_t data_size,const void*data)
+bool mesh::load_pmd(shared_mesh &res,size_t data_size,const void*data,const char* name)
 {
     if(!data)
         return false;
@@ -86,6 +86,17 @@ void mesh::draw()
     mat.scale(m_scale.x,m_scale.y,m_scale.z);
 
     nya_render::set_modelview_matrix(mat);
+
+	//ToDo: only for materials that need camera
+	//material::set_camera_local_pos(get_camera().get_pos()-m_pos);
+
+	nya_math::mat4 inv_transform;
+    //inv_transform.scale(m_scale.x,m_scale.y,m_scale.z);
+    inv_transform.rotate(-m_rot.z,0,0,1);
+    inv_transform.rotate(-m_rot.x,1,0,0);
+    inv_transform.rotate(-m_rot.y,0,1,0);
+    inv_transform.translate(-m_pos.x,-m_pos.y,-m_pos.z);
+	material::set_camera_local_pos(inv_transform*get_camera().get_pos());
 
     m_shared->vbo.bind();
 

@@ -196,6 +196,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\memory\memory_reader.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\memory\pool.h"
 				>
 			</File>

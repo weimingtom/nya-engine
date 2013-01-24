@@ -27,19 +27,20 @@ void material::set() const
         if(!m_textures[i].proxy.is_valid())
         {
             nya_render::texture::select_multitex_slot(m_textures[i].slot);
-            nya_render::texture::unbind();
+            nya_render::texture::unbind_all();
             continue;
         }
 
         m_textures[i].proxy->set(m_textures[i].slot);
     }
-
+/*
     for(invalid_slots::const_iterator it=m_invalid_slots.begin();
         it!=m_invalid_slots.end();++it)
     {
         nya_render::texture::select_multitex_slot(it->first);
-        nya_render::texture::unbind();
+        nya_render::texture::unbind_all();
     }
+*/
 }
 
 void material::unset() const

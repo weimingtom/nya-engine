@@ -20,6 +20,9 @@ public:
     const nya_math::mat4 &get_view_matrix() const;
 
 public:
+	const nya_math::vec3 &get_pos() const { return m_pos; }
+
+public:
     camera(): m_recalc_view(true) {}
 
 private:

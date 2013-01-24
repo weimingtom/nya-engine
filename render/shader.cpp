@@ -471,8 +471,8 @@ void shader::add_program(program_type type,const char*code)
                 get_log()<<log<<"\n";
                 delete(log);
             }
-            m_program=0; //??
-            return;
+            //m_program=0; //??
+            //return;
         }
 
 #ifdef SUPPORT_OLD_SHADERS
@@ -540,39 +540,42 @@ void shader::set_sampler(const char*name,unsigned int layer)
     glUniform1iARB(handler,layer);
 }
 
-int shader::get_handler(const char *name)
+int shader::get_handler(const char *name) const
 {
-    if(!check_init_shaders())
-        return 0;
-
     if(!name || !name[0])
     {
         get_log()<<"Unable to set shader handler: invalid name\n";
-        return 0;
+        return -1;
+    }
+
+    if(!m_program)
+    {
+        get_log()<<"Unable to get shader handler \'"<<name<<"\': invalid program\n";
+        return -1;
     }
 
     return glGetUniformLocationARB(m_program,name);
 }
 
-void shader::set_uniform(unsigned int i,float f0,float f1,float f2,float f3)
+void shader::set_uniform(unsigned int i,float f0,float f1,float f2,float f3) const
 {
-    if(!check_init_shaders())
+    if(!m_program)
         return;
 
     glUniform4fARB(i,f0,f1,f2,f3);
 }
 
-void shader::set_uniform4_array(unsigned int i,const float *f,unsigned int count)
+void shader::set_uniform4_array(unsigned int i,const float *f,unsigned int count) const
 {
-    if(!check_init_shaders() || !f)
+    if(!m_program || !f)
         return;
 
     glUniform4fvARB(i,count,f);
 }
 
-void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int count,bool transpose)
+void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int count,bool transpose) const
 {
-    if(!check_init_shaders() || !f)
+    if(!m_program || !f)
         return;
 
     glUniformMatrix4fvARB(i,count,transpose,f);
@@ -580,7 +583,7 @@ void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int coun
 
 void shader::release()
 {
-    if(m_program==0)
+    if(!m_program)
         return;
 
     glUseProgramObjectARB(0);

@@ -18,7 +18,7 @@ void rgb_to_bgr(unsigned char *data,size_t data_size)
     }
 }
 
-bool texture::load_tga(shared_texture &res,size_t data_size,const void*data) 
+bool texture::load_tga(shared_texture &res,size_t data_size,const void* data,const char* name) 
 {
     if(!data)
         return false;
@@ -153,7 +153,7 @@ void texture::set(int slot) const
     if(!m_shared.is_valid())
     {
         nya_render::texture::select_multitex_slot(slot);
-        nya_render::texture::unbind();
+        nya_render::texture::unbind_all();
         return;
     }
 
@@ -173,14 +173,18 @@ void texture::unset() const
 
 void texture::build(const void *data,unsigned int width,unsigned int height,color_format format)
 {
-    unload();
-
     if(!data)
+	{
+		unload();
         return;
+	}
 
     shared_resources::shared_resource_mutable_ref ref=get_shared_resources().create();
     if(!ref.is_valid())
+	{
+		unload();
         return;
+	}
 
     ref->tex.build_texture(data,width,height,format);
 

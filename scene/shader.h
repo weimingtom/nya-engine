@@ -4,6 +4,7 @@
 
 #include "shared_resources.h"
 #include "render/shader.h"
+#include "math/vector.h"
 
 namespace nya_scene
 {
@@ -17,6 +18,10 @@ struct shared_shader
     typedef std::map<std::string,int> samplers_map;
     samplers_map samplers;
     int samplers_count;
+
+	int predef_camera_local_pos;
+
+	shared_shader(): predef_camera_local_pos(-1),samplers_count(0){}
 
     bool release()
     {
@@ -34,7 +39,7 @@ class shader: public scene_shared<shared_shader>
     friend class material;
 
 private:
-    static bool load_nya_shader(shared_shader &res,size_t data_size,const void*data);
+    static bool load_nya_shader(shared_shader &res,size_t data_size,const void*data,const char* name);
 
 private:
     void set() const;
@@ -43,6 +48,12 @@ private:
 private:
     int get_texture_slot(const char *semantic) const;
     int get_texture_slots_count() const;
+
+private:
+	struct predefined
+	{
+		static nya_math::vec3 camera_local_pos;
+	};
 
 public:
     shader() { register_load_function(load_nya_shader); }

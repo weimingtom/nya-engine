@@ -41,6 +41,10 @@ private:
     void set() const;
     void unset() const;
 
+private:
+	static void set_camera_local_pos(const nya_math::vec3 &pos) 
+	{ shader::predefined::camera_local_pos=pos; }
+
 public:
     material(): m_zwrite(true),m_blend(false)
         ,m_blend_src(nya_render::blend::one),m_blend_dst(nya_render::blend::zero) {}

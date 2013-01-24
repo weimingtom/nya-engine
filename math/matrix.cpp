@@ -139,5 +139,19 @@ mat4 &mat4::scale(float sx,float sy,float sz)
     return *this;
 }
 
+vec3 operator * (const vec3 &v,const mat4 &m)
+{
+	return vec3(m.m[0][0]*v.x+m.m[0][1]*v.y+m.m[0][2]*v.z+m.m[0][3],
+				m.m[1][0]*v.x+m.m[1][1]*v.y+m.m[1][2]*v.z+m.m[1][3],
+				m.m[2][0]*v.x+m.m[2][1]*v.y+m.m[2][2]*v.z+m.m[2][3]);
+}
+
+vec3 operator * (const mat4 &m,const vec3 &v)
+{
+	return vec3(m.m[0][0]*v.x+m.m[1][0]*v.y+m.m[2][0]*v.z+m.m[3][0],
+				m.m[0][1]*v.x+m.m[1][1]*v.y+m.m[2][1]*v.z+m.m[3][1],
+				m.m[0][2]*v.x+m.m[1][2]*v.y+m.m[2][2]*v.z+m.m[3][2]);
+}
+
 }
 
