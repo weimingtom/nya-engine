@@ -454,6 +454,8 @@ void shader::add_program(program_type type,const char*code)
 
         if(type==pixel)
         {
+            glUseProgramObjectARB(m_program);
+
             for(size_t i=0;i<m_samplers.size();++i)
             {
                 const sampler &s=m_samplers[i];
@@ -463,6 +465,8 @@ void shader::add_program(program_type type,const char*code)
                 else
                     get_log()<<"Unable to set shader sampler \'"<<s.name.c_str()<<"\': probably not found\n";
             }
+
+            glUseProgramObjectARB(0);
         }
 
         result=0;
