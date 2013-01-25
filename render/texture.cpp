@@ -208,6 +208,8 @@ void texture::select_multitex_slot(unsigned int idx)
 
     tex_glClientActiveTextureARB=(PFNGLCLIENTACTIVETEXTUREARBPROC)get_extension("glClientActiveTexture");
     initialised=true;
+    
+    select_multitex_slot(idx);
 #endif
 }
 
