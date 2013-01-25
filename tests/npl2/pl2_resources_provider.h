@@ -36,6 +36,7 @@ public:
 
 public:
     resource_data *access(const char *resource_name);
+    bool has(const char *resource_name);
 
 public:
     pl2_resources_provider(): m_archieve_data(0), m_entries(0), m_attribute(0) {}

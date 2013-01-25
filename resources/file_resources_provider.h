@@ -13,6 +13,7 @@ class file_resources_provider: public resources_provider
 {
 public:
     resource_data *access(const char *resource_name);
+    bool has(const char *resource_name);
 
 public:
     bool set_folder(const char*,bool recursive=true);

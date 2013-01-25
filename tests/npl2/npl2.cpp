@@ -187,6 +187,7 @@ private:
         const std::string path=std::string(nya_system::get_app_path())+"add-ons/";
 
         static nya_resources::composite_resources_provider cprov;
+        cprov.enable_cache();
         cprov.set_ignore_case(true);
 
         static nya_resources::file_resources_provider fprov;

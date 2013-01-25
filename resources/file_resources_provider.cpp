@@ -283,6 +283,15 @@ resource_data *file_resources_provider::access(const char *resource_name)
     return file;
 }
 
+bool file_resources_provider::has(const char *name)
+{
+    if(!name)
+        return false;
+
+    struct stat sb;
+    return stat((m_path+name).c_str(),&sb)==0;
+}
+
 bool file_resources_provider::set_folder(const char*name,bool recursive)
 {
     clear_entries();
@@ -383,16 +392,17 @@ void file_resources_provider::enumerate_folder(const char*folder_name,file_resou
     {
 		const char *name=dp->d_name;
 #endif
-        if(name[0]=='.')
+        if((name[0]=='.'&&name[1]=='\0')||(name[0]=='.'&&name[1]=='.'&&name[2]=='\0'))
             continue;
 
 #ifdef WIN32
         std::string name_str=folder_name_str+"/"+name;
+        std::string full_path_str=m_path+name_str;
 
         struct stat stat_buf;
-        if(!stat(name_str.c_str(),&stat_buf))
+        if(stat(full_path_str.c_str(),&stat_buf)<0)
         {
-            nya_log::get_log()<<"unable to read "<<name_str.c_str()<<"\n";
+            nya_log::get_log()<<"unable to read "<<full_path_str.c_str()<<"\n";
             continue;
         }
 

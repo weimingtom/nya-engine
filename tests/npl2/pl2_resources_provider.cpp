@@ -197,6 +197,23 @@ resource_data *pl2_resources_provider::access(const char *resource_name)
     return 0;
 }
 
+bool pl2_resources_provider::has(const char *resource_name)
+{
+    if(!resource_name)
+        return false;
+
+    pl2_entry_info *entry=m_entries;
+    while(entry)
+    {
+        if(entry->name.compare(resource_name)==0)
+            return true;
+
+        entry=entry->next;
+    }
+
+    return false;
+}
+
 resource_data *pl2_resources_provider::access_attribute()
 {
     if(!m_attribute)

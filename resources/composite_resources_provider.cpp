@@ -94,6 +94,17 @@ void composite_resources_provider::add_provider(resources_provider *provider)
         return;
     }
 
+    m_providers.push_back(provider);
+
+    if(m_cache_entries)
+        cache_provider(provider);
+}
+
+void composite_resources_provider::cache_provider(resources_provider *provider)
+{
+    if(!provider)
+        return;
+
     resource_info *entry=provider->first_res_info();
     while(entry)
     {
@@ -112,8 +123,8 @@ void composite_resources_provider::add_provider(resources_provider *provider)
         std::pair<res_info_iterator,bool> ir=m_resources_info.insert(std::make_pair(name_str,entry));
         if(!ir.second)
         {
-            get_log()<<"unable to add composite provider entry "<<entry->get_name()
-                    <<": already exist\n";
+            //get_log()<<"unable to add composite provider entry "<<entry->get_name()
+            //        <<": already exist\n";
         }
         else
         {
@@ -143,6 +154,17 @@ resource_data *composite_resources_provider::access(const char *resource_name)
     if(!resource_name)
     {
         get_log()<<"unable to access composite entry: invalid name\n";
+        return 0;
+    }
+
+    if(!m_cache_entries)
+    {
+        for(int i=0;i<m_providers.size();++i)
+        {
+            if(m_providers[i]->has(resource_name))
+                return m_providers[i]->access(resource_name);
+        }
+
         return 0;
     }
 
@@ -176,8 +198,52 @@ resource_data *composite_resources_provider::access(const char *resource_name)
     return entry->access();
 }
 
+bool composite_resources_provider::has(const char *resource_name)
+{
+    if(!resource_name)
+        return false;
+
+    if(!m_cache_entries)
+    {
+        for(int i=0;i<m_providers.size();++i)
+        {
+            if(m_providers[i]->has(resource_name))
+                return true;
+        }
+
+        return false;
+    }
+
+    res_info_iterator it;
+
+    if(m_ignore_case)
+    {
+        std::string res_str(resource_name);
+        std::transform(res_str.begin(),res_str.end(),res_str.begin(),::tolower);
+
+        it=m_resources_info.find(res_str.c_str());
+    }
+    else
+        it=m_resources_info.find(resource_name);
+
+    return it!=m_resources_info.end();
+}
+
+void composite_resources_provider::enable_cache()
+{
+    if(m_cache_entries)
+        return;
+
+    for(size_t i=0;i<m_providers.size();++i)
+        cache_provider(m_providers[i]);
+
+    m_cache_entries=true;
+}
+
 resource_info *composite_resources_provider::first_res_info()
 {
+    enable_cache();
+
     return m_entries;
 }
 
