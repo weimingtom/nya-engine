@@ -312,6 +312,7 @@ void scene::init()
     scenery_ps_str.append(precision);
     scenery_ps_str.append(fprogram);
 
+    m_shader_scenery.set_sampler("base_map",0);
     m_shader_scenery.add_program(nya_render::shader::vertex,scenery_vs_str.c_str());
     m_shader_scenery.add_program(nya_render::shader::pixel,scenery_ps_str.c_str());
 
@@ -326,6 +327,7 @@ void scene::init()
     scenery_anim_ps_str.append(precision);
     scenery_anim_ps_str.append(fprogram);
 
+    m_shader_scenery_anim.set_sampler("base_map",0);
     m_shader_scenery_anim.add_program(nya_render::shader::vertex,scenery_anim_vs_str.c_str());
     m_shader_scenery_anim.add_program(nya_render::shader::pixel,scenery_anim_ps_str.c_str());
 
@@ -371,10 +373,10 @@ void scene::init()
     char_vs_str.append(uber_vs);
     char_ps_str.append(char_ps);
 
+    m_shader.set_sampler("base_map",0);
     m_shader.add_program(nya_render::shader::vertex,char_vs_str.c_str());
     m_shader.add_program(nya_render::shader::pixel,char_ps_str.c_str());
 
-    m_shader.set_sampler("base_map",0);
     m_sh_mat_uniform=m_shader.get_handler("bones");
 
 #ifndef OPENGL_ES

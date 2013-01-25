@@ -12,6 +12,9 @@
     #define SUPPORT_OLD_SHADERS
 #endif
 
+#include <string>
+#include <vector>
+
 namespace nya_render
 {
 
@@ -61,6 +64,19 @@ public:
 private:
     GLhandleARB m_program;
     GLhandleARB m_objects[program_types_count];
+
+private:
+    struct sampler
+    {
+        std::string name;
+        unsigned int layer;
+        
+        sampler():layer(0){}
+        sampler(const char *name,unsigned int layer):
+                            name(name),layer(layer){}
+    };
+
+    std::vector<sampler> m_samplers;
 
 #ifdef SUPPORT_OLD_SHADERS
 private:

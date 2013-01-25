@@ -452,6 +452,19 @@ void shader::add_program(program_type type,const char*code)
             return;
         }
 
+        if(type==pixel)
+        {
+            for(size_t i=0;i<m_samplers.size();++i)
+            {
+                const sampler &s=m_samplers[i];
+                int handler=glGetUniformLocationARB(m_program,s.name.c_str());
+                if(handler>=0)
+                    glUniform1iARB(handler,s.layer);
+                else
+                    get_log()<<"Unable to set shader sampler \'"<<s.name.c_str()<<"\': probably not found\n";
+            }
+        }
+
         result=0;
         glValidateProgramARB(m_program);
         glGetObjectParam(m_program,GL_OBJECT_VALIDATE_STATUS_ARB,&result);
@@ -471,8 +484,8 @@ void shader::add_program(program_type type,const char*code)
                 get_log()<<log<<"\n";
                 delete(log);
             }
-            //m_program=0; //??
-            //return;
+            m_program=0; //??
+            return;
         }
 
 #ifdef SUPPORT_OLD_SHADERS
@@ -524,20 +537,16 @@ void shader::set_sampler(const char*name,unsigned int layer)
         return;
     }
 
-    if(!m_program)
+    for(size_t i=0;i<m_samplers.size();++i)
     {
-        get_log()<<"Unable to set shader sampler \'"<<name<<"\': invalid program\n";
+        if(m_samplers[i].layer!=layer)
+            continue;
+        
+        m_samplers[i].name.assign(name);
         return;
     }
 
-    int handler=glGetUniformLocationARB(m_program,name);
-    if(handler<0)
-    {
-        get_log()<<"Unable to set shader sampler \'"<<name<<"\': probably not found\n";
-        return;
-    }
-
-    glUniform1iARB(handler,layer);
+    m_samplers.push_back(sampler(name,layer));
 }
 
 int shader::get_handler(const char *name) const
@@ -583,6 +592,8 @@ void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int coun
 
 void shader::release()
 {
+    m_samplers.clear();
+
     if(!m_program)
         return;
 
