@@ -192,23 +192,23 @@ void texture::select_multitex_slot(unsigned int idx)
 #if defined(OPENGL_ES)
     glActiveTexture(GL_TEXTURE0+idx);
 #elif defined(NO_EXTENSIONS_INIT)
-    glClientActiveTexture(GL_TEXTURE0+idx);
+    glActiveTexture(GL_TEXTURE0+idx);
 #else
-    static PFNGLCLIENTACTIVETEXTUREARBPROC tex_glClientActiveTextureARB=0;
+    static PFNGLACTIVETEXTUREARBPROC tex_glActiveTexture=0;
 
     static bool initialised=false;
-    if(tex_glClientActiveTextureARB!=0)
+    if(tex_glActiveTexture!=0)
     {
-        tex_glClientActiveTextureARB(GL_TEXTURE0_ARB+idx);
+        tex_glActiveTexture(GL_TEXTURE0_ARB+idx);
         return;
     }
 
     if(initialised)
         return;
 
-    tex_glClientActiveTextureARB=(PFNGLCLIENTACTIVETEXTUREARBPROC)get_extension("glClientActiveTexture");
+    tex_glActiveTexture=(PFNGLACTIVETEXTUREARBPROC)get_extension("glActiveTexture");
     initialised=true;
-    
+
     select_multitex_slot(idx);
 #endif
 }
