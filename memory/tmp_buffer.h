@@ -18,7 +18,7 @@ public:
     bool copy_to(const void*data,size_t size,size_t offset=0);
 
 public:
-    void *get_data(size_t offset=0);
+    void *get_data(size_t offset=0) const;
     size_t get_size() const;
 
 public:
@@ -27,6 +27,11 @@ public:
 
 public:
     tmp_buffer_ref(): m_buf(0) {}
+    tmp_buffer_ref(size_t size)
+    {
+        m_buf=0;
+        allocate(size);
+    }
 
 private:
     tmp_buffer* m_buf;
@@ -39,7 +44,7 @@ public:
     bool copy_to(const void*data,size_t size,size_t offset=0);
 
 public:
-    void *get_data(size_t offset=0);
+    void *get_data(size_t offset=0) const;
 
 public:
     tmp_buffer_scoped(size_t size);

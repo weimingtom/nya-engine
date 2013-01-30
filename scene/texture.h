@@ -24,7 +24,7 @@ class texture: public scene_shared<shared_texture>
     friend class material;
 
 private:
-    static bool load_tga(shared_texture &res,size_t data_size,const void* data,const char* name);
+    static bool load_tga(shared_texture &res,resource_data &data,const char* name);
 
 private:
     void set(int slot=0) const;

@@ -10,12 +10,12 @@
 namespace nya_scene
 {
 
-bool mesh::load_pmd(shared_mesh &res,size_t data_size,const void*data,const char* name)
+bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
 {
-    if(!data)
+    if(!data.get_size())
         return false;
 
-    nya_memory::memory_reader reader(data,data_size);
+    nya_memory::memory_reader reader(data.get_data(),data.get_size());
     if(!reader.test("Pmd",3))
         return false;
 
@@ -57,7 +57,7 @@ bool mesh::load_pmd(shared_mesh &res,size_t data_size,const void*data,const char
     if(!reader.check_remained(sizeof(ushort)*ind_count))
         return false;
 
-    res.vbo.gen_index_data((const char*)data+reader.get_offset(),nya_render::vbo::index2b,ind_count);
+    res.vbo.gen_index_data(data.get_data(reader.get_offset()),nya_render::vbo::index2b,ind_count);
 
     return true;
 }

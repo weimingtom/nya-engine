@@ -39,7 +39,7 @@ class shader: public scene_shared<shared_shader>
     friend class material;
 
 private:
-    static bool load_nya_shader(shared_shader &res,size_t data_size,const void*data,const char* name);
+    static bool load_nya_shader(shared_shader &res,resource_data &data,const char* name);
 
 private:
     void set() const;

@@ -163,7 +163,7 @@ size_t tmp_buffers::get_total_size()
     return tmp_buffer::get_total_size();
 }
 
-void *tmp_buffer_ref::get_data(size_t offset)
+void *tmp_buffer_ref::get_data(size_t offset) const
 {
     if(!m_buf)
         return 0;
@@ -212,7 +212,7 @@ void tmp_buffer_ref::free()
     m_buf=0;
 }
 
-void *tmp_buffer_scoped::get_data(size_t offset)
+void *tmp_buffer_scoped::get_data(size_t offset) const
 {
     return m_buf->get_data(offset);
 }

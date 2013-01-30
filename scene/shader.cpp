@@ -8,9 +8,13 @@ namespace nya_scene
 
 nya_math::vec3 shader::predefined::camera_local_pos;
 
-bool shader::load_nya_shader(shared_shader &res,size_t data_size,const void*data,const char* name)
+bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* name)
 {
-    const char *text=(const char*)data;
+    size_t data_size=data.get_size();
+    if(!data_size)
+        return false;
+
+    const char *text=(const char*)data.get_data();
 
     std::map<std::string,std::string> samplers;
 

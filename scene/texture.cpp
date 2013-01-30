@@ -18,12 +18,12 @@ void rgb_to_bgr(unsigned char *data,size_t data_size)
     }
 }
 
-bool texture::load_tga(shared_texture &res,size_t data_size,const void* data,const char* name) 
+bool texture::load_tga(shared_texture &res,resource_data &data,const char* name) 
 {
-    if(!data)
+    if(!data.get_size())
         return false;
 
-    nya_memory::memory_reader reader(data,data_size);
+    nya_memory::memory_reader reader(data.get_data(),data.get_size());
 
     const char id_length=reader.read<char>();
     reader.skip(id_length);
@@ -144,6 +144,8 @@ bool texture::load_tga(shared_texture &res,size_t data_size,const void* data,con
 
         res.tex.build_texture(reader.get_data(),width,height,color_format);
     }
+
+    data.free();
 
     return true;
 }

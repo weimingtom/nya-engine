@@ -8,6 +8,8 @@
 namespace nya_scene
 {
 
+typedef nya_memory::tmp_buffer_ref resource_data;
+
 template<typename t>
 class scene_shared
 {
@@ -39,7 +41,7 @@ public:
     static void set_resources_prefix(const char *prefix) { get_resources_prefix().assign(prefix?prefix:""); }
 
 public:
-    typedef bool (*load_function)(t &sh,size_t data_size,const void*data,const char *name);
+    typedef bool (*load_function)(t &sh,resource_data &data,const char *name);
 
     static void register_load_function(load_function function)
     {
@@ -75,15 +77,20 @@ protected:
             }
 
             const size_t data_size=file_data->get_size();
-            nya_memory::tmp_buffer_scoped res_data(data_size);
+            nya_memory::tmp_buffer_ref res_data(data_size);
             file_data->read_all(res_data.get_data());
             file_data->release();
 
             for(size_t i=0;i<m_loader.get_load_functions().size();++i)
             {
-                if(m_loader.get_load_functions()[i](res,data_size,res_data.get_data(),name))
+                if(m_loader.get_load_functions()[i](res,res_data,name))
+                {
+                    res_data.free(); //just for shure, load function should do this
                     return true;
+                }
             }
+
+            res_data.free();
 
             nya_resources::get_log()<<"unable to load scene resource: unknown format in "<<name<<"\n";
 

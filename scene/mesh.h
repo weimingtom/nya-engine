@@ -59,7 +59,7 @@ public:
     const nya_render::skeleton &get_skeleton();
 
 private:
-    static bool load_pmd(shared_mesh &res,size_t data_size,const void*data,const char* name);
+    static bool load_pmd(shared_mesh &res,resource_data &data,const char* name);
 
 public:
     mesh():m_scale(nya_math::vec3(1.0f,1.0f,1.0f)) { register_load_function(load_pmd); }
