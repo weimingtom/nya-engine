@@ -23,7 +23,7 @@ private:
         {
             get_log()<<"tmp buf resized from "<<m_data.size()<<" to "<<size<<", ";
             m_data.resize(size);
-            get_log()<<get_total_size()<<" in "<<m_buffers.size()<<"buffers total)\n";
+            get_log()<<get_total_size()<<" in "<<m_buffers.size()<<" buffers total)\n";
         }
 
         m_size = size;
