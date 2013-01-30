@@ -49,4 +49,10 @@ private:
     tmp_buffer *m_buf;
 };
 
+namespace tmp_buffers
+{
+    void force_free();
+    size_t get_total_size();
+}
+
 }

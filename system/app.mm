@@ -2,6 +2,7 @@
 
 #include "app.h"
 #include "system.h"
+#include "memory/tmp_buffer.h"
 
 #include <string>
 
@@ -362,6 +363,13 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 {
     [super didReceiveMemoryWarning];
     // Release any cached data, images, etc. that aren't in use.
+
+    nya_log::get_log()<<"app recieved memory warning, ";
+
+    size_t tmp_buffers_size=nya_memory::tmp_buffers::get_total_size();
+    nya_memory::tmp_buffers::force_free();
+    nya_log::get_log()<<"forced to free "<<tmp_buffers_size-
+                    nya_memory::tmp_buffers::get_total_size()<<" bytes\n";
 }
 
 - (void)viewWillAppear:(BOOL)animated

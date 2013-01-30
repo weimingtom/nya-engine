@@ -14,20 +14,21 @@ class tmp_buffer
 private:
     bool is_used() const
     {
-        return m_ref_count > 0;
+        return m_used;
     }
 
     void allocate(size_t size)
     {
         if(size>m_data.size())
         {
-            get_log()<<"tmp buf resized from "<<m_data.size()<<" to "<<size<<"\n";
+            get_log()<<"tmp buf resized from "<<m_data.size()<<" to "<<size<<", ";
             m_data.resize(size);
+            get_log()<<get_total_size()<<" in "<<m_buffers.size()<<"buffers total)\n";
         }
 
         m_size = size;
 
-        ++m_ref_count;
+        m_used=true;
     }
 
     size_t get_actual_size() const
@@ -43,8 +44,8 @@ public:
 
     void free()
     {
-        if(m_ref_count)
-            --m_ref_count;
+        m_size=0;
+        m_used=false;
     }
 
     void *get_data(size_t offset)
@@ -83,27 +84,21 @@ public:
 
     static tmp_buffer *allocate_new(size_t size)
     {
-        typedef std::list<tmp_buffer> buffers_list;
-        static std::list<tmp_buffer> m_buffers;
-
         tmp_buffer* first_free=0;
-        buffers_list::iterator it=m_buffers.begin();
-        while(it!=m_buffers.end())
+        for(buffers_list::iterator it=m_buffers.begin();it!=m_buffers.end();++it)
         {
             tmp_buffer &buffer = *it;
-            if(!buffer.is_used())
-            {
-                if(buffer.get_actual_size()<=size)
-                {
-                    buffer.allocate(size);
-                    return &buffer;
-                }
+            if(buffer.is_used())
+                continue;
 
-                if(!first_free)
-                    first_free = &buffer;
+            if(buffer.get_actual_size()<=size)
+            {
+                buffer.allocate(size);
+                return &buffer;
             }
-            
-            ++it;
+
+            if(!first_free)
+                first_free = &buffer;
         }
 
         if(first_free)
@@ -120,13 +115,53 @@ public:
         return &m_buffers.back();
     }
 
-    tmp_buffer(): m_ref_count(0), m_size(0) {}
+    static void force_free()
+    {
+        for(buffers_list::iterator it=m_buffers.begin();it!=m_buffers.end();++it)
+        {
+            tmp_buffer &buffer = *it;
+            if(buffer.is_used())
+                continue;
+
+            std::vector<char>().swap(buffer.m_data);
+        }
+    }
+
+    static size_t get_total_size()
+    {
+        size_t size=0;
+        for(buffers_list::iterator it=m_buffers.begin();it!=m_buffers.end();++it)
+        {
+            tmp_buffer &buffer = *it;
+            size+=buffer.m_data.size();
+        }
+
+        return size;
+    }
+
+    tmp_buffer(): m_used(false), m_size(0) {}
 
 private:
     std::vector<char> m_data;
-    unsigned int m_ref_count;
+    bool m_used;
     size_t m_size;
+
+private:
+    typedef std::list<tmp_buffer> buffers_list;
+    static std::list<tmp_buffer> m_buffers;
 };
+
+tmp_buffer::buffers_list tmp_buffer::m_buffers;
+
+void tmp_buffers::force_free()
+{
+    tmp_buffer::force_free();
+}
+
+size_t tmp_buffers::get_total_size()
+{
+    return tmp_buffer::get_total_size();
+}
 
 void *tmp_buffer_ref::get_data(size_t offset)
 {
