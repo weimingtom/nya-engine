@@ -35,7 +35,7 @@ public:
 
         --m_ref->count;
 
-        if(!m_ref->count)
+        if(m_ref->count<=0)
             delete m_ref;
 
         m_ref=0;
@@ -45,9 +45,7 @@ public:
 
     explicit texture_proxy(const texture &tex)
     {
-        m_ref=new ref;
-        m_ref->count=1;
-        m_ref->tex=tex;
+        m_ref=new ref(tex);
     }
 
     texture_proxy(const texture_proxy &proxy)
@@ -59,6 +57,11 @@ public:
 
     texture_proxy &operator=(const texture_proxy &proxy) 
     {
+		if(this==&proxy)
+			return *this;
+
+		free();
+
         m_ref=proxy.m_ref;
         if(m_ref)
             ++m_ref->count;
@@ -73,6 +76,8 @@ private:
     {
         int count;
         texture tex;
+
+		ref(const texture &tex):count(1),tex(tex){}
     };
 
     ref *m_ref;

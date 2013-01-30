@@ -61,6 +61,11 @@ public:
 
         shared_resource_ref &operator=(const shared_resource_ref &ref) 
         {
+			if(this==&ref)
+				return *this;
+
+			free();
+
             m_res=ref.m_res;
             m_res_holder=ref.m_res_holder;
             m_creator=ref.m_creator;
@@ -209,6 +214,8 @@ public:
 
         if(ref.m_res_holder->ref_count>0)
             return;
+
+		ref.m_res_holder->ref_count=0;
 
         if(!m_should_unload_unused)
             return;
@@ -397,7 +404,7 @@ private:
     struct res_holder
     {
         t_res res;
-        unsigned int ref_count;
+        int ref_count;
         resources_map_iterator map_it;
 
         res_holder *lru_prev;
