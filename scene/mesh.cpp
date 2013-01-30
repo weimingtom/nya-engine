@@ -73,9 +73,9 @@ void mesh::unload()
     m_replaced_materials_idx.clear();
 }
 
-void mesh::draw()
+void mesh::draw(int idx)
 {
-    if(!m_shared.is_valid())
+    if(!m_shared.is_valid() || idx>=(int)m_shared->groups.size())
         return;
 
     nya_math::mat4 mat=get_camera().get_view_matrix();
@@ -102,20 +102,30 @@ void mesh::draw()
 
     if(m_replaced_materials_idx.empty())
     {
-        for(size_t i=0;i<m_shared->groups.size();++i)
+        if(idx>=0)
         {
-            const shared_mesh::group &g=m_shared->groups[i];
+            const shared_mesh::group &g=m_shared->groups[idx];
             g.mat.set();
             m_shared->vbo.draw(g.offset,g.count);
             g.mat.unset();
         }
+        else
+        {
+            for(size_t i=0;i<m_shared->groups.size();++i)
+            {
+                const shared_mesh::group &g=m_shared->groups[i];
+                g.mat.set();
+                m_shared->vbo.draw(g.offset,g.count);
+                g.mat.unset();
+            }
+        }
     }
     else
     {
-        for(size_t i=0;i<m_shared->groups.size();++i)
+        if(idx>=0)
         {
-            const shared_mesh::group &g=m_shared->groups[i];
-            const int rep_idx=m_replaced_materials_idx[i];
+            const shared_mesh::group &g=m_shared->groups[idx];
+            const int rep_idx=m_replaced_materials_idx[idx];
             if(rep_idx>=0)
             {
                 m_replaced_materials[rep_idx].set();
@@ -127,6 +137,26 @@ void mesh::draw()
                 g.mat.set();
                 m_shared->vbo.draw(g.offset,g.count);
                 g.mat.unset();
+            }
+        }
+        else
+        {
+            for(size_t i=0;i<m_shared->groups.size();++i)
+            {
+                const shared_mesh::group &g=m_shared->groups[i];
+                const int rep_idx=m_replaced_materials_idx[i];
+                if(rep_idx>=0)
+                {
+                    m_replaced_materials[rep_idx].set();
+                    m_shared->vbo.draw(g.offset,g.count);
+                    m_replaced_materials[rep_idx].unset();
+                }
+                else
+                {
+                    g.mat.set();
+                    m_shared->vbo.draw(g.offset,g.count);
+                    g.mat.unset();
+                }
             }
         }
     }

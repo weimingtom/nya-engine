@@ -44,7 +44,7 @@ class mesh: public scene_shared<shared_mesh>
 public:
     virtual void unload();
 
-    void draw();
+    void draw(int group_idx=-1);
 
     void set_pos(float x,float y,float z) { m_pos.x=x; m_pos.y=y; m_pos.z=z; }
     void set_rot(float yaw,float pitch,float roll) { m_rot.y=yaw; m_rot.x=pitch; m_rot.z=roll; }
