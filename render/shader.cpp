@@ -311,11 +311,6 @@ void shader::add_program(program_type type,const char*code)
                         used_attribs[tc0_attribute+idx]=true;
                         replace=true;
                     }
-                    else if(code_str.size()>gl+16 && code_str.compare(gl+3,16,"ProjectionMatrix")==0)
-                    {
-                        m_mat_p=1;
-                        replace=true;
-                    }
                     else if(code_str.size()>gl+15 && code_str.compare(gl+3,15,"ModelViewMatrix")==0)
                     {
                         m_mat_mv=1;
@@ -324,6 +319,14 @@ void shader::add_program(program_type type,const char*code)
                     else if(code_str.size()>gl+25 && code_str.compare(gl+3,25,"ModelViewProjectionMatrix")==0)
                     {
                         m_mat_mvp=1;
+                        replace=true;
+                    }
+                    break;
+
+                case 'P':
+                    if(code_str.size()>gl+16 && code_str.compare(gl+3,16,"ProjectionMatrix")==0)
+                    {
+                        m_mat_p=1;
                         replace=true;
                     }
                     break;
