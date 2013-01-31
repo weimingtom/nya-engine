@@ -18,17 +18,22 @@ class material
     friend struct shared_mesh;
 
 public:
+    typedef nya_render::blend::mode blend_mode;
+
+public:
     const char *get_name() const { return m_name.c_str(); }
     int get_textures_count() const { return (int)m_textures.size(); }
     const char *get_texture_name(int idx) const;
     const char *get_texture_semantics(int idx) const;
+    bool get_zwrite() const { return m_zwrite; }
+    bool get_blend(blend_mode &src,blend_mode &dst) const { 
+                   src=m_blend_src; dst=m_blend_dst; return m_blend; }
+    bool get_blend() const { return m_blend; }
 
 public:
     void release();
 
 public:
-    typedef nya_render::blend::mode blend_mode;
-
     void set_name(const char*name) { m_name.assign(name?name:""); }
     void set_texture(const char *semantics,const texture &tex);
     void set_texture(const char *semantics,const texture_proxy &proxy);
