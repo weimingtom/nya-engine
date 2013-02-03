@@ -20,9 +20,16 @@ public:
         index2b=2,
         index4b=4
     };
+    
+    enum usage_hint
+    {
+        static_draw,
+        dynamic_draw,
+        stream_draw
+    };
 
-    void gen_vertex_data(const void*data,unsigned int vert_stride,unsigned int vert_count,bool dynamic=false);
-    void gen_index_data(const void*data,element_size size,unsigned int elements_count,bool dynamic=false);
+    void set_vertex_data(const void*data,unsigned int vert_stride,unsigned int vert_count,usage_hint usage=static_draw);
+    void set_index_data(const void*data,element_size size,unsigned int elements_count,usage_hint usage=static_draw);
     void set_element_type(element_type type) { m_element_type = type; }
     void set_normals(unsigned int offset);
     void set_tc(unsigned int tc_idx,unsigned int offset,unsigned int dimension=2);

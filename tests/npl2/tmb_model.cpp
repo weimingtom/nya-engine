@@ -271,7 +271,7 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
         average_color[j]+=0.4f;
     }
 
-    m_vbo.gen_vertex_data(&vertices[0],sizeof(vertex),verts_offset);
+    m_vbo.set_vertex_data(&vertices[0],sizeof(vertex),verts_offset);
     m_vbo.set_normals(3*sizeof(float));
     m_vbo.set_tc(0,6*sizeof(float));
     m_vbo.set_tc(1,8*sizeof(float),4);

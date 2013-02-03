@@ -33,14 +33,6 @@ void material::set() const
 
         m_textures[i].proxy->set(m_textures[i].slot);
     }
-/*
-    for(invalid_slots::const_iterator it=m_invalid_slots.begin();
-        it!=m_invalid_slots.end();++it)
-    {
-        nya_render::texture::select_multitex_slot(it->first);
-        nya_render::texture::unbind_all();
-    }
-*/
 }
 
 void material::unset() const
@@ -68,16 +60,8 @@ void material::set_shader(const shader &shdr)
 
     m_shader=shdr;
 
-    for(int i=0;i<m_shader.get_texture_slots_count();++i)
-        m_invalid_slots[i]=true;
-
     for(size_t i=0;i<m_textures.size();++i)
-    {
         m_textures[i].slot=m_shader.get_texture_slot(m_textures[i].semantics.c_str());
-        invalid_slots::iterator it=m_invalid_slots.find(m_textures[i].slot);
-        if(it!=m_invalid_slots.end())
-            m_invalid_slots.erase(it);
-    }
 }
 
 void material::set_texture(const char *semantics,const texture &tex)
@@ -108,9 +92,6 @@ void material::set_texture(const char *semantics,const texture_proxy &proxy)
     m_textures.back().proxy=proxy;
     m_textures.back().semantics.assign(semantics);
     m_textures.back().slot=m_shader.get_texture_slot(semantics);
-    invalid_slots::iterator it=m_invalid_slots.find(m_textures.back().slot);
-    if(it!=m_invalid_slots.end())
-        m_invalid_slots.erase(it);
 }
 
 void material::set_blend(bool enabled,blend_mode src,blend_mode dst)

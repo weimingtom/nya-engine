@@ -172,7 +172,10 @@ nya_log::get_log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n"
         nya_log::get_log()<<"on_free\n";
         
         get_scene().release();
+        
+#ifndef NO_UI
         m_ui.release();
+#endif
     }
 
 private:

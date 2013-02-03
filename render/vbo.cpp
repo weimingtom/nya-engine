@@ -35,6 +35,10 @@ namespace nya_render
         #define GL_STATIC_DRAW_ARB GL_STATIC_DRAW
     #endif
 
+    #ifndef GL_STREAM_DRAW_ARB
+        #define GL_STREAM_DRAW_ARB GL_STREAM_DRAW
+    #endif
+
     #ifndef GL_ELEMENT_ARRAY_BUFFER_ARB
         #define GL_ELEMENT_ARRAY_BUFFER_ARB GL_ELEMENT_ARRAY_BUFFER
     #endif
@@ -317,63 +321,71 @@ void vbo::release()
     m_vertex_id=m_index_id=0;
 }
 
-void vbo::gen_vertex_data(const void*data,unsigned int vert_stride,unsigned int vert_count,bool dynamic)
+int gl_usage(vbo::usage_hint usage)
 {
-    if(!check_init_vbo())
+    switch(usage)
     {
-        get_log()<<"Unable to gen vertices: vbo unsupported\n";
-        return;
+        case vbo::static_draw: return GL_STATIC_DRAW_ARB;
+        case vbo::dynamic_draw: return GL_DYNAMIC_DRAW_ARB;
+        case vbo::stream_draw: return GL_STREAM_DRAW_ARB;
     }
+}
 
+void vbo::set_vertex_data(const void*data,unsigned int vert_stride,unsigned int vert_count,usage_hint usage)
+{
     const unsigned int size=vert_count*vert_stride;
     if(size==0 || !data)
     {
         m_verts_count=0;
-        get_log()<<"Unable to gen vertices: invalid data\n";
+        get_log()<<"Unable to set vertices: invalid data\n";
         return;
     }
 
     if(!m_vertex_id)
     {
+        if(!check_init_vbo())
+        {
+            get_log()<<"Unable to gen vertex data: vbo unsupported\n";
+            return;
+        }
+
         vbo_glGenBuffers(1,&m_vertex_id);
-        vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,m_vertex_id);
     }
 
-    vbo_glBufferData(GL_ARRAY_BUFFER_ARB,size,data,dynamic?GL_DYNAMIC_DRAW_ARB:GL_STATIC_DRAW_ARB);
-
+    vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,m_vertex_id);
+    vbo_glBufferData(GL_ARRAY_BUFFER_ARB,size,data,gl_usage(usage));
     vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,0);
 
     m_vertex_stride=vert_stride;
     m_verts_count=vert_count;
 }
 
-void vbo::gen_index_data(const void*data,element_size size,unsigned int elements_count,bool dynamic)
+void vbo::set_index_data(const void*data,element_size size,unsigned int elements_count,usage_hint usage)
 {
-    if(!check_init_vbo())
-    {
-        get_log()<<"Unable to gen indexes: vbo unsupported\n";
-        return;
-    }
-
     const unsigned int buffer_size=elements_count*size;
     if(buffer_size==0 || !data)
     {
-        get_log()<<"Unable to gen indexes: invalid data\n";
+        get_log()<<"Unable to set indexes: invalid data\n";
         m_element_count=0;
         return;
     }
 
     if(!m_index_id)
     {
+        if(!check_init_vbo())
+        {
+            get_log()<<"Unable to gen index data: vbo unsupported\n";
+            return;
+        }
+
         vbo_glGenBuffers(1,&m_index_id);
-        vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,m_index_id);
     }
 
     m_element_count=elements_count;
     m_element_size=size;
 
-    vbo_glBufferData(GL_ELEMENT_ARRAY_BUFFER_ARB,buffer_size,data,dynamic?GL_DYNAMIC_DRAW_ARB:GL_STATIC_DRAW_ARB);
-
+    vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,m_index_id);
+    vbo_glBufferData(GL_ELEMENT_ARRAY_BUFFER_ARB,buffer_size,data,gl_usage(usage));
     vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,0);
 }
 

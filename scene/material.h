@@ -72,8 +72,6 @@ private:
     };
 
     std::vector<material_texture> m_textures;
-    typedef std::map<int,bool> invalid_slots;
-    invalid_slots m_invalid_slots;
 };
 
 }

@@ -46,7 +46,7 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
         reader.skip(1);
     }
 
-    res.vbo.gen_vertex_data(&vertices[0],sizeof(float)*11,vert_count);
+    res.vbo.set_vertex_data(&vertices[0],sizeof(float)*11,vert_count);
     res.vbo.set_normals(3*sizeof(float));
     res.vbo.set_tc(0,6*sizeof(float));
     res.vbo.set_tc(1,8*sizeof(float),3); //skin info
@@ -57,7 +57,7 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
     if(!reader.check_remained(sizeof(ushort)*ind_count))
         return false;
 
-    res.vbo.gen_index_data(data.get_data(reader.get_offset()),nya_render::vbo::index2b,ind_count);
+    res.vbo.set_index_data(data.get_data(reader.get_offset()),nya_render::vbo::index2b,ind_count);
 
     return true;
 }
