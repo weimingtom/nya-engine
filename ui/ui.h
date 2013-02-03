@@ -2,12 +2,16 @@
 
 /*
     left-bottom alligned
+ 
+    ToDo: external renderer(ui itself should not depend on nya_render),
+          textured ui skins, fonts
 */
 
 #pragma once
 
 #include "log/log.h"
 #include "memory/pool.h"
+#include "render/vbo.h"
 
 #include <string>
 #include <list>
@@ -378,6 +382,7 @@ public:
     virtual void draw();
     virtual void resize(uint width,uint height);
     virtual void process();
+    virtual void release();
 
 private:
     virtual void process_events(event &e) {}
@@ -451,7 +456,12 @@ public:
     virtual uint get_height() { return m_height; }
 
 public:
-    layer(): m_width(0), m_height(0) {}
+    layer(): m_width(0), m_height(0)
+    {
+        m_font_vbo.set_vertices(0,2);
+        m_font_vbo.set_tc(0,sizeof(float)*2,2);
+        m_font_vbo.set_element_type(nya_render::vbo::triangles);
+    }
 
 private:
     uint m_width;
@@ -460,6 +470,10 @@ private:
 private:
     typedef std::deque<event> events_deque;
     events_deque m_events;
+
+private:
+    nya_render::vbo m_rect_vbo;
+    nya_render::vbo m_font_vbo;
 
     //font m_default_font;
 };

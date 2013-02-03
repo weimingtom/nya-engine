@@ -107,28 +107,35 @@ void layer::draw_text(uint x,uint y,const char *text
     float px=-1.0f+2.0f*x/m_width;
     float py=-1.0f+2.0f*y/m_height;
 
-    const uint elem_per_char=4;
-    nya_memory::tmp_buffer_scoped vert_buf(text_str.size()*4*elem_per_char*sizeof(float));
-    const size_t tc_buf_offset=str_len*sizeof(float)*2*elem_per_char;
+    struct vertex
+    {
+        float x;
+        float y;
+        float s;
+        float t;
+    };
+
+    const uint elem_per_char=6;
+    nya_memory::tmp_buffer_scoped vert_buf(text_str.size()*elem_per_char*sizeof(vertex));
+
+    vertex *vertices=(vertex*)vert_buf.get_data();
 
     float dpos=0;
     for(size_t i=0;i<str_len;++i)
     {
-        const size_t buf_offset=i*sizeof(float)*2*elem_per_char;
-        float *pos=(float*)vert_buf.get_data(buf_offset);
-        float *tc=(float*)vert_buf.get_data(tc_buf_offset+buf_offset);
-
         const char c=text_str[i];
 
         if(c<32 || c>127)
             continue;
 
+        vertex *v=&vertices[elem_per_char*i];
+
         const uint char_width=char_widths[c-32];
 
-        pos[6]=pos[4]=px+dpos;
-        pos[2]=pos[0]=pos[6]+w*char_width/char_size;
-        pos[7]=pos[1]=py;
-        pos[5]=pos[3]=h+py;
+        v[2].x=v[5].x=px+dpos;
+        v[1].x=v[0].x=v[2].x+w*char_width/char_size;
+        v[0].y=v[5].y=py;
+        v[2].y=v[1].y=py+h;
 
         const uint letter_pos=c-32;
         const uint letter_x=(letter_pos)%chars_per_row;
@@ -141,24 +148,21 @@ void layer::draw_text(uint x,uint y,const char *text
 
         const float tc_fix=0.5f*(tc_w-float(char_width)/font_width);
 
-        tc[6]=tc[4]=tcx+tc_fix;
-        tc[2]=tc[0]=tcx+tcw-tc_fix;
-        tc[7]=tc[1]=tcy+tch;
-        tc[5]=tc[3]=tcy;
+        v[5].s=v[2].s=tcx+tc_fix;
+        v[1].s=v[0].s=tcx+tcw-tc_fix;
+        v[5].t=v[0].t=tcy+tch;
+        v[2].t=v[1].t=tcy;
+
+        v[3]=v[0];
+        v[4]=v[2];
 
         dpos+=w*char_width/char_size;
     }
 
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-    glVertexPointer(2,GL_FLOAT,0,vert_buf.get_data());
-    glTexCoordPointer(2,GL_FLOAT,0,vert_buf.get_data(tc_buf_offset));
-
-    glDrawArrays(GL_QUADS,0,(GLsizei)str_len*elem_per_char);
-
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
+    m_font_vbo.set_vertex_data(vert_buf.get_data(),sizeof(vertex),str_len*elem_per_char,nya_render::vbo::dynamic_draw);
+    m_font_vbo.bind();
+    m_font_vbo.draw();
+    m_font_vbo.unbind();
 }
 
 void layer::draw_rect(rect &r,rect_style &s)
@@ -178,24 +182,30 @@ void layer::draw_rect(rect &r,rect_style &s)
     pos[5]=pos[3]=h+py;
     pos[2]=pos[0]=w+px;
 
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(2,GL_FLOAT,0,pos);
+    m_rect_vbo.set_vertex_data(pos,sizeof(float)*2,4,nya_render::vbo::dynamic_draw);
+    m_rect_vbo.set_vertices(0,2);
+    m_rect_vbo.bind();
 
     if(s.solid)
     {
         glColor4f(s.solid_color.r,s.solid_color.g,
                   s.solid_color.b,s.solid_color.a);
-        glDrawArrays(GL_QUADS,0,4);
+
+        m_rect_vbo.set_element_type(nya_render::vbo::triangle_fan);
+
+        m_rect_vbo.draw();
     }
 
     if(s.border)
     {
         glColor4f(s.border_color.r,s.border_color.g,
                   s.border_color.b,s.border_color.a);
-        glDrawArrays(GL_LINE_LOOP,0,4);
+
+        m_rect_vbo.set_element_type(nya_render::vbo::line_loop);
+        m_rect_vbo.draw();
     }
 
-    glDisableClientState(GL_VERTEX_ARRAY);
+    m_rect_vbo.unbind();
 }
 
 void layer::set_scissor(rect &r)
@@ -222,6 +232,12 @@ void layer::process()
     }
 
     m_events.clear();
+}
+
+void layer::release()
+{
+    m_rect_vbo.release();
+    //m_font_vbo.release();
 }
 
 void layout::process_events(layout::event &e)

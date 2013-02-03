@@ -104,14 +104,14 @@
         doc->m_changed=false;
 
         const uint vstride=sizeof(float)*8;
-        m_vbo.gen_vertex_data(&doc->m_verts[0],vstride,(unsigned int)doc->m_verts.size()/8);
+        m_vbo.set_vertex_data(&doc->m_verts[0],vstride,(unsigned int)doc->m_verts.size()/8);
         m_vbo.set_normals(3*sizeof(float));
-        m_vbo.set_tc(0,6*sizeof(float));
+        m_vbo.set_tc(0,6*sizeof(float),2);
 
         if(doc->m_indices.empty())
             return;
 
-        m_vbo.gen_index_data(&doc->m_indices[0],nya_render::vbo::index2b,(unsigned int)doc->m_indices.size());
+        m_vbo.set_index_data(&doc->m_indices[0],nya_render::vbo::index2b,(unsigned int)doc->m_indices.size());
 
         m_materials.resize(doc->m_materials.size());
         for(unsigned int i=0;i<doc->m_materials.size();++i)

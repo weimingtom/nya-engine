@@ -273,7 +273,7 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
 
     m_vbo.set_vertex_data(&vertices[0],sizeof(vertex),verts_offset);
     m_vbo.set_normals(3*sizeof(float));
-    m_vbo.set_tc(0,6*sizeof(float));
+    m_vbo.set_tc(0,6*sizeof(float),2);
     m_vbo.set_tc(1,8*sizeof(float),4);
     m_vbo.set_tc(2,12*sizeof(float),4);
     m_vbo.set_tc(3,16*sizeof(float),4);
