@@ -285,8 +285,11 @@ void vbo::draw(unsigned int offset,unsigned int count) const
     switch(m_element_type)
     {
         case triangles: gl_elem=GL_TRIANGLES; break;
-        case triangles_strip: gl_elem=GL_TRIANGLE_STRIP; break;
-        case triangles_fan: gl_elem=GL_TRIANGLE_FAN; break;
+        case triangle_strip: gl_elem=GL_TRIANGLE_STRIP; break;
+        case triangle_fan: gl_elem=GL_TRIANGLE_FAN; break;
+        case points: gl_elem=GL_POINTS; break;
+        case lines: gl_elem=GL_LINES; break;
+        case line_loop: gl_elem=GL_LINE_LOOP; break;
         default: return;
     }
 
@@ -350,14 +353,20 @@ void vbo::set_vertex_data(const void*data,unsigned int vert_stride,unsigned int 
         }
 
         vbo_glGenBuffers(1,&m_vertex_id);
+        vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,m_vertex_id);
+    }
+    else
+    {
+        vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,m_vertex_id);
+        vbo_glBufferData(GL_ARRAY_BUFFER_ARB,m_vertex_stride*m_verts_count,0,gl_usage(m_vertex_usage));
     }
 
-    vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,m_vertex_id);
     vbo_glBufferData(GL_ARRAY_BUFFER_ARB,size,data,gl_usage(usage));
     vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,0);
 
     m_vertex_stride=vert_stride;
     m_verts_count=vert_count;
+    m_vertex_usage=usage;
 }
 
 void vbo::set_index_data(const void*data,element_size size,unsigned int elements_count,usage_hint usage)
@@ -379,14 +388,20 @@ void vbo::set_index_data(const void*data,element_size size,unsigned int elements
         }
 
         vbo_glGenBuffers(1,&m_index_id);
+        vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,m_index_id);
     }
+    else
+    {
+        vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,m_index_id);
+        vbo_glBufferData(GL_ELEMENT_ARRAY_BUFFER_ARB,m_element_count*m_element_size,0,gl_usage(m_elements_usage));
+    }
+
+    vbo_glBufferData(GL_ELEMENT_ARRAY_BUFFER_ARB,buffer_size,data,gl_usage(usage));
+    vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,0);
 
     m_element_count=elements_count;
     m_element_size=size;
-
-    vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,m_index_id);
-    vbo_glBufferData(GL_ELEMENT_ARRAY_BUFFER_ARB,buffer_size,data,gl_usage(usage));
-    vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,0);
+    m_elements_usage=usage;
 }
 
 void vbo::set_normals(unsigned int offset)

@@ -11,8 +11,11 @@ public:
     enum element_type
     {
         triangles,
-        triangles_strip,
-        triangles_fan
+        triangle_strip,
+        triangle_fan,
+        points,
+        lines,
+        line_loop
     };
 
     enum element_size
@@ -20,7 +23,7 @@ public:
         index2b=2,
         index4b=4
     };
-    
+
     enum usage_hint
     {
         static_draw,
@@ -62,12 +65,14 @@ private:
     element_type m_element_type;
     element_size m_element_size;
     unsigned int m_element_count;
+    usage_hint m_elements_usage;
 
     unsigned int m_vertex_id;
     unsigned int m_index_id;
     unsigned int m_verts_count;
 
     unsigned int m_vertex_stride;
+    usage_hint m_vertex_usage;
 
     mutable bool m_vertex_bind;
     mutable bool m_index_bind;
