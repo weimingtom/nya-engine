@@ -23,7 +23,7 @@ class texture: public scene_shared<shared_texture>
 {
     friend class material;
 
-private:
+public:
     static bool load_tga(shared_texture &res,resource_data &data,const char* name);
 
 private:
