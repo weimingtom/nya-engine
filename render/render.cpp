@@ -54,6 +54,8 @@ unsigned int blend::gl_mode(mode m)
         case dst_alpha: return GL_DST_ALPHA;
         case inv_dst_alpha: return GL_ONE_MINUS_DST_ALPHA;
     }
+
+    return GL_ONE;
 }
 
 void blend::enable(blend::mode src,blend::mode dst)

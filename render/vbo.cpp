@@ -363,6 +363,8 @@ int gl_usage(vbo::usage_hint usage)
         case vbo::dynamic_draw: return GL_DYNAMIC_DRAW_ARB;
         case vbo::stream_draw: return GL_STREAM_DRAW_ARB;
     }
+
+    return GL_DYNAMIC_DRAW_ARB;
 }
 
 void vbo::set_vertex_data(const void*data,unsigned int vert_stride,unsigned int vert_count,usage_hint usage)
