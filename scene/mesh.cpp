@@ -2,7 +2,6 @@
 
 #include "mesh.h"
 #include "scene.h"
-#include "camera.h"
 #include "render/render.h"
 #include "memory/tmp_buffer.h"
 #include "memory/memory_reader.h"
@@ -78,25 +77,7 @@ void mesh::draw(int idx)
     if(!m_shared.is_valid() || idx>=(int)m_shared->groups.size())
         return;
 
-    nya_math::mat4 mat=get_camera().get_view_matrix();
-    mat.translate(m_pos.x,m_pos.y,m_pos.z);
-    mat.rotate(m_rot.y,0,1,0);
-    mat.rotate(m_rot.x,1,0,0);
-    mat.rotate(m_rot.z,0,0,1);
-    mat.scale(m_scale.x,m_scale.y,m_scale.z);
-
-    nya_render::set_modelview_matrix(mat);
-
-	//ToDo: only for materials that need camera
-	//material::set_camera_local_pos(get_camera().get_pos()-m_pos);
-
-	nya_math::mat4 inv_transform;
-    //inv_transform.scale(m_scale.x,m_scale.y,m_scale.z);
-    inv_transform.rotate(-m_rot.z,0,0,1);
-    inv_transform.rotate(-m_rot.x,1,0,0);
-    inv_transform.rotate(-m_rot.y,0,1,0);
-    inv_transform.translate(-m_pos.x,-m_pos.y,-m_pos.z);
-	material::set_camera_local_pos(inv_transform*get_camera().get_pos());
+    nya_scene_internal::transform::set(m_transform);
 
     m_shared->vbo.bind();
 

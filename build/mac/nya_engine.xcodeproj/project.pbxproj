@@ -155,6 +155,10 @@
 		F2F0A0B41695F809007245BC /* matrix.h in Headers */ = {isa = PBXBuildFile; fileRef = F2F0A0B11695F809007245BC /* matrix.h */; };
 		F2F0A0B51695F809007245BC /* matrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2F0A0B21695F809007245BC /* matrix.cpp */; };
 		F2F0A0B61695F809007245BC /* matrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2F0A0B21695F809007245BC /* matrix.cpp */; };
+		F2FF5FD916C15CCE00C6A705 /* transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2FF5FD716C15CCE00C6A705 /* transform.cpp */; };
+		F2FF5FDA16C15CCE00C6A705 /* transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2FF5FD716C15CCE00C6A705 /* transform.cpp */; };
+		F2FF5FDB16C15CCE00C6A705 /* transform.h in Headers */ = {isa = PBXBuildFile; fileRef = F2FF5FD816C15CCE00C6A705 /* transform.h */; };
+		F2FF5FDC16C15CCE00C6A705 /* transform.h in Headers */ = {isa = PBXBuildFile; fileRef = F2FF5FD816C15CCE00C6A705 /* transform.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -237,6 +241,8 @@
 		F2F0A0A61695A794007245BC /* bezier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = bezier.cpp; path = ../../math/bezier.cpp; sourceTree = "<group>"; };
 		F2F0A0B11695F809007245BC /* matrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = matrix.h; path = ../../math/matrix.h; sourceTree = "<group>"; };
 		F2F0A0B21695F809007245BC /* matrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = matrix.cpp; path = ../../math/matrix.cpp; sourceTree = "<group>"; };
+		F2FF5FD716C15CCE00C6A705 /* transform.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = transform.cpp; path = ../../scene/transform.cpp; sourceTree = "<group>"; };
+		F2FF5FD816C15CCE00C6A705 /* transform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = transform.h; path = ../../scene/transform.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -274,6 +280,8 @@
 				F20E2D7816999B7000395A1B /* texture.cpp */,
 				F20E2D7B16999B7000395A1B /* texture.h */,
 				F2D7D35B16AC1EF400C7DEE5 /* texture_proxy.h */,
+				F2FF5FD716C15CCE00C6A705 /* transform.cpp */,
+				F2FF5FD816C15CCE00C6A705 /* transform.h */,
 			);
 			name = scene;
 			sourceTree = "<group>";
@@ -469,6 +477,7 @@
 				F20E2D911699A0C800395A1B /* shared_resources.h in Headers */,
 				F2BFD31F169C195D00ED4A9E /* constants.h in Headers */,
 				F2D7D35E16AC1EF600C7DEE5 /* texture_proxy.h in Headers */,
+				F2FF5FDC16C15CCE00C6A705 /* transform.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -518,6 +527,7 @@
 				F20E2D901699A0C800395A1B /* shared_resources.h in Headers */,
 				F2BFD31E169C195D00ED4A9E /* constants.h in Headers */,
 				F2D7D35D16AC1EF600C7DEE5 /* texture_proxy.h in Headers */,
+				F2FF5FDB16C15CCE00C6A705 /* transform.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -615,6 +625,7 @@
 				F20E2D8516999B7000395A1B /* material.cpp in Sources */,
 				F20E2D8716999B7000395A1B /* camera.cpp in Sources */,
 				F2BFD322169C1AF400ED4A9E /* constants.cpp in Sources */,
+				F2FF5FDA16C15CCE00C6A705 /* transform.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -657,6 +668,7 @@
 				F20E2D8416999B7000395A1B /* material.cpp in Sources */,
 				F20E2D8616999B7000395A1B /* camera.cpp in Sources */,
 				F2BFD321169C1AF400ED4A9E /* constants.cpp in Sources */,
+				F2FF5FD916C15CCE00C6A705 /* transform.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

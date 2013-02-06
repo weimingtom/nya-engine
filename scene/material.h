@@ -22,9 +22,11 @@ public:
 
 public:
     const char *get_name() const { return m_name.c_str(); }
+
     int get_textures_count() const { return (int)m_textures.size(); }
     const char *get_texture_name(int idx) const;
     const char *get_texture_semantics(int idx) const;
+
     bool get_zwrite() const { return m_zwrite; }
     bool get_blend(blend_mode &src,blend_mode &dst) const { 
                    src=m_blend_src; dst=m_blend_dst; return m_blend; }
@@ -45,10 +47,6 @@ public:
 private:
     void set() const;
     void unset() const;
-
-private:
-	static void set_camera_local_pos(const nya_math::vec3 &pos) 
-	{ shader::predefined::camera_local_pos=pos; }
 
 public:
     material(): m_zwrite(true),m_blend(false)

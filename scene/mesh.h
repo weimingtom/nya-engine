@@ -7,6 +7,7 @@
 #include "render/vbo.h"
 #include "render/skeleton.h"
 #include "math/vector.h"
+#include "transform.h"
 
 namespace nya_scene
 {
@@ -46,9 +47,9 @@ public:
 
     void draw(int group_idx=-1);
 
-    void set_pos(float x,float y,float z) { m_pos.x=x; m_pos.y=y; m_pos.z=z; }
-    void set_rot(float yaw,float pitch,float roll) { m_rot.y=yaw; m_rot.x=pitch; m_rot.z=roll; }
-    void set_scale(float sx,float sy,float sz) { m_scale.x=sx; m_scale.y=sy; m_scale.z=sz; }
+    void set_pos(float x,float y,float z) { m_transform.set_pos(x,y,z); }
+    void set_rot(float yaw,float pitch,float roll) { m_transform.set_rot(yaw,pitch,roll); }
+    void set_scale(float sx,float sy,float sz) { m_transform.set_scale(sx,sy,sz); }
 
 public:
     int get_materials_count();
@@ -58,16 +59,14 @@ public:
 public:
     const nya_render::skeleton &get_skeleton();
 
-private:
+public:
     static bool load_pmd(shared_mesh &res,resource_data &data,const char* name);
 
 public:
-    mesh():m_scale(nya_math::vec3(1.0f,1.0f,1.0f)) { register_load_function(load_pmd); }
+    mesh() { register_load_function(load_pmd); }
 
 private:
-    nya_math::vec3 m_pos;
-    nya_math::vec3 m_rot;
-    nya_math::vec3 m_scale;
+    nya_scene_internal::transform m_transform;
 
 private:
     std::vector<int> m_replaced_materials_idx;

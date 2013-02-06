@@ -2,11 +2,11 @@
 
 #include "shader.h"
 #include "scene.h"
+#include "camera.h"
+#include "transform.h"
 
 namespace nya_scene
 {
-
-nya_math::vec3 shader::predefined::camera_local_pos;
 
 bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* name)
 {
@@ -16,9 +16,20 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
 
     const char *text=(const char*)data.get_data();
 
-    std::map<std::string,std::string> samplers;
+    struct description
+    {
+        struct predefined
+        {
+            std::string name;
+            bool local;
+        };
 
-	std::string predef_cam_local_pos;
+        predefined predefines[shared_shader::predefines_count];
+
+        typedef std::map<std::string,std::string> strings_map;
+        strings_map samplers;
+        strings_map uniforms;
+    } desc;
 
     for(size_t i=0;i<data_size-1;++i)
     {
@@ -27,7 +38,8 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
 
         ++i;
 
-        switch (text[i]) 
+        char check=text[i];
+        switch (check) 
         {
             case 'a':
                 if(i+3<data_size && strncmp(&text[i],"all",3)==0)
@@ -42,7 +54,7 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
                     --i;
                 }
                 break;
-                
+
             case 's':
                 if(i+8<data_size && strncmp(&text[i],"sampler",7)==0)
                 {
@@ -55,15 +67,24 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
 
                     while(i<data_size && (text[i]==' ' || text[i]=='\t')) ++i;
 
-                    for(begin=i;i<data_size;++i)
-                        if(text[i]=='\n' || text[i]=='\r'
-                           || text[i]==' ' || text[i]=='\t')
-                            break;
+                    for(begin=std::string::npos;i<data_size;++i)
+                    {
+                        if(text[i]=='"')
+                        {
+                            if(begin==std::string::npos)
+                            {
+                                begin=i+1;
+                                continue;
+                            }
 
-                    std::string sampler_semantics=std::string(&text[begin],i-begin);
-                    samplers[sampler_semantics]=sampler_name;
-                    res.samplers[sampler_semantics]=-1;
-                    --i;
+                            std::string sampler_semantics=std::string(&text[begin],i-begin);
+                            desc.samplers[sampler_semantics]=sampler_name;
+                            res.samplers[sampler_semantics]=-1;
+                        }
+
+                        if(text[i]=='\n' || text[i]=='\r')
+                            break;
+                    }
                 }
                 break;
 
@@ -94,36 +115,68 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
             break;
 
             case 'p':
-                if(i+5<data_size && strncmp(&text[i],"pixel",5)==0)
+            case 'u':
+                if((check=='p' && i+11<data_size && strncmp(&text[i],"predefined",10)==0)
+                   || (check=='u' && i+8<data_size && strncmp(&text[i],"uniform",7)==0))
                 {
-                    size_t begin=i+5;
-                    for(i=begin;i<data_size;++i)
-                        if(text[i]=='@')
-                            break;
+                    size_t begin=i+8;
+                    if(check=='p')
+                        begin+=(11-8);
 
-                    res.pixel.append(&text[begin],i-begin);
-                    --i;
-                }
-                else if(i+11<data_size && strncmp(&text[i],"predefined",10)==0)
-                {
-                    size_t begin=i+11;
                     for(i=begin;i<data_size;++i)
                         if(text[i]==' ' || text[i]=='\t')
                             break;
 
-                    std::string predef_name(&text[begin],i-begin);
+                    std::string name(&text[begin],i-begin);
 
-                    while(i<data_size && (text[i]==' ' || text[i]=='\t')) ++i;
+                    for(begin=std::string::npos;i<data_size;++i)
+                    {
+                        if(text[i]=='"')
+                        {
+                            if(begin==std::string::npos)
+                            {
+                                begin=i+1;
+                                continue;
+                            }
 
-                    for(begin=i;i<data_size;++i)
-                        if(text[i]=='\n' || text[i]=='\r'
-                           || text[i]==' ' || text[i]=='\t')
+                            std::string semantics=std::string(&text[begin],i-begin);
+
+                            bool local=false;
+                            for(begin=std::string::npos;i<data_size;++i)
+                            {
+                                if(text[i]=='\n' || text[i]=='\r')
+                                {
+                                    if(begin!=std::string::npos)
+                                    {
+                                        std::string params=std::string(&text[begin],i-begin);
+                                        if(params.find("local")!=std::string::npos)
+                                            local=true;
+                                    }
+
+                                    break;
+                                }
+
+                                if(text[i]==':')
+                                    begin=i+1;
+                            }
+
+                            if(check=='p')
+                            {
+                                if(semantics=="nya camera position")
+                                {
+                                    description::predefined &p=desc.predefines[shared_shader::camera_pos];
+                                    p.name=name;
+                                    p.local=local;
+                                }
+                            }
+                            else
+                            {
+                            }
+                        }
+
+                        if(text[i]=='\n' || text[i]=='\r')
                             break;
-
-                    std::string predef_semantics=std::string(&text[begin],i-begin);
-					if(predef_semantics=="nya_camera_local_pos")
-						predef_cam_local_pos=predef_name;
-                    --i;
+                    }
                 }
                 break;
 
@@ -147,11 +200,12 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
 
     //get_log()<<"vertex <"<<res.vertex.c_str()<<">\n";
     //get_log()<<"pixel <"<<res.pixel.c_str()<<">\n";
+
     res.samplers_count=0;
     for(shared_shader::samplers_map::iterator it=res.samplers.begin();
         it!=res.samplers.end();++it)
     {
-        res.shdr.set_sampler(samplers[it->first].c_str(),res.samplers_count);
+        res.shdr.set_sampler(desc.samplers[it->first].c_str(),res.samplers_count);
         it->second=res.samplers_count;
         ++res.samplers_count;
     }
@@ -159,8 +213,17 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
     res.shdr.add_program(nya_render::shader::vertex,res.vertex.c_str());
     res.shdr.add_program(nya_render::shader::pixel,res.pixel.c_str());
 
-	if(!predef_cam_local_pos.empty())
-		res.predef_camera_local_pos=res.shdr.get_handler(predef_cam_local_pos.c_str());
+    for(shared_shader::predefined_values i=shared_shader::predefines_first;i<shared_shader::predefines_count;++i)
+    {
+        const description::predefined &p=desc.predefines[i];
+        if(p.name.empty())
+            continue;
+
+        res.predefines.resize(res.predefines.size()+1);
+        res.predefines.back().local=p.local;
+        res.predefines.back().type=i;
+        res.predefines.back().location=res.shdr.get_handler(p.name.c_str());
+    }
 
     return true;
 }
@@ -172,11 +235,29 @@ void shader::set() const
 
     m_shared->shdr.bind();
 
-	if(m_shared->predef_camera_local_pos>=0)
-	{
-		m_shared->shdr.set_uniform(m_shared->predef_camera_local_pos,predefined::camera_local_pos.x,
-								   predefined::camera_local_pos.y,predefined::camera_local_pos.z);
-	}
+    for(size_t i=0;i<m_shared->predefines.size();++i)
+    {
+        const shared_shader::predefined &p=m_shared->predefines[i];
+        switch(p.type)
+        {
+            case shared_shader::camera_pos:
+            {
+                if(p.local)
+                {
+                    const nya_math::vec3 v=nya_scene_internal::transform::get().inverse_transform(get_camera().get_pos());
+                    m_shared->shdr.set_uniform(p.location,v.x,v.y,v.z);
+                }
+                else
+                {
+                    const nya_math::vec3 v=get_camera().get_pos();
+                    m_shared->shdr.set_uniform(p.location,v.x,v.y,v.z);
+                }
+            }
+            break;
+
+            default: break;
+        }
+    }
 }
 
 void shader::unset() const
@@ -205,6 +286,27 @@ int shader::get_texture_slots_count() const
         return 0;
 
     return m_shared->samplers_count;
+}
+
+const shared_shader::uniform &shader::get_uniform(int idx) const
+{
+    return m_shared->uniforms[idx];
+}
+
+void shader::set_uniform_value(int idx,float f0,float f1,float f2,float f3) const
+{
+    if(idx<0 || idx >=m_shared->uniforms.size())
+        return;
+
+    m_shared->shdr.set_uniform(m_shared->uniforms[idx].location,f0,f1,f2,f3);
+}
+
+int shader::get_uniforms_count() const
+{
+    if(!m_shared.is_valid())
+        return 0;
+
+    return m_shared->uniforms.size();
 }
 
 }

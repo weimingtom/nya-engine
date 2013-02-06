@@ -19,15 +19,41 @@ struct shared_shader
     samplers_map samplers;
     int samplers_count;
 
-	int predef_camera_local_pos;
+    enum predefined_values
+    {
+        predefines_first=0,
+        camera_pos=0,
 
-	shared_shader(): predef_camera_local_pos(-1),samplers_count(0){}
+        predefines_count
+    };
+
+    struct predefined
+    {
+        predefined_values type;
+        int location;
+        bool local;
+    };
+
+    std::vector<predefined> predefines;
+
+    struct uniform
+    {
+        std::string name;
+        int location;
+        bool local;
+    };
+
+    std::vector<uniform> uniforms;
+
+	shared_shader():samplers_count(0){}
 
     bool release()
     {
         vertex.clear();
         pixel.clear();
         shdr.release();
+        predefines.clear();
+        uniforms.clear();
         samplers.clear();
         samplers_count=0;
         return true;
@@ -50,10 +76,9 @@ private:
     int get_texture_slots_count() const;
 
 private:
-	struct predefined
-	{
-		static nya_math::vec3 camera_local_pos;
-	};
+    const shared_shader::uniform &get_uniform(int idx) const;
+    void set_uniform_value(int idx,float f0,float f1,float f2,float f3) const;
+    int get_uniforms_count() const;
 
 public:
     shader() { register_load_function(load_nya_shader); }
