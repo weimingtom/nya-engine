@@ -72,7 +72,7 @@ void mesh::unload()
     m_replaced_materials_idx.clear();
 }
 
-void mesh::draw(int idx)
+void mesh::draw(int idx) const
 {
     if(!m_shared.is_valid() || idx>=(int)m_shared->groups.size())
         return;
@@ -145,7 +145,7 @@ void mesh::draw(int idx)
     m_shared->vbo.unbind();
 }
 
-int mesh::get_materials_count()
+int mesh::get_materials_count() const
 {
     if(!m_shared.is_valid())
         return 0;
@@ -153,12 +153,12 @@ int mesh::get_materials_count()
     return (int)m_shared->groups.size();
 }
 
-const material &mesh::get_material(int idx)
+const material &mesh::get_material(int idx) const
 {
     if(!m_shared.is_valid() || idx<0 || idx>=(int)m_shared->groups.size())
     {
-        const static material empty;
-        return empty;
+        const static material invalid;
+        return invalid;
     }
 
     if(!m_replaced_materials.empty())
@@ -169,6 +169,29 @@ const material &mesh::get_material(int idx)
     }
 
     return m_shared->groups[idx].mat;
+}
+
+material &mesh::modify_material(int idx)
+{
+    if(!m_shared.is_valid() || idx<0 || idx>=(int)m_shared->groups.size())
+    {
+        static material invalid;
+        invalid=material();
+        return invalid;
+    }
+
+    if(m_replaced_materials.empty())
+        m_replaced_materials_idx.resize(m_shared->groups.size(),-1);
+
+    int &replace_idx=m_replaced_materials_idx[idx];
+    if(replace_idx<0)
+    {
+        replace_idx=(int)m_replaced_materials.size();
+        m_replaced_materials.resize(m_replaced_materials.size()+1);
+        m_replaced_materials.back()=m_shared->groups[idx].mat;
+    }
+
+    return m_replaced_materials[replace_idx];
 }
 
 void mesh::set_material(int idx,const material &mat)
@@ -190,12 +213,12 @@ void mesh::set_material(int idx,const material &mat)
     m_replaced_materials.back()=mat;
 }
 
-const nya_render::skeleton &mesh::get_skeleton()
+const nya_render::skeleton &mesh::get_skeleton() const
 {
     if(!m_shared.is_valid())
     {
-        static nya_render::skeleton empty;
-        return empty;
+        static nya_render::skeleton invalid;
+        return invalid;
     }
 
     return m_shared->skeleton;
