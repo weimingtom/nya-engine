@@ -297,7 +297,7 @@ int shader::get_texture_slots_count() const
 
 const shared_shader::uniform &shader::get_uniform(int idx) const
 {
-    if(idx<0 || idx >=(int)m_shared->uniforms.size())
+    if(!m_shared.is_valid() || idx<0 || idx >=(int)m_shared->uniforms.size())
     {
         static shared_shader::uniform invalid;
         return invalid;
@@ -308,10 +308,16 @@ const shared_shader::uniform &shader::get_uniform(int idx) const
 
 void shader::set_uniform_value(int idx,float f0,float f1,float f2,float f3) const
 {
-    if(idx<0 || idx >=(int)m_shared->uniforms.size())
+    if(!m_shared.is_valid() || idx<0 || idx >=(int)m_shared->uniforms.size())
         return;
 
-    m_shared->shdr.set_uniform(m_shared->uniforms[idx].location,f0,f1,f2,f3);
+    if(m_shared->uniforms[idx].local)
+    {
+        nya_math::vec3 v=nya_scene_internal::transform::get().inverse_transform(nya_math::vec3(f0,f1,f2));
+        m_shared->shdr.set_uniform(m_shared->uniforms[idx].location,v.x,v.y,v.z,f3);
+    }
+    else
+        m_shared->shdr.set_uniform(m_shared->uniforms[idx].location,f0,f1,f2,f3);
 }
 
 int shader::get_uniforms_count() const
