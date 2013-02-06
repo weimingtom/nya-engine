@@ -27,6 +27,11 @@ public:
     const char *get_texture_name(int idx) const;
     const char *get_texture_semantics(int idx) const;
 
+    int get_params_count() const { return m_shader.get_uniforms_count(); }
+    const char *get_param_name(int idx) const;
+    int get_param_idx(const char *name) const;
+    void set_param(int idx,float f0,float f1,float f2,float f3);
+
     bool get_zwrite() const { return m_zwrite; }
     bool get_blend(blend_mode &src,blend_mode &dst) const { 
                    src=m_blend_src; dst=m_blend_dst; return m_blend; }
@@ -70,6 +75,15 @@ private:
     };
 
     std::vector<material_texture> m_textures;
+
+    struct param
+    {
+        float f[4];
+ 
+        param(){for(int i=0;i<4;++i)f[i]=0;}
+    };
+
+    std::vector<param> m_params;
 };
 
 }

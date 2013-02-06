@@ -8,6 +8,12 @@ namespace nya_scene
 void material::set() const
 {
     m_shader.set();
+    
+    for(size_t i=0;i<m_params.size();++i)
+    {
+        const param &p=m_params[i];
+        m_shader.set_uniform_value(i,p.f[0],p.f[1],p.f[2],p.f[3]); 
+    }
 
     if(m_blend)
         nya_render::blend::enable(m_blend_src,m_blend_dst);
@@ -62,6 +68,9 @@ void material::set_shader(const shader &shdr)
 
     for(size_t i=0;i<m_textures.size();++i)
         m_textures[i].slot=m_shader.get_texture_slot(m_textures[i].semantics.c_str());
+
+    m_params.clear();
+    m_params.resize(m_shader.get_uniforms_count());
 }
 
 void material::set_texture(const char *semantics,const texture &tex)
@@ -118,6 +127,40 @@ const char *material::get_texture_semantics(int idx) const
         return 0;
 
     return m_textures[idx].semantics.c_str();
+}
+
+const char *material::get_param_name(int idx) const
+{
+    if(idx<0 || idx>=m_params.size())
+        return 0;
+
+    return m_shader.get_uniform(idx).name.c_str();
+}
+
+int material::get_param_idx(const char *name) const
+{
+    if(!name)
+        return -1;
+
+    for(int i=0;i<m_shader.get_uniforms_count();++i)
+    {
+        if(m_shader.get_uniform(i).name.compare(name)==0)
+            return i;
+    }
+
+    return -1;
+}
+
+void material::set_param(int idx,float f0,float f1,float f2,float f3)
+{
+    if(idx<0 || idx>=m_params.size())
+        return;
+
+    param &p=m_params[idx];
+    p.f[0]=f0;
+    p.f[1]=f1;
+    p.f[2]=f2;
+    p.f[3]=f3;
 }
 
 void material::release()
