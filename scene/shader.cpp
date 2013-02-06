@@ -169,8 +169,12 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
                                     p.local=local;
                                 }
                             }
-                            else
+                            else if(desc.uniforms.find(semantics)==desc.uniforms.end())
                             {
+                                desc.uniforms[semantics]=name;
+                                res.uniforms.resize(res.uniforms.size()+1);
+                                res.uniforms.back().name=semantics;
+                                res.uniforms.back().local=local;
                             }
                         }
 
@@ -224,6 +228,9 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
         res.predefines.back().type=(shared_shader::predefined_values)i;
         res.predefines.back().location=res.shdr.get_handler(p.name.c_str());
     }
+
+    for(int i=0;i<(int)res.uniforms.size();++i)
+        res.uniforms[i].location=res.shdr.get_handler(desc.uniforms[res.uniforms[i].name].c_str());
 
     return true;
 }
