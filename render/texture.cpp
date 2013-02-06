@@ -80,7 +80,7 @@ void texture::build_texture(const void *data,unsigned int width,unsigned int hei
 #endif
 
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
 }
 
 void texture::build_cubemap(const void *data[6],unsigned int width,unsigned int height,color_format format)
