@@ -443,6 +443,36 @@
 				RelativePath="..\..\scene\texture.h"
 				>
 			</File>
+			<File
+				RelativePath="..\..\scene\texture_proxy.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\scene\transform.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\scene\transform.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="ui"
