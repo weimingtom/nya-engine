@@ -25,12 +25,19 @@ struct shared_shader
 
         predefines_count
     };
+    
+    enum transform_type
+    {
+        none,
+        local,
+        local_rot
+    };
 
     struct predefined
     {
         predefined_values type;
         int location;
-        bool local;
+        transform_type transform;
     };
 
     std::vector<predefined> predefines;
@@ -39,7 +46,7 @@ struct shared_shader
     {
         std::string name;
         int location;
-        bool local;
+        transform_type transform;
     };
 
     std::vector<uniform> uniforms;

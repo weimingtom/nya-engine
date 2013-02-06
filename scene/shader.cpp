@@ -21,7 +21,7 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
         struct predefined
         {
             std::string name;
-            bool local;
+            shared_shader::transform_type transform;
         };
 
         predefined predefines[shared_shader::predefines_count];
@@ -141,7 +141,7 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
 
                             std::string semantics=std::string(&text[begin],i-begin);
 
-                            bool local=false;
+                            shared_shader::transform_type transform=shared_shader::none;
                             for(begin=std::string::npos;i<data_size;++i)
                             {
                                 if(text[i]=='\n' || text[i]=='\r')
@@ -149,8 +149,10 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
                                     if(begin!=std::string::npos)
                                     {
                                         std::string params=std::string(&text[begin],i-begin);
-                                        if(params.find("local")!=std::string::npos)
-                                            local=true;
+                                        if(params.find("local_rot")!=std::string::npos)
+                                            transform=shared_shader::local_rot;
+                                        else if(params.find("local")!=std::string::npos)
+                                            transform=shared_shader::local;
                                     }
 
                                     break;
@@ -166,7 +168,7 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
                                 {
                                     description::predefined &p=desc.predefines[shared_shader::camera_pos];
                                     p.name=name;
-                                    p.local=local;
+                                    p.transform=transform;
                                 }
                             }
                             else if(desc.uniforms.find(semantics)==desc.uniforms.end())
@@ -174,7 +176,7 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
                                 desc.uniforms[semantics]=name;
                                 res.uniforms.resize(res.uniforms.size()+1);
                                 res.uniforms.back().name=semantics;
-                                res.uniforms.back().local=local;
+                                res.uniforms.back().transform=transform;
                             }
                         }
 
@@ -224,7 +226,7 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
             continue;
 
         res.predefines.resize(res.predefines.size()+1);
-        res.predefines.back().local=p.local;
+        res.predefines.back().transform=p.transform;
         res.predefines.back().type=(shared_shader::predefined_values)i;
         res.predefines.back().location=res.shdr.get_handler(p.name.c_str());
     }
@@ -249,9 +251,14 @@ void shader::set() const
         {
             case shared_shader::camera_pos:
             {
-                if(p.local)
+                if(p.transform==shared_shader::local)
                 {
                     const nya_math::vec3 v=nya_scene_internal::transform::get().inverse_transform(get_camera().get_pos());
+                    m_shared->shdr.set_uniform(p.location,v.x,v.y,v.z);
+                }
+                else if(p.transform==shared_shader::local_rot)
+                {
+                    const nya_math::vec3 v=nya_scene_internal::transform::get().inverse_rot(get_camera().get_pos());
                     m_shared->shdr.set_uniform(p.location,v.x,v.y,v.z);
                 }
                 else
@@ -311,9 +318,14 @@ void shader::set_uniform_value(int idx,float f0,float f1,float f2,float f3) cons
     if(!m_shared.is_valid() || idx<0 || idx >=(int)m_shared->uniforms.size())
         return;
 
-    if(m_shared->uniforms[idx].local)
+    if(m_shared->uniforms[idx].transform==shared_shader::local)
     {
         nya_math::vec3 v=nya_scene_internal::transform::get().inverse_transform(nya_math::vec3(f0,f1,f2));
+        m_shared->shdr.set_uniform(m_shared->uniforms[idx].location,v.x,v.y,v.z,f3);
+    }
+    else if(m_shared->uniforms[idx].transform==shared_shader::local_rot)
+    {
+        nya_math::vec3 v=nya_scene_internal::transform::get().inverse_rot(nya_math::vec3(f0,f1,f2));
         m_shared->shdr.set_uniform(m_shared->uniforms[idx].location,v.x,v.y,v.z,f3);
     }
     else

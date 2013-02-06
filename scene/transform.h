@@ -21,6 +21,7 @@ public:
 
 public:
     nya_math::vec3 inverse_transform(const nya_math::vec3 &vec) const;
+    nya_math::vec3 inverse_rot(const nya_math::vec3 &vec) const;
 
 public:
     transform():m_scale(nya_math::vec3(1.0f,1.0f,1.0f)){}

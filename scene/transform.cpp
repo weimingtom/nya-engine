@@ -47,6 +47,16 @@ nya_math::vec3 transform::inverse_transform(const nya_math::vec3 &vec) const
     return inv_transform*vec;
 }
 
+nya_math::vec3 transform::inverse_rot(const nya_math::vec3 &vec) const
+{
+    nya_math::mat4 inv_transform;
+    inv_transform.rotate(-m_rot.z,0,0,1);
+    inv_transform.rotate(-m_rot.x,1,0,0);
+    inv_transform.rotate(-m_rot.y,0,1,0);
+
+    return inv_transform*vec;
+}
+
 void transform::apply() const
 {
     nya_math::mat4 mat=nya_scene::get_camera().get_view_matrix();
