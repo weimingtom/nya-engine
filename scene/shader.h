@@ -21,7 +21,6 @@ struct shared_shader
 
     enum predefined_values
     {
-        predefines_first=0,
         camera_pos=0,
 
         predefines_count

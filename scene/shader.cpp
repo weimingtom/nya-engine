@@ -213,7 +213,7 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
     res.shdr.add_program(nya_render::shader::vertex,res.vertex.c_str());
     res.shdr.add_program(nya_render::shader::pixel,res.pixel.c_str());
 
-    for(shared_shader::predefined_values i=shared_shader::predefines_first;i<shared_shader::predefines_count;++i)
+    for(int i=0;i<shared_shader::predefines_count;++i)
     {
         const description::predefined &p=desc.predefines[i];
         if(p.name.empty())
@@ -221,7 +221,7 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
 
         res.predefines.resize(res.predefines.size()+1);
         res.predefines.back().local=p.local;
-        res.predefines.back().type=i;
+        res.predefines.back().type=(shared_shader::predefined_values)i;
         res.predefines.back().location=res.shdr.get_handler(p.name.c_str());
     }
 
@@ -290,12 +290,18 @@ int shader::get_texture_slots_count() const
 
 const shared_shader::uniform &shader::get_uniform(int idx) const
 {
+    if(idx<0 || idx >=(int)m_shared->uniforms.size())
+    {
+        static shared_shader::uniform invalid;
+        return invalid;
+    }
+
     return m_shared->uniforms[idx];
 }
 
 void shader::set_uniform_value(int idx,float f0,float f1,float f2,float f3) const
 {
-    if(idx<0 || idx >=m_shared->uniforms.size())
+    if(idx<0 || idx >=(int)m_shared->uniforms.size())
         return;
 
     m_shared->shdr.set_uniform(m_shared->uniforms[idx].location,f0,f1,f2,f3);
