@@ -131,7 +131,7 @@ const char *material::get_texture_semantics(int idx) const
 
 const char *material::get_param_name(int idx) const
 {
-    if(idx<0 || idx>=m_params.size())
+    if(idx<0 || idx>=(int)m_params.size())
         return 0;
 
     return m_shader.get_uniform(idx).name.c_str();
@@ -153,7 +153,7 @@ int material::get_param_idx(const char *name) const
 
 void material::set_param(int idx,float f0,float f1,float f2,float f3)
 {
-    if(idx<0 || idx>=m_params.size())
+    if(idx<0 || idx>=(int)m_params.size())
         return;
 
     param &p=m_params[idx];

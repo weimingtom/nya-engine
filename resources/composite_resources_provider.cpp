@@ -159,7 +159,7 @@ resource_data *composite_resources_provider::access(const char *resource_name)
 
     if(!m_cache_entries)
     {
-        for(int i=0;i<m_providers.size();++i)
+        for(size_t i=0;i<m_providers.size();++i)
         {
             if(m_providers[i]->has(resource_name))
                 return m_providers[i]->access(resource_name);
@@ -205,7 +205,7 @@ bool composite_resources_provider::has(const char *resource_name)
 
     if(!m_cache_entries)
     {
-        for(int i=0;i<m_providers.size();++i)
+        for(size_t i=0;i<m_providers.size();++i)
         {
             if(m_providers[i]->has(resource_name))
                 return true;
