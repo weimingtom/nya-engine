@@ -29,6 +29,19 @@ public:
         return m_shared.is_valid();
     }
 
+    void create(const t &res)
+    {
+        typename shared_resources::shared_resource_mutable_ref ref=get_shared_resources().create();        
+        if(!ref.is_valid())
+        {
+            unload();
+            return;
+        }
+
+        *ref.get()=res;
+        m_shared=ref;
+    }
+
     virtual void unload()
     {
         if(m_shared.is_valid())
