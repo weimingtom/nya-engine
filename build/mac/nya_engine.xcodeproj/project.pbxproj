@@ -728,6 +728,7 @@
 				OBJROOT = ../../obj/;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
 				SYMROOT = ../../bin/;
 				USER_HEADER_SEARCH_PATHS = ../../;
 			};
@@ -752,6 +753,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				OBJROOT = ../../obj/;
 				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
 				SYMROOT = ../../bin/;
 				USER_HEADER_SEARCH_PATHS = ../../;
 			};
