@@ -196,8 +196,8 @@ public:
 
     void reload_resources()
     {
-        resources_map_iterator it=m_res_map.begin();
-        while(it!=m_res_map.end())
+        for(resources_map_iterator it=m_res_map.begin();
+            it!=m_res_map.end();++it)
         {
             if(!it->second || it->first.empty())
                 continue;
@@ -265,7 +265,6 @@ public:
     void free_unused()
     {
         resources_map_iterator it=m_res_map.begin();
-
         while(it!=m_res_map.end())
         {
             if(it->second)
