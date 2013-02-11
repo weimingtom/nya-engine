@@ -54,6 +54,9 @@ public:
     static void set_resources_prefix(const char *prefix) { get_resources_prefix().assign(prefix?prefix:""); }
 
 public:
+    static void reload_all_resources() { get_shared_resources().reload_resources(); }
+
+public:
     typedef bool (*load_function)(t &sh,resource_data &data,const char *name);
 
     static void register_load_function(load_function function)
@@ -94,9 +97,9 @@ protected:
             file_data->read_all(res_data.get_data());
             file_data->release();
 
-            for(size_t i=0;i<m_loader.get_load_functions().size();++i)
+            for(size_t i=0;i<scene_shared::get_load_functions().size();++i)
             {
-                if(m_loader.get_load_functions()[i](res,res_data,name))
+                if(scene_shared::get_load_functions()[i](res,res_data,name))
                 {
                     res_data.free(); //just for shure, load function should do this
                     return true;
@@ -114,17 +117,11 @@ protected:
         {
             return res.release();
         }
-
-    public:
-        shared_resources_manager(scene_shared &loader):m_loader(loader){}
-
-    private:
-        scene_shared &m_loader;
     };
 
-    shared_resources_manager &get_shared_resources()
+    static shared_resources_manager &get_shared_resources()
     {
-        static shared_resources_manager manager(*this);
+        static shared_resources_manager manager;
         return manager;
     }
 

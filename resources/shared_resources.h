@@ -194,6 +194,19 @@ public:
         return shared_resource_mutable_ref(&(holder->res),holder,this);
     }
 
+    void reload_resources()
+    {
+        resources_map_iterator it=m_res_map.begin();
+        while(it!=m_res_map.end())
+        {
+            if(!it->second || it->first.empty())
+                continue;
+
+            release_resource(it->second->res);
+            fill_resource(it->first.c_str(),it->second->res);
+        }
+    }
+
     const char *get_res_name(const shared_resource_ref&ref)
     {
         if(!ref.m_res_holder)
