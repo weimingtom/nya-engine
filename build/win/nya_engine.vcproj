@@ -380,6 +380,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\scene\proxy.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\scene\scene.cpp"
 				>
 			</File>
@@ -441,10 +445,6 @@
 			</File>
 			<File
 				RelativePath="..\..\scene\texture.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\scene\texture_proxy.h"
 				>
 			</File>
 			<File
