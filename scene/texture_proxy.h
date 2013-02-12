@@ -28,6 +28,14 @@ public:
         return &m_ref->tex;
     };
 
+    void set(const texture &tex)
+    {
+        if(!m_ref)
+            return;
+
+        m_ref->tex=tex;
+    }
+
     void free()
     {
         if(!m_ref)
