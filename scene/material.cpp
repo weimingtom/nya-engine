@@ -8,11 +8,17 @@ namespace nya_scene
 void material::set() const
 {
     m_shader.set();
-    
-    for(size_t i=0;i<m_params.size();++i)
+
+    for(int i=0;i<(int)m_params.size();++i)
     {
-        const param &p=m_params[i];
-        m_shader.set_uniform_value(i,p.f[0],p.f[1],p.f[2],p.f[3]); 
+        const param_proxy &p=m_params[i];
+        if(!p.is_valid())
+        {
+            m_shader.set_uniform_value(i,0,0,0,0); 
+            continue;
+        }
+
+        m_shader.set_uniform_value(i,p->f[0],p->f[1],p->f[2],p->f[3]); 
     }
 
     if(m_blend)
@@ -156,11 +162,7 @@ void material::set_param(int idx,float f0,float f1,float f2,float f3)
     if(idx<0 || idx>=(int)m_params.size())
         return;
 
-    param &p=m_params[idx];
-    p.f[0]=f0;
-    p.f[1]=f1;
-    p.f[2]=f2;
-    p.f[3]=f3;
+    m_params[idx]=param_proxy(param(f0,f1,f2,f3));
 }
 
 void material::release()

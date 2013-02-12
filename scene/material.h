@@ -4,7 +4,7 @@
 
 #include "shader.h"
 #include "texture.h"
-#include "texture_proxy.h"
+#include "proxy.h"
 #include "render/render.h"
 #include <string>
 #include <vector>
@@ -12,10 +12,33 @@
 namespace nya_scene
 {
 
+typedef proxy<texture> texture_proxy;
+
 class material
 {
     friend class mesh;
     friend struct shared_mesh;
+
+public:
+    class param
+    {
+        friend class material;
+
+    public:
+        void set(float f0,float f1,float f2,float f3);
+        
+        param() { for(int i=0;i<4;++i) f[i]=0.0f; }
+        param(float f0,float f1,float f2,float f3)
+        {
+            f[0]=f0; f[1]=f1;
+            f[2]=f2; f[3]=f3;
+        }
+
+    private:
+        float f[4];
+    };
+
+    typedef proxy<param> param_proxy;
 
 public:
     typedef nya_render::blend::mode blend_mode;
@@ -76,14 +99,7 @@ private:
 
     std::vector<material_texture> m_textures;
 
-    struct param
-    {
-        float f[4];
- 
-        param(){for(int i=0;i<4;++i)f[i]=0;}
-    };
-
-    std::vector<param> m_params;
+    std::vector<param_proxy> m_params;
 };
 
 }

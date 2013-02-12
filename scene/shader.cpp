@@ -337,7 +337,7 @@ int shader::get_uniforms_count() const
     if(!m_shared.is_valid())
         return 0;
 
-    return m_shared->uniforms.size();
+    return (int)m_shared->uniforms.size();
 }
 
 }

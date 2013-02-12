@@ -32,7 +32,7 @@ animation::bone animation::get_bone(int idx,unsigned int time,bool looped) const
 
     const sequence &seq=m_bones[idx];
 
-    const unsigned int frames_count=seq.frames.size();
+    const unsigned int frames_count=(unsigned int)seq.frames.size();
     for(unsigned int i=frames_count;i>0;--i)
     {
         const frame &prev=seq.frames[i-1];

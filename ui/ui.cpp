@@ -55,7 +55,7 @@ void layer::draw_text(uint x,uint y,const char *text
     if(text_str.empty())
         return;
 
-    const size_t str_len=text_str.size();
+    const int str_len=(int)text_str.size();
 
     //font_params
     const uint font_width=256;
@@ -121,7 +121,7 @@ void layer::draw_text(uint x,uint y,const char *text
     vertex *vertices=(vertex*)vert_buf.get_data();
 
     float dpos=0;
-    for(size_t i=0;i<str_len;++i)
+    for(int i=0;i<str_len;++i)
     {
         const char c=text_str[i];
 

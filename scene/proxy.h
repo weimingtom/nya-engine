@@ -2,38 +2,37 @@
 
 #pragma once
 
-#include "texture.h"
-
 namespace nya_scene
 {
 
-class texture_proxy
+template<typename t>
+class proxy
 {
 public:
     bool is_valid() const { return m_ref!=0; }
 
-    const texture *operator -> () const
+    const t *operator -> () const
     {
         if(!m_ref)
             return 0;
         
-        return &m_ref->tex;
+        return &m_ref->obj;
     };
 
-    texture *operator -> ()
+    t *operator -> ()
     {
         if(!m_ref)
             return 0;
 
-        return &m_ref->tex;
+        return &m_ref->obj;
     };
 
-    void set(const texture &tex)
+    void set(const t &obj)
     {
         if(!m_ref)
             return;
 
-        m_ref->tex=tex;
+        m_ref->obj=obj;
     }
 
     void free()
@@ -49,43 +48,43 @@ public:
         m_ref=0;
     }
 
-    texture_proxy(): m_ref(0) {}
+    proxy(): m_ref(0) {}
 
-    explicit texture_proxy(const texture &tex)
+    explicit proxy(const t &obj)
     {
-        m_ref=new ref(tex);
+        m_ref=new ref(obj);
     }
 
-    texture_proxy(const texture_proxy &proxy)
+    proxy(const proxy &p)
     {
-        m_ref=proxy.m_ref;
+        m_ref=p.m_ref;
         if(m_ref)
             ++m_ref->count;
     }
 
-    texture_proxy &operator=(const texture_proxy &proxy) 
+    proxy &operator=(const proxy &p) 
     {
-		if(this==&proxy)
+		if(this==&p)
 			return *this;
 
 		free();
 
-        m_ref=proxy.m_ref;
+        m_ref=p.m_ref;
         if(m_ref)
             ++m_ref->count;
 
         return *this;
     }
 
-    ~texture_proxy() { free(); }
+    ~proxy() { free(); }
 
 private:
     struct ref
     {
         int count;
-        texture tex;
+        t obj;
 
-		ref(const texture &tex):count(1),tex(tex){}
+		ref(const t &obj):count(1),obj(obj){}
     };
 
     ref *m_ref;
