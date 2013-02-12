@@ -8,28 +8,28 @@
 namespace nya_scene
 {
 
-bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* name)
+struct shader_description
+{
+    struct predefined
+    {
+        std::string name;
+        shared_shader::transform_type transform;
+    };
+
+    predefined predefines[shared_shader::predefines_count];
+
+    typedef std::map<std::string,std::string> strings_map;
+    strings_map samplers;
+    strings_map uniforms;
+};
+
+bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resource_data &data,const char* name,bool include)
 {
     size_t data_size=data.get_size();
     if(!data_size)
         return false;
 
     const char *text=(const char*)data.get_data();
-
-    struct description
-    {
-        struct predefined
-        {
-            std::string name;
-            shared_shader::transform_type transform;
-        };
-
-        predefined predefines[shared_shader::predefines_count];
-
-        typedef std::map<std::string,std::string> strings_map;
-        strings_map samplers;
-        strings_map uniforms;
-    } desc;
 
     for(size_t i=0;i<data_size-1;++i)
     {
@@ -39,8 +39,26 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
         ++i;
 
         char check=text[i];
-        switch (check) 
+        switch (check)
         {
+            case 'i':
+                if(i+7<data_size && strncmp(&text[i],"include",7)==0)
+                {
+                    size_t begin=i+7;
+
+                    while(i<data_size && (text[i]==' ' || text[i]=='\t')) ++i;
+
+                    for(i=begin;i<data_size;++i)
+                        if(text[i]=='\n')
+                            break;
+
+                    std::string include_name(&text[begin],i-begin);
+
+                    load_nya_shader_internal(res,desc,data,name,true);
+                    --i;
+                }
+                break;
+
             case 'a':
                 if(i+3<data_size && strncmp(&text[i],"all",3)==0)
                 {
@@ -56,9 +74,12 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
                 break;
 
             case 's':
-                if(i+8<data_size && strncmp(&text[i],"sampler",7)==0)
+                if(i+7<data_size && strncmp(&text[i],"sampler",7)==0)
                 {
-                    size_t begin=i+8;
+                    size_t begin=i+7;
+
+                    while(i<data_size && (text[i]==' ' || text[i]=='\t')) ++i;
+
                     for(i=begin;i<data_size;++i)
                         if(text[i]==' ' || text[i]=='\t')
                             break;
@@ -116,12 +137,14 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
 
             case 'p':
             case 'u':
-                if((check=='p' && i+11<data_size && strncmp(&text[i],"predefined",10)==0)
-                   || (check=='u' && i+8<data_size && strncmp(&text[i],"uniform",7)==0))
+                if((check=='p' && i+10<data_size && strncmp(&text[i],"predefined",10)==0)
+                   || (check=='u' && i+7<data_size && strncmp(&text[i],"uniform",7)==0))
                 {
-                    size_t begin=i+8;
+                    size_t begin=i+7;
                     if(check=='p')
-                        begin+=(11-8);
+                        begin+=(10-7);
+
+                    while(i<data_size && (text[i]==' ' || text[i]=='\t')) ++i;
 
                     for(i=begin;i<data_size;++i)
                         if(text[i]==' ' || text[i]=='\t')
@@ -166,7 +189,7 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
                             {
                                 if(semantics=="nya camera position")
                                 {
-                                    description::predefined &p=desc.predefines[shared_shader::camera_pos];
+                                    shader_description::predefined &p=desc.predefines[shared_shader::camera_pos];
                                     p.name=name;
                                     p.transform=transform;
                                 }
@@ -191,6 +214,9 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
             break;
         }
     }
+
+    if(include)
+        return true;
 
     if(res.vertex.empty())
     {
@@ -221,7 +247,7 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
 
     for(int i=0;i<shared_shader::predefines_count;++i)
     {
-        const description::predefined &p=desc.predefines[i];
+        const shader_description::predefined &p=desc.predefines[i];
         if(p.name.empty())
             continue;
 
@@ -235,6 +261,12 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
         res.uniforms[i].location=res.shdr.get_handler(desc.uniforms[res.uniforms[i].name].c_str());
 
     return true;
+}
+
+bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* name)
+{
+    shader_description desc;
+    return load_nya_shader_internal(res,desc,data,name,false);
 }
 
 void shader::set() const

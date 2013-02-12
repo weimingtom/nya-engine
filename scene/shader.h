@@ -70,7 +70,7 @@ class shader: public scene_shared<shared_shader>
 {
     friend class material;
 
-private:
+public:
     static bool load_nya_shader(shared_shader &res,resource_data &data,const char* name);
 
 private:
