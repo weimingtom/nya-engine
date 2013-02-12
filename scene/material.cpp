@@ -165,6 +165,22 @@ void material::set_param(int idx,float f0,float f1,float f2,float f3)
     m_params[idx]=param_proxy(param(f0,f1,f2,f3));
 }
 
+void material::set_param(int idx,const param_proxy &p)
+{
+    if(idx<0 || idx>=(int)m_params.size())
+        return;
+
+    m_params[idx]=p;
+}
+
+void material::set_param(int idx,const param &p)
+{
+    if(idx<0 || idx>=(int)m_params.size())
+        return;
+    
+    m_params[idx]=param_proxy(p);
+}
+
 void material::release()
 {
     for(size_t i=0;i<m_textures.size();++i)

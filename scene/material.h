@@ -54,6 +54,8 @@ public:
     const char *get_param_name(int idx) const;
     int get_param_idx(const char *name) const;
     void set_param(int idx,float f0,float f1,float f2,float f3);
+    void set_param(int idx,const param &p);
+    void set_param(int idx,const param_proxy &p);
 
     bool get_zwrite() const { return m_zwrite; }
     bool get_blend(blend_mode &src,blend_mode &dst) const { 
