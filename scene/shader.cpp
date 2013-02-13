@@ -76,17 +76,13 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
             case 's':
                 if(i+7<data_size && strncmp(&text[i],"sampler",7)==0)
                 {
-                    size_t begin=i+7;
-
+                    i+=7;
                     while(i<data_size && (text[i]==' ' || text[i]=='\t')) ++i;
 
-                    for(i=begin;i<data_size;++i)
-                        if(text[i]==' ' || text[i]=='\t')
-                            break;
+                    size_t begin=i;
+                    while(i<data_size && text[i]!=' ' && text[i]!='\t' && text[i]!='"') ++i;
 
                     std::string sampler_name(&text[begin],i-begin);
-
-                    while(i<data_size && (text[i]==' ' || text[i]=='\t')) ++i;
 
                     for(begin=std::string::npos;i<data_size;++i)
                     {
@@ -140,15 +136,12 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
                 if((check=='p' && i+10<data_size && strncmp(&text[i],"predefined",10)==0)
                    || (check=='u' && i+7<data_size && strncmp(&text[i],"uniform",7)==0))
                 {
-                    size_t begin=i+7;
-                    if(check=='p')
-                        begin+=(10-7);
+                    i+=(check=='p')?10:7;
 
                     while(i<data_size && (text[i]==' ' || text[i]=='\t')) ++i;
 
-                    for(i=begin;i<data_size;++i)
-                        if(text[i]==' ' || text[i]=='\t')
-                            break;
+                    size_t begin=i;
+                    while(i<data_size && text[i]!=' ' && text[i]!='\t' && text[i]!='"') ++i;
 
                     std::string name(&text[begin],i-begin);
 
