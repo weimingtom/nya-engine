@@ -52,9 +52,19 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
                         if(text[i]=='\n')
                             break;
 
-                    std::string include_name(&text[begin],i-begin);
+                    std::string path(name);
+                    size_t p=path.rfind("/");
+                    if(p==std::string::npos)
+                        p=path.rfind("\\");
 
-                    load_nya_shader_internal(res,desc,data,name,true);
+                    if(p==std::string::npos)
+                        path.clear();
+                    else
+                        path.resize(p+1);
+
+                    path.append(&text[begin],i-begin);
+
+                    load_nya_shader_internal(res,desc,data,path.c_str(),true);
                     --i;
                 }
                 break;
