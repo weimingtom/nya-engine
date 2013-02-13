@@ -64,7 +64,27 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
 
                     path.append(&text[begin],i-begin);
 
-                    load_nya_shader_internal(res,desc,data,path.c_str(),true);
+                    nya_resources::resource_data *file_data=nya_resources::get_resources_provider().access(name);
+                    if(!file_data)
+                    {
+                        nya_resources::get_log()<<"unable to load shader include resource: unable to access resource "<<path.c_str()<<"\n";
+                        return false;
+                    }
+
+                    const size_t data_size=file_data->get_size();
+                    nya_memory::tmp_buffer_ref include_data(data_size);
+                    file_data->read_all(include_data.get_data());
+                    file_data->release();
+
+                    if(!load_nya_shader_internal(res,desc,include_data,path.c_str(),true))
+                    {
+                        get_log()<<"unable to load shader include: unknown format in "<<path.c_str()<<"\n";
+                        include_data.free();
+                        return false;
+                    }
+
+                    include_data.free();
+
                     --i;
                 }
                 break;
@@ -219,7 +239,10 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
     }
 
     if(include)
+    {
+        data.free();
         return true;
+    }
 
     if(res.vertex.empty())
     {
@@ -262,6 +285,8 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
 
     for(int i=0;i<(int)res.uniforms.size();++i)
         res.uniforms[i].location=res.shdr.get_handler(desc.uniforms[res.uniforms[i].name].c_str());
+
+    data.free();
 
     return true;
 }
