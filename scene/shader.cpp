@@ -44,46 +44,54 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
             case 'i':
                 if(i+7<data_size && strncmp(&text[i],"include",7)==0)
                 {
-                    size_t begin=i+7;
+                    i+=7;
+                    for(size_t begin=std::string::npos;i<data_size;++i)
+                    {
+                        if(text[i]=='"')
+                        {
+                            if(begin==std::string::npos)
+                            {
+                                begin=i+1;
+                                continue;
+                            }
 
-                    while(i<data_size && (text[i]==' ' || text[i]=='\t')) ++i;
+                            std::string path(name);
+                            size_t p=path.rfind("/");
+                            if(p==std::string::npos)
+                                p=path.rfind("\\");
 
-                    for(i=begin;i<data_size;++i)
-                        if(text[i]=='\n')
+                            if(p==std::string::npos)
+                                path.clear();
+                            else
+                                path.resize(p+1);
+
+                            path.append(&text[begin],i-begin);
+
+                            nya_resources::resource_data *file_data=nya_resources::get_resources_provider().access(name);
+                            if(!file_data)
+                            {
+                                nya_resources::get_log()<<"unable to load shader include resource: unable to access resource "<<path.c_str()<<"\n";
+                                return false;
+                            }
+
+                            const size_t data_size=file_data->get_size();
+                            nya_memory::tmp_buffer_ref include_data(data_size);
+                            file_data->read_all(include_data.get_data());
+                            file_data->release();
+
+                            if(!load_nya_shader_internal(res,desc,include_data,path.c_str(),true))
+                            {
+                                get_log()<<"unable to load shader include: unknown format in "<<path.c_str()<<"\n";
+                                include_data.free();
+                                return false;
+                            }
+
+                            include_data.free();
+                        }
+
+                        if(text[i]=='\n' || text[i]=='\r')
                             break;
-
-                    std::string path(name);
-                    size_t p=path.rfind("/");
-                    if(p==std::string::npos)
-                        p=path.rfind("\\");
-
-                    if(p==std::string::npos)
-                        path.clear();
-                    else
-                        path.resize(p+1);
-
-                    path.append(&text[begin],i-begin);
-
-                    nya_resources::resource_data *file_data=nya_resources::get_resources_provider().access(name);
-                    if(!file_data)
-                    {
-                        nya_resources::get_log()<<"unable to load shader include resource: unable to access resource "<<path.c_str()<<"\n";
-                        return false;
                     }
-
-                    const size_t data_size=file_data->get_size();
-                    nya_memory::tmp_buffer_ref include_data(data_size);
-                    file_data->read_all(include_data.get_data());
-                    file_data->release();
-
-                    if(!load_nya_shader_internal(res,desc,include_data,path.c_str(),true))
-                    {
-                        get_log()<<"unable to load shader include: unknown format in "<<path.c_str()<<"\n";
-                        include_data.free();
-                        return false;
-                    }
-
-                    include_data.free();
 
                     --i;
                 }
