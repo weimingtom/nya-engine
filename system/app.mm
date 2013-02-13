@@ -286,20 +286,21 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 {
     [super viewDidLoad];
 
-    if (!self.context) {
+    if (!self.context)
+    {
         EAGLContext *aContext = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
         if (!aContext)
             NSLog(@"Failed to create ES2 context");
         else if (![EAGLContext setCurrentContext:aContext])
             NSLog(@"Failed to set ES context current");
 
-        self.context = aContext;
+        self.context=aContext;
 
-        animating = NO;
-        m_time=nya_system::get_time();
-        animationFrameInterval = 1;
+        animating=NO;
+        animationFrameInterval=1;
+        m_time=0;
         self.displayLink = nil;
-        
+
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillResignActive:) name:UIApplicationWillResignActiveNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminateActive:) name:UIApplicationWillTerminateNotification object:nil];
@@ -354,7 +355,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
         nya_system::app_responder *responder=shared_app::get_app().get_responder();
         if(responder)
             responder->on_free();
-        
+
         [EAGLContext setCurrentContext:nil];
     }
 }
@@ -425,6 +426,8 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
         [aDisplayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
         self.displayLink = aDisplayLink;
 
+        m_time=(unsigned long)(self.displayLink.timestamp*1000.0);
+
         animating = YES;
     }
 }
@@ -442,7 +445,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 {
     [(EAGLView *)self.view setFramebuffer];
 
-    unsigned long time=nya_system::get_time();
+    unsigned long time=(unsigned long)(self.displayLink.timestamp*1000.0);
     unsigned int dt=(unsigned int)(time-m_time);
     m_time=time;
 
@@ -516,7 +519,8 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
 - (void)setContext:(EAGLContext *)newContext
 {
-    if (context != newContext) {
+    if (context != newContext) 
+    {
         [self deleteFramebuffer];
 
         context = newContext;
@@ -566,19 +570,21 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
 - (void)deleteFramebuffer
 {
-    if (context) 
+    if (!context)
+        return;
+
+    [EAGLContext setCurrentContext:context];
+
+    if (defaultFramebuffer)
     {
-        [EAGLContext setCurrentContext:context];
+        glDeleteFramebuffers(1,&defaultFramebuffer);
+        defaultFramebuffer=0;
+    }
 
-        if (defaultFramebuffer) {
-            glDeleteFramebuffers(1, &defaultFramebuffer);
-            defaultFramebuffer = 0;
-        }
-
-        if (colorRenderbuffer) {
-            glDeleteRenderbuffers(1, &colorRenderbuffer);
-            colorRenderbuffer = 0;
-        }
+    if (colorRenderbuffer)
+    {
+        glDeleteRenderbuffers(1,&colorRenderbuffer);
+        colorRenderbuffer=0;
     }
 }
 
@@ -603,18 +609,14 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
 - (BOOL)presentFramebuffer
 {
-    BOOL success = FALSE;
+    if(!context)
+        return false;
 
-    if (context) 
-    {
-        [EAGLContext setCurrentContext:context];
+    [EAGLContext setCurrentContext:context];
 
-        glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
 
-        success = [context presentRenderbuffer:GL_RENDERBUFFER];
-    }
-
-    return success;
+    return [context presentRenderbuffer:GL_RENDERBUFFER];
 }
 
 - (void)layoutSubviews
