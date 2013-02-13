@@ -67,7 +67,7 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
 
                             path.append(&text[begin],i-begin);
 
-                            nya_resources::resource_data *file_data=nya_resources::get_resources_provider().access(name);
+                            nya_resources::resource_data *file_data=nya_resources::get_resources_provider().access(path.c_str());
                             if(!file_data)
                             {
                                 nya_resources::get_log()<<"unable to load shader include resource: unable to access resource "<<path.c_str()<<"\n";
