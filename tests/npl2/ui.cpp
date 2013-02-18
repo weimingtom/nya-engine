@@ -5,6 +5,7 @@
 #include "ui/list.h"
 #include "ui/button.h"
 #include "ui/label.h"
+#include "render/render.h"
 
 #include "attributes.h"
 #include "scene.h"
@@ -14,38 +15,50 @@
 void ui::init()
 {
     m_text_shader.add_program(nya_render::shader::vertex,
+                              "varying vec4 tc;"
+                              "varying vec4 color;"
+
                               "void main()"
                               "{"
-                              "    gl_TexCoord[0]=gl_MultiTexCoord0;"
-                              "    gl_TexCoord[1]=gl_Color;"
+                              "    tc=gl_MultiTexCoord0;"
+                              "    color=gl_Color;"
                               "    gl_Position=vec4(gl_Vertex.xyz,1.0);"
                               "}");
 
     m_text_shader.add_program(nya_render::shader::pixel,
                               "uniform sampler2D alpha_map;"
+                              "varying vec4 tc;"
+                              "varying vec4 color;"
+
                               "void main(void)"
                               "{"
-                              "    float alpha=texture2D(alpha_map,gl_TexCoord[0].xy).r;"
-                              "    gl_FragColor=vec4(gl_TexCoord[1].rgb,alpha);"
+                              "    float alpha=texture2D(alpha_map,tc.xy).r;"
+                              "    gl_FragColor=vec4(color.rgb,alpha);"
                               "}");
 
     m_text_shader.set_sampler("alpha_map",0);
 
     m_ui_shader.add_program(nya_render::shader::vertex,
+                            "varying vec4 tc;"
+                            "varying vec4 color;"
+
                             "void main()"
                             "{"
-                            "    gl_TexCoord[0]=gl_MultiTexCoord0;"
-                            "    gl_TexCoord[1]=gl_Color;"
+                            "    tc=gl_MultiTexCoord0;"
+                            "    color=gl_Color;"
                             "    gl_Position=vec4(gl_Vertex.xyz,1.0);"
                             "}");
 
     m_ui_shader.add_program(nya_render::shader::pixel,
                             "uniform sampler2D base_map;"
+                            "varying vec4 tc;"
+                            "varying vec4 color;"
+
                             "void main(void)"
                             "{"
                             //"    vec4 base=texture2D(base_map,gl_TexCoord[0].xy);"
                             //"    gl_FragColor=gl_TexCoord[1]*base;"
-                              "    gl_FragColor=gl_TexCoord[1];"
+                              "    gl_FragColor=color;"
                             "}");
 
     m_ui_shader.set_sampler("base_map",0);
@@ -338,7 +351,7 @@ void ui::draw_text(uint x,uint y,const char *text
         return;
 
     //glColor4f(0,0,0,1);
-    glColor4f(1,1,1,1);
+    nya_render::set_color(1.0f,1.0f,1.0f,1.0f);
 
     m_text_shader.bind();
     m_font_tex->bind();

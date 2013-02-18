@@ -14,6 +14,8 @@ nya_log::log &get_log();
 void set_projection_matrix(const nya_math::mat4 &mat);
 void set_modelview_matrix(const nya_math::mat4 &mat);
 
+void set_color(float r,float g,float b,float a);
+
 struct blend
 {
     enum mode
@@ -40,6 +42,12 @@ private:
 struct zwrite
 {
     static void enable();
+    static void disable();
+};
+
+struct scissor
+{
+    static void enable(int x,int y,int w,int h);
     static void disable();
 };
 

@@ -37,6 +37,12 @@
 		F22ADA0516946EC000B01B4A /* mesh.h in Headers */ = {isa = PBXBuildFile; fileRef = F22AD9FD16946EC000B01B4A /* mesh.h */; };
 		F22ADA311694C15100B01B4A /* memory_reader.h in Headers */ = {isa = PBXBuildFile; fileRef = F22ADA301694C15100B01B4A /* memory_reader.h */; };
 		F22ADA321694C15100B01B4A /* memory_reader.h in Headers */ = {isa = PBXBuildFile; fileRef = F22ADA301694C15100B01B4A /* memory_reader.h */; };
+		F22F864116D1A4C5000EAEA6 /* ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259320F15D858140092C7D8 /* ui.cpp */; };
+		F22F864316D1A4C9000EAEA6 /* panel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259320D15D858140092C7D8 /* panel.cpp */; };
+		F22F864416D1A4CC000EAEA6 /* list.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259320B15D858140092C7D8 /* list.cpp */; };
+		F22F864516D1A4CF000EAEA6 /* button.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259320715D858140092C7D8 /* button.cpp */; };
+		F22F864616D1A4D4000EAEA6 /* label.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F241A70D160292B1004646EB /* label.cpp */; };
+		F22F864716D1A4D7000EAEA6 /* slider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F241A70B160292B1004646EB /* slider.cpp */; };
 		F23997921696406D00170768 /* transform.h in Headers */ = {isa = PBXBuildFile; fileRef = F23997901696406C00170768 /* transform.h */; };
 		F23997931696406D00170768 /* transform.h in Headers */ = {isa = PBXBuildFile; fileRef = F23997901696406C00170768 /* transform.h */; };
 		F23997941696406D00170768 /* transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F23997911696406C00170768 /* transform.cpp */; };
@@ -626,6 +632,12 @@
 				F20E2D8716999B7000395A1B /* camera.cpp in Sources */,
 				F2BFD322169C1AF400ED4A9E /* constants.cpp in Sources */,
 				F2FF5FDA16C15CCE00C6A705 /* transform.cpp in Sources */,
+				F22F864116D1A4C5000EAEA6 /* ui.cpp in Sources */,
+				F22F864316D1A4C9000EAEA6 /* panel.cpp in Sources */,
+				F22F864416D1A4CC000EAEA6 /* list.cpp in Sources */,
+				F22F864516D1A4CF000EAEA6 /* button.cpp in Sources */,
+				F22F864616D1A4D4000EAEA6 /* label.cpp in Sources */,
+				F22F864716D1A4D7000EAEA6 /* slider.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

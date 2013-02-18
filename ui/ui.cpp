@@ -8,7 +8,7 @@
     ToDo: abstract render
 */
 
-#include "render/platform_specific_gl.h"
+#include "render/render.h"
 
 namespace
 {
@@ -188,8 +188,8 @@ void layer::draw_rect(rect &r,rect_style &s)
 
     if(s.solid)
     {
-        glColor4f(s.solid_color.r,s.solid_color.g,
-                  s.solid_color.b,s.solid_color.a);
+        nya_render::set_color(s.solid_color.r,s.solid_color.g,
+                              s.solid_color.b,s.solid_color.a);
 
         m_rect_vbo.set_element_type(nya_render::vbo::triangle_fan);
 
@@ -198,8 +198,8 @@ void layer::draw_rect(rect &r,rect_style &s)
 
     if(s.border)
     {
-        glColor4f(s.border_color.r,s.border_color.g,
-                  s.border_color.b,s.border_color.a);
+        nya_render::set_color(s.border_color.r,s.border_color.g,
+                              s.border_color.b,s.border_color.a);
 
         m_rect_vbo.set_element_type(nya_render::vbo::line_loop);
         m_rect_vbo.draw();
@@ -210,13 +210,12 @@ void layer::draw_rect(rect &r,rect_style &s)
 
 void layer::set_scissor(rect &r)
 {
-    glEnable(GL_SCISSOR_TEST);
-    glScissor(r.x,r.y,r.w,r.h);
+    nya_render::scissor::enable(r.x,r.y,r.w,r.h);
 }
 
 void layer::remove_scissor()
 {
-    glDisable(GL_SCISSOR_TEST);
+    nya_render::scissor::disable();
 }
 
 void layer::process()

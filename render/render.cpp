@@ -39,6 +39,15 @@ void set_modelview_matrix(const nya_math::mat4 &mat)
     transform::get().set_modelview_matrix(mat);
 }
 
+void set_color(float r,float g,float b,float a)
+{
+#ifdef OPENGL_ES
+    glVertexAttrib4f(color_attribute,r,g,b,a);
+#else
+    glColor4f(r,g,b,a);
+#endif
+}
+
 unsigned int blend::gl_mode(mode m)
 {
     switch(m)
@@ -77,6 +86,17 @@ void zwrite::enable()
 void zwrite::disable()
 {
     glDepthMask(false);
+}
+
+void scissor::enable(int x,int y,int w,int h)
+{
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(x,y,w,h);
+}
+
+void scissor::disable()
+{
+    glDisable(GL_SCISSOR_TEST);
 }
 
 }

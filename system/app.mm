@@ -139,11 +139,15 @@ namespace
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    UIWindow *win=[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    self.window = win;
+    [win release];
 
-    self.viewController = [[view_controller alloc] init];
+    view_controller *vc=[[view_controller alloc] init];
+    self.viewController = vc;
+    [vc release];
+
     [self.window setRootViewController:self.viewController];
-    [self.viewController release];
 
     [self.window makeKeyAndVisible];
 
@@ -245,6 +249,7 @@ namespace
 
     self.view = view;
     m_scale = [view getScale];
+    [view release];
 }
 
 - (float)getScale
@@ -296,8 +301,10 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
         self.context=aContext;
 
+        [aContext release];
+
         animating=NO;
-        animationFrameInterval=1;
+        animationFrameInterval=2;
         m_time=0;
         self.displayLink = nil;
 

@@ -16,6 +16,23 @@
 		F220566F15D929D100362591 /* ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F220566315D929D100362591 /* ui.cpp */; };
 		F220567015D929D100362591 /* pl2_resources_provider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F220566515D929D100362591 /* pl2_resources_provider.cpp */; };
 		F220567115D929D100362591 /* tsb_anim.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F220566915D929D100362591 /* tsb_anim.cpp */; };
+		F22F864A16D1A69B000EAEA6 /* npl2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F220565B15D929D100362591 /* npl2.cpp */; };
+		F22F864B16D1A69B000EAEA6 /* character.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F220565C15D929D100362591 /* character.cpp */; };
+		F22F864C16D1A69B000EAEA6 /* tmb_model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F220565D15D929D100362591 /* tmb_model.cpp */; };
+		F22F864D16D1A69B000EAEA6 /* scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F220565F15D929D100362591 /* scene.cpp */; };
+		F22F864E16D1A69B000EAEA6 /* attributes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F220566115D929D100362591 /* attributes.cpp */; };
+		F22F864F16D1A69B000EAEA6 /* ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F220566315D929D100362591 /* ui.cpp */; };
+		F22F865016D1A69B000EAEA6 /* pl2_resources_provider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F220566515D929D100362591 /* pl2_resources_provider.cpp */; };
+		F22F865116D1A69B000EAEA6 /* tsb_anim.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F220566915D929D100362591 /* tsb_anim.cpp */; };
+		F22F865216D1A69B000EAEA6 /* config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2037A72160136E300C7C104 /* config.cpp */; };
+		F22F865316D1A69B000EAEA6 /* animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2D7D32516AAED9700C7DEE5 /* animation.cpp */; };
+		F22F865416D1A69B000EAEA6 /* shared_textures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2D7D35516AB55F600C7DEE5 /* shared_textures.cpp */; };
+		F22F866516D1A7F3000EAEA6 /* font.tga in Resources */ = {isa = PBXBuildFile; fileRef = F22F866416D1A7F3000EAEA6 /* font.tga */; };
+		F22F866716D1A9C0000EAEA6 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F22F866616D1A9C0000EAEA6 /* OpenGLES.framework */; };
+		F22F866816D1A9D0000EAEA6 /* libnya_engine_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F223874A168DF58F000C28DE /* libnya_engine_ios.a */; };
+		F22F866C16D1A9EB000EAEA6 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F22F866B16D1A9EB000EAEA6 /* UIKit.framework */; };
+		F22F868016D1AA51000EAEA6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F22F867F16D1AA51000EAEA6 /* Foundation.framework */; };
+		F22F868416D1AA81000EAEA6 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F22F868316D1AA81000EAEA6 /* QuartzCore.framework */; };
 		F259326B15D85A730092C7D8 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F259326A15D85A730092C7D8 /* Cocoa.framework */; };
 		F25932B515D860A20092C7D8 /* libnya_engine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F25932B415D8608B0092C7D8 /* libnya_engine.a */; };
 		F25932B915D860F60092C7D8 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F25932B815D860F60092C7D8 /* OpenGL.framework */; };
@@ -58,6 +75,14 @@
 		F220566715D929D100362591 /* pl2_resources_provider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pl2_resources_provider.h; path = ../../tests/npl2/pl2_resources_provider.h; sourceTree = "<group>"; };
 		F220566815D929D100362591 /* tsb_anim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tsb_anim.h; path = ../../tests/npl2/tsb_anim.h; sourceTree = "<group>"; };
 		F220566915D929D100362591 /* tsb_anim.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tsb_anim.cpp; path = ../../tests/npl2/tsb_anim.cpp; sourceTree = "<group>"; };
+		F22F865D16D1A69B000EAEA6 /* npl2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = npl2.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F22F866416D1A7F3000EAEA6 /* font.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = font.tga; path = ../../tests/npl2/font.tga; sourceTree = "<group>"; };
+		F22F866616D1A9C0000EAEA6 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/OpenGLES.framework; sourceTree = DEVELOPER_DIR; };
+		F22F866916D1A9DF000EAEA6 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/CoreFoundation.framework; sourceTree = DEVELOPER_DIR; };
+		F22F866B16D1A9EB000EAEA6 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
+		F22F867F16D1AA51000EAEA6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		F22F868116D1AA6A000EAEA6 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/GLKit.framework; sourceTree = DEVELOPER_DIR; };
+		F22F868316D1AA81000EAEA6 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/QuartzCore.framework; sourceTree = DEVELOPER_DIR; };
 		F259326615D85A730092C7D8 /* npl2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = npl2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F259326A15D85A730092C7D8 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		F259326D15D85A730092C7D8 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -72,6 +97,18 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		F22F865516D1A69B000EAEA6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F22F866816D1A9D0000EAEA6 /* libnya_engine_ios.a in Frameworks */,
+				F22F866C16D1A9EB000EAEA6 /* UIKit.framework in Frameworks */,
+				F22F866716D1A9C0000EAEA6 /* OpenGLES.framework in Frameworks */,
+				F22F868416D1AA81000EAEA6 /* QuartzCore.framework in Frameworks */,
+				F22F868016D1AA51000EAEA6 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F259326315D85A730092C7D8 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -113,10 +150,25 @@
 			name = npl2;
 			sourceTree = "<group>";
 		};
+		F22F866316D1A7BE000EAEA6 /* ios assets */ = {
+			isa = PBXGroup;
+			children = (
+				F22F866416D1A7F3000EAEA6 /* font.tga */,
+			);
+			name = "ios assets";
+			sourceTree = "<group>";
+		};
 		F259325B15D85A730092C7D8 = {
 			isa = PBXGroup;
 			children = (
+				F22F868316D1AA81000EAEA6 /* QuartzCore.framework */,
+				F22F868116D1AA6A000EAEA6 /* GLKit.framework */,
+				F22F867F16D1AA51000EAEA6 /* Foundation.framework */,
+				F22F866B16D1A9EB000EAEA6 /* UIKit.framework */,
+				F22F866916D1A9DF000EAEA6 /* CoreFoundation.framework */,
+				F22F866616D1A9C0000EAEA6 /* OpenGLES.framework */,
 				F25932AF15D8608B0092C7D8 /* nya_engine.xcodeproj */,
+				F22F866316D1A7BE000EAEA6 /* ios assets */,
 				F220567215D929D900362591 /* npl2 */,
 				F259326915D85A730092C7D8 /* Frameworks */,
 				F259326715D85A730092C7D8 /* Products */,
@@ -127,6 +179,7 @@
 			isa = PBXGroup;
 			children = (
 				F259326615D85A730092C7D8 /* npl2.app */,
+				F22F865D16D1A69B000EAEA6 /* npl2.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -163,6 +216,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		F22F864816D1A69B000EAEA6 /* npl2 ios */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F22F865A16D1A69B000EAEA6 /* Build configuration list for PBXNativeTarget "npl2 ios" */;
+			buildPhases = (
+				F22F864916D1A69B000EAEA6 /* Sources */,
+				F22F865516D1A69B000EAEA6 /* Frameworks */,
+				F22F865916D1A69B000EAEA6 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "npl2 ios";
+			productName = npl2;
+			productReference = F22F865D16D1A69B000EAEA6 /* npl2.app */;
+			productType = "com.apple.product-type.application";
+		};
 		F259326515D85A730092C7D8 /* npl2 */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = F259328415D85A730092C7D8 /* Build configuration list for PBXNativeTarget "npl2" */;
@@ -204,6 +274,7 @@
 			projectRoot = "";
 			targets = (
 				F259326515D85A730092C7D8 /* npl2 */,
+				F22F864816D1A69B000EAEA6 /* npl2 ios */,
 			);
 		};
 /* End PBXProject section */
@@ -226,6 +297,14 @@
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
+		F22F865916D1A69B000EAEA6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F22F866516D1A7F3000EAEA6 /* font.tga in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F259326415D85A730092C7D8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -236,6 +315,24 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		F22F864916D1A69B000EAEA6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F22F864A16D1A69B000EAEA6 /* npl2.cpp in Sources */,
+				F22F864B16D1A69B000EAEA6 /* character.cpp in Sources */,
+				F22F864C16D1A69B000EAEA6 /* tmb_model.cpp in Sources */,
+				F22F864D16D1A69B000EAEA6 /* scene.cpp in Sources */,
+				F22F864E16D1A69B000EAEA6 /* attributes.cpp in Sources */,
+				F22F864F16D1A69B000EAEA6 /* ui.cpp in Sources */,
+				F22F865016D1A69B000EAEA6 /* pl2_resources_provider.cpp in Sources */,
+				F22F865116D1A69B000EAEA6 /* tsb_anim.cpp in Sources */,
+				F22F865216D1A69B000EAEA6 /* config.cpp in Sources */,
+				F22F865316D1A69B000EAEA6 /* animation.cpp in Sources */,
+				F22F865416D1A69B000EAEA6 /* shared_textures.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F259326215D85A730092C7D8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -257,6 +354,37 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		F22F865B16D1A69B000EAEA6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CONFIGURATION_BUILD_DIR = ../../bin/ios_debug;
+				CONFIGURATION_TEMP_DIR = ../../obj/ios_debug;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "../../tests/npl2/npl2 ios-Info.plist";
+				PRODUCT_NAME = npl2;
+				SDKROOT = iphoneos;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		F22F865C16D1A69B000EAEA6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CONFIGURATION_BUILD_DIR = ../../bin/ios_release;
+				CONFIGURATION_TEMP_DIR = ../../obj/ios_release;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "../../tests/npl2/npl2 ios-Info.plist";
+				PRODUCT_NAME = npl2;
+				SDKROOT = iphoneos;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
 		F259328215D85A730092C7D8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -337,6 +465,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		F22F865A16D1A69B000EAEA6 /* Build configuration list for PBXNativeTarget "npl2 ios" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F22F865B16D1A69B000EAEA6 /* Debug */,
+				F22F865C16D1A69B000EAEA6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		F259326015D85A730092C7D8 /* Build configuration list for PBXProject "npl2" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
