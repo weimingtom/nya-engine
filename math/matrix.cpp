@@ -9,7 +9,7 @@ namespace nya_math
 
 mat4 &mat4::identity()
 {
-    for(int i=0;i<4;++i) 
+    for(int i=0;i<4;++i)
         for(int j=0;j<4;++j)
             m[i][j]=0.0f;
 
@@ -69,7 +69,7 @@ mat4 &mat4::rotate(float angle,float x,float y,float z)
 
     return *this=rot*(*this);
 }
-    
+
 mat4 &mat4::perspective(float fov,float aspect,float near,float far)
 {
 	const float h=tanf(fov*constants::pi/360.0f)*near;
@@ -113,7 +113,7 @@ mat4 mat4::operator*(const mat4 &mat) const
 {
     mat4 out;
 
-    for(int i=0;i<4;++i) 
+    for(int i=0;i<4;++i)
     {
         for(int j=0;j<4;++j)
         {

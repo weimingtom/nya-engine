@@ -120,7 +120,7 @@ namespace nya_render
     #ifndef GL_FRAGMENT_SHADER_ARB
         #define GL_FRAGMENT_SHADER_ARB GL_FRAGMENT_SHADER
     #endif
-    
+
     #ifndef GL_ARB_shader_objects
         #define GL_OBJECT_COMPILE_STATUS_ARB GL_COMPILE_STATUS
         #define GL_OBJECT_INFO_LOG_LENGTH_ARB GL_INFO_LOG_LENGTH
@@ -548,7 +548,7 @@ void shader::set_sampler(const char*name,unsigned int layer)
     {
         if(m_samplers[i].layer!=layer)
             continue;
-        
+
         m_samplers[i].name.assign(name);
         return;
     }

@@ -31,7 +31,7 @@ public:
 
     void create(const t &res)
     {
-        typename shared_resources::shared_resource_mutable_ref ref=get_shared_resources().create();        
+        typename shared_resources::shared_resource_mutable_ref ref=get_shared_resources().create();
         if(!ref.is_valid())
         {
             unload();

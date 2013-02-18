@@ -15,7 +15,7 @@ public:
     {
         if(!m_ref)
             return 0;
-        
+
         return &m_ref->obj;
     };
 
@@ -62,7 +62,7 @@ public:
             ++m_ref->count;
     }
 
-    proxy &operator=(const proxy &p) 
+    proxy &operator=(const proxy &p)
     {
 		if(this==&p)
 			return *this;

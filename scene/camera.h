@@ -12,6 +12,8 @@ class camera
 {
 public:
     void set_proj(float fov,float aspect,float near,float far);
+    void set_frustrum(float left,float right,float bottom,float top,float near,float far);
+
     void set_pos(float x,float y,float z);
     void set_rot(float yaw,float pitch,float roll);
 

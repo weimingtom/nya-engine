@@ -70,7 +70,7 @@ private:
     {
         std::string name;
         unsigned int layer;
-        
+
         sampler():layer(0){}
         sampler(const char *name,unsigned int layer):
                             name(name),layer(layer){}

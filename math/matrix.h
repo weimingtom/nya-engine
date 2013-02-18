@@ -16,7 +16,7 @@ struct mat4
     mat4 &rotate(float angle,float x,float y,float z);
     mat4 &scale(float sx,float sy,float sz);
     mat4 &scale(float s) { return scale(s,s,s); }
-    
+
     mat4 &perspective(float fov,float aspect,float near,float far);
     mat4 &frustrum(float left,float right,float bottom,float top,float near,float far);
 

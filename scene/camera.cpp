@@ -19,12 +19,20 @@ void camera::set_proj(float fov,float aspect,float near,float far)
         nya_render::set_projection_matrix(m_proj);
 }
 
+void camera::set_frustrum(float left,float right,float bottom,float top,float near,float far)
+{
+    m_proj.identity();
+    m_proj.frustrum(left,right,bottom,top,near,far);
+    if(this==active_camera)
+        nya_render::set_projection_matrix(m_proj);
+}
+
 void camera::set_pos(float x,float y,float z)
 {
     m_pos.x=x;
     m_pos.y=y;
     m_pos.z=z;
-    
+
     m_recalc_view=true;
 }
 

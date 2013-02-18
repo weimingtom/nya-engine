@@ -14,11 +14,11 @@ void material::set() const
         const param_proxy &p=m_params[i];
         if(!p.is_valid())
         {
-            m_shader.set_uniform_value(i,0,0,0,0); 
+            m_shader.set_uniform_value(i,0,0,0,0);
             continue;
         }
 
-        m_shader.set_uniform_value(i,p->f[0],p->f[1],p->f[2],p->f[3]); 
+        m_shader.set_uniform_value(i,p->f[0],p->f[1],p->f[2],p->f[3]);
     }
 
     if(m_blend)
@@ -66,7 +66,7 @@ void material::unset() const
     }
 }
 
-void material::set_shader(const shader &shdr) 
+void material::set_shader(const shader &shdr)
 {
     m_shader.unload();
 
@@ -120,7 +120,7 @@ const char *material::get_texture_name(int idx) const
 {
     if(idx<0 || idx>=(int)m_textures.size())
         return 0;
-    
+
     if(!m_textures[idx].proxy.is_valid())
         return 0;
 
@@ -177,7 +177,7 @@ void material::set_param(int idx,const param &p)
 {
     if(idx<0 || idx>=(int)m_params.size())
         return;
-    
+
     m_params[idx]=param_proxy(p);
 }
 

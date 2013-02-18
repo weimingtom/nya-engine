@@ -26,7 +26,7 @@ public:
     void bind() const;
     void unbind() const;
     static void unbind_all();
-    
+
 public:
     static void select_multitex_slot(unsigned int idx);
 

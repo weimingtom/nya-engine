@@ -25,7 +25,7 @@ struct shared_shader
 
         predefines_count
     };
-    
+
     enum transform_type
     {
         none,

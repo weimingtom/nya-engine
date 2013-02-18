@@ -18,7 +18,7 @@ void rgb_to_bgr(unsigned char *data,size_t data_size)
     }
 }
 
-bool texture::load_tga(shared_texture &res,resource_data &data,const char* name) 
+bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
 {
     if(!data.get_size())
         return false;
@@ -107,11 +107,11 @@ bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
 
         const unsigned char *cur=(unsigned char *)reader.get_data();
 
-        for(size_t i=0;i<color_data_size;) 
+        for(size_t i=0;i<color_data_size;)
         {
             if(*cur & 0x80)
             {
-                unsigned char len= *cur -127; 
+                unsigned char len= *cur -127;
                 ++cur;
 
                 for(unsigned char j=0;j<len;++j,i+=channels)
@@ -121,7 +121,7 @@ bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
             }
             else // raw
             {
-                unsigned char len= *cur +1; 
+                unsigned char len= *cur +1;
                 ++cur;
 
                 for(unsigned char j=0;j<len;++j,i+=channels,cur+=channels)
