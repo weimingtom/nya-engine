@@ -203,12 +203,6 @@ void scene::init()
         m_aniki.load(model_res);
         model_res->release();
     }
-    
-#ifdef OPENGL_ES
-    const char *precision="precision mediump float;\n";
-#else
-    const char *precision="";
-#endif
 
     const char *uber_vs=
     "uniform mat4 bones[200];"
@@ -241,11 +235,7 @@ void scene::init()
     "  normal=gl_ModelViewMatrix*bone*vec4(gl_Normal.xyz,0);"
     "\n#endif\n"
 
-#ifdef OPENGL_ES
-    "color=vec4(1.0);"
-#else
     "  color=gl_Color;"
-#endif
 
     "\n#ifdef vcolor_enabled\n"
     "  vcolor=gl_MultiTexCoord3;"
@@ -270,11 +260,7 @@ void scene::init()
                                  "  tc=gl_MultiTexCoord0;"
                                  "  vcolor=gl_MultiTexCoord3;"
 
-#ifdef OPENGL_ES
-                                 "color=vec4(1.0);"
-#else
                                  "  color=gl_Color;"
-#endif
 
                                  //"  normal.xyz=get_rot(gl_ModelViewMatrix)*gl_Normal.xyz;"
 
@@ -302,34 +288,19 @@ void scene::init()
     //"  gl_FragColor=vcolor;"
     "}";
 
-    
-    std::string scenery_vs_str;
-    std::string scenery_ps_str;
-    
-    scenery_vs_str.append(precision);
-    scenery_vs_str.append(vprogram);
-
-    scenery_ps_str.append(precision);
-    scenery_ps_str.append(fprogram);
-
     m_shader_scenery.set_sampler("base_map",0);
-    m_shader_scenery.add_program(nya_render::shader::vertex,scenery_vs_str.c_str());
-    m_shader_scenery.add_program(nya_render::shader::pixel,scenery_ps_str.c_str());
+    m_shader_scenery.add_program(nya_render::shader::vertex,vprogram);
+    m_shader_scenery.add_program(nya_render::shader::pixel,fprogram);
 
     std::string scenery_anim_vs_str;
     std::string scenery_anim_ps_str;
 
-    scenery_anim_vs_str.append(precision);
-
     scenery_anim_vs_str.append("#define vcolor_enabled\n");
     scenery_anim_vs_str.append(uber_vs);
 
-    scenery_anim_ps_str.append(precision);
-    scenery_anim_ps_str.append(fprogram);
-
     m_shader_scenery_anim.set_sampler("base_map",0);
     m_shader_scenery_anim.add_program(nya_render::shader::vertex,scenery_anim_vs_str.c_str());
-    m_shader_scenery_anim.add_program(nya_render::shader::pixel,scenery_anim_ps_str.c_str());
+    m_shader_scenery_anim.add_program(nya_render::shader::pixel,fprogram);
 
     m_shsc_mat_uniform=m_shader_scenery_anim.get_handler("bones");
 
@@ -359,10 +330,7 @@ void scene::init()
 
     std::string char_vs_str;
     std::string char_ps_str;
-    
-    char_vs_str.append(precision);
-    char_ps_str.append(precision);
-    
+
     if(get_config().specular_enabled)
     {
         const char *specular_define="#define specular_enabled\n";
@@ -534,12 +502,10 @@ void scene::draw()
 
     imouto.draw(true);
 
-#ifndef OPENGL_ES
     if(scene_loc)
-        glColor4f(scene_loc->color[0],scene_loc->color[1],scene_loc->color[2],1.0f);
+        nya_render::set_color(scene_loc->color[0],scene_loc->color[1],scene_loc->color[2],1.0f);
     else
-        glColor4f(1.0f,1.0f,1.0f,1.0f);
-#endif
+        nya_render::set_color(1.0f,1.0f,1.0f,1.0f);
 
     /*
     glPushMatrix();

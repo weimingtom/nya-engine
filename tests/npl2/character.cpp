@@ -5,8 +5,7 @@
 #include "tsb_anim.h"
 #include "string.h"
 #include "config.h"
-
-#include "render/platform_specific_gl.h"
+#include "render/render.h"
 
 void character::set_attrib(const char *key,const char *value,int num)
 {
@@ -348,9 +347,7 @@ void character::draw(bool use_materials)
     if(!m_parts[body].subparts[0].model.is_valid())
         return;
 
-#ifndef OPENGL_ES
-    glColor4f(m_color[0],m_color[1],m_color[2],1);
-#endif
+    nya_render::set_color(m_color[0],m_color[1],m_color[2],1);
 
     if(use_materials || m_parts[body].subparts[0].outline)
     {
@@ -367,9 +364,7 @@ void character::draw(bool use_materials)
     draw_part(hair,use_materials);
     draw_part(head,use_materials);
 
-#ifndef OPENGL_ES
-    glColor4f(m_color[0],m_color[1],m_color[2],1);
-#endif
+    nya_render::set_color(m_color[0],m_color[1],m_color[2],1);
 
     if(use_materials || m_parts[body].subparts[0].outline)
         m_parts[body].subparts[0].model->draw(use_materials,m_body_blend_group_idx);
@@ -390,9 +385,7 @@ void character::draw(bool use_materials)
         model_ref &m=p.subparts[mode+i-1].model;
         if(m.is_valid())
         {
-#ifndef OPENGL_ES
-            glColor4f(m_color[0],m_color[1],m_color[2],p.subparts[i-1].opacity);
-#endif
+            nya_render::set_color(m_color[0],m_color[1],m_color[2],p.subparts[i-1].opacity);
             m->draw(use_materials);
         }
     }
@@ -415,9 +408,7 @@ void character::draw_part(unsigned int idx,bool use_materials)
         model_ref &m=p.subparts[i-1].model;
         if(m.is_valid())
         {
-#ifndef OPENGL_ES
-            glColor4f(m_color[0],m_color[1],m_color[2],p.subparts[i-1].opacity);
-#endif
+            nya_render::set_color(m_color[0],m_color[1],m_color[2],p.subparts[i-1].opacity);
             m->draw(use_materials);
         }
     }

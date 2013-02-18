@@ -18,6 +18,10 @@
 
 #include "stdio.h"
 
+#ifdef __APPLE__
+    #include "TargetConditionals.h"
+#endif
+
 void init_resource_system();
 
 class npl2: public nya_system::app
@@ -160,7 +164,11 @@ private:
 
         init=true;
 
+#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+        const std::string path=std::string(nya_system::get_app_path())+"../Documents/";
+#else
         const std::string path=std::string(nya_system::get_app_path())+"add-ons/";
+#endif
 
         static nya_resources::composite_resources_provider cprov;
         cprov.enable_cache();
