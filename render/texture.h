@@ -7,6 +7,8 @@ namespace nya_render
 
 class texture
 {
+    friend class fbo;
+
 public:
     enum color_format
     {
@@ -14,7 +16,11 @@ public:
         //color_bgr,
         color_rgba,
         color_bgra,
-        color_r
+        color_r,
+
+        depth16,
+        depth24,
+        depth32
     };
 
     void build_texture(const void *data,unsigned int width,unsigned int height,color_format format);

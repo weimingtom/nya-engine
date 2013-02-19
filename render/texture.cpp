@@ -9,9 +9,9 @@ namespace nya_render
 
 void texture::build_texture(const void *data,unsigned int width,unsigned int height,color_format format)
 {
-    if(!data || width==0 || height==0)
+    if(width==0 || height==0)
     {
-        get_log()<<"Unable to build texture: invalid data/width/height\n";
+        get_log()<<"Unable to build texture: invalid width or height\n";
 	    release();
         return;
     }
@@ -40,6 +40,14 @@ void texture::build_texture(const void *data,unsigned int width,unsigned int hei
         case color_rgba: source_format=GL_RGBA; gl_format=GL_RGBA; break;
         case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; break;
         case color_r: source_format=GL_LUMINANCE; gl_format=GL_LUMINANCE; break;
+        case depth16: source_format=GL_DEPTH_COMPONENT16; gl_format=GL_DEPTH_COMPONENT; break;
+#ifdef OPENGL_ES
+        case depth24: source_format=GL_DEPTH_COMPONENT24_OES; gl_format=GL_DEPTH_COMPONENT; break;
+        case depth32: source_format=GL_DEPTH_COMPONENT32_OES; gl_format=GL_DEPTH_COMPONENT; break;
+#else
+        case depth24: source_format=GL_DEPTH_COMPONENT24; gl_format=GL_DEPTH_COMPONENT; break;
+        case depth32: source_format=GL_DEPTH_COMPONENT32; gl_format=GL_DEPTH_COMPONENT; break;
+#endif
     };
 
     if(!source_format || !gl_format)
@@ -67,7 +75,8 @@ void texture::build_texture(const void *data,unsigned int width,unsigned int hei
     */
 
 #ifdef GL_GENERATE_MIPMAP
-    glTexParameteri(GL_TEXTURE_2D,GL_GENERATE_MIPMAP,GL_TRUE);
+    if(data)
+        glTexParameteri(GL_TEXTURE_2D,GL_GENERATE_MIPMAP,GL_TRUE);
 #endif
 
 	//if(create_new)
@@ -76,11 +85,16 @@ void texture::build_texture(const void *data,unsigned int width,unsigned int hei
 	//	glTexSubImage2D(GL_TEXTURE_2D,0,0,0,width,height,gl_format,GL_UNSIGNED_BYTE,data);
 
 #ifndef GL_GENERATE_MIPMAP
-    glGenerateMipmap(GL_TEXTURE_2D);
+    if(data)
+        glGenerateMipmap(GL_TEXTURE_2D);
 #endif
 
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+
+    if(data)
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+    else
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 }
 
 void texture::build_cubemap(const void *data[6],unsigned int width,unsigned int height,color_format format)
