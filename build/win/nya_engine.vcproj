@@ -256,6 +256,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\render\fbo.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\render\fbo.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\render\platform_specific_gl.cpp"
 				>
 			</File>

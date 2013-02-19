@@ -6,8 +6,57 @@
 namespace nya_render
 {
 
+#ifdef NO_EXTENSIONS_INIT
+    #define fbo_glGenFramebuffers glGenFramebuffers
+    #define fbo_glBindFramebuffer glBindFramebuffer
+	#define fbo_glDeleteFramebuffers glDeleteFramebuffers;
+	#define fbo_glFramebufferTexture2D glFramebufferTexture2D;
+#else
+    PFNGLGENFRAMEBUFFERSPROC fbo_glGenFramebuffers;
+	PFNGLBINDFRAMEBUFFERPROC fbo_glBindFramebuffer;
+	PFNGLDELETEFRAMEBUFFERSPROC fbo_glDeleteFramebuffers;
+	PFNGLFRAMEBUFFERTEXTURE2DPROC fbo_glFramebufferTexture2D;
+#endif
+
+bool check_init_fbo()
+{
+    static bool initialised=false;
+    static bool failed=true;
+    if(initialised)
+        return !failed;
+
+    //if(!has_extension("GL_EXT_framebuffer_object"))
+    //    return false;
+
+#ifndef NO_EXTENSIONS_INIT
+    fbo_glGenFramebuffers = (PFNGLGENFRAMEBUFFERSPROC)get_extension("glGenFramebuffers");
+    if(!fbo_glGenFramebuffers)
+        return false;
+
+	fbo_glBindFramebuffer = (PFNGLBINDFRAMEBUFFERPROC)get_extension("glBindFramebuffer");
+    if(!fbo_glBindFramebuffer)
+        return false;
+
+	fbo_glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSPROC)get_extension("glDeleteFramebuffers");
+    if(!fbo_glDeleteFramebuffers)
+        return false;
+
+	fbo_glFramebufferTexture2D = (PFNGLFRAMEBUFFERTEXTURE2DPROC)get_extension("glFramebufferTexture2D");
+    if(!fbo_glFramebufferTexture2D)
+        return false;
+#endif
+
+    initialised=true;
+    failed=false;
+
+    return true;
+}
+
 void fbo::set_color_target(const texture &tex)
 {
+	if(!check_init_fbo())
+		return;
+
     if(tex.m_gl_type!=GL_TEXTURE_2D)
         return;
 
@@ -15,9 +64,9 @@ void fbo::set_color_target(const texture &tex)
         return;
 
     if(!m_fbo_idx)
-        glGenFramebuffers(1,&m_fbo_idx);
+        fbo_glGenFramebuffers(1,&m_fbo_idx);
 
-    glBindFramebuffer(GL_FRAMEBUFFER,m_fbo_idx);
+    fbo_glBindFramebuffer(GL_FRAMEBUFFER,m_fbo_idx);
 
     if(!m_color_target_idx && m_depth_target_idx)
     {
@@ -25,14 +74,17 @@ void fbo::set_color_target(const texture &tex)
         glReadBuffer(GL_COLOR_ATTACHMENT0);
     }
 
-    glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,tex.m_tex_id,0);
-    glBindFramebuffer(GL_FRAMEBUFFER,0);
+    fbo_glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,tex.m_tex_id,0);
+    fbo_glBindFramebuffer(GL_FRAMEBUFFER,0);
 
     m_color_target_idx=tex.m_tex_id;
 }
 
 void fbo::set_depth_target(const texture &tex)
 {
+	if(!check_init_fbo())
+		return;
+
     if(tex.m_gl_type!=GL_TEXTURE_2D)
         return;
 
@@ -40,9 +92,9 @@ void fbo::set_depth_target(const texture &tex)
         return;
 
     if(!m_fbo_idx)
-        glGenFramebuffers(1,&m_fbo_idx);
+        fbo_glGenFramebuffers(1,&m_fbo_idx);
 
-    glBindFramebuffer(GL_FRAMEBUFFER,m_fbo_idx);
+    fbo_glBindFramebuffer(GL_FRAMEBUFFER,m_fbo_idx);
 
     if(!m_color_target_idx)
     {
@@ -50,8 +102,8 @@ void fbo::set_depth_target(const texture &tex)
         glReadBuffer(GL_NONE);
     }
 
-    glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,tex.m_tex_id,0);
-    glBindFramebuffer(GL_FRAMEBUFFER,0);
+    fbo_glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,tex.m_tex_id,0);
+    fbo_glBindFramebuffer(GL_FRAMEBUFFER,0);
 
     m_depth_target_idx=tex.m_tex_id;
 }
@@ -61,8 +113,8 @@ void fbo::release()
     if(!m_fbo_idx)
         return;
 
-    glBindFramebuffer(GL_FRAMEBUFFER,0);
-    glDeleteFramebuffers(1,&m_fbo_idx);
+    fbo_glBindFramebuffer(GL_FRAMEBUFFER,0);
+    fbo_glDeleteFramebuffers(1,&m_fbo_idx);
 
     m_fbo_idx=0;
     m_color_target_idx=0;
@@ -71,12 +123,18 @@ void fbo::release()
 
 void fbo::bind()
 {
-    glBindFramebuffer(GL_FRAMEBUFFER,m_fbo_idx);
+	if(!m_fbo_idx)
+		return;
+
+    fbo_glBindFramebuffer(GL_FRAMEBUFFER,m_fbo_idx);
 }
 
 void fbo::unbind()
 {
-    glBindFramebuffer(GL_FRAMEBUFFER,0);
+	if(!m_fbo_idx)
+		return;
+
+    fbo_glBindFramebuffer(GL_FRAMEBUFFER,0);
 }
 
 }
