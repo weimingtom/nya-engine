@@ -9,8 +9,8 @@ namespace nya_render
 #ifdef NO_EXTENSIONS_INIT
     #define fbo_glGenFramebuffers glGenFramebuffers
     #define fbo_glBindFramebuffer glBindFramebuffer
-	#define fbo_glDeleteFramebuffers glDeleteFramebuffers;
-	#define fbo_glFramebufferTexture2D glFramebufferTexture2D;
+	#define fbo_glDeleteFramebuffers glDeleteFramebuffers
+	#define fbo_glFramebufferTexture2D glFramebufferTexture2D
 #else
     PFNGLGENFRAMEBUFFERSPROC fbo_glGenFramebuffers;
 	PFNGLBINDFRAMEBUFFERPROC fbo_glBindFramebuffer;
