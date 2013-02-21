@@ -7,13 +7,13 @@
 namespace nya_render
 {
 
-void texture::build_texture(const void *data,unsigned int width,unsigned int height,color_format format)
+bool texture::build_texture(const void *data,unsigned int width,unsigned int height,color_format format)
 {
     if(width==0 || height==0)
     {
         get_log()<<"Unable to build texture: invalid width or height\n";
 	    release();
-        return;
+        return false;
     }
 
     if(!m_max_tex_size)
@@ -27,11 +27,12 @@ void texture::build_texture(const void *data,unsigned int width,unsigned int hei
     {
         get_log()<<"Unable to build texture: width or height is too high, maximum is "<<m_max_tex_size<<"\n";
 	    release();
-        return;
+        return false;
     }
 
     unsigned int source_format=0;
     unsigned int gl_format=0;
+    unsigned int precision=GL_UNSIGNED_BYTE;
 
     switch(format)
     {
@@ -40,11 +41,12 @@ void texture::build_texture(const void *data,unsigned int width,unsigned int hei
         case color_rgba: source_format=GL_RGBA; gl_format=GL_RGBA; break;
         case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; break;
         case color_r: source_format=GL_LUMINANCE; gl_format=GL_LUMINANCE; break;
-        case depth16: source_format=GL_DEPTH_COMPONENT16; gl_format=GL_DEPTH_COMPONENT; break;
 #ifdef OPENGL_ES
-        case depth24: source_format=GL_DEPTH_COMPONENT24_OES; gl_format=GL_DEPTH_COMPONENT; break;
-        case depth32: source_format=GL_DEPTH_COMPONENT32_OES; gl_format=GL_DEPTH_COMPONENT; break;
+        case depth16: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_SHORT; break;
+        case depth24: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; break;
+        case depth32: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; break;
 #else
+        case depth16: source_format=GL_DEPTH_COMPONENT16; gl_format=GL_DEPTH_COMPONENT; break;
         case depth24: source_format=GL_DEPTH_COMPONENT24; gl_format=GL_DEPTH_COMPONENT; break;
         case depth32: source_format=GL_DEPTH_COMPONENT32; gl_format=GL_DEPTH_COMPONENT; break;
 #endif
@@ -54,7 +56,7 @@ void texture::build_texture(const void *data,unsigned int width,unsigned int hei
     {
         get_log()<<"Unable to build texture: unsuppored color format\n";
 	    release();
-        return;
+        return false;
     }
 
 	//bool create_new=(!m_tex_id || m_width!=width || m_height!=height || m_type!=texture_2d || m_format!=format);
@@ -78,32 +80,40 @@ void texture::build_texture(const void *data,unsigned int width,unsigned int hei
     if(data)
         glTexParameteri(GL_TEXTURE_2D,GL_GENERATE_MIPMAP,GL_TRUE);
 #endif
-
 	//if(create_new)
-	    glTexImage2D(GL_TEXTURE_2D,0,source_format,width,height,0,gl_format,GL_UNSIGNED_BYTE,data);
-	//else
-	//	glTexSubImage2D(GL_TEXTURE_2D,0,0,0,width,height,gl_format,GL_UNSIGNED_BYTE,data);
+	    glTexImage2D(GL_TEXTURE_2D,0,source_format,width,height,0,gl_format,precision,data);
 
+	//else
+	//	glTexSubImage2D(GL_TEXTURE_2D,0,0,0,width,height,gl_format,precision,data);
 #ifndef GL_GENERATE_MIPMAP
     if(data)
         glGenerateMipmap(GL_TEXTURE_2D);
 #endif
 
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    //if(format<depth16)
+    {
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 
-    if(data)
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+        if(data)
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+        else
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+    }/*
     else
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+    {
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    }*/
+    return true;
 }
 
-void texture::build_cubemap(const void *data[6],unsigned int width,unsigned int height,color_format format)
+bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int height,color_format format)
 {
     if(!data || width==0 || height==0)
     {
-        get_log()<<"Unable to build texture: invalid data/width/height\n";
+        get_log()<<"Unable to build cube texture: invalid data/width/height\n";
 	    release();
-        return;
+        return false;
     }
 
     if(!m_max_tex_size)
@@ -115,9 +125,9 @@ void texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 
     if(width>m_max_tex_size || height>m_max_tex_size)
     {
-        get_log()<<"Unable to build texture: width or height is too high, maximum is "<<m_max_tex_size<<"\n";
+        get_log()<<"Unable to build cube texture: width or height is too high, maximum is "<<m_max_tex_size<<"\n";
 	    release();
-        return;
+        return false;
     }
 
     unsigned int source_format=0;
@@ -130,13 +140,14 @@ void texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
         case color_rgba: source_format=GL_RGBA; gl_format=GL_RGBA; break;
         case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; break;
         case color_r: source_format=GL_LUMINANCE; gl_format=GL_LUMINANCE; break;
+        default: break;
     };
 
     if(!source_format || !gl_format)
     {
-        get_log()<<"Unable to build texture: unsuppored color format\n";
+        get_log()<<"Unable to build cube texture: unsuppored color format\n";
 	    release();
-        return;
+        return false;
     }
 
 	if(m_format!=format)
@@ -171,6 +182,8 @@ void texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_NEAREST);
+
+    return true;
 }
 
 void texture::bind() const

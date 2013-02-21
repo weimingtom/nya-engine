@@ -10,6 +10,7 @@ namespace nya_render
 
 void set_log(nya_log::log *l);
 nya_log::log &get_log();
+void log_gl_errors(const char *place=0);
 
 void set_projection_matrix(const nya_math::mat4 &mat);
 void set_modelview_matrix(const nya_math::mat4 &mat);

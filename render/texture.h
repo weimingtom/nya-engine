@@ -23,10 +23,10 @@ public:
         depth32
     };
 
-    void build_texture(const void *data,unsigned int width,unsigned int height,color_format format);
+    bool build_texture(const void *data,unsigned int width,unsigned int height,color_format format);
 
 	//order: positive_x,negative_x,positive_y,negative_y,positive_z,negative_z
-	void build_cubemap(const void *data[6],unsigned int width,unsigned int height,color_format format);
+	bool build_cubemap(const void *data[6],unsigned int width,unsigned int height,color_format format);
 
 public:
     void bind() const;

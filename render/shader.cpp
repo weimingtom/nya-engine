@@ -216,15 +216,15 @@ bool check_init_shaders()
     return true;
 }
 
-void shader::add_program(program_type type,const char*code)
+bool shader::add_program(program_type type,const char*code)
 {
     if(!check_init_shaders())
-        return;
+        return false;
 
     if(!code || !code[0])
     {
         get_log()<<"Unable to add shader program: invalid code\n";
-        return;
+        return false;
     }
 
     if(!m_program)
@@ -233,7 +233,7 @@ void shader::add_program(program_type type,const char*code)
     if(!m_program)
     {
         get_log()<<"Unable to create shader program object\n";
-        return;
+        return false;
     }
 
     if(m_objects[type])
@@ -419,7 +419,7 @@ void shader::add_program(program_type type,const char*code)
         }
 
         m_program=0;
-        return;
+        return false;
     }
     glAttachObjectARB(m_program,object);
 
@@ -452,7 +452,7 @@ void shader::add_program(program_type type,const char*code)
             }
 
             m_program=0; //??
-            return;
+            return false;
         }
 
         if(type==pixel)
@@ -492,7 +492,7 @@ void shader::add_program(program_type type,const char*code)
                 delete(log);
             }
             m_program=0; //??
-            return;
+            return false;
         }
 
 #ifdef SUPPORT_OLD_SHADERS
@@ -509,6 +509,8 @@ void shader::add_program(program_type type,const char*code)
     m_objects[type]=object;
 
     //glUseProgramObjectARB(0);
+    
+    return true;
 }
 
 void shader::bind() const

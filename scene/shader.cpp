@@ -276,8 +276,11 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
         ++res.samplers_count;
     }
 
-    res.shdr.add_program(nya_render::shader::vertex,res.vertex.c_str());
-    res.shdr.add_program(nya_render::shader::pixel,res.pixel.c_str());
+    if(!res.shdr.add_program(nya_render::shader::vertex,res.vertex.c_str()))
+        return false;
+
+    if(!res.shdr.add_program(nya_render::shader::pixel,res.pixel.c_str()))
+        return false;
 
     for(int i=0;i<shared_shader::predefines_count;++i)
     {

@@ -3,6 +3,11 @@
 #include "fbo.h"
 #include "platform_specific_gl.h"
 
+namespace
+{
+    int default_fbo_idx=0;
+}
+
 namespace nya_render
 {
 
@@ -24,6 +29,8 @@ bool check_init_fbo()
     static bool failed=true;
     if(initialised)
         return !failed;
+
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING,&default_fbo_idx);
 
     //if(!has_extension("GL_EXT_framebuffer_object"))
     //    return false;
@@ -70,12 +77,14 @@ void fbo::set_color_target(const texture &tex)
 
     if(!m_color_target_idx && m_depth_target_idx)
     {
+#ifndef OPENGL_ES
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
         glReadBuffer(GL_COLOR_ATTACHMENT0);
+#endif
     }
 
     fbo_glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,tex.m_tex_id,0);
-    fbo_glBindFramebuffer(GL_FRAMEBUFFER,0);
+    fbo_glBindFramebuffer(GL_FRAMEBUFFER,default_fbo_idx);
 
     m_color_target_idx=tex.m_tex_id;
 }
@@ -98,12 +107,14 @@ void fbo::set_depth_target(const texture &tex)
 
     if(!m_color_target_idx)
     {
+#ifndef OPENGL_ES
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
+#endif
     }
 
     fbo_glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,tex.m_tex_id,0);
-    fbo_glBindFramebuffer(GL_FRAMEBUFFER,0);
+    fbo_glBindFramebuffer(GL_FRAMEBUFFER,default_fbo_idx);
 
     m_depth_target_idx=tex.m_tex_id;
 }
@@ -113,7 +124,7 @@ void fbo::release()
     if(!m_fbo_idx)
         return;
 
-    fbo_glBindFramebuffer(GL_FRAMEBUFFER,0);
+    fbo_glBindFramebuffer(GL_FRAMEBUFFER,default_fbo_idx);
     fbo_glDeleteFramebuffers(1,&m_fbo_idx);
 
     m_fbo_idx=0;
@@ -134,7 +145,7 @@ void fbo::unbind()
 	if(!m_fbo_idx)
 		return;
 
-    fbo_glBindFramebuffer(GL_FRAMEBUFFER,0);
+    fbo_glBindFramebuffer(GL_FRAMEBUFFER,default_fbo_idx);
 }
 
 }

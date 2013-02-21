@@ -29,6 +29,33 @@ nya_log::log &get_log()
     return *render_log;
 }
 
+void log_gl_errors(const char *place)
+{
+    for(int i=glGetError();i!=GL_NO_ERROR;i=glGetError())
+    {
+        get_log()<<"gl error: ";
+        switch(i)
+        {
+            case GL_INVALID_ENUM: get_log()<<"invalid enum"; break;
+            case GL_INVALID_VALUE: get_log()<<"invalid value"; break;
+            case GL_INVALID_OPERATION: get_log()<<"invalid operation"; break;
+#ifndef OPENGL_ES
+            case GL_STACK_OVERFLOW: get_log()<<"stack overflow"; break;
+            case GL_STACK_UNDERFLOW: get_log()<<"stack underflow"; break;
+#endif
+            case GL_OUT_OF_MEMORY: get_log()<<"out of memory"; break;
+
+            default: get_log()<<"unknown"; break;
+        }
+
+        get_log()<<" ("<<i<<")";
+        if(place)
+            get_log()<<" at "<<place<<"\n";
+        else
+            get_log()<<"\n";
+    }
+}
+
 void set_projection_matrix(const nya_math::mat4 &mat)
 {
     transform::get().set_projection_matrix(mat);

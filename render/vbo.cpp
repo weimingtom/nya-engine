@@ -367,14 +367,14 @@ int gl_usage(vbo::usage_hint usage)
     return GL_DYNAMIC_DRAW_ARB;
 }
 
-void vbo::set_vertex_data(const void*data,unsigned int vert_stride,unsigned int vert_count,usage_hint usage)
+bool vbo::set_vertex_data(const void*data,unsigned int vert_stride,unsigned int vert_count,usage_hint usage)
 {
     const unsigned int size=vert_count*vert_stride;
     if(size==0 || !data)
     {
         m_verts_count=0;
         get_log()<<"Unable to set vertices: invalid data\n";
-        return;
+        return false;
     }
 
     if(!m_vertex_id)
@@ -382,7 +382,7 @@ void vbo::set_vertex_data(const void*data,unsigned int vert_stride,unsigned int 
         if(!check_init_vbo())
         {
             get_log()<<"Unable to gen vertex data: vbo unsupported\n";
-            return;
+            return false;
         }
 
         vbo_glGenBuffers(1,&m_vertex_id);
@@ -412,16 +412,18 @@ void vbo::set_vertex_data(const void*data,unsigned int vert_stride,unsigned int 
 
     vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,0);
     m_verts_count=vert_count;
+    
+    return true;
 }
 
-void vbo::set_index_data(const void*data,element_size size,unsigned int elements_count,usage_hint usage)
+bool vbo::set_index_data(const void*data,element_size size,unsigned int elements_count,usage_hint usage)
 {
     const unsigned int buffer_size=elements_count*size;
     if(buffer_size==0 || !data)
     {
         get_log()<<"Unable to set indexes: invalid data\n";
         m_element_count=0;
-        return;
+        return false;
     }
 
     if(!m_index_id)
@@ -429,7 +431,7 @@ void vbo::set_index_data(const void*data,element_size size,unsigned int elements
         if(!check_init_vbo())
         {
             get_log()<<"Unable to gen vertex data: vbo unsupported\n";
-            return;
+            return false;
         }
 
         vbo_glGenBuffers(1,&m_index_id);
@@ -459,6 +461,8 @@ void vbo::set_index_data(const void*data,element_size size,unsigned int elements
 
     vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,0);
     m_element_count=elements_count;
+
+    return true;
 }
 
 void vbo::set_vertices(unsigned int offset,unsigned int dimension)

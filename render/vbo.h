@@ -31,8 +31,8 @@ public:
         stream_draw
     };
 
-    void set_vertex_data(const void*data,unsigned int vert_stride,unsigned int vert_count,usage_hint usage=static_draw);
-    void set_index_data(const void*data,element_size size,unsigned int elements_count,usage_hint usage=static_draw);
+    bool set_vertex_data(const void*data,unsigned int vert_stride,unsigned int vert_count,usage_hint usage=static_draw);
+    bool set_index_data(const void*data,element_size size,unsigned int elements_count,usage_hint usage=static_draw);
     void set_element_type(element_type type) { m_element_type = type; }
     void set_vertices(unsigned int offset,unsigned int dimension);
     void set_normals(unsigned int offset);

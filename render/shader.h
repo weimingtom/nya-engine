@@ -30,7 +30,7 @@ public:
         program_types_count
     };
 
-    void add_program(program_type type,const char*code);
+    bool add_program(program_type type,const char*code);
 
 public:
     void bind() const;
