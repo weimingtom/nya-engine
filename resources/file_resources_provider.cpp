@@ -288,8 +288,15 @@ bool file_resources_provider::has(const char *name)
     if(!name)
         return false;
 
+    std::string file_name=m_path+name;
+    for(size_t i=m_path.size();i<file_name.size();++i)
+    {
+        if(file_name[i]=='\\')
+            file_name[i]='/';
+    }
+
     struct stat sb;
-    return stat((m_path+name).c_str(),&sb)==0;
+    return stat(file_name.c_str(),&sb)==0;
 }
 
 bool file_resources_provider::set_folder(const char*name,bool recursive)

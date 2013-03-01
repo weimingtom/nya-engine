@@ -76,25 +76,38 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
     */
 
+    const bool pot=((width&(width-1))==0 && (height&(height-1))==0);
+    const bool has_mipmap=(data && pot);
+
 #ifdef GL_GENERATE_MIPMAP
-    if(data)
+    if(has_mipmap)
         glTexParameteri(GL_TEXTURE_2D,GL_GENERATE_MIPMAP,GL_TRUE);
 #endif
 	//if(create_new)
 	    glTexImage2D(GL_TEXTURE_2D,0,source_format,width,height,0,gl_format,precision,data);
-
 	//else
 	//	glTexSubImage2D(GL_TEXTURE_2D,0,0,0,width,height,gl_format,precision,data);
 #ifndef GL_GENERATE_MIPMAP
-    if(data)
+    if(has_mipmap)
         glGenerateMipmap(GL_TEXTURE_2D);
 #endif
+
+    if(pot)
+    {
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
+    }
+    else
+    {
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+    }
 
     //if(format<depth16)
     {
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 
-        if(data)
+        if(has_mipmap)
             glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
         else
             glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
@@ -104,6 +117,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     }*/
+
     return true;
 }
 
