@@ -42,6 +42,7 @@ public:
 
 public:
     typedef nya_render::blend::mode blend_mode;
+    typedef nya_render::cull_face::order cull_order;
 
 public:
     const char *get_name() const { return m_name.c_str(); }
@@ -73,14 +74,16 @@ public:
     void set_zwrite(bool enabled) { m_zwrite=enabled; }
     void set_blend(bool enabled,blend_mode src,blend_mode dst);
     void set_blend(bool enabled) { m_blend=enabled; }
+    void set_cull_face(bool enabled,cull_order order) { m_cull_face=enabled; m_cull_order=order; }
+    void set_cull_face(bool enabled) { m_cull_face=enabled; }
 
 private:
     void set() const;
     void unset() const;
 
 public:
-    material(): m_zwrite(true),m_blend(false)
-        ,m_blend_src(nya_render::blend::one),m_blend_dst(nya_render::blend::zero) {}
+    material(): m_zwrite(true),m_blend(false),m_cull_face(false),m_cull_order(nya_render::cull_face::ccw),
+                m_blend_src(nya_render::blend::one),m_blend_dst(nya_render::blend::zero) {}
 
 private:
     std::string m_name;
@@ -89,6 +92,8 @@ private:
 
     bool m_zwrite;
     bool m_blend;
+    bool m_cull_face;
+    cull_order m_cull_order;
     blend_mode m_blend_src;
     blend_mode m_blend_dst;
 

@@ -31,6 +31,11 @@ void material::set() const
     else
         nya_render::zwrite::disable();
 
+    if(m_cull_face)
+        nya_render::cull_face::enable(m_cull_order);
+    else
+        nya_render::cull_face::disable();
+
     for(size_t i=0;i<m_textures.size();++i)
     {
         if(m_textures[i].slot<0)

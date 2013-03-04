@@ -44,8 +44,8 @@ struct cull_face
 {
     enum order
     {
-        cw,
-        ccw
+        ccw,
+        cw
     };
 
     static void enable(order o);
