@@ -105,6 +105,21 @@ void blend::disable()
     glDisable(GL_BLEND);
 }
 
+void cull_face::enable(cull_face::order o)
+{
+    glEnable(GL_CULL_FACE);
+
+    if(o==cw)
+        glCullFace(GL_CW);
+    else
+        glCullFace(GL_CCW);
+}
+
+void cull_face::disable()
+{
+    glDisable(GL_CULL_FACE);
+}
+
 void zwrite::enable()
 {
     glDepthMask(true);

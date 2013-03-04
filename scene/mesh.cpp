@@ -6,6 +6,17 @@
 #include "memory/tmp_buffer.h"
 #include "memory/memory_reader.h"
 
+namespace
+{
+    struct mmd_material_params
+    {
+        float diffuse[4];
+        float shininess;        
+        float specular[3];
+        float ambient[3];
+    };
+}
+
 namespace nya_scene
 {
 
@@ -53,10 +64,59 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
     vertices.clear();
 
     uint ind_count=reader.read<uint>();
-    if(!reader.check_remained(sizeof(ushort)*ind_count))
+    const size_t inds_size=sizeof(ushort)*ind_count;
+    if(!reader.check_remained(inds_size))
         return false;
 
     res.vbo.set_index_data(data.get_data(reader.get_offset()),nya_render::vbo::index2b,ind_count);
+    reader.skip(inds_size);
+
+    uint mat_count=reader.read<uint>();
+    if(!reader.check_remained(sizeof(mmd_material_params)+2+sizeof(uint)+20))
+        return false;
+
+    res.groups.resize(mat_count);
+
+    shader sh;
+    shared_shader sh_;
+    sh_.shdr.set_sampler("base",0);
+    sh_.samplers_count=1;
+    sh_.samplers["diffuse"]=0;
+    sh_.vertex="varying vec2 tc; void main() { tc=gl_MultiTexCoord0.xy; gl_Position=gl_ModelViewProjectionMatrix*gl_Vertex; }";
+    sh_.pixel="varying vec2 tc; uniform sampler2D base; void main() { gl_FragColor=texture2D(base,tc.xy); }";
+    sh_.shdr.add_program(nya_render::shader::vertex,sh_.vertex.c_str());
+    sh_.shdr.add_program(nya_render::shader::pixel,sh_.pixel.c_str());
+    sh.create(sh_);
+
+    std::string path(name);
+    size_t p=path.rfind("/");
+    if(p==std::string::npos)
+        p=path.rfind("\\");
+    if(p==std::string::npos)
+        path.clear();
+    else
+        path.resize(p+1);
+
+    for(uint i=0,ind_offset=0;i<mat_count;++i)
+    {
+        shared_mesh::group &g=res.groups[i];
+
+        const mmd_material_params params=reader.read<mmd_material_params>();
+
+        reader.skip(2); //toon_idx and edge_flag
+
+        g.offset=ind_offset;
+        g.count=reader.read<uint>();
+        ind_offset+=g.count;
+
+        std::string tex_name((const char*)data.get_data(reader.get_offset()),20);
+        reader.skip(20);
+
+        texture tex;
+        tex.load((path+tex_name).c_str());
+        g.mat.set_texture("diffuse",tex);
+        g.mat.set_shader(sh);
+    }
 
     return true;
 }

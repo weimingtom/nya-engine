@@ -72,6 +72,7 @@ camera &get_camera()
     if(!active_camera)
     {
         static camera default_camera;
+        active_camera=&default_camera;
         return default_camera;
     }
 

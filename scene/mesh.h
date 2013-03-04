@@ -50,6 +50,7 @@ public:
     void set_pos(float x,float y,float z) { m_transform.set_pos(x,y,z); }
     void set_rot(float yaw,float pitch,float roll) { m_transform.set_rot(yaw,pitch,roll); }
     void set_scale(float sx,float sy,float sz) { m_transform.set_scale(sx,sy,sz); }
+    void set_scale(float s) { m_transform.set_scale(s,s,s); }
 
 public:
     int get_materials_count() const;

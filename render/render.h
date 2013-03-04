@@ -40,6 +40,18 @@ private:
     static unsigned int gl_mode(mode m);
 };
 
+struct cull_face
+{
+    enum order
+    {
+        cw,
+        ccw
+    };
+
+    static void enable(order o);
+    static void disable();
+};
+
 struct zwrite
 {
     static void enable();
