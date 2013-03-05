@@ -1,0 +1,181 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{35C1C4FC-C0E4-4DA2-B857-D23D6F7832D0}</ProjectGuid>
+    <RootNamespace>nya_engine</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>..\..\bin\win_vs2012_debug\</OutDir>
+    <IntDir>..\..\obj\win_vs2012_debug\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>..\..\bin\win_vs2012_release\</OutDir>
+    <IntDir>..\..\obj\win_vs2012_release\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\</AdditionalIncludeDirectories>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\..\</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\log\html_log.cpp" />
+    <ClCompile Include="..\..\log\log.cpp" />
+    <ClCompile Include="..\..\log\plain_file_log.cpp" />
+    <ClCompile Include="..\..\log\stdout_log.cpp" />
+    <ClCompile Include="..\..\math\bezier.cpp" />
+    <ClCompile Include="..\..\math\constants.cpp" />
+    <ClCompile Include="..\..\math\matrix.cpp" />
+    <ClCompile Include="..\..\math\quaternion.cpp" />
+    <ClCompile Include="..\..\memory\memory.cpp" />
+    <ClCompile Include="..\..\memory\tmp_buffer.cpp" />
+    <ClCompile Include="..\..\render\animation.cpp" />
+    <ClCompile Include="..\..\render\fbo.cpp" />
+    <ClCompile Include="..\..\render\platform_specific_gl.cpp" />
+    <ClCompile Include="..\..\render\render.cpp" />
+    <ClCompile Include="..\..\render\shader.cpp" />
+    <ClCompile Include="..\..\render\skeleton.cpp" />
+    <ClCompile Include="..\..\render\texture.cpp" />
+    <ClCompile Include="..\..\render\transform.cpp" />
+    <ClCompile Include="..\..\render\vbo.cpp" />
+    <ClCompile Include="..\..\resources\composite_resources_provider.cpp" />
+    <ClCompile Include="..\..\resources\file_resources_provider.cpp" />
+    <ClCompile Include="..\..\resources\resources.cpp" />
+    <ClCompile Include="..\..\scene\camera.cpp" />
+    <ClCompile Include="..\..\scene\material.cpp" />
+    <ClCompile Include="..\..\scene\mesh.cpp" />
+    <ClCompile Include="..\..\scene\scene.cpp" />
+    <ClCompile Include="..\..\scene\shader.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)scene\</ObjectFileName>
+      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)scene\</XMLDocumentationFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)scene\</ObjectFileName>
+      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)scene\</XMLDocumentationFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\scene\texture.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)scene\</ObjectFileName>
+      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)scene\</XMLDocumentationFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)scene\</ObjectFileName>
+      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)scene\</XMLDocumentationFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\scene\transform.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)scene\</ObjectFileName>
+      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)scene\</XMLDocumentationFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)$(InputName)1.obj</ObjectFileName>
+      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)$(InputName)1.xdc</XMLDocumentationFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\system\app.cpp" />
+    <ClCompile Include="..\..\system\system.cpp" />
+    <ClCompile Include="..\..\ui\button.cpp" />
+    <ClCompile Include="..\..\ui\label.cpp" />
+    <ClCompile Include="..\..\ui\list.cpp" />
+    <ClCompile Include="..\..\ui\panel.cpp" />
+    <ClCompile Include="..\..\ui\slider.cpp" />
+    <ClCompile Include="..\..\ui\ui.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\log\html_log.h" />
+    <ClInclude Include="..\..\log\log.h" />
+    <ClInclude Include="..\..\log\plain_file_log.h" />
+    <ClInclude Include="..\..\log\stdout_log.h" />
+    <ClInclude Include="..\..\math\bezier.h" />
+    <ClInclude Include="..\..\math\constants.h" />
+    <ClInclude Include="..\..\math\matrix.h" />
+    <ClInclude Include="..\..\math\quaternion.h" />
+    <ClInclude Include="..\..\math\vector.h" />
+    <ClInclude Include="..\..\memory\memory.h" />
+    <ClInclude Include="..\..\memory\memory_mapper.h" />
+    <ClInclude Include="..\..\memory\memory_reader.h" />
+    <ClInclude Include="..\..\memory\pool.h" />
+    <ClInclude Include="..\..\memory\tmp_buffer.h" />
+    <ClInclude Include="..\..\render\animation.h" />
+    <ClInclude Include="..\..\render\fbo.h" />
+    <ClInclude Include="..\..\render\platform_specific_gl.h" />
+    <ClInclude Include="..\..\render\render.h" />
+    <ClInclude Include="..\..\render\shader.h" />
+    <ClInclude Include="..\..\render\skeleton.h" />
+    <ClInclude Include="..\..\render\texture.h" />
+    <ClInclude Include="..\..\render\transform.h" />
+    <ClInclude Include="..\..\render\vbo.h" />
+    <ClInclude Include="..\..\resources\composite_resources_provider.h" />
+    <ClInclude Include="..\..\resources\file_resources_provider.h" />
+    <ClInclude Include="..\..\resources\resources.h" />
+    <ClInclude Include="..\..\resources\shared_resources.h" />
+    <ClInclude Include="..\..\scene\camera.h" />
+    <ClInclude Include="..\..\scene\material.h" />
+    <ClInclude Include="..\..\scene\mesh.h" />
+    <ClInclude Include="..\..\scene\proxy.h" />
+    <ClInclude Include="..\..\scene\scene.h" />
+    <ClInclude Include="..\..\scene\shader.h" />
+    <ClInclude Include="..\..\scene\shared_resources.h" />
+    <ClInclude Include="..\..\scene\texture.h" />
+    <ClInclude Include="..\..\scene\transform.h" />
+    <ClInclude Include="..\..\system\app.h" />
+    <ClInclude Include="..\..\system\button_codes.h" />
+    <ClInclude Include="..\..\system\system.h" />
+    <ClInclude Include="..\..\ui\button.h" />
+    <ClInclude Include="..\..\ui\label.h" />
+    <ClInclude Include="..\..\ui\list.h" />
+    <ClInclude Include="..\..\ui\panel.h" />
+    <ClInclude Include="..\..\ui\slider.h" />
+    <ClInclude Include="..\..\ui\ui.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
