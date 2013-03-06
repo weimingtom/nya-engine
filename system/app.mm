@@ -916,6 +916,7 @@ private:
     [window setContentView:view];
 
     [window makeFirstResponder:view];
+    [view release];
     [window setAcceptsMouseMovedEvents:YES];
 
     if([view openGLContext]==nil) 
