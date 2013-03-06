@@ -16,6 +16,7 @@ class skeleton
 {
 public:
     int get_bone_idx(const char *name) const; //< 0 if invalid
+    const char *get_bone_name(int idx) const;
     nya_math::vec3 transform(int bone_idx,nya_math::vec3 point) const;
     int get_bones_count() const { return (int)m_bones.size(); }
 
@@ -41,6 +42,8 @@ private:
     void update_bone(int idx);
 
 private:
+    typedef std::map<std::string,unsigned int> index_map;
+
     struct bone
     {
         nya_math::vec3 pos_org;
@@ -50,9 +53,10 @@ private:
         nya_math::quat	rot;
 
         int parent;
+
+        index_map::const_iterator map_it;
     };
 
-    typedef std::map<std::string,unsigned int> index_map;
     index_map m_bones_map;
     std::vector<bone> m_bones;
 

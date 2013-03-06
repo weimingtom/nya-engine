@@ -14,12 +14,13 @@ int skeleton::add_bone(const char *name,const nya_math::vec3 &pos,int parent)
     if(parent>=(int)m_bones.size())
         return -1;
 
-    index_map::const_iterator it=m_bones_map.find(name);
-    if(it!=m_bones_map.end())
-        return it->second;
-
     int bone_idx=(int)m_bones.size();
-    m_bones_map[name]=bone_idx;
+    std::pair<index_map::iterator,bool> ret=
+            m_bones_map.insert (std::pair<std::string,int>(name,bone_idx));
+
+    if(ret.second==false)
+        return ret.first->second;
+
     m_bones.resize(bone_idx+1);
     m_pos_tr.resize(bone_idx+1);
     m_rot_tr.resize(bone_idx+1);
@@ -27,6 +28,7 @@ int skeleton::add_bone(const char *name,const nya_math::vec3 &pos,int parent)
     bone &b=m_bones[bone_idx];
     b.pos=b.pos_org=pos;
     b.parent=parent;
+    b.map_it=ret.first;
 
     if(parent>=0)
     {
@@ -51,6 +53,18 @@ int skeleton::get_bone_idx(const char *name) const
         return -1;
 
     return (int)it->second;
+}
+
+const char *skeleton::get_bone_name(int idx) const
+{
+    if(idx<0 || idx>=(int)m_bones.size())
+        return 0;
+
+    index_map::const_iterator it=m_bones[idx].map_it;
+    if(it==m_bones_map.end())
+        return 0;
+
+    return it->first.c_str();
 }
 
 nya_math::vec3 skeleton::get_bone_pos(int idx) const

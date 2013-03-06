@@ -45,12 +45,15 @@ bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
     if(colourmapdepth!=0)
         return false;
 
-    const short x_origin=reader.read<short>();
-    const short y_origin=reader.read<short>();
+    //const short x_origin=
+        reader.read<short>();
+    //const short y_origin=
+        reader.read<short>();
     const short width=reader.read<short>();
     const short height=reader.read<short>();
     const char bitsperpixel=reader.read<char>();
-    const char imagedescriptor=reader.read<char>();
+    //const char imagedescriptor=
+        reader.read<char>();
 
     int channels = 0;
     bool rle = false;

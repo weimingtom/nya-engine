@@ -5,6 +5,7 @@
 #include "render/render.h"
 #include "memory/tmp_buffer.h"
 #include "memory/memory_reader.h"
+#include "math/constants.h"
 
 namespace
 {
@@ -38,13 +39,12 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
     typedef unsigned short ushort;
     typedef unsigned char uchar;
 
-    uint vert_count=reader.read<uint>();
+    const uint vert_count=reader.read<uint>();
     const size_t pmd_vert_size=sizeof(float)*8+sizeof(ushort)*2+sizeof(uchar)*2;
     if(!reader.check_remained(pmd_vert_size*vert_count))
         return false;
 
-    std::vector<float> vertices;
-    vertices.resize(vert_count*11);
+    std::vector<float> vertices(vert_count*11);
     for(size_t i=0;i<vertices.size();i+=11)
     {
         for(int j=0;j<8;++j)
@@ -63,7 +63,7 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
 
     vertices.clear();
 
-    uint ind_count=reader.read<uint>();
+    const uint ind_count=reader.read<uint>();
     const size_t inds_size=sizeof(ushort)*ind_count;
     if(!reader.check_remained(inds_size))
         return false;
@@ -71,8 +71,8 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
     res.vbo.set_index_data(data.get_data(reader.get_offset()),nya_render::vbo::index2b,ind_count);
     reader.skip(inds_size);
 
-    uint mat_count=reader.read<uint>();
-    if(!reader.check_remained(sizeof(mmd_material_params)+2+sizeof(uint)+20))
+    const uint mat_count=reader.read<uint>();
+    if(!reader.check_remained(mat_count*(sizeof(mmd_material_params)+2+sizeof(uint)+20)))
         return false;
 
     res.groups.resize(mat_count);
@@ -101,7 +101,8 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
     {
         shared_mesh::group &g=res.groups[i];
 
-        const mmd_material_params params=reader.read<mmd_material_params>();
+        //const mmd_material_params params=
+            reader.read<mmd_material_params>();
 
         reader.skip(2); //toon_idx and edge_flag
 
@@ -109,13 +110,63 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
         g.count=reader.read<uint>();
         ind_offset+=g.count;
 
-        std::string tex_name((const char*)data.get_data(reader.get_offset()),20);
+        const std::string tex_name((const char*)data.get_data(reader.get_offset()),20);
         reader.skip(20);
 
         texture tex;
         tex.load((path+tex_name).c_str());
         g.mat.set_texture("diffuse",tex);
         g.mat.set_shader(sh);
+    }
+
+    const ushort bones_count=reader.read<ushort>();
+    if(!reader.check_remained(bones_count*(20+sizeof(short)+5+sizeof(nya_math::vec3))))
+        return false;
+
+    for(ushort i=0;i<bones_count;++i)
+    {
+        const std::string name((const char*)data.get_data(reader.get_offset()),20);
+        reader.skip(20);
+        const short parent=reader.read<short>();
+        reader.skip(5); //child,kind,ik target
+
+        const nya_math::vec3 pos=reader.read<nya_math::vec3>();
+
+        if(res.skeleton.add_bone(name.c_str(),pos,parent)!=i)
+            nya_log::get_log()<<"pmd load warning: invalid bone\n";
+    }
+
+    const ushort iks_count=reader.read<ushort>();
+    //if(!reader.check_remained(iks_count*()))
+    //    return false;
+
+    for(ushort i=0;i<iks_count;++i)
+    {
+        const short target=reader.read<short>();
+        const short eff=reader.read<short>();
+        const uchar link_count=reader.read<uchar>();
+        const ushort count=reader.read<ushort>();
+        const float k=reader.read<float>();
+
+        const int ik=res.skeleton.add_ik(target,eff,count,k*nya_math::constants::pi);
+        for(int j=0;j<link_count;++j)
+        {
+            const ushort link=reader.read<ushort>();
+            bool limit=false;
+            const char *name=res.skeleton.get_bone_name(link);
+            if(!name)
+            {
+                nya_log::get_log()<<"pmd load warning: invalid ik link\n";
+                continue;
+            }
+
+            if(strcmp(name,"\x8d\xb6\x82\xd0\x82\xb4")==0)
+                limit=true;
+            else if(strcmp(name,"\x89\x45\x82\xd0\x82\xb4")==0)
+                limit=true;
+
+            res.skeleton.add_ik_link(ik,link,limit);
+        }
     }
 
     return true;
