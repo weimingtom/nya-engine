@@ -18,6 +18,54 @@ void rgb_to_bgr(unsigned char *data,size_t data_size)
     }
 }
 
+void flip_horisontal(unsigned char *data,int width,int height,int bpp)
+{
+    const int line_size=width*bpp;
+    const int half=line_size/2;
+    const int size=line_size*height;
+
+    unsigned char tmp[4];
+
+    for(int offset=0;offset<size;offset+=line_size)
+    {
+        unsigned char *ha=data+offset;
+        unsigned char *hb=ha+line_size-bpp;
+
+        for(int w=0;w<half;w+=bpp)
+        {
+            unsigned char *a=ha+w;
+            unsigned char *b=hb-w;
+            memcpy(tmp,a,bpp);
+            memcpy(a,b,bpp);
+            memcpy(b,tmp,bpp);
+        }
+    }
+}
+
+void flip_vertical(unsigned char *data,int width,int height,int bpp)
+{
+    const int line_size=width*bpp;
+    const int top=line_size*(height-1);
+    const int half=line_size*height/2;
+
+    unsigned char tmp[4];
+
+    for(int offset=0;offset<half;offset+=line_size)
+    {
+        unsigned char *ha=data+offset;
+        unsigned char *hb=data+top-offset;
+
+        for(int w=0;w<line_size;w+=bpp)
+        {
+            unsigned char *a=ha+w;
+            unsigned char *b=hb+w;
+            memcpy(tmp,a,bpp);
+            memcpy(a,b,bpp);
+            memcpy(b,tmp,bpp);
+        }
+    }
+}
+
 bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
 {
     if(!data.get_size())
@@ -52,8 +100,7 @@ bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
     const short width=reader.read<short>();
     const short height=reader.read<short>();
     const char bitsperpixel=reader.read<char>();
-    //const char imagedescriptor=
-        reader.read<char>();
+    const char imagedescriptor=reader.read<char>();
 
     int channels = 0;
     bool rle = false;
@@ -135,6 +182,12 @@ bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
         if(color_format==nya_render::texture::color_rgb)
             rgb_to_bgr((unsigned char*)color_data.get_data(),color_data_size);
 
+        if(imagedescriptor & 0x10)
+            flip_horisontal((unsigned char*)color_data.get_data(),width,height,channels);
+
+        if(imagedescriptor & 0x20)
+            flip_vertical((unsigned char*)color_data.get_data(),width,height,channels);
+
         res.tex.build_texture(color_data.get_data(),width,height,color_format);
     }
     else
@@ -144,6 +197,12 @@ bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
 
         if(color_format==nya_render::texture::color_rgb)
             rgb_to_bgr((unsigned char*)reader.get_data(),color_data_size);
+
+        if(imagedescriptor & 0x10)
+            flip_horisontal((unsigned char*)reader.get_data(),width,height,channels);
+
+        if(imagedescriptor & 0x20)
+            flip_vertical((unsigned char*)reader.get_data(),width,height,channels);
 
         res.tex.build_texture(reader.get_data(),width,height,color_format);
     }
