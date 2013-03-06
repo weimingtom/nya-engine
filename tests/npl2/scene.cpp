@@ -113,7 +113,6 @@ void scene::init()
                 script_buf.push_back(0);
                 script_str.assign(&script_buf[0]);
 
-                size_t last_pos=0;
                 size_t pos=script_str.find("%mm");
                 while(pos!=std::string::npos)
                 {
@@ -153,8 +152,6 @@ void scene::init()
                         }
                         else
                             anim_ignored=true;
-
-                        last_pos=pos2;
                     }
                     else if(num<='9' && !anim_ignored)
                     {
