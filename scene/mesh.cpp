@@ -47,8 +47,12 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
     std::vector<float> vertices(vert_count*11);
     for(size_t i=0;i<vertices.size();i+=11)
     {
-        for(int j=0;j<8;++j)
+        vertices[i]=-reader.read<float>();
+
+        for(int j=1;j<7;++j)
             vertices[i+j]=reader.read<float>();
+
+        vertices[i+7]=1.0f-reader.read<float>();
 
         vertices[i+8]=reader.read<ushort>();
         vertices[i+9]=reader.read<ushort>();
@@ -117,6 +121,7 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
         tex.load((path+tex_name).c_str());
         g.mat.set_texture("diffuse",tex);
         g.mat.set_shader(sh);
+        //g.mat.set_cull_face(true,nya_render::cull_face::cw);
     }
 
     const ushort bones_count=reader.read<ushort>();

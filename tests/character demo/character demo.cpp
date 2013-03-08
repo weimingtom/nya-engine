@@ -17,20 +17,21 @@ class viewer_camera
 {
 public:
     void add_rot(float dx,float dy);
-    void add_pos(float dx,float dy);
-    void add_scale(float ds);
+    void add_pos(float dx,float dy,float dz);
 
     void set_aspect(float aspect);
 
+private:
+    void update();
+
 public:
-    viewer_camera(): m_rot_x(0), m_rot_y(0), m_scale(1.0f), m_pos_x(0), m_pos_y(0) {}
+    viewer_camera(): m_rot_x(180.0f), m_rot_y(0), m_pos(0.0f,0.0f,20.0f) {}
 
 private:
     float m_rot_x;
     float m_rot_y;
-    float m_scale;
-    float m_pos_x;
-    float m_pos_y;
+
+    nya_math::vec3 m_pos;
 };
 
 void viewer_camera::add_rot(float dx,float dy)
@@ -51,32 +52,35 @@ void viewer_camera::add_rot(float dx,float dy)
 
     if ( m_rot_y < -max_angle )
         m_rot_y += max_angle;
+
+    update();
 }
 
-void viewer_camera::add_pos(float dx,float dy)
+void viewer_camera::add_pos(float dx,float dy,float dz)
 {
-    m_pos_x+=dx;
-    m_pos_y+=dy;
-    
-}
+    m_pos.x-=dx;
+    m_pos.y-=dy;
+    m_pos.z-=dz;
+    if(m_pos.z < 0.0f)
+        m_pos.z = 0.0f;
 
-void viewer_camera::add_scale(float ds)
-{
-    m_scale *= (1.0f+ds);
-    const float min_scale=0.4f;
-    if(m_scale<min_scale)
-        m_scale=min_scale;
-
-    const float max_scale=10.0f;
-    if(m_scale>max_scale)
-        m_scale=max_scale;
+    update();
 }
 
 void viewer_camera::set_aspect(float aspect)
 {
     nya_scene::get_camera().set_proj(70,aspect,0.5,5000.0);
-    nya_scene::get_camera().set_pos(0.0,10.0,-20.0);
-    nya_scene::get_camera().set_rot(180.0,0.0,0.0);
+    update();
+}
+
+void viewer_camera::update()
+{
+    nya_scene::get_camera().set_rot(m_rot_x,m_rot_y,0.0);
+
+    nya_math::quat rot(nya_math::vec3(-m_rot_y*3.14f/180.0f,-m_rot_x*3.14f/180.0f,0.0f));
+    nya_math::vec3 pos=rot.rotate(m_pos);
+
+    nya_scene::get_camera().set_pos(pos.x,pos.y+10.0f,pos.z);
 }
 
 class scene
@@ -167,7 +171,7 @@ private:
         }
         else if(m_mouse_drag.right)
         {
-            m_camera.add_pos((x-m_mouse_drag.last_x)/20.0f,(y-m_mouse_drag.last_y)/20.0f);
+            m_camera.add_pos((x-m_mouse_drag.last_x)/20.0f,(y-m_mouse_drag.last_y)/20.0f,0.0);
         }
 
         m_mouse_drag.last_x=x;
@@ -176,7 +180,7 @@ private:
 
     void on_mouse_scroll(int dx,int dy)
     {
-        m_camera.add_scale(dy*0.03f);
+        m_camera.add_pos(0.0f,0.0f,dy/10.0f);
     }
 
     void on_mouse_button(nya_system::mouse_button button,bool pressed)

@@ -107,12 +107,12 @@ void blend::disable()
 
 void cull_face::enable(cull_face::order o)
 {
-    glEnable(GL_CULL_FACE);
-
     if(o==cw)
-        glCullFace(GL_CW);
+        glFrontFace(GL_CW);
     else
-        glCullFace(GL_CCW);
+        glFrontFace(GL_CCW);
+
+    glEnable(GL_CULL_FACE);
 }
 
 void cull_face::disable()
