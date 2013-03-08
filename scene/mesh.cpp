@@ -47,9 +47,11 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
     std::vector<float> vertices(vert_count*11);
     for(size_t i=0;i<vertices.size();i+=11)
     {
-        vertices[i]=-reader.read<float>();
+        vertices[i]=reader.read<float>();
+        vertices[i+1]=reader.read<float>();
+        vertices[i+2]=-reader.read<float>();
 
-        for(int j=1;j<7;++j)
+        for(int j=3;j<7;++j)
             vertices[i+j]=reader.read<float>();
 
         vertices[i+7]=1.0f-reader.read<float>();
@@ -117,8 +119,13 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
         const std::string tex_name((const char*)data.get_data(reader.get_offset()),20);
         reader.skip(20);
 
+        std::string base_tex=tex_name;
+        size_t pos=base_tex.find('*');
+        if(pos!=std::string::npos)
+            base_tex.resize(pos);
+
         texture tex;
-        tex.load((path+tex_name).c_str());
+        tex.load((path+base_tex).c_str());
         g.mat.set_texture("diffuse",tex);
         g.mat.set_shader(sh);
         //g.mat.set_cull_face(true,nya_render::cull_face::cw);

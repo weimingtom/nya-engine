@@ -2,37 +2,35 @@
 
 #import <Cocoa/Cocoa.h>
 
-#include "render/vbo.h"
-#include "render/texture.h"
-#include "shared_textures.h"
-//#include "render/shader.h"
+#include "scene/mesh.h"
 
-#include <vector>
+class viewer_camera
+{
+public:
+    void add_rot(float dx,float dy);
+    void add_pos(float dx,float dy,float dz);
+
+    void set_aspect(float aspect);
+
+private:
+    void update();
+
+public:
+    viewer_camera(): m_rot_x(0.0f),m_rot_y(0.0f),m_pos(0.0f,0.0f,50.0f) {}
+
+private:
+    float m_rot_x;
+    float m_rot_y;
+
+    nya_math::vec3 m_pos;
+};
 
 @interface PmdView : NSOpenGLView
 {
     NSPoint m_mouse_old;
-    float m_rot_x;
-    float m_rot_y;
-    float m_scale;
-    float m_pos_x;
-    float m_pos_y;
 
-    nya_render::vbo m_vbo;
-
-    struct view_material
-    {
-        unsigned int ind_offset;
-        unsigned int ind_count;
-
-        float color[4];
-
-        nya_resources::texture_ref tex;
-    };
-
-    std::vector<view_material> m_materials;
+    nya_scene::mesh m_mesh;
+    viewer_camera m_camera;
 }
-
-- (void)draw;
 
 @end
