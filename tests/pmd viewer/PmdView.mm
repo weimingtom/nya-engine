@@ -108,9 +108,15 @@ bool load_texture(nya_scene::shared_texture &res,nya_scene::resource_data &textu
 
     if(bpp==24)
         format=nya_render::texture::color_rgb;
-    else if(bpp==32 )
+    else if(bpp==32)
         format=nya_render::texture::color_rgba;
     else
+    {
+        nya_log::get_log()<<"unable to load texture: unsupported format\n";
+        return false;
+    }
+
+    if([image bitsPerSample] != 8)
     {
         nya_log::get_log()<<"unable to load texture: unsupported format\n";
         return false;
@@ -309,19 +315,6 @@ public:
         const int mat_count=reader.read<int>();
         res.groups.resize(mat_count);
 
-        nya_scene::shader sh;
-        nya_scene::shared_shader sh_;
-        sh_.shdr.set_sampler("base",0);
-        sh_.samplers_count=1;
-        sh_.samplers["diffuse"]=0;
-        sh_.vertex="varying vec2 tc; void main() { tc=gl_MultiTexCoord0.xy; gl_Position=gl_ModelViewProjectionMatrix*gl_Vertex; }";
-        sh_.pixel="varying vec2 tc; uniform sampler2D base; void main() { vec4 tex=texture2D(base,tc.xy);"
-                                                                         //"if(tex.a<0.1) discard;"
-                                                                         "gl_FragColor=tex; }";
-        sh_.shdr.add_program(nya_render::shader::vertex,sh_.vertex.c_str());
-        sh_.shdr.add_program(nya_render::shader::pixel,sh_.pixel.c_str());
-        sh.create(sh_);
-
         std::string path(name);
         size_t p=path.rfind("/");
         if(p==std::string::npos)
@@ -340,13 +333,29 @@ public:
                 reader.skip(name_len);
             }
 
-            reader.read<pmx_material_params>();
+            std::string sh_defines;
+
+            pmx_material_params params=reader.read<pmx_material_params>();
+
+            char buf[255];
+            sprintf(buf,"#define k_d vec4(%f,%f,%f,%f)\n",params.diffuse[0],params.diffuse[1],
+                                                          params.diffuse[2],params.diffuse[3]);
+            sh_defines.append(buf);
+            
+            sprintf(buf,"#define k_s vec4(%f,%f,%f,%f)\n",params.specular[0],params.specular[1],
+                                                          params.specular[2],params.shininess);
+            sh_defines.append(buf);
+            
+            sprintf(buf,"#define k_a vec3(%f,%f,%f)\n",params.ambient[0],params.ambient[1],
+                                                       params.ambient[2]);
+            sh_defines.append(buf);
+
             reader.read<char>();//flag
             reader.skip(sizeof(float)*4);//edge color
             reader.read<float>();//edge size
             const int tex_idx=read_idx(reader,header.texture_idx_size);
             const int sph_tex_idx=read_idx(reader,header.texture_idx_size);
-            reader.read<char>();//sphere mode
+            const int sph_mode=reader.read<char>();
             const char toon_flag=reader.read<char>();
 
             int toon_tex_idx=-1;
@@ -363,12 +372,76 @@ public:
             g.count=reader.read<int>();
             offset+=g.count;
 
+            nya_scene::shared_shader sh_;
+            sh_.shdr.set_sampler("base",0);
+            sh_.samplers_count=1;
+            sh_.samplers["diffuse"]=0;
+
             if(tex_idx>=0 && tex_idx<(int)tex_names.size())
             {
                 nya_scene::texture tex;
                 tex.load((path+tex_names[tex_idx]).c_str());
                 g.mat.set_texture("diffuse",tex);
+                //printf("tex %d %s ",tex_idx,tex_names[tex_idx].c_str());
             }
+
+            if(sph_tex_idx>=0 && sph_tex_idx<(int)tex_names.size())
+            {
+                const std::string &name=tex_names[sph_tex_idx];
+                if(sph_mode>0 && !name.empty())
+                {
+                    sh_.shdr.set_sampler("env",1);
+                    sh_.samplers["env"]=1;
+                    ++sh_.samplers_count;
+                    
+                    nya_scene::texture tex;
+                    tex.load((path+name).c_str());
+                    g.mat.set_texture("env",tex);
+                    //printf("sp %d %d %s\n",sph_mode,sph_tex_idx,tex_names[sph_tex_idx].c_str());
+
+                    char last=name[name.length()-1];
+                    if(last=='h' || last=='H')
+                        sh_defines+="#define sph\n";
+                    else
+                        sh_defines+="#define spa\n";
+                }
+            }
+            //else
+                //printf("sp %d %d\n",sph_mode,sph_tex_idx);
+
+            nya_scene::shader sh;
+            sh_.vertex=sh_defines+"varying vec4 tc;"
+            "uniform vec4 cam_pos;"
+            "void main() { tc.xy=gl_MultiTexCoord0.xy;"
+            "vec3 u = normalize( gl_Vertex.xyz-cam_pos.xyz );"
+            "vec3 r = normalize(reflect( u, gl_Normal ));"
+            //"r.z+=1.0;"
+            "tc.zw = 0.5*r.xy/length(r) + 0.5;"
+            "gl_Position=gl_ModelViewProjectionMatrix*gl_Vertex; }";
+    
+            sh_.pixel=sh_defines+"varying vec4 tc;\n"
+            "uniform sampler2D base;\n"
+            "uniform sampler2D env;\n"
+            "void main() {\n"
+            "vec4 tm=texture2D(base,tc.xy);\n"
+
+            "#ifdef spa\n"
+            "   vec4 em=texture2D(env,tc.zw);\n"
+            "   gl_FragColor=vec4(tm.rgb+em.rgb,tm.a); }\n"
+            "#elif defined sph\n"
+            "   vec4 em=texture2D(env,tc.zw);\n"
+            "   gl_FragColor=vec4(tm.xyz*(k_a+k_d.rgb*em.rgb),tm.a); }\n"
+            "#else\n"
+            "   gl_FragColor=tm; }\n"
+            "#endif\n";
+            
+            sh_.shdr.add_program(nya_render::shader::vertex,sh_.vertex.c_str());
+            sh_.shdr.add_program(nya_render::shader::pixel,sh_.pixel.c_str());
+            sh_.predefines.resize(1);
+            sh_.predefines[0].type=nya_scene::shared_shader::camera_pos;
+            sh_.predefines[0].transform=nya_scene::shared_shader::local;
+            sh_.predefines[0].location=sh_.shdr.get_handler("cam_pos");
+            sh.create(sh_);
 
             g.mat.set_shader(sh);
             g.mat.set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);

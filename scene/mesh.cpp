@@ -125,8 +125,11 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
             base_tex.resize(pos);
 
         texture tex;
-        tex.load((path+base_tex).c_str());
+        if(!base_tex.empty() && base_tex[0])
+            tex.load((path+base_tex).c_str());
+
         g.mat.set_texture("diffuse",tex);
+
         g.mat.set_shader(sh);
         //g.mat.set_cull_face(true,nya_render::cull_face::cw);
     }
