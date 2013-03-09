@@ -94,21 +94,21 @@ bool load_texture(nya_scene::shared_texture &res,nya_scene::resource_data &textu
         nya_log::get_log()<<"unable to load texture: NSData error\n";
         return false;
     }
-    
+
     NSBitmapImageRep *image=[NSBitmapImageRep imageRepWithData:data];
     if (image == nil)
     {
         nya_log::get_log()<<"unable to load texture: invalid file\n";
         return false;
     }
-    
+
     unsigned int bpp=(unsigned int)[image bitsPerPixel];
-    
+
     nya_render::texture::color_format format;
-    
+
     if(bpp==24)
         format=nya_render::texture::color_rgb;
-    else if(bpp== 32 )
+    else if(bpp==32 )
         format=nya_render::texture::color_rgba;
     else
     {
@@ -150,16 +150,24 @@ class pmx_loader
         float bone_weight[4];
     };
 
-    static float read_idx(nya_memory::memory_reader &reader,int size)
+    struct pmx_material_params
+    {
+        float diffuse[4];
+        float specular[3];
+        float shininess;
+        float ambient[3];
+    };
+
+    static int read_idx(nya_memory::memory_reader &reader,int size)
     {
         switch(size)
         {
-            case 1: return (float)reader.read<unsigned char>();
-            case 2: return (float)reader.read<unsigned short>();
-            case 4: return (float)reader.read<int>();
+            case 1: return reader.read<unsigned char>();
+            case 2: return reader.read<unsigned short>();
+            case 4: return reader.read<int>();
         }
 
-        return 0.0f;
+        return 0;
     }
 
 public:
@@ -216,7 +224,7 @@ public:
                     for(int j=1;j<4;++j)
                         v.bone_weight[j]=v.bone_idx[j]=0.0f;
                 break;
-                    
+
                 case 1:
                     v.bone_idx[0]=read_idx(reader,header.bone_idx_size);
                     v.bone_idx[1]=read_idx(reader,header.bone_idx_size);
@@ -257,6 +265,10 @@ public:
 
         res.vbo.set_vertex_data(&verts[0],sizeof(vert),vert_count);
         res.vbo.set_vertices(0,3);
+        res.vbo.set_normals(sizeof(float)*3);
+        res.vbo.set_tc(0,sizeof(float)*6,2);
+        res.vbo.set_tc(1,sizeof(float)*8,4);
+        res.vbo.set_tc(2,sizeof(float)*12,4);
 
         const int indices_count=reader.read<int>();
         if(header.index_size==2)
@@ -266,9 +278,101 @@ public:
         else
             return false;
 
-        res.groups.resize(1);
-        res.groups[0].offset=0;
-        res.groups[0].count=indices_count;
+        reader.skip(indices_count*header.index_size);
+
+        const int textures_count=reader.read<int>();
+        std::vector<std::string> tex_names(textures_count);
+        for(int i=0;i<textures_count;++i)
+        {
+            const int str_len=reader.read<int>();
+            if(header.text_encoding==0)
+            {
+                /*
+                NSData* data = [[[NSData alloc] initWithBytes:reader.get_data()
+                                                             length:str_len] autorelease];
+                NSString* str = [[NSString alloc] initWithData:data
+                                                         encoding:NSUTF16LittleEndianStringEncoding];
+                tex_names[i].assign(str.UTF8String);
+                */
+
+                const char *data=(const char*)reader.get_data();
+                tex_names[i].resize(str_len/2);
+                for(int j=0;j<str_len/2;++j)
+                    tex_names[i][j]=data[j*2];
+            }
+            else
+                tex_names[i]=std::string((const char*)reader.get_data(),str_len);
+
+            reader.skip(str_len);
+        }
+
+        const int mat_count=reader.read<int>();
+        res.groups.resize(mat_count);
+
+        nya_scene::shader sh;
+        nya_scene::shared_shader sh_;
+        sh_.shdr.set_sampler("base",0);
+        sh_.samplers_count=1;
+        sh_.samplers["diffuse"]=0;
+        sh_.vertex="varying vec2 tc; void main() { tc=gl_MultiTexCoord0.xy; gl_Position=gl_ModelViewProjectionMatrix*gl_Vertex; }";
+        sh_.pixel="varying vec2 tc; uniform sampler2D base; void main() { vec4 tex=texture2D(base,tc.xy);"
+                                                                         //"if(tex.a<0.1) discard;"
+                                                                         "gl_FragColor=tex; }";
+        sh_.shdr.add_program(nya_render::shader::vertex,sh_.vertex.c_str());
+        sh_.shdr.add_program(nya_render::shader::pixel,sh_.pixel.c_str());
+        sh.create(sh_);
+
+        std::string path(name);
+        size_t p=path.rfind("/");
+        if(p==std::string::npos)
+            p=path.rfind("\\");
+        if(p==std::string::npos)
+            path.clear();
+        else
+            path.resize(p+1);
+
+        for(int i=0,offset=0;i<mat_count;++i)
+        {
+            nya_scene::shared_mesh::group &g=res.groups[i];
+            for(int j=0;j<2;++j)
+            {
+                const int name_len=reader.read<int>();
+                reader.skip(name_len);
+            }
+
+            reader.read<pmx_material_params>();
+            reader.read<char>();//flag
+            reader.skip(sizeof(float)*4);//edge color
+            reader.read<float>();//edge size
+            const int tex_idx=read_idx(reader,header.texture_idx_size);
+            const int sph_tex_idx=read_idx(reader,header.texture_idx_size);
+            reader.read<char>();//sphere mode
+            const char toon_flag=reader.read<char>();
+
+            int toon_tex_idx=-1;
+            if(toon_flag==0)
+                toon_tex_idx=read_idx(reader,header.texture_idx_size);
+            else if(toon_flag==1)
+                toon_tex_idx=reader.read<char>();
+            else
+                return false;
+
+            const int comment_len=reader.read<int>();
+            reader.skip(comment_len);
+            g.offset=offset;
+            g.count=reader.read<int>();
+            offset+=g.count;
+
+            if(tex_idx>=0 && tex_idx<(int)tex_names.size())
+            {
+                nya_scene::texture tex;
+                tex.load((path+tex_names[tex_idx]).c_str());
+                g.mat.set_texture("diffuse",tex);
+            }
+
+            g.mat.set_shader(sh);
+            g.mat.set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
+        }
 
         return true;
     }
