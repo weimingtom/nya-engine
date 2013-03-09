@@ -378,7 +378,72 @@ public:
     }
 };
 
+class shared_context
+{
+public:
+    NSOpenGLContext *allocate()
+    {
+        if(!m_context)
+        {
+            NSOpenGLPixelFormatAttribute pixelFormatAttributes[] =
+            {
+                NSOpenGLPFADoubleBuffer,
+                NSOpenGLPFADepthSize, 32,
+                NSOpenGLPFASampleBuffers,1,NSOpenGLPFASamples,2,
+                0
+            };
+            
+            NSOpenGLPixelFormat *pixelFormat = [[[NSOpenGLPixelFormat alloc] initWithAttributes:pixelFormatAttributes] autorelease];
+            
+            m_context=[[NSOpenGLContext alloc] initWithFormat:pixelFormat shareContext:nil];
+        }
+        
+        ++m_ref_count;
+        return m_context;
+    }
+
+    void free()
+    {
+        --m_ref_count;
+        if(m_ref_count>0)
+            return;
+
+        if(m_context)
+            [m_context release];
+
+        m_context=0;
+        m_ref_count=0;
+    }
+
+public:
+    static shared_context &get()
+    {
+        static shared_context holder;
+        return holder;
+    }
+
+    shared_context(): m_context(0), m_ref_count(0) {}
+
+private:
+    NSOpenGLContext *m_context;
+    int m_ref_count;
+};
+
 @implementation PmdView
+
+-(id)initWithCoder:(NSCoder *)aDecoder
+{
+    NSOpenGLContext* openGLContext = shared_context::get().allocate();
+
+    self=[super initWithCoder:aDecoder];
+    if(self)
+    {
+        [self setOpenGLContext:openGLContext];
+        [openGLContext makeCurrentContext];
+    }
+
+    return self;
+}
 
 - (void) mouseDown: (NSEvent *) theEvent
 {
@@ -444,7 +509,7 @@ public:
         glClearColor(0.2,0.4,0.5,0);
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
-        
+
         nya_scene::texture::register_load_function(load_texture);
         nya_scene::mesh::register_load_function(pmx_loader::load);
         m_mesh.load(doc->m_model_name.c_str());
@@ -467,6 +532,8 @@ public:
 -(void) dealloc
 {
     m_mesh.unload();
+
+    shared_context::get().free();
 
     [super dealloc];
 }
