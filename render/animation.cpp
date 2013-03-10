@@ -132,4 +132,11 @@ void animation::add_bone_frame(int idx,unsigned int time,bone &b,interpolation &
     seq.frames.push_back(f);
 }
 
+void animation::release()
+{
+    m_bones_map.clear();
+    m_bones.clear();
+    m_duration=0;
+}
+
 }

@@ -4,6 +4,7 @@
 
 #include "shared_resources.h"
 #include "material.h"
+#include "animation.h"
 #include "render/vbo.h"
 #include "render/skeleton.h"
 #include "math/vector.h"

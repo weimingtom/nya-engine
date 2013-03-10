@@ -23,9 +23,6 @@ namespace nya_scene
 
 bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
 {
-    if(!data.get_size())
-        return false;
-
     nya_memory::memory_reader reader(data.get_data(),data.get_size());
     if(!reader.test("Pmd",3))
         return false;
@@ -131,6 +128,7 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
         g.mat.set_texture("diffuse",tex);
 
         g.mat.set_shader(sh);
+        g.mat.set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
         //g.mat.set_cull_face(true,nya_render::cull_face::cw);
     }
 

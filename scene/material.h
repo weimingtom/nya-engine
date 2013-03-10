@@ -17,7 +17,6 @@ typedef proxy<texture> texture_proxy;
 class material
 {
     friend class mesh;
-    friend struct shared_mesh;
 
 public:
     class param

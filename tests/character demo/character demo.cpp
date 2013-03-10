@@ -25,7 +25,7 @@ private:
     void update();
 
 public:
-    viewer_camera(): m_rot_x(180.0f), m_rot_y(0), m_pos(0.0f,0.0f,20.0f) {}
+    viewer_camera(): m_rot_x(0.0f), m_rot_y(0), m_pos(0.0f,0.0f,20.0f) {}
 
 private:
     float m_rot_x;
@@ -69,7 +69,7 @@ void viewer_camera::add_pos(float dx,float dy,float dz)
 
 void viewer_camera::set_aspect(float aspect)
 {
-    nya_scene::get_camera().set_proj(70,aspect,0.5,5000.0);
+    nya_scene::get_camera().set_proj(70,aspect,1.0,1000.0);
     update();
 }
 
@@ -90,6 +90,9 @@ public:
     {
         m_char.load("Project DIVA Ex Miku Hatsune/skin00_000.pmd");
         //m_char.load("Appearance Miku/Appearance Miku.pmx");
+        
+        nya_scene::animation anim;
+        anim.load("anims/run.vmd");
     }
 
     void process(unsigned int dt)

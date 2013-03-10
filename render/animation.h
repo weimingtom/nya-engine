@@ -42,6 +42,9 @@ public:
     void add_bone_frame(int idx,unsigned int time,bone &b,interpolation &i);
 
 public:
+    void release();
+
+public:
     animation(): m_duration(0) {}
 
 private:
@@ -67,4 +70,3 @@ private:
 };
 
 }
-

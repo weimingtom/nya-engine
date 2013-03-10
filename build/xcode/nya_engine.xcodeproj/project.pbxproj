@@ -88,6 +88,10 @@
 		F241A70F160292B1004646EB /* slider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F241A70B160292B1004646EB /* slider.cpp */; };
 		F241A710160292B1004646EB /* label.h in Headers */ = {isa = PBXBuildFile; fileRef = F241A70C160292B1004646EB /* label.h */; };
 		F241A711160292B1004646EB /* label.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F241A70D160292B1004646EB /* label.cpp */; };
+		F25216A016EC14F400A1B2A6 /* animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F252169E16EC14E400A1B2A6 /* animation.cpp */; };
+		F25216A116EC14F400A1B2A6 /* animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F252169E16EC14E400A1B2A6 /* animation.cpp */; };
+		F25216A216EC14F400A1B2A6 /* animation.h in Headers */ = {isa = PBXBuildFile; fileRef = F252169F16EC14F100A1B2A6 /* animation.h */; };
+		F25216A316EC14F400A1B2A6 /* animation.h in Headers */ = {isa = PBXBuildFile; fileRef = F252169F16EC14F100A1B2A6 /* animation.h */; };
 		F259322615D858140092C7D8 /* platform_specific_gl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F25931ED15D858140092C7D8 /* platform_specific_gl.cpp */; };
 		F259322715D858140092C7D8 /* platform_specific_gl.h in Headers */ = {isa = PBXBuildFile; fileRef = F25931EE15D858140092C7D8 /* platform_specific_gl.h */; };
 		F259322815D858140092C7D8 /* render.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F25931EF15D858140092C7D8 /* render.cpp */; };
@@ -193,6 +197,8 @@
 		F241A70B160292B1004646EB /* slider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = slider.cpp; sourceTree = "<group>"; };
 		F241A70C160292B1004646EB /* label.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = label.h; sourceTree = "<group>"; };
 		F241A70D160292B1004646EB /* label.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = label.cpp; sourceTree = "<group>"; };
+		F252169E16EC14E400A1B2A6 /* animation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = animation.cpp; path = ../../scene/animation.cpp; sourceTree = "<group>"; };
+		F252169F16EC14F100A1B2A6 /* animation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = animation.h; path = ../../scene/animation.h; sourceTree = "<group>"; };
 		F25931E215D857C40092C7D8 /* libnya_engine.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libnya_engine.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		F25931ED15D858140092C7D8 /* platform_specific_gl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = platform_specific_gl.cpp; sourceTree = "<group>"; };
 		F25931EE15D858140092C7D8 /* platform_specific_gl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = platform_specific_gl.h; sourceTree = "<group>"; };
@@ -278,6 +284,8 @@
 		F22AD9F816946E9200B01B4A /* scene */ = {
 			isa = PBXGroup;
 			children = (
+				F252169E16EC14E400A1B2A6 /* animation.cpp */,
+				F252169F16EC14F100A1B2A6 /* animation.h */,
 				F20E2D7A16999B7000395A1B /* camera.cpp */,
 				F20E2D7D16999B7000395A1B /* camera.h */,
 				F20E2D7916999B7000395A1B /* material.cpp */,
@@ -493,6 +501,7 @@
 				F2D7D35E16AC1EF600C7DEE5 /* proxy.h in Headers */,
 				F2FF5FDC16C15CCE00C6A705 /* transform.h in Headers */,
 				F2EB8EEE16D42A9C002B7B9A /* fbo.h in Headers */,
+				F25216A316EC14F400A1B2A6 /* animation.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -544,6 +553,7 @@
 				F2D7D35D16AC1EF600C7DEE5 /* proxy.h in Headers */,
 				F2FF5FDB16C15CCE00C6A705 /* transform.h in Headers */,
 				F2EB8EED16D42A9C002B7B9A /* fbo.h in Headers */,
+				F25216A216EC14F400A1B2A6 /* animation.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -649,6 +659,7 @@
 				F22F864616D1A4D4000EAEA6 /* label.cpp in Sources */,
 				F22F864716D1A4D7000EAEA6 /* slider.cpp in Sources */,
 				F2EB8EEC16D42A9C002B7B9A /* fbo.cpp in Sources */,
+				F25216A116EC14F400A1B2A6 /* animation.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -693,6 +704,7 @@
 				F2BFD321169C1AF400ED4A9E /* constants.cpp in Sources */,
 				F2FF5FD916C15CCE00C6A705 /* transform.cpp in Sources */,
 				F2EB8EEB16D42A9C002B7B9A /* fbo.cpp in Sources */,
+				F25216A016EC14F400A1B2A6 /* animation.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
