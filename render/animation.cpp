@@ -137,7 +137,7 @@ void animation::add_bone_frame(int idx,unsigned int time,bone &b,interpolation &
 
 const char *animation::get_bone_name(int idx) const
 {
-    if(idx<0 || idx>=m_bones.size())
+    if(idx<0 || idx>=(int)m_bones.size())
         return 0;
 
     const sequence &s=m_bones[idx];
