@@ -88,13 +88,16 @@ int animation::add_bone(const char *name)
     if(!name)
         return -1;
 
-    index_map::const_iterator it=m_bones_map.find(name);
-    if(it!=m_bones_map.end())
-        return it->second;
+    const int bone_idx=(int)m_bones.size();
+    std::pair<index_map::iterator,bool> ret=
+    m_bones_map.insert (std::pair<std::string,int>(name,bone_idx));
 
-    int bone_idx=(int)m_bones.size();
+    if(ret.second==false)
+        return ret.first->second;
+
     m_bones_map[name]=bone_idx;
     m_bones.resize(bone_idx+1);
+    m_bones.back().it=ret.first;
 
     return bone_idx;
 }
@@ -130,6 +133,18 @@ void animation::add_bone_frame(int idx,unsigned int time,bone &b,interpolation &
     }
 
     seq.frames.push_back(f);
+}
+
+const char *animation::get_bone_name(int idx) const
+{
+    if(idx<0 || idx>=m_bones.size())
+        return 0;
+
+    const sequence &s=m_bones[idx];
+    if(s.it==m_bones_map.end())
+        return 0;
+
+    return s.it->first.c_str();
 }
 
 void animation::release()

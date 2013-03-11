@@ -44,6 +44,7 @@ struct shared_mesh
 class mesh: public scene_shared<shared_mesh>
 {
 public:
+    virtual bool load(const char *name);
     virtual void unload();
 
     void draw(int group_idx=-1) const;
@@ -63,6 +64,20 @@ public:
     const nya_render::skeleton &get_skeleton() const;
 
 public:
+    int add_anim(const animation & anim,float weight=1.0f,float speed=1.0f);
+    void remove_anim(int idx);
+    void set_anim_time(int idx,unsigned int time);
+    void set_anim_weight(int idx,float weight);
+    void set_anim_speed(int idx,float speed);
+    unsigned int get_anim_time(int idx) const;
+    float get_anim_weight(int idx) const;
+    float get_anim_speed(int idx) const;
+    const animation & get_anim(int idx) const;
+
+public:
+    void update(unsigned int dt);
+
+public:
     static bool load_pmd(shared_mesh &res,resource_data &data,const char* name);
 
 public:
@@ -74,6 +89,22 @@ private:
 private:
     std::vector<int> m_replaced_materials_idx;
     std::vector<material> m_replaced_materials;
+
+private:
+    struct applied_anim
+    {
+        bool free;
+        unsigned int time;
+        std::vector<int> bones_map;
+        animation anim;
+        float weight;
+        float speed;
+
+        applied_anim(): free(true) {}
+    };
+
+    nya_render::skeleton m_skeleton;
+    std::vector<applied_anim> m_anims;
 };
 
 }

@@ -17,6 +17,7 @@ class skeleton
 public:
     int get_bone_idx(const char *name) const; //< 0 if invalid
     const char *get_bone_name(int idx) const;
+    int get_bone_parent_idx(int idx) const;
     nya_math::vec3 transform(int bone_idx,nya_math::vec3 point) const;
     int get_bones_count() const { return (int)m_bones.size(); }
 
@@ -28,15 +29,16 @@ public:
     void update();
 
 public:
-    float *get_pos_buffer();
-    float *get_rot_buffer();
+    const float *get_pos_buffer() const;
+    const float *get_rot_buffer() const;
 
 public:
     int add_bone(const char *name,const nya_math::vec3 &pos,int parent_bone_idx=-1);
 
 public:
     int add_ik(int target_bone_idx,int effect_bone_idx,int count,float fact);
-    void add_ik_link(int ik_idx,int bone_idx,bool limit_angle);
+    void add_ik_link(int ik_idx,int bone_idx);
+    void add_ik_link(int ik_idx,int bone_idx,float limit_from,float limit_to);
 
 private:
     void update_bone(int idx);
@@ -67,6 +69,8 @@ private:
     {
         int idx;
         bool limit;
+        float limit_from;
+        float limit_to;
     };
 
     struct ik

@@ -40,16 +40,25 @@ bool animation::load_vmd(shared_animation &res,resource_data &data,const char* n
         } bone_frame;
 
         bone_frame.name=std::string((const char*)reader.get_data(),15);
+        reader.skip(15);
         bone_frame.frame=reader.read<uint>();
-        for(int j=0;j<3;++j)
-            bone_frame.pos[j]=reader.read<float>();
-        for(int j=0;j<4;++j)
-            bone_frame.rot[j]=reader.read<float>();
+        bone_frame.pos[0]=reader.read<float>();
+        bone_frame.pos[1]=reader.read<float>();
+        bone_frame.pos[2]=-reader.read<float>();
+
+        bone_frame.rot[0]=-reader.read<float>();
+        bone_frame.rot[1]=-reader.read<float>();
+        bone_frame.rot[2]=reader.read<float>();
+        bone_frame.rot[3]=reader.read<float>();
 
         memcpy(bone_frame.bezier_x,reader.get_data(),sizeof(bone_frame.bezier_x));
+        reader.skip(sizeof(bone_frame.bezier_x));
         memcpy(bone_frame.bezier_y,reader.get_data(),sizeof(bone_frame.bezier_y));
+        reader.skip(sizeof(bone_frame.bezier_y));
         memcpy(bone_frame.bezier_z,reader.get_data(),sizeof(bone_frame.bezier_z));
+        reader.skip(sizeof(bone_frame.bezier_z));
         memcpy(bone_frame.bezier_rot,reader.get_data(),sizeof(bone_frame.bezier_rot));
+        reader.skip(sizeof(bone_frame.bezier_rot));
 
         const float c2f=1.0f/128.0f;
 
@@ -83,5 +92,12 @@ bool animation::load_vmd(shared_animation &res,resource_data &data,const char* n
     return true;
 }
 
+unsigned int animation::get_duration()
+{
+    if(!m_shared.is_valid())
+        return 0;
+
+    return m_shared->anim.get_duration();
 }
 
+}

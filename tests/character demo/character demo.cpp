@@ -7,7 +7,6 @@
 #include "render/platform_specific_gl.h"
 #include "resources/resources.h"
 #include "resources/file_resources_provider.h"
-#include "resources/shared_animations.h"
 #include "scene/mesh.h"
 #include "scene/camera.h"
 
@@ -88,20 +87,48 @@ class scene
 public:
     void init()
     {
-        m_char.load("Project DIVA Ex Miku Hatsune/skin00_000.pmd");
+        //m_char.load("Project DIVA Ex Miku Hatsune/skin00_000.pmd");
         //m_char.load("Appearance Miku/Appearance Miku.pmx");
-        
+        m_char.load("luka_sonica/luka2.pmd");
+
         nya_scene::animation anim;
         anim.load("anims/run.vmd");
+
+        m_char.add_anim(anim);
     }
 
     void process(unsigned int dt)
     {
+        m_char.update(dt);
     }
 
     void draw()
     {
         m_char.draw();
+
+        const nya_render::skeleton skeleton=m_char.get_skeleton();
+        glDisable(GL_DEPTH_TEST);
+        glPointSize(2.0f);
+
+        const float *pos_buf=skeleton.get_pos_buffer();
+        for(int i=0;i<skeleton.get_bones_count();++i)
+        {
+            glBegin(GL_POINTS);
+            nya_math::vec3 pos=skeleton.get_bone_pos(i);
+            glVertex3fv(&pos.x);
+            glEnd();
+            int parent=skeleton.get_bone_parent_idx(i);
+            if(parent>=0)
+            {
+                glBegin(GL_LINES);
+                int pi=skeleton.get_bone_parent_idx(i);
+                glVertex3fv(&pos_buf[i*3]);
+                glVertex3fv(&pos_buf[pi*3]);
+                glEnd();
+            }
+        }
+        
+        glEnable(GL_DEPTH_TEST);
     }
 
 private:

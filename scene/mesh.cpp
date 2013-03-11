@@ -143,7 +143,10 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
         const short parent=reader.read<short>();
         reader.skip(5); //child,kind,ik target
 
-        const nya_math::vec3 pos=reader.read<nya_math::vec3>();
+        nya_math::vec3 pos;
+        pos.x=reader.read<float>();
+        pos.y=reader.read<float>();
+        pos.z=-reader.read<float>();
 
         if(res.skeleton.add_bone(name.c_str(),pos,parent)!=i)
             nya_log::get_log()<<"pmd load warning: invalid bone\n";
@@ -165,7 +168,6 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
         for(int j=0;j<link_count;++j)
         {
             const ushort link=reader.read<ushort>();
-            bool limit=false;
             const char *name=res.skeleton.get_bone_name(link);
             if(!name)
             {
@@ -173,14 +175,25 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
                 continue;
             }
 
-            if(strcmp(name,"\x8d\xb6\x82\xd0\x82\xb4")==0)
-                limit=true;
-            else if(strcmp(name,"\x89\x45\x82\xd0\x82\xb4")==0)
-                limit=true;
-
-            res.skeleton.add_ik_link(ik,link,limit);
+            if(strcmp(name,"\x8d\xb6\x82\xd0\x82\xb4")==0 || strcmp(name,"\x89\x45\x82\xd0\x82\xb4")==0)
+                res.skeleton.add_ik_link(ik,link,0.002f,nya_math::constants::pi);
+            else
+                res.skeleton.add_ik_link(ik,link);
         }
     }
+
+    return true;
+}
+
+bool mesh::load(const char *name)
+{
+    if(!scene_shared::load(name))
+        return false;
+
+    if(!m_shared.is_valid())
+        return false;
+
+    m_skeleton=m_shared->skeleton;
 
     return true;
 }
@@ -194,6 +207,8 @@ void mesh::unload()
 
     m_replaced_materials.clear();
     m_replaced_materials_idx.clear();
+    m_anims.clear();
+    m_skeleton=nya_render::skeleton();
 }
 
 void mesh::draw(int idx) const
@@ -339,13 +354,57 @@ void mesh::set_material(int idx,const material &mat)
 
 const nya_render::skeleton &mesh::get_skeleton() const
 {
-    if(!m_shared.is_valid())
+    return m_skeleton;
+}
+
+int mesh::add_anim(const animation & anim,float weight,float speed)
+{
+    if(!m_shared.is_valid() || !anim.m_shared.is_valid())
+        return -1;
+
+    size_t i=0;
+    for(i=0;i<m_anims.size();++i)
     {
-        static nya_render::skeleton invalid;
-        return invalid;
+        if(!m_anims[i].free)
+            break;
     }
 
-    return m_shared->skeleton;
+    if(i>=m_anims.size())
+        m_anims.resize(i+1);
+
+    applied_anim &a=m_anims[i];
+    a.free=false;
+    a.anim=anim;
+    a.weight=weight;
+    a.speed=speed;
+    a.time=0;
+    const nya_render::animation &ra=anim.m_shared->anim;
+    a.bones_map.resize(ra.get_bones_count());
+    for(int j=0;j<(int)a.bones_map.size();++j)
+        a.bones_map[j]=m_skeleton.get_bone_idx(ra.get_bone_name(j));
+
+    return (int)i;
+}
+
+void mesh::update(unsigned int dt)
+{
+    for(size_t i=0;i<m_anims.size();++i) //ToDo: animblend, speed
+    {
+        applied_anim &a=m_anims[i];
+        if(a.free)
+            continue;
+
+        a.time+=dt;
+        const nya_render::animation &ra=a.anim.m_shared->anim;
+
+        for(int j=0;j<(int)a.bones_map.size();++j)
+        {
+            const nya_render::animation::bone &b=ra.get_bone(j,a.time);
+            m_skeleton.set_bone_transform(a.bones_map[j],b.pos,b.rot);
+        }
+    }
+
+    m_skeleton.update();
 }
 
 }

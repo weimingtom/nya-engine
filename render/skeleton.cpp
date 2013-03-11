@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
 #include "skeleton.h"
-#include "math/constants.h"
 
 namespace nya_render
 {
@@ -26,7 +25,7 @@ int skeleton::add_bone(const char *name,const nya_math::vec3 &pos,int parent)
     m_rot_tr.resize(bone_idx+1);
 
     bone &b=m_bones[bone_idx];
-    b.pos=b.pos_org=pos;
+    b.pos_org=pos;
     b.parent=parent;
     b.map_it=ret.first;
 
@@ -55,6 +54,14 @@ int skeleton::get_bone_idx(const char *name) const
     return (int)it->second;
 }
 
+int skeleton::get_bone_parent_idx(int idx) const
+{
+    if(idx<0 || idx>=(int)m_bones.size())
+        return -1;
+
+    return m_bones[idx].parent;
+}
+
 const char *skeleton::get_bone_name(int idx) const
 {
     if(idx<0 || idx>=(int)m_bones.size())
@@ -72,7 +79,7 @@ nya_math::vec3 skeleton::get_bone_pos(int idx) const
     if(idx<0 || idx>=(int)m_bones.size())
         return nya_math::vec3();
 
-    return m_bones[idx].pos;
+    return m_pos_tr[idx];
 }
 
 nya_math::quat skeleton::get_bone_rot(int idx) const
@@ -80,7 +87,7 @@ nya_math::quat skeleton::get_bone_rot(int idx) const
     if(idx<0 || idx>=(int)m_bones.size())
         return nya_math::vec3();
 
-    return m_bones[idx].rot;
+    return m_rot_tr[idx];
 }
 
 int skeleton::add_ik(int target_bone_idx,int effect_bone_idx,int count,float fact)
@@ -103,7 +110,7 @@ int skeleton::add_ik(int target_bone_idx,int effect_bone_idx,int count,float fac
     return ik_idx;
 }
 
-void skeleton::add_ik_link(int ik_idx,int bone_idx,bool limit_angle)
+void skeleton::add_ik_link(int ik_idx,int bone_idx)
 {
     if(ik_idx<0 || ik_idx>=(int)m_iks.size())
         return;
@@ -114,7 +121,23 @@ void skeleton::add_ik_link(int ik_idx,int bone_idx,bool limit_angle)
     ik &k=m_iks[ik_idx];
     k.links.resize(k.links.size()+1);
     k.links.back().idx=bone_idx;
-    k.links.back().limit=limit_angle;
+    k.links.back().limit=false;
+}
+
+void skeleton::add_ik_link(int ik_idx,int bone_idx,float limit_from,float limit_to)
+{
+    if(ik_idx<0 || ik_idx>=(int)m_iks.size())
+        return;
+    
+    if(bone_idx<0 || bone_idx>=(int)m_bones.size())
+        return;
+    
+    ik &k=m_iks[ik_idx];
+    k.links.resize(k.links.size()+1);
+    k.links.back().idx=bone_idx;
+    k.links.back().limit=true;
+    k.links.back().limit_from=limit_from;
+    k.links.back().limit_to=limit_to;
 }
 
 void skeleton::set_bone_transform(int bone_idx,const nya_math::vec3 &pos,const nya_math::quat &rot)
@@ -191,7 +214,7 @@ void skeleton::update()
                 nya_math::quat rot(axis,ang);
 
                 if(k.links[l].limit)
-					rot.limit_angle(-nya_math::constants::pi,-0.002f);
+					rot.limit_angle(k.links[l].limit_from,k.links[l].limit_to);
 
                 rot.normalize();
 
@@ -215,7 +238,7 @@ nya_math::vec3 skeleton::transform(int bone_idx,nya_math::vec3 point) const
     return m_pos_tr[bone_idx]+m_rot_tr[bone_idx].rotate(point-m_bones[bone_idx].pos_org);
 }
 
-float *skeleton::get_pos_buffer()
+const float *skeleton::get_pos_buffer() const
 {
     if(m_pos_tr.empty())
         return 0;
@@ -223,7 +246,7 @@ float *skeleton::get_pos_buffer()
     return &m_pos_tr[0].x;
 }
 
-float *skeleton::get_rot_buffer()
+const float *skeleton::get_rot_buffer() const
 {
     if(m_rot_tr.empty())
         return 0;
