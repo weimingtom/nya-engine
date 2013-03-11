@@ -138,6 +138,9 @@
     <ClCompile Include="..\..\ui\ui.cpp">
       <Filter>ui</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\scene\animation.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\log\html_log.h">
@@ -274,6 +277,9 @@
     </ClInclude>
     <ClInclude Include="..\..\ui\ui.h">
       <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\scene\animation.h">
+      <Filter>scene</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
