@@ -105,7 +105,7 @@ public:
     void draw()
     {
         m_char.draw();
-
+/*
         const nya_render::skeleton skeleton=m_char.get_skeleton();
         glDisable(GL_DEPTH_TEST);
         glPointSize(2.0f);
@@ -129,6 +129,7 @@ public:
         }
         
         glEnable(GL_DEPTH_TEST);
+*/
     }
 
 private:

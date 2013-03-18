@@ -583,6 +583,14 @@ void shader::set_uniform(unsigned int i,float f0,float f1,float f2,float f3) con
     glUniform4fARB(i,f0,f1,f2,f3);
 }
 
+void shader::set_uniform3_array(unsigned int i,const float *f,unsigned int count) const
+{
+    if(!m_program || !f)
+        return;
+
+    glUniform3fvARB(i,count,f);
+}
+
 void shader::set_uniform4_array(unsigned int i,const float *f,unsigned int count) const
 {
     if(!m_program || !f)

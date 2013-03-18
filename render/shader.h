@@ -42,6 +42,7 @@ public:
 public:
     int get_handler(const char*name) const;
     void set_uniform(unsigned int i,float f0,float f1=0.0f,float f2=0.0f,float f3=0.0f) const;
+    void set_uniform3_array(unsigned int i,const float *f,unsigned int count) const;
     void set_uniform4_array(unsigned int i,const float *f,unsigned int count) const;
     void set_uniform16_array(unsigned int i,const float *f,unsigned int count,bool transpose=false) const;
 

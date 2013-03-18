@@ -3,6 +3,7 @@
 #include "mesh.h"
 #include "scene.h"
 #include "camera.h"
+#include "shader.h"
 #include "render/render.h"
 #include "memory/tmp_buffer.h"
 #include "memory/memory_reader.h"
@@ -42,12 +43,12 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
     if(!reader.check_remained(pmd_vert_size*vert_count))
         return false;
 
-    std::vector<float> vertices(vert_count*11);
-    for(size_t i=0;i<vertices.size();i+=11)
+    std::vector<float> vertices(vert_count*14);
+    for(size_t i=0;i<vertices.size();i+=14)
     {
-        vertices[i]=reader.read<float>();
-        vertices[i+1]=reader.read<float>();
-        vertices[i+2]=-reader.read<float>();
+        vertices[i+11]=vertices[i]=reader.read<float>();
+        vertices[i+12]=vertices[i+1]=reader.read<float>();
+        vertices[i+13]=vertices[i+2]=-reader.read<float>();
 
         for(int j=3;j<7;++j)
             vertices[i+j]=reader.read<float>();
@@ -56,16 +57,10 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
 
         vertices[i+8]=reader.read<ushort>();
         vertices[i+9]=reader.read<ushort>();
-        vertices[i+10]=reader.read<uchar>()/255.0f;
+        vertices[i+10]=reader.read<uchar>()/100.0f;
+
         reader.skip(1);
     }
-
-    res.vbo.set_vertex_data(&vertices[0],sizeof(float)*11,vert_count);
-    res.vbo.set_normals(3*sizeof(float));
-    res.vbo.set_tc(0,6*sizeof(float),2);
-    res.vbo.set_tc(1,8*sizeof(float),3); //skin info
-
-    vertices.clear();
 
     const uint ind_count=reader.read<uint>();
     const size_t inds_size=sizeof(ushort)*ind_count;
@@ -86,8 +81,18 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
     sh_.shdr.set_sampler("base",0);
     sh_.samplers_count=1;
     sh_.samplers["diffuse"]=0;
-    sh_.vertex="varying vec2 tc; void main() { tc=gl_MultiTexCoord0.xy; gl_Position=gl_ModelViewProjectionMatrix*gl_Vertex; }";
+
+    sh_.vertex="uniform vec3 bones_pos[200]; uniform vec4 bones_rot[200];"
+                "vec3 tr(vec3 pos,int idx) { vec4 q=bones_rot[idx];"
+                "return bones_pos[idx]+pos+cross(q.xyz,cross(q.xyz,pos)+pos*q.w)*2.0; }"
+                "varying vec2 tc;"
+                "void main()"
+                "{  int bone0=int(gl_MultiTexCoord1.x); int bone1=int(gl_MultiTexCoord1.y);"
+                "vec3 pos=mix(tr(gl_MultiTexCoord2.xyz,bone1),tr(gl_Vertex.xyz,bone0),gl_MultiTexCoord1.z);"
+                "tc=gl_MultiTexCoord0.xy; gl_Position=gl_ModelViewProjectionMatrix*vec4(pos,1.0); }";
+
     sh_.pixel="varying vec2 tc; uniform sampler2D base; void main() { gl_FragColor=texture2D(base,tc.xy); }";
+
     sh_.shdr.add_program(nya_render::shader::vertex,sh_.vertex.c_str());
     sh_.shdr.add_program(nya_render::shader::pixel,sh_.pixel.c_str());
     sh_.predefines.resize(2);
@@ -157,6 +162,29 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
         if(res.skeleton.add_bone(name.c_str(),pos,parent)!=i)
             nya_log::get_log()<<"pmd load warning: invalid bone\n";
     }
+
+    for(size_t i=0;i<vertices.size();i+=14)
+    {
+        const nya_math::vec3 bp0=res.skeleton.get_bone_pos(vertices[i+8]);
+
+        vertices[i]-=bp0.x;
+        vertices[i+1]-=bp0.y;
+        vertices[i+2]-=bp0.z;
+
+        const nya_math::vec3 bp1=res.skeleton.get_bone_pos(vertices[i+9]);
+
+        vertices[i+11]-=bp1.x;
+        vertices[i+12]-=bp1.y;
+        vertices[i+13]-=bp1.z;
+    }
+
+    res.vbo.set_vertex_data(&vertices[0],sizeof(float)*14,vert_count);
+    res.vbo.set_normals(3*sizeof(float));
+    res.vbo.set_tc(0,6*sizeof(float),2);
+    res.vbo.set_tc(1,8*sizeof(float),3); //skin info
+    res.vbo.set_tc(2,11*sizeof(float),3); //pos2
+
+    vertices.clear();
 
     const ushort iks_count=reader.read<ushort>();
     //if(!reader.check_remained(iks_count*()))
@@ -230,6 +258,7 @@ void mesh::draw(int idx) const
         return;
 
     nya_scene_internal::transform::set(m_transform);
+    shader::set_skeleton(&m_skeleton);
 
     m_shared->vbo.bind();
 

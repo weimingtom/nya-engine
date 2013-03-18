@@ -4,6 +4,7 @@
 
 #include "shared_resources.h"
 #include "render/shader.h"
+#include "render/skeleton.h"
 #include "math/vector.h"
 
 namespace nya_scene
@@ -75,6 +76,7 @@ struct shared_shader
 class shader: public scene_shared<shared_shader>
 {
     friend class material;
+    friend class mesh;
 
 public:
     static bool load_nya_shader(shared_shader &res,resource_data &data,const char* name);
@@ -82,6 +84,7 @@ public:
 private:
     void set() const;
     void unset() const;
+    static void set_skeleton(const nya_render::skeleton *skeleton) { m_skeleton=skeleton; }
 
 private:
     int get_texture_slot(const char *semantic) const;
@@ -94,6 +97,9 @@ private:
 
 public:
     shader() { register_load_function(load_nya_shader); }
+
+private:
+    static const nya_render::skeleton *m_skeleton;
 };
 
 }
