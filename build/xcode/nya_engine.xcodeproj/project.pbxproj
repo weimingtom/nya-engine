@@ -135,10 +135,10 @@
 		F259325815D858140092C7D8 /* tmp_buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259322415D858140092C7D8 /* tmp_buffer.cpp */; };
 		F259325915D858140092C7D8 /* tmp_buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = F259322515D858140092C7D8 /* tmp_buffer.h */; };
 		F25932BB15D865BF0092C7D8 /* app.mm in Sources */ = {isa = PBXBuildFile; fileRef = F25932BA15D865BF0092C7D8 /* app.mm */; };
-		F29B45FE16F3821500C4CC36 /* frustrum.h in Headers */ = {isa = PBXBuildFile; fileRef = F29B45FC16F3821500C4CC36 /* frustrum.h */; };
-		F29B45FF16F3821500C4CC36 /* frustrum.h in Headers */ = {isa = PBXBuildFile; fileRef = F29B45FC16F3821500C4CC36 /* frustrum.h */; };
-		F29B460016F3821500C4CC36 /* frustrum.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F29B45FD16F3821500C4CC36 /* frustrum.cpp */; };
-		F29B460116F3821500C4CC36 /* frustrum.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F29B45FD16F3821500C4CC36 /* frustrum.cpp */; };
+		F29B45FE16F3821500C4CC36 /* frustum.h in Headers */ = {isa = PBXBuildFile; fileRef = F29B45FC16F3821500C4CC36 /* frustum.h */; };
+		F29B45FF16F3821500C4CC36 /* frustum.h in Headers */ = {isa = PBXBuildFile; fileRef = F29B45FC16F3821500C4CC36 /* frustum.h */; };
+		F29B460016F3821500C4CC36 /* frustum.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F29B45FD16F3821500C4CC36 /* frustum.cpp */; };
+		F29B460116F3821500C4CC36 /* frustum.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F29B45FD16F3821500C4CC36 /* frustum.cpp */; };
 		F2A1356F16973394006DCC1B /* app.mm in Sources */ = {isa = PBXBuildFile; fileRef = F25932BA15D865BF0092C7D8 /* app.mm */; };
 		F2AB83DE168DC6C000C23817 /* vbo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F25931F915D858140092C7D8 /* vbo.cpp */; };
 		F2BFD31E169C195D00ED4A9E /* constants.h in Headers */ = {isa = PBXBuildFile; fileRef = F2BFD31D169C195C00ED4A9E /* constants.h */; };
@@ -247,8 +247,8 @@
 		F259322415D858140092C7D8 /* tmp_buffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tmp_buffer.cpp; sourceTree = "<group>"; };
 		F259322515D858140092C7D8 /* tmp_buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tmp_buffer.h; sourceTree = "<group>"; };
 		F25932BA15D865BF0092C7D8 /* app.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = app.mm; sourceTree = "<group>"; };
-		F29B45FC16F3821500C4CC36 /* frustrum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = frustrum.h; path = ../../math/frustrum.h; sourceTree = "<group>"; };
-		F29B45FD16F3821500C4CC36 /* frustrum.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = frustrum.cpp; path = ../../math/frustrum.cpp; sourceTree = "<group>"; };
+		F29B45FC16F3821500C4CC36 /* frustum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = frustum.h; path = ../../math/frustum.h; sourceTree = "<group>"; };
+		F29B45FD16F3821500C4CC36 /* frustum.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = frustum.cpp; path = ../../math/frustum.cpp; sourceTree = "<group>"; };
 		F2BFD31D169C195C00ED4A9E /* constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = constants.h; path = ../../math/constants.h; sourceTree = "<group>"; };
 		F2BFD320169C1AF400ED4A9E /* constants.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = constants.cpp; path = ../../math/constants.cpp; sourceTree = "<group>"; };
 		F2D7D35B16AC1EF400C7DEE5 /* proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = proxy.h; path = ../../scene/proxy.h; sourceTree = "<group>"; };
@@ -447,8 +447,8 @@
 				F2F0A0A51695A794007245BC /* bezier.h */,
 				F2BFD320169C1AF400ED4A9E /* constants.cpp */,
 				F2BFD31D169C195C00ED4A9E /* constants.h */,
-				F29B45FD16F3821500C4CC36 /* frustrum.cpp */,
-				F29B45FC16F3821500C4CC36 /* frustrum.h */,
+				F29B45FD16F3821500C4CC36 /* frustum.cpp */,
+				F29B45FC16F3821500C4CC36 /* frustum.h */,
 				F2F0A0A41695A794007245BC /* quaternion.cpp */,
 				F2F0A0A31695A794007245BC /* quaternion.h */,
 				F2F0A0B21695F809007245BC /* matrix.cpp */,
@@ -510,7 +510,7 @@
 				F2FF5FDC16C15CCE00C6A705 /* transform.h in Headers */,
 				F2EB8EEE16D42A9C002B7B9A /* fbo.h in Headers */,
 				F25216A316EC14F400A1B2A6 /* animation.h in Headers */,
-				F29B45FF16F3821500C4CC36 /* frustrum.h in Headers */,
+				F29B45FF16F3821500C4CC36 /* frustum.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -563,7 +563,7 @@
 				F2FF5FDB16C15CCE00C6A705 /* transform.h in Headers */,
 				F2EB8EED16D42A9C002B7B9A /* fbo.h in Headers */,
 				F25216A216EC14F400A1B2A6 /* animation.h in Headers */,
-				F29B45FE16F3821500C4CC36 /* frustrum.h in Headers */,
+				F29B45FE16F3821500C4CC36 /* frustum.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -670,7 +670,7 @@
 				F22F864716D1A4D7000EAEA6 /* slider.cpp in Sources */,
 				F2EB8EEC16D42A9C002B7B9A /* fbo.cpp in Sources */,
 				F25216A116EC14F400A1B2A6 /* animation.cpp in Sources */,
-				F29B460116F3821500C4CC36 /* frustrum.cpp in Sources */,
+				F29B460116F3821500C4CC36 /* frustum.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -716,7 +716,7 @@
 				F2FF5FD916C15CCE00C6A705 /* transform.cpp in Sources */,
 				F2EB8EEB16D42A9C002B7B9A /* fbo.cpp in Sources */,
 				F25216A016EC14F400A1B2A6 /* animation.cpp in Sources */,
-				F29B460016F3821500C4CC36 /* frustrum.cpp in Sources */,
+				F29B460016F3821500C4CC36 /* frustum.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

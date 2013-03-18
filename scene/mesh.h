@@ -8,7 +8,7 @@
 #include "render/vbo.h"
 #include "render/skeleton.h"
 #include "math/vector.h"
-#include "math/frustrum.h"
+#include "math/frustum.h"
 #include "transform.h"
 
 namespace nya_scene

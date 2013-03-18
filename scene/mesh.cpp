@@ -226,7 +226,7 @@ void mesh::draw(int idx) const
     if(!m_shared.is_valid() || idx>=(int)m_shared->groups.size())
         return;
 
-    if(m_has_aabb && !get_camera().get_frustrum().test_intersect(get_aabb()))
+    if(m_has_aabb && !get_camera().get_frustum().test_intersect(get_aabb()))
         return;
 
     nya_scene_internal::transform::set(m_transform);

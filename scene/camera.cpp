@@ -18,7 +18,7 @@ void camera::set_proj(float fov,float aspect,float near,float far)
     if(this==active_camera)
         nya_render::set_projection_matrix(m_proj);
 
-    m_recalc_frustrum=true;
+    m_recalc_frustum=true;
 }
 
 void camera::set_proj(float left,float right,float bottom,float top,float near,float far)
@@ -28,7 +28,7 @@ void camera::set_proj(float left,float right,float bottom,float top,float near,f
     if(this==active_camera)
         nya_render::set_projection_matrix(m_proj);
 
-    m_recalc_frustrum=true;
+    m_recalc_frustum=true;
 }
 
 void camera::set_pos(float x,float y,float z)
@@ -38,7 +38,7 @@ void camera::set_pos(float x,float y,float z)
     m_pos.z=z;
 
     m_recalc_view=true;
-    m_recalc_frustrum=true;
+    m_recalc_frustum=true;
 }
 
 void camera::set_rot(float yaw,float pitch,float roll)
@@ -48,7 +48,7 @@ void camera::set_rot(float yaw,float pitch,float roll)
     m_rot.z=roll;
 
     m_recalc_view=true;
-    m_recalc_frustrum=true;
+    m_recalc_frustum=true;
 }
 
 const nya_math::mat4 &camera::get_view_matrix() const
@@ -67,16 +67,16 @@ const nya_math::mat4 &camera::get_view_matrix() const
     return m_view;
 }
 
-const nya_math::frustrum &camera::get_frustrum() const
+const nya_math::frustum &camera::get_frustum() const
 {
-    if(m_recalc_frustrum)
+    if(m_recalc_frustum)
     {
-        m_recalc_frustrum=false;
+        m_recalc_frustum=false;
 
-        m_frustrum=nya_math::frustrum(get_view_matrix()*get_proj_matrix());
+        m_frustum=nya_math::frustum(get_view_matrix()*get_proj_matrix());
     }
 
-    return m_frustrum;
+    return m_frustum;
 }
 
 void set_camera(camera &cam)
