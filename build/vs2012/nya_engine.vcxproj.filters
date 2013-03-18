@@ -141,6 +141,9 @@
     <ClCompile Include="..\..\scene\animation.cpp">
       <Filter>scene</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\math\frustum.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\log\html_log.h">
@@ -280,6 +283,9 @@
     </ClInclude>
     <ClInclude Include="..\..\scene\animation.h">
       <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\math\frustum.h">
+      <Filter>math</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

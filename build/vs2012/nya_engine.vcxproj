@@ -81,6 +81,7 @@
     <ClCompile Include="..\..\log\stdout_log.cpp" />
     <ClCompile Include="..\..\math\bezier.cpp" />
     <ClCompile Include="..\..\math\constants.cpp" />
+    <ClCompile Include="..\..\math\frustum.cpp" />
     <ClCompile Include="..\..\math\matrix.cpp" />
     <ClCompile Include="..\..\math\quaternion.cpp" />
     <ClCompile Include="..\..\memory\memory.cpp" />
@@ -141,6 +142,7 @@
     <ClInclude Include="..\..\log\stdout_log.h" />
     <ClInclude Include="..\..\math\bezier.h" />
     <ClInclude Include="..\..\math\constants.h" />
+    <ClInclude Include="..\..\math\frustum.h" />
     <ClInclude Include="..\..\math\matrix.h" />
     <ClInclude Include="..\..\math\quaternion.h" />
     <ClInclude Include="..\..\math\vector.h" />
