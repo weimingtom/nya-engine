@@ -32,5 +32,5 @@ private:
     int m_scope;
     std::string m_scope_tab;
 };
-    
+
 }

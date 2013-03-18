@@ -229,7 +229,7 @@ void vbo::unbind() const
 {
     if(m_vertex_bind)
     {
-        
+
 #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
         glDisableVertexAttribArray(vertex_attribute);
 #else
@@ -412,7 +412,7 @@ bool vbo::set_vertex_data(const void*data,unsigned int vert_stride,unsigned int 
 
     vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,0);
     m_verts_count=vert_count;
-    
+
     return true;
 }
 

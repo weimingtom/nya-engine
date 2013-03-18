@@ -1,3 +1,4 @@
+
 //https://code.google.com/p/nya-engine/
 
 #include "app.h"
@@ -48,7 +49,7 @@
     GLint framebufferWidth;
     GLint framebufferHeight;
     float m_scale;
-    
+
     GLuint defaultFramebuffer, colorRenderbuffer, depthRenderbuffer;
 }
 
@@ -105,7 +106,7 @@ namespace
             /*
             if(!m_window)
                 return;
-            
+
             NSString *title_str=[NSString stringWithCString:m_title.c_str() encoding:NSUTF8StringEncoding];
             [m_window setTitle:title_str];
              */
@@ -126,7 +127,7 @@ namespace
     public:
         shared_app():m_responder(0),m_title("Nya engine") {}
 
-    private:        
+    private:
         nya_system::app_responder *m_responder;
         std::string m_title;
     };
@@ -175,7 +176,7 @@ namespace
 
     //UITouch *touchSample = [[event allTouches] anyObject];
     //int count=[touchSample tapCount];
-    
+
     const float scale=[self.viewController getScale];
 
     CGPoint tappedPt = [[touches anyObject] locationInView: self.viewController.view];
@@ -187,7 +188,7 @@ namespace
     nya_system::app_responder *responder=shared_app::get_app().get_responder();
     if(!responder)
         return;
-    
+
     const float scale=[self.viewController getScale];
 
     CGPoint tappedPt = [[touches anyObject] locationInView: self.viewController.view];
@@ -521,7 +522,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
 - (void)dealloc
 {
-    [self deleteFramebuffer];    
+    [self deleteFramebuffer];
 }
 
 - (void)setContext:(EAGLContext *)newContext
@@ -792,7 +793,7 @@ private:
     m_app->on_process(dt);
     m_app->on_draw();
 
-    [[self openGLContext] flushBuffer];    
+    [[self openGLContext] flushBuffer];
 }
 
 -(void)reshape 

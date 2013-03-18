@@ -187,7 +187,7 @@ public:
         width=m_width;
         height=m_height;
     }
-    
+
 protected:
     virtual void parent_moved(int x,int y)
     {

@@ -45,7 +45,7 @@ public:
 
         return true;
     }
-    
+
     bool check_remained(size_t size)
     {
         return m_offset+size<=m_size;
@@ -69,7 +69,7 @@ public:
     {
         if(m_offset>=m_size)
             return 0;
-        
+
         return m_data+m_offset;
     }
 

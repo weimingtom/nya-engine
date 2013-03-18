@@ -25,7 +25,7 @@ public:
 
 public:
     resource_info *first_res_info(); //enables cache
-    
+
 private:
     void cache_provider(resources_provider *provider);
 

@@ -128,10 +128,10 @@ void skeleton::add_ik_link(int ik_idx,int bone_idx,float limit_from,float limit_
 {
     if(ik_idx<0 || ik_idx>=(int)m_iks.size())
         return;
-    
+
     if(bone_idx<0 || bone_idx>=(int)m_bones.size())
         return;
-    
+
     ik &k=m_iks[ik_idx];
     k.links.resize(k.links.size()+1);
     k.links.back().idx=bone_idx;

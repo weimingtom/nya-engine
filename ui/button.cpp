@@ -25,7 +25,7 @@ void button::draw(layer &layer)
     rs.solid_color.b-=0.1f;
     rs.solid_color.a=0.8f;
     rs.solid=true;
-    
+
     layer.draw_rect(r,rs);
  
     if(!m_text.empty())

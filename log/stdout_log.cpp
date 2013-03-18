@@ -14,7 +14,7 @@ log & stdout_log::operator << (long int a)
     printf("%ld",a);
     return *this;
 }
-    
+
 log & stdout_log::operator << (unsigned long int a)
 {
     for(int i=0;i<m_scope;++i)
