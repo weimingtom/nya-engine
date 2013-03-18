@@ -2,6 +2,7 @@
 
 #include "mesh.h"
 #include "scene.h"
+#include "camera.h"
 #include "render/render.h"
 #include "memory/tmp_buffer.h"
 #include "memory/memory_reader.h"
@@ -89,6 +90,11 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
     sh_.pixel="varying vec2 tc; uniform sampler2D base; void main() { gl_FragColor=texture2D(base,tc.xy); }";
     sh_.shdr.add_program(nya_render::shader::vertex,sh_.vertex.c_str());
     sh_.shdr.add_program(nya_render::shader::pixel,sh_.pixel.c_str());
+    sh_.predefines.resize(2);
+    sh_.predefines[0].type=shared_shader::bones_pos;
+    sh_.predefines[0].location=sh_.shdr.get_handler("bones_pos");
+    sh_.predefines[1].type=shared_shader::bones_rot;
+    sh_.predefines[1].location=sh_.shdr.get_handler("bones_rot");
     sh.create(sh_);
 
     std::string path(name);
@@ -195,6 +201,9 @@ bool mesh::load(const char *name)
 
     m_skeleton=m_shared->skeleton;
 
+    m_recalc_aabb=true;
+    m_has_aabb=m_shared->aabb.delta*m_shared->aabb.delta>0.0001;
+
     return true;
 }
 
@@ -209,11 +218,15 @@ void mesh::unload()
     m_replaced_materials_idx.clear();
     m_anims.clear();
     m_skeleton=nya_render::skeleton();
+    m_aabb=nya_math::aabb();
 }
 
 void mesh::draw(int idx) const
 {
     if(!m_shared.is_valid() || idx>=(int)m_shared->groups.size())
+        return;
+
+    if(m_has_aabb && !get_camera().get_frustrum().test_intersect(get_aabb()))
         return;
 
     nya_scene_internal::transform::set(m_transform);
@@ -405,6 +418,21 @@ void mesh::update(unsigned int dt)
     }
 
     m_skeleton.update();
+}
+
+const nya_math::aabb &mesh::get_aabb() const
+{
+    if(!m_shared.is_valid())
+        return m_aabb;
+
+    if(m_recalc_aabb)
+    {
+        m_recalc_aabb=false;
+        m_aabb.origin=m_shared->aabb.origin+m_transform.get_pos();
+        m_aabb.delta=m_shared->aabb.delta; //ToDo: rotate and scale
+    }
+
+    return m_aabb;
 }
 
 }

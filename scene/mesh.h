@@ -8,6 +8,7 @@
 #include "render/vbo.h"
 #include "render/skeleton.h"
 #include "math/vector.h"
+#include "math/frustrum.h"
 #include "transform.h"
 
 namespace nya_scene
@@ -39,6 +40,7 @@ struct shared_mesh
     }
 
     nya_render::skeleton skeleton;
+    nya_math::aabb aabb;
 };
 
 class mesh: public scene_shared<shared_mesh>
@@ -49,10 +51,10 @@ public:
 
     void draw(int group_idx=-1) const;
 
-    void set_pos(float x,float y,float z) { m_transform.set_pos(x,y,z); }
-    void set_rot(float yaw,float pitch,float roll) { m_transform.set_rot(yaw,pitch,roll); }
-    void set_scale(float sx,float sy,float sz) { m_transform.set_scale(sx,sy,sz); }
-    void set_scale(float s) { m_transform.set_scale(s,s,s); }
+    void set_pos(float x,float y,float z) { m_transform.set_pos(x,y,z); m_recalc_aabb=true; }
+    void set_rot(float yaw,float pitch,float roll) { m_transform.set_rot(yaw,pitch,roll); m_recalc_aabb=true; }
+    void set_scale(float sx,float sy,float sz) { m_transform.set_scale(sx,sy,sz); m_recalc_aabb=true; }
+    void set_scale(float s) { set_scale(s,s,s); }
 
 public:
     int get_materials_count() const;
@@ -76,12 +78,15 @@ public:
 
 public:
     void update(unsigned int dt);
+    
+public:
+    const nya_math::aabb &get_aabb() const;
 
 public:
     static bool load_pmd(shared_mesh &res,resource_data &data,const char* name);
 
 public:
-    mesh() { register_load_function(load_pmd); }
+    mesh(): m_recalc_aabb(true), m_has_aabb(false) { register_load_function(load_pmd); }
 
 private:
     nya_scene_internal::transform m_transform;
@@ -105,6 +110,10 @@ private:
 
     nya_render::skeleton m_skeleton;
     std::vector<applied_anim> m_anims;
+
+    mutable bool m_recalc_aabb;
+    mutable nya_math::aabb m_aabb;
+    bool m_has_aabb;
 };
 
 }

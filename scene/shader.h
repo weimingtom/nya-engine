@@ -22,6 +22,8 @@ struct shared_shader
     enum predefined_values
     {
         camera_pos=0,
+        bones_pos,
+        bones_rot,
 
         predefines_count
     };
@@ -38,6 +40,8 @@ struct shared_shader
         predefined_values type;
         int location;
         transform_type transform;
+
+        predefined(): location(-1), transform(none) {}
     };
 
     std::vector<predefined> predefines;
@@ -47,6 +51,8 @@ struct shared_shader
         std::string name;
         int location;
         transform_type transform;
+
+        uniform(): location(-1), transform(none) {}
     };
 
     std::vector<uniform> uniforms;
