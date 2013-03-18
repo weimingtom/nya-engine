@@ -42,6 +42,7 @@ public:
 
 private:
     void update_bone(int idx);
+    void update_ik(int idx);
 
 private:
     typedef std::map<std::string,unsigned int> index_map;

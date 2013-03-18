@@ -159,7 +159,7 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
         pos.y=reader.read<float>();
         pos.z=-reader.read<float>();
 
-        if(res.skeleton.add_bone(name.c_str(),pos,parent)!=i)
+        if(res.skeleton.add_bone(name.c_str(),pos,parent>0?parent:-1)!=i)
             nya_log::get_log()<<"pmd load warning: invalid bone\n";
     }
 

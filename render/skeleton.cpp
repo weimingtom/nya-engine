@@ -164,70 +164,73 @@ void skeleton::update_bone(int idx)
     m_rot_tr[idx]=b.rot*m_rot_tr[b.parent];
 }
 
+void skeleton::update_ik(int idx)
+{
+    const ik &k=m_iks[idx];
+    const nya_math::vec3 target_pos_org=m_pos_tr[k.target];
+
+    for(int j=0;j<k.count;++j)
+    {
+        for(int l=0;l<(int)k.links.size();++l)
+        {
+            const int lnk_idx=k.links[l].idx;
+            bone &lnk=m_bones[lnk_idx];
+
+            nya_math::vec3 target_pos=
+            m_rot_tr[lnk_idx].rotate_inv(target_pos_org-m_pos_tr[lnk_idx]);
+
+            nya_math::vec3 eff_pos=
+            m_rot_tr[lnk_idx].rotate_inv(m_pos_tr[k.eff]-m_pos_tr[lnk_idx]);
+
+            const float eps=0.00001f;
+
+            const nya_math::vec3 diff=eff_pos-target_pos;
+            if(diff*diff<eps)
+                return;
+
+            eff_pos.normalize();
+            target_pos.normalize();
+
+            float ang=acosf(eff_pos*target_pos);
+            if(fabsf(ang)<eps)
+                return;
+
+            if(ang< -k.fact)
+                ang= -k.fact;
+            else if(ang>k.fact)
+                ang=k.fact;
+
+            nya_math::vec3 axis=nya_math::vec3::cross(eff_pos,target_pos);
+            if(axis*axis<eps)
+                return;
+
+            axis.normalize();
+
+            nya_math::quat rot(axis,ang);
+
+            if(k.links[l].limit)
+                rot.limit_angle(k.links[l].limit_from,k.links[l].limit_to);
+
+            rot.normalize();
+
+            lnk.rot=lnk.rot*rot;
+            lnk.rot.normalize();
+            
+            for(int m=l;m>=0;--m)
+                update_bone(k.links[m].idx);
+
+            update_bone(k.eff);
+        }
+    }
+}
+
 void skeleton::update()
 {
     for(int i=0;i<(int)m_bones.size();++i)
         update_bone(i);
 
     for(int i=0;i<(int)m_iks.size();++i)
-    {
-        const ik &k=m_iks[i];
-        const nya_math::vec3 target_pos_org=m_pos_tr[k.target];
-
-        for(int j=0;j<k.count;++j)
-        {
-            for(int l=0;l<(int)k.links.size();++l)
-            {
-                const int lnk_idx=k.links[l].idx;
-                bone &lnk=m_bones[lnk_idx];
-
-                nya_math::vec3 target_pos=
-                m_rot_tr[lnk_idx].rotate_inv(target_pos_org-m_pos_tr[lnk_idx]);
-
-                nya_math::vec3 eff_pos=
-                m_rot_tr[lnk_idx].rotate_inv(m_pos_tr[k.eff]-m_pos_tr[lnk_idx]);
-
-                const float eps=0.00001f;
-
-                const nya_math::vec3 diff=eff_pos-target_pos;
-                if(diff*diff<eps)
-                    return;
-
-                eff_pos.normalize();
-                target_pos.normalize();
-
-                float ang=acosf(eff_pos*target_pos);
-                if(fabsf(ang)<eps)
-                    continue;
-
-                if(ang< -k.fact)
-                    ang= -k.fact;
-                else if(ang>k.fact)
-                    ang=k.fact;
-
-                nya_math::vec3 axis=nya_math::vec3::cross(eff_pos,target_pos);
-                if(axis*axis<eps)
-                    continue;
-
-                axis.normalize();
-
-                nya_math::quat rot(axis,ang);
-
-                if(k.links[l].limit)
-					rot.limit_angle(k.links[l].limit_from,k.links[l].limit_to);
-
-                rot.normalize();
-
-                lnk.rot=lnk.rot*rot;
-                lnk.rot.normalize();
-
-                for(int m=l;m>=0;--m)
-                    update_bone(k.links[m].idx);
-
-                update_bone(k.eff);
-            }
-        }
-    }
+        update_ik(i);
 }
 
 nya_math::vec3 skeleton::transform(int bone_idx,nya_math::vec3 point) const
