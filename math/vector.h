@@ -31,6 +31,8 @@ struct vec3
 
     float length() const { return sqrtf(x*x+y*y+z*z); }
 
+    vec3 &abs() { x=fabsf(x); y=fabsf(y); z=fabsf(z); return *this; }
+
     vec3 &normalize()
     {
         float len=length();

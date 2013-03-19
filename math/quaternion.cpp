@@ -89,18 +89,18 @@ vec3 quat::get_euler() const
     return vec3(-atan2f(xy2-wz2,1.0f-xx2+zz2),ang,0.0f);
 }
 
-quat::quat(vec3 euler)
+quat::quat(float pitch,float yaw,float roll)
 {
-    euler*=0.5f;
+    pitch*=0.5f; yaw*=0.5f; roll*=0.5f;
 
-    const float sin_x=sinf(euler.x);
-    const float cos_x=cosf(euler.x);
+    const float sin_x=sinf(pitch);
+    const float cos_x=cosf(pitch);
 
-    const float sin_y=sinf(euler.y);
-    const float cos_y=cosf(euler.y);
+    const float sin_y=sinf(yaw);
+    const float cos_y=cosf(yaw);
 
-    const float sin_z=sinf(euler.z);
-    const float cos_z=cosf(euler.z);
+    const float sin_z=sinf(roll);
+    const float cos_z=cosf(roll);
 
     v.x=sin_x*cos_y*cos_z - cos_x*sin_y*sin_z;
     v.y=cos_x*sin_y*cos_z + sin_x*cos_y*sin_z;
@@ -134,7 +134,7 @@ quat quat::limit_angle(float from,float to)
     ang.y=0.0f;
     ang.z=0.0f;
 
-    return *this=quat(ang);
+    return *this=quat(ang.x,ang.y,ang.z);
 }
 
 quat quat::normalize()

@@ -1,9 +1,37 @@
 //https://code.google.com/p/nya-engine/
 
 #include "frustum.h"
+#include "quaternion.h"
 
 namespace nya_math
 {
+
+aabb::aabb(const aabb &b,const vec3 &p,const quat &q,const vec3 &s)
+{
+    delta.x=s.x*b.delta.x;
+    delta.y=s.y*b.delta.y;
+    delta.z=s.z*b.delta.z;
+
+    const nya_math::vec3 v[4]=
+    {
+        nya_math::vec3(delta.x,delta.y,delta.z),
+        nya_math::vec3(delta.x,-delta.y,delta.z),
+        nya_math::vec3(delta.x,delta.y,-delta.z),
+        nya_math::vec3(delta.x,-delta.y,-delta.z)
+    };
+
+    delta=nya_math::vec3();
+
+    for(int i=0;i<4;++i)
+    {
+        const nya_math::vec3 t=q.rotate(v[i]).abs();
+        if(t.x>delta.x) delta.x=t.x;
+        if(t.y>delta.y) delta.y=t.y;
+        if(t.z>delta.z) delta.z=t.z;
+    }
+
+    origin=b.origin+p;
+}
 
 bool frustum::test_intersect(const aabb &box) const
 {

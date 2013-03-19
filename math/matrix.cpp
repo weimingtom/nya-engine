@@ -1,6 +1,8 @@
 //https://code.google.com/p/nya-engine/
 
 #include "matrix.h"
+#include "vector.h"
+#include "quaternion.h"
 #include "constants.h"
 #include <math.h>
 
@@ -151,6 +153,28 @@ vec3 operator * (const mat4 &m,const vec3 &v)
 	return vec3(m.m[0][0]*v.x+m.m[1][0]*v.y+m.m[2][0]*v.z+m.m[3][0],
 				m.m[0][1]*v.x+m.m[1][1]*v.y+m.m[2][1]*v.z+m.m[3][1],
 				m.m[0][2]*v.x+m.m[1][2]*v.y+m.m[2][2]*v.z+m.m[3][2]);
+}
+
+mat4::mat4(const quat &q)
+{
+    const float xx=q.v.x*q.v.x;
+    const float yy=q.v.y*q.v.y;
+    const float zz=q.v.z*q.v.z;
+    const float xy=q.v.x*q.v.y;
+    const float yz=q.v.y*q.v.z;
+    const float xz=q.v.x*q.v.z;
+    const float xw=q.v.x*q.w;
+    const float yw=q.v.y*q.w;
+    const float zw=q.v.z*q.w;
+
+    m[0][0]=1.0f-2.0f*(yy+zz); m[1][0]=2.0f*(xy-zw); m[2][0]=2.0f*(xz+yw);
+    m[0][1]=2.0f*(xy+zw); m[1][1]=1.0f-2.0f*(xx+zz); m[2][1]=2.0f*(yz-xw);
+    m[0][2]=2.0f*(xz-yw); m[1][2]=2.0f*(yz+xw); m[2][2]=1.0f-2.0f*(xx+yy);
+
+    for(int i=0;i<3;++i)
+        m[3][i]=m[i][3]=0.0f;
+
+    m[3][3]=1.0f;
 }
 
 }

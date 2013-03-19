@@ -3,6 +3,7 @@
 #pragma once
 
 #include "matrix.h"
+#include "vector.h"
 
 namespace nya_math
 {
@@ -11,6 +12,9 @@ struct aabb
 {
     vec3 origin;
     vec3 delta;
+
+    aabb() {}
+    aabb(const aabb &source,const vec3 &pos,const quat &rot,const vec3 &scale);
 };
 
 class frustum

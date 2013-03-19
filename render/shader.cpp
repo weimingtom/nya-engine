@@ -110,6 +110,7 @@ namespace nya_render
     #define glGetUniformLocationARB glGetUniformLocation
     #define glUniform1iARB glUniform1i
     #define glUniform4fARB glUniform4f
+    #define glUniform3fvARB glUniform3fv
     #define glUniform4fvARB glUniform4fv
     #define glUniformMatrix4fvARB glUniformMatrix4fv
 

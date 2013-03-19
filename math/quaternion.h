@@ -20,9 +20,9 @@ struct quat
         v.z=z; this->w=w;
     }
 
-    quat(vec3 euler);
+    quat(float pitch,float yaw,float roll); //angles in radians
 
-    quat(vec3 axis,float angle);
+    quat(vec3 axis,float angle); //angle in radians
 
     quat(const float *q) { v.x=q[0]; v.y=q[1]; v.z=q[2]; w=q[3]; }
 
@@ -30,7 +30,7 @@ struct quat
 
     quat operator * (const quat &q) const;
 
-    vec3 get_euler() const;
+    vec3 get_euler() const; //pitch,yaw,roll
 
     quat limit_angle(float from,float to);
 

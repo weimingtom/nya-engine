@@ -52,7 +52,9 @@ public:
     void draw(int group_idx=-1) const;
 
     void set_pos(float x,float y,float z) { m_transform.set_pos(x,y,z); m_recalc_aabb=true; }
+    void set_pos(const nya_math::vec3 &pos) { m_transform.set_pos(pos.x,pos.y,pos.z); m_recalc_aabb=true; }
     void set_rot(float yaw,float pitch,float roll) { m_transform.set_rot(yaw,pitch,roll); m_recalc_aabb=true; }
+    void set_rot(const nya_math::quat &rot) { m_transform.set_rot(rot); m_recalc_aabb=true; }
     void set_scale(float sx,float sy,float sz) { m_transform.set_scale(sx,sy,sz); m_recalc_aabb=true; }
     void set_scale(float s) { set_scale(s,s,s); }
 

@@ -2,10 +2,11 @@
 
 #pragma once
 
-#include "vector.h"
-
 namespace nya_math
 {
+
+struct vec3;
+struct quat;
 
 struct mat4
 {
@@ -13,16 +14,17 @@ struct mat4
 
     mat4 &identity();
     mat4 &translate(float x,float y,float z);
-    mat4 &rotate(float angle,float x,float y,float z);
+    mat4 &rotate(float angle,float x,float y,float z); //angle in degrees
     mat4 &scale(float sx,float sy,float sz);
     mat4 &scale(float s) { return scale(s,s,s); }
 
-    mat4 &perspective(float fov,float aspect,float near,float far);
+    mat4 &perspective(float fov,float aspect,float near,float far); //fov in degrees
     mat4 &frustrum(float left,float right,float bottom,float top,float near,float far);
 
     mat4 operator * (const mat4 &mat) const;
 
     mat4() { identity(); }
+    mat4(const quat &q);
 };
 
 vec3 operator * (const mat4 &m,const vec3 &v);

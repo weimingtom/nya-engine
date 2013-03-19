@@ -457,8 +457,7 @@ const nya_math::aabb &mesh::get_aabb() const
     if(m_recalc_aabb)
     {
         m_recalc_aabb=false;
-        m_aabb.origin=m_shared->aabb.origin+m_transform.get_pos();
-        m_aabb.delta=m_shared->aabb.delta; //ToDo: rotate and scale
+        m_aabb=m_transform.transform_aabb(m_shared->aabb);
     }
 
     return m_aabb;

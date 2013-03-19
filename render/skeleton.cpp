@@ -85,7 +85,7 @@ nya_math::vec3 skeleton::get_bone_pos(int idx) const
 nya_math::quat skeleton::get_bone_rot(int idx) const
 {
     if(idx<0 || idx>=(int)m_bones.size())
-        return nya_math::vec3();
+        return nya_math::quat();
 
     return m_rot_tr[idx];
 }
@@ -215,7 +215,7 @@ void skeleton::update_ik(int idx)
 
             lnk.rot=lnk.rot*rot;
             lnk.rot.normalize();
-            
+
             for(int m=l;m>=0;--m)
                 update_bone(k.links[m].idx);
 
