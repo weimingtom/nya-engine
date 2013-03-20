@@ -165,13 +165,13 @@ bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
 
     for(size_t i=0;i<vertices.size();i+=14)
     {
-        const nya_math::vec3 bp0=res.skeleton.get_bone_pos(vertices[i+8]);
+        const nya_math::vec3 bp0=res.skeleton.get_bone_pos(int(vertices[i+8]));
 
         vertices[i]-=bp0.x;
         vertices[i+1]-=bp0.y;
         vertices[i+2]-=bp0.z;
 
-        const nya_math::vec3 bp1=res.skeleton.get_bone_pos(vertices[i+9]);
+        const nya_math::vec3 bp1=res.skeleton.get_bone_pos(int(vertices[i+9]));
 
         vertices[i+11]-=bp1.x;
         vertices[i+12]-=bp1.y;
