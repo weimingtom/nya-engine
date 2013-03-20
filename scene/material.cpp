@@ -11,14 +11,18 @@ void material::set() const
 
     for(int i=0;i<(int)m_params.size();++i)
     {
-        const param_proxy &p=m_params[i];
+        const param_proxy &p=m_params[i].p;
         if(!p.is_valid())
         {
             m_shader.set_uniform_value(i,0,0,0,0);
             continue;
         }
 
-        m_shader.set_uniform_value(i,p->f[0],p->f[1],p->f[2],p->f[3]);
+        const param_proxy &m=m_params[i].m;
+        if(m.is_valid())
+            m_shader.set_uniform_value(i,p->f[0]*m->f[0],p->f[1]*m->f[1],p->f[2]*m->f[2],p->f[3]*m->f[3]);
+        else
+            m_shader.set_uniform_value(i,p->f[0],p->f[1],p->f[2],p->f[3]);
     }
 
     if(m_blend)
@@ -164,10 +168,12 @@ int material::get_param_idx(const char *name) const
 
 void material::set_param(int idx,float f0,float f1,float f2,float f3)
 {
-    if(idx<0 || idx>=(int)m_params.size())
-        return;
+    set_param(idx,param(f0,f1,f2,f3));
+}
 
-    m_params[idx]=param_proxy(param(f0,f1,f2,f3));
+void material::set_param(int idx,const param &p)
+{
+    set_param(idx,param_proxy(p));
 }
 
 void material::set_param(int idx,const param_proxy &p)
@@ -175,15 +181,22 @@ void material::set_param(int idx,const param_proxy &p)
     if(idx<0 || idx>=(int)m_params.size())
         return;
 
-    m_params[idx]=p;
+    m_params[idx].p=p;
+    m_params[idx].m.free();
 }
 
-void material::set_param(int idx,const param &p)
+void material::set_param(int idx,const param_proxy &p,const param &m)
+{
+    set_param(idx,p,param_proxy(m));
+}
+
+void material::set_param(int idx,const param_proxy &p,const param_proxy &m)
 {
     if(idx<0 || idx>=(int)m_params.size())
         return;
 
-    m_params[idx]=param_proxy(p);
+    m_params[idx].p=p;
+    m_params[idx].m=m;
 }
 
 void material::release()
@@ -192,6 +205,7 @@ void material::release()
         m_textures[i].proxy.free();
 
     m_textures.clear();
+    m_params.clear();
     m_shader.unload();
     m_name.clear();
 }

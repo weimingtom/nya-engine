@@ -56,6 +56,8 @@ public:
     void set_param(int idx,float f0,float f1,float f2,float f3);
     void set_param(int idx,const param &p);
     void set_param(int idx,const param_proxy &p);
+    void set_param(int idx,const param_proxy &p,const param &m); //set as p*m
+    void set_param(int idx,const param_proxy &p,const param_proxy &m);
 
     bool get_zwrite() const { return m_zwrite; }
     bool get_blend(blend_mode &src,blend_mode &dst) const { 
@@ -105,7 +107,13 @@ private:
 
     std::vector<material_texture> m_textures;
 
-    std::vector<param_proxy> m_params;
+    struct param_holder
+    {
+        param_proxy p;
+        param_proxy m;
+    };
+
+    std::vector<param_holder> m_params;
 };
 
 }
