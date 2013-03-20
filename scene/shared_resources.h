@@ -56,6 +56,17 @@ public:
 public:
     static void reload_all_resources() { get_shared_resources().reload_resources(); }
 
+    static void reload_resource(const char *name)
+    {
+        if(!name)
+            return;
+
+        if(get_resources_prefix().empty())
+            get_shared_resources().reload_resource(name);
+        else
+            get_shared_resources().reload_resource((get_resources_prefix()+name).c_str());
+    }
+
 public:
     typedef bool (*load_function)(t &sh,resource_data &data,const char *name);
 

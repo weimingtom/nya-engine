@@ -207,6 +207,19 @@ public:
         }
     }
 
+    void reload_resource(const char *name)
+    {
+        if(!name)
+            return;
+
+        resources_map_iterator it=m_res_map.find(name);
+        if(it==m_res_map.end() || !it->second)
+            return;
+
+        release_resource(it->second->res);
+        fill_resource(it->first.c_str(),it->second->res);
+    }
+
     const char *get_res_name(const shared_resource_ref&ref)
     {
         if(!ref.m_res_holder)
