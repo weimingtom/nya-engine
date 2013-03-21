@@ -54,17 +54,17 @@ public:
     static void set_resources_prefix(const char *prefix) { get_resources_prefix().assign(prefix?prefix:""); }
 
 public:
-    static void reload_all_resources() { get_shared_resources().reload_resources(); }
+    static int reload_all_resources() { return get_shared_resources().reload_resources(); }
 
-    static void reload_resource(const char *name)
+    static bool reload_resource(const char *name)
     {
         if(!name)
-            return;
+            return false;
 
         if(get_resources_prefix().empty())
-            get_shared_resources().reload_resource(name);
-        else
-            get_shared_resources().reload_resource((get_resources_prefix()+name).c_str());
+            return get_shared_resources().reload_resource(name);
+
+        return get_shared_resources().reload_resource((get_resources_prefix()+name).c_str());
     }
 
 public:

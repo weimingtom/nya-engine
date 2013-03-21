@@ -194,8 +194,10 @@ public:
         return shared_resource_mutable_ref(&(holder->res),holder,this);
     }
 
-    void reload_resources()
+    int reload_resources()
     {
+        int count=0;
+
         for(resources_map_iterator it=m_res_map.begin();
             it!=m_res_map.end();++it)
         {
@@ -203,21 +205,22 @@ public:
                 continue;
 
             release_resource(it->second->res);
-            fill_resource(it->first.c_str(),it->second->res);
+            if(fill_resource(it->first.c_str(),it->second->res))
+                ++count;
         }
     }
 
-    void reload_resource(const char *name)
+    bool reload_resource(const char *name)
     {
         if(!name)
-            return;
+            return false;
 
         resources_map_iterator it=m_res_map.find(name);
         if(it==m_res_map.end() || !it->second)
-            return;
+            return false;
 
         release_resource(it->second->res);
-        fill_resource(it->first.c_str(),it->second->res);
+        return fill_resource(it->first.c_str(),it->second->res);
     }
 
     const char *get_res_name(const shared_resource_ref&ref)
