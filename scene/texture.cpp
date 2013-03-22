@@ -156,13 +156,20 @@ bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
         nya_memory::tmp_buffer_scoped color_data(color_data_size);
 
         const unsigned char *cur=(unsigned char *)reader.get_data();
+        const unsigned char *const last=cur+reader.get_remained();
 
         for(size_t i=0;i<color_data_size;)
         {
+            if(cur>=last)
+                return false;
+
             if(*cur & 0x80)
             {
                 unsigned char len= *cur -127;
                 ++cur;
+
+                if(cur>=last+channels)
+                    return false;
 
                 for(unsigned char j=0;j<len;++j,i+=channels)
                     memcpy(color_data.get_data(i),cur,channels);
@@ -173,6 +180,9 @@ bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
             {
                 unsigned char len= *cur +1;
                 ++cur;
+
+                if(cur>=last+len*channels)
+                    return false;
 
                 for(unsigned char j=0;j<len;++j,i+=channels,cur+=channels)
                     memcpy(color_data.get_data(i),cur,channels);
