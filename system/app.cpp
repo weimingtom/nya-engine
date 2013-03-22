@@ -44,7 +44,7 @@ public:
         AdjustWindowRect(&rect,WS_OVERLAPPEDWINDOW,false);
 
         m_hwnd = CreateWindow(TEXT("nya_engine"),
-                          TEXT("nya_engine"),
+                          TEXT(m_title.c_str()),
                           WS_OVERLAPPEDWINDOW,
                           rect.left,rect.top,
                           rect.right-rect.left,rect.bottom-rect.top,
@@ -134,7 +134,7 @@ public:
             DestroyWindow (m_hwnd);
 
             m_hwnd = CreateWindow(TEXT("nya_engine"),
-                          TEXT("nya_engine"),
+                          TEXT(m_title.c_str()),
                           WS_OVERLAPPEDWINDOW,
                           rect.left,rect.top,
                           rect.right-rect.left,rect.bottom-rect.top,
