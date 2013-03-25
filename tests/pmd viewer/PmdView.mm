@@ -10,21 +10,21 @@ void viewer_camera::add_rot(float dx,float dy)
 {
     m_rot_x+=dx;
     m_rot_y+=dy;
-    
+
     const float max_angle=360.0f;
-    
+
     if ( m_rot_x > max_angle )
         m_rot_x -= max_angle;
-    
+
     if ( m_rot_x < -max_angle )
         m_rot_x += max_angle;
-    
+
     if ( m_rot_y > max_angle )
         m_rot_y -= max_angle;
-    
+
     if ( m_rot_y < -max_angle )
         m_rot_y += max_angle;
-    
+
     update();
 }
 
@@ -51,10 +51,10 @@ void viewer_camera::set_aspect(float aspect)
 void viewer_camera::update()
 {
     nya_scene::get_camera().set_rot(m_rot_x,m_rot_y,0.0);
-    
-    nya_math::quat rot(nya_math::vec3(-m_rot_y*3.14f/180.0f,-m_rot_x*3.14f/180.0f,0.0f));
+
+    nya_math::quat rot(-m_rot_y*3.14f/180.0f,-m_rot_x*3.14f/180.0f,0.0f);
     nya_math::vec3 pos=rot.rotate(m_pos);
-    
+
     nya_scene::get_camera().set_pos(pos.x,pos.y+10.0f,pos.z);
 }
 
@@ -63,14 +63,14 @@ void flip_vertical(unsigned char *data,int width,int height,int bpp)
     const int line_size=width*bpp;
     const int top=line_size*(height-1);
     const int half=line_size*height/2;
-    
+
     unsigned char tmp[4];
-    
+
     for(int offset=0;offset<half;offset+=line_size)
     {
         unsigned char *ha=data+offset;
         unsigned char *hb=data+top-offset;
-        
+
         for(int w=0;w<line_size;w+=bpp)
         {
             unsigned char *a=ha+w;
@@ -181,11 +181,11 @@ public:
     {
         if(!data.get_size())
             return false;
-        
+
         nya_memory::memory_reader reader(data.get_data(),data.get_size());
         if(!reader.test("PMX ",4))
             return false;
-        
+
         if(reader.read<float>()!=2.0f)
             return false;
 
@@ -196,13 +196,13 @@ public:
         const pmx_header header=reader.read<pmx_header>();
         if(header.extended_uv>0)
             return false; //ToDo
-        
+
         for(int i=0;i<4;++i)
         {
             const int size=reader.read<int>();
             reader.skip(size);
         }
-        
+
         const int vert_count=reader.read<int>();
 
         std::vector<vert> verts(vert_count);
@@ -234,10 +234,10 @@ public:
                 case 1:
                     v.bone_idx[0]=read_idx(reader,header.bone_idx_size);
                     v.bone_idx[1]=read_idx(reader,header.bone_idx_size);
-                    
+
                     v.bone_weight[0]=reader.read<float>();
                     v.bone_weight[1]=1.0f-v.bone_weight[0];
-                    
+
                     for(int j=2;j<4;++j)
                         v.bone_weight[j]=v.bone_idx[j]=0.0f;
                     break;
@@ -253,10 +253,10 @@ public:
                 case 3:
                     v.bone_idx[0]=read_idx(reader,header.bone_idx_size);
                     v.bone_idx[1]=read_idx(reader,header.bone_idx_size);
-                    
+
                     v.bone_weight[0]=reader.read<float>();
                     v.bone_weight[1]=1.0f-v.bone_weight[0];
-                    
+
                     for(int j=2;j<4;++j)
                         v.bone_weight[j]=v.bone_idx[j]=0.0f;
 
@@ -341,11 +341,11 @@ public:
             sprintf(buf,"#define k_d vec4(%f,%f,%f,%f)\n",params.diffuse[0],params.diffuse[1],
                                                           params.diffuse[2],params.diffuse[3]);
             sh_defines.append(buf);
-            
+
             sprintf(buf,"#define k_s vec4(%f,%f,%f,%f)\n",params.specular[0],params.specular[1],
                                                           params.specular[2],params.shininess);
             sh_defines.append(buf);
-            
+
             sprintf(buf,"#define k_a vec3(%f,%f,%f)\n",params.ambient[0],params.ambient[1],
                                                        params.ambient[2]);
             sh_defines.append(buf);
@@ -393,7 +393,7 @@ public:
                     sh_.shdr.set_sampler("env",1);
                     sh_.samplers["env"]=1;
                     ++sh_.samplers_count;
-                    
+
                     nya_scene::texture tex;
                     tex.load((path+name).c_str());
                     g.mat.set_texture("env",tex);
@@ -418,7 +418,7 @@ public:
             //"r.z+=1.0;"
             "tc.zw = 0.5*r.xy/length(r) + 0.5;"
             "gl_Position=gl_ModelViewProjectionMatrix*gl_Vertex; }";
-    
+
             sh_.pixel=sh_defines+"varying vec4 tc;\n"
             "uniform sampler2D base;\n"
             "uniform sampler2D env;\n"
@@ -434,7 +434,7 @@ public:
             "#else\n"
             "   gl_FragColor=tm; }\n"
             "#endif\n";
-            
+
             sh_.shdr.add_program(nya_render::shader::vertex,sh_.vertex.c_str());
             sh_.shdr.add_program(nya_render::shader::pixel,sh_.pixel.c_str());
             sh_.predefines.resize(1);
@@ -465,12 +465,12 @@ public:
                 NSOpenGLPFASampleBuffers,1,NSOpenGLPFASamples,2,
                 0
             };
-            
+
             NSOpenGLPixelFormat *pixelFormat = [[[NSOpenGLPixelFormat alloc] initWithAttributes:pixelFormatAttributes] autorelease];
-            
+
             m_context=[[NSOpenGLContext alloc] initWithFormat:pixelFormat shareContext:nil];
         }
-        
+
         ++m_ref_count;
         return m_context;
     }
@@ -521,21 +521,21 @@ private:
 - (void) mouseDown: (NSEvent *) theEvent
 {
     NSPoint pt = [theEvent locationInWindow];
-    
+
     m_mouse_old = [self convertPoint: pt fromView: nil];
 }
 
 - (void) rightMouseDown: (NSEvent *) theEvent
 {
     NSPoint pt = [theEvent locationInWindow];
-    
+
     m_mouse_old = [self convertPoint: pt fromView: nil];
 }
 
 - (void) mouseDragged: (NSEvent *) theEvent
 {
     NSPoint pt = [theEvent locationInWindow];
-    
+
     pt = [self convertPoint: pt fromView: nil];
 
     m_camera.add_rot(pt.x-m_mouse_old.x,-(pt.y-m_mouse_old.y));
@@ -550,7 +550,7 @@ private:
     NSPoint pt = [theEvent locationInWindow];
 
     pt = [self convertPoint: pt fromView: nil];
-    
+
     m_camera.add_pos((pt.x-m_mouse_old.x)/20.0f,(pt.y-m_mouse_old.y)/20.0f,0.0f);
 
     m_mouse_old = pt;
@@ -561,14 +561,14 @@ private:
 - (void) scrollWheel: (NSEvent*) event
 {
     m_camera.add_pos(0.0f,0.0f,[event deltaY]);
-    
+
     [self setNeedsDisplay: YES];
 }
 
 -(void)reshape
 {
-    glViewport( 0,0,[self frame].size.width,[self frame].size.height );     
-    
+    glViewport( 0,0,[self frame].size.width,[self frame].size.height ); 
+
     m_camera.set_aspect([self frame].size.width / [self frame].size.height);
 
     [self setNeedsDisplay: YES];
@@ -599,7 +599,7 @@ private:
 {
 	[self draw];
 
-    [ [ self openGLContext ] flushBuffer ];    
+    [ [ self openGLContext ] flushBuffer ];
 }
 
 -(void) dealloc
