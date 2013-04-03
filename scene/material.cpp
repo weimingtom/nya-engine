@@ -30,6 +30,11 @@ void material::set() const
     else
         nya_render::blend::disable();
 
+    if(m_color_write)
+        nya_render::color_write::enable();
+    else
+        nya_render::color_write::disable();
+
     if(m_zwrite)
         nya_render::zwrite::enable();
     else

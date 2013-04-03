@@ -60,6 +60,7 @@ public:
     void set_param(int idx,const param_proxy &p,const param_proxy &m);
 
     bool get_zwrite() const { return m_zwrite; }
+    bool get_color_write() const { return m_color_write; }
     bool get_blend(blend_mode &src,blend_mode &dst) const { 
                    src=m_blend_src; dst=m_blend_dst; return m_blend; }
     bool get_blend() const { return m_blend; }
@@ -73,6 +74,7 @@ public:
     void set_texture(const char *semantics,const texture_proxy &proxy);
     void set_shader(const shader &shdr);
     void set_zwrite(bool enabled) { m_zwrite=enabled; }
+    void set_color_write(bool enabled) { m_color_write=enabled; }
     void set_blend(bool enabled,blend_mode src,blend_mode dst);
     void set_blend(bool enabled) { m_blend=enabled; }
     void set_cull_face(bool enabled,cull_order order) { m_cull_face=enabled; m_cull_order=order; }
@@ -83,7 +85,7 @@ private:
     void unset() const;
 
 public:
-    material(): m_zwrite(true),m_blend(false),m_cull_face(false),m_cull_order(nya_render::cull_face::ccw),
+    material(): m_zwrite(true),m_color_write(false),m_blend(false),m_cull_face(false),m_cull_order(nya_render::cull_face::ccw),
                 m_blend_src(nya_render::blend::one),m_blend_dst(nya_render::blend::zero) {}
 
 private:
@@ -92,6 +94,7 @@ private:
     shader m_shader;
 
     bool m_zwrite;
+    bool m_color_write;
     bool m_blend;
     bool m_cull_face;
     cull_order m_cull_order;

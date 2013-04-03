@@ -58,6 +58,12 @@ struct zwrite
     static void disable();
 };
 
+struct color_write
+{
+    static void enable();
+    static void disable();
+};
+
 struct scissor
 {
     static void enable(int x,int y,int w,int h);

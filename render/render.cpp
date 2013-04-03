@@ -130,6 +130,16 @@ void zwrite::disable()
     glDepthMask(false);
 }
 
+void color_write::enable()
+{
+    glColorMask(true,true,true,true);
+}
+
+void color_write::disable()
+{
+    glColorMask(false,false,false,false);
+}
+
 void scissor::enable(int x,int y,int w,int h)
 {
     glEnable(GL_SCISSOR_TEST);
