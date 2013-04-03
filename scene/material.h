@@ -85,7 +85,7 @@ private:
     void unset() const;
 
 public:
-    material(): m_zwrite(true),m_color_write(false),m_blend(false),m_cull_face(false),m_cull_order(nya_render::cull_face::ccw),
+    material(): m_zwrite(true),m_color_write(true),m_blend(false),m_cull_face(false),m_cull_order(nya_render::cull_face::ccw),
                 m_blend_src(nya_render::blend::one),m_blend_dst(nya_render::blend::zero) {}
 
 private:

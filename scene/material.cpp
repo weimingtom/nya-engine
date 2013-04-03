@@ -71,6 +71,9 @@ void material::unset() const
     if(!m_zwrite)
         nya_render::zwrite::enable();
 
+    if(!m_color_write)
+        nya_render::color_write::enable();
+
     for(size_t i=0;i<m_textures.size();++i)
     {
         if(m_textures[i].slot<0 || !m_textures[i].proxy.is_valid())
