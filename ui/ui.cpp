@@ -178,30 +178,39 @@ void layer::draw_rect(rect &r,rect_style &s)
 
     float pos[8];
     pos[6]=pos[4]=px;
-    pos[7]=pos[1]=py;
-    pos[5]=pos[3]=h+py;
+    pos[7]=pos[3]=py;
+    pos[5]=pos[1]=h+py;
     pos[2]=pos[0]=w+px;
 
     m_rect_vbo.set_vertex_data(pos,sizeof(float)*2,4,nya_render::vbo::dynamic_draw);
-    m_rect_vbo.set_vertices(0,2);
-    m_rect_vbo.bind();
+    static bool initialised=false;
+    if(!initialised)
+    {
+        initialised=true;
+        m_rect_vbo.set_vertices(0,2);
+        unsigned short indices[5]={1,0,2,3,1};
+        m_rect_vbo.set_index_data(indices,nya_render::vbo::index2b,5);
+    }
+
+    m_rect_vbo.bind(false);
 
     if(s.solid)
     {
         nya_render::set_color(s.solid_color.r,s.solid_color.g,
                               s.solid_color.b,s.solid_color.a);
 
-        m_rect_vbo.set_element_type(nya_render::vbo::triangle_fan);
+        m_rect_vbo.set_element_type(nya_render::vbo::triangle_strip);
 
         m_rect_vbo.draw();
     }
 
     if(s.border)
     {
+        m_rect_vbo.bind_indices();
         nya_render::set_color(s.border_color.r,s.border_color.g,
                               s.border_color.b,s.border_color.a);
 
-        m_rect_vbo.set_element_type(nya_render::vbo::line_loop);
+        m_rect_vbo.set_element_type(nya_render::vbo::line_strip);
         m_rect_vbo.draw();
     }
 

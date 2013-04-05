@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "platform_specific_gl.h"
+
 namespace nya_render
 {
 
@@ -12,10 +14,9 @@ public:
     {
         triangles,
         triangle_strip,
-        triangle_fan,
         points,
         lines,
-        line_loop
+        line_strip
     };
 
     enum element_size
@@ -59,7 +60,7 @@ public:
     void release();
 
 public:
-    vbo(): m_element_type(triangles),m_element_count(0),m_allocated_elements_count(0),m_vertex_id(0),m_index_id(0),
+    vbo(): m_element_type(triangles),m_element_count(0),m_allocated_elements_count(0),m_vertex_loc(0),m_index_loc(0),
            m_verts_count(0),m_allocated_verts_count(0),m_vertex_bind(false),m_index_bind(false) { set_vertices(0,3); }
 
 private:
@@ -69,8 +70,14 @@ private:
     usage_hint m_elements_usage;
     unsigned int m_allocated_elements_count;
 
-    unsigned int m_vertex_id;
-    unsigned int m_index_id;
+#ifdef DIRECTX11
+	ID3D11Buffer *m_vertex_loc;
+	ID3D11Buffer *m_index_loc;
+#else
+    unsigned int m_vertex_loc;
+    unsigned int m_index_loc;
+#endif
+
     unsigned int m_verts_count;
     unsigned int m_allocated_verts_count;
 
