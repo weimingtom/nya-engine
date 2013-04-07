@@ -45,12 +45,14 @@ private:
 
         init_resource_system();
 
+        /*
         nya_resources::resource_data *outline_cfg=nya_resources::get_resources_provider().access("outline_ignore_list.txt");
         if(outline_cfg)
         {
             get_outline_ignore().load(outline_cfg);
             outline_cfg->release();
         }
+        */
 
 const unsigned long time_start=nya_system::get_time();
 

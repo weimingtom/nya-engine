@@ -176,11 +176,11 @@ void layer::draw_rect(rect &r,rect_style &s)
     float px=-1.0f+2.0f*r.x/m_width;
     float py=-1.0f+2.0f*r.y/m_height;
 
-    float pos[8];
-    pos[6]=pos[4]=px;
-    pos[7]=pos[3]=py;
-    pos[5]=pos[1]=h+py;
-    pos[2]=pos[0]=w+px;
+    float pos[4][2];
+    pos[0][0]=pos[2][0]=px;
+    pos[0][1]=pos[1][1]=py;
+    pos[2][1]=pos[3][1]=h+py;
+    pos[1][0]=pos[3][0]=w+px;
 
     m_rect_vbo.set_vertex_data(pos,sizeof(float)*2,4,nya_render::vbo::dynamic_draw);
     static bool initialised=false;
