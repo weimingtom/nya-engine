@@ -16,7 +16,7 @@ public:
     bool load(nya_resources::resource_data *data);
     void release();
 
-    void draw(bool use_materials,int group=-1) const;
+    void draw(bool use_materials,bool cull_face,int group=-1) const;
 
     unsigned int get_bones_count() const { return (unsigned int)m_bones.size(); }
     const nya_math::mat4 &get_bone(int idx) const { return m_bones[idx]; }

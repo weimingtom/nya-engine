@@ -22,8 +22,6 @@
     #include "TargetConditionals.h"
 #endif
 
-void init_resource_system();
-
 class npl2: public nya_system::app
 {
 private:

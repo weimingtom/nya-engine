@@ -345,7 +345,7 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
     return true;
 }
 
-void tmb_model::draw(bool use_materials,int group) const
+void tmb_model::draw(bool use_materials,bool cull_face,int group) const
 {
     m_vbo.bind();
     if(!use_materials)
@@ -362,7 +362,7 @@ void tmb_model::draw(bool use_materials,int group) const
         if(group>=0 && group!=mat.group)
             continue;
 
-        if(mat.cull_face)
+        if(mat.cull_face && cull_face)
             glEnable(GL_CULL_FACE);
         else
             glDisable(GL_CULL_FACE);

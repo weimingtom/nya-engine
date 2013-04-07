@@ -26,7 +26,7 @@ public:
         m_under_state[1]=bottom;
     }
 
-    void draw(bool use_materials);
+    void draw(bool use_materials,bool cull_face);
 
     void release();
 
@@ -72,7 +72,7 @@ private:
 
     part_id get_part_id(const char *name);  //unstrict
 
-    void draw_part(unsigned int idx,bool use_materials);
+    void draw_part(unsigned int idx,bool use_materials,bool cull_face);
 
 private:
     struct part

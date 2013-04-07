@@ -342,7 +342,7 @@ void character::reset_parts_opacity()
             m_parts[i].subparts[j].opacity=1.0f;
 }
 
-void character::draw(bool use_materials)
+void character::draw(bool use_materials,bool cull_face)
 {
     if(!m_parts[body].subparts[0].model.is_valid())
         return;
@@ -356,21 +356,21 @@ void character::draw(bool use_materials)
             if(i==m_body_blend_group_idx)
                 continue;
 
-            m_parts[body].subparts[0].model->draw(use_materials,i);
+            m_parts[body].subparts[0].model->draw(use_materials,cull_face,i);
         }
     }
 
-    draw_part(eye,use_materials);
-    draw_part(hair,use_materials);
-    draw_part(head,use_materials);
+    draw_part(eye,use_materials,cull_face);
+    draw_part(hair,use_materials,cull_face);
+    draw_part(head,use_materials,cull_face);
 
     nya_render::set_color(m_color[0],m_color[1],m_color[2],1);
 
     if(use_materials || m_parts[body].subparts[0].outline)
-        m_parts[body].subparts[0].model->draw(use_materials,m_body_blend_group_idx);
+        m_parts[body].subparts[0].model->draw(use_materials,cull_face,m_body_blend_group_idx);
 
     for(int i=face;i<under;++i)
-        draw_part(i,use_materials);
+        draw_part(i,use_materials,cull_face);
 
     part &p=m_parts[under];
     for(int i=m_under_count;i>0;--i)
@@ -386,15 +386,15 @@ void character::draw(bool use_materials)
         if(m.is_valid())
         {
             nya_render::set_color(m_color[0],m_color[1],m_color[2],p.subparts[i-1].opacity);
-            m->draw(use_materials);
+            m->draw(use_materials,cull_face);
         }
     }
 
     for(int i=under+1;i<max_parts;++i)
-        draw_part(i,use_materials);
+        draw_part(i,use_materials,cull_face);
 }
 
-void character::draw_part(unsigned int idx,bool use_materials)
+void character::draw_part(unsigned int idx,bool use_materials,bool cull_face)
 {
     if(idx>=max_parts)
         return;
@@ -409,7 +409,7 @@ void character::draw_part(unsigned int idx,bool use_materials)
         if(m.is_valid())
         {
             nya_render::set_color(m_color[0],m_color[1],m_color[2],p.subparts[i-1].opacity);
-            m->draw(use_materials);
+            m->draw(use_materials,cull_face);
         }
     }
 }
