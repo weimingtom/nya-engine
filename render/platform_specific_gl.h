@@ -4,10 +4,12 @@
 
 #ifdef _WIN32
     #include <windows.h>
-		#if defined _WIN32_WINNT_WIN8 && !defined NETFX_CORE
-			#include <d3d11_1.h>
+		#if defined _WIN32_WINNT_WIN8 && defined _M_ARM
+				#define DIRECTX11
+		#endif
 
-			#define DIRECTX11
+		#if defined DIRECTX11
+			#include <d3d11_1.h>
 			#define NO_EXTENSIONS_INIT
 		#else
 			#include <gl/gl.h>
