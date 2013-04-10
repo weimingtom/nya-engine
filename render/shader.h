@@ -49,6 +49,8 @@ public:
 public:
     void release();
 
+#ifdef DIRECTX11
+#else
 public:
     shader(): m_program(0)
     {
@@ -65,6 +67,7 @@ public:
 private:
     GLhandleARB m_program;
     GLhandleARB m_objects[program_types_count];
+#endif
 
 private:
     struct sampler

@@ -18,8 +18,8 @@
 
 namespace nya_render
 {
-
-#ifndef NO_EXTENSIONS_INIT
+#ifndef DIRECTX11
+  #ifndef NO_EXTENSIONS_INIT
     PFNGLGENPROGRAMSARBPROC glGenProgramsARB = NULL;
     PFNGLDELETEPROGRAMSARBPROC glDeleteProgramsARB = NULL;
     PFNGLBINDPROGRAMARBPROC glBindProgramARB = NULL;
@@ -91,9 +91,9 @@ namespace nya_render
     PFNGLGETACTIVEATTRIBARBPROC glGetActiveAttribARB = NULL;
     PFNGLGETATTRIBLOCATIONARBPROC glGetAttribLocationARB = NULL;
     PFNGLGETVERTEXATTRIBFVARBPROC glGetVertexAttribfvARB = NULL;
-#endif
+  #endif
 
-#ifdef OPENGL_ES
+  #ifdef OPENGL_ES
     #define glCreateProgramObjectARB glCreateProgram
     #define glUseProgramObjectARB glUseProgram
     #define glLinkProgramARB glLinkProgram
@@ -131,10 +131,10 @@ namespace nya_render
 
     #define glGetObjectParam glGetProgramiv
     #define glGetShaderParam glGetShaderiv
-#else
+  #else
     #define glGetObjectParam glGetObjectParameterivARB
     #define glGetShaderParam glGetObjectParameterivARB
-#endif
+  #endif
 
 bool check_init_shaders()
 {
@@ -143,7 +143,7 @@ bool check_init_shaders()
     if(initialised)
         return !failed;
 
-#ifndef NO_EXTENSIONS_INIT
+  #ifndef NO_EXTENSIONS_INIT
     glGenProgramsARB                = (PFNGLGENPROGRAMSARBPROC)               get_extension ( "glGenProgramsARB" );
     if(!glGenProgramsARB)
     {
@@ -211,14 +211,17 @@ bool check_init_shaders()
     glGetActiveAttribARB      = (PFNGLGETACTIVEATTRIBARBPROC)      get_extension ( "glGetActiveAttribARB"    );
     glGetAttribLocationARB    = (PFNGLGETATTRIBLOCATIONARBPROC)    get_extension ( "glGetAttribLocationARB"  );
     glGetVertexAttribfvARB    = (PFNGLGETVERTEXATTRIBFVARBPROC)    get_extension ( "glGetVertexAttribfvARB"  );
-#endif
+  #endif
     failed=false;
     initialised=true;
     return true;
 }
+#endif
 
 bool shader::add_program(program_type type,const char*code)
 {
+#ifdef DIRECTX11
+#else
     if(!check_init_shaders())
         return false;
 
@@ -510,33 +513,40 @@ bool shader::add_program(program_type type,const char*code)
     m_objects[type]=object;
 
     //glUseProgramObjectARB(0);
-    
+#endif
+
     return true;
 }
 
 void shader::bind() const
 {
+#ifdef DIRECTX11
+#else
     if(!m_program)
         return;
 
     glUseProgramObjectARB(m_program);
 
-#ifdef SUPPORT_OLD_SHADERS
+  #ifdef SUPPORT_OLD_SHADERS
     if(m_mat_mvp>=0)
         glUniformMatrix4fvARB(m_mat_mvp,1,false,transform::get().get_modelviewprojection_matrix().m[0]);
     if(m_mat_mv>=0)
         glUniformMatrix4fvARB(m_mat_mv,1,false,transform::get().get_modelview_matrix().m[0]);
     if(m_mat_p>=0)
         glUniformMatrix4fvARB(m_mat_p,1,false,transform::get().get_projection_matrix().m[0]);
+  #endif
 #endif
 }
 
 void shader::unbind()
 {
+#ifdef DIRECTX11
+#else
     if(!check_init_shaders())
         return;
 
     glUseProgramObjectARB(0);
+#endif
 }
 
 void shader::set_sampler(const char*name,unsigned int layer)
@@ -567,6 +577,9 @@ int shader::get_handler(const char *name) const
         return -1;
     }
 
+#ifdef DIRECTX11
+	return -1;
+#else
     if(!m_program)
     {
         get_log()<<"Unable to get shader handler \'"<<name<<"\': invalid program\n";
@@ -574,44 +587,59 @@ int shader::get_handler(const char *name) const
     }
 
     return glGetUniformLocationARB(m_program,name);
+#endif
 }
 
 void shader::set_uniform(unsigned int i,float f0,float f1,float f2,float f3) const
 {
+#ifdef DIRECTX11
+#else
     if(!m_program)
         return;
 
     glUniform4fARB(i,f0,f1,f2,f3);
+#endif
 }
 
 void shader::set_uniform3_array(unsigned int i,const float *f,unsigned int count) const
 {
+#ifdef DIRECTX11
+#else
     if(!m_program || !f)
         return;
 
     glUniform3fvARB(i,count,f);
+#endif
 }
 
 void shader::set_uniform4_array(unsigned int i,const float *f,unsigned int count) const
 {
+#ifdef DIRECTX11
+#else
     if(!m_program || !f)
         return;
 
     glUniform4fvARB(i,count,f);
+#endif
 }
 
 void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int count,bool transpose) const
 {
+#ifdef DIRECTX11
+#else
     if(!m_program || !f)
         return;
 
     glUniformMatrix4fvARB(i,count,transpose,f);
+#endif
 }
 
 void shader::release()
 {
     m_samplers.clear();
 
+#ifdef DIRECTX11
+#else
     if(!m_program)
         return;
 
@@ -629,6 +657,7 @@ void shader::release()
 
     glDeleteObjectARB(m_program);
     m_program=0;
+#endif
 }
 
 }

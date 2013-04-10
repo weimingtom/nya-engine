@@ -113,6 +113,9 @@ void vbo::bind_verts() const
 {
     if(!m_vertices.has)
         return;
+        
+	if(!m_vertex_loc)
+        return;
 
 #ifdef DIRECTX11
 	UINT offset = 0;
@@ -120,9 +123,6 @@ void vbo::bind_verts() const
 #else
     if(!m_vertex_bind)
     {
-        if(!m_vertex_loc)
-            return;
-
         vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,m_vertex_loc);
         m_vertex_bind=true;
     }

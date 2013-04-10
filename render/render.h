@@ -12,10 +12,16 @@ void set_log(nya_log::log *l);
 nya_log::log &get_log();
 void log_gl_errors(const char *place=0);
 
+void set_viewport(int x,int y,int width,int height);
+
 void set_projection_matrix(const nya_math::mat4 &mat);
 void set_modelview_matrix(const nya_math::mat4 &mat);
 
 void set_color(float r,float g,float b,float a);
+
+void set_clear_color(float r,float g,float b,float a);
+void set_clear_depth(float value);
+void clear(bool clear_color,bool clear_depth);
 
 struct blend
 {
@@ -49,6 +55,12 @@ struct cull_face
     };
 
     static void enable(order o);
+    static void disable();
+};
+
+struct depth_test
+{
+    static void enable();
     static void disable();
 };
 

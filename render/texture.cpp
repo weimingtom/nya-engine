@@ -16,6 +16,8 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         return false;
     }
 
+#ifdef DIRECTX11
+#else
     if(!m_max_tex_size)
     {
         GLint texSize;
@@ -117,6 +119,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     }*/
+#endif
 
     return true;
 }
@@ -130,6 +133,8 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
         return false;
     }
 
+#ifdef DIRECTX11
+#else
     if(!m_max_tex_size)
     {
         GLint texSize;
@@ -196,6 +201,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+#endif
 
     return true;
 }
@@ -208,7 +214,10 @@ void texture::bind() const
 		return;
 	}
 
+#ifdef DIRECTX11
+#else
     glBindTexture(m_gl_type,m_tex_id);
+#endif
 }
 
 void texture::unbind() const
@@ -219,17 +228,26 @@ void texture::unbind() const
 		return;
 	}
 
+#ifdef DIRECTX11
+#else
 	glBindTexture(m_gl_type,0);
+#endif
 }
 
 void texture::unbind_all()
 {
+#ifdef DIRECTX11
+#else
     glBindTexture(GL_TEXTURE_2D,0);
     glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+#endif
 }
 
 void texture::select_multitex_slot(unsigned int idx)
 {
+#ifdef DIRECTX11
+#else
+
 #if defined(OPENGL_ES)
     glActiveTexture(GL_TEXTURE0+idx);
 #elif defined(NO_EXTENSIONS_INIT)
@@ -252,16 +270,21 @@ void texture::select_multitex_slot(unsigned int idx)
 
     select_multitex_slot(idx);
 #endif
+
+#endif
 }
 
 void texture::release()
 {
+#ifdef DIRECTX11
+#else
     if(m_tex_id)
 	    glDeleteTextures(1,&m_tex_id);
 
     m_tex_id=0;
     m_width=0;
     m_height=0;
+#endif
 }
 
 }

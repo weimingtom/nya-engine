@@ -5,7 +5,7 @@
 #include "math/matrix.h"
 #include "platform_specific_gl.h"
 
-#ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+#if defined ATTRIBUTES_INSTEAD_OF_CLIENTSTATES || defined DIRECTX11
     #define MANUAL_MATRICES_ASSIGN
 #endif
 

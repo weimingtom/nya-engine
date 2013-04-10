@@ -66,17 +66,17 @@ bool has_extension(const char *name)
 
 namespace
 {
-	ID3D11Device1 *render_device=0;
-	ID3D11DeviceContext1 *render_context=0;
+	ID3D11Device *render_device=0;
+	ID3D11DeviceContext *render_context=0;
 }
 
 namespace nya_render
 {
-	ID3D11Device1 *get_device() { return render_device; }
-    void set_device(ID3D11Device1 *device) { render_device=device; }
+	ID3D11Device *get_device() { return render_device; }
+    void set_device(ID3D11Device *device) { render_device=device; }
 
-	ID3D11DeviceContext1 *get_context() { return render_context; }
-	void set_context(ID3D11DeviceContext1 *context) { render_context=context; }
+	ID3D11DeviceContext *get_context() { return render_context; }
+	void set_context(ID3D11DeviceContext *context) { render_context=context; }
 }
 
 #endif

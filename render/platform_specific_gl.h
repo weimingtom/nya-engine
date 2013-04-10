@@ -4,7 +4,7 @@
 
 #ifdef _WIN32
     #include <windows.h>
-		#if defined _WIN32_WINNT_WIN8 && defined _M_ARM
+		#if _WIN32_WINNT>=_WIN32_WINNT_WIN8 && defined _M_ARM
 				#define DIRECTX11
 		#endif
 
@@ -57,10 +57,10 @@ namespace nya_render
 #endif
 
 #ifdef DIRECTX11
-	ID3D11Device1 *get_device();
-	void set_device(ID3D11Device1 *device);
+	ID3D11Device *get_device();
+	void set_device(ID3D11Device *device);
 
-	ID3D11DeviceContext1 *get_context();
-	void set_context(ID3D11DeviceContext1 *context);
+	ID3D11DeviceContext *get_context();
+	void set_context(ID3D11DeviceContext *context);
 #endif
 }
