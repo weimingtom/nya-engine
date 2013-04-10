@@ -119,6 +119,8 @@ void set_clear_depth(float value)
 {
 #ifdef DIRECTX11
 	clear_depth=value;
+#elif defined OPENGL_ES
+	glClearDepthf(value);
 #else
 	glClearDepth(value);
 #endif
