@@ -10,6 +10,15 @@
 #include "platform_specific_gl.h"
 #include "render.h"
 
+#ifdef DIRECTX11
+    #include <D3Dcompiler.h>
+
+namespace
+{
+    ID3D10Blob *active_vs_blob=0;
+}
+#endif
+
 #include <string>
 
 #ifdef SUPPORT_OLD_SHADERS
@@ -218,11 +227,41 @@ bool check_init_shaders()
 }
 #endif
 
+#ifdef DIRECTX11
+shader::layouts_map shader::m_layouts;
+
+ID3D11InputLayout *shader::get_layout(const std::string &layout)
+{
+    layouts_map::iterator it=m_layouts.find(layout);
+    if(it==m_layouts.end())
+        return 0;
+
+    return it->second;
+}
+
+ID3D11InputLayout *shader::add_layout(const std::string &layout,
+                                      const D3D11_INPUT_ELEMENT_DESC*desc,size_t desc_size)
+{
+    if(!active_vs_blob)
+        return 0;
+
+    ID3D11InputLayout *out=0;
+
+	get_device()->CreateInputLayout(desc,desc_size,active_vs_blob->GetBufferPointer(),
+                                    active_vs_blob->GetBufferSize(),&out);
+
+    if(!out)
+        return 0;
+
+    m_layouts[layout]=out;
+
+    return out;
+}
+#endif
+
 bool shader::add_program(program_type type,const char*code)
 {
-#ifdef DIRECTX11
-#else
-    if(!check_init_shaders())
+    if(type>=geometry)
         return false;
 
     if(!code || !code[0])
@@ -230,6 +269,59 @@ bool shader::add_program(program_type type,const char*code)
         get_log()<<"Unable to add shader program: invalid code\n";
         return false;
     }
+
+    const static char type_str[][12]={"vertex","pixel","geometry","tesselation"};
+
+#ifdef DIRECTX11
+    if(!get_device())
+        return false;
+
+    std::string code_str(code);
+
+    //ToDo: release or reuse if already exists
+    m_layouts.clear();
+
+	ID3D10Blob *error=0;
+    if(type==vertex)
+    {
+    	D3DCompile(code_str.c_str(),code_str.size(),0,0,0,"main","vs_4_0",0,0,&m_blobs[type],&error);
+    }
+    else if(type==pixel)
+        D3DCompile(code_str.c_str(),code_str.size(),0,0,0,"main","ps_4_0",0,0,&m_blobs[type],&error);
+
+    if(error)
+    {
+        get_log()<<"Can`t compile "<<type_str[type]<<" shader: \n";
+        std::string error_text((const char *)error->GetBufferPointer(),error->GetBufferSize());
+        get_log()<<error_text.c_str()<<"\n";
+
+        error->Release();
+        return false;
+    }
+
+    if(type==vertex)
+    {
+        if(get_device()->CreateVertexShader(m_blobs[type]->GetBufferPointer(),
+                                            m_blobs[type]->GetBufferSize(),nullptr,&m_vertex)<0)
+        {
+            get_log()<<"Can`t create "<<type_str[type]<<" shader\n";
+            return false;
+        }
+    }
+
+    if(type==pixel)
+    {
+        if(get_device()->CreatePixelShader(m_blobs[type]->GetBufferPointer(),
+                                           m_blobs[type]->GetBufferSize(),nullptr,&m_pixel)<0)
+        {
+            get_log()<<"Can`t create "<<type_str[type]<<" shader\n";
+            return false;
+        }
+    }
+
+#else
+    if(!check_init_shaders())
+        return false;
 
     if(!m_program)
         m_program=glCreateProgramObjectARB();
@@ -407,8 +499,6 @@ bool shader::add_program(program_type type,const char*code)
     GLint compiled;
     glGetShaderParam(object,GL_OBJECT_COMPILE_STATUS_ARB,&compiled);
 
-    const static char type_str[][12]={"vertex","pixel","geometry","tesselation"};
-
     if(!compiled)
     {
         GLint log_len=0;
@@ -521,6 +611,13 @@ bool shader::add_program(program_type type,const char*code)
 void shader::bind() const
 {
 #ifdef DIRECTX11
+    if(m_vertex)
+        get_context()->VSSetShader(m_vertex,nullptr,0);
+
+    if(m_pixel)
+        get_context()->PSSetShader(m_pixel,nullptr,0);
+
+    active_vs_blob=m_blobs[vertex];
 #else
     if(!m_program)
         return;

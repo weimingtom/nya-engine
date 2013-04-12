@@ -9,7 +9,7 @@
 		#endif
 
 		#if defined DIRECTX11
-			#include <d3d11_1.h>
+			#include <d3d11.h>
 			#define NO_EXTENSIONS_INIT
 		#else
 			#include <gl/gl.h>

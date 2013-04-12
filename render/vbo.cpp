@@ -12,6 +12,10 @@
 #include "vbo.h"
 #include "render.h"
 
+#ifdef DIRECTX11
+    #include "shader.h"
+#endif
+
 namespace nya_render
 {
 #ifndef DIRECTX11
@@ -328,13 +332,104 @@ void vbo::draw(unsigned int count) const
     draw(0,count);
 }
 
+#ifdef DIRECTX11
+DXGI_FORMAT get_dx_format(int dimension)
+{
+    switch(dimension)
+    {
+        case 1: return DXGI_FORMAT_R32_FLOAT;
+        case 2: return DXGI_FORMAT_R32G32_FLOAT;
+        case 3: return DXGI_FORMAT_R32G32B32_FLOAT;
+        case 4: return DXGI_FORMAT_R32G32B32A32_FLOAT;
+    }
+}
+#endif
+
 void vbo::draw(unsigned int offset,unsigned int count) const
 {
     if(!m_vertex_bind)
         return; 
 
 #ifdef DIRECTX11
-	//get_context()->IASetInputLayout(m_inputLayout.Get()); //ToDo: fake shader layout manager
+    if(m_layout.empty())
+    {
+        char tmp[64];
+        if(!m_vertices.has)
+            return;
+
+        if(m_colors.has)
+        {
+            sprintf(tmp,"c%d%d",m_colors.dimension,m_colors.offset);
+            m_layout.append(tmp);
+        }
+        for(int i=0;i<vbo_max_tex_coord;++i)
+        {
+            const attribute &tc=m_tcs[i];
+            if(!tc.has)
+                continue;
+
+            sprintf(tmp,"t%d_%d%d",i,tc.dimension,tc.offset);
+            m_layout.append(tmp);
+        }
+
+        sprintf(tmp,"p%d%d",m_vertices.dimension,m_vertices.offset);
+        m_layout.append(tmp);
+    }
+
+    ID3D11InputLayout *layout=shader::get_layout(m_layout);
+    if(!layout)
+    {
+        std::vector<D3D11_INPUT_ELEMENT_DESC> desc;
+
+        if(m_vertices.has)
+        {
+            D3D11_INPUT_ELEMENT_DESC d;
+            d.SemanticName="POSITION";
+            d.SemanticIndex=0;
+            d.Format=get_dx_format(m_vertices.dimension);
+            d.InputSlot=0;
+            d.AlignedByteOffset=m_vertices.offset;
+            d.InputSlotClass=D3D11_INPUT_PER_VERTEX_DATA;
+            d.InstanceDataStepRate=0;
+            desc.push_back(d);
+        }
+
+        if(m_colors.has)
+        {
+            D3D11_INPUT_ELEMENT_DESC d;
+            d.SemanticName="COLOR";
+            d.SemanticIndex=0;
+            d.Format=get_dx_format(m_colors.dimension);
+            d.InputSlot=0;
+            d.AlignedByteOffset=m_colors.offset;
+            d.InputSlotClass=D3D11_INPUT_PER_VERTEX_DATA;
+            d.InstanceDataStepRate=0;
+            desc.push_back(d);
+        }
+
+        for(int i=0;i<vbo_max_tex_coord;++i)
+        {
+            const attribute &tc=m_tcs[i];
+            if(!tc.has)
+                continue;
+
+            D3D11_INPUT_ELEMENT_DESC d;
+            d.SemanticName="TEXCOORD";
+            d.SemanticIndex=i;
+            d.Format=get_dx_format(tc.dimension);
+            d.InputSlot=0;
+            d.AlignedByteOffset=tc.offset;
+            d.InputSlotClass=D3D11_INPUT_PER_VERTEX_DATA;
+            d.InstanceDataStepRate=0;
+            desc.push_back(d);
+        }
+
+        layout=shader::add_layout(m_layout,&desc[0],desc.size());
+
+        if(!layout)
+            return;
+    }
+	get_context()->IASetInputLayout(layout);
 
     switch(m_element_type)
     {
@@ -582,6 +677,16 @@ bool vbo::set_index_data(const void*data,element_size size,unsigned int elements
 
 void vbo::set_vertices(unsigned int offset,unsigned int dimension)
 {
+#ifdef DIRECTX11
+    m_layout.clear();
+#endif
+
+    if(dimension==0 || dimension>4)
+    {
+        m_vertices.has=false;
+        return;
+    }
+    
     m_vertices.has=true;
     m_vertices.offset=offset;
     m_vertices.dimension=dimension;
@@ -589,6 +694,10 @@ void vbo::set_vertices(unsigned int offset,unsigned int dimension)
 
 void vbo::set_normals(unsigned int offset)
 {
+#ifdef DIRECTX11
+    m_layout.clear();
+#endif
+
     m_normals.has=true;
     m_normals.offset=offset;
 }
@@ -598,7 +707,17 @@ void vbo::set_tc(unsigned int tc_idx,unsigned int offset,unsigned int dimension)
     if(tc_idx>=vbo_max_tex_coord)
         return;
 
+#ifdef DIRECTX11
+    m_layout.clear();
+#endif
+
     attribute &tc=m_tcs[tc_idx];
+    if(dimension==0 || dimension>4)
+    {
+        tc.has=false;
+        return;
+    }
+
     tc.has=true;
     tc.offset=offset;
     tc.dimension=dimension;
@@ -606,6 +725,16 @@ void vbo::set_tc(unsigned int tc_idx,unsigned int offset,unsigned int dimension)
 
 void vbo::set_colors(unsigned int offset,unsigned int dimension)
 {
+#ifdef DIRECTX11
+    m_layout.clear();
+#endif
+
+    if(dimension==0 || dimension>4)
+    {
+        m_colors.has=false;
+        return;
+    }
+
     m_colors.has=true;
     m_colors.offset=offset;
     m_colors.dimension=dimension;

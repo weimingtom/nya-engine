@@ -4,6 +4,10 @@
 
 #include "platform_specific_gl.h"
 
+#ifdef DIRECTX11
+    #include <string>
+#endif
+
 namespace nya_render
 {
 
@@ -73,6 +77,7 @@ private:
 #ifdef DIRECTX11
 	ID3D11Buffer *m_vertex_loc;
 	ID3D11Buffer *m_index_loc;
+    mutable std::string m_layout;
 #else
     unsigned int m_vertex_loc;
     unsigned int m_index_loc;
