@@ -76,7 +76,7 @@ void viewer_camera::update()
 {
     nya_scene::get_camera().set_rot(m_rot_x,m_rot_y,0.0);
 
-    nya_math::quat rot(nya_math::vec3(-m_rot_y*3.14f/180.0f,-m_rot_x*3.14f/180.0f,0.0f));
+    nya_math::quat rot(-m_rot_y*3.14f/180.0f,-m_rot_x*3.14f/180.0f,0.0f);
     nya_math::vec3 pos=rot.rotate(m_pos);
 
     nya_scene::get_camera().set_pos(pos.x,pos.y+10.0f,pos.z);
@@ -87,19 +87,25 @@ class scene
 public:
     void init()
     {
-        //m_char.load("Project DIVA Ex Miku Hatsune/skin00_000.pmd");
+        m_char.load("Project DIVA Ex Miku Hatsune/skin00_000.pmd");
         //m_char.load("Appearance Miku/Appearance Miku.pmx");
-        m_char.load("luka_sonica/luka2.pmd");
+
+        //m_char.load("luka_sonica/luka2.pmd");
 
         nya_scene::animation anim;
-        anim.load("anims/run.vmd");
+        anim.load("anims/walk.vmd");
 
         m_char.add_anim(anim);
+        //m_char.update(130);
+        
+        m_time=0;
     }
 
     void process(unsigned int dt)
     {
         m_char.update(dt);
+        
+        m_time+=dt;
     }
 
     void draw()
@@ -134,6 +140,7 @@ public:
 
 private:
     nya_scene::mesh m_char;
+    unsigned int m_time;
 };
 
 class character_demo: public nya_system::app
