@@ -73,6 +73,20 @@ private:
 
     typedef std::map<std::string,ID3D11InputLayout*> layouts_map;
     static layouts_map m_layouts;
+
+    struct constants
+    {
+        mutable std::vector<float> buffer;
+        bool mvp_matrix;
+        bool mv_matrix;
+        bool p_matrix;
+
+        ID3D11Buffer *dx_buffer;
+
+        constants():mvp_matrix(false),mv_matrix(false),p_matrix(false),dx_buffer(0){}
+    };
+
+    constants m_constants;
 #else
 public:
     shader(): m_program(0)

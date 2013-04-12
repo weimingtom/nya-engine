@@ -342,6 +342,8 @@ DXGI_FORMAT get_dx_format(int dimension)
         case 3: return DXGI_FORMAT_R32G32B32_FLOAT;
         case 4: return DXGI_FORMAT_R32G32B32A32_FLOAT;
     }
+
+    return DXGI_FORMAT_UNKNOWN;
 }
 #endif
 

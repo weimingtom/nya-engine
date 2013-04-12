@@ -11,6 +11,7 @@
 #include "render.h"
 
 #ifdef DIRECTX11
+    #include "transform.h"
     #include <D3Dcompiler.h>
 
 namespace
@@ -276,18 +277,51 @@ bool shader::add_program(program_type type,const char*code)
     if(!get_device())
         return false;
 
-    std::string code_str(code);
-
     //ToDo: release or reuse if already exists
-    m_layouts.clear();
+
+    std::string code_str(code);
+    std::string code_final;
+
+    if(type==vertex)
+    {
+        m_layouts.clear();
+
+        m_constants.mvp_matrix=code_str.find("ModelViewProjectionMatrix")!=std::string::npos;
+        m_constants.mv_matrix=code_str.find("ModelViewMatrix")!=std::string::npos;
+        //m_constants.p_matrix=code_str.find("ProjectionMatrix")!=std::string::npos; //ToDo
+
+        int size=0;
+        if(m_constants.mvp_matrix) size+=16;
+        if(m_constants.mv_matrix) size+=16;
+        if(m_constants.p_matrix) size+=16;
+
+        if(m_constants.dx_buffer)
+            m_constants.dx_buffer->Release();
+
+        m_constants.dx_buffer=0;
+
+        if(size>0)
+        {
+            code_final.append("cbuffer NyaConstantBuffer : register(b0){");
+            if(m_constants.mvp_matrix) code_final.append("matrix ModelViewProjectionMatrix;");
+            if(m_constants.mv_matrix) code_final.append("matrix ModelViewMatrix;");
+            if(m_constants.p_matrix) code_final.append("matrix ProjectionMatrix;");
+            code_final.append("}");
+
+            CD3D11_BUFFER_DESC desc(size*sizeof(float),D3D11_BIND_CONSTANT_BUFFER);
+            get_device()->CreateBuffer(&desc,nullptr,&m_constants.dx_buffer);
+        }
+
+        m_constants.buffer.resize(size);
+    }
+
+    code_final.append(code_str);
 
 	ID3D10Blob *error=0;
     if(type==vertex)
-    {
-    	D3DCompile(code_str.c_str(),code_str.size(),0,0,0,"main","vs_4_0",0,0,&m_blobs[type],&error);
-    }
+    	D3DCompile(code_final.c_str(),code_final.size(),0,0,0,"main","vs_4_0",0,0,&m_blobs[type],&error);
     else if(type==pixel)
-        D3DCompile(code_str.c_str(),code_str.size(),0,0,0,"main","ps_4_0",0,0,&m_blobs[type],&error);
+        D3DCompile(code_final.c_str(),code_final.size(),0,0,0,"main","ps_4_0",0,0,&m_blobs[type],&error);
 
     if(error)
     {
@@ -612,7 +646,37 @@ void shader::bind() const
 {
 #ifdef DIRECTX11
     if(m_vertex)
+    {
+        if(m_constants.dx_buffer)
+        {
+            int offset=0;
+            if(m_constants.mvp_matrix)
+            {
+                memcpy(&m_constants.buffer[0],
+                       transform::get().get_modelviewprojection_matrix().m[0],16*sizeof(float));
+                offset+=16;
+            }
+
+            if(m_constants.mv_matrix)
+            {
+                memcpy(&m_constants.buffer[0]+offset,
+                       transform::get().get_modelview_matrix().m[0],16*sizeof(float));
+                offset+=16;
+            }
+
+            if(m_constants.p_matrix)
+            {
+                memcpy(&m_constants.buffer[0]+offset,
+                       transform::get().get_projection_matrix().m[0],16*sizeof(float));
+                offset+=16;
+            }
+
+            get_context()->UpdateSubresource(m_constants.dx_buffer,0,NULL,&m_constants.buffer[0],0,0);
+            get_context()->VSSetConstantBuffers(0,1,&m_constants.dx_buffer);
+        }
+
         get_context()->VSSetShader(m_vertex,nullptr,0);
+    }
 
     if(m_pixel)
         get_context()->PSSetShader(m_pixel,nullptr,0);
