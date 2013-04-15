@@ -70,7 +70,7 @@ private:
 			"vsout main(vsin input)"
             "{"
                 "vsout output;"
-                "output.pos=float4(input.pos,1.0);"
+                "output.pos=mul(ModelViewProjectionMatrix,float4(input.pos,1.0));"
                 "output.color=input.color;"
                 "return output;"
             "}";
@@ -128,7 +128,7 @@ private:
 		mv.rotate(30.0f,1.0f,0.0f,0.0f);
 		mv.rotate(m_rot,0.0f,1.0f,0.0f);
 		nya_render::transform::get().set_modelview_matrix(mv);
-		
+
 		m_shader.bind();
 		m_vbo.bind();
 		m_vbo.draw();
