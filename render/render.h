@@ -41,9 +41,6 @@ struct blend
 
     static void enable(mode src,mode dst);
     static void disable();
-
-private:
-    static unsigned int gl_mode(mode m);
 };
 
 struct cull_face

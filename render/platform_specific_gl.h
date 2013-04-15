@@ -5,10 +5,16 @@
 #ifdef _WIN32
     #include <windows.h>
 		#if _WIN32_WINNT>=_WIN32_WINNT_WIN8 && defined _M_ARM
-				#define DIRECTX11
+            #define WINDOWS_PHONE8
 		#endif
 
-		#if defined DIRECTX11
+        //#define NYA_DIRECTX11
+
+        #if defined WINDOWS_PHONE8 || defined NYA_DIRECTX11
+            #define DIRECTX11
+        #endif
+
+		#ifdef DIRECTX11
 			#include <d3d11.h>
 			#define NO_EXTENSIONS_INIT
 		#else

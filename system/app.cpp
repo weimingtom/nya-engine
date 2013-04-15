@@ -11,7 +11,11 @@
 #include <windows.h>
 #include <windowsx.h>
 #include "render/platform_specific_gl.h"
-#include <gl/wglext.h>
+#include "render/render.h"
+
+#ifndef DIRECTX11
+	#include <gl/wglext.h>
+#endif
 
 namespace
 {
@@ -54,7 +58,62 @@ public:
             return;
 
         ShowWindow(m_hwnd,SW_SHOW);
+		
+#ifdef DIRECTX11
+        UINT create_device_flags=0;
+    #ifdef _DEBUG
+        create_device_flags|=D3D11_CREATE_DEVICE_DEBUG;
+    #endif
 
+        D3D_DRIVER_TYPE driver_types[]=
+        {
+            D3D_DRIVER_TYPE_HARDWARE,
+            D3D_DRIVER_TYPE_WARP,
+            D3D_DRIVER_TYPE_REFERENCE,
+        };
+
+        D3D_FEATURE_LEVEL feature_levels[]=
+        {
+            D3D_FEATURE_LEVEL_11_0,
+            D3D_FEATURE_LEVEL_10_1,
+            D3D_FEATURE_LEVEL_10_0,
+        };
+
+	    D3D_FEATURE_LEVEL feature_level=D3D_FEATURE_LEVEL_11_0;
+
+        DXGI_SWAP_CHAIN_DESC sd;
+        ZeroMemory(&sd,sizeof(sd));
+        sd.BufferCount=1;
+        sd.BufferDesc.Width=w;
+        sd.BufferDesc.Height=h;
+        sd.BufferDesc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;
+        sd.BufferDesc.RefreshRate.Numerator=60;
+        sd.BufferDesc.RefreshRate.Denominator=1;
+        sd.BufferUsage=DXGI_USAGE_RENDER_TARGET_OUTPUT;
+        sd.OutputWindow=m_hwnd;
+        sd.SampleDesc.Count=1;
+        sd.SampleDesc.Quality=0;
+        sd.Windowed=TRUE;
+
+        HRESULT hr = S_OK;
+
+        for(int i=0;i<ARRAYSIZE(driver_types);++i)
+        {
+            D3D_DRIVER_TYPE driver_type=driver_types[i];
+            hr=D3D11CreateDeviceAndSwapChain(0,driver_type,0,create_device_flags,feature_levels,
+            ARRAYSIZE(feature_levels),D3D11_SDK_VERSION,&sd,&m_swap_chain,&m_device,&feature_level,&m_context);
+            if(SUCCEEDED(hr))
+                break;
+        }
+        if(FAILED(hr))
+            return;
+
+        recreate_targets(w,h);
+
+        nya_render::set_context(m_context);
+        nya_render::set_device(m_device);
+        nya_render::cull_face::disable();
+#else
         m_hdc=GetDC(m_hwnd);
 
         PIXELFORMATDESCRIPTOR pfd={0};
@@ -169,10 +228,12 @@ public:
 
         if(antialiasing>0)
             glEnable(GL_MULTISAMPLE_ARB);
-
+#endif
         SetWindowTextA(m_hwnd,m_title.c_str());
 
         SetWindowLongPtr(m_hwnd,GWL_USERDATA,(LONG)&app);
+
+        nya_render::set_viewport(0,0,w,h);
 
         app.on_resize(w,h);
         app.on_init_splash();
@@ -202,7 +263,11 @@ public:
                 app.on_process(dt);
                 app.on_draw();
 
+#ifdef DIRECTX11
+				m_swap_chain->Present(0,0);
+#else
                 SwapBuffers(m_hdc);
+#endif
             }
         }
 
@@ -213,7 +278,7 @@ public:
     {
         //ToDo
 
-		start_windowed(0,0,w,h,0,app);
+        start_windowed(0,0,w,h,0,app);
     }
 
     void finish(nya_system::app_responder &app)
@@ -223,13 +288,98 @@ public:
 
         app.on_free();
 
+#ifdef DIRECTX11
+		if(m_context)
+			m_context->ClearState();
+
+		if(m_color_target)
+		{
+			m_color_target->Release();
+			m_color_target=0;
+		}
+
+		if( m_depth_target )
+		{
+			m_depth_target->Release();
+			m_depth_target=0;
+		}
+
+		if(m_swap_chain)
+		{
+			m_swap_chain->Release();
+			m_swap_chain=0;
+		}
+
+		if(m_context)
+		{
+			m_context->Release();
+			m_context=0;
+		}
+
+		if(m_device)
+		{
+			m_device->Release();
+			m_device=0;
+		}
+#else
         wglMakeCurrent (m_hdc, 0);
         wglDeleteContext(m_hglrc);
         ReleaseDC(m_hwnd,m_hdc);
         DestroyWindow (m_hwnd);
-
+#endif
         m_hwnd=0;
     }
+
+#ifdef DIRECTX11
+private:
+    bool recreate_targets(int w,int h)
+    {
+        HRESULT hr=S_OK;
+
+        m_context->OMSetRenderTargets(0,0,0);
+
+        if(m_color_target)
+        {
+            m_color_target->Release();
+            m_color_target=0;
+        }
+
+        if(m_depth_target)
+        {
+            m_depth_target->Release();
+            m_depth_target=0;
+        }
+
+        hr=m_swap_chain->ResizeBuffers(0,0,0,DXGI_FORMAT_UNKNOWN,0);
+        if(FAILED(hr))
+            return false;
+
+        ID3D11Texture2D* pBackBuffer=0;
+        hr=m_swap_chain->GetBuffer(0,__uuidof(ID3D11Texture2D ),(LPVOID*)&pBackBuffer);
+        if(FAILED(hr))
+            return false;
+
+        hr=m_device->CreateRenderTargetView(pBackBuffer,0,&m_color_target);
+        pBackBuffer->Release();
+        if(FAILED(hr))
+            return false;
+
+	    CD3D11_TEXTURE2D_DESC depthStencilDesc(DXGI_FORMAT_D24_UNORM_S8_UINT,w,h,1,1,D3D11_BIND_DEPTH_STENCIL);
+
+	    ID3D11Texture2D *depthStencil;
+	    hr=m_device->CreateTexture2D(&depthStencilDesc,nullptr,&depthStencil);
+        if(FAILED(hr))
+            return false;
+
+        CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc(D3D11_DSV_DIMENSION_TEXTURE2D);
+        m_device->CreateDepthStencilView(depthStencil,&depthStencilViewDesc,&m_depth_target);
+        depthStencil->Release();
+
+        m_context->OMSetRenderTargets(1,&m_color_target,m_depth_target);
+        
+        return true;
+    }
+#endif
 
 private:
     static LRESULT CALLBACK wnd_proc(HWND hwnd,UINT message,WPARAM wparam,LPARAM lparam)
@@ -248,7 +398,10 @@ private:
                 const int w=rc.right-rc.left;
                 const int h=rc.bottom-rc.top;
 
-                glViewport(0,0,w,h);
+#ifdef DIRECTX11
+                get_app().recreate_targets(w,h);
+#endif
+                nya_render::set_viewport(0,0,w,h);
                 app->on_resize(w,h);
             }
             break;
@@ -330,7 +483,11 @@ public:
         m_time=time;
 
         app.on_splash(dt);
+
+#ifdef DIRECTX11
+#else
         SwapBuffers(m_hdc);
+#endif
     }
 
 public:
@@ -341,13 +498,31 @@ public:
     }
 
 public:
-    shared_app():m_hdc(0),m_title("Nya engine"),m_time(0) {}
+    shared_app():
+#ifdef DIRECTX11
+        m_device(0),
+		m_context(0),
+		m_swap_chain(0),
+		m_color_target(0),
+		m_depth_target(0),
+#else
+		m_hdc(0),
+#endif
+		m_title("Nya engine"),m_time(0) {}
 
 private:
     HINSTANCE m_instance;
     HWND m_hwnd;
+#ifdef DIRECTX11
+	ID3D11Device* m_device;
+	ID3D11DeviceContext* m_context;
+	IDXGISwapChain* m_swap_chain;
+	ID3D11RenderTargetView* m_color_target;
+	ID3D11DepthStencilView* m_depth_target;
+#else
     HDC m_hdc;
     HGLRC m_hglrc;
+#endif
 
     std::string m_title;
     unsigned long m_time;
