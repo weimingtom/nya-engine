@@ -68,6 +68,7 @@ namespace
 {
 	ID3D11Device *render_device=0;
 	ID3D11DeviceContext *render_context=0;
+    nya_render::compiled_shaders_provider *render_csp=0;
 }
 
 namespace nya_render
@@ -77,6 +78,9 @@ namespace nya_render
 
 	ID3D11DeviceContext *get_context() { return render_context; }
 	void set_context(ID3D11DeviceContext *context) { render_context=context; }
+
+    compiled_shaders_provider *get_compiled_shaders_provider() { return render_csp; }
+    void set_compiled_shaders_provider(compiled_shaders_provider *csp) { render_csp=csp; }
 }
 
 #endif

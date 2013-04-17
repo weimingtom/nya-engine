@@ -60,14 +60,10 @@ public:
                                          const D3D11_INPUT_ELEMENT_DESC*desc,size_t desc_size);
 
 public:
-    shader(): m_vertex(0),m_pixel(0)
-    {
-        for(int i=0;i<program_types_count;++i)
-            m_blobs[i]=0;
-    }
+    shader(): m_vertex(0),m_pixel(0) {}
 
 private:
-    ID3D10Blob *m_blobs[program_types_count];
+    compiled_shader m_compiled[program_types_count];
     ID3D11VertexShader *m_vertex;
     ID3D11PixelShader *m_pixel;
 

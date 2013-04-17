@@ -144,6 +144,9 @@
     <ClCompile Include="..\..\math\frustum.cpp">
       <Filter>math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\system\shaders_cache_provider.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\log\html_log.h">
@@ -286,6 +289,9 @@
     </ClInclude>
     <ClInclude Include="..\..\math\frustum.h">
       <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\system\shaders_cache_provider.h">
+      <Filter>system</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

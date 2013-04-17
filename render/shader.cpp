@@ -12,11 +12,14 @@
 
 #ifdef DIRECTX11
     #include "transform.h"
+
+  #ifndef WINDOWS_PHONE8
     #include <D3Dcompiler.h>
+  #endif
 
 namespace
 {
-    ID3D10Blob *active_vs_blob=0;
+    const nya_render::compiled_shader *active_vs_compiled_shader=0; //ToDo: refs instead of pointers
 }
 #endif
 
@@ -243,13 +246,13 @@ ID3D11InputLayout *shader::get_layout(const std::string &layout)
 ID3D11InputLayout *shader::add_layout(const std::string &layout,
                                       const D3D11_INPUT_ELEMENT_DESC*desc,size_t desc_size)
 {
-    if(!active_vs_blob)
+    if(!active_vs_compiled_shader)
         return 0;
 
     ID3D11InputLayout *out=0;
 
-	get_device()->CreateInputLayout(desc,desc_size,active_vs_blob->GetBufferPointer(),
-                                    active_vs_blob->GetBufferSize(),&out);
+	get_device()->CreateInputLayout(desc,desc_size,active_vs_compiled_shader->get_data(),
+                                    active_vs_compiled_shader->get_size(),&out);
 
     if(!out)
         return 0;
@@ -317,26 +320,46 @@ bool shader::add_program(program_type type,const char*code)
 
     code_final.append(code_str);
 
-	ID3D10Blob *error=0;
-    if(type==vertex)
-    	D3DCompile(code_final.c_str(),code_final.size(),0,0,0,"main","vs_4_0",0,0,&m_blobs[type],&error);
-    else if(type==pixel)
-        D3DCompile(code_final.c_str(),code_final.size(),0,0,0,"main","ps_4_0",0,0,&m_blobs[type],&error);
+    compiled_shaders_provider *csp=get_compiled_shaders_provider();
+    if(csp)
+        csp->get(code_final.c_str(),m_compiled[type]);
 
-    if(error)
+    if(!m_compiled[type].get_data())
     {
-        get_log()<<"Can`t compile "<<type_str[type]<<" shader: \n";
-        std::string error_text((const char *)error->GetBufferPointer(),error->GetBufferSize());
-        get_log()<<error_text.c_str()<<"\n";
-
-        error->Release();
+#ifdef WINDOWS_PHONE8
+        get_log()<<"Can`t compile "<<type_str[type]<<" shader: Windows phone 8 not allowed to compile shaders, please, set compiled_shaders_provider and add compiled shaders cache\n";
         return false;
+#else
+        ID3D10Blob *compiled=0;
+	    ID3D10Blob *error=0;
+        if(type==vertex)
+    	    D3DCompile(code_final.c_str(),code_final.size(),0,0,0,"main","vs_4_0_level_9_3",0,0,&compiled,&error);
+        else if(type==pixel)
+            D3DCompile(code_final.c_str(),code_final.size(),0,0,0,"main","ps_4_0_level_9_3",0,0,&compiled,&error);
+
+        if(error)
+        {
+            get_log()<<"Can`t compile "<<type_str[type]<<" shader: \n";
+            std::string error_text((const char *)error->GetBufferPointer(),error->GetBufferSize());
+            get_log()<<error_text.c_str()<<"\n";
+
+            error->Release();
+            return false;
+        }
+
+        m_compiled[type]=compiled_shader(compiled->GetBufferSize());
+        memcpy(m_compiled[type].get_data(),compiled->GetBufferPointer(),compiled->GetBufferSize());
+        compiled->Release();
+
+        if(csp)
+            csp->set(code_final.c_str(),m_compiled[type]);
+#endif
     }
 
     if(type==vertex)
     {
-        if(get_device()->CreateVertexShader(m_blobs[type]->GetBufferPointer(),
-                                            m_blobs[type]->GetBufferSize(),nullptr,&m_vertex)<0)
+        if(get_device()->CreateVertexShader(m_compiled[type].get_data(),
+                                            m_compiled[type].get_size(),nullptr,&m_vertex)<0)
         {
             get_log()<<"Can`t create "<<type_str[type]<<" shader\n";
             return false;
@@ -345,8 +368,8 @@ bool shader::add_program(program_type type,const char*code)
 
     if(type==pixel)
     {
-        if(get_device()->CreatePixelShader(m_blobs[type]->GetBufferPointer(),
-                                           m_blobs[type]->GetBufferSize(),nullptr,&m_pixel)<0)
+        if(get_device()->CreatePixelShader(m_compiled[type].get_data(),
+                                           m_compiled[type].get_size(),nullptr,&m_pixel)<0)
         {
             get_log()<<"Can`t create "<<type_str[type]<<" shader\n";
             return false;
@@ -681,7 +704,7 @@ void shader::bind() const
     if(m_pixel)
         get_context()->PSSetShader(m_pixel,nullptr,0);
 
-    active_vs_blob=m_blobs[vertex];
+    active_vs_compiled_shader=&m_compiled[vertex];
 #else
     if(!m_program)
         return;
