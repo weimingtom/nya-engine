@@ -11,7 +11,7 @@ namespace
 
 #ifdef DIRECTX11
 	float dx_clear_color[4]={0.0f};
-	float dx_clear_depth=0.0f;
+	float dx_clear_depth=1.0f;
 
     bool dx_depth_test=true;
     bool dx_depth_write=true;

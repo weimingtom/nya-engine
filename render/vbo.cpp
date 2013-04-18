@@ -364,6 +364,11 @@ void vbo::draw(unsigned int offset,unsigned int count) const
             sprintf(tmp,"c%d%d",m_colors.dimension,m_colors.offset);
             m_layout.append(tmp);
         }
+        if(m_normals.has)
+        {
+            sprintf(tmp,"n%d",m_normals.offset);
+            m_layout.append(tmp);
+        }
         for(int i=0;i<vbo_max_tex_coord;++i)
         {
             const attribute &tc=m_tcs[i];
@@ -391,6 +396,19 @@ void vbo::draw(unsigned int offset,unsigned int count) const
             d.Format=get_dx_format(m_vertices.dimension);
             d.InputSlot=0;
             d.AlignedByteOffset=m_vertices.offset;
+            d.InputSlotClass=D3D11_INPUT_PER_VERTEX_DATA;
+            d.InstanceDataStepRate=0;
+            desc.push_back(d);
+        }
+        
+        if(m_normals.has)
+        {
+            D3D11_INPUT_ELEMENT_DESC d;
+            d.SemanticName="NORMAL";
+            d.SemanticIndex=0;
+            d.Format=get_dx_format(3);
+            d.InputSlot=0;
+            d.AlignedByteOffset=m_normals.offset;
             d.InputSlotClass=D3D11_INPUT_PER_VERTEX_DATA;
             d.InstanceDataStepRate=0;
             desc.push_back(d);
