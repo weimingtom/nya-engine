@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 	#include <io.h>
 #else
 	#include <dirent.h>
@@ -377,7 +377,7 @@ void file_resources_provider::enumerate_folder(const char*folder_name,file_resou
     while(!first_dir.empty() && first_dir[first_dir.length()-1]=='/')
         first_dir.resize(first_dir.length()-1);
 
-#ifdef WIN32
+#ifdef _WIN32
 	_finddata_t data;
 	intptr_t hdl=_findfirst((first_dir + "/*").c_str(),&data);
     if(!hdl)
@@ -390,7 +390,7 @@ void file_resources_provider::enumerate_folder(const char*folder_name,file_resou
         return;
     }
 
-#ifdef WIN32
+#ifdef _WIN32
 	for(intptr_t it=hdl;it>=0;it=_findnext(hdl,&data))
 	{
 		const char *name=data.name;
@@ -402,7 +402,7 @@ void file_resources_provider::enumerate_folder(const char*folder_name,file_resou
         if((name[0]=='.'&&name[1]=='\0')||(name[0]=='.'&&name[1]=='.'&&name[2]=='\0'))
             continue;
 
-#ifdef WIN32
+#ifdef _WIN32
         std::string name_str=folder_name_str+"/"+name;
         std::string full_path_str=m_path+name_str;
 
@@ -436,7 +436,7 @@ void file_resources_provider::enumerate_folder(const char*folder_name,file_resou
         entry->next=*last;
         *last=entry;
     }
-#ifdef WIN32
+#ifdef _WIN32
     _findclose(hdl);
 #else
     closedir(dirp);
