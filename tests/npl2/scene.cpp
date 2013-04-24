@@ -460,23 +460,17 @@ void scene::process(unsigned int dt)
 void scene::draw()
 {
     if(m_has_scenery)
-        glClearColor(0,0,0,0);
+        nya_render::set_clear_color(0,0,0,0);
     else
-        glClearColor(0.2,0.4,0.5,0);
+        nya_render::set_clear_color(0.2,0.4,0.5,0);
+
+    nya_render::clear(true,true);
 
     character &imouto=m_preview?m_imouto_preview:m_imouto;
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     nya_render::set_modelview_matrix(m_camera.get_matrix());
-
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-
-    glEnable(GL_BLEND);
-
+    nya_render::depth_test::enable(nya_render::depth_test::less);
+    nya_render::blend::enable(nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
     nya_render::set_color(1.0,1.0,1.0,1.0);
 
 #ifndef OPENGL_ES
@@ -572,9 +566,7 @@ void scene::draw()
 
     if(get_config().wireframe_outline_enabled)
     {
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-
+        //nya_render::blend::enable(nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
         //m_scenery.draw(false);
 
         if(frames_count)

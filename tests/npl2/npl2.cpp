@@ -29,14 +29,14 @@ private:
 	{
 	    nya_log::get_log()<<"on_init_splash\n";
 
-	    glClearColor(0,0.6,0.7,1);
+	    nya_render::set_clear_color(0,0.6,0.7,1);
 	}
 
 	void on_splash(unsigned int dt)
 	{
 	    nya_log::get_log()<<"on_splash\n";
 
-	    glClear(GL_COLOR_BUFFER_BIT);
+	    nya_render::clear(true,false);
     }
 
 	void on_init()
@@ -90,8 +90,6 @@ nya_log::get_log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n"
 
 	void on_draw()
 	{
-        glClear(GL_COLOR_BUFFER_BIT);
-
         get_scene().draw();
         m_ui.draw();
 	}

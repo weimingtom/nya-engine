@@ -3,7 +3,7 @@
 #include "tmb_model.h"
 #include "tsb_anim.h"
 #include "memory/tmp_buffer.h"
-#include "render/platform_specific_gl.h"
+#include "render/render.h"
 
 #include "string.h"
 #include <vector>
@@ -363,9 +363,9 @@ void tmb_model::draw(bool use_materials,bool cull_face,int group) const
             continue;
 
         if(mat.cull_face && cull_face)
-            glEnable(GL_CULL_FACE);
+            nya_render::cull_face::enable(nya_render::cull_face::ccw);
         else
-            glDisable(GL_CULL_FACE);
+            nya_render::cull_face::disable();
 
         m_textures[mat.tex_idx].bind();
 
