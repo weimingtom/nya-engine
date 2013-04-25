@@ -313,9 +313,8 @@ void ui::init()
 
 void ui::draw()
 {
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-    glDisable(GL_DEPTH_TEST);
+    nya_render::blend::enable(nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
+    nya_render::depth_test::disable();
 
     //m_ui_shader.bind();
     nya_ui::layer::draw();
@@ -341,7 +340,7 @@ void ui::draw()
 
      m_text_shader.unbind();
      */
-    glDisable(GL_BLEND);
+    nya_render::blend::disable();
 }
 
 void ui::draw_text(uint x,uint y,const char *text

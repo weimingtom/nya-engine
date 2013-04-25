@@ -14,6 +14,12 @@ void log_gl_errors(const char *place=0);
 
 void set_viewport(int x,int y,int width,int height);
 
+struct scissor
+{
+    static void enable(int x,int y,int w,int h);
+    static void disable();
+};
+
 void set_projection_matrix(const nya_math::mat4 &mat);
 void set_modelview_matrix(const nya_math::mat4 &mat);
 
@@ -57,7 +63,19 @@ struct cull_face
 
 struct depth_test
 {
-    static void enable();
+    enum comparsion
+    {
+        never,
+        less,
+        equal,
+        greater,
+        not_less, //greater or equal
+        not_equal,
+        not_greater, //less or equal
+        allways
+    };
+
+    static void enable(comparsion mode);
     static void disable();
 };
 
@@ -73,10 +91,43 @@ struct color_write
     static void disable();
 };
 
-struct scissor
+struct state
 {
-    static void enable(int x,int y,int w,int h);
-    static void disable();
+    float color[4];
+
+    bool blend;
+    blend::mode blend_src;
+    blend::mode blend_dst;
+
+    bool cull_face;
+    cull_face::order cull_order;
+
+    bool depth_test;
+    depth_test::comparsion depth_comparsion;
+
+    bool zwrite;
+    bool color_write;
+
+    state():
+        blend(false),
+        blend_src(nya_render::blend::one),
+        blend_dst(nya_render::blend::zero),
+
+        cull_face(false),
+        cull_order(nya_render::cull_face::ccw),
+
+        depth_test(true),
+        depth_comparsion(nya_render::depth_test::less),
+
+        zwrite(true),
+        color_write(true)
+    { for(int i=0;i<4;++i) color[i]=0.0f; }
 };
+
+void set_state(const state &s);
+const state &get_state();
+const state &get_applied_state();
+
+void apply_state(bool ignore_cache=false);
 
 }

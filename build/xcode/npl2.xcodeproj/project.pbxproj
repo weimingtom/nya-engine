@@ -358,6 +358,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CONFIGURATION_BUILD_DIR = ../../bin/ios_debug;
 				CONFIGURATION_TEMP_DIR = ../../obj/ios_debug;
 				DEBUG_INFORMATION_FORMAT = dwarf;
@@ -366,6 +367,7 @@
 				INFOPLIST_FILE = "../../tests/npl2/npl2 ios-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				PRODUCT_NAME = npl2;
+				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
@@ -376,6 +378,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CONFIGURATION_BUILD_DIR = ../../bin/ios_release;
 				CONFIGURATION_TEMP_DIR = ../../obj/ios_release;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
@@ -383,6 +386,7 @@
 				INFOPLIST_FILE = "../../tests/npl2/npl2 ios-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				PRODUCT_NAME = npl2;
+				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;

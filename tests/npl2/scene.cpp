@@ -79,7 +79,10 @@ void viewer_camera::add_scale(float ds)
 
 void scene::init()
 {
+#ifndef OPENGL_ES
     get_shared_anims().should_unload_unused(false);
+#endif
+
     //get_shared_models().set_lru_limit(20);
     //get_shared_models().should_unload_unused(false);
 
@@ -735,9 +738,9 @@ void scene::set_anim(unsigned int num)
         return;
 
     m_curr_anim=m_anim_list.begin()+num;
-    
+
     nya_log::get_log()<<"\nset_anim\n";
-    
+
     for(int i=0;i<10;++i)
     {
         if(!m_curr_anim->name[i].empty())
@@ -774,7 +777,10 @@ void scene::apply_anim()
         bro_anim.append(".tsb");
 
         anim_ref a=get_shared_anims().access(bro_anim.c_str());
-        m_aniki_anim.apply_anim(m_aniki,*a.const_get());
+        if(a.is_valid())
+            m_aniki_anim.apply_anim(m_aniki,*a.const_get());
+        else
+            m_aniki_anim.clear();
     }
     else
         m_aniki_anim.clear();

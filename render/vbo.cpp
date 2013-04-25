@@ -350,7 +350,9 @@ DXGI_FORMAT get_dx_format(int dimension)
 void vbo::draw(unsigned int offset,unsigned int count) const
 {
     if(!m_vertex_bind)
-        return; 
+        return;
+
+    apply_state();
 
 #ifdef DIRECTX11
     if(m_layout.empty())
