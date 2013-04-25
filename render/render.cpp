@@ -322,16 +322,16 @@ void dx_apply_blend_state()
     nya_render::get_context()->OMSetBlendState(state,blend_factor,current_state.color_write?0xffffffff:0);
 }
 
-void dx_apply_cull_face_state(bool cull,cull_face::order o)
+void dx_apply_cull_face_state()
 {
-    if(cull)
+    if(current_state.cull_face)
     {
         static ID3D11RasterizerState *cull_enabled=0;
         if(!cull_enabled)
         {
             D3D11_RASTERIZER_DESC desc;
             ZeroMemory(&desc,sizeof(desc));
-            if(o==cw)
+            if(current_state.cull_order==cull_face::cw)
                 desc.CullMode=D3D11_CULL_BACK;
             else
                 desc.CullMode=D3D11_CULL_FRONT;
@@ -471,7 +471,7 @@ void apply_state(bool ignore_cache)
 #ifdef DIRECTX11
     //ToDo: color
     
-    if(c.cull_face_order!=a.cull_face_order || c.cull_face!=a.cull_face || ignore_cache)
+    if(c.cull_order!=a.cull_order || c.cull_face!=a.cull_face || ignore_cache)
         dx_apply_cull_face_state();
 
     if(c.blend!=a.blend || c.blend_src!=a.blend_src || c.blend_dst!=a.blend_dst
