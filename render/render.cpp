@@ -469,7 +469,7 @@ void apply_state(bool ignore_cache)
     }
 
 #ifdef DIRECTX11
-    //ToDo: color, scissor
+    //ToDo: color
     
     if(c.cull_face_order!=a.cull_face_order || c.cull_face!=a.cull_face || ignore_cache)
         dx_apply_cull_face_state();
