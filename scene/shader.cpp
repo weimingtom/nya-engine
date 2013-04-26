@@ -134,7 +134,8 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
 
                             std::string sampler_semantics=std::string(&text[begin],i-begin);
                             desc.samplers[sampler_semantics]=sampler_name;
-                            res.samplers[sampler_semantics]=-1;
+                            res.samplers[sampler_semantics]=res.samplers_count;
+                            ++res.samplers_count;
                         }
 
                         if(text[i]=='\n' || text[i]=='\r')
@@ -267,14 +268,9 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
     //get_log()<<"vertex <"<<res.vertex.c_str()<<">\n";
     //get_log()<<"pixel <"<<res.pixel.c_str()<<">\n";
 
-    res.samplers_count=0;
     for(shared_shader::samplers_map::iterator it=res.samplers.begin();
         it!=res.samplers.end();++it)
-    {
-        res.shdr.set_sampler(desc.samplers[it->first].c_str(),res.samplers_count);
-        it->second=res.samplers_count;
-        ++res.samplers_count;
-    }
+        res.shdr.set_sampler(desc.samplers[it->first].c_str(),it->second);
 
     if(!res.shdr.add_program(nya_render::shader::vertex,res.vertex.c_str()))
         return false;

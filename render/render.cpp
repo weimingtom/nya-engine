@@ -152,10 +152,24 @@ void clear(bool color,bool depth)
 #else
 	unsigned int mode=0;
 	if(color)
+    {
 		mode|=GL_COLOR_BUFFER_BIT;
+        if(!applied_state.color_write)
+        {
+            glColorMask(true,true,true,true);
+            applied_state.color_write=true;
+        }
+    }
 
 	if(depth)
+    {
 		mode|=GL_DEPTH_BUFFER_BIT;
+        if(!applied_state.zwrite)
+        {
+            glDepthMask(true);
+            applied_state.zwrite=true;
+        }
+    }
 
 	glClear(mode);
 #endif

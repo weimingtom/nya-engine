@@ -291,7 +291,15 @@ bool shader::add_program(program_type type,const char*code)
 
         m_constants.mvp_matrix=code_str.find("ModelViewProjectionMatrix")!=std::string::npos;
         m_constants.mv_matrix=code_str.find("ModelViewMatrix")!=std::string::npos;
-        //m_constants.p_matrix=code_str.find("ProjectionMatrix")!=std::string::npos; //ToDo
+        for(size_t i=code_str.find("ProjectionMatrix");i!=std::string::npos;
+                                                       i=code_str.find("ProjectionMatrix",i+16))
+        {
+            if(code_str[i-1]!='w')
+            {
+                m_constants.p_matrix=true;
+                break;
+            }
+        }
 
         int size=0;
         if(m_constants.mvp_matrix) size+=16;
@@ -823,11 +831,27 @@ void shader::release()
     m_samplers.clear();
 
 #ifdef DIRECTX11
+    for(int i=0;i<program_types_count;++i)
+        m_compiled[i]=compiled_shader();
+
+    if(m_vertex)
+    {
+        m_vertex->Release();
+        m_vertex=0;
+    }
+
+    if(m_pixel)
+    {
+        m_pixel->Release();
+        m_pixel=0;
+    }
+
+    m_layouts.clear();
 #else
     if(!m_program)
         return;
 
-    glUseProgramObjectARB(0);
+    glUseProgramObjectARB(0); //ToDo: only if currently bind
 
     for(int i=0;i<program_types_count;++i)
     {

@@ -514,7 +514,19 @@ void vbo::release()
     unbind();
 
 #ifdef DIRECTX11
-    //ToDo
+    if(m_vertex_loc)
+    {
+        m_vertex_loc->Release();
+        m_vertex_loc=0;
+    }
+
+    if(m_index_loc)
+    {
+        m_index_loc->Release();
+        m_index_loc=0;
+    }
+
+    m_layout.clear();
 #else
     if(m_vertex_loc)
         vbo_glDeleteBuffers(1,&m_vertex_loc);

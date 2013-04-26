@@ -85,7 +85,7 @@ std::string compiled_shaders_provider::crc(const char *text)
         crc=crc_table[(crc^ *buf++)&0xFF]^(crc>>8);
 
     char tmp[256];
-    sprintf(tmp,"%d",crc);
+    sprintf(tmp,"%ud",crc);
 
     return std::string(tmp);
 }

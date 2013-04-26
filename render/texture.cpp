@@ -1,8 +1,16 @@
 //https://code.google.com/p/nya-engine/
 
 #include "texture.h"
-#include "platform_specific_gl.h"
 #include "render.h"
+
+#ifdef DIRECTX11
+#include "memory/tmp_buffer.h"
+
+namespace
+{
+    int dx_current_layer=0;
+}
+#endif
 
 namespace nya_render
 {
@@ -17,6 +25,101 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     }
 
 #ifdef DIRECTX11
+    if(!get_device())
+        return false;
+
+    D3D11_TEXTURE2D_DESC desc;
+    memset(&desc,0,sizeof(desc));
+
+    desc.Width=width;
+    desc.Height=height;
+    desc.MipLevels=1;
+    desc.ArraySize=1;
+
+    D3D11_SUBRESOURCE_DATA srdata;
+    srdata.pSysMem=data;
+
+    switch(format)
+    {
+        case color_rgb:
+        case color_rgba:
+            desc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;
+            srdata.SysMemPitch=width*4;
+        break;
+
+        case color_bgra:
+            desc.Format=DXGI_FORMAT_B8G8R8A8_UNORM;
+            srdata.SysMemPitch=width*4;
+        break;
+
+        case color_r:
+            desc.Format=DXGI_FORMAT_R8_UNORM;
+            srdata.SysMemPitch=width;
+        break;
+
+        case depth16: desc.Format=DXGI_FORMAT_D16_UNORM; break;
+        case depth24: desc.Format=DXGI_FORMAT_D24_UNORM_S8_UINT; break; //ToDo if data != 0
+        case depth32: desc.Format=DXGI_FORMAT_D32_FLOAT; break;
+
+        default: return false;
+    }
+
+    srdata.SysMemSlicePitch=srdata.SysMemPitch*height;
+
+    desc.SampleDesc.Count=1;
+    desc.Usage=D3D11_USAGE_DEFAULT;
+    desc.BindFlags=D3D11_BIND_SHADER_RESOURCE|D3D11_BIND_RENDER_TARGET;
+    if(data)
+        desc.MiscFlags=D3D11_RESOURCE_MISC_GENERATE_MIPS;
+
+    //desc.MiscFlags=D3D11_RESOURCE_MISC_GDI_COMPATIBLE;
+
+    ID3D11Texture2D *tex=0;
+    if(format==color_rgb && data)
+    {
+        nya_memory::tmp_buffer_scoped buf(srdata.SysMemSlicePitch);
+        srdata.pSysMem=buf.get_data();
+
+        typedef unsigned char uchar;
+        const uchar *from=(const uchar *)data;
+        uchar *to=(uchar *)buf.get_data();
+        for(unsigned int h=0;h<height;++h)
+        {
+            for(unsigned int w=0;w<width;++w)
+            {
+                memcpy(to,from,3);
+                *(to+3)=255;
+                to+=4;
+                from+=3;
+            }
+        }
+
+        get_device()->CreateTexture2D(&desc,&srdata,&tex);
+    }
+    else
+        get_device()->CreateTexture2D(&desc,data?(&srdata):0,&tex);
+
+    if(!tex)
+        return false;
+
+    get_device()->CreateShaderResourceView(tex,0,&m_tex);
+    tex->Release();
+    if(!m_tex)
+        return false;
+
+    D3D11_SAMPLER_DESC sdesc;
+    memset(&sdesc,0,sizeof(sdesc));
+	sdesc.Filter=D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sdesc.AddressU=D3D11_TEXTURE_ADDRESS_WRAP;
+	sdesc.AddressV=D3D11_TEXTURE_ADDRESS_WRAP;
+    sdesc.AddressW=D3D11_TEXTURE_ADDRESS_WRAP;
+    sdesc.ComparisonFunc=D3D11_COMPARISON_NEVER;
+    sdesc.MaxAnisotropy=0;
+    sdesc.MinLOD=0;
+    sdesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+    get_device()->CreateSamplerState(&sdesc,&m_sampler_state);
+
 #else
     if(!m_max_tex_size)
     {
@@ -208,28 +311,40 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 
 void texture::bind() const
 {
+#ifdef DIRECTX11
+    if(!m_tex && !m_sampler_state)
+    {
+        unbind_all();
+        return;
+    }
+
+    if(!get_context())
+        return;
+
+    get_context()->PSSetShaderResources(dx_current_layer,1,&m_tex);
+    get_context()->PSSetSamplers(dx_current_layer,1,&m_sampler_state);
+#else
 	if(!m_gl_type)
 	{
 		unbind_all();
 		return;
 	}
 
-#ifdef DIRECTX11
-#else
     glBindTexture(m_gl_type,m_tex_id);
 #endif
 }
 
 void texture::unbind() const
 {
+#ifdef DIRECTX11
+    unbind_all();
+#else
 	if(!m_gl_type)
 	{
 		unbind_all();
 		return;
 	}
 
-#ifdef DIRECTX11
-#else
 	glBindTexture(m_gl_type,0);
 #endif
 }
@@ -237,6 +352,11 @@ void texture::unbind() const
 void texture::unbind_all()
 {
 #ifdef DIRECTX11
+    if(!get_context())
+        return;
+
+    get_context()->PSSetShaderResources(dx_current_layer,0,0);
+    get_context()->PSSetSamplers(dx_current_layer,0,0);
 #else
     glBindTexture(GL_TEXTURE_2D,0);
     glBindTexture(GL_TEXTURE_CUBE_MAP,0);
@@ -246,6 +366,7 @@ void texture::unbind_all()
 void texture::select_multitex_slot(unsigned int idx)
 {
 #ifdef DIRECTX11
+    dx_current_layer=idx;
 #else
 
 #if defined(OPENGL_ES)
@@ -277,6 +398,17 @@ void texture::select_multitex_slot(unsigned int idx)
 void texture::release()
 {
 #ifdef DIRECTX11
+    if(m_tex)
+    {
+        m_tex->Release();
+        m_tex=0;
+    }
+
+    if(m_sampler_state)
+    {
+        m_sampler_state->Release();
+        m_sampler_state=0;
+    }
 #else
     if(m_tex_id)
 	    glDeleteTextures(1,&m_tex_id);
