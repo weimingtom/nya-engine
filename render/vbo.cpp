@@ -12,6 +12,7 @@
 #include "vbo.h"
 #include "render.h"
 #include "texture.h"
+#include "shader.h"
 
 #ifdef DIRECTX11
     #include "shader.h"
@@ -118,7 +119,7 @@ void vbo::bind_verts() const
 {
     if(!m_vertices.has)
         return;
-        
+
 	if(!m_vertex_loc)
         return;
 
@@ -353,6 +354,7 @@ void vbo::draw(unsigned int offset,unsigned int count) const
     if(!m_vertex_bind)
         return;
 
+    shader::apply();
     texture::apply();
     apply_state();
 

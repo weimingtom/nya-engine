@@ -2,49 +2,11 @@
 
 #pragma once
 
-#include "platform_specific_gl.h"
-
-#ifdef OPENGL_ES
-    #define GLhandleARB GLuint
-#endif
-
-#ifdef DIRECTX11
-    #include <map>
-#endif
-
-#ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
-    #define SUPPORT_OLD_SHADERS
-#endif
-
 #include <string>
 #include <vector>
 
 namespace nya_render
 {
-
-class compiled_shader
-{
-public:
-    void *get_data() { if(m_data.empty()) return 0; return &m_data[0]; }
-    const void *get_data() const { if(m_data.empty()) return 0; return &m_data[0]; }
-    size_t get_size() const { return m_data.size(); }
-    
-public:
-    compiled_shader() {}
-    compiled_shader(size_t size) { m_data.resize(size); }
-private:
-    std::vector<char> m_data;
-};
-
-class compiled_shaders_provider
-{
-public:
-    virtual bool get(const char *text,compiled_shader &shader) { return 0; }
-    virtual bool set(const char *text,const compiled_shader &shader) { return false; }
-};
-
-compiled_shaders_provider *get_compiled_shaders_provider();
-void set_compiled_shaders_provider(compiled_shaders_provider *provider);
 
 class shader
 {
@@ -98,5 +60,28 @@ private:
     std::vector<sampler> m_samplers;
 };
 
-}
+class compiled_shader
+{
+public:
+    void *get_data() { if(m_data.empty()) return 0; return &m_data[0]; }
+    const void *get_data() const { if(m_data.empty()) return 0; return &m_data[0]; }
+    size_t get_size() const { return m_data.size(); }
 
+public:
+    compiled_shader() {}
+    compiled_shader(size_t size) { m_data.resize(size); }
+private:
+    std::vector<char> m_data;
+};
+
+class compiled_shaders_provider
+{
+public:
+    virtual bool get(const char *text,compiled_shader &shader) { return 0; }
+    virtual bool set(const char *text,const compiled_shader &shader) { return false; }
+};
+
+compiled_shaders_provider *get_compiled_shaders_provider();
+void set_compiled_shaders_provider(compiled_shaders_provider *provider);
+
+}

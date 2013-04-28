@@ -1,59 +1,46 @@
 //https://code.google.com/p/nya-engine/
 
 /*
-    ToDo: check if this program already set (less state changes)
-          check if this program on uniform and handler sets
-          more log
+    ToDo: more log
 */
 
 #include "shader.h"
 #include "platform_specific_gl.h"
 #include "render.h"
 
+#ifdef OPENGL_ES
+    #define GLhandleARB GLuint
+#endif
+
 #ifdef DIRECTX11
-    #include "transform.h"
+    #include <map>
 
   #ifndef WINDOWS_PHONE8
     #include <D3Dcompiler.h>
   #endif
-
-namespace
-{
-/*
-    struct shader_obj
-    {
-#ifdef DIRECTX11
-        ID3D11ShaderResourceView* srv;
-        ID3D11SamplerState* sampler_state;
-        
-        texture_obj(): srv(0),sampler_state(0) {}
-#else
-        unsigned int tex_id;
-        unsigned int gl_type;
-        
-        shader_obj(): tex_id(0),gl_type(0) {}
-#endif
-    }
-*/
-    nya_render::compiled_shaders_provider *render_csp=0;
-    const nya_render::compiled_shader *active_vs_compiled_shader=0; //ToDo: refs instead of pointers
-}
 #endif
 
-namespace
-{
-    int current_shader=0;
-    int active_shader=0;
-}
+#ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+    #define SUPPORT_OLD_SHADERS
+#endif
 
-#include <string>
-
-#ifdef SUPPORT_OLD_SHADERS
+#if defined DIRECTX11 || defined SUPPORT_OLD_SHADERS
     #include "transform.h"
 #endif
 
+namespace
+{
+    nya_render::compiled_shaders_provider *render_csp=0;
+
+    int current_shader=-1;
+    int active_shader=-1;
+}
+
 namespace nya_render
 {
+    compiled_shaders_provider *get_compiled_shaders_provider() { return render_csp; }
+    void set_compiled_shaders_provider(compiled_shaders_provider *csp) { render_csp=csp; }
+
     struct shader_obj
     {
 #ifdef DIRECTX11
@@ -118,11 +105,6 @@ namespace nya_render
             return objs;
         }
     };
-
-#ifdef DIRECTX11
-    compiled_shaders_provider *get_compiled_shaders_provider() { return render_csp; }
-    void set_compiled_shaders_provider(compiled_shaders_provider *csp) { render_csp=csp; }
-#endif
 
 #ifndef DIRECTX11
   #ifndef NO_EXTENSIONS_INIT
@@ -510,9 +492,9 @@ bool shader::add_program(program_type type,const char*code)
         const char *attribute_names[]={"nyaVertex","nyaNormal","nyaColor","nyaMultiTexCoord"};
 
         bool used_attribs[max_attributes]={false};
-        m_mat_mvp=-1;
-        m_mat_mv=-1;
-        m_mat_p=-1;
+        shdr.mat_mvp=-1;
+        shdr.mat_mv=-1;
+        shdr.mat_p=-1;
 
         for(size_t gl=code_str.find("gl_");gl!=std::string::npos;gl=code_str.find("gl_",gl+8))
         {
@@ -571,12 +553,12 @@ bool shader::add_program(program_type type,const char*code)
                     }
                     else if(code_str.size()>gl+15 && code_str.compare(gl+3,15,"ModelViewMatrix")==0)
                     {
-                        m_mat_mv=1;
+                        shdr.mat_mv=1;
                         replace=true;
                     }
                     else if(code_str.size()>gl+25 && code_str.compare(gl+3,25,"ModelViewProjectionMatrix")==0)
                     {
-                        m_mat_mvp=1;
+                        shdr.mat_mvp=1;
                         replace=true;
                     }
                     break;
@@ -584,7 +566,7 @@ bool shader::add_program(program_type type,const char*code)
                 case 'P':
                     if(code_str.size()>gl+16 && code_str.compare(gl+3,16,"ProjectionMatrix")==0)
                     {
-                        m_mat_p=1;
+                        shdr.mat_p=1;
                         replace=true;
                     }
                     break;
@@ -770,7 +752,35 @@ bool shader::add_program(program_type type,const char*code)
     return true;
 }
 
-void shader::bind() const
+void shader::bind() const { current_shader=m_shdr; }
+void shader::unbind() { current_shader=-1; }
+
+#ifndef DIRECTX11
+void set_shader(int idx)
+{
+    if(idx==active_shader)
+        return;
+
+    if(!check_init_shaders())
+        return;
+
+    if(idx<0)
+    {
+        glUseProgramObjectARB(0);
+        return;
+    }
+
+    shader_obj &shdr=shader_obj::get(idx);
+    if(!shdr.program)
+        active_shader=-1;
+
+    glUseProgramObjectARB(shdr.program);
+
+    active_shader=idx;
+}
+#endif
+
+void shader::apply()
 {
 #ifdef DIRECTX11
     if(m_vertex)
@@ -784,44 +794,38 @@ void shader::bind() const
                        transform::get().get_modelviewprojection_matrix().m[0],16*sizeof(float));
                 offset+=16;
             }
-
+            
             if(m_constants.mv_matrix)
             {
                 memcpy(&m_constants.buffer[0]+offset,
                        transform::get().get_modelview_matrix().m[0],16*sizeof(float));
                 offset+=16;
             }
-
+            
             if(m_constants.p_matrix)
             {
                 memcpy(&m_constants.buffer[0]+offset,
                        transform::get().get_projection_matrix().m[0],16*sizeof(float));
                 offset+=16;
             }
-
+            
             get_context()->UpdateSubresource(m_constants.dx_buffer,0,NULL,&m_constants.buffer[0],0,0);
             get_context()->VSSetConstantBuffers(0,1,&m_constants.dx_buffer);
         }
-
+        
         get_context()->VSSetShader(m_vertex,nullptr,0);
     }
-
+    
     if(m_pixel)
         get_context()->PSSetShader(m_pixel,nullptr,0);
-
+    
     active_vs_compiled_shader=&m_compiled[vertex];
 #else
-    if(m_shdr<0)
-        return;
-
-    shader_obj &shdr=shader_obj::get(m_shdr);
-
-    if(!shdr.program)
-        return;
-
-    glUseProgramObjectARB(shdr.program);
+    set_shader(current_shader);
 
   #ifdef SUPPORT_OLD_SHADERS
+    shader_obj &shdr=shader_obj::get(current_shader);
+
     if(shdr.mat_mvp>=0)
         glUniformMatrix4fvARB(shdr.mat_mvp,1,false,transform::get().get_modelviewprojection_matrix().m[0]);
     if(shdr.mat_mv>=0)
@@ -829,17 +833,6 @@ void shader::bind() const
     if(shdr.mat_p>=0)
         glUniformMatrix4fvARB(shdr.mat_p,1,false,transform::get().get_projection_matrix().m[0]);
   #endif
-#endif
-}
-
-void shader::unbind()
-{
-#ifdef DIRECTX11
-#else
-    if(!check_init_shaders())
-        return;
-
-    glUseProgramObjectARB(0);
 #endif
 }
 
@@ -877,6 +870,8 @@ int shader::get_handler(const char *name) const
     if(m_shdr<0)
         return -1;
 
+    set_shader(m_shdr);
+
     if(!shader_obj::get(m_shdr).program)
     {
         get_log()<<"Unable to get shader handler \'"<<name<<"\': invalid program\n";
@@ -893,6 +888,8 @@ void shader::set_uniform(unsigned int i,float f0,float f1,float f2,float f3) con
 #else
     if(m_shdr<0)
         return;
+    
+    set_shader(m_shdr);
 
     if(!shader_obj::get(m_shdr).program)
         return;
@@ -907,6 +904,8 @@ void shader::set_uniform3_array(unsigned int i,const float *f,unsigned int count
 #else
     if(m_shdr<0)
         return;
+    
+    set_shader(m_shdr);
 
     if(!shader_obj::get(m_shdr).program || !f)
         return;
@@ -921,6 +920,8 @@ void shader::set_uniform4_array(unsigned int i,const float *f,unsigned int count
 #else
     if(m_shdr<0)
         return;
+    
+    set_shader(m_shdr);
 
     if(!shader_obj::get(m_shdr).program || !f)
         return;
@@ -935,6 +936,8 @@ void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int coun
 #else
     if(m_shdr<0)
         return;
+    
+    set_shader(m_shdr);
 
     if(!shader_obj::get(m_shdr).program || !f)
         return;
@@ -946,6 +949,9 @@ void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int coun
 void shader::release()
 {
     m_samplers.clear();
+
+    if(m_shdr==active_shader)
+        set_shader(-1);
 
 #ifdef DIRECTX11
     for(int i=0;i<program_types_count;++i)
