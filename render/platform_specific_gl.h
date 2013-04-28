@@ -91,4 +91,10 @@ namespace nya_render
             return objs;
         }
     };
+
+#ifdef DIRECTX11
+    ID3D11InputLayout *get_layout(const std::string &layout);
+    ID3D11InputLayout *add_layout(const std::string &layout,
+                                  const D3D11_INPUT_ELEMENT_DESC*desc,size_t desc_size);
+#endif
 }

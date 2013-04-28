@@ -19,10 +19,32 @@
 
 namespace
 {
+/*
+    struct shader_obj
+    {
+#ifdef DIRECTX11
+        ID3D11ShaderResourceView* srv;
+        ID3D11SamplerState* sampler_state;
+        
+        texture_obj(): srv(0),sampler_state(0) {}
+#else
+        unsigned int tex_id;
+        unsigned int gl_type;
+        
+        shader_obj(): tex_id(0),gl_type(0) {}
+#endif
+    }
+*/
     nya_render::compiled_shaders_provider *render_csp=0;
     const nya_render::compiled_shader *active_vs_compiled_shader=0; //ToDo: refs instead of pointers
 }
 #endif
+
+namespace
+{
+    int current_shader=0;
+    int active_shader=0;
+}
 
 #include <string>
 
@@ -32,6 +54,71 @@ namespace
 
 namespace nya_render
 {
+    struct shader_obj
+    {
+#ifdef DIRECTX11
+    public:
+        shader_obj(): vertex_program(0),pixel_program(0) {}
+
+    public:
+        compiled_shader compiled[program_types_count];
+        ID3D11VertexShader *vertex_program;
+        ID3D11PixelShader *pixel_program;
+
+        typedef std::map<std::string,ID3D11InputLayout*> layouts_map;
+        static layouts_map layouts;
+
+        struct constants_buffer
+        {
+            mutable std::vector<float> buffer;
+            bool mvp_matrix;
+            bool mv_matrix;
+            bool p_matrix;
+
+            ID3D11Buffer *dx_buffer;
+
+            constants_buffer():mvp_matrix(false),mv_matrix(false),p_matrix(false),dx_buffer(0){}
+        };
+
+        constants_buffer constants;
+#else
+    public:
+        shader_obj(): program(0)
+        {
+            for(int i = 0;i<shader::program_types_count;++i)
+                objects[i]=0;
+
+#ifdef SUPPORT_OLD_SHADERS
+            mat_mvp=-1;
+            mat_mv=-1;
+            mat_p=-1;
+#endif
+        }
+
+    public:
+        GLhandleARB program;
+        GLhandleARB objects[shader::program_types_count];
+
+#ifdef SUPPORT_OLD_SHADERS
+        int mat_mvp;
+        int mat_mv;
+        int mat_p;
+#endif
+#endif
+    public:
+        static int add() { return get_shader_objs().add(); }
+        static shader_obj &get(int idx) { return get_shader_objs().get(idx); }
+        static void remove(int idx) { return get_shader_objs().remove(idx); }
+
+    private:
+        typedef render_objects<shader_obj> shader_objs;
+        static shader_objs &get_shader_objs()
+        {
+            static shader_objs objs;
+            return objs;
+        }
+    };
+
 #ifdef DIRECTX11
     compiled_shaders_provider *get_compiled_shaders_provider() { return render_csp; }
     void set_compiled_shaders_provider(compiled_shaders_provider *csp) { render_csp=csp; }
@@ -259,7 +346,6 @@ ID3D11InputLayout *shader::add_layout(const std::string &layout,
 
 	get_device()->CreateInputLayout(desc,desc_size,active_vs_compiled_shader->get_data(),
                                     active_vs_compiled_shader->get_size(),&out);
-
     if(!out)
         return 0;
 
@@ -394,20 +480,25 @@ bool shader::add_program(program_type type,const char*code)
     if(!check_init_shaders())
         return false;
 
-    if(!m_program)
-        m_program=glCreateProgramObjectARB();
+    if(m_shdr<0)
+        m_shdr=shader_obj::add();
 
-    if(!m_program)
+    shader_obj &shdr=shader_obj::get(m_shdr);
+
+    if(!shdr.program)
+        shdr.program=glCreateProgramObjectARB();
+
+    if(!shdr.program)
     {
         get_log()<<"Unable to create shader program object\n";
         return false;
     }
 
-    if(m_objects[type])
+    if(shdr.objects[type])
     {
-        glDetachObjectARB(m_program,m_objects[type]);
-        glDeleteObjectARB(m_objects[type]);
-        m_objects[type]=0;
+        glDetachObjectARB(shdr.program,shdr.objects[type]);
+        glDeleteObjectARB(shdr.objects[type]);
+        shdr.objects[type]=0;
     }
 
 #ifdef SUPPORT_OLD_SHADERS
@@ -510,11 +601,11 @@ bool shader::add_program(program_type type,const char*code)
             }
         }
 
-        if(m_mat_mvp>0)
+        if(shdr.mat_mvp>0)
             code_final.append("uniform mat4 nyaModelViewProjectionMatrix;");
-        if(m_mat_mv>0)
+        if(shdr.mat_mv>0)
             code_final.append("uniform mat4 nyaModelViewMatrix;");
-        if(m_mat_p>0)
+        if(shdr.mat_p>0)
             code_final.append("uniform mat4 nyaProjectionMatrix;");
 
         for(int i=0;i<tc0_attribute;++i)
@@ -526,7 +617,7 @@ bool shader::add_program(program_type type,const char*code)
             code_final.append(attribute_names[i]);
             code_final.append(";\n");
 
-            glBindAttribLocation(m_program,i,attribute_names[i]);
+            glBindAttribLocation(shdr.program,i,attribute_names[i]);
         }
 
         for(int i=tc0_attribute;i<max_attributes;++i)
@@ -548,7 +639,7 @@ bool shader::add_program(program_type type,const char*code)
             code_final.append(attrib_name);
             code_final.append(";\n");
 
-            glBindAttribLocation(m_program,i,attrib_name.c_str());
+            glBindAttribLocation(shdr.program,i,attrib_name.c_str());
         }
     }
 
@@ -583,22 +674,22 @@ bool shader::add_program(program_type type,const char*code)
             delete []buf;
         }
 
-        m_program=0;
+        shdr.program=0;
         return false;
     }
-    glAttachObjectARB(m_program,object);
+    glAttachObjectARB(shdr.program,object);
 
 #ifdef OPENGL_ES
-    m_objects[type]=object;
+    shdr.objects[type]=object;
 
-    if(m_program && m_objects[vertex] && m_objects[pixel])
+    if(shdr.program && shdr.objects[vertex] && shdr.objects[pixel])
 #else
-    if(m_program)
+    if(shdr.program)
 #endif
     {
         GLint result=0;
-        glLinkProgramARB(m_program);
-        glGetObjectParam(m_program,GL_OBJECT_LINK_STATUS_ARB,&result);
+        glLinkProgramARB(shdr.program);
+        glGetObjectParam(shdr.program,GL_OBJECT_LINK_STATUS_ARB,&result);
         if(!result)
         {
 #ifdef OPENGL_ES
@@ -607,27 +698,27 @@ bool shader::add_program(program_type type,const char*code)
             get_log()<<"Can`t link "<<type_str[type]<<" shader\n";
 #endif
             GLint log_len=0;
-            glGetObjectParam(m_program,GL_OBJECT_INFO_LOG_LENGTH_ARB,&log_len);
+            glGetObjectParam(shdr.program,GL_OBJECT_INFO_LOG_LENGTH_ARB,&log_len);
             if (log_len>0)
             {
                 GLchar *log = new GLchar[log_len];
-                glGetInfoLogARB(m_program,log_len,&log_len,log);
+                glGetInfoLogARB(shdr.program,log_len,&log_len,log);
                 get_log()<<log<<"\n";
                 delete(log);
             }
 
-            m_program=0; //??
+            shdr.program=0; //??
             return false;
         }
 
         if(type==pixel)
         {
-            glUseProgramObjectARB(m_program);
+            glUseProgramObjectARB(shdr.program);
 
             for(size_t i=0;i<m_samplers.size();++i)
             {
                 const sampler &s=m_samplers[i];
-                int handler=glGetUniformLocationARB(m_program,s.name.c_str());
+                int handler=glGetUniformLocationARB(shdr.program,s.name.c_str());
                 if(handler>=0)
                     glUniform1iARB(handler,s.layer);
                 else
@@ -638,8 +729,8 @@ bool shader::add_program(program_type type,const char*code)
         }
 
         result=0;
-        glValidateProgramARB(m_program);
-        glGetObjectParam(m_program,GL_OBJECT_VALIDATE_STATUS_ARB,&result);
+        glValidateProgramARB(shdr.program);
+        glGetObjectParam(shdr.program,GL_OBJECT_VALIDATE_STATUS_ARB,&result);
         if(!result)
         {
 #ifdef OPENGL_ES
@@ -648,30 +739,30 @@ bool shader::add_program(program_type type,const char*code)
             get_log()<<"Can`t validate "<<type_str[type]<<" shader\n";
 #endif
             GLint log_len=0;
-            glGetObjectParam(m_program,GL_OBJECT_INFO_LOG_LENGTH_ARB,&log_len);
+            glGetObjectParam(shdr.program,GL_OBJECT_INFO_LOG_LENGTH_ARB,&log_len);
             if (log_len>0)
             {
                 GLchar *log = new GLchar[log_len];
-                glGetInfoLogARB(m_program,log_len,&log_len,log);
+                glGetInfoLogARB(shdr.program,log_len,&log_len,log);
                 get_log()<<log<<"\n";
                 delete(log);
             }
-            m_program=0; //??
+            shdr.program=0; //??
             return false;
         }
 
 #ifdef SUPPORT_OLD_SHADERS
 
-        if(m_mat_mvp>=0)
-            m_mat_mvp=get_handler("nyaModelViewProjectionMatrix");
-        if(m_mat_mv>=0)
-            m_mat_mv=get_handler("nyaModelViewMatrix");
-        if(m_mat_p>=0)
-            m_mat_p=get_handler("nyaProjectionMatrix");
+        if(shdr.mat_mvp>=0)
+            shdr.mat_mvp=get_handler("nyaModelViewProjectionMatrix");
+        if(shdr.mat_mv>=0)
+            shdr.mat_mv=get_handler("nyaModelViewMatrix");
+        if(shdr.mat_p>=0)
+            shdr.mat_p=get_handler("nyaProjectionMatrix");
 #endif
     }
 
-    m_objects[type]=object;
+    shdr.objects[type]=object;
 
     //glUseProgramObjectARB(0);
 #endif
@@ -720,18 +811,23 @@ void shader::bind() const
 
     active_vs_compiled_shader=&m_compiled[vertex];
 #else
-    if(!m_program)
+    if(m_shdr<0)
         return;
 
-    glUseProgramObjectARB(m_program);
+    shader_obj &shdr=shader_obj::get(m_shdr);
+
+    if(!shdr.program)
+        return;
+
+    glUseProgramObjectARB(shdr.program);
 
   #ifdef SUPPORT_OLD_SHADERS
-    if(m_mat_mvp>=0)
-        glUniformMatrix4fvARB(m_mat_mvp,1,false,transform::get().get_modelviewprojection_matrix().m[0]);
-    if(m_mat_mv>=0)
-        glUniformMatrix4fvARB(m_mat_mv,1,false,transform::get().get_modelview_matrix().m[0]);
-    if(m_mat_p>=0)
-        glUniformMatrix4fvARB(m_mat_p,1,false,transform::get().get_projection_matrix().m[0]);
+    if(shdr.mat_mvp>=0)
+        glUniformMatrix4fvARB(shdr.mat_mvp,1,false,transform::get().get_modelviewprojection_matrix().m[0]);
+    if(shdr.mat_mv>=0)
+        glUniformMatrix4fvARB(shdr.mat_mv,1,false,transform::get().get_modelview_matrix().m[0]);
+    if(shdr.mat_p>=0)
+        glUniformMatrix4fvARB(shdr.mat_p,1,false,transform::get().get_projection_matrix().m[0]);
   #endif
 #endif
 }
@@ -778,13 +874,16 @@ int shader::get_handler(const char *name) const
 #ifdef DIRECTX11
 	return -1;
 #else
-    if(!m_program)
+    if(m_shdr<0)
+        return -1;
+
+    if(!shader_obj::get(m_shdr).program)
     {
         get_log()<<"Unable to get shader handler \'"<<name<<"\': invalid program\n";
         return -1;
     }
 
-    return glGetUniformLocationARB(m_program,name);
+    return glGetUniformLocationARB(shader_obj::get(m_shdr).program,name);
 #endif
 }
 
@@ -792,7 +891,10 @@ void shader::set_uniform(unsigned int i,float f0,float f1,float f2,float f3) con
 {
 #ifdef DIRECTX11
 #else
-    if(!m_program)
+    if(m_shdr<0)
+        return;
+
+    if(!shader_obj::get(m_shdr).program)
         return;
 
     glUniform4fARB(i,f0,f1,f2,f3);
@@ -803,7 +905,10 @@ void shader::set_uniform3_array(unsigned int i,const float *f,unsigned int count
 {
 #ifdef DIRECTX11
 #else
-    if(!m_program || !f)
+    if(m_shdr<0)
+        return;
+
+    if(!shader_obj::get(m_shdr).program || !f)
         return;
 
     glUniform3fvARB(i,count,f);
@@ -814,7 +919,10 @@ void shader::set_uniform4_array(unsigned int i,const float *f,unsigned int count
 {
 #ifdef DIRECTX11
 #else
-    if(!m_program || !f)
+    if(m_shdr<0)
+        return;
+
+    if(!shader_obj::get(m_shdr).program || !f)
         return;
 
     glUniform4fvARB(i,count,f);
@@ -825,7 +933,10 @@ void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int coun
 {
 #ifdef DIRECTX11
 #else
-    if(!m_program || !f)
+    if(m_shdr<0)
+        return;
+
+    if(!shader_obj::get(m_shdr).program || !f)
         return;
 
     glUniformMatrix4fvARB(i,count,transpose,f);
@@ -854,25 +965,29 @@ void shader::release()
 
     m_layouts.clear();
 #else
-    if(!m_program)
+    if(m_shdr<0)
+        return;
+
+    shader_obj &shdr=shader_obj::get(m_shdr);
+
+    if(!shader_obj::get(m_shdr).program)
         return;
 
     glUseProgramObjectARB(0); //ToDo: only if currently bind
 
     for(int i=0;i<program_types_count;++i)
     {
-        if(!m_objects[i])
+        if(!shdr.objects[i])
             continue;
 
-        glDetachObjectARB(m_program,m_objects[i]);
-        glDeleteObjectARB(m_objects[i]);
-        m_objects[i]=0;
+        glDetachObjectARB(shdr.program,shdr.objects[i]);
+        glDeleteObjectARB(shdr.objects[i]);
     }
 
-    glDeleteObjectARB(m_program);
-    m_program=0;
+    glDeleteObjectARB(shdr.program);
+
+    shader_obj::remove(m_shdr);
 #endif
 }
 
 }
-

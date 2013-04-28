@@ -64,6 +64,8 @@ public:
     void bind() const;
     static void unbind();
 
+    static void apply();
+
 public:
     void set_sampler(const char*name,unsigned int layer);
 
@@ -77,56 +79,12 @@ public:
 public:
     void release();
 
-#ifdef DIRECTX11
 public:
-    static ID3D11InputLayout *get_layout(const std::string &layout);
-    static ID3D11InputLayout *add_layout(const std::string &layout,
-                                         const D3D11_INPUT_ELEMENT_DESC*desc,size_t desc_size);
-
-public:
-    shader(): m_vertex(0),m_pixel(0) {}
+    shader(): m_shdr(-1) {}
 
 private:
-    compiled_shader m_compiled[program_types_count];
-    ID3D11VertexShader *m_vertex;
-    ID3D11PixelShader *m_pixel;
+    int m_shdr;
 
-    typedef std::map<std::string,ID3D11InputLayout*> layouts_map;
-    static layouts_map m_layouts;
-
-    struct constants
-    {
-        mutable std::vector<float> buffer;
-        bool mvp_matrix;
-        bool mv_matrix;
-        bool p_matrix;
-
-        ID3D11Buffer *dx_buffer;
-
-        constants():mvp_matrix(false),mv_matrix(false),p_matrix(false),dx_buffer(0){}
-    };
-
-    constants m_constants;
-#else
-public:
-    shader(): m_program(0)
-    {
-        for(int i = 0;i<program_types_count;++i)
-            m_objects[i]=0;
-
-#ifdef SUPPORT_OLD_SHADERS
-        m_mat_mvp=-1;
-        m_mat_mv=-1;
-        m_mat_p=-1;
-#endif
-    }
-
-private:
-    GLhandleARB m_program;
-    GLhandleARB m_objects[program_types_count];
-#endif
-
-private:
     struct sampler
     {
         std::string name;
@@ -138,13 +96,6 @@ private:
     };
 
     std::vector<sampler> m_samplers;
-
-#ifdef SUPPORT_OLD_SHADERS
-private:
-    int m_mat_mvp;
-    int m_mat_mv;
-    int m_mat_p;
-#endif
 };
 
 }
