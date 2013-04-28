@@ -2,8 +2,28 @@
 
 #include "render.h"
 #include "transform.h"
+#include "platform_specific_gl.h"
 
 #include <map>
+
+#ifdef DIRECTX11
+
+namespace
+{
+	ID3D11Device *render_device=0;
+	ID3D11DeviceContext *render_context=0;
+}
+
+namespace nya_render
+{
+	ID3D11Device *get_device() { return render_device; }
+    void set_device(ID3D11Device *device) { render_device=device; }
+
+	ID3D11DeviceContext *get_context() { return render_context; }
+	void set_context(ID3D11DeviceContext *context) { render_context=context; }
+}
+
+#endif
 
 namespace
 {
@@ -136,7 +156,7 @@ void clear(bool color,bool depth)
 
     ID3D11RenderTargetView* color_target=0;
     ID3D11DepthStencilView* depth_target=0;
-	get_context()->OMGetRenderTargets(1,&color_target,&depth_target);
+	get_context()->OMGetRenderTargets(1,&color_target,&depth_target);    //ToDo
 
 	if(color && color_target)
     {

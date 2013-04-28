@@ -2,18 +2,56 @@
 
 #include "texture.h"
 #include "render.h"
+#include "platform_specific_gl.h"
 
 #ifdef DIRECTX11
-#include "memory/tmp_buffer.h"
+    #include "memory/tmp_buffer.h"
+#endif
 
 namespace
 {
-    int dx_current_layer=0;
+    unsigned int current_layer=0;
+    unsigned int active_layer=0;
+    const unsigned int max_layers=16;
+    int current_layers[max_layers]={-1};
+    int active_layers[max_layers]={-1};
 }
-#endif
 
 namespace nya_render
 {
+
+#ifndef DIRECTX11
+void gl_select_multitex_layer(int idx)
+{
+    if(idx==active_layer)
+        return;
+
+    active_layer=idx;
+
+#if defined(OPENGL_ES)
+    glActiveTexture(GL_TEXTURE0+idx);
+#elif defined(NO_EXTENSIONS_INIT)
+    glActiveTexture(GL_TEXTURE0+idx);
+#else
+    static PFNGLACTIVETEXTUREARBPROC tex_glActiveTexture=0;
+
+    static bool initialised=false;
+    if(tex_glActiveTexture!=0)
+    {
+        tex_glActiveTexture(GL_TEXTURE0_ARB+idx);
+        return;
+    }
+
+    if(initialised)
+        return;
+
+    tex_glActiveTexture=(PFNGLACTIVETEXTUREARBPROC)get_extension("glActiveTexture");
+    initialised=true;
+
+    select_multitex_slot(idx);
+#endif
+}
+#endif
 
 bool texture::build_texture(const void *data,unsigned int width,unsigned int height,color_format format)
 {
@@ -27,6 +65,9 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 #ifdef DIRECTX11
     if(!get_device())
         return false;
+
+    if(m_tex>=0)
+        release();
 
     D3D11_TEXTURE2D_DESC desc;
     memset(&desc,0,sizeof(desc));
@@ -102,9 +143,10 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     if(!tex)
         return false;
 
-    get_device()->CreateShaderResourceView(tex,0,&m_tex);
+    ID3D11ShaderResourceView *srv;
+    get_device()->CreateShaderResourceView(tex,0,&srv);
     tex->Release();
-    if(!m_tex)
+    if(!srv)
         return false;
 
     D3D11_SAMPLER_DESC sdesc;
@@ -118,7 +160,10 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     sdesc.MinLOD=0;
     sdesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-    get_device()->CreateSamplerState(&sdesc,&m_sampler_state);
+    m_tex=texture_obj::add();
+    texture_obj::get(m_tex).srv=srv;
+
+    get_device()->CreateSamplerState(&sdesc,&texture_obj::get(m_tex).sampler_state);
 
 #else
     if(!m_max_tex_size)
@@ -166,15 +211,25 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 
 	//bool create_new=(!m_tex_id || m_width!=width || m_height!=height || m_type!=texture_2d || m_format!=format);
 
-    if(!m_tex_id || m_gl_type!=GL_TEXTURE_2D)
-        glGenTextures(1,&m_tex_id);
+    if(m_tex<0)
+        m_tex=texture_obj::add();
+
+    if(!texture_obj::get(m_tex).tex_id || texture_obj::get(m_tex).gl_type!=GL_TEXTURE_2D)
+        glGenTextures(1,&texture_obj::get(m_tex).tex_id);
 
     m_width=width;
     m_height=height;
-	m_gl_type=GL_TEXTURE_2D;
+	texture_obj::get(m_tex).gl_type=GL_TEXTURE_2D;
 	m_format=format;
+    
+    if(active_layers[active_layer]>=0)
+    {
+        if(texture_obj::get(active_layers[active_layer]).gl_type!=GL_TEXTURE_2D)
+            glBindTexture(texture_obj::get(active_layers[active_layer]).gl_type,0);
+    }
 
-    glBindTexture(GL_TEXTURE_2D,m_tex_id);
+    glBindTexture(GL_TEXTURE_2D,texture_obj::get(m_tex).tex_id);
+    active_layers[active_layer]=-1;
 
     /*
      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
@@ -222,6 +277,8 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     }*/
+
+    glBindTexture(GL_TEXTURE_2D,0);
 #endif
 
     return true;
@@ -275,17 +332,25 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 	if(m_format!=format)
 		release();
 
-	//bool create_new=(!m_tex_id || m_width!=width || m_height!=height || m_type!=texture_2d || m_format!=format);
+    if(m_tex<0)
+        m_tex=texture_obj::add();
+
+    if(!texture_obj::get(m_tex).tex_id || texture_obj::get(m_tex).gl_type!=GL_TEXTURE_CUBE_MAP)
+        glGenTextures(1,&texture_obj::get(m_tex).tex_id);
 
     m_width=width;
     m_height=height;
-	m_gl_type=GL_TEXTURE_CUBE_MAP;
+	texture_obj::get(m_tex).gl_type=GL_TEXTURE_CUBE_MAP;
 	m_format=format;
 
-    if(!m_tex_id)
-        glGenTextures(1,&m_tex_id);
+    if(active_layers[active_layer]>=0)
+    {
+        if(texture_obj::get(active_layers[active_layer]).gl_type!=GL_TEXTURE_CUBE_MAP)
+            glBindTexture(texture_obj::get(active_layers[active_layer]).gl_type,0);
+    }
 
-    glBindTexture(GL_TEXTURE_CUBE_MAP,m_tex_id);
+    glBindTexture(GL_TEXTURE_CUBE_MAP,texture_obj::get(m_tex).tex_id);
+    active_layers[active_layer]=-1;
 
 #ifdef GL_GENERATE_MIPMAP
     glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_GENERATE_MIPMAP,GL_TRUE);
@@ -304,120 +369,119 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+
+    glBindTexture(GL_TEXTURE_CUBE_MAP,0);
 #endif
 
     return true;
 }
 
-void texture::bind() const
-{
-#ifdef DIRECTX11
-    if(!m_tex && !m_sampler_state)
-    {
-        unbind_all();
-        return;
-    }
+void texture::bind() const { current_layers[current_layer]=m_tex; }
 
-    if(!get_context())
-        return;
-
-    get_context()->PSSetShaderResources(dx_current_layer,1,&m_tex);
-    get_context()->PSSetSamplers(dx_current_layer,1,&m_sampler_state);
-#else
-	if(!m_gl_type)
-	{
-		unbind_all();
-		return;
-	}
-
-    glBindTexture(m_gl_type,m_tex_id);
-#endif
-}
-
-void texture::unbind() const
-{
-#ifdef DIRECTX11
-    unbind_all();
-#else
-	if(!m_gl_type)
-	{
-		unbind_all();
-		return;
-	}
-
-	glBindTexture(m_gl_type,0);
-#endif
-}
-
-void texture::unbind_all()
-{
-#ifdef DIRECTX11
-    if(!get_context())
-        return;
-
-    get_context()->PSSetShaderResources(dx_current_layer,0,0);
-    get_context()->PSSetSamplers(dx_current_layer,0,0);
-#else
-    glBindTexture(GL_TEXTURE_2D,0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP,0);
-#endif
-}
+void texture::unbind() { current_layers[current_layer]=-1; }
 
 void texture::select_multitex_slot(unsigned int idx)
 {
+    if(idx>=max_layers)
+        return;
+
+    current_layer=idx;
+}
+
+void texture::apply()
+{
 #ifdef DIRECTX11
-    dx_current_layer=idx;
-#else
+    if(!get_context())
+        return;
+#endif
 
-#if defined(OPENGL_ES)
-    glActiveTexture(GL_TEXTURE0+idx);
-#elif defined(NO_EXTENSIONS_INIT)
-    glActiveTexture(GL_TEXTURE0+idx);
-#else
-    static PFNGLACTIVETEXTUREARBPROC tex_glActiveTexture=0;
-
-    static bool initialised=false;
-    if(tex_glActiveTexture!=0)
+    for(unsigned int i=0;i<max_layers;++i)
     {
-        tex_glActiveTexture(GL_TEXTURE0_ARB+idx);
-        return;
+        if(current_layers[i]==active_layers[i])
+            continue;
+
+#ifdef DIRECTX11
+        if(current_layers[i]<0)
+        {
+            get_context()->PSSetShaderResources(i,0,0);
+            get_context()->PSSetSamplers(i,0,0);
+            continue;
+        }
+
+        const texture_obj &tex=texture_obj::get(current_layers[i]);
+        get_context()->PSSetShaderResources(i,1,&tex.srv);
+        get_context()->PSSetSamplers(i,1,&tex.sampler_state);
+#else
+        gl_select_multitex_layer(i);
+
+        if(current_layers[i]<0)
+        {
+            glBindTexture(texture_obj::get(active_layers[i]).gl_type,0);
+            continue;
+        }
+
+        const texture_obj &tex=texture_obj::get(current_layers[i]);
+        if(active_layers[i]>=0)
+        {
+            const texture_obj &atex=texture_obj::get(active_layers[i]);
+            if(tex.gl_type!=atex.gl_type)
+                glBindTexture(atex.gl_type,0);
+        }
+
+        glBindTexture(tex.gl_type,tex.tex_id);
+#endif
     }
-
-    if(initialised)
-        return;
-
-    tex_glActiveTexture=(PFNGLACTIVETEXTUREARBPROC)get_extension("glActiveTexture");
-    initialised=true;
-
-    select_multitex_slot(idx);
-#endif
-
-#endif
 }
 
 void texture::release()
 {
+    if(m_tex<0)
+        return;
+
 #ifdef DIRECTX11
-    if(m_tex)
+    if(!get_context())
+        return;
+
+    for(unsigned int i=0;i<max_layers;++i)
     {
-        m_tex->Release();
-        m_tex=0;
+        if(active_layers[i]==m_tex)
+        {
+            get_context()->PSSetShaderResources(i,0,0);
+            get_context()->PSSetSamplers(i,0,0);
+            active_layers[i]=-1;
+        }
+
+        if(current_layers[i]==m_tex)
+            current_layers[i]=-1;
     }
 
-    if(m_sampler_state)
-    {
-        m_sampler_state->Release();
-        m_sampler_state=0;
-    }
+    if(texture_obj::get(m_tex).srv)
+        texture_obj::get(m_tex).srv->Release();
+
+    if(texture_obj::get(m_tex).sampler_state)
+        texture_obj::get(m_tex).sampler_state->Release();
 #else
-    if(m_tex_id)
-	    glDeleteTextures(1,&m_tex_id);
+    for(unsigned int i=0;i<max_layers;++i)
+    {
+        if(active_layers[i]==m_tex)
+        {
+            gl_select_multitex_layer(i);
+            glBindTexture(texture_obj::get(m_tex).gl_type,0);
+            active_layers[i]=-1;
+        }
 
-    m_tex_id=0;
+        if(current_layers[i]==m_tex)
+            current_layers[i]=-1;
+    }
+
+    if(texture_obj::get(m_tex).tex_id)
+	    glDeleteTextures(1,&texture_obj::get(m_tex).tex_id);
+#endif
+    texture_obj::remove(m_tex);
+
+    m_tex=-1;
     m_width=0;
     m_height=0;
-#endif
 }
 
 }
-

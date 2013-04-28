@@ -5,6 +5,9 @@
 #include "log/log.h"
 #include "math/matrix.h"
 
+class ID3D11Device;
+class ID3D11DeviceContext;
+
 namespace nya_render
 {
 
@@ -129,5 +132,12 @@ const state &get_state();
 const state &get_applied_state();
 
 void apply_state(bool ignore_cache=false);
+
+//dx-specific
+ID3D11Device *get_device();
+void set_device(ID3D11Device *device);
+
+ID3D11DeviceContext *get_context();
+void set_context(ID3D11DeviceContext *context);
 
 }

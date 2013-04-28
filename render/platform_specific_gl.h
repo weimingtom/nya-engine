@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "render_objects.h"
+
 #ifdef _WIN32
     #include <windows.h>
 		#if _WIN32_WINNT>=_WIN32_WINNT_WIN8 && defined _M_ARM
@@ -63,36 +65,30 @@ namespace nya_render
     void *get_extension(const char*ext_name);
 #endif
 
+    struct texture_obj
+    {
 #ifdef DIRECTX11
-	ID3D11Device *get_device();
-	void set_device(ID3D11Device *device);
+        ID3D11ShaderResourceView* srv;
+        ID3D11SamplerState* sampler_state;
 
-	ID3D11DeviceContext *get_context();
-	void set_context(ID3D11DeviceContext *context);
+        texture_obj(): srv(0),sampler_state(0) {}
+#else
+        unsigned int tex_id;
+        unsigned int gl_type;
 
-    class compiled_shader
-    {
-    public:
-        void *get_data() { if(m_data.empty()) return 0; return &m_data[0]; }
-        const void *get_data() const { if(m_data.empty()) return 0; return &m_data[0]; }
-        size_t get_size() const { return m_data.size(); }
-
-    public:
-        compiled_shader() {}
-        compiled_shader(size_t size) { m_data.resize(size); }
-    private:
-        std::vector<char> m_data;
-    };
-
-    class compiled_shaders_provider
-    {
-    public:
-        virtual bool get(const char *text,compiled_shader &shader) { return 0; }
-        virtual bool set(const char *text,const compiled_shader &shader) { return false; }
-    };
-
-    compiled_shaders_provider *get_compiled_shaders_provider();
-    void set_compiled_shaders_provider(compiled_shaders_provider *provider);
-
+        texture_obj(): tex_id(0),gl_type(0) {}
 #endif
+    public:
+        static int add() { return get_texture_objs().add(); }
+        static texture_obj &get(int idx) { return get_texture_objs().get(idx); }
+        static void remove(int idx) { return get_texture_objs().remove(idx); }
+
+    private:
+        typedef render_objects<texture_obj> texture_objs;
+        static texture_objs &get_texture_objs()
+        {
+            static texture_objs objs;
+            return objs;
+        }
+    };
 }

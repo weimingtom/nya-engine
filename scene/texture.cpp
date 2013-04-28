@@ -227,7 +227,7 @@ void texture::set(int slot) const
     if(!m_shared.is_valid())
     {
         nya_render::texture::select_multitex_slot(slot);
-        nya_render::texture::unbind_all();
+        nya_render::texture::unbind();
         return;
     }
 

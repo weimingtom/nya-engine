@@ -11,6 +11,7 @@
 
 #include "vbo.h"
 #include "render.h"
+#include "texture.h"
 
 #ifdef DIRECTX11
     #include "shader.h"
@@ -352,6 +353,7 @@ void vbo::draw(unsigned int offset,unsigned int count) const
     if(!m_vertex_bind)
         return;
 
+    texture::apply();
     apply_state();
 
 #ifdef DIRECTX11

@@ -19,6 +19,7 @@
 
 namespace
 {
+    nya_render::compiled_shaders_provider *render_csp=0;
     const nya_render::compiled_shader *active_vs_compiled_shader=0; //ToDo: refs instead of pointers
 }
 #endif
@@ -31,6 +32,11 @@ namespace
 
 namespace nya_render
 {
+#ifdef DIRECTX11
+    compiled_shaders_provider *get_compiled_shaders_provider() { return render_csp; }
+    void set_compiled_shaders_provider(compiled_shaders_provider *csp) { render_csp=csp; }
+#endif
+
 #ifndef DIRECTX11
   #ifndef NO_EXTENSIONS_INIT
     PFNGLGENPROGRAMSARBPROC glGenProgramsARB = NULL;

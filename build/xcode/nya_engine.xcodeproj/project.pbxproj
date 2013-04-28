@@ -145,6 +145,8 @@
 		F2BFD31F169C195D00ED4A9E /* constants.h in Headers */ = {isa = PBXBuildFile; fileRef = F2BFD31D169C195C00ED4A9E /* constants.h */; };
 		F2BFD321169C1AF400ED4A9E /* constants.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2BFD320169C1AF400ED4A9E /* constants.cpp */; };
 		F2BFD322169C1AF400ED4A9E /* constants.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2BFD320169C1AF400ED4A9E /* constants.cpp */; };
+		F2CA66FB172C700800965F9F /* render_objects.h in Headers */ = {isa = PBXBuildFile; fileRef = F2CA66FA172C700800965F9F /* render_objects.h */; };
+		F2CA66FC172C700800965F9F /* render_objects.h in Headers */ = {isa = PBXBuildFile; fileRef = F2CA66FA172C700800965F9F /* render_objects.h */; };
 		F2D7D35D16AC1EF600C7DEE5 /* proxy.h in Headers */ = {isa = PBXBuildFile; fileRef = F2D7D35B16AC1EF400C7DEE5 /* proxy.h */; };
 		F2D7D35E16AC1EF600C7DEE5 /* proxy.h in Headers */ = {isa = PBXBuildFile; fileRef = F2D7D35B16AC1EF400C7DEE5 /* proxy.h */; };
 		F2EB8EEB16D42A9C002B7B9A /* fbo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2EB8EE916D42A9C002B7B9A /* fbo.cpp */; };
@@ -251,6 +253,7 @@
 		F29B45FD16F3821500C4CC36 /* frustum.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = frustum.cpp; path = ../../math/frustum.cpp; sourceTree = "<group>"; };
 		F2BFD31D169C195C00ED4A9E /* constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = constants.h; path = ../../math/constants.h; sourceTree = "<group>"; };
 		F2BFD320169C1AF400ED4A9E /* constants.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = constants.cpp; path = ../../math/constants.cpp; sourceTree = "<group>"; };
+		F2CA66FA172C700800965F9F /* render_objects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = render_objects.h; sourceTree = "<group>"; };
 		F2D7D35B16AC1EF400C7DEE5 /* proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = proxy.h; path = ../../scene/proxy.h; sourceTree = "<group>"; };
 		F2EB8EE916D42A9C002B7B9A /* fbo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fbo.cpp; sourceTree = "<group>"; };
 		F2EB8EEA16D42A9C002B7B9A /* fbo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fbo.h; sourceTree = "<group>"; };
@@ -347,6 +350,7 @@
 				F25931EE15D858140092C7D8 /* platform_specific_gl.h */,
 				F25931EF15D858140092C7D8 /* render.cpp */,
 				F25931F015D858140092C7D8 /* render.h */,
+				F2CA66FA172C700800965F9F /* render_objects.h */,
 				F25931F115D858140092C7D8 /* shader.cpp */,
 				F25931F215D858140092C7D8 /* shader.h */,
 				F2F0A0961695A757007245BC /* skeleton.cpp */,
@@ -511,6 +515,7 @@
 				F2EB8EEE16D42A9C002B7B9A /* fbo.h in Headers */,
 				F25216A316EC14F400A1B2A6 /* animation.h in Headers */,
 				F29B45FF16F3821500C4CC36 /* frustum.h in Headers */,
+				F2CA66FC172C700800965F9F /* render_objects.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -564,6 +569,7 @@
 				F2EB8EED16D42A9C002B7B9A /* fbo.h in Headers */,
 				F25216A216EC14F400A1B2A6 /* animation.h in Headers */,
 				F29B45FE16F3821500C4CC36 /* frustum.h in Headers */,
+				F2CA66FB172C700800965F9F /* render_objects.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

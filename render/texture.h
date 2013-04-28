@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include "platform_specific_gl.h"
-
 namespace nya_render
 {
 
@@ -32,11 +30,11 @@ public:
 
 public:
     void bind() const;
-    void unbind() const;
-    static void unbind_all();
+    static void unbind();
 
-public:
     static void select_multitex_slot(unsigned int idx);
+
+    static void apply();
 
 public:
     void release();
@@ -44,21 +42,12 @@ public:
     unsigned int get_width() const { return m_width; }
     unsigned int get_height() const { return m_height; }
 
-#ifdef DIRECTX11
 public:
-    texture(): m_tex(0),m_sampler_state(0),m_width(0),m_height(0),m_max_tex_size(0) {}
+    texture(): m_tex(-1),m_width(0),m_height(0),m_max_tex_size(0) {}
 
 private:
-    ID3D11ShaderResourceView* m_tex;
-    ID3D11SamplerState* m_sampler_state;
-#else
-public:
-    texture(): m_tex_id(0),m_width(0),m_height(0),m_max_tex_size(0),m_gl_type(0) {}
+    int m_tex;
 
-private:
-    unsigned int m_tex_id;
-	unsigned int m_gl_type;
-#endif
     unsigned int m_width;
     unsigned int m_height;
     unsigned int m_max_tex_size;

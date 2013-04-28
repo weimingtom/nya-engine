@@ -68,10 +68,15 @@ void fbo::set_color_target(const texture &tex)
 	if(!check_init_fbo())
 		return;
 
-    if(tex.m_gl_type!=GL_TEXTURE_2D)
+    if(tex.m_tex<0)
         return;
 
-    if(m_color_target_idx==tex.m_tex_id)
+    const texture_obj &tex_obj=texture_obj::get(tex.m_tex);
+
+    if(tex_obj.gl_type!=GL_TEXTURE_2D)
+        return;
+
+    if(m_color_target_idx==tex_obj.tex_id)
         return;
 
     if(!m_fbo_idx)
@@ -87,10 +92,11 @@ void fbo::set_color_target(const texture &tex)
   #endif
     }
 
-    fbo_glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,tex.m_tex_id,0);
+    fbo_glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,tex_obj.tex_id,0);
     fbo_glBindFramebuffer(GL_FRAMEBUFFER,default_fbo_idx);
 
-    m_color_target_idx=tex.m_tex_id;
+    m_color_target_idx=tex_obj.tex_id;
+
 #endif
 }
 
@@ -100,11 +106,17 @@ void fbo::set_depth_target(const texture &tex)
 #else
 	if(!check_init_fbo())
 		return;
+    //ToDo
+    
+    if(tex.m_tex<0)
+        return;
+    
+    const texture_obj &tex_obj=texture_obj::get(tex.m_tex);
 
-    if(tex.m_gl_type!=GL_TEXTURE_2D)
+    if(tex_obj.gl_type!=GL_TEXTURE_2D)
         return;
 
-    if(m_depth_target_idx==tex.m_tex_id)
+    if(m_depth_target_idx==tex_obj.tex_id)
         return;
 
     if(!m_fbo_idx)
@@ -120,10 +132,10 @@ void fbo::set_depth_target(const texture &tex)
   #endif
     }
 
-    fbo_glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,tex.m_tex_id,0);
+    fbo_glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,tex_obj.tex_id,0);
     fbo_glBindFramebuffer(GL_FRAMEBUFFER,default_fbo_idx);
 
-    m_depth_target_idx=tex.m_tex_id;
+    m_depth_target_idx=tex_obj.tex_id;
 #endif
 }
 
