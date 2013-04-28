@@ -2,17 +2,14 @@
 
 #pragma once
 
-#include "render/platform_specific_gl.h"
+#include "render/shader.h"
 #include <string>
 
 namespace nya_render{ class compiled_shader; }
 
 namespace nya_system
 {
-    class compiled_shaders_provider
-#ifdef DIRECTX11
-        : public nya_render::compiled_shaders_provider
-#endif
+    class compiled_shaders_provider: public nya_render::compiled_shaders_provider
     {
     public:
         void set_load_path(const char *path) { m_load_path.assign(path?path:""); }

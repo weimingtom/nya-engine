@@ -79,7 +79,7 @@ std::string compiled_shaders_provider::crc(const char *text)
     }
 
     unsigned int crc=0xFFFFFFFFUL;
-    int len=strlen(text);
+    size_t len=strlen(text);
     unsigned char *buf=(unsigned char*)text;
     while(len--)
         crc=crc_table[(crc^ *buf++)&0xFF]^(crc>>8);

@@ -147,6 +147,10 @@
 		F2BFD322169C1AF400ED4A9E /* constants.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2BFD320169C1AF400ED4A9E /* constants.cpp */; };
 		F2CA66FB172C700800965F9F /* render_objects.h in Headers */ = {isa = PBXBuildFile; fileRef = F2CA66FA172C700800965F9F /* render_objects.h */; };
 		F2CA66FC172C700800965F9F /* render_objects.h in Headers */ = {isa = PBXBuildFile; fileRef = F2CA66FA172C700800965F9F /* render_objects.h */; };
+		F2CA6767172D92CE00965F9F /* shaders_cache_provider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2CA6765172D92CE00965F9F /* shaders_cache_provider.cpp */; };
+		F2CA6768172D92CE00965F9F /* shaders_cache_provider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2CA6765172D92CE00965F9F /* shaders_cache_provider.cpp */; };
+		F2CA6769172D92CE00965F9F /* shaders_cache_provider.h in Headers */ = {isa = PBXBuildFile; fileRef = F2CA6766172D92CE00965F9F /* shaders_cache_provider.h */; };
+		F2CA676A172D92CE00965F9F /* shaders_cache_provider.h in Headers */ = {isa = PBXBuildFile; fileRef = F2CA6766172D92CE00965F9F /* shaders_cache_provider.h */; };
 		F2D7D35D16AC1EF600C7DEE5 /* proxy.h in Headers */ = {isa = PBXBuildFile; fileRef = F2D7D35B16AC1EF400C7DEE5 /* proxy.h */; };
 		F2D7D35E16AC1EF600C7DEE5 /* proxy.h in Headers */ = {isa = PBXBuildFile; fileRef = F2D7D35B16AC1EF400C7DEE5 /* proxy.h */; };
 		F2EB8EEB16D42A9C002B7B9A /* fbo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2EB8EE916D42A9C002B7B9A /* fbo.cpp */; };
@@ -254,6 +258,8 @@
 		F2BFD31D169C195C00ED4A9E /* constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = constants.h; path = ../../math/constants.h; sourceTree = "<group>"; };
 		F2BFD320169C1AF400ED4A9E /* constants.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = constants.cpp; path = ../../math/constants.cpp; sourceTree = "<group>"; };
 		F2CA66FA172C700800965F9F /* render_objects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = render_objects.h; sourceTree = "<group>"; };
+		F2CA6765172D92CE00965F9F /* shaders_cache_provider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shaders_cache_provider.cpp; sourceTree = "<group>"; };
+		F2CA6766172D92CE00965F9F /* shaders_cache_provider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shaders_cache_provider.h; sourceTree = "<group>"; };
 		F2D7D35B16AC1EF400C7DEE5 /* proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = proxy.h; path = ../../scene/proxy.h; sourceTree = "<group>"; };
 		F2EB8EE916D42A9C002B7B9A /* fbo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fbo.cpp; sourceTree = "<group>"; };
 		F2EB8EEA16D42A9C002B7B9A /* fbo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fbo.h; sourceTree = "<group>"; };
@@ -409,6 +415,8 @@
 				F259321415D858140092C7D8 /* button_codes.h */,
 				F259321515D858140092C7D8 /* system.cpp */,
 				F259321615D858140092C7D8 /* system.h */,
+				F2CA6765172D92CE00965F9F /* shaders_cache_provider.cpp */,
+				F2CA6766172D92CE00965F9F /* shaders_cache_provider.h */,
 			);
 			name = system;
 			path = ../../system;
@@ -516,6 +524,7 @@
 				F25216A316EC14F400A1B2A6 /* animation.h in Headers */,
 				F29B45FF16F3821500C4CC36 /* frustum.h in Headers */,
 				F2CA66FC172C700800965F9F /* render_objects.h in Headers */,
+				F2CA676A172D92CE00965F9F /* shaders_cache_provider.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -570,6 +579,7 @@
 				F25216A216EC14F400A1B2A6 /* animation.h in Headers */,
 				F29B45FE16F3821500C4CC36 /* frustum.h in Headers */,
 				F2CA66FB172C700800965F9F /* render_objects.h in Headers */,
+				F2CA6769172D92CE00965F9F /* shaders_cache_provider.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -677,6 +687,7 @@
 				F2EB8EEC16D42A9C002B7B9A /* fbo.cpp in Sources */,
 				F25216A116EC14F400A1B2A6 /* animation.cpp in Sources */,
 				F29B460116F3821500C4CC36 /* frustum.cpp in Sources */,
+				F2CA6768172D92CE00965F9F /* shaders_cache_provider.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -723,6 +734,7 @@
 				F2EB8EEB16D42A9C002B7B9A /* fbo.cpp in Sources */,
 				F25216A016EC14F400A1B2A6 /* animation.cpp in Sources */,
 				F29B460016F3821500C4CC36 /* frustum.cpp in Sources */,
+				F2CA6767172D92CE00965F9F /* shaders_cache_provider.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

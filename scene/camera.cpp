@@ -31,6 +31,15 @@ void camera::set_proj(float left,float right,float bottom,float top,float near,f
     m_recalc_frustum=true;
 }
 
+void camera::set_proj(const nya_math::mat4 &mat)
+{
+    m_proj=mat;
+    if(this==active_camera)
+        nya_render::set_projection_matrix(m_proj);
+
+    m_recalc_frustum=true;
+}
+
 void camera::set_pos(float x,float y,float z)
 {
     m_pos.x=x;

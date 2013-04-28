@@ -14,6 +14,7 @@ class camera
 public:
     void set_proj(float fov,float aspect,float near,float far);
     void set_proj(float left,float right,float bottom,float top,float near,float far);
+    void set_proj(const nya_math::mat4 &mat);
 
     void set_pos(float x,float y,float z);
     void set_rot(float yaw,float pitch,float roll);
