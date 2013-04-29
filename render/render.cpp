@@ -154,9 +154,18 @@ void clear(bool color,bool depth)
 	if(!get_context())
 		return;
 
+    //ToDo
+#ifdef WINDOWS_PHONE8
+    static ID3D11RenderTargetView* color_target=0;
+    static ID3D11DepthStencilView* depth_target=0;
+    if(!color_target)
+    	get_context()->OMGetRenderTargets(1,&color_target,&depth_target);
+
+#else
     ID3D11RenderTargetView* color_target=0;
     ID3D11DepthStencilView* depth_target=0;
-	get_context()->OMGetRenderTargets(1,&color_target,&depth_target);    //ToDo
+	get_context()->OMGetRenderTargets(1,&color_target,&depth_target);
+#endif
 
 	if(color && color_target)
     {

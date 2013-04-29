@@ -38,7 +38,6 @@ namespace
 
 namespace nya_render
 {
-    compiled_shaders_provider *get_compiled_shaders_provider() { return render_csp; }
     void set_compiled_shaders_provider(compiled_shaders_provider *csp) { render_csp=csp; }
 
     struct shader_obj
@@ -48,7 +47,7 @@ namespace nya_render
         shader_obj(): vertex_program(0),pixel_program(0) {}
 
     public:
-        compiled_shader compiled[program_types_count];
+        compiled_shader compiled[shader::program_types_count];
         ID3D11VertexShader *vertex_program;
         ID3D11PixelShader *pixel_program;
 
@@ -316,7 +315,7 @@ ID3D11InputLayout *get_layout(const std::string &layout)
     if(current_shader<0)
         return 0;
 
-    layouts_map::iterator it=shader_obj::get(current_shader).layouts.find(layout);
+    shader_obj::layouts_map::iterator it=shader_obj::get(current_shader).layouts.find(layout);
     if(it==shader_obj::get(current_shader).layouts.end())
         return 0;
 
@@ -332,8 +331,8 @@ ID3D11InputLayout *add_layout(const std::string &layout,
     shader_obj &shdr=shader_obj::get(current_shader);
 
     ID3D11InputLayout *out=0;
-	get_device()->CreateInputLayout(desc,desc_size,shdr.compiled[vertex].get_data(),
-                                    shdr.compiled[vertex].get_size(),&out);
+	get_device()->CreateInputLayout(desc,desc_size,shdr.compiled[shader::vertex].get_data(),
+                                    shdr.compiled[shader::vertex].get_size(),&out);
     if(!out)
         return 0;
 
@@ -413,9 +412,8 @@ bool shader::add_program(program_type type,const char*code)
 
     code_final.append(code_str);
 
-    compiled_shaders_provider *csp=get_compiled_shaders_provider();
-    if(csp)
-        csp->get(code_final.c_str(),m_compiled[type]);
+    if(render_csp)
+        render_csp->get(code_final.c_str(),shdr.compiled[type]);
 
     if(!shdr.compiled[type].get_data())
     {
@@ -444,8 +442,8 @@ bool shader::add_program(program_type type,const char*code)
         memcpy(shdr.compiled[type].get_data(),compiled->GetBufferPointer(),compiled->GetBufferSize());
         compiled->Release();
 
-        if(csp)
-            csp->set(code_final.c_str(),shdr.compiled[type]);
+        if(render_csp)
+            render_csp->set(code_final.c_str(),shdr.compiled[type]);
 #endif
     }
 
@@ -976,11 +974,11 @@ void shader::release()
     shader_obj &shdr=shader_obj::get(m_shdr);
 
 #ifdef DIRECTX11
-    if(shdr.vertex)
-        shdr.vertex->Release();
+    if(shdr.vertex_program)
+        shdr.vertex_program->Release();
 
-    if(shdr.pixel)
-        shdr.pixel->Release();
+    if(shdr.pixel_program)
+        shdr.pixel_program->Release();
 
     shdr.layouts.clear();
 #else

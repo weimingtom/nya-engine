@@ -82,7 +82,6 @@ public:
     virtual bool set(const char *text,const compiled_shader &shader) { return false; }
 };
 
-compiled_shaders_provider *get_compiled_shaders_provider();
 void set_compiled_shaders_provider(compiled_shaders_provider *provider);
 
 }

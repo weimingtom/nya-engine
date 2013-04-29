@@ -1,6 +1,7 @@
 //https://code.google.com/p/nya-engine/
 
 #include "shaders_cache_provider.h"
+#include "render/platform_specific_gl.h"
 
 #ifdef DIRECTX11
     #include "resources/resources.h"
