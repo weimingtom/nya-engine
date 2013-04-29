@@ -366,6 +366,8 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
         [EAGLContext setCurrentContext:nil];
     }
+    
+    [super dealloc];
 }
 
 - (void)didReceiveMemoryWarning
@@ -523,6 +525,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 - (void)dealloc
 {
     [self deleteFramebuffer];
+    [super dealloc];
 }
 
 - (void)setContext:(EAGLContext *)newContext
