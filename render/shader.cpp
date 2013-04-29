@@ -106,6 +106,10 @@ namespace nya_render
         }
     };
 
+#ifdef DIRECTX11
+    shader_obj::layouts_map shader_obj::layouts;
+#endif
+
 #ifndef DIRECTX11
   #ifndef NO_EXTENSIONS_INIT
     PFNGLGENPROGRAMSARBPROC glGenProgramsARB = NULL;
@@ -307,31 +311,33 @@ bool check_init_shaders()
 #endif
 
 #ifdef DIRECTX11
-shader::layouts_map shader::m_layouts;
-
-ID3D11InputLayout *shader::get_layout(const std::string &layout)
+ID3D11InputLayout *get_layout(const std::string &layout)
 {
-    layouts_map::iterator it=m_layouts.find(layout);
-    if(it==m_layouts.end())
+    if(current_shader<0)
+        return 0;
+
+    layouts_map::iterator it=shader_obj::get(current_shader).layouts.find(layout);
+    if(it==shader_obj::get(current_shader).layouts.end())
         return 0;
 
     return it->second;
 }
 
-ID3D11InputLayout *shader::add_layout(const std::string &layout,
-                                      const D3D11_INPUT_ELEMENT_DESC*desc,size_t desc_size)
+ID3D11InputLayout *add_layout(const std::string &layout,
+                              const D3D11_INPUT_ELEMENT_DESC*desc,size_t desc_size)
 {
-    if(!active_vs_compiled_shader)
+    if(current_shader<0)
         return 0;
 
-    ID3D11InputLayout *out=0;
+    shader_obj &shdr=shader_obj::get(current_shader);
 
-	get_device()->CreateInputLayout(desc,desc_size,active_vs_compiled_shader->get_data(),
-                                    active_vs_compiled_shader->get_size(),&out);
+    ID3D11InputLayout *out=0;
+	get_device()->CreateInputLayout(desc,desc_size,shdr.compiled[vertex].get_data(),
+                                    shdr.compiled[vertex].get_size(),&out);
     if(!out)
         return 0;
 
-    m_layouts[layout]=out;
+    shdr.layouts[layout]=out;
 
     return out;
 }
@@ -339,7 +345,7 @@ ID3D11InputLayout *shader::add_layout(const std::string &layout,
 
 bool shader::add_program(program_type type,const char*code)
 {
-    if(type>=geometry)
+    if(type>pixel)
         return false;
 
     if(!code || !code[0])
@@ -350,54 +356,59 @@ bool shader::add_program(program_type type,const char*code)
 
     const static char type_str[][12]={"vertex","pixel","geometry","tesselation"};
 
+    //ToDo: release or reuse if already exists
+
 #ifdef DIRECTX11
     if(!get_device())
         return false;
 
-    //ToDo: release or reuse if already exists
+    if(m_shdr<0)
+        m_shdr=shader_obj::add();
+
+    shader_obj &shdr=shader_obj::get(m_shdr);
 
     std::string code_str(code);
     std::string code_final;
 
     if(type==vertex)
     {
-        m_layouts.clear();
+        shdr.layouts.clear();
 
-        m_constants.mvp_matrix=code_str.find("ModelViewProjectionMatrix")!=std::string::npos;
-        m_constants.mv_matrix=code_str.find("ModelViewMatrix")!=std::string::npos;
+        shdr.constants.mvp_matrix=code_str.find("ModelViewProjectionMatrix")!=std::string::npos;
+        shdr.constants.mv_matrix=code_str.find("ModelViewMatrix")!=std::string::npos;
         for(size_t i=code_str.find("ProjectionMatrix");i!=std::string::npos;
                                                        i=code_str.find("ProjectionMatrix",i+16))
         {
             if(code_str[i-1]!='w')
             {
-                m_constants.p_matrix=true;
+                shdr.constants.p_matrix=true;
                 break;
             }
         }
 
         int size=0;
-        if(m_constants.mvp_matrix) size+=16;
-        if(m_constants.mv_matrix) size+=16;
-        if(m_constants.p_matrix) size+=16;
+        if(shdr.constants.mvp_matrix) size+=16;
+        if(shdr.constants.mv_matrix) size+=16;
+        if(shdr.constants.p_matrix) size+=16;
 
-        if(m_constants.dx_buffer)
-            m_constants.dx_buffer->Release();
+        if(shdr.constants.dx_buffer)
+            shdr.constants.dx_buffer->Release();
 
-        m_constants.dx_buffer=0;
+        shdr.constants.dx_buffer=0;
 
         if(size>0)
         {
             code_final.append("cbuffer NyaConstantBuffer : register(b0){");
-            if(m_constants.mvp_matrix) code_final.append("matrix ModelViewProjectionMatrix;");
-            if(m_constants.mv_matrix) code_final.append("matrix ModelViewMatrix;");
-            if(m_constants.p_matrix) code_final.append("matrix ProjectionMatrix;");
+            if(shdr.constants.mvp_matrix) code_final.append("matrix ModelViewProjectionMatrix;");
+            if(shdr.constants.mv_matrix) code_final.append("matrix ModelViewMatrix;");
+            if(shdr.constants.p_matrix) code_final.append("matrix ProjectionMatrix;");
             code_final.append("}");
 
             CD3D11_BUFFER_DESC desc(size*sizeof(float),D3D11_BIND_CONSTANT_BUFFER);
-            get_device()->CreateBuffer(&desc,nullptr,&m_constants.dx_buffer);
+            get_device()->CreateBuffer(&desc,nullptr,&shdr.constants.dx_buffer);
         }
 
-        m_constants.buffer.resize(size);
+        shdr.constants.buffer.resize(size);
     }
 
     code_final.append(code_str);
@@ -406,7 +417,7 @@ bool shader::add_program(program_type type,const char*code)
     if(csp)
         csp->get(code_final.c_str(),m_compiled[type]);
 
-    if(!m_compiled[type].get_data())
+    if(!shdr.compiled[type].get_data())
     {
 #ifdef WINDOWS_PHONE8
         get_log()<<"Can`t compile "<<type_str[type]<<" shader: Windows phone 8 not allowed to compile shaders, please, set compiled_shaders_provider and add compiled shaders cache\n";
@@ -429,19 +440,19 @@ bool shader::add_program(program_type type,const char*code)
             return false;
         }
 
-        m_compiled[type]=compiled_shader(compiled->GetBufferSize());
-        memcpy(m_compiled[type].get_data(),compiled->GetBufferPointer(),compiled->GetBufferSize());
+        shdr.compiled[type]=compiled_shader(compiled->GetBufferSize());
+        memcpy(shdr.compiled[type].get_data(),compiled->GetBufferPointer(),compiled->GetBufferSize());
         compiled->Release();
 
         if(csp)
-            csp->set(code_final.c_str(),m_compiled[type]);
+            csp->set(code_final.c_str(),shdr.compiled[type]);
 #endif
     }
 
     if(type==vertex)
     {
-        if(get_device()->CreateVertexShader(m_compiled[type].get_data(),
-                                            m_compiled[type].get_size(),nullptr,&m_vertex)<0)
+        if(get_device()->CreateVertexShader(shdr.compiled[type].get_data(),
+                                            shdr.compiled[type].get_size(),nullptr,&shdr.vertex_program)<0)
         {
             get_log()<<"Can`t create "<<type_str[type]<<" shader\n";
             return false;
@@ -450,8 +461,8 @@ bool shader::add_program(program_type type,const char*code)
 
     if(type==pixel)
     {
-        if(get_device()->CreatePixelShader(m_compiled[type].get_data(),
-                                           m_compiled[type].get_size(),nullptr,&m_pixel)<0)
+        if(get_device()->CreatePixelShader(shdr.compiled[type].get_data(),
+                                           shdr.compiled[type].get_size(),nullptr,&shdr.pixel_program)<0)
         {
             get_log()<<"Can`t create "<<type_str[type]<<" shader\n";
             return false;
@@ -783,48 +794,57 @@ void set_shader(int idx)
 void shader::apply()
 {
 #ifdef DIRECTX11
-    if(m_vertex)
+    if(current_shader<0)
+        return;
+
+    if(!get_context())
+        return;
+
+    const shader_obj &shdr=shader_obj::get(current_shader);
+
+    if(shdr.vertex_program)
     {
-        if(m_constants.dx_buffer)
+        if(shdr.constants.dx_buffer)
         {
             int offset=0;
-            if(m_constants.mvp_matrix)
+            if(shdr.constants.mvp_matrix)
             {
-                memcpy(&m_constants.buffer[0],
+                memcpy(&shdr.constants.buffer[0],
                        transform::get().get_modelviewprojection_matrix().m[0],16*sizeof(float));
                 offset+=16;
             }
-            
-            if(m_constants.mv_matrix)
+
+            if(shdr.constants.mv_matrix)
             {
-                memcpy(&m_constants.buffer[0]+offset,
+                memcpy(&shdr.constants.buffer[0]+offset,
                        transform::get().get_modelview_matrix().m[0],16*sizeof(float));
                 offset+=16;
             }
-            
-            if(m_constants.p_matrix)
+
+            if(shdr.constants.p_matrix)
             {
-                memcpy(&m_constants.buffer[0]+offset,
+                memcpy(&shdr.constants.buffer[0]+offset,
                        transform::get().get_projection_matrix().m[0],16*sizeof(float));
                 offset+=16;
             }
-            
-            get_context()->UpdateSubresource(m_constants.dx_buffer,0,NULL,&m_constants.buffer[0],0,0);
-            get_context()->VSSetConstantBuffers(0,1,&m_constants.dx_buffer);
+
+            get_context()->UpdateSubresource(shdr.constants.dx_buffer,0,NULL,&shdr.constants.buffer[0],0,0);
+            get_context()->VSSetConstantBuffers(0,1,&shdr.constants.dx_buffer);
         }
-        
-        get_context()->VSSetShader(m_vertex,nullptr,0);
+
+        get_context()->VSSetShader(shdr.vertex_program,nullptr,0);
     }
-    
-    if(m_pixel)
-        get_context()->PSSetShader(m_pixel,nullptr,0);
-    
-    active_vs_compiled_shader=&m_compiled[vertex];
+
+    if(shdr.pixel_program)
+        get_context()->PSSetShader(shdr.pixel_program,nullptr,0);
 #else
     set_shader(current_shader);
 
   #ifdef SUPPORT_OLD_SHADERS
-    shader_obj &shdr=shader_obj::get(current_shader);
+    if(current_shader<0)
+        return;
+
+    const shader_obj &shdr=shader_obj::get(current_shader);
 
     if(shdr.mat_mvp>=0)
         glUniformMatrix4fvARB(shdr.mat_mvp,1,false,transform::get().get_modelviewprojection_matrix().m[0]);
@@ -888,7 +908,7 @@ void shader::set_uniform(unsigned int i,float f0,float f1,float f2,float f3) con
 #else
     if(m_shdr<0)
         return;
-    
+
     set_shader(m_shdr);
 
     if(!shader_obj::get(m_shdr).program)
@@ -904,7 +924,7 @@ void shader::set_uniform3_array(unsigned int i,const float *f,unsigned int count
 #else
     if(m_shdr<0)
         return;
-    
+
     set_shader(m_shdr);
 
     if(!shader_obj::get(m_shdr).program || !f)
@@ -920,7 +940,7 @@ void shader::set_uniform4_array(unsigned int i,const float *f,unsigned int count
 #else
     if(m_shdr<0)
         return;
-    
+
     set_shader(m_shdr);
 
     if(!shader_obj::get(m_shdr).program || !f)
@@ -936,7 +956,7 @@ void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int coun
 #else
     if(m_shdr<0)
         return;
-    
+
     set_shader(m_shdr);
 
     if(!shader_obj::get(m_shdr).program || !f)
@@ -950,36 +970,25 @@ void shader::release()
 {
     m_samplers.clear();
 
-    if(m_shdr==active_shader)
-        set_shader(-1);
-
-#ifdef DIRECTX11
-    for(int i=0;i<program_types_count;++i)
-        m_compiled[i]=compiled_shader();
-
-    if(m_vertex)
-    {
-        m_vertex->Release();
-        m_vertex=0;
-    }
-
-    if(m_pixel)
-    {
-        m_pixel->Release();
-        m_pixel=0;
-    }
-
-    m_layouts.clear();
-#else
     if(m_shdr<0)
         return;
 
     shader_obj &shdr=shader_obj::get(m_shdr);
 
-    if(!shader_obj::get(m_shdr).program)
-        return;
+#ifdef DIRECTX11
+    if(shdr.vertex)
+        shdr.vertex->Release();
 
-    glUseProgramObjectARB(0); //ToDo: only if currently bind
+    if(shdr.pixel)
+        shdr.pixel->Release();
+
+    shdr.layouts.clear();
+#else
+    if(m_shdr==active_shader)
+        set_shader(-1);
+
+    if(!shdr.program)
+        return;
 
     for(int i=0;i<program_types_count;++i)
     {
@@ -991,9 +1000,8 @@ void shader::release()
     }
 
     glDeleteObjectARB(shdr.program);
-
-    shader_obj::remove(m_shdr);
 #endif
+    shader_obj::remove(m_shdr);
 }
 
 }

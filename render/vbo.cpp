@@ -389,7 +389,7 @@ void vbo::draw(unsigned int offset,unsigned int count) const
         m_layout.append(tmp);
     }
 
-    ID3D11InputLayout *layout=shader::get_layout(m_layout);
+    ID3D11InputLayout *layout=get_layout(m_layout);
     if(!layout)
     {
         std::vector<D3D11_INPUT_ELEMENT_DESC> desc;
@@ -450,7 +450,7 @@ void vbo::draw(unsigned int offset,unsigned int count) const
             desc.push_back(d);
         }
 
-        layout=shader::add_layout(m_layout,&desc[0],desc.size());
+        layout=add_layout(m_layout,&desc[0],desc.size());
 
         if(!layout)
             return;

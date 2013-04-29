@@ -15,8 +15,8 @@ public:
     {
         vertex,
         pixel,
-        geometry,
-        tesselation,
+        //geometry,
+        //tesselation,
         program_types_count
     };
 
@@ -70,6 +70,7 @@ public:
 public:
     compiled_shader() {}
     compiled_shader(size_t size) { m_data.resize(size); }
+
 private:
     std::vector<char> m_data;
 };
