@@ -604,9 +604,9 @@ void scene::draw()
         const size_t bro_frames_count=m_aniki_anim.get_frames_count();
         if(bro_frames_count)
         {
-            m_shader.set_uniform16_array(m_shbl_mat_uniform,
-                                         m_aniki_anim.get_buffer(int(m_anim_time)),
-                                         m_aniki_anim.get_bones_count());
+            m_shader_black.set_uniform16_array(m_shbl_mat_uniform,
+                                               m_aniki_anim.get_buffer(int(m_anim_time)),
+                                               m_aniki_anim.get_bones_count());
             m_aniki.draw(true,false);
         }
         //glPopMatrix();
