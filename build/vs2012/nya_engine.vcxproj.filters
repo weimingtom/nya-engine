@@ -120,12 +120,6 @@
     <ClCompile Include="..\..\system\system.cpp">
       <Filter>system</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\ui\button.cpp">
-      <Filter>ui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\ui\label.cpp">
-      <Filter>ui</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\ui\list.cpp">
       <Filter>ui</Filter>
     </ClCompile>

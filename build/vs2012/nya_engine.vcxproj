@@ -231,8 +231,6 @@
     <ClCompile Include="..\..\system\app.cpp" />
     <ClCompile Include="..\..\system\shaders_cache_provider.cpp" />
     <ClCompile Include="..\..\system\system.cpp" />
-    <ClCompile Include="..\..\ui\button.cpp" />
-    <ClCompile Include="..\..\ui\label.cpp" />
     <ClCompile Include="..\..\ui\list.cpp" />
     <ClCompile Include="..\..\ui\panel.cpp" />
     <ClCompile Include="..\..\ui\slider.cpp" />

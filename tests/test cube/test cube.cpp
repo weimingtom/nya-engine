@@ -5,10 +5,14 @@
 #include "system/system.h"
 #include "render/vbo.h"
 #include "render/shader.h"
-#include "render/transform.h"
 #include "render/render.h"
 
 #include "stdio.h"
+
+#if defined _WIN32 && defined _M_ARM
+    #define DIRECTX11
+    #define WINDOWS_PHONE8
+#endif
 
 class test_cube: public nya_system::app
 {
@@ -33,7 +37,7 @@ private:
 
 	    nya_render::set_clear_color(0.2f,0.4f,0.5f,0.0f);
 		nya_render::set_clear_depth(1.0f);
-		nya_render::depth_test::enable();
+        nya_render::depth_test::enable(nya_render::depth_test::less);
 
 		float vertices[] = 
 		{
@@ -127,7 +131,7 @@ private:
 		mv.translate(0,0,-2.0f);
 		mv.rotate(30.0f,1.0f,0.0f,0.0f);
 		mv.rotate(m_rot,0.0f,1.0f,0.0f);
-		nya_render::transform::get().set_modelview_matrix(mv);
+		nya_render::set_modelview_matrix(mv);
 
 		m_shader.bind();
 		m_vbo.bind();
@@ -145,7 +149,7 @@ private:
 
 		nya_math::mat4 proj;
 		proj.perspective(70.0f,float(w)/h,0.01f,100.0f);
-		nya_render::transform::get().set_projection_matrix(proj);
+		nya_render::set_projection_matrix(proj);
     }
 
 	void on_free()
@@ -178,8 +182,10 @@ private:
     nya_log::set_log(&log);
     */
 
+#ifndef WINDOWS_PHONE8
     nya_log::get_log()<<"test cube started from path "
                       <<nya_system::get_app_path()<<"\n";
+#endif
 
     test_cube app;
     app.set_title("Loading, please wait...");
