@@ -1,14 +1,8 @@
 //https://code.google.com/p/nya-engine/
 
 #include "ui/ui.h"
-#include "memory/tmp_buffer.h"
+
 #include <string>
-
-/*
-    ToDo: abstract render
-*/
-
-#include "render/render.h"
 
 namespace
 {
@@ -32,6 +26,84 @@ float clamp(float v,float from,float to)
     return v;
 }
 
+const rect &widget::get_rect()
+{
+    if(m_cached_rect)
+        return m_rect;
+
+    int x,y,w,h;
+    if(m_align_left)
+    {
+        x=m_pos_left+m_parent_pos_x;
+        if(m_align_right)
+            w=m_parent_width-m_pos_right-m_pos_left;
+        else
+            w=m_width;
+    }
+    else if(m_align_right)
+    {
+        x=m_parent_pos_x+m_parent_width-m_width-m_pos_right;
+        w=m_width;
+    }
+    else
+    {
+        x=m_parent_pos_x+m_parent_width/2-m_center_x-m_width/2;
+        w=m_width;
+    }
+    
+    if(m_align_bottom)
+    {
+        y=m_pos_bottom+m_parent_pos_y;
+        if(m_align_top)
+            h=m_parent_height-m_pos_top-m_pos_bottom;
+        else
+            h=m_height;
+    }
+    else if(m_align_top)
+    {
+        y=m_parent_pos_y+m_parent_height-m_height-m_pos_top;
+        h=m_height;
+    }
+    else
+    {
+        y=m_parent_pos_y+m_parent_height/2-m_center_y-m_height/2;
+        h=m_height;
+    }
+    
+    if(m_keep_aspect==from_width)
+    {
+        h=w*m_height/m_width;
+    }
+    else if(m_keep_aspect==from_height)
+    {
+        w=h*m_width/m_height;
+    }
+    
+    if(x<m_parent_pos_x)
+        x=m_parent_pos_x;
+    if(y<m_parent_pos_y)
+        y=m_parent_pos_y;
+    
+    const int cw=m_parent_pos_x-x+m_parent_width;
+    if(w>cw)
+        w=cw;
+    
+    const int ch=m_parent_pos_y-y+m_parent_height;
+    if(h>ch)
+        h=ch;
+    
+    m_rect=rect();
+    
+    if(x>0) m_rect.x=x;
+    if(y>0) m_rect.y=y;
+    if(w>0) m_rect.w=w;
+    if(h>0) m_rect.h=h;
+    
+    m_cached_rect=true;
+    
+    return m_rect;
+}
+
 void layer::draw()
 {
     draw_widgets(*this);
@@ -43,188 +115,6 @@ void layer::resize(uint width, uint height)
     m_height=height;
 
     layout::resize(m_width,m_height);
-}
-
-void layer::draw_text(uint x,uint y,const char *text
-                      ,font_align aligh_hor,font_align aligh_vert)
-{
-    if(!text)
-        return;
-
-    std::string text_str(text);
-    if(text_str.empty())
-        return;
-
-    const int str_len=(int)text_str.size();
-
-    //font_params
-    const uint font_width=256;
-    const uint font_height=128;
-    const uint char_size=16;
-    const uint char_offs=1;
-
-    const uint char_actual_width=8;//bad magic: should
-    uint char_widths[128-32]; //be font-defined array
-    for(int i=0;i<128-32;++i)
-    {
-        char c=i+32;
-        if(c=='i'||c=='j' || c=='l')
-            char_widths[i]=5;
-        else if(c=='m')
-            char_widths[i]=10;
-        else
-            char_widths[i]=char_actual_width;
-    }
-
-    //
-    const float font_scale=1.0f;
-
-    //precomputed from font_params
-    const int chars_per_row=font_width/char_size;
-    const float tc_w=float(char_size)/font_width;
-    const float tc_h=float(char_size)/font_height;
-
-    const float offs_w=float(char_offs)/font_width;
-    const float offs_h=float(char_offs)/font_height;
-
-    float chs=2.0f*font_scale*(char_size-char_offs);
-
-//=====
-
-    const float w=chs/m_width;
-    const float h=chs/m_height;
-
-    if(aligh_hor==center)
-        x-=int(0.25f*(chs*char_actual_width/char_size*str_len));
-    else if(aligh_hor==right)
-        x-=int(0.5f*(chs*char_actual_width/char_size*str_len));
-
-    if(aligh_vert==center)
-        y-=int(0.25f*chs);
-    else if(aligh_vert==top)
-        y-=int(0.5f*chs);
-
-    float px=-1.0f+2.0f*x/m_width;
-    float py=-1.0f+2.0f*y/m_height;
-
-    struct vertex
-    {
-        float x;
-        float y;
-        float s;
-        float t;
-    };
-
-    const uint elem_per_char=6;
-    nya_memory::tmp_buffer_scoped vert_buf(text_str.size()*elem_per_char*sizeof(vertex));
-
-    vertex *vertices=(vertex*)vert_buf.get_data();
-
-    float dpos=0;
-    for(int i=0;i<str_len;++i)
-    {
-        const char c=text_str[i];
-
-        if(c<32 || c>127)
-            continue;
-
-        vertex *v=&vertices[elem_per_char*i];
-
-        const uint char_width=char_widths[c-32];
-
-        v[2].x=v[5].x=px+dpos;
-        v[1].x=v[0].x=v[2].x+w*char_width/char_size;
-        v[0].y=v[5].y=py;
-        v[2].y=v[1].y=py+h;
-
-        const uint letter_pos=c-32;
-        const uint letter_x=(letter_pos)%chars_per_row;
-        const uint letter_y=(letter_pos)/chars_per_row;
-
-        const float tcx=tc_w*letter_x-offs_w;
-        const float tcy=tc_h*letter_y;
-        float tcw=tc_w-offs_w;
-        float tch=tc_h-offs_h;
-
-        const float tc_fix=0.5f*(tc_w-float(char_width)/font_width);
-
-        v[5].s=v[2].s=tcx+tc_fix;
-        v[1].s=v[0].s=tcx+tcw-tc_fix;
-        v[5].t=v[0].t=tcy+tch;
-        v[2].t=v[1].t=tcy;
-
-        v[3]=v[0];
-        v[4]=v[2];
-
-        dpos+=w*char_width/char_size;
-    }
-
-    m_font_vbo.set_vertex_data(vert_buf.get_data(),sizeof(vertex),str_len*elem_per_char,nya_render::vbo::dynamic_draw);
-    m_font_vbo.bind();
-    m_font_vbo.draw();
-    m_font_vbo.unbind();
-}
-
-void layer::draw_rect(rect &r,rect_style &s)
-{
-    if(!s.border&&!s.solid)
-        return;
-
-    float w = 2.0f*r.w/m_width;
-    float h = 2.0f*r.h/m_height;
-
-    float px=-1.0f+2.0f*r.x/m_width;
-    float py=-1.0f+2.0f*r.y/m_height;
-
-    float pos[4][2];
-    pos[0][0]=pos[2][0]=px;
-    pos[0][1]=pos[1][1]=py;
-    pos[2][1]=pos[3][1]=h+py;
-    pos[1][0]=pos[3][0]=w+px;
-
-    m_rect_vbo.set_vertex_data(pos,sizeof(float)*2,4,nya_render::vbo::dynamic_draw);
-    static bool initialised=false;
-    if(!initialised)
-    {
-        initialised=true;
-        m_rect_vbo.set_vertices(0,2);
-        unsigned short indices[5]={1,0,2,3,1};
-        m_rect_vbo.set_index_data(indices,nya_render::vbo::index2b,5);
-    }
-
-    m_rect_vbo.bind(false);
-
-    if(s.solid)
-    {
-        nya_render::set_color(s.solid_color.r,s.solid_color.g,
-                              s.solid_color.b,s.solid_color.a);
-
-        m_rect_vbo.set_element_type(nya_render::vbo::triangle_strip);
-
-        m_rect_vbo.draw();
-    }
-
-    if(s.border)
-    {
-        m_rect_vbo.bind_indices();
-        nya_render::set_color(s.border_color.r,s.border_color.g,
-                              s.border_color.b,s.border_color.a);
-
-        m_rect_vbo.set_element_type(nya_render::vbo::line_strip);
-        m_rect_vbo.draw();
-    }
-
-    m_rect_vbo.unbind();
-}
-
-void layer::set_scissor(rect &r)
-{
-    nya_render::scissor::enable(r.x,r.y,r.w,r.h);
-}
-
-void layer::remove_scissor()
-{
-    nya_render::scissor::disable();
 }
 
 void layer::process()
@@ -240,12 +130,6 @@ void layer::process()
     }
 
     m_events.clear();
-}
-
-void layer::release()
-{
-    m_rect_vbo.release();
-    //m_font_vbo.release();
 }
 
 void layout::process_events(layout::event &e)
@@ -303,7 +187,7 @@ void layout::move(int x,int y)
         (*it)->parent_moved(m_x,m_y);
 }
 
-bool layout::mouse_button(layout::button button,bool pressed)
+bool layout::mouse_button(layout::mbutton button,bool pressed)
 {
     bool processed=false;
 
@@ -340,7 +224,7 @@ bool layout::mouse_move(uint x,uint y)
             continue;
 
         bool inside=false;
-        if(!processed && w->get_draw_rect().check_point(x,y))
+        if(!processed && w->get_rect().check_point(x,y))
         {
             if(!w->m_mouse_over)
             {

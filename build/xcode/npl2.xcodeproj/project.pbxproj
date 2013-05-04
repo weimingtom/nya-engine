@@ -36,6 +36,8 @@
 		F259326B15D85A730092C7D8 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F259326A15D85A730092C7D8 /* Cocoa.framework */; };
 		F25932B515D860A20092C7D8 /* libnya_engine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F25932B415D8608B0092C7D8 /* libnya_engine.a */; };
 		F25932B915D860F60092C7D8 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F25932B815D860F60092C7D8 /* OpenGL.framework */; };
+		F2CA68911735378600965F9F /* widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2CA68901735378600965F9F /* widgets.cpp */; };
+		F2CA68921735378600965F9F /* widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2CA68901735378600965F9F /* widgets.cpp */; };
 		F2D7D32616AAED9700C7DEE5 /* animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2D7D32516AAED9700C7DEE5 /* animation.cpp */; };
 		F2D7D35716AB55F600C7DEE5 /* shared_textures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2D7D35516AB55F600C7DEE5 /* shared_textures.cpp */; };
 /* End PBXBuildFile section */
@@ -90,6 +92,8 @@
 		F259326F15D85A730092C7D8 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		F25932AF15D8608B0092C7D8 /* nya_engine.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = nya_engine.xcodeproj; sourceTree = "<group>"; };
 		F25932B815D860F60092C7D8 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		F2CA688F1735378600965F9F /* widgets.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = widgets.h; path = ../../tests/npl2/widgets.h; sourceTree = "<group>"; };
+		F2CA68901735378600965F9F /* widgets.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = widgets.cpp; path = ../../tests/npl2/widgets.cpp; sourceTree = "<group>"; };
 		F2D7D32416AAED9700C7DEE5 /* animation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = animation.h; path = ../../tests/npl2/animation.h; sourceTree = "<group>"; };
 		F2D7D32516AAED9700C7DEE5 /* animation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = animation.cpp; path = ../../tests/npl2/animation.cpp; sourceTree = "<group>"; };
 		F2D7D35316AB55F600C7DEE5 /* shared_textures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = shared_textures.h; path = ../../tests/npl2/shared_textures.h; sourceTree = "<group>"; };
@@ -125,27 +129,29 @@
 		F220567215D929D900362591 /* npl2 */ = {
 			isa = PBXGroup;
 			children = (
-				F2D7D35316AB55F600C7DEE5 /* shared_textures.h */,
-				F2D7D35516AB55F600C7DEE5 /* shared_textures.cpp */,
 				F2D7D32516AAED9700C7DEE5 /* animation.cpp */,
 				F2D7D32416AAED9700C7DEE5 /* animation.h */,
-				F2037A71160136E300C7C104 /* config.h */,
-				F2037A72160136E300C7C104 /* config.cpp */,
-				F220565B15D929D100362591 /* npl2.cpp */,
-				F220565C15D929D100362591 /* character.cpp */,
-				F220566415D929D100362591 /* character.h */,
-				F220565D15D929D100362591 /* tmb_model.cpp */,
-				F220565E15D929D100362591 /* tmb_model.h */,
-				F220565F15D929D100362591 /* scene.cpp */,
-				F220566015D929D100362591 /* scene.h */,
 				F220566115D929D100362591 /* attributes.cpp */,
 				F220566215D929D100362591 /* attributes.h */,
-				F220566315D929D100362591 /* ui.cpp */,
+				F220565C15D929D100362591 /* character.cpp */,
+				F220566415D929D100362591 /* character.h */,
+				F2037A72160136E300C7C104 /* config.cpp */,
+				F2037A71160136E300C7C104 /* config.h */,
+				F220565B15D929D100362591 /* npl2.cpp */,
 				F220566515D929D100362591 /* pl2_resources_provider.cpp */,
-				F220566615D929D100362591 /* ui.h */,
 				F220566715D929D100362591 /* pl2_resources_provider.h */,
-				F220566815D929D100362591 /* tsb_anim.h */,
+				F220565F15D929D100362591 /* scene.cpp */,
+				F220566015D929D100362591 /* scene.h */,
+				F2D7D35516AB55F600C7DEE5 /* shared_textures.cpp */,
+				F2D7D35316AB55F600C7DEE5 /* shared_textures.h */,
+				F220565D15D929D100362591 /* tmb_model.cpp */,
+				F220565E15D929D100362591 /* tmb_model.h */,
 				F220566915D929D100362591 /* tsb_anim.cpp */,
+				F220566815D929D100362591 /* tsb_anim.h */,
+				F220566315D929D100362591 /* ui.cpp */,
+				F220566615D929D100362591 /* ui.h */,
+				F2CA68901735378600965F9F /* widgets.cpp */,
+				F2CA688F1735378600965F9F /* widgets.h */,
 			);
 			name = npl2;
 			sourceTree = "<group>";
@@ -330,6 +336,7 @@
 				F22F865216D1A69B000EAEA6 /* config.cpp in Sources */,
 				F22F865316D1A69B000EAEA6 /* animation.cpp in Sources */,
 				F22F865416D1A69B000EAEA6 /* shared_textures.cpp in Sources */,
+				F2CA68921735378600965F9F /* widgets.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -348,6 +355,7 @@
 				F2037A73160136E300C7C104 /* config.cpp in Sources */,
 				F2D7D32616AAED9700C7DEE5 /* animation.cpp in Sources */,
 				F2D7D35716AB55F600C7DEE5 /* shared_textures.cpp in Sources */,
+				F2CA68911735378600965F9F /* widgets.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

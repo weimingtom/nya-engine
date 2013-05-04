@@ -2,23 +2,8 @@
 
 #include "panel.h"
 
-/*
-    ToDo: rect_style customisation
-*/
-
 namespace nya_ui
 {
-
-void panel::draw(layer &layer)
-{
-    rect r=get_draw_rect();
-    if(!r.w || !r.h)
-        return;
-
-    layer.draw_rect(r,m_style.panel);
-
-    layout::draw_widgets(layer);
-}
 
 void panel::process_events(layout::event &e)
 {
@@ -57,7 +42,7 @@ void panel::calc_pos_markers()
 
 void panel::update_layout_rect()
 {
-    rect r=get_draw_rect();
+    rect r=get_rect();
     layout::move(r.x,r.y);
     layout::resize(r.w,r.h);
 }

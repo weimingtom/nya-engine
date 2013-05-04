@@ -40,8 +40,6 @@
 		F22F864116D1A4C5000EAEA6 /* ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259320F15D858140092C7D8 /* ui.cpp */; };
 		F22F864316D1A4C9000EAEA6 /* panel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259320D15D858140092C7D8 /* panel.cpp */; };
 		F22F864416D1A4CC000EAEA6 /* list.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259320B15D858140092C7D8 /* list.cpp */; };
-		F22F864516D1A4CF000EAEA6 /* button.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259320715D858140092C7D8 /* button.cpp */; };
-		F22F864616D1A4D4000EAEA6 /* label.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F241A70D160292B1004646EB /* label.cpp */; };
 		F22F864716D1A4D7000EAEA6 /* slider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F241A70B160292B1004646EB /* slider.cpp */; };
 		F23997921696406D00170768 /* transform.h in Headers */ = {isa = PBXBuildFile; fileRef = F23997901696406C00170768 /* transform.h */; };
 		F23997931696406D00170768 /* transform.h in Headers */ = {isa = PBXBuildFile; fileRef = F23997901696406C00170768 /* transform.h */; };
@@ -87,7 +85,6 @@
 		F241A70E160292B1004646EB /* slider.h in Headers */ = {isa = PBXBuildFile; fileRef = F241A70A160292B1004646EB /* slider.h */; };
 		F241A70F160292B1004646EB /* slider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F241A70B160292B1004646EB /* slider.cpp */; };
 		F241A710160292B1004646EB /* label.h in Headers */ = {isa = PBXBuildFile; fileRef = F241A70C160292B1004646EB /* label.h */; };
-		F241A711160292B1004646EB /* label.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F241A70D160292B1004646EB /* label.cpp */; };
 		F25216A016EC14F400A1B2A6 /* animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F252169E16EC14E400A1B2A6 /* animation.cpp */; };
 		F25216A116EC14F400A1B2A6 /* animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F252169E16EC14E400A1B2A6 /* animation.cpp */; };
 		F25216A216EC14F400A1B2A6 /* animation.h in Headers */ = {isa = PBXBuildFile; fileRef = F252169F16EC14F100A1B2A6 /* animation.h */; };
@@ -109,7 +106,6 @@
 		F259323815D858140092C7D8 /* resources.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259320015D858140092C7D8 /* resources.cpp */; };
 		F259323915D858140092C7D8 /* resources.h in Headers */ = {isa = PBXBuildFile; fileRef = F259320115D858140092C7D8 /* resources.h */; };
 		F259323A15D858140092C7D8 /* shared_resources.h in Headers */ = {isa = PBXBuildFile; fileRef = F259320215D858140092C7D8 /* shared_resources.h */; };
-		F259323E15D858140092C7D8 /* button.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259320715D858140092C7D8 /* button.cpp */; };
 		F259323F15D858140092C7D8 /* button.h in Headers */ = {isa = PBXBuildFile; fileRef = F259320815D858140092C7D8 /* button.h */; };
 		F259324215D858140092C7D8 /* list.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F259320B15D858140092C7D8 /* list.cpp */; };
 		F259324315D858140092C7D8 /* list.h in Headers */ = {isa = PBXBuildFile; fileRef = F259320C15D858140092C7D8 /* list.h */; };
@@ -206,7 +202,6 @@
 		F241A70A160292B1004646EB /* slider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = slider.h; sourceTree = "<group>"; };
 		F241A70B160292B1004646EB /* slider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = slider.cpp; sourceTree = "<group>"; };
 		F241A70C160292B1004646EB /* label.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = label.h; sourceTree = "<group>"; };
-		F241A70D160292B1004646EB /* label.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = label.cpp; sourceTree = "<group>"; };
 		F252169E16EC14E400A1B2A6 /* animation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = animation.cpp; path = ../../scene/animation.cpp; sourceTree = "<group>"; };
 		F252169F16EC14F100A1B2A6 /* animation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = animation.h; path = ../../scene/animation.h; sourceTree = "<group>"; };
 		F25931E215D857C40092C7D8 /* libnya_engine.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libnya_engine.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -227,7 +222,6 @@
 		F259320015D858140092C7D8 /* resources.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = resources.cpp; sourceTree = "<group>"; };
 		F259320115D858140092C7D8 /* resources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = resources.h; sourceTree = "<group>"; };
 		F259320215D858140092C7D8 /* shared_resources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shared_resources.h; sourceTree = "<group>"; };
-		F259320715D858140092C7D8 /* button.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = button.cpp; sourceTree = "<group>"; };
 		F259320815D858140092C7D8 /* button.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = button.h; sourceTree = "<group>"; };
 		F259320B15D858140092C7D8 /* list.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = list.cpp; sourceTree = "<group>"; };
 		F259320C15D858140092C7D8 /* list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = list.h; sourceTree = "<group>"; };
@@ -390,16 +384,14 @@
 		F259320615D858140092C7D8 /* ui */ = {
 			isa = PBXGroup;
 			children = (
-				F241A70A160292B1004646EB /* slider.h */,
-				F241A70B160292B1004646EB /* slider.cpp */,
-				F241A70C160292B1004646EB /* label.h */,
-				F241A70D160292B1004646EB /* label.cpp */,
-				F259320715D858140092C7D8 /* button.cpp */,
 				F259320815D858140092C7D8 /* button.h */,
+				F241A70C160292B1004646EB /* label.h */,
 				F259320B15D858140092C7D8 /* list.cpp */,
 				F259320C15D858140092C7D8 /* list.h */,
 				F259320D15D858140092C7D8 /* panel.cpp */,
 				F259320E15D858140092C7D8 /* panel.h */,
+				F241A70B160292B1004646EB /* slider.cpp */,
+				F241A70A160292B1004646EB /* slider.h */,
 				F259320F15D858140092C7D8 /* ui.cpp */,
 				F259321015D858140092C7D8 /* ui.h */,
 			);
@@ -681,8 +673,6 @@
 				F22F864116D1A4C5000EAEA6 /* ui.cpp in Sources */,
 				F22F864316D1A4C9000EAEA6 /* panel.cpp in Sources */,
 				F22F864416D1A4CC000EAEA6 /* list.cpp in Sources */,
-				F22F864516D1A4CF000EAEA6 /* button.cpp in Sources */,
-				F22F864616D1A4D4000EAEA6 /* label.cpp in Sources */,
 				F22F864716D1A4D7000EAEA6 /* slider.cpp in Sources */,
 				F2EB8EEC16D42A9C002B7B9A /* fbo.cpp in Sources */,
 				F25216A116EC14F400A1B2A6 /* animation.cpp in Sources */,
@@ -703,7 +693,6 @@
 				F259323415D858140092C7D8 /* composite_resources_provider.cpp in Sources */,
 				F259323615D858140092C7D8 /* file_resources_provider.cpp in Sources */,
 				F259323815D858140092C7D8 /* resources.cpp in Sources */,
-				F259323E15D858140092C7D8 /* button.cpp in Sources */,
 				F259324215D858140092C7D8 /* list.cpp in Sources */,
 				F259324415D858140092C7D8 /* panel.cpp in Sources */,
 				F259324615D858140092C7D8 /* ui.cpp in Sources */,
@@ -716,7 +705,6 @@
 				F259325815D858140092C7D8 /* tmp_buffer.cpp in Sources */,
 				F25932BB15D865BF0092C7D8 /* app.mm in Sources */,
 				F241A70F160292B1004646EB /* slider.cpp in Sources */,
-				F241A711160292B1004646EB /* label.cpp in Sources */,
 				F22AD9FE16946EC000B01B4A /* mesh.cpp in Sources */,
 				F22ADA0016946EC000B01B4A /* scene.cpp in Sources */,
 				F2F0A09B1695A758007245BC /* skeleton.cpp in Sources */,

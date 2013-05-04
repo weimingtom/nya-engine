@@ -5,19 +5,9 @@
 namespace nya_ui
 {
 
-void slider::draw(layer &layer)
-{
-    rect r=get_draw_rect();
-    if(!r.w || !r.h)
-        return;
-
-    layer.draw_rect(r,m_style.area);
-    layer.draw_rect(m_slider_rect,m_style.slider);
-}
-
 void slider::update_rects()
 {
-    rect r=get_draw_rect();
+    rect r=get_rect();
     if(!r.w || !r.h)
         return;
 
@@ -25,13 +15,13 @@ void slider::update_rects()
 
     if(m_vertical)
     {
-        m_slider_rect.h=m_style.size;
-        m_slider_rect.y=r.y+int((r.h-m_style.size)*m_value);
+        m_slider_rect.h=m_slider_size;
+        m_slider_rect.y=r.y+int((r.h-m_slider_size)*m_value);
     }
     else
     {
-        m_slider_rect.w=m_style.size;
-        m_slider_rect.x=r.x+int((r.w-m_style.size)*m_value);
+        m_slider_rect.w=m_slider_size;
+        m_slider_rect.x=r.x+int((r.w-m_slider_size)*m_value);
     }
 }
 
@@ -43,7 +33,7 @@ bool slider::on_mouse_move(uint x,uint y,bool inside)
     {
         if(m_mouse_pressed)
         {
-            rect r=get_draw_rect();
+            rect r=get_rect();
             if(r.h<1)
                 return false;
 
@@ -57,7 +47,7 @@ bool slider::on_mouse_move(uint x,uint y,bool inside)
     {
         if(m_mouse_pressed)
         {
-            rect r=get_draw_rect();
+            rect r=get_rect();
             if(r.w<1)
                 return false;
 
@@ -89,7 +79,7 @@ bool slider::on_mouse_move(uint x,uint y,bool inside)
     return inside;
 }
 
-bool slider::on_mouse_button(layout::button button,bool pressed)
+bool slider::on_mouse_button(layout::mbutton button,bool pressed)
 {
     m_mouse_pressed=pressed;
 
@@ -104,7 +94,7 @@ bool slider::on_mouse_button(layout::button button,bool pressed)
 bool slider::on_mouse_scroll(uint x,uint y)
 {
     /*
-    rect r=get_draw_rect();
+    rect r=get_rect();
     if(r.h<1)
         return false;
 

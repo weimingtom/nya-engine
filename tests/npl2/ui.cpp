@@ -2,9 +2,6 @@
 
 #include "ui.h"
 
-#include "ui/list.h"
-#include "ui/button.h"
-#include "ui/label.h"
 #include "render/render.h"
 
 #include "attributes.h"
@@ -14,65 +11,15 @@
 
 void ui::init()
 {
-    m_text_shader.add_program(nya_render::shader::vertex,
-                              "varying vec4 tc;"
-                              "varying vec4 color;"
-
-                              "void main()"
-                              "{"
-                              "    tc=gl_MultiTexCoord0;"
-                              "    color=gl_Color;"
-                              "    gl_Position=vec4(gl_Vertex.xyz,1.0);"
-                              "}");
-
-    m_text_shader.add_program(nya_render::shader::pixel,
-                              "uniform sampler2D alpha_map;"
-                              "varying vec4 tc;"
-                              "varying vec4 color;"
-
-                              "void main(void)"
-                              "{"
-                              "    float alpha=texture2D(alpha_map,tc.xy).r;"
-                              "    gl_FragColor=vec4(color.rgb,alpha);"
-                              "}");
-
-    m_text_shader.set_sampler("alpha_map",0);
-
-    m_ui_shader.add_program(nya_render::shader::vertex,
-                            "varying vec4 tc;"
-                            "varying vec4 color;"
-
-                            "void main()"
-                            "{"
-                            "    tc=gl_MultiTexCoord0;"
-                            "    color=gl_Color;"
-                            "    gl_Position=vec4(gl_Vertex.xyz,1.0);"
-                            "}");
-
-    m_ui_shader.add_program(nya_render::shader::pixel,
-                            "uniform sampler2D base_map;"
-                            "varying vec4 tc;"
-                            "varying vec4 color;"
-
-                            "void main(void)"
-                            "{"
-                            //"    vec4 base=texture2D(base_map,gl_TexCoord[0].xy);"
-                            //"    gl_FragColor=gl_TexCoord[1]*base;"
-                              "    gl_FragColor=color;"
-                            "}");
-
-    m_ui_shader.set_sampler("base_map",0);
-
-    m_font_tex=nya_resources::get_shared_textures().access("font.tga");
-    //m_ui_tex=nya_resources::get_shared_textures().access("ui.tga");
-
+    widget_renderer::get().init();
+    
     const int btn_width=72;
     const int btn_height=22;
     const int offset=6;
 
     int xpos=offset;
 
-    static nya_ui::button customize_btn;
+    static button customize_btn;
     customize_btn.set_id("customize_btn");
     customize_btn.set_text("Customize");
     customize_btn.set_pos(xpos,offset);
@@ -81,7 +28,7 @@ void ui::init()
 
     xpos+=btn_width+offset;
 
-    static nya_ui::button anim_btn;
+    static button anim_btn;
     anim_btn.set_id("anim_btn");
     anim_btn.set_text("Anims");
     anim_btn.set_pos(xpos,offset);
@@ -90,14 +37,14 @@ void ui::init()
 
     xpos+=btn_width+offset;
 
-    static nya_ui::button scenery_btn;
+    static button scenery_btn;
     scenery_btn.set_id("scenery_btn");
     scenery_btn.set_text("Scenery");
     scenery_btn.set_pos(xpos,offset);
     scenery_btn.set_size(btn_width,btn_height);
     add_widget(scenery_btn);
 
-    static nya_ui::button options_btn;
+    static button options_btn;
     options_btn.set_id("options_btn");
     options_btn.set_text("Options");
     options_btn.set_align(false,true,false,true);
@@ -155,7 +102,7 @@ void ui::init()
         }
 
         m_customize_btns[it].id.assign(atr);
-        nya_ui::button &btn=m_customize_btns[it].btn;
+        button &btn=m_customize_btns[it].btn;
         btn.set_id(atr);
         if(strcmp(atr,"COORDINATE")==0)
             btn.set_text("SET");
@@ -175,7 +122,7 @@ void ui::init()
         ++it;
     }
 
-    nya_ui::panel_style modal_bg;
+    panel::style modal_bg;
     modal_bg.panel.border=false;
     modal_bg.panel.solid=true;
     modal_bg.panel.solid_color.set(0,0,0,0.7);
@@ -190,7 +137,7 @@ void ui::init()
     const int modal_box_width=btn_width+offset*2;
     const int modal_box_height=btn_height*3+offset*4;
 
-    nya_ui::panel_style mod_box_bg;
+    panel::style mod_box_bg;
     mod_box_bg.panel.solid=true;
     mod_box_bg.panel.solid_color=mod_box_bg.panel.border_color;
     mod_box_bg.panel.solid_color.a=0.3;
@@ -200,10 +147,10 @@ void ui::init()
     m_mod_box.set_size(modal_box_width,modal_box_height);
     m_cos_modal.add_widget(m_mod_box);
 
-    static nya_ui::button cos_mod_btn[3];
+    static button cos_mod_btn[3];
     for(int i=0;i<3;++i)
     {
-        nya_ui::button &btn=cos_mod_btn[i];
+        button &btn=cos_mod_btn[i];
         btn.set_pos(offset,(offset+btn_height)*i+offset);
         btn.set_size(btn_width,btn_height);
         m_mod_box.add_widget(btn);
@@ -225,13 +172,13 @@ void ui::init()
     m_props_pnl.set_visible(false);
     add_widget(m_props_pnl);
 
-    static nya_ui::label opac_lbl;
+    static label opac_lbl;
     opac_lbl.set_text("Opacity");
     opac_lbl.set_pos(0,props_height-btn_height-offset);
     opac_lbl.set_size(btn_width,btn_height);
     m_props_pnl.add_widget(opac_lbl);
 
-    static nya_ui::button opac_reset_btn;
+    static button opac_reset_btn;
     opac_reset_btn.set_id("opac_reset_btn");
     opac_reset_btn.set_text("Reset all");
     opac_reset_btn.set_pos(props_width-(btn_width+offset),props_height-(btn_height+offset));
@@ -246,7 +193,7 @@ void ui::init()
     m_opac_slider.set_size(slider_width,slider_height);
     m_props_pnl.add_widget(m_opac_slider);
 
-    nya_ui::panel_style under_pnl_style;
+    panel::style under_pnl_style;
     under_pnl_style.panel.border=false;
     const int under_pnl_height=slider_y;
     m_under_pnl.set_pos(0,0);
@@ -255,20 +202,20 @@ void ui::init()
     m_under_pnl.set_visible(false);
     m_props_pnl.add_widget(m_under_pnl);
 
-    static nya_ui::label under_lbl;
+    static label under_lbl;
     under_lbl.set_text("Under toggle");
     under_lbl.set_pos(0,btn_height+offset*1.5);
     under_lbl.set_size(btn_width*1.5,btn_height);
     m_under_pnl.add_widget(under_lbl);
 
-    static nya_ui::button under_top;
+    static button under_top;
     under_top.set_id("under_top");
     under_top.set_text("Top");
     under_top.set_pos(offset,offset);
     under_top.set_size(btn_width,btn_height);
     m_under_pnl.add_widget(under_top);
 
-    static nya_ui::button under_btm;
+    static button under_btm;
     under_btm.set_id("under_btm");
     under_btm.set_text("Bottom");
     under_btm.set_pos(offset*2+btn_width,offset);
@@ -316,62 +263,9 @@ void ui::draw()
     nya_render::blend::enable(nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
     nya_render::depth_test::disable();
 
-    //m_ui_shader.bind();
     nya_ui::layer::draw();
 
-    //m_ui_shader.unbind();
-    /*
-     if(!m_font_tex.is_valid())
-     return;
-
-     glColor4f(0,0,0,1);
-
-     m_text_shader.bind();
-     m_font_tex->bind();
-     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-     draw_text(100,100,"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890");
-
-     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-     draw_text(100,150,"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890");
-
-     m_font_tex->unbind();
-
-     m_text_shader.unbind();
-     */
     nya_render::blend::disable();
-}
-
-void ui::draw_text(uint x,uint y,const char *text
-                   ,font_align aligh_hor,font_align aligh_vert)
-{
-    if(!m_font_tex.is_valid())
-        return;
-
-    //glColor4f(0,0,0,1);
-    nya_render::set_color(1.0f,1.0f,1.0f,1.0f);
-
-    m_text_shader.bind();
-    m_font_tex->bind();
-
-    nya_ui::layer::draw_text(x,y,text,aligh_hor,aligh_vert);
-
-    m_font_tex->unbind();
-
-    m_text_shader.unbind();
-}
-
-void ui::draw_rect(nya_ui::rect &r,rect_style &s)
-{
-    //if(!m_ui_tex.is_valid())
-    //    return;
-
-    m_ui_shader.bind();
-    //m_ui_tex->bind();
-    nya_ui::layer::draw_rect(r,s);
-    //m_ui_tex->unbind();
-    m_ui_shader.unbind();
 }
 
 bool ui::is_props_visible()
@@ -654,13 +548,3 @@ void ui::process_events(event &e)
         return;
     }
 }
-
-void ui::release()
-{
-    nya_ui::layer::release();
-
-    m_font_tex.free();
-    m_ui_shader.release();
-    m_text_shader.release();
-}
-

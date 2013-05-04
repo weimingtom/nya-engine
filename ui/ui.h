@@ -2,16 +2,12 @@
 
 /*
     left-bottom alligned
- 
-    ToDo: external renderer(ui itself should not depend on nya_render),
-          textured ui skins, fonts
 */
 
 #pragma once
 
 #include "log/log.h"
 #include "memory/pool.h"
-#include "render/vbo.h"
 
 #include <string>
 #include <list>
@@ -35,7 +31,7 @@ struct rect
     uint w;
     uint h;
 
-    bool check_point(uint px, uint py)
+    bool check_point(uint px, uint py) const
     {
         if(px<x) return false;
         if(py<y) return false;
@@ -62,14 +58,14 @@ public:
     virtual void remove_widget() {}
 
 public:
-    enum button
+    enum mbutton
     {
         left_button,
         middle_button,
         right_button
     };
 
-    virtual bool mouse_button(button button,bool pressed);
+    virtual bool mouse_button(mbutton button,bool pressed);
     virtual bool mouse_move(uint x,uint y);
     virtual void mouse_left();
     virtual bool mouse_scroll(uint dx,uint dy);
@@ -170,7 +166,10 @@ public:
     };
 
     virtual void set_keep_aspect(keep_aspect a)
-    { m_keep_aspect=a; calc_pos_markers(); }
+    {
+        m_keep_aspect=a;
+        calc_pos_markers();
+    }
 
     virtual bool is_visible() { return m_visible; }
 
@@ -209,7 +208,7 @@ protected:
     virtual void on_mouse_over() {}
     virtual void on_mouse_left() {}
     virtual bool on_mouse_move(uint x,uint y,bool inside) { return false; }
-    virtual bool on_mouse_button(layout::button button,bool pressed) { return false; }
+    virtual bool on_mouse_button(layout::mbutton button,bool pressed) { return false; }
     virtual bool on_mouse_scroll(uint x,uint y) { return false; }
 
 protected:
@@ -226,89 +225,10 @@ protected:
         m_parent->send_event(e);
     }
 
-    virtual bool has_events()
-    {
-        return !m_id.empty();
-    }
+    virtual bool has_events() { return !m_id.empty(); }
 
 protected:
-    virtual rect get_draw_rect()
-    {
-        if(m_cached_rect)
-            return m_rect;
-
-        int x,y,w,h;
-        if(m_align_left)
-        {
-            x=m_pos_left+m_parent_pos_x;
-            if(m_align_right)
-                w=m_parent_width-m_pos_right-m_pos_left;
-            else
-                w=m_width;
-        }
-        else if(m_align_right)
-        {
-            x=m_parent_pos_x+m_parent_width-m_width-m_pos_right;
-            w=m_width;
-        }
-        else
-        {
-            x=m_parent_pos_x+m_parent_width/2-m_center_x-m_width/2;
-            w=m_width;
-        }
-
-        if(m_align_bottom)
-        {
-            y=m_pos_bottom+m_parent_pos_y;
-            if(m_align_top)
-                h=m_parent_height-m_pos_top-m_pos_bottom;
-            else
-                h=m_height;
-        }
-        else if(m_align_top)
-        {
-            y=m_parent_pos_y+m_parent_height-m_height-m_pos_top;
-            h=m_height;
-        }
-        else
-        {
-            y=m_parent_pos_y+m_parent_height/2-m_center_y-m_height/2;
-            h=m_height;
-        }
-
-        if(m_keep_aspect==from_width)
-        {
-            h=w*m_height/m_width;
-        }
-        else if(m_keep_aspect==from_height)
-        {
-            w=h*m_width/m_height;
-        }
-
-        if(x<m_parent_pos_x)
-            x=m_parent_pos_x;
-        if(y<m_parent_pos_y)
-            y=m_parent_pos_y;
-
-        const int cw=m_parent_pos_x-x+m_parent_width;
-        if(w>cw)
-            w=cw;
-
-        const int ch=m_parent_pos_y-y+m_parent_height;
-        if(h>ch)
-            h=ch;
-
-        m_rect=rect();
-
-        if(x>0) m_rect.x=x;
-        if(y>0) m_rect.y=y;
-        if(w>0) m_rect.w=w;
-        if(h>0) m_rect.h=h;
-
-        m_cached_rect=true;
-
-        return m_rect;
-    }
+    virtual const rect &get_rect();
 
 protected:
     virtual void calc_pos_markers()
@@ -382,7 +302,6 @@ public:
     virtual void draw();
     virtual void resize(uint width,uint height);
     virtual void process();
-    virtual void release();
 
 private:
     virtual void process_events(event &e) {}
@@ -391,77 +310,11 @@ public:
     virtual void send_event(event &e);
 
 public:
-    struct color
-    {
-        float r;
-        float g;
-        float b;
-        float a;
-
-        void set(float r,float g,float b,float a=1.0f)
-        {
-            this->r=r;
-            this->g=g;
-            this->b=b;
-            this->a=a;
-        }
-
-        color(): r(0),g(0),b(0),a(1.0f) {}
-        color(float r,float g,float b,float a=1.0f):
-                            r(r), g(g), b(b), a(a) {}
-    };
-
-    struct font
-    {
-        //std::string name;
-        uint font_width;
-        uint font_height;
-        uint char_size;
-        uint char_offs;
-    };
-
-    enum font_align
-    {
-        left,
-        right,
-        top,
-        bottom,
-        center
-    };
-
-    virtual void draw_text(uint x,uint y,const char *text
-                   ,font_align aligh_hor=left,font_align aligh_vert=bottom);
-    virtual void draw_text(uint x,uint y,const char *text,font &f
-                   ,font_align aligh_hor=left,font_align aligh_vert=bottom) {}
-
-    struct rect_style
-    {
-        bool border;
-        bool solid;
-
-        color border_color;
-        color solid_color;
-
-        //std::string tex_name;
-        //rect tc_rect;
-
-        rect_style(): border(false), solid(false) {}
-    };
-
-    virtual void draw_rect(rect &r,rect_style &s);
-    virtual void set_scissor(rect &r);
-    virtual void remove_scissor();
-
     virtual uint get_width() { return m_width; }
     virtual uint get_height() { return m_height; }
 
 public:
-    layer(): m_width(0), m_height(0)
-    {
-        m_font_vbo.set_vertices(0,2);
-        m_font_vbo.set_tc(0,sizeof(float)*2,2);
-        m_font_vbo.set_element_type(nya_render::vbo::triangles);
-    }
+    layer(): m_width(0), m_height(0) {}
 
 private:
     uint m_width;
@@ -470,10 +323,6 @@ private:
 private:
     typedef std::deque<event> events_deque;
     events_deque m_events;
-
-private:
-    nya_render::vbo m_rect_vbo;
-    nya_render::vbo m_font_vbo;
 
     //font m_default_font;
 };

@@ -18,8 +18,8 @@ public:
         m_text.assign(text);
     }
 
-private:
-    virtual void draw(layer &l);
+protected:
+    virtual void draw(layer &l) {}
 
     virtual void on_mouse_over()
     {
@@ -41,7 +41,7 @@ private:
         send_event(get_id(),e);
     }
 
-    virtual bool on_mouse_button(layout::button button,bool pressed)
+    virtual bool on_mouse_button(layout::mbutton button,bool pressed)
     {
         if(!has_events())
             return true;
@@ -58,7 +58,7 @@ private:
         return true;
     }
 
-private:
+protected:
     std::string m_text;
 };
 

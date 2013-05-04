@@ -5,80 +5,12 @@
 #include "ui/ui.h"
 #include <vector>
 
-/*
-
-    ToDo: use button and slider style instead of rect style and _hl _pressed stuff
-
-*/
-
 namespace nya_ui
 {
-
-struct list_style
-{
-    uint scroll_area_width;
-    uint scroll_width;
-    uint scroll_height;
-    uint button_height;
-    uint entry_height;
-
-    layer::rect_style list;
-    layer::rect_style entry;
-    layer::rect_style entry_hl;
-    layer::rect_style entry_selected;
-    layer::rect_style scroll;
-    layer::rect_style scroll_hl;
-    layer::rect_style scroll_area;
-    layer::rect_style button_up;
-    layer::rect_style button_dn;
-    layer::rect_style button_up_hl;
-    layer::rect_style button_dn_hl;
-
-    list_style()
-    {
-        scroll_area_width=12;
-        scroll_width=scroll_area_width;
-        scroll_height=20;
-        button_height=16;
-        entry_height=18;
-
-        list.border=true;
-        list.border_color.set(0.4f,0.3f,1.0f,1.0f);
-
-        entry=list;
-
-        list.solid=true;
-        list.solid_color=list.border_color;
-        list.solid_color.a=0.4f;
-
-        scroll_area=list;
-        scroll_area.solid_color.a=0.5f;
-
-        scroll=list;
-        scroll.solid_color.a=0.8f;
-
-        button_up=button_dn=scroll;
-
-        entry_selected=list;
-
-        entry_selected.solid_color.a=0.6f;
-        entry_hl=entry;
-        entry_hl.solid=true;
-        entry_hl.solid_color.set(0.7f,0.6f,1.0f,0.8f);
-        scroll_hl=button_dn_hl=button_up_hl=entry_hl;
-    }
-};
 
 class list: public widget
 {
 public:
-    virtual void set_style(list_style &s)
-    {
-        m_style=s;
-
-        update_rects();
-    }
-
     virtual void add_element(const char *name)
     {
         if(!name)
@@ -101,9 +33,9 @@ public:
     void select_element(uint num)
     {
         m_selected=num;
-        unsigned int scrl=m_scroll_max*m_selected/((int)m_elements.size()-m_scroll_max/m_style.entry_height);
+        unsigned int scrl=m_scroll_max*m_selected/((int)m_elements.size()
+                                                   -m_scroll_max/m_entry_height);
         m_scroll=clamp(scrl,0,m_scroll_max);
-
         update_rects();
     }
 
@@ -123,6 +55,23 @@ public:
     }
 
 public:
+    virtual void set_scroll_size(uint scroll_area_width,uint scroll_width,
+                                 uint scroll_height, uint button_height)
+    {
+        m_scroll_area_width=scroll_area_width;
+        m_scroll_width=scroll_width;
+        m_scroll_height=scroll_height;
+        m_button_height=button_height;
+        update_rects();
+    }
+
+    virtual void set_entry_height(uint height )
+    {
+        m_entry_height=height;
+        update_rects();
+    }
+
+public:
     struct event_data: public layout::event_data
     {
         std::string element;
@@ -135,12 +84,12 @@ protected:
     typedef event_data_allocator<event_data> list_event_data;
 
 protected:
-    virtual void draw(layer &l);
+    virtual void draw(layer &l) {}
     virtual void update_rects();
 
 protected:
     virtual bool on_mouse_move(uint x,uint y,bool inside);
-    virtual bool on_mouse_button(layout::button button,bool pressed);
+    virtual bool on_mouse_button(layout::mbutton button,bool pressed);
     virtual bool on_mouse_scroll(uint x,uint y);
 
 protected:
@@ -164,10 +113,23 @@ protected:
 
 public:
     list(): m_scroll(0), m_scroll_max(0),  m_mouse_x(0), m_mouse_y(0),
-            m_mouse_hold_y(0), m_scrolling(false), m_selected(-1), m_mover(-1) {}
+            m_mouse_hold_y(0), m_scrolling(false), m_selected(-1), m_mover(-1)
+    {
+        m_scroll_area_width=12;
+        m_scroll_width=m_scroll_area_width;
+        m_scroll_height=20;
+        m_button_height=16;
+        m_entry_height=18;
+    }
 
 protected:
-    list_style m_style;
+    uint m_scroll_area_width;
+    uint m_scroll_width;
+    uint m_scroll_height;
+    uint m_button_height;
+    uint m_entry_height;
+
+protected:
     uint m_scroll;
     uint m_scroll_max;
     uint m_mouse_x;

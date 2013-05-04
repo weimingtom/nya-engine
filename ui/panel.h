@@ -7,31 +7,14 @@
 namespace nya_ui
 {
 
-struct panel_style
-{
-    layer::rect_style panel;
-
-    panel_style()
-    {
-        panel.border_color.set(0.4f,0.3f,1.0f,1.0f);
-        panel.border=true;
-    }
-};
-
 class panel: public widget, public layout
 {
-public:
-    virtual void set_style(panel_style &s)
-    {
-        m_style=s;
-    }
-
 public:
     virtual void set_pos(int x,int y);
     virtual void set_size(uint width,uint height);
 
 protected:
-    virtual void draw(layer &l);
+    virtual void draw(layer &l) { layout::draw_widgets(l); }
     virtual void process_events(layout::event &e);
     virtual void parent_resized(uint width,uint height);
     virtual void parent_moved(int x,int y);
@@ -61,7 +44,7 @@ protected:
         return true;
     }
 
-    virtual bool on_mouse_button(layout::button button,bool pressed)
+    virtual bool on_mouse_button(layout::mbutton button,bool pressed)
     {
         layout::mouse_button(button,pressed);
         return true;
@@ -72,9 +55,6 @@ public:
 
 protected:
     void update_layout_rect();
-
-protected:
-    panel_style m_style;
 };
 
 }

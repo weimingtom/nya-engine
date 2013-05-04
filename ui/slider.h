@@ -7,28 +7,6 @@
 namespace nya_ui
 {
 
-struct slider_style
-{
-    layer::rect_style area;
-    layer::rect_style slider;
-    layer::rect_style slider_hl;
-    int size;
-
-    slider_style()
-    {
-        area.border=true;
-        area.solid=true;
-        area.border_color.set(0.4f,0.3f,1.0f,1.0f);
-        area.solid_color=area.border_color;
-        area.solid_color.a=0.2f;
-        slider=area;
-        slider.solid_color.a=0.5f;
-        slider_hl=slider;
-        slider_hl.solid_color.set(0.7f,0.6f,1.0f,0.5f);
-        size=10;
-    }
-};
-
 class slider: public widget
 {
 public:
@@ -39,6 +17,12 @@ public:
     {
         m_vertical=width<height;
         widget::set_size(width,height);
+    }
+
+    virtual void set_slider_size(uint size) //default is 10
+    {
+        m_slider_size=size;
+        update_rects();
     }
 
 public:
@@ -53,12 +37,12 @@ protected:
     typedef event_data_allocator<event_data> slider_event_data;
 
 protected:
-    void draw(layer &layer);
+    void draw(layer &layer) {}
     void update_rects();
 
 protected:
     virtual bool on_mouse_move(uint x,uint y,bool inside);
-    virtual bool on_mouse_button(layout::button button,bool pressed);
+    virtual bool on_mouse_button(layout::mbutton button,bool pressed);
     virtual bool on_mouse_scroll(uint x,uint y);
 
 protected:
@@ -81,7 +65,7 @@ protected:
     }
 
 public:
-    slider(): m_value(0),m_mouse_pressed(false),m_mouse_last(0),m_vertical(false){}
+    slider(): m_value(0),m_mouse_pressed(false),m_mouse_last(0),m_slider_size(10),m_vertical(false){}
 
 protected:
     float m_value;
@@ -89,7 +73,7 @@ protected:
     uint m_mouse_last;
 
 protected:
-    slider_style m_style;
+    uint m_slider_size;
     rect m_slider_rect;
     bool m_vertical;
 };

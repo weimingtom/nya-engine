@@ -2,14 +2,7 @@
 
 #pragma once
 
-#include "ui/ui.h"
-#include "ui/button.h"
-#include "ui/list.h"
-#include "ui/panel.h"
-#include "ui/slider.h"
-
-#include "shared_textures.h"
-#include "render/shader.h"
+#include "widgets.h"
 
 typedef nya_ui::uint uint;
 
@@ -18,13 +11,14 @@ class ui: public nya_ui::layer
 public:
     void init();
     void draw();
-    void release();
+    void resize(uint width,uint height)
+    {
+        widget_renderer::get().resize(width,height);
+        nya_ui::layer::resize(width,height);
+    }
 
-    void draw_text(uint x,uint y,const char *text
-                   ,font_align aligh_hor=left,font_align aligh_vert=bottom);
+    void release() { widget_renderer::get().release(); }
 
-    void draw_rect(nya_ui::rect &r,rect_style &s);
-    
 public:
     ui(): m_under_top(false),m_under_bottom(false) {}
 
@@ -37,24 +31,24 @@ private:
     void modal(bool enabled,int x,int y);
 
 private:
-    nya_ui::panel m_anim_pnl;
-    nya_ui::panel m_customize_pnl;
-    nya_ui::panel m_scenery_pnl;
+    panel m_anim_pnl;
+    panel m_customize_pnl;
+    panel m_scenery_pnl;
 
-    nya_ui::panel m_props_pnl;
-    nya_ui::slider m_opac_slider;
-    
-    nya_ui::panel m_under_pnl;
+    panel m_props_pnl;
+    slider m_opac_slider;
+
+    panel m_under_pnl;
     bool m_under_top;
     bool m_under_bottom;
 
-    nya_ui::panel m_cos_modal;
-    nya_ui::panel m_mod_box;
+    panel m_cos_modal;
+    panel m_mod_box;
 
     struct customize_btn
     {
         std::string id;
-        nya_ui::button btn;
+        button btn;
     };
 
     static const uint max_customize_btns=32;
@@ -72,12 +66,7 @@ private:
     std::string m_customise_group;
 
 private:
-    nya_ui::list m_customise_lst;
-    nya_ui::list m_anim_lst;
-    nya_ui::list m_scenery_lst;
-
-private:
-    nya_resources::texture_ref m_font_tex;
-    nya_render::shader m_ui_shader;
-    nya_render::shader m_text_shader;
+    list m_customise_lst;
+    list m_anim_lst;
+    list m_scenery_lst;
 };

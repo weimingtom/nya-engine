@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-#ifndef label_h
-#define label_h
+#pragma once
 
 #include "ui/ui.h"
 
@@ -19,13 +18,11 @@ public:
         m_text.assign(text);
     }
 
-private:
-    virtual void draw(layer &l);
+protected:
+    virtual void draw(layer &l) {}
 
-private:
+protected:
     std::string m_text;
 };
 
 }
-
-#endif
