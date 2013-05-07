@@ -16,13 +16,8 @@ namespace nya_scene
 
 struct shared_mesh
 {
+    nya_math::aabb aabb;
     nya_render::vbo vbo;
-
-    struct texture_info
-    {
-        std::string name;
-        std::string semantic;
-    };
 
     struct group
     {
@@ -33,14 +28,17 @@ struct shared_mesh
 
     std::vector<group> groups;
 
+    nya_render::skeleton skeleton;
+
     bool release()
     {
+        aabb=nya_math::aabb();
         vbo.release();
+        groups.clear();
+        skeleton=nya_render::skeleton();
+
         return true;
     }
-
-    nya_render::skeleton skeleton;
-    nya_math::aabb aabb;
 };
 
 class mesh: public scene_shared<shared_mesh>
@@ -80,15 +78,21 @@ public:
 
 public:
     void update(unsigned int dt);
-    
+
 public:
     const nya_math::aabb &get_aabb() const;
 
 public:
+    static bool load_nms_mesh_section(shared_mesh &res,const void *data,size_t size);
+    static bool load_nms_skeleton_section(shared_mesh &res,const void *data,size_t size);
+    static bool load_nms_material_section(shared_mesh &res,const void *data,size_t size);
+
+public:
+    static bool load_nms(shared_mesh &res,resource_data &data,const char* name);
     static bool load_pmd(shared_mesh &res,resource_data &data,const char* name);
 
 public:
-    mesh(): m_recalc_aabb(true), m_has_aabb(false) { register_load_function(load_pmd); }
+    mesh(): m_recalc_aabb(true), m_has_aabb(false) { register_load_function(load_nms); register_load_function(load_pmd); }
 
 private:
     nya_scene_internal::transform m_transform;

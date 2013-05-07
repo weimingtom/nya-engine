@@ -18,10 +18,148 @@ namespace
         float specular[3];
         float ambient[3];
     };
+
+    std::string read_string(nya_memory::memory_reader &reader)
+    {
+        unsigned short size=reader.read<unsigned short>();
+        if(!size || !reader.check_remained(size))
+            return "";
+
+        return std::string((const char *)reader.get_data(),size);
+    }
 }
 
 namespace nya_scene
 {
+
+bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size)
+{
+    nya_memory::memory_reader reader(data,size);
+
+    typedef unsigned int uint;
+    typedef unsigned short ushort;
+    typedef unsigned char uchar;
+
+    const ushort lod_from_begin=reader.read<ushort>(); //ToDo
+    const ushort lod_from_end=reader.read<ushort>();
+    const ushort lods_count=lod_from_begin+lod_from_end+1;
+
+    const nya_math::vec3 min(reader.read<float>(),reader.read<float>(),reader.read<float>());
+    const nya_math::vec3 max(reader.read<float>(),reader.read<float>(),reader.read<float>());
+    res.aabb.delta=(max-min)*0.5f;
+    res.aabb.origin=min+res.aabb.delta;
+
+    uint vertex_stride=0;
+    const uchar el_count=reader.read<uchar>();
+    for(uchar i=0;i<el_count;++i)
+    {
+        enum el_type
+        {
+            pos,
+            normal,
+            color,
+            tc0=100
+        };
+
+        const uchar type=reader.read<uchar>();
+        const uchar dimension=reader.read<uchar>();
+        read_string(reader); //semantics
+
+        switch(type)
+        {
+            case pos: res.vbo.set_vertices(vertex_stride,dimension); break;
+            case normal: res.vbo.set_normals(vertex_stride); break;
+            case color: res.vbo.set_colors(vertex_stride,dimension); break;
+            default: res.vbo.set_tc(type-tc0,vertex_stride,dimension); break;
+        };
+
+        vertex_stride+=dimension*sizeof(float);
+    }
+
+    if(!vertex_stride)
+        return false;
+
+    uint verts_count=reader.read<uint>();
+    if(!reader.check_remained(verts_count*vertex_stride))
+        return false;
+
+    res.vbo.set_vertex_data(reader.get_data(),vertex_stride,verts_count);
+
+    uchar index_size=reader.read<uchar>();
+    if(index_size)
+    {
+        uint inds_count=reader.read<uint>();
+        if(!reader.check_remained(inds_count*sizeof(ushort)))
+            return false;
+
+        switch(index_size)
+        {
+            case 2: res.vbo.set_index_data(reader.get_data(),nya_render::vbo::index2b,verts_count); break;
+            case 4: res.vbo.set_index_data(reader.get_data(),nya_render::vbo::index4b,verts_count); break;
+            default: return false;
+        }
+    }
+
+    return true;
+}
+
+bool mesh::load_nms_skeleton_section(shared_mesh &res,const void *data,size_t size)
+{
+    nya_memory::memory_reader section_reader(data,size);
+
+    return true;
+}
+
+bool mesh::load_nms_material_section(shared_mesh &res,const void *data,size_t size)
+{
+    nya_memory::memory_reader section_reader(data,size);
+
+    return true;
+}
+
+bool mesh::load_nms(shared_mesh &res,resource_data &data,const char* name)
+{
+    nya_memory::memory_reader reader(data.get_data(),data.get_size());
+    if(!reader.test("nya mesh",8))
+        return false;
+
+    typedef unsigned int uint;
+
+    if(reader.read<uint>()!=1)
+        return false;
+
+    enum section_type
+    {
+        mesh_data,
+        skeleton,
+        material
+    };
+
+    const uint num_sections=reader.read<uint>();
+    for(uint i=0;i<num_sections;++i)
+    {
+        const uint type=reader.read<uint>();
+        const uint size=reader.read<uint>();
+
+        if(!reader.check_remained(size))
+        {
+            nya_log::get_log()<<"nms load error: chunk size is bigger than remained data size\n";
+            return false;
+        }
+
+        switch(type)
+        {
+            case mesh_data: load_nms_mesh_section(res,reader.get_data(),size); break;
+            case skeleton: load_nms_skeleton_section(res,reader.get_data(),size); break;
+            case material: load_nms_material_section(res,reader.get_data(),size); break;
+            default: nya_log::get_log()<<"nms load warning: unknown chunk type\n";
+        };
+
+        reader.skip(size);
+    }
+
+    return true;
+}
 
 bool mesh::load_pmd(shared_mesh &res,resource_data &data,const char* name)
 {
