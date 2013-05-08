@@ -44,10 +44,10 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size)
     const ushort lod_from_end=reader.read<ushort>();
     const ushort lods_count=lod_from_begin+lod_from_end+1;
 
-    const nya_math::vec3 min(reader.read<float>(),reader.read<float>(),reader.read<float>());
-    const nya_math::vec3 max(reader.read<float>(),reader.read<float>(),reader.read<float>());
-    res.aabb.delta=(max-min)*0.5f;
-    res.aabb.origin=min+res.aabb.delta;
+    const nya_math::vec3 aabb_min(reader.read<float>(),reader.read<float>(),reader.read<float>());
+    const nya_math::vec3 aabb_max(reader.read<float>(),reader.read<float>(),reader.read<float>());
+    res.aabb.delta=(aabb_max-aabb_min)*0.5f;
+    res.aabb.origin=aabb_min+res.aabb.delta;
 
     uint vertex_stride=0;
     const uchar el_count=reader.read<uchar>();
