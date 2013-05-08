@@ -40,10 +40,6 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size)
     typedef unsigned short ushort;
     typedef unsigned char uchar;
 
-    const ushort lod_from_begin=reader.read<ushort>(); //ToDo
-    const ushort lod_from_end=reader.read<ushort>();
-    const ushort lods_count=lod_from_begin+lod_from_end+1;
-
     const nya_math::vec3 aabb_min(reader.read<float>(),reader.read<float>(),reader.read<float>());
     const nya_math::vec3 aabb_max(reader.read<float>(),reader.read<float>(),reader.read<float>());
     res.aabb.delta=(aabb_max-aabb_min)*0.5f;
@@ -100,19 +96,104 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size)
         }
     }
 
+    const ushort lods_count=reader.read<ushort>();
+    for(ushort i=0;i<lods_count;++i)
+    {
+        const ushort groups_count=reader.read<ushort>();
+        res.groups.resize(groups_count);
+        for(ushort j=0;j<groups_count;++j)
+        {
+            shared_mesh::group &g=res.groups[j];
+
+            const nya_math::vec3 aabb_min(reader.read<float>(),reader.read<float>(),reader.read<float>()); //ToDo
+            const nya_math::vec3 aabb_max(reader.read<float>(),reader.read<float>(),reader.read<float>());
+
+            g.material_idx=reader.read<ushort>();
+            g.offset=reader.read<ushort>();
+            g.count=reader.read<ushort>();
+        }
+
+        break; //ToDo: load all lods
+    }
+
     return true;
 }
 
 bool mesh::load_nms_skeleton_section(shared_mesh &res,const void *data,size_t size)
 {
-    nya_memory::memory_reader section_reader(data,size);
+    nya_memory::memory_reader reader(data,size);
+
+    const int bones_count=reader.read<int>();
+    for(int i=0;i<bones_count;++i)
+    {
+        const std::string name=read_string(reader);
+        const nya_math::quat rot(reader.read<float>(),reader.read<float>(), //ToDo
+                                 reader.read<float>(),reader.read<float>());
+        const nya_math::vec3 pos(reader.read<float>(),reader.read<float>(),reader.read<float>());
+        const int parent=reader.read<int>();
+
+        res.skeleton.add_bone(name.c_str(),pos,parent);
+    }
 
     return true;
 }
 
 bool mesh::load_nms_material_section(shared_mesh &res,const void *data,size_t size)
 {
-    nya_memory::memory_reader section_reader(data,size);
+    nya_memory::memory_reader reader(data,size);
+
+    typedef unsigned short ushort;
+
+    const ushort materials_count=reader.read<ushort>();
+    res.materials.resize(materials_count);
+    for(ushort i=0;i<materials_count;++i)
+    {
+        material &m=res.materials[i];
+        std::string name=read_string(reader);
+        m.set_name(name.c_str());
+
+        const ushort textures_count=reader.read<ushort>();
+        for(ushort j=0;j<textures_count;++j)
+        {
+            std::string name=read_string(reader);
+            std::string semantics=read_string(reader);
+
+            texture tex;
+            tex.load(name.c_str());
+            m.set_texture(semantics.c_str(),tex);
+        }
+
+        const ushort strings_count=reader.read<ushort>();
+        for(ushort j=0;j<strings_count;++j)
+        {
+            std::string name=read_string(reader);
+            std::string value=read_string(reader);
+
+            if(name=="nya_shader")
+            {
+                shader sh;
+                sh.load(value.c_str());
+                m.set_shader(sh);
+            }
+        }
+
+        const ushort vec4_count=reader.read<ushort>();
+        for(ushort j=0;j<vec4_count;++j)
+        {
+            read_string(reader);
+            reader.read<float>();
+            reader.read<float>();
+            reader.read<float>();
+            reader.read<float>();
+        }
+
+        const ushort ints_count=reader.read<ushort>();
+        for(ushort j=0;j<ints_count;++j)
+        {
+            read_string(reader);
+            reader.read<int>();
+        }
+    }
 
     return true;
 }
