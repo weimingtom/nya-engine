@@ -96,7 +96,7 @@ private:
     int get_uniforms_count() const;
 
 public:
-    shader() { register_load_function(load_nya_shader); }
+    shader() { default_load_function(load_nya_shader); }
 
 private:
     static const nya_render::skeleton *m_skeleton;

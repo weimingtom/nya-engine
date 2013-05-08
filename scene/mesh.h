@@ -21,13 +21,14 @@ struct shared_mesh
 
     struct group
     {
-        material mat;
-        int offset;
-        int count;
+        unsigned int material_idx;
+        unsigned int offset;
+        unsigned int count;
     };
 
     std::vector<group> groups;
 
+    std::vector<material> materials;
     nya_render::skeleton skeleton;
 
     bool release()
@@ -57,10 +58,13 @@ public:
     void set_scale(float s) { set_scale(s,s,s); }
 
 public:
+    int get_groups_count() const;
+    int get_material_idx(int group_idx) const;
+
     int get_materials_count() const;
-    const material &get_material(int idx) const;
-    material &modify_material(int idx);
-    void set_material(int idx,const material &mat);
+    const material &get_material(int material_idx) const;
+    material &modify_material(int material_idx);
+    void set_material(int material_idx,const material &mat);
 
 public:
     const nya_render::skeleton &get_skeleton() const;
@@ -89,13 +93,15 @@ public:
 
 public:
     static bool load_nms(shared_mesh &res,resource_data &data,const char* name);
-    static bool load_pmd(shared_mesh &res,resource_data &data,const char* name);
 
 public:
-    mesh(): m_recalc_aabb(true), m_has_aabb(false) { register_load_function(load_nms); register_load_function(load_pmd); }
+    mesh(): m_recalc_aabb(true), m_has_aabb(false) { default_load_function(load_nms); }
 
 private:
     nya_scene_internal::transform m_transform;
+
+private:
+    void draw_group(int idx) const;
 
 private:
     std::vector<int> m_replaced_materials_idx;

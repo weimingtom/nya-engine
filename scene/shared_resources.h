@@ -75,11 +75,25 @@ public:
         if(!function)
             return;
 
-        for(size_t i=0;i<get_load_functions().size();++i)
-            if(get_load_functions()[i]==function)
-                return;
+        if(get_load_functions().has_default)
+        {
+            get_load_functions().f.clear();
+            get_load_functions().has_default=false;
+        }
 
-        get_load_functions().push_back(function);
+        get_load_functions().add(function);
+    }
+
+    static void default_load_function(load_function function)
+    {
+        if(!function)
+            return;
+
+        if(!get_load_functions().f.empty() && !get_load_functions().has_default)
+            return;
+
+        get_load_functions().add(function);
+        get_load_functions().has_default=true;
     }
 
 protected:
@@ -108,9 +122,9 @@ protected:
             file_data->read_all(res_data.get_data());
             file_data->release();
 
-            for(size_t i=0;i<scene_shared::get_load_functions().size();++i)
+            for(size_t i=0;i<scene_shared::get_load_functions().f.size();++i)
             {
-                if(scene_shared::get_load_functions()[i](res,res_data,name))
+                if(scene_shared::get_load_functions().f[i](res,res_data,name))
                 {
                     res_data.free(); //just for shure, load function should do this
                     return true;
@@ -137,7 +151,26 @@ protected:
     }
 
 private:
-    typedef std::vector<load_function> load_functions;
+    struct load_functions
+    {
+        std::vector<load_function> f;
+        bool has_default;
+
+        void add(load_function function)
+        {
+            if(!function)
+                return;
+
+            for(size_t i=0;i<f.size();++i)
+                if(f[i]==function)
+                    return;
+
+            f.push_back(function);
+        }
+
+        load_functions(): has_default(false) {}
+    };
+
     static load_functions &get_load_functions()
     {
         static load_functions functions;

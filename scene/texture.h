@@ -35,7 +35,7 @@ public:
     void build(const void *data,unsigned int width,unsigned int height,color_format format);
 
 public:
-    texture():m_last_slot(0) { register_load_function(load_tga); }
+    texture():m_last_slot(0) { default_load_function(load_tga); }
 
 private:
     mutable int m_last_slot;
