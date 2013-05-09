@@ -75,13 +75,13 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size)
     if(!vertex_stride)
         return false;
 
-    uint verts_count=reader.read<uint>();
+    const uint verts_count=reader.read<uint>();
     if(!reader.check_remained(verts_count*vertex_stride))
         return false;
 
     res.vbo.set_vertex_data(reader.get_data(),vertex_stride,verts_count);
 
-    uchar index_size=reader.read<uchar>();
+    const uchar index_size=reader.read<uchar>();
     if(index_size)
     {
         uint inds_count=reader.read<uint>();
@@ -104,13 +104,14 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size)
         for(ushort j=0;j<groups_count;++j)
         {
             shared_mesh::group &g=res.groups[j];
+            read_string(reader); //ToDo: group name
 
             const nya_math::vec3 aabb_min(reader.read<float>(),reader.read<float>(),reader.read<float>()); //ToDo
             const nya_math::vec3 aabb_max(reader.read<float>(),reader.read<float>(),reader.read<float>());
 
             g.material_idx=reader.read<ushort>();
-            g.offset=reader.read<ushort>();
-            g.count=reader.read<ushort>();
+            g.offset=reader.read<uint>();
+            g.count=reader.read<uint>();
         }
 
         break; //ToDo: load all lods
@@ -155,8 +156,8 @@ bool mesh::load_nms_material_section(shared_mesh &res,const void *data,size_t si
         const ushort textures_count=reader.read<ushort>();
         for(ushort j=0;j<textures_count;++j)
         {
-            std::string name=read_string(reader);
             std::string semantics=read_string(reader);
+            std::string name=read_string(reader);
 
             texture tex;
             tex.load(name.c_str());
@@ -213,7 +214,7 @@ bool mesh::load_nms(shared_mesh &res,resource_data &data,const char* name)
     {
         mesh_data,
         skeleton,
-        material
+        materials
     };
 
     const uint num_sections=reader.read<uint>();
@@ -232,7 +233,7 @@ bool mesh::load_nms(shared_mesh &res,resource_data &data,const char* name)
         {
             case mesh_data: load_nms_mesh_section(res,reader.get_data(),size); break;
             case skeleton: load_nms_skeleton_section(res,reader.get_data(),size); break;
-            case material: load_nms_material_section(res,reader.get_data(),size); break;
+            case materials: load_nms_material_section(res,reader.get_data(),size); break;
             default: nya_log::get_log()<<"nms load warning: unknown chunk type\n";
         };
 
