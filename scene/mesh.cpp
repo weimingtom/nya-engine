@@ -313,7 +313,7 @@ void mesh::draw(int idx) const
 
     if(idx>=0)
     {
-        if(idx<m_shared->groups.size())
+        if(idx<(int)m_shared->groups.size())
             draw_group(idx);
     }
     else
@@ -338,7 +338,7 @@ int mesh::get_material_idx(int group_idx) const
     if(!m_shared.is_valid())
         return 0;
 
-    if(group_idx<0 || group_idx>=m_shared->groups.size())
+    if(group_idx<0 || group_idx>=(int)m_shared->groups.size())
         return 0;
 
     return m_shared->groups[group_idx].material_idx;
