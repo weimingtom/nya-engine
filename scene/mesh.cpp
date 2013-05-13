@@ -22,10 +22,12 @@ namespace
     std::string read_string(nya_memory::memory_reader &reader)
     {
         unsigned short size=reader.read<unsigned short>();
-        if(!size || !reader.check_remained(size))
+        const char *str=(const char *)reader.get_data();
+        reader.skip(size);
+        if(!size || !str || !reader.check_remained(size))
             return "";
 
-        return std::string((const char *)reader.get_data(),size);
+        return std::string(str,size);
     }
 }
 
@@ -80,6 +82,7 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size)
         return false;
 
     res.vbo.set_vertex_data(reader.get_data(),vertex_stride,verts_count);
+    reader.skip(verts_count*vertex_stride);
 
     const uchar index_size=reader.read<uchar>();
     if(index_size)
@@ -94,6 +97,8 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size)
             case 4: res.vbo.set_index_data(reader.get_data(),nya_render::vbo::index4b,verts_count); break;
             default: return false;
         }
+
+        reader.skip(index_size*inds_count);
     }
 
     const ushort lods_count=reader.read<ushort>();
