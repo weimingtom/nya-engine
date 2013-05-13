@@ -225,6 +225,18 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
                                     p.name=name;
                                     p.transform=transform;
                                 }
+                                else if(semantics=="nya bones pos")
+                                {
+                                    shader_description::predefined &p=desc.predefines[shared_shader::bones_pos];
+                                    p.name=name;
+                                    p.transform=transform;
+                                }
+                                else if(semantics=="nya bones rot")
+                                {
+                                    shader_description::predefined &p=desc.predefines[shared_shader::bones_rot];
+                                    p.name=name;
+                                    p.transform=transform;
+                                }
                             }
                             else if(desc.uniforms.find(semantics)==desc.uniforms.end())
                             {
