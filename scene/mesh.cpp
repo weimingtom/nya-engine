@@ -23,9 +23,13 @@ namespace
     {
         unsigned short size=reader.read<unsigned short>();
         const char *str=(const char *)reader.get_data();
-        reader.skip(size);
         if(!size || !str || !reader.check_remained(size))
+        {
+            reader.skip(size);
             return "";
+        }
+
+        reader.skip(size);
 
         return std::string(str,size);
     }
