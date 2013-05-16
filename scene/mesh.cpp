@@ -457,6 +457,15 @@ int mesh::add_anim(const animation & anim,float weight,float speed)
     return (int)i;
 }
 
+void mesh::remove_anim(int idx)
+{
+    if(idx<0 || idx>=(int)m_anims.size())
+        return;
+
+    m_anims[idx].free=true;
+    m_anims[idx].anim.unload();
+}
+
 const animation & mesh::get_anim(int idx) const
 {
     if(idx<0 || idx >= (int)m_anims.size())
