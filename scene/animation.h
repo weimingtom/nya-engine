@@ -30,7 +30,14 @@ public:
     unsigned int get_duration() const;
 
 public:
-    animation() { register_load_function(load_vmd); }
+    void set_loop(bool looped) { m_looped=looped; }
+    bool get_loop() { return m_looped; }
+
+public:
+    animation(): m_looped(true) { register_load_function(load_vmd); }
+
+private:
+    bool m_looped;
 };
 
 }

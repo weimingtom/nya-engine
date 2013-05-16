@@ -498,7 +498,7 @@ void mesh::update(unsigned int dt)
 
         for(int j=0;j<(int)a.bones_map.size();++j)
         {
-            const nya_render::animation::bone &b=ra.get_bone(j,a.time);
+            const nya_render::animation::bone &b=ra.get_bone(j,a.time,a.anim.get_loop());
             m_skeleton.set_bone_transform(a.bones_map[j],b.pos,b.rot);
         }
     }

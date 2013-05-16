@@ -22,10 +22,18 @@ animation::bone animation::get_bone(int idx,unsigned int time,bool looped) const
     if(idx<0 || idx>=(int)m_bones.size())
         return bone();
 
-    if(m_duration)
-        time=time%m_duration;
-    else
-        time=0;
+    if(time>m_duration)
+    {
+        if(looped)
+        {            
+            if(m_duration)
+                time=time%m_duration;
+            else
+                time=0;
+        }
+        else
+            time=m_duration;
+    }
 
     //ToDo: faster frame search, start with non-first frame
     // via additional frames map with constant quantity
