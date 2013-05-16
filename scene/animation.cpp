@@ -92,7 +92,7 @@ bool animation::load_vmd(shared_animation &res,resource_data &data,const char* n
     return true;
 }
 
-unsigned int animation::get_duration()
+unsigned int animation::get_duration() const
 {
     if(!m_shared.is_valid())
         return 0;

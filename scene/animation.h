@@ -27,7 +27,7 @@ public:
     static bool load_vmd(shared_animation &res,resource_data &data,const char* name);
 
 public:
-    unsigned int get_duration();
+    unsigned int get_duration() const;
 
 public:
     animation() { register_load_function(load_vmd); }
