@@ -457,6 +457,25 @@ int mesh::add_anim(const animation & anim,float weight,float speed)
     return (int)i;
 }
 
+const animation & mesh::get_anim(int idx) const
+{
+    if(idx<0 || idx >= (int)m_anims.size())
+    {
+        static animation empty;
+        return empty;
+    }
+
+    return m_anims[idx].anim;
+}
+
+void mesh::set_anim_time(int idx,unsigned int time)
+{
+    if(idx<0 || idx >= (int)m_anims.size())
+        return;
+
+    m_anims[idx].time=time;
+}
+
 void mesh::update(unsigned int dt)
 {
     for(size_t i=0;i<m_anims.size();++i) //ToDo: animblend, speed
