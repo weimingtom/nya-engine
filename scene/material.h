@@ -59,6 +59,9 @@ public:
     void set_param(int idx,const param_proxy &p,const param &m); //set as p*m
     void set_param(int idx,const param_proxy &p,const param_proxy &m);
 
+    const param_proxy &get_param(int idx);
+    const param_proxy &get_param_multiplier(int idx);
+
     bool get_zwrite() const { return m_zwrite; }
     bool get_color_write() const { return m_color_write; }
     bool get_blend(blend_mode &src,blend_mode &dst) const { 

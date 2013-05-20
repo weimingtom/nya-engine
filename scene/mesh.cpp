@@ -470,8 +470,8 @@ const animation & mesh::get_anim(int idx) const
 {
     if(idx<0 || idx >= (int)m_anims.size())
     {
-        static animation empty;
-        return empty;
+        static animation invalid;
+        return invalid;
     }
 
     return m_anims[idx].anim;
