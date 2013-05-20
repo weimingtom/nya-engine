@@ -88,6 +88,9 @@ animation::bone animation::get_bone(int idx,unsigned int time,bool looped) const
         }
     }
 
+    if(frames_count)
+        return seq.frames[0].pos_rot;
+
     return bone();
 }
 
