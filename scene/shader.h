@@ -93,6 +93,7 @@ private:
 private:
     const shared_shader::uniform &get_uniform(int idx) const;
     void set_uniform_value(int idx,float f0,float f1,float f2,float f3) const;
+    void set_uniform4_array(int idx,const float *array,int size) const;
     int get_uniforms_count() const;
 
 public:

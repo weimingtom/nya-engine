@@ -425,6 +425,14 @@ void shader::set_uniform_value(int idx,float f0,float f1,float f2,float f3) cons
         m_shared->shdr.set_uniform(m_shared->uniforms[idx].location,f0,f1,f2,f3);
 }
 
+void shader::set_uniform4_array(int idx,const float *array,int size) const
+{
+    if(!m_shared.is_valid() || idx<0 || idx >=(int)m_shared->uniforms.size())
+        return;
+
+    m_shared->shdr.set_uniform4_array(m_shared->uniforms[idx].location,array,size);
+}
+
 int shader::get_uniforms_count() const
 {
     if(!m_shared.is_valid())

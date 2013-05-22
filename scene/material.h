@@ -36,8 +36,28 @@ public:
     private:
         float f[4];
     };
-
+    
     typedef proxy<param> param_proxy;
+
+    class param_array
+    {
+        friend class material;
+
+    public:
+        void set_count(int count) { m_params.resize(count); }
+        int get_count() const { return (int)m_params.size(); }
+        void set(int idx,const param &p) { if(idx>=0 && idx<(int)m_params.size()) m_params[idx]=p; }
+        void set(int idx,float f0,float f1,float f2,float f3)
+        {
+            if(idx>=0 && idx<(int)m_params.size())
+                m_params[idx].set(f0,f1,f2,f3);
+        }
+
+    private:
+        std::vector<param> m_params;
+    };
+
+    typedef proxy<param_array> param_array_proxy;
 
 public:
     typedef nya_render::blend::mode blend_mode;
@@ -58,9 +78,12 @@ public:
     void set_param(int idx,const param_proxy &p);
     void set_param(int idx,const param_proxy &p,const param &m); //set as p*m
     void set_param(int idx,const param_proxy &p,const param_proxy &m);
+    void set_param_array(int idx,const param_array & a);
+    void set_param_array(int idx,const param_array_proxy & p);
 
     const param_proxy &get_param(int idx);
     const param_proxy &get_param_multiplier(int idx);
+    const param_array_proxy &get_param_array(int idx);
 
     bool get_zwrite() const { return m_zwrite; }
     bool get_color_write() const { return m_color_write; }
@@ -117,6 +140,7 @@ private:
     {
         param_proxy p;
         param_proxy m;
+        param_array_proxy a;
     };
 
     std::vector<param_holder> m_params;

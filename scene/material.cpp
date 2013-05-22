@@ -14,6 +14,13 @@ void material::set() const
         const param_proxy &p=m_params[i].p;
         if(!p.is_valid())
         {
+            const param_array_proxy &a=m_params[i].a;
+            if(a.is_valid())
+            {
+                m_shader.set_uniform4_array(i,a->m_params[0].f,a->get_count());
+                continue;
+            }
+            
             m_shader.set_uniform_value(i,0,0,0,0);
             continue;
         }
@@ -191,6 +198,7 @@ void material::set_param(int idx,const param_proxy &p)
 
     m_params[idx].p=p;
     m_params[idx].m.free();
+    m_params[idx].a.free();
 }
 
 void material::set_param(int idx,const param_proxy &p,const param &m)
@@ -205,6 +213,22 @@ void material::set_param(int idx,const param_proxy &p,const param_proxy &m)
 
     m_params[idx].p=p;
     m_params[idx].m=m;
+    m_params[idx].a.free();
+}
+
+void material::set_param_array(int idx,const param_array & a)
+{
+    set_param_array(idx,param_array_proxy(a));
+}
+
+void material::set_param_array(int idx,const param_array_proxy & p)
+{
+    if(idx<0 || idx>=(int)m_params.size())
+        return;
+
+    m_params[idx].p.free();
+    m_params[idx].m.free();
+    m_params[idx].a=p;
 }
 
 const material::param_proxy &material::get_param(int idx)
@@ -227,6 +251,17 @@ const material::param_proxy &material::get_param_multiplier(int idx)
     }
 
     return m_params[idx].m;
+}
+
+const material::param_array_proxy &material::get_param_array(int idx)
+{
+    if(idx<0 || idx>=(int)m_params.size())
+    {
+        static param_array_proxy invalid;
+        return invalid;
+    }
+
+    return m_params[idx].a;
 }
 
 void material::release()
