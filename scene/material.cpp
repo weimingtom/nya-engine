@@ -15,12 +15,12 @@ void material::set() const
         if(!p.is_valid())
         {
             const param_array_proxy &a=m_params[i].a;
-            if(a.is_valid())
+            if(a.is_valid() && a->get_count()>0)
             {
                 m_shader.set_uniform4_array(i,a->m_params[0].f,a->get_count());
                 continue;
             }
-            
+
             m_shader.set_uniform_value(i,0,0,0,0);
             continue;
         }
