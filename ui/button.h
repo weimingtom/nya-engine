@@ -55,6 +55,12 @@ protected:
 
         send_event(get_id(),e);
 
+        if(!pressed && m_mouse_over)
+        {
+            e.type="button_pressed";
+            send_event(get_id(),e);
+        }
+
         return true;
     }
 
