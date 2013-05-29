@@ -54,6 +54,18 @@ public:
         }
     }
 
+    const char *get_element(uint idx)
+    {
+        if(idx>=m_elements.size())
+            return 0;
+
+        return m_elements[idx].c_str();
+    }
+
+    int get_selected_idx() { return m_selected; }
+
+    const char *get_selected_element() { return get_element((uint)m_selected); }
+
 public:
     virtual void set_scroll_size(uint scroll_area_width,uint scroll_width,
                                  uint scroll_height, uint button_height)
