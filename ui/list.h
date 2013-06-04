@@ -66,6 +66,8 @@ public:
 
     const char *get_selected_element() { return get_element((uint)m_selected); }
 
+    int get_elements_count() { return (int)m_elements.size(); }
+
 public:
     virtual void set_scroll_size(uint scroll_area_width,uint scroll_width,
                                  uint scroll_height, uint button_height)
