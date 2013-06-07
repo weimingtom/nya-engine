@@ -97,8 +97,8 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size)
 
         switch(index_size)
         {
-            case 2: res.vbo.set_index_data(reader.get_data(),nya_render::vbo::index2b,verts_count); break;
-            case 4: res.vbo.set_index_data(reader.get_data(),nya_render::vbo::index4b,verts_count); break;
+            case 2: res.vbo.set_index_data(reader.get_data(),nya_render::vbo::index2b,inds_count); break;
+            case 4: res.vbo.set_index_data(reader.get_data(),nya_render::vbo::index4b,inds_count); break;
             default: return false;
         }
 

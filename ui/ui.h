@@ -139,7 +139,7 @@ public:
 
     virtual void set_visible(bool visible)
     {
-        if(m_mouse_over)
+        if(m_mouse_over && m_visible && !visible)
         {
             on_mouse_left();
             m_mouse_over=false;
