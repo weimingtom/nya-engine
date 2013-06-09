@@ -62,8 +62,8 @@ bool animation::load_vmd(shared_animation &res,resource_data &data,const char* n
 
         const float c2f=1.0f/128.0f;
 
-        const uint bone_idx=res.anim.add_bone(bone_frame.name.c_str());
-        if(!bone_idx)
+        const int bone_idx=res.anim.add_bone(bone_frame.name.c_str());
+        if(bone_idx<0)
             continue;
 
         const uint time=bone_frame.frame*60; //ToDo: adjust framerate
