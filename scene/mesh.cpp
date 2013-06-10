@@ -485,6 +485,26 @@ void mesh::set_anim_time(int idx,unsigned int time)
     m_anims[idx].time=time;
 }
 
+void mesh::set_bone_pos(int bone_idx,const nya_math::vec3 &pos,bool additive)
+{
+    if(bone_idx<0 || bone_idx>=m_skeleton.get_bones_count())
+        return;
+
+    bone_control &b=m_bone_controls[bone_idx];
+    b.pos=pos;
+    b.pos_ctrl=additive?bone_additive:bone_override;
+}
+
+void mesh::set_bone_rot(int bone_idx,const nya_math::quat &rot,bool additive)
+{
+    if(bone_idx<0 || bone_idx>=m_skeleton.get_bones_count())
+        return;
+
+    bone_control &b=m_bone_controls[bone_idx];
+    b.rot=rot;
+    b.rot_ctrl=additive?bone_additive:bone_override;
+}
+
 void mesh::update(unsigned int dt)
 {
     for(size_t i=0;i<m_anims.size();++i) //ToDo: animblend, speed
@@ -501,6 +521,31 @@ void mesh::update(unsigned int dt)
             const nya_render::animation::bone &b=ra.get_bone(j,a.time,a.anim.get_loop());
             m_skeleton.set_bone_transform(a.bones_map[j],b.pos,b.rot);
         }
+    }
+
+    //ToDo: correct additive pos&rot for bones that not animated
+
+    for(bone_control_map::const_iterator it=m_bone_controls.begin();it!=m_bone_controls.end();++it)
+    {
+        const bone_control &b=it->second;
+
+        nya_math::vec3 pos=m_skeleton.get_bone_pos(it->first);
+        switch(b.pos_ctrl)
+        {
+            case bone_override: pos=b.pos; break;
+            case bone_additive: pos+=b.pos; break;
+            case bone_free: break;
+        }
+
+        nya_math::quat rot=m_skeleton.get_bone_rot(it->first);
+        switch(b.rot_ctrl)
+        {
+            case bone_override: rot=b.rot; break;
+            case bone_additive: rot=rot*b.rot; break;
+            case bone_free: break;
+        }
+
+        m_skeleton.set_bone_transform(it->first,pos,rot);
     }
 
     m_skeleton.update();

@@ -67,6 +67,10 @@ public:
     void set_material(int material_idx,const material &mat);
 
 public:
+    void set_bone_pos(int bone_idx,const nya_math::vec3 &pos,bool additive);
+    void set_bone_rot(int bone_idx,const nya_math::quat &rot,bool additive);
+
+public:
     const nya_render::skeleton &get_skeleton() const;
 
 public:
@@ -122,6 +126,26 @@ private:
 
     nya_render::skeleton m_skeleton;
     std::vector<applied_anim> m_anims;
+
+    enum bone_control_mode
+    {
+        bone_free,
+        bone_additive,
+        bone_override
+    };
+
+    struct bone_control
+    {
+        nya_math::vec3 pos;
+        bone_control_mode pos_ctrl;
+        nya_math::quat rot;
+        bone_control_mode rot_ctrl;
+
+        bone_control(): pos_ctrl(bone_free),rot_ctrl(bone_free) {}
+    };
+
+    typedef std::map<int,bone_control> bone_control_map;
+    bone_control_map m_bone_controls;
 
     mutable bool m_recalc_aabb;
     mutable nya_math::aabb m_aabb;
