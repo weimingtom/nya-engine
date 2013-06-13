@@ -473,7 +473,7 @@ void mesh::applied_anim::set_time(float t)
     }
 
     time=t;
-    const float anim_len=anim->m_range_to-anim->m_range_from;
+    const float anim_len=float(anim->m_range_to-anim->m_range_from);
     if(!anim->get_loop())
     {
         if(time>anim_len)

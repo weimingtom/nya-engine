@@ -32,9 +32,11 @@ struct quat
 
     vec3 get_euler() const; //pitch,yaw,roll
 
-    quat limit_angle(float from,float to);
+    quat &limit_angle(float from,float to);
 
-    quat normalize();
+    quat &normalize();
+
+    quat &apply_weight(float weight);
 
     vec3 rotate(const vec3 &v) const;
     vec3 rotate_inv(const vec3 &v) const;

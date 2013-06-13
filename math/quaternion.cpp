@@ -122,7 +122,7 @@ quat::quat(vec3 axis,float angle)
     w=cosf(angle);
 }
 
-quat quat::limit_angle(float from,float to)
+quat &quat::limit_angle(float from,float to)
 {
     vec3 ang=get_euler();
 
@@ -137,7 +137,7 @@ quat quat::limit_angle(float from,float to)
     return *this=quat(ang.x,ang.y,ang.z);
 }
 
-quat quat::normalize()
+quat &quat::normalize()
 {
     const float len=sqrtf(v*v+w*w);
     if(len>0.00001f)
@@ -148,6 +148,13 @@ quat quat::normalize()
     }
 
     return *this;
+}
+
+quat &quat::apply_weight(float weight)
+{
+    v*=weight;
+    w*=weight;
+    w+=1.0-weight;
 }
 
 quat quat::operator * (const quat &q) const
