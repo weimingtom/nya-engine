@@ -154,7 +154,9 @@ quat &quat::apply_weight(float weight)
 {
     v*=weight;
     w*=weight;
-    w+=1.0-weight;
+    w+=1.0f-weight;
+
+    return *this;
 }
 
 quat quat::operator * (const quat &q) const
