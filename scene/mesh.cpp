@@ -113,7 +113,7 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size)
         for(ushort j=0;j<groups_count;++j)
         {
             shared_mesh::group &g=res.groups[j];
-            read_string(reader); //ToDo: group name
+            g.name=read_string(reader);
 
             const nya_math::vec3 aabb_min(reader.read<float>(),reader.read<float>(),reader.read<float>()); //ToDo
             const nya_math::vec3 aabb_max(reader.read<float>(),reader.read<float>(),reader.read<float>());
@@ -342,6 +342,17 @@ int mesh::get_groups_count() const
         return 0;
 
     return (int)m_shared->groups.size();
+}
+
+const char *mesh::get_group_name(int group_idx) const
+{
+    if(!m_shared.is_valid())
+        return 0;
+
+    if(group_idx<0 || group_idx>=(int)m_shared->groups.size())
+        return 0;
+
+    return m_shared->groups[group_idx].name.c_str();
 }
 
 int mesh::get_material_idx(int group_idx) const

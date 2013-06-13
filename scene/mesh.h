@@ -21,6 +21,7 @@ struct shared_mesh
 
     struct group
     {
+        std::string name;
         unsigned int material_idx;
         unsigned int offset;
         unsigned int count;
@@ -61,6 +62,7 @@ public:
 
 public:
     int get_groups_count() const;
+    const char *get_group_name(int group_idx) const;
     int get_material_idx(int group_idx) const;
 
     int get_materials_count() const;
