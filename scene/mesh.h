@@ -122,11 +122,12 @@ private:
         unsigned int version;
         bool full_weight;
 
-        void set_time(float time);
-        void update_mapping(const nya_render::skeleton &skeleton);
-
         applied_anim(): layer(0),time(0),version(0) {}
     };
+
+private:
+    void anim_update_mapping(applied_anim &anim);
+    void anim_set_time(applied_anim &anim,float time);
 
     nya_render::skeleton m_skeleton;
     std::vector<applied_anim> m_anims;

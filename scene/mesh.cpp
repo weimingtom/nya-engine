@@ -464,43 +464,43 @@ void mesh::set_anim(const animation_proxy & anim,int layer)
     a.version=0;
 }
 
-void mesh::applied_anim::set_time(float t)
+void mesh::anim_set_time(applied_anim &a,float t)
 {
-    if(!anim.is_valid())
+    if(!a.anim.is_valid())
     {
-        time=0.0f;
+        a.time=0.0f;
         return;
     }
 
-    time=t;
-    const float anim_len=float(anim->m_range_to-anim->m_range_from);
-    if(!anim->get_loop())
+    a.time=t;
+    const float anim_len=float(a.anim->m_range_to-a.anim->m_range_from);
+    if(!a.anim->get_loop())
     {
-        if(time>anim_len)
-            time=anim_len;
+        if(a.time>anim_len)
+            a.time=anim_len;
 
         return;
     }
 
-    while(time>anim_len)
-        time-=anim_len;
+    while(a.time>anim_len)
+        a.time-=anim_len;
 }
 
-void mesh::applied_anim::update_mapping(const nya_render::skeleton &skeleton)
+void mesh::anim_update_mapping(applied_anim &a)
 {
-    if(!anim->m_shared.is_valid())
+    if(!a.anim->m_shared.is_valid())
         return;
 
-    const nya_render::animation &ra=anim->m_shared->anim;
-    bones_map.resize(skeleton.get_bones_count(),-1);
+    const nya_render::animation &ra=a.anim->m_shared->anim;
+    a.bones_map.resize(m_skeleton.get_bones_count(),-1);
 
     for(int j=0;j<(int)ra.get_bones_count();++j)
     {
-        int idx=skeleton.get_bone_idx(ra.get_bone_name(j));
+        int idx=m_skeleton.get_bone_idx(ra.get_bone_name(j));
         if(idx<0)
             continue;
 
-        bones_map[idx]=j;
+        a.bones_map[idx]=j;
     }
 }
 
@@ -522,7 +522,7 @@ void mesh::set_anim_time(unsigned int time,int layer)
     {
         if(m_anims[i].layer==layer)
         {
-            m_anims[i].set_time(float(time));
+            anim_set_time(m_anims[i],float(time));
             return;
         }
     }
@@ -556,10 +556,10 @@ void mesh::update(unsigned int dt)
     for(int i=0;i<(int)m_anims.size();++i)
     {
         applied_anim &a=m_anims[i];
-        a.set_time(a.time+dt*a.anim->m_speed);
+        anim_set_time(a,a.time+dt*a.anim->m_speed);
         if(a.version!=a.anim->m_version)
         {
-            a.update_mapping(m_skeleton);
+            anim_update_mapping(a);
             a.version=a.anim->m_version;
         }
 
