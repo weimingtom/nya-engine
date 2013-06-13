@@ -6,6 +6,33 @@
 namespace nya_scene
 {
 
+bool animation::load(const char *name)
+{
+    if(!scene_shared::load(name))
+        return false;
+
+    if(!m_shared.is_valid())
+        return false;
+
+    m_range_from=0;
+    m_range_to=m_shared->anim.get_duration();
+
+    m_speed=m_weight=1.0f;
+
+    static unsigned int version = 0;
+    m_version= ++version;
+
+    return true;
+}
+
+void animation::unload()
+{
+    scene_shared::unload();
+
+    m_range_from=m_range_to=0;
+    m_speed=m_weight=1.0f;
+}
+
 bool animation::load_vmd(shared_animation &res,resource_data &data,const char* name)
 {
     nya_memory::memory_reader reader(data.get_data(),data.get_size());
@@ -98,6 +125,22 @@ unsigned int animation::get_duration() const
         return 0;
 
     return m_shared->anim.get_duration();
+}
+
+void animation::set_range(unsigned int from,unsigned int to)
+{
+    m_range_from=from;
+    m_range_to=to;
+
+    unsigned int duration = m_shared->anim.get_duration();
+    if(m_range_from>duration)
+        m_range_from=duration;
+
+    if(m_range_to>duration)
+        m_range_to=duration;
+
+    if(m_range_from>m_range_to)
+        m_range_from=m_range_to;
 }
 
 }

@@ -42,6 +42,8 @@ struct shared_mesh
     }
 };
 
+typedef proxy<animation> animation_proxy;
+
 class mesh: public scene_shared<shared_mesh>
 {
 public:
@@ -74,15 +76,14 @@ public:
     const nya_render::skeleton &get_skeleton() const;
 
 public:
-    int add_anim(const animation & anim,float weight=1.0f,float speed=1.0f);
-    void remove_anim(int idx);
-    void set_anim_time(int idx,unsigned int time);
-    void set_anim_weight(int idx,float weight);
-    void set_anim_speed(int idx,float speed);
-    unsigned int get_anim_time(int idx) const;
-    float get_anim_weight(int idx) const;
-    float get_anim_speed(int idx) const;
-    const animation & get_anim(int idx) const;
+    void set_anim(const animation & anim,int layer=0) { set_anim(animation_proxy(anim)); }
+    void set_anim(const animation_proxy & anim,int layer=0);
+
+    const animation_proxy & get_anim(int layer=0) const;
+    unsigned int get_anim_time(int layer=0) const;
+    void set_anim_time(unsigned int time,int layer=0);
+
+    //float get_anim_weight(int layer=0) const; //mesh own anim weight
 
 public:
     void update(unsigned int dt);
@@ -114,14 +115,17 @@ private:
 private:
     struct applied_anim
     {
-        bool free;
-        unsigned int time;
+        int layer;
+        float time;
         std::vector<int> bones_map;
-        animation anim;
-        float weight;
-        float speed;
+        animation_proxy anim;
+        unsigned int version;
+        bool full_weight;
 
-        applied_anim(): free(true) {}
+        void set_time(float time);
+        void update_mapping(const nya_render::skeleton &skeleton);
+
+        applied_anim(): layer(0),time(0),version(0) {}
     };
 
     nya_render::skeleton m_skeleton;

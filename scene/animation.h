@@ -24,20 +24,33 @@ class animation: public scene_shared<shared_animation>
     friend class mesh;
 
 public:
-    static bool load_vmd(shared_animation &res,resource_data &data,const char* name);
+    virtual bool load(const char *name);
+    virtual void unload();
 
 public:
+    void set_range(unsigned int from,unsigned int to);
+    void set_weight(float weight) { m_weight=weight; }
+    void set_speed(float speed) { m_speed=speed; }
+
     unsigned int get_duration() const;
-
-public:
     void set_loop(bool looped) { m_looped=looped; }
-    bool get_loop() { return m_looped; }
+    bool get_loop() const { return m_looped; }
 
 public:
-    animation(): m_looped(true) { register_load_function(load_vmd); }
+    animation(): m_looped(true),m_range_from(0),m_range_to(0),m_speed(1.0f),
+                 m_weight(1.0f),m_version(0) { register_load_function(load_vmd); }
+
+public:
+    static bool load_vmd(shared_animation &res,resource_data &data,const char* name);
 
 private:
     bool m_looped;
+    unsigned int m_range_from;
+    unsigned int m_range_to;
+    float m_speed;
+    float m_weight;
+
+    unsigned int m_version;
 };
 
 }

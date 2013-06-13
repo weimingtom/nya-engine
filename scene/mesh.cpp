@@ -428,61 +428,104 @@ const nya_render::skeleton &mesh::get_skeleton() const
     return m_skeleton;
 }
 
-int mesh::add_anim(const animation & anim,float weight,float speed)
+void mesh::set_anim(const animation_proxy & anim,int layer)
 {
-    if(!m_shared.is_valid() || !anim.m_shared.is_valid())
-        return -1;
+    if(!m_shared.is_valid() || layer<0)
+        return;
 
-    size_t i=0;
-    for(i=0;i<m_anims.size();++i)
+    int idx=-1;
+    for(int i=0;i<(int)m_anims.size();++i)
     {
-        if(!m_anims[i].free)
+        if(m_anims[i].layer==layer)
+        {
+            idx=i;
             break;
+        }
     }
 
-    if(i>=m_anims.size())
-        m_anims.resize(i+1);
-
-    applied_anim &a=m_anims[i];
-    a.free=false;
-    a.anim=anim;
-    a.weight=weight;
-    a.speed=speed;
-    a.time=0;
-    const nya_render::animation &ra=anim.m_shared->anim;
-    a.bones_map.resize(ra.get_bones_count());
-    for(int j=0;j<(int)a.bones_map.size();++j)
-        a.bones_map[j]=m_skeleton.get_bone_idx(ra.get_bone_name(j));
-
-    return (int)i;
-}
-
-void mesh::remove_anim(int idx)
-{
-    if(idx<0 || idx>=(int)m_anims.size())
-        return;
-
-    m_anims[idx].free=true;
-    m_anims[idx].anim.unload();
-}
-
-const animation & mesh::get_anim(int idx) const
-{
-    if(idx<0 || idx >= (int)m_anims.size())
+    if(!anim.is_valid())
     {
-        static animation invalid;
-        return invalid;
+        if(idx>=0)
+            m_anims.erase(m_anims.begin()+idx);
+
+        return;
     }
 
-    return m_anims[idx].anim;
+    if(idx<0)
+    {
+        idx=(int)m_anims.size();
+        m_anims.resize(m_anims.size()+1);
+    }
+
+    applied_anim &a=m_anims[idx];
+    a.layer=layer;
+    a.anim=anim;
+    a.time=0;
+    a.version=0;
 }
 
-void mesh::set_anim_time(int idx,unsigned int time)
+void mesh::applied_anim::set_time(float t)
 {
-    if(idx<0 || idx >= (int)m_anims.size())
+    if(!anim.is_valid())
+    {
+        time=0.0f;
+        return;
+    }
+
+    time=t;
+    const float anim_len=anim->m_range_to-anim->m_range_from;
+    if(!anim->get_loop())
+    {
+        if(time>anim_len)
+            time=anim_len;
+
+        return;
+    }
+
+    while(time>anim_len)
+        time-=anim_len;
+}
+
+void mesh::applied_anim::update_mapping(const nya_render::skeleton &skeleton)
+{
+    if(!anim->m_shared.is_valid())
         return;
 
-    m_anims[idx].time=time;
+    const nya_render::animation &ra=anim->m_shared->anim;
+    bones_map.resize(skeleton.get_bones_count(),-1);
+
+    for(int j=0;j<(int)ra.get_bones_count();++j)
+    {
+        int idx=skeleton.get_bone_idx(ra.get_bone_name(j));
+        if(idx<0)
+            continue;
+
+        bones_map[idx]=j;
+    }
+}
+
+const animation_proxy & mesh::get_anim(int layer) const
+{
+    for(int i=0;i<(int)m_anims.size();++i)
+    {
+        if(m_anims[i].layer==layer)
+            return m_anims[i].anim;
+    }
+
+    static const animation_proxy invalid;
+    return invalid;
+}
+
+void mesh::set_anim_time(unsigned int time,int layer)
+{
+    for(int i=0;i<(int)m_anims.size();++i)
+    {
+        if(m_anims[i].layer==layer)
+        {
+            m_anims[i].set_time(float(time));
+            return;
+        }
+    }
 }
 
 void mesh::set_bone_pos(int bone_idx,const nya_math::vec3 &pos,bool additive)
@@ -507,45 +550,93 @@ void mesh::set_bone_rot(int bone_idx,const nya_math::quat &rot,bool additive)
 
 void mesh::update(unsigned int dt)
 {
-    for(size_t i=0;i<m_anims.size();++i) //ToDo: animblend, speed
+    if(m_anims.empty())
+        return;
+
+    for(int i=0;i<(int)m_anims.size();++i)
     {
         applied_anim &a=m_anims[i];
-        if(a.free)
-            continue;
-
-        a.time+=dt;
-        const nya_render::animation &ra=a.anim.m_shared->anim;
-
-        for(int j=0;j<(int)a.bones_map.size();++j)
+        a.set_time(a.time+dt*a.anim->m_speed);
+        if(a.version!=a.anim->m_version)
         {
-            const nya_render::animation::bone &b=ra.get_bone(j,a.time,a.anim.get_loop());
-            m_skeleton.set_bone_transform(a.bones_map[j],b.pos,b.rot);
+            a.update_mapping(m_skeleton);
+            a.version=a.anim->m_version;
         }
+
+        const float eps=0.0001f;
+        a.full_weight=(fabsf(1.0f-a.anim->m_weight)>eps);
     }
 
-    //ToDo: correct additive pos&rot for bones that not animated
-
-    for(bone_control_map::const_iterator it=m_bone_controls.begin();it!=m_bone_controls.end();++it)
+    for(int i=0;i<m_skeleton.get_bones_count();++i)
     {
-        const bone_control &b=it->second;
+        nya_math::vec3 pos;
+        nya_math::quat rot;
 
-        nya_math::vec3 pos=m_skeleton.get_bone_pos(it->first);
-        switch(b.pos_ctrl)
+        const applied_anim &a=m_anims[0];
+        if(a.bones_map[i]>=0)
         {
-            case bone_override: pos=b.pos; break;
-            case bone_additive: pos+=b.pos; break;
-            case bone_free: break;
+            const unsigned int time=(unsigned int)a.time+a.anim->m_range_from;
+            const nya_render::animation::bone &b=
+                a.anim->m_shared->anim.get_bone(a.bones_map[i],time,a.anim->get_loop());
+
+            if(a.full_weight)
+            {
+                pos=b.pos;
+                rot=b.rot;
+            }
+            else
+            {
+                pos=b.pos*a.anim->m_weight;
+                rot=b.rot;
+                rot.apply_weight(a.anim->m_weight);
+            }
         }
 
-        nya_math::quat rot=m_skeleton.get_bone_rot(it->first);
-        switch(b.rot_ctrl)
+        for(int j=1;j<(int)m_anims.size();++j)
         {
-            case bone_override: rot=b.rot; break;
-            case bone_additive: rot=rot*b.rot; break;
-            case bone_free: break;
+            const applied_anim &a=m_anims[j];
+            if(a.bones_map[i]>=0)
+            {
+                const unsigned int time=(unsigned int)a.time+a.anim->m_range_from;
+                const nya_render::animation::bone &b=
+                    a.anim->m_shared->anim.get_bone(a.bones_map[i],time,a.anim->get_loop());
+
+                if(a.full_weight)
+                {
+                    pos+=b.pos;
+                    rot=rot*b.rot;
+                }
+                else
+                {
+                    pos+=b.pos*a.anim->m_weight;
+                    nya_math::quat tmp=b.rot;
+                    tmp.apply_weight(a.anim->m_weight);
+                    rot=rot*tmp;
+                }
+            }
         }
 
-        m_skeleton.set_bone_transform(it->first,pos,rot);
+        bone_control_map::const_iterator it=m_bone_controls.find(i);
+        if(it!=m_bone_controls.end())
+        {
+            const bone_control &b=it->second;
+
+            switch(b.pos_ctrl)
+            {
+                case bone_override: pos=b.pos; break;
+                case bone_additive: pos+=b.pos; break;
+                case bone_free: break;
+            }
+
+            switch(b.rot_ctrl)
+            {
+                case bone_override: rot=b.rot; break;
+                case bone_additive: rot=rot*b.rot; break;
+                case bone_free: break;
+            }
+        }
+
+        m_skeleton.set_bone_transform(i,pos,rot);
     }
 
     m_skeleton.update();
