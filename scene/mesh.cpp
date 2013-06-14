@@ -115,8 +115,8 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size)
             shared_mesh::group &g=res.groups[j];
             g.name=read_string(reader);
 
-            const nya_math::vec3 aabb_min(reader.read<float>(),reader.read<float>(),reader.read<float>()); //ToDo
-            const nya_math::vec3 aabb_max(reader.read<float>(),reader.read<float>(),reader.read<float>());
+            const nya_math::vec3 aabb_min=reader.read<nya_math::vec3>(); //ToDo
+            const nya_math::vec3 aabb_max=reader.read<nya_math::vec3>();
 
             g.material_idx=reader.read<ushort>();
             g.offset=reader.read<uint>();
@@ -137,9 +137,8 @@ bool mesh::load_nms_skeleton_section(shared_mesh &res,const void *data,size_t si
     for(int i=0;i<bones_count;++i)
     {
         const std::string name=read_string(reader);
-        const nya_math::quat rot(reader.read<float>(),reader.read<float>(), //ToDo
-                                 reader.read<float>(),reader.read<float>());
-        const nya_math::vec3 pos(reader.read<float>(),reader.read<float>(),reader.read<float>());
+        const nya_math::quat rot=reader.read<nya_math::quat>(); //ToDo
+        const nya_math::vec3 pos=reader.read<nya_math::vec3>();
         const int parent=reader.read<int>();
 
         res.skeleton.add_bone(name.c_str(),pos,parent);
