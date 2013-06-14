@@ -584,7 +584,7 @@ void mesh::update(unsigned int dt)
         nya_math::quat rot;
 
         const applied_anim &a=m_anims[0];
-        if(i<a.bones_map.size() && a.bones_map[i]>=0)
+        if(i<(int)a.bones_map.size() && a.bones_map[i]>=0)
         {
             const unsigned int time=(unsigned int)a.time+a.anim->m_range_from;
             const nya_render::animation::bone &b=
@@ -606,7 +606,7 @@ void mesh::update(unsigned int dt)
         for(int j=1;j<(int)m_anims.size();++j)
         {
             const applied_anim &a=m_anims[j];
-            if(i<a.bones_map.size() && a.bones_map[i]>=0)
+            if(i<(int)a.bones_map.size() && a.bones_map[i]>=0)
             {
                 const unsigned int time=(unsigned int)a.time+a.anim->m_range_from;
                 const nya_render::animation::bone &b=
