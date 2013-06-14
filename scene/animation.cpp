@@ -129,6 +129,9 @@ unsigned int animation::get_duration() const
 
 void animation::set_range(unsigned int from,unsigned int to)
 {
+    if(!m_shared.is_valid())
+        return;
+
     m_range_from=from;
     m_range_to=to;
 
