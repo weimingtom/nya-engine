@@ -16,15 +16,23 @@ class scene_shared
 public:
     virtual bool load(const char *name)
     {
+        if(!name)
+        {
+            unload();
+            return false;
+        }
+
+        const std::string final_name=get_resources_prefix()+name;
+        if(m_shared.is_valid())
+        {
+            const char *res_name=m_shared.get_name();
+            if(res_name && final_name==res_name)
+                return true;
+        }
+
         unload();
 
-        if(!name)
-            return false;
-
-        if(get_resources_prefix().empty())
-            m_shared=get_shared_resources().access(name);
-        else
-            m_shared=get_shared_resources().access((get_resources_prefix()+name).c_str());
+        m_shared=get_shared_resources().access(final_name.c_str());
 
         return m_shared.is_valid();
     }
