@@ -263,6 +263,13 @@ bool mesh::load(const char *name)
     if(!m_shared.is_valid())
         return false;
 
+    for(size_t i=0;i<m_replaced_materials.size();++i)
+        m_replaced_materials[i].release();
+
+    m_replaced_materials.clear();
+    m_replaced_materials_idx.clear();
+    m_anims.clear();
+
     m_skeleton=m_shared->skeleton;
 
     m_recalc_aabb=true;
