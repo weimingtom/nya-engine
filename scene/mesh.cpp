@@ -589,7 +589,7 @@ void mesh::update(unsigned int dt)
         }
 
         const float eps=0.0001f;
-        a.full_weight=(fabsf(1.0f-a.anim->m_weight)>eps);
+        a.full_weight=(fabsf(1.0f-a.anim->m_weight)<eps);
     }
 
     for(int i=0;i<m_skeleton.get_bones_count();++i)
