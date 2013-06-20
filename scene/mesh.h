@@ -83,6 +83,7 @@ public:
 
     const animation_proxy & get_anim(int layer=0) const;
     unsigned int get_anim_time(int layer=0) const;
+    bool is_anim_finished(int layer=0) const;
     void set_anim_time(unsigned int time,int layer=0);
 
     //float get_anim_weight(int layer=0) const; //mesh own anim weight

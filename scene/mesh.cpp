@@ -553,6 +553,37 @@ void mesh::set_anim_time(unsigned int time,int layer)
     }
 }
 
+unsigned int mesh::get_anim_time(int layer) const
+{
+    for(int i=0;i<(int)m_anims.size();++i)
+    {
+        if(m_anims[i].layer==layer)
+            return (unsigned int)m_anims[i].time;
+    }
+
+    return 0;
+}
+
+bool mesh::is_anim_finished(int layer) const
+{
+    for(int i=0;i<(int)m_anims.size();++i)
+    {
+        if(m_anims[i].layer==layer)
+        {
+            if(!m_anims[i].anim.is_valid())
+                return true;
+
+            if(m_anims[i].anim->get_loop())
+                return false;
+
+            const float eps = 0.001f;
+            return fabs(m_anims[i].anim->m_range_to-m_anims[i].anim->m_range_from-m_anims[i].time)<eps;
+        }
+    }
+
+    return true;
+}
+
 void mesh::set_bone_pos(int bone_idx,const nya_math::vec3 &pos,bool additive)
 {
     if(bone_idx<0 || bone_idx>=m_skeleton.get_bones_count())
