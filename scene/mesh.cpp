@@ -489,18 +489,26 @@ void mesh::anim_set_time(applied_anim &a,float t)
         return;
     }
 
+    const unsigned int anim_len=a.anim->m_range_to-a.anim->m_range_from;
+    if(!anim_len)
+    {
+        a.time=0.0f;
+        return;
+    }
+
     a.time=t;
-    const float anim_len=float(a.anim->m_range_to-a.anim->m_range_from);
+
+    const float anim_len_f=float(anim_len);
     if(!a.anim->get_loop())
     {
-        if(a.time>anim_len)
-            a.time=anim_len;
+        if(a.time>anim_len_f)
+            a.time=anim_len_f;
 
         return;
     }
 
-    while(a.time>anim_len)
-        a.time-=anim_len;
+    while(a.time>anim_len_f)
+        a.time-=anim_len_f;
 }
 
 void mesh::anim_update_mapping(applied_anim &a)
