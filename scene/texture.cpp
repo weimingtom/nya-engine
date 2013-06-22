@@ -245,6 +245,22 @@ void texture::unset() const
     m_shared->tex.unbind();
 }
 
+unsigned int texture::get_width() const
+{
+    if(!m_shared.is_valid())
+        return 0;
+
+    return m_shared->tex.get_width();
+}
+
+unsigned int texture::get_height() const
+{
+    if(!m_shared.is_valid())
+        return 0;
+    
+    return m_shared->tex.get_height();
+}
+
 void texture::build(const void *data,unsigned int width,unsigned int height,color_format format)
 {
     if(!data)

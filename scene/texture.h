@@ -31,6 +31,10 @@ private:
     void unset() const;
 
 public:
+    unsigned int get_width() const;
+    unsigned int get_height() const;
+
+public:
     typedef nya_render::texture::color_format color_format;
     void build(const void *data,unsigned int width,unsigned int height,color_format format);
 
