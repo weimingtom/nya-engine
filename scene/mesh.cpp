@@ -504,11 +504,17 @@ void mesh::anim_set_time(applied_anim &a,float t)
         if(a.time>anim_len_f)
             a.time=anim_len_f;
 
+        if(a.time<0.0f)
+            a.time=0.0f;
+
         return;
     }
 
     while(a.time>anim_len_f)
         a.time-=anim_len_f;
+
+    while(a.time<0.0f)
+        a.time+=anim_len_f;
 }
 
 void mesh::anim_update_mapping(applied_anim &a)
@@ -577,7 +583,10 @@ bool mesh::is_anim_finished(int layer) const
                 return false;
 
             const float eps = 0.001f;
-            return fabs(m_anims[i].anim->m_range_to-m_anims[i].anim->m_range_from-m_anims[i].time)<eps;
+            if(m_anims[i].anim->m_speed>=0.0f)
+                return fabs(m_anims[i].anim->m_range_to-m_anims[i].anim->m_range_from-m_anims[i].time)<eps;
+            else
+                return fabs(m_anims[i].time)<eps;
         }
     }
 
