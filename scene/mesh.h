@@ -78,7 +78,7 @@ public:
     const nya_render::skeleton &get_skeleton() const;
 
 public:
-    void set_anim(const animation & anim,int layer=0) { set_anim(animation_proxy(anim)); }
+    void set_anim(const animation & anim,int layer=0) { set_anim(animation_proxy(anim),layer); }
     void set_anim(const animation_proxy & anim,int layer=0);
 
     const animation_proxy & get_anim(int layer=0) const;
