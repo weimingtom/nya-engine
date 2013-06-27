@@ -67,7 +67,7 @@ public:
     const char *get_name() const { return m_name.c_str(); }
 
     int get_textures_count() const { return (int)m_textures.size(); }
-    const char *get_texture_name(int idx) const;
+    const texture_proxy &get_texture(int idx) const;
     const char *get_texture_semantics(int idx) const;
 
     int get_params_count() const { return m_shader.get_uniforms_count(); }

@@ -140,15 +140,15 @@ void material::set_blend(bool enabled,blend_mode src,blend_mode dst)
     m_blend_dst=dst;
 }
 
-const char *material::get_texture_name(int idx) const
+const texture_proxy &material::get_texture(int idx) const
 {
-    if(idx<0 || idx>=(int)m_textures.size())
-        return 0;
+    if(idx<0 || idx>=(int)m_textures.size() )
+    {
+        static texture_proxy invalid;
+        return invalid;
+    }
 
-    if(!m_textures[idx].proxy.is_valid())
-        return 0;
-
-    return m_textures[idx].proxy->get_name();
+    return m_textures[idx].proxy;
 }
 
 const char *material::get_texture_semantics(int idx) const
