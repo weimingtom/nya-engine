@@ -9,34 +9,23 @@
 #include "memory/memory_reader.h"
 #include "math/constants.h"
 
-namespace
-{
-    struct mmd_material_params
-    {
-        float diffuse[4];
-        float shininess;        
-        float specular[3];
-        float ambient[3];
-    };
-
-    std::string read_string(nya_memory::memory_reader &reader)
-    {
-        unsigned short size=reader.read<unsigned short>();
-        const char *str=(const char *)reader.get_data();
-        if(!size || !str || !reader.check_remained(size))
-        {
-            reader.skip(size);
-            return "";
-        }
-
-        reader.skip(size);
-
-        return std::string(str,size);
-    }
-}
-
 namespace nya_scene
 {
+
+static std::string read_string(nya_memory::memory_reader &reader)
+{
+    unsigned short size=reader.read<unsigned short>();
+    const char *str=(const char *)reader.get_data();
+    if(!size || !str || !reader.check_remained(size))
+    {
+        reader.skip(size);
+        return "";
+    }
+    
+    reader.skip(size);
+    
+    return std::string(str,size);
+}
 
 bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size)
 {

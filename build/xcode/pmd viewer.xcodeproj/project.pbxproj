@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F20FADB7177CBF6500330FA5 /* load_pmd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F20FADB6177CBF6400330FA5 /* load_pmd.cpp */; };
+		F20FADBA177CC06F00330FA5 /* load_pmx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F20FADB8177CC06F00330FA5 /* load_pmx.cpp */; };
 		F261EA56151E698D00C195DA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F261EA55151E698D00C195DA /* Cocoa.framework */; };
 		F2714300151F1E5600DE6B9A /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F27142FF151F1E5600DE6B9A /* OpenGL.framework */; };
 		F28DAD9815D9AF4E0030D67B /* PmdView.mm in Sources */ = {isa = PBXBuildFile; fileRef = F28DAD8F15D9AF4E0030D67B /* PmdView.mm */; };
@@ -38,6 +40,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		F20FADB5177CBF6400330FA5 /* load_pmd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = load_pmd.h; path = ../../tests/shared/load_pmd.h; sourceTree = "<group>"; };
+		F20FADB6177CBF6400330FA5 /* load_pmd.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = load_pmd.cpp; path = ../../tests/shared/load_pmd.cpp; sourceTree = "<group>"; };
+		F20FADB8177CC06F00330FA5 /* load_pmx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = load_pmx.cpp; path = ../../tests/shared/load_pmx.cpp; sourceTree = "<group>"; };
+		F20FADB9177CC06F00330FA5 /* load_pmx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = load_pmx.h; path = ../../tests/shared/load_pmx.h; sourceTree = "<group>"; };
 		F261EA51151E698D00C195DA /* pmd viewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "pmd viewer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F261EA55151E698D00C195DA /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		F261EA58151E698D00C195DA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -113,6 +119,10 @@
 		F28DAD8D15D9AF330030D67B /* pmd viewer */ = {
 			isa = PBXGroup;
 			children = (
+				F20FADB8177CC06F00330FA5 /* load_pmx.cpp */,
+				F20FADB9177CC06F00330FA5 /* load_pmx.h */,
+				F20FADB6177CBF6400330FA5 /* load_pmd.cpp */,
+				F20FADB5177CBF6400330FA5 /* load_pmd.h */,
 				F28DAD8F15D9AF4E0030D67B /* PmdView.mm */,
 				F28DAD9015D9AF4E0030D67B /* PmdView.h */,
 				F28DAD9115D9AF4E0030D67B /* PmdDocument.mm */,
@@ -236,6 +246,8 @@
 				F28DAD9815D9AF4E0030D67B /* PmdView.mm in Sources */,
 				F28DAD9915D9AF4E0030D67B /* PmdDocument.mm in Sources */,
 				F28DAD9C15D9AF4E0030D67B /* main.m in Sources */,
+				F20FADB7177CBF6500330FA5 /* load_pmd.cpp in Sources */,
+				F20FADBA177CC06F00330FA5 /* load_pmx.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
