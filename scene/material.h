@@ -81,9 +81,9 @@ public:
     void set_param_array(int idx,const param_array & a);
     void set_param_array(int idx,const param_array_proxy & p);
 
-    const param_proxy &get_param(int idx);
-    const param_proxy &get_param_multiplier(int idx);
-    const param_array_proxy &get_param_array(int idx);
+    const param_proxy &get_param(int idx) const;
+    const param_proxy &get_param_multiplier(int idx) const;
+    const param_array_proxy &get_param_array(int idx) const;
 
     bool get_zwrite() const { return m_zwrite; }
     bool get_color_write() const { return m_color_write; }

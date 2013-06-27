@@ -231,7 +231,7 @@ void material::set_param_array(int idx,const param_array_proxy & p)
     m_params[idx].a=p;
 }
 
-const material::param_proxy &material::get_param(int idx)
+const material::param_proxy &material::get_param(int idx) const
 {
     if(idx<0 || idx>=(int)m_params.size())
     {
@@ -242,7 +242,7 @@ const material::param_proxy &material::get_param(int idx)
     return m_params[idx].p;
 }
 
-const material::param_proxy &material::get_param_multiplier(int idx)
+const material::param_proxy &material::get_param_multiplier(int idx) const
 {
     if(idx<0 || idx>=(int)m_params.size())
     {
@@ -253,7 +253,7 @@ const material::param_proxy &material::get_param_multiplier(int idx)
     return m_params[idx].m;
 }
 
-const material::param_array_proxy &material::get_param_array(int idx)
+const material::param_array_proxy &material::get_param_array(int idx) const
 {
     if(idx<0 || idx>=(int)m_params.size())
     {
