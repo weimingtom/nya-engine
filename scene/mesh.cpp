@@ -514,13 +514,38 @@ void mesh::anim_update_mapping(applied_anim &a)
     const nya_render::animation &ra=a.anim->m_shared->anim;
     a.bones_map.resize(m_skeleton.get_bones_count(),-1);
 
-    for(int j=0;j<(int)ra.get_bones_count();++j)
+    if(a.anim->m_mask)
     {
-        int idx=m_skeleton.get_bone_idx(ra.get_bone_name(j));
-        if(idx<0)
-            continue;
+        typedef std::map<std::string,bool> map_data;
+        map_data &d=a.anim->m_mask->data;
+        for(map_data::iterator it=d.begin();it!=d.end();++it)
+        {
+            const int idx=m_skeleton.get_bone_idx(it->first.c_str());
+            if(idx<0)
+                continue;
 
-        a.bones_map[idx]=j;
+            a.bones_map[idx]=ra.get_bone_idx(it->first.c_str());
+        }
+
+        for(int j=0;j<(int)a.anim->m_mask->data.size();++j)
+        {
+            const int idx=m_skeleton.get_bone_idx(ra.get_bone_name(j));
+            if(idx<0)
+                continue;
+
+            a.bones_map[idx]=j;
+        }
+    }
+    else
+    {
+        for(int j=0;j<(int)ra.get_bones_count();++j)
+        {
+            int idx=m_skeleton.get_bone_idx(ra.get_bone_name(j));
+            if(idx<0)
+                continue;
+
+            a.bones_map[idx]=j;
+        }
     }
 }
 

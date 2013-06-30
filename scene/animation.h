@@ -37,8 +37,17 @@ public:
     bool get_loop() const { return m_looped; }
 
 public:
+    void mask_all(bool enabled);
+    void add_mask(const char *name,bool enabled);
+
+private:
+    void update_version();
+
+public:
     animation(): m_looped(true),m_range_from(0),m_range_to(0),m_speed(1.0f),
-                 m_weight(1.0f),m_version(0) { register_load_function(load_vmd); }
+                 m_weight(1.0f),m_version(0),m_mask(0) { register_load_function(load_vmd); }
+
+    ~animation() { if(m_mask) delete m_mask; }
 
 public:
     static bool load_vmd(shared_animation &res,resource_data &data,const char* name);
@@ -51,6 +60,10 @@ private:
     float m_weight;
 
     unsigned int m_version;
+
+    struct mask_data { std::map<std::string,bool> data; };
+
+    mask_data *m_mask;
 };
 
 }
