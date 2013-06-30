@@ -512,6 +512,7 @@ void mesh::anim_update_mapping(applied_anim &a)
         return;
 
     const nya_render::animation &ra=a.anim->m_shared->anim;
+    a.bones_map.clear();
     a.bones_map.resize(m_skeleton.get_bones_count(),-1);
 
     if(a.anim->m_mask)
