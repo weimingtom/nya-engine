@@ -776,16 +776,16 @@ void set_shader(int idx)
     if(idx<0)
     {
         glUseProgramObjectARB(0);
+        active_shader=-1;
         return;
     }
 
     shader_obj &shdr=shader_obj::get(idx);
+    glUseProgramObjectARB(shdr.program);
     if(!shdr.program)
         active_shader=-1;
-
-    glUseProgramObjectARB(shdr.program);
-
-    active_shader=idx;
+    else
+        active_shader=idx;
 }
 #endif
 
@@ -984,6 +984,9 @@ void shader::release()
 #else
     if(m_shdr==active_shader)
         set_shader(-1);
+
+    if(m_shdr==current_shader)
+        current_shader=-1;
 
     if(!shdr.program)
         return;
