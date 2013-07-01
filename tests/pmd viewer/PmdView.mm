@@ -15,17 +15,17 @@ void viewer_camera::add_rot(float dx,float dy)
 
     const float max_angle=360.0f;
 
-    if ( m_rot_x > max_angle )
-        m_rot_x -= max_angle;
+    if(m_rot_x>max_angle)
+        m_rot_x-=max_angle;
 
-    if ( m_rot_x < -max_angle )
-        m_rot_x += max_angle;
+    if(m_rot_x< -max_angle)
+        m_rot_x+=max_angle;
 
-    if ( m_rot_y > max_angle )
-        m_rot_y -= max_angle;
+    if(m_rot_y>max_angle)
+        m_rot_y-=max_angle;
 
-    if ( m_rot_y < -max_angle )
-        m_rot_y += max_angle;
+    if(m_rot_y< -max_angle)
+        m_rot_y+=max_angle;
 
     update();
 }
@@ -35,11 +35,11 @@ void viewer_camera::add_pos(float dx,float dy,float dz)
     m_pos.x-=dx;
     m_pos.y-=dy;
     m_pos.z-=dz;
-    if(m_pos.z < 5.0f)
-        m_pos.z = 5.0f;
+    if(m_pos.z<5.0f)
+        m_pos.z=5.0f;
 
-    if(m_pos.z > 100.0f)
-        m_pos.z = 100.0f;
+    if(m_pos.z>100.0f)
+        m_pos.z=100.0f;
 
     update();
 }
@@ -89,16 +89,16 @@ bool load_texture(nya_scene::shared_texture &res,nya_scene::resource_data &textu
     if(!texture_data.get_size())
         return false;
 
-    NSData * data  = [NSData dataWithBytesNoCopy:texture_data.get_data() 
+    NSData *data=[NSData dataWithBytesNoCopy:texture_data.get_data() 
                                           length: texture_data.get_size() freeWhenDone:NO];
-    if (data == nil)
+    if(data==nil)
     {
         nya_log::get_log()<<"unable to load texture: NSData error\n";
         return false;
     }
 
     NSBitmapImageRep *image=[NSBitmapImageRep imageRepWithData:data];
-    if (image == nil)
+    if(image==nil)
     {
         nya_log::get_log()<<"unable to load texture: invalid file\n";
         return false;
@@ -118,13 +118,13 @@ bool load_texture(nya_scene::shared_texture &res,nya_scene::resource_data &textu
         return false;
     }
 
-    if([image bitsPerSample] != 8)
+    if([image bitsPerSample]!=8)
     {
         nya_log::get_log()<<"unable to load texture: unsupported format\n";
         return false;
     }
 
-    unsigned int width =(unsigned int)[image pixelsWide];
+    unsigned int width=(unsigned int)[image pixelsWide];
     unsigned int height=(unsigned int)[image pixelsHigh];
     unsigned char *image_data=[image bitmapData];
 
@@ -150,7 +150,7 @@ public:
                 0
             };
 
-            NSOpenGLPixelFormat *pixelFormat = [[[NSOpenGLPixelFormat alloc] initWithAttributes:pixelFormatAttributes] autorelease];
+            NSOpenGLPixelFormat *pixelFormat=[[[NSOpenGLPixelFormat alloc] initWithAttributes:pixelFormatAttributes] autorelease];
 
             m_context=[[NSOpenGLContext alloc] initWithFormat:pixelFormat shareContext:nil];
         }
@@ -179,7 +179,7 @@ public:
         return holder;
     }
 
-    shared_context(): m_context(0), m_ref_count(0) {}
+    shared_context(): m_context(0),m_ref_count(0) {}
 
 private:
     NSOpenGLContext *m_context;
@@ -190,7 +190,7 @@ private:
 
 -(id)initWithCoder:(NSCoder *)aDecoder
 {
-    NSOpenGLContext* openGLContext = shared_context::get().allocate();
+    NSOpenGLContext* openGLContext=shared_context::get().allocate();
 
     self=[super initWithCoder:aDecoder];
     if(self)
@@ -204,40 +204,40 @@ private:
 
 - (void) mouseDown: (NSEvent *) theEvent
 {
-    NSPoint pt = [theEvent locationInWindow];
+    NSPoint pt=[theEvent locationInWindow];
 
-    m_mouse_old = [self convertPoint: pt fromView: nil];
+    m_mouse_old=[self convertPoint: pt fromView: nil];
 }
 
 - (void) rightMouseDown: (NSEvent *) theEvent
 {
-    NSPoint pt = [theEvent locationInWindow];
+    NSPoint pt=[theEvent locationInWindow];
 
-    m_mouse_old = [self convertPoint: pt fromView: nil];
+    m_mouse_old=[self convertPoint: pt fromView: nil];
 }
 
 - (void) mouseDragged: (NSEvent *) theEvent
 {
-    NSPoint pt = [theEvent locationInWindow];
+    NSPoint pt=[theEvent locationInWindow];
 
-    pt = [self convertPoint: pt fromView: nil];
+    pt=[self convertPoint: pt fromView: nil];
 
     m_camera.add_rot(pt.x-m_mouse_old.x,-(pt.y-m_mouse_old.y));
 
-    m_mouse_old = pt;
+    m_mouse_old=pt;
 
     [self setNeedsDisplay: YES];
 }
 
 - (void) rightMouseDragged: (NSEvent *) theEvent
 {
-    NSPoint pt = [theEvent locationInWindow];
+    NSPoint pt=[theEvent locationInWindow];
 
-    pt = [self convertPoint: pt fromView: nil];
+    pt=[self convertPoint: pt fromView: nil];
 
     m_camera.add_pos((pt.x-m_mouse_old.x)/20.0f,(pt.y-m_mouse_old.y)/20.0f,0.0f);
 
-    m_mouse_old = pt;
+    m_mouse_old=pt;
 
     [self setNeedsDisplay: YES];
 }
@@ -251,8 +251,7 @@ private:
 
 -(void)reshape
 {
-    glViewport( 0,0,[self frame].size.width,[self frame].size.height ); 
-
+    nya_render::set_viewport(0,0,[self frame].size.width,[self frame].size.height);
     m_camera.set_aspect([self frame].size.width / [self frame].size.height);
 
     [self setNeedsDisplay: YES];
@@ -263,19 +262,19 @@ private:
     PmdDocument *doc=[[[self window] windowController] document];
     if(!doc->m_model_name.empty())
     {
-        glClearColor(0.2,0.4,0.5,0);
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
+        nya_render::set_clear_color(0.2f,0.4f,0.5f,0.0f);
+        nya_render::depth_test::enable(nya_render::depth_test::less);
 
         nya_scene::texture::register_load_function(load_texture);
         nya_scene::mesh::register_load_function(pmx_loader::load);
         nya_scene::mesh::register_load_function(pmd_loader::load);
         m_mesh.load(doc->m_model_name.c_str());
+        nya_render::apply_state(true);
 
         doc->m_model_name.clear();
     }
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    nya_render::clear(true,true);
 
     m_mesh.draw();
 }
@@ -284,7 +283,7 @@ private:
 {
 	[self draw];
 
-    [ [ self openGLContext ] flushBuffer ];
+    [[ self openGLContext ] flushBuffer];
 }
 
 -(void) dealloc
