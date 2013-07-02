@@ -13,8 +13,8 @@ namespace
     unsigned int current_layer=0;
     unsigned int active_layer=0;
     const unsigned int max_layers=16;
-    int current_layers[max_layers]={-1};
-    int active_layers[max_layers]={-1};
+    int current_layers[max_layers]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+    int active_layers[max_layers]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 }
 
 namespace nya_render
@@ -416,6 +416,9 @@ void texture::apply()
 
         if(current_layers[i]<0)
         {
+            if(active_layers[i]<0)
+                continue;
+
             glBindTexture(texture_obj::get(active_layers[i]).gl_type,0);
             continue;
         }

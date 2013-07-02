@@ -161,7 +161,7 @@ void skeleton::update_bone(int idx)
     }
 
     m_pos_tr[idx]=m_pos_tr[b.parent] + m_rot_tr[b.parent].rotate(b.pos+b.offset);
-    m_rot_tr[idx]=b.rot*m_rot_tr[b.parent];
+    m_rot_tr[idx]=m_rot_tr[b.parent]*b.rot;
 }
 
 void skeleton::update_ik(int idx)
