@@ -754,8 +754,6 @@ bool shader::add_program(program_type type,const char*code)
     }
 
     shdr.objects[type]=object;
-
-    //glUseProgramObjectARB(0);
 #endif
 
     return true;
@@ -1010,6 +1008,7 @@ void shader::release()
         current_shader=-1;
 
     shader_obj::remove(m_shdr);
+    m_shdr=-1;
 }
 
 }

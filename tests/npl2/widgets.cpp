@@ -227,8 +227,8 @@ void widget_renderer::draw_rect(nya_ui::rect &r,rect_style &s)
         unsigned short indices[5]={1,0,2,3,1};
         m_rect_vbo.set_index_data(indices,nya_render::vbo::index2b,5);
     }
-    
-    m_rect_vbo.bind(false);
+
+    m_rect_vbo.bind_verts();
     m_ui_shader.bind();
 
     if(s.solid)

@@ -22,7 +22,6 @@ public:
     };
 
 public:
-    //unsigned int get_frames_count() const; //?
     unsigned int get_duration() const { return m_duration; }
     int get_bone_idx(const char *name) const; //< 0 if invalid
     bone get_bone(int idx,unsigned int time,bool looped=true) const;
