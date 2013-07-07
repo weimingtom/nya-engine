@@ -830,11 +830,14 @@ void shader::apply()
             get_context()->VSSetConstantBuffers(0,1,&shdr.constants.dx_buffer);
         }
 
-        get_context()->VSSetShader(shdr.vertex_program,nullptr,0);
+        if(current_shader!=active_shader)
+            get_context()->VSSetShader(shdr.vertex_program,nullptr,0);
     }
 
-    if(shdr.pixel_program)
+    if(shdr.pixel_program && current_shader!=active_shader)
         get_context()->PSSetShader(shdr.pixel_program,nullptr,0);
+
+    active_shader=current_shader;
 #else
     set_shader(current_shader);
 
@@ -981,12 +984,12 @@ void shader::release()
         shdr.pixel_program->Release();
 
     shdr.layouts.clear();
+
+    if(m_shdr==active_shader)
+        active_shader=-1;
 #else
     if(m_shdr==active_shader)
         set_shader(-1);
-
-    if(m_shdr==current_shader)
-        current_shader=-1;
 
     if(!shdr.program)
         return;
@@ -1002,6 +1005,10 @@ void shader::release()
 
     glDeleteObjectARB(shdr.program);
 #endif
+
+    if(m_shdr==current_shader)
+        current_shader=-1;
+
     shader_obj::remove(m_shdr);
 }
 
