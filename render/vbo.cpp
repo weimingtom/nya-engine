@@ -35,13 +35,13 @@ namespace nya_render
         unsigned int element_count;
         vbo::usage_hint elements_usage;
         unsigned int allocated_elements_count;
-        
+
         unsigned int verts_count;
         unsigned int allocated_verts_count;
-        
+
         unsigned int vertex_stride;
         vbo::usage_hint vertex_usage;
-        
+
         struct attribute
         {
             bool has;
@@ -166,53 +166,6 @@ void vbo::bind_verts() const { current_verts=m_verts; }
 void vbo::bind_indices() const { current_inds=m_indices; }
 void vbo::unbind() { current_verts=current_inds=-1; }
 
-/*
-    if(!m_vertices.has)
-        return;
-
-	if(!m_vertex_loc)
-        return;
-
-#ifdef DIRECTX11
-	UINT offset = 0;
-	get_context()->IASetVertexBuffers(0,1,&m_vertex_loc,&m_vertex_stride,&offset);
-#else
-    if(!m_vertex_bind)
-    {
-        vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,m_vertex_loc);
-        m_vertex_bind=true;
-    }
-
-  #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
-    glEnableVertexAttribArray(vertex_attribute);
-    glVertexAttribPointer(vertex_attribute,m_vertices.dimension,GL_FLOAT,0,m_vertex_stride,(void *)(m_vertices.offset));
-  #else
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(m_vertices.dimension,GL_FLOAT,m_vertex_stride,(void *)0);
-  #endif
-#endif
-    m_vertex_bind=true;
-}
-
-void vbo::bind_indices() const
-{
-    if(!m_index_loc)
-        return;
-
-    m_index_bind=true;
-
-#ifdef DIRECTX11
-	switch(m_element_size)
-	{
-		case index2b: get_context()->IASetIndexBuffer(m_index_loc,DXGI_FORMAT_R16_UINT,0); break;
-		case index4b: get_context()->IASetIndexBuffer(m_index_loc,DXGI_FORMAT_R32_UINT,0); break;
-	}
-#else
-    vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,m_index_loc);
-#endif
-}
-*/
-
 void vbo::draw()
 {
     if(current_verts<0)
@@ -239,6 +192,22 @@ DXGI_FORMAT get_dx_format(int dimension)
 
     return DXGI_FORMAT_UNKNOWN;
 }
+
+bool set_dx_topology(vbo::element_type type)
+{
+    switch(type)
+    {
+        case triangles: get_context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST); return true;
+        case triangle_strip: get_context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP); return true;
+        case points: get_context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST); return true;
+        case lines: get_context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST); return true;
+        case line_strip: get_context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP); return true;
+        default: return false;
+    }
+
+    return false;
+}
+
 #else
 int get_gl_element_type(vbo::element_type type)
 {
@@ -268,83 +237,86 @@ void vbo::draw(unsigned int offset,unsigned int count)
     vbo_obj &vobj=vbo_obj::get(current_verts);
 
 #ifdef DIRECTX11
-    if(m_layout.empty())
+    UINT offset = 0;
+    get_context()->IASetVertexBuffers(0,1,&vobj.vertex_loc,&vobj.vertex_stride,&offset);
+
+    if(vobj.layout.empty())
     {
         char tmp[64];
-        if(!m_vertices.has)
+        if(!vobj.vertices.has)
             return;
 
-        if(m_colors.has)
+        if(vobj.colors.has)
         {
-            sprintf(tmp,"c%d%d",m_colors.dimension,m_colors.offset);
-            m_layout.append(tmp);
+            sprintf(tmp,"c%d%d",vobj.colors.dimension,vobj.colors.offset);
+            vobj.layout.append(tmp);
         }
-        if(m_normals.has)
+        if(vobj.normals.has)
         {
-            sprintf(tmp,"n%d",m_normals.offset);
-            m_layout.append(tmp);
+            sprintf(tmp,"n%d",vobj.normals.offset);
+            vobj.layout.append(tmp);
         }
-        for(int i=0;i<vbo_max_tex_coord;++i)
+        for(int i=0;i<vbo_obj::max_tex_coord;++i)
         {
-            const attribute &tc=m_tcs[i];
+            const attribute &tc=vobj.tcs[i];
             if(!tc.has)
                 continue;
 
             sprintf(tmp,"t%d_%d%d",i,tc.dimension,tc.offset);
-            m_layout.append(tmp);
+            vobj.layout.append(tmp);
         }
 
-        sprintf(tmp,"p%d%d",m_vertices.dimension,m_vertices.offset);
-        m_layout.append(tmp);
+        sprintf(tmp,"p%d%d",vobj.vertices.dimension,vobj.vertices.offset);
+        vobj.layout.append(tmp);
     }
 
-    ID3D11InputLayout *layout=get_layout(m_layout);
+    ID3D11InputLayout *layout=get_layout(vobj.layout);
     if(!layout)
     {
         std::vector<D3D11_INPUT_ELEMENT_DESC> desc;
 
-        if(m_vertices.has)
+        if(vobj.vertices.has)
         {
             D3D11_INPUT_ELEMENT_DESC d;
             d.SemanticName="POSITION";
             d.SemanticIndex=0;
-            d.Format=get_dx_format(m_vertices.dimension);
+            d.Format=get_dx_format(vobj.vertices.dimension);
             d.InputSlot=0;
-            d.AlignedByteOffset=m_vertices.offset;
+            d.AlignedByteOffset=vobj.vertices.offset;
             d.InputSlotClass=D3D11_INPUT_PER_VERTEX_DATA;
             d.InstanceDataStepRate=0;
             desc.push_back(d);
         }
 
-        if(m_normals.has)
+        if(vobj.normals.has)
         {
             D3D11_INPUT_ELEMENT_DESC d;
             d.SemanticName="NORMAL";
             d.SemanticIndex=0;
             d.Format=get_dx_format(3);
             d.InputSlot=0;
-            d.AlignedByteOffset=m_normals.offset;
+            d.AlignedByteOffset=vobj.normals.offset;
             d.InputSlotClass=D3D11_INPUT_PER_VERTEX_DATA;
             d.InstanceDataStepRate=0;
             desc.push_back(d);
         }
 
-        if(m_colors.has)
+        if(vobj.colors.has)
         {
             D3D11_INPUT_ELEMENT_DESC d;
             d.SemanticName="COLOR";
             d.SemanticIndex=0;
-            d.Format=get_dx_format(m_colors.dimension);
+            d.Format=get_dx_format(vobj.colors.dimension);
             d.InputSlot=0;
-            d.AlignedByteOffset=m_colors.offset;
+            d.AlignedByteOffset=vobj.colors.offset;
             d.InputSlotClass=D3D11_INPUT_PER_VERTEX_DATA;
             d.InstanceDataStepRate=0;
             desc.push_back(d);
         }
 
-        for(int i=0;i<vbo_max_tex_coord;++i)
+        for(int i=0;i<vbo_obj::max_tex_coord;++i)
         {
-            const attribute &tc=m_tcs[i];
+            const attribute &tc=vobj.tcs[i];
             if(!tc.has)
                 continue;
 
@@ -359,34 +331,35 @@ void vbo::draw(unsigned int offset,unsigned int count)
             desc.push_back(d);
         }
 
-        layout=add_layout(m_layout,&desc[0],desc.size());
+        layout=add_layout(vobj.layout,&desc[0],desc.size());
 
         if(!layout)
             return;
     }
 	get_context()->IASetInputLayout(layout);
 
-    switch(m_element_type)
+    if(current_inds>=0)
     {
-        case triangles: get_context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST); break;
-        case triangle_strip: get_context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP); break;
-        case points: get_context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST); break;
-        case lines: get_context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST); break;
-		case line_strip: get_context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP); break;
-        default: return;
-    }
-
-	if(m_index_bind)
-	{
-        if(offset+count>m_element_count)
+        vbo_obj &iobj=vbo_obj::get(current_inds);
+        if(offset+count>iobj.element_count)
             return;
+
+        set_dx_topology(iobj.element_type);
+
+        switch(iobj.element_size)
+        {
+            case index2b: get_context()->IASetIndexBuffer(iobj.index_loc,DXGI_FORMAT_R16_UINT,0); break;
+            case index4b: get_context()->IASetIndexBuffer(iobj.index_loc,DXGI_FORMAT_R32_UINT,0); break;
+        }
 
 		get_context()->DrawIndexed(count,offset,0);
 	}
 	else
 	{
-        if(offset+count>m_verts_count)
+        if(offset+count>vobj.verts_count)
             return;
+
+        set_dx_topology(vobj.element_type);
 
 		get_context()->Draw(count,offset);
 	}
@@ -477,10 +450,6 @@ void vbo::draw(unsigned int offset,unsigned int count)
         if(offset+count>iobj.element_count)
             return;
 
-        int gl_elem=get_gl_element_type(iobj.element_type);
-        if(gl_elem<0)
-            return;
-
         if(current_inds!=active_inds)
         {
             if(current_inds>=0)
@@ -491,6 +460,7 @@ void vbo::draw(unsigned int offset,unsigned int count)
             active_inds=current_inds;
         }
 
+        const int gl_elem=get_gl_element_type(iobj.element_type);
         const unsigned int gl_elem_type=(iobj.element_size==index4b?GL_UNSIGNED_INT:GL_UNSIGNED_SHORT);
         glDrawElements(gl_elem,count,gl_elem_type,(void*)(offset*iobj.element_size));
     }
@@ -499,10 +469,7 @@ void vbo::draw(unsigned int offset,unsigned int count)
         if(offset+count>vobj.verts_count)
             return;
 
-        int gl_elem=get_gl_element_type(vobj.element_type);
-        if(gl_elem<0)
-            return;
-
+        const int gl_elem=get_gl_element_type(vobj.element_type);
         glDrawArrays(gl_elem,offset,count);
     }
 #endif
@@ -511,19 +478,38 @@ void vbo::draw(unsigned int offset,unsigned int count)
 void vbo::release()
 {
 #ifdef DIRECTX11
-    if(m_vertex_loc)
+    if(m_verts>=0)
     {
-        m_vertex_loc->Release();
-        m_vertex_loc=0;
+        vbo_obj &obj=vbo_obj::get(m_verts);
+
+        if(active_verts==m_verts)
+            active_verts=-1;
+
+        if(current_verts==m_verts)
+            current_verts=-1;
+
+        if(obj.vertex_loc)
+            obj.vertex_loc->Release();
+
+        obj.layout.clear();
     }
 
-    if(m_index_loc)
+    if(m_indices>=0)
     {
-        m_index_loc->Release();
-        m_index_loc=0;
-    }
+        vbo_obj &obj=vbo_obj::get(m_indices);
 
-    m_layout.clear();
+        if(active_inds==m_indices)
+        {
+            vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,0);
+            active_inds=-1;
+        }
+
+        if(current_inds==m_verts)
+            current_inds=-1;
+
+        if(obj.index_loc)
+            obj.index_loc->Release();
+    }
 #else
     if(m_verts>=0)
     {
@@ -549,7 +535,7 @@ void vbo::release()
   #endif
                 }
             }
-            
+
             if(obj.normals.has)
             {
   #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
@@ -638,7 +624,7 @@ bool vbo::set_vertex_data(const void*data,unsigned int vert_stride,unsigned int 
 		return false;
 	}
 
-	if(m_vertex_loc)
+	if(obj.vertex_loc)
 	{
 		//ToDo: release or refill
 	}
@@ -726,7 +712,7 @@ bool vbo::set_index_data(const void*data,element_size size,unsigned int elements
 		return false;
 	}
 
-	if(m_index_loc)
+	if(obj.index_loc)
 	{
 		//ToDo: release or refill
 	}
@@ -736,15 +722,15 @@ bool vbo::set_index_data(const void*data,element_size size,unsigned int elements
 	index_buffer_data.SysMemPitch=0;
 	index_buffer_data.SysMemSlicePitch=0;
 	CD3D11_BUFFER_DESC index_buffer_desc(buffer_size,D3D11_BIND_INDEX_BUFFER);
-	if(nya_render::get_device()->CreateBuffer(&index_buffer_desc,&index_buffer_data,&m_index_loc)<0)
+	if(nya_render::get_device()->CreateBuffer(&index_buffer_desc,&index_buffer_data,&obj.index_loc)<0)
 	{
 		get_log()<<"Unable to set indices: unable to create buffer\n";
-		m_index_loc=0;
+		obj.index_loc=0;
 		return false;
 	}
 
-    m_elements_usage=usage;
-    m_element_size=size;
+    obj.elements_usage=usage;
+    obj.element_size=size;
 #else
     if(!obj.index_loc)
     {
