@@ -197,11 +197,11 @@ bool set_dx_topology(vbo::element_type type)
 {
     switch(type)
     {
-        case triangles: get_context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST); return true;
-        case triangle_strip: get_context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP); return true;
-        case points: get_context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST); return true;
-        case lines: get_context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST); return true;
-        case line_strip: get_context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP); return true;
+        case vbo::triangles: get_context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST); return true;
+        case vbo::triangle_strip: get_context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP); return true;
+        case vbo::points: get_context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST); return true;
+        case vbo::lines: get_context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST); return true;
+        case vbo::line_strip: get_context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP); return true;
         default: return false;
     }
 
@@ -237,8 +237,8 @@ void vbo::draw(unsigned int offset,unsigned int count)
     vbo_obj &vobj=vbo_obj::get(current_verts);
 
 #ifdef DIRECTX11
-    UINT offset = 0;
-    get_context()->IASetVertexBuffers(0,1,&vobj.vertex_loc,&vobj.vertex_stride,&offset);
+    UINT zero_offset = 0;
+    get_context()->IASetVertexBuffers(0,1,&vobj.vertex_loc,&vobj.vertex_stride,&zero_offset);
 
     if(vobj.layout.empty())
     {
@@ -258,7 +258,7 @@ void vbo::draw(unsigned int offset,unsigned int count)
         }
         for(int i=0;i<vbo_obj::max_tex_coord;++i)
         {
-            const attribute &tc=vobj.tcs[i];
+            const vbo_obj::attribute &tc=vobj.tcs[i];
             if(!tc.has)
                 continue;
 
@@ -316,7 +316,7 @@ void vbo::draw(unsigned int offset,unsigned int count)
 
         for(int i=0;i<vbo_obj::max_tex_coord;++i)
         {
-            const attribute &tc=vobj.tcs[i];
+            const vbo_obj::attribute &tc=vobj.tcs[i];
             if(!tc.has)
                 continue;
 
@@ -499,10 +499,7 @@ void vbo::release()
         vbo_obj &obj=vbo_obj::get(m_indices);
 
         if(active_inds==m_indices)
-        {
-            vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,0);
             active_inds=-1;
-        }
 
         if(current_inds==m_verts)
             current_inds=-1;
@@ -824,7 +821,7 @@ void vbo::set_tc(unsigned int tc_idx,unsigned int offset,unsigned int dimension)
     vbo_obj &obj=vbo_obj::get(m_verts);
 
 #ifdef DIRECTX11
-    m_layout.clear();
+    obj.layout.clear();
 #endif
 
     vbo_obj::attribute &tc=obj.tcs[tc_idx];
