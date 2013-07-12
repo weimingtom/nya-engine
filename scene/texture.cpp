@@ -147,7 +147,7 @@ bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
     else if(channels==3)
         color_format=nya_render::texture::color_rgb;
     else if(channels==1)
-        color_format=nya_render::texture::color_r;
+        color_format=nya_render::texture::greyscale;
     else
         return false;
 

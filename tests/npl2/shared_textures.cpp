@@ -138,7 +138,7 @@ bool shared_textures_manager::fill_resource(const char *name,nya_render::texture
     else if(channels==3)
         color_format=nya_render::texture::color_rgb;
     else if(channels==1)
-        color_format=nya_render::texture::color_r;
+        color_format=nya_render::texture::greyscale;
     else
         return false;
 
