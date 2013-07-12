@@ -63,10 +63,33 @@ namespace nya_render
 
             ID3D11Buffer *dx_buffer;
 
-            constants_buffer():mvp_matrix(false),mv_matrix(false),p_matrix(false),dx_buffer(0){}
+            constants_buffer(): mvp_matrix(false),mv_matrix(false),p_matrix(false),dx_buffer(0) {}
         };
 
         constants_buffer constants;
+
+        struct uniforms_buffer
+        {
+            std::vector<float> buffer;
+            ID3D11Buffer *dx_buffer;
+            bool changed;
+
+            uniforms_buffer(): dx_buffer(0),changed(false) {}
+        };
+
+        uniforms_buffer vertex_uniforms;
+        uniforms_buffer pixel_uniforms;
+
+        struct uniform
+        {
+            std::string name;
+            shader::program_type program_type;
+            int offset;
+            int dimension;
+            int array_size;
+        };
+
+        std::vector<uniform> uniforms;
 #else
     public:
         shader_obj(): program(0)
@@ -369,6 +392,116 @@ bool shader::add_program(program_type type,const char*code)
     std::string code_str(code);
     std::string code_final;
 
+    shader_obj::uniforms_buffer &buf=(type==vertex)?shdr.vertex_uniforms:shdr.pixel_uniforms;
+    for(size_t i=code_str.find("uniform");i!=std::string::npos;i=code_str.find("uniform",i+7))
+    {
+        size_t type_from=i+8;
+        while(code_str[type_from]<=' ') if(++type_from>=code_str.length()) return false;
+        size_t type_to=type_from;
+        while(code_str[type_to]>' ') if(++type_to>=code_str.length()) return false;
+
+        size_t name_from=type_to+1;
+        while(code_str[name_from]<=' ') if(++name_from>=code_str.length()) return false;
+        size_t name_to=name_from;
+        while(code_str[name_to]>' ' && code_str[name_to]!=';' && code_str[name_to]!='[') if(++name_to>=code_str.length()) return false;
+
+        const std::string name=code_str.substr(name_from,name_to-name_from);
+        const std::string type_name=code_str.substr(type_from,type_to-type_from);
+
+        size_t last=name_to;
+        while(code_str[last]!=';') if(++last>=code_str.length()) return false;
+
+        int count=1;
+        size_t array_from=code_str.find('[',name_to);
+        if(array_from<last)
+            count=atoi(&code_str[array_from+1]);
+
+        if(count<=0)
+            return false;
+
+        for(size_t c=i;c<=last;++c)
+            code_str[c]=' ';
+
+        if(type_name.compare("float")>=0)
+        {
+            shdr.uniforms.resize(shdr.uniforms.size()+1);
+            shader_obj::uniform &u=shdr.uniforms.back();
+            u.name=name;
+            u.program_type=type;
+            u.offset=(int)buf.buffer.size();
+            u.array_size=count;
+
+            char dim=(type_name.length()==6)?type_name[5]:'\0';
+
+            switch(dim)
+            {
+            case '2':
+                u.dimension=2;
+                buf.buffer.resize(buf.buffer.size()+4*count,0.0f);
+                break;
+
+            case '3':
+                u.dimension=3;
+                buf.buffer.resize(buf.buffer.size()+4*count,0.0f);
+                break;
+
+            case '4':
+                u.dimension=4;
+                buf.buffer.resize(buf.buffer.size()+4*count,0.0f);
+                break;
+
+            default:
+                u.dimension=1;
+                buf.buffer.resize(buf.buffer.size()+4,0.0f);
+                break;
+            };
+
+            buf.changed=true;
+        }
+    }
+
+    if(!buf.buffer.empty())
+    {
+        code_final.append("cbuffer NyaUniformsBuffer : register");
+        if(type==vertex)
+            code_final.append("(b1){");
+        else
+            code_final.append("(b2){");
+
+        for(size_t i=0;i<shdr.uniforms.size();++i)
+        {
+            const shader_obj::uniform &u=shdr.uniforms[i];
+            if(u.program_type!=type)
+                continue;
+
+            switch(u.dimension)
+            {
+            case 2:
+            case 3:
+            case 4:
+                code_final.append("float");
+                code_final.push_back('0'+u.dimension);
+                code_final.push_back(' ');
+                code_final.append(u.name);
+                if(u.array_size>1)
+                {
+                    char buf[255];
+                    sprintf(buf,"[%d]",u.array_size);
+                    code_final.append(buf);
+                }
+                code_final.push_back(';');
+                break;
+
+            default: return false;
+            }
+        }
+
+        code_final.append("}\n");
+
+        CD3D11_BUFFER_DESC desc(buf.buffer.size()*sizeof(float),D3D11_BIND_CONSTANT_BUFFER);
+        get_device()->CreateBuffer(&desc,nullptr,&buf.dx_buffer);
+    }
+
     if(type==vertex)
     {
         shdr.layouts.clear();
@@ -401,7 +534,7 @@ bool shader::add_program(program_type type,const char*code)
             if(shdr.constants.mvp_matrix) code_final.append("matrix ModelViewProjectionMatrix;");
             if(shdr.constants.mv_matrix) code_final.append("matrix ModelViewMatrix;");
             if(shdr.constants.p_matrix) code_final.append("matrix ProjectionMatrix;");
-            code_final.append("}");
+            code_final.append("}\n");
 
             CD3D11_BUFFER_DESC desc(size*sizeof(float),D3D11_BIND_CONSTANT_BUFFER);
             get_device()->CreateBuffer(&desc,nullptr,&shdr.constants.dx_buffer);
@@ -796,7 +929,7 @@ void shader::apply()
     if(!get_context())
         return;
 
-    const shader_obj &shdr=shader_obj::get(current_shader);
+    shader_obj &shdr=shader_obj::get(current_shader);
 
     if(shdr.vertex_program)
     {
@@ -825,15 +958,36 @@ void shader::apply()
             }
 
             get_context()->UpdateSubresource(shdr.constants.dx_buffer,0,NULL,&shdr.constants.buffer[0],0,0);
-            get_context()->VSSetConstantBuffers(0,1,&shdr.constants.dx_buffer);
+        }
+
+        if(shdr.vertex_uniforms.changed)
+        {
+            shdr.vertex_uniforms.changed=false;
+            get_context()->UpdateSubresource(shdr.vertex_uniforms.dx_buffer,0,NULL,&shdr.vertex_uniforms.buffer[0],0,0);
         }
 
         if(current_shader!=active_shader)
+        {
+            get_context()->VSSetConstantBuffers(0,1,&shdr.constants.dx_buffer);
+            get_context()->VSSetConstantBuffers(1,1,&shdr.vertex_uniforms.dx_buffer);
             get_context()->VSSetShader(shdr.vertex_program,nullptr,0);
+        }
     }
 
-    if(shdr.pixel_program && current_shader!=active_shader)
-        get_context()->PSSetShader(shdr.pixel_program,nullptr,0);
+    if(shdr.pixel_program)
+    {
+        if(shdr.pixel_uniforms.changed)
+        {
+            shdr.pixel_uniforms.changed=false;
+            get_context()->UpdateSubresource(shdr.pixel_uniforms.dx_buffer,0,NULL,&shdr.pixel_uniforms.buffer[0],0,0);
+        }
+
+        if(current_shader!=active_shader)
+        {
+            get_context()->PSSetConstantBuffers(2,1,&shdr.pixel_uniforms.dx_buffer);
+            get_context()->PSSetShader(shdr.pixel_program,nullptr,0);
+        }
+    }
 
     active_shader=current_shader;
 #else
@@ -884,7 +1038,17 @@ int shader::get_handler(const char *name) const
     }
 
 #ifdef DIRECTX11
-	return -1;
+    if(m_shdr<0)
+        return -1;
+
+    shader_obj &shdr=shader_obj::get(m_shdr);
+    for(int i=0;i<(int)shdr.uniforms.size();++i)
+    {
+        if(shdr.uniforms[i].name==name)
+            return i;
+    }
+
+    return -1;
 #else
     if(m_shdr<0)
         return -1;
@@ -904,6 +1068,21 @@ int shader::get_handler(const char *name) const
 void shader::set_uniform(unsigned int i,float f0,float f1,float f2,float f3) const
 {
 #ifdef DIRECTX11
+    if(m_shdr<0)
+        return;
+
+    shader_obj &shdr=shader_obj::get(m_shdr);
+    if(i>=(int)shdr.uniforms.size())
+        return;
+
+    const shader_obj::uniform &u=shdr.uniforms[i];
+    shader_obj::uniforms_buffer &buf=(u.program_type==vertex)?shdr.vertex_uniforms:shdr.pixel_uniforms;
+    buf.buffer[u.offset]=f0;
+    buf.buffer[u.offset+1]=f1;
+    buf.buffer[u.offset+2]=f2;
+    buf.buffer[u.offset+3]=f3;
+    buf.changed=true;
+
 #else
     if(m_shdr<0)
         return;
@@ -920,6 +1099,23 @@ void shader::set_uniform(unsigned int i,float f0,float f1,float f2,float f3) con
 void shader::set_uniform3_array(unsigned int i,const float *f,unsigned int count) const
 {
 #ifdef DIRECTX11
+    if(m_shdr<0)
+        return;
+
+    shader_obj &shdr=shader_obj::get(m_shdr);
+    if(i>=(int)shdr.uniforms.size())
+        return;
+
+    const shader_obj::uniform &u=shdr.uniforms[i];
+    shader_obj::uniforms_buffer &buf=(u.program_type==vertex)?shdr.vertex_uniforms:shdr.pixel_uniforms;
+    for(int i=0,o=u.offset,o2=0;i<count;++i,o+=4,o2+=3)
+    {
+        for(int j=0;j<3;++j)
+            buf.buffer[o+j]=f[o2+j];
+    }
+
+    buf.changed=true;
+
 #else
     if(m_shdr<0)
         return;
@@ -936,6 +1132,18 @@ void shader::set_uniform3_array(unsigned int i,const float *f,unsigned int count
 void shader::set_uniform4_array(unsigned int i,const float *f,unsigned int count) const
 {
 #ifdef DIRECTX11
+    if(m_shdr<0)
+        return;
+
+    shader_obj &shdr=shader_obj::get(m_shdr);
+    if(i>=(int)shdr.uniforms.size())
+        return;
+
+    const shader_obj::uniform &u=shdr.uniforms[i];
+    shader_obj::uniforms_buffer &buf=(u.program_type==vertex)?shdr.vertex_uniforms:shdr.pixel_uniforms;
+    memcpy(&buf.buffer[u.offset],f,sizeof(float)*4*count);
+    buf.changed=true;
+
 #else
     if(m_shdr<0)
         return;
@@ -952,6 +1160,18 @@ void shader::set_uniform4_array(unsigned int i,const float *f,unsigned int count
 void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int count,bool transpose) const
 {
 #ifdef DIRECTX11
+    if(m_shdr<0)
+        return;
+
+    shader_obj &shdr=shader_obj::get(m_shdr);
+    if(i>=(int)shdr.uniforms.size())
+        return;
+
+    const shader_obj::uniform &u=shdr.uniforms[i];
+    shader_obj::uniforms_buffer &buf=(u.program_type==vertex)?shdr.vertex_uniforms:shdr.pixel_uniforms;
+    memcpy(&buf.buffer[u.offset],f,sizeof(float)*16*count);
+    buf.changed=true;
+
 #else
     if(m_shdr<0)
         return;
@@ -982,6 +1202,19 @@ void shader::release()
         shdr.pixel_program->Release();
 
     shdr.layouts.clear();
+
+    if(shdr.constants.dx_buffer)
+        shdr.constants.dx_buffer->Release();
+
+    if(shdr.vertex_uniforms.dx_buffer)
+        shdr.vertex_uniforms.dx_buffer->Release();
+
+    if(shdr.pixel_uniforms.dx_buffer)
+        shdr.pixel_uniforms.dx_buffer->Release();
+
+    shdr.constants = shader_obj::constants_buffer();
+    shdr.vertex_uniforms = shader_obj::uniforms_buffer();
+    shdr.pixel_uniforms = shader_obj::uniforms_buffer();
 
     if(m_shdr==active_shader)
         active_shader=-1;
