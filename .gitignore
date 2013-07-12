@@ -4,4 +4,6 @@ bin/
 *.xcuserstate
 *.suo
 *.ncb
+*.sdf
 *.vcproj.*.user
+*.vcxproj.user
