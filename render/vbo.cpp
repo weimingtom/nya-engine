@@ -13,6 +13,7 @@
 #include "render.h"
 #include "texture.h"
 #include "shader.h"
+#include "platform_specific_gl.h"
 
 #ifdef DIRECTX11
     #include "shader.h"

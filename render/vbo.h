@@ -2,12 +2,6 @@
 
 #pragma once
 
-#include "platform_specific_gl.h"
-
-#ifdef DIRECTX11
-    #include <string>
-#endif
-
 namespace nya_render
 {
 
