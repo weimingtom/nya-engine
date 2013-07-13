@@ -82,6 +82,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 
     switch(format)
     {
+        case greyscale:
         case color_rgb:
         case color_rgba:
             desc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -116,7 +117,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     //desc.MiscFlags=D3D11_RESOURCE_MISC_GDI_COMPATIBLE;
 
     ID3D11Texture2D *tex=0;
-    if(format==color_rgb && data)
+    if((format==color_rgb || format==greyscale) && data)
     {
         nya_memory::tmp_buffer_scoped buf(srdata.SysMemSlicePitch);
         srdata.pSysMem=buf.get_data();
@@ -124,14 +125,33 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         typedef unsigned char uchar;
         const uchar *from=(const uchar *)data;
         uchar *to=(uchar *)buf.get_data();
-        for(unsigned int h=0;h<height;++h)
+
+        if(format==color_rgb)
         {
-            for(unsigned int w=0;w<width;++w)
+            for(unsigned int h=0;h<height;++h)
             {
-                memcpy(to,from,3);
-                *(to+3)=255;
-                to+=4;
-                from+=3;
+                for(unsigned int w=0;w<width;++w)
+                {
+                    memcpy(to,from,3);
+                    *(to+3)=255;
+                    to+=4;
+                    from+=3;
+                }
+            }
+        }
+        else
+        {
+            for(unsigned int h=0;h<height;++h)
+            {
+                for(unsigned int w=0;w<width;++w)
+                {
+                    for(int i=0;i<3;++i,++to)
+                        *(to)=*(from);
+
+                    *(to)=255;
+                    ++to;
+                    ++from;
+                }
             }
         }
 
