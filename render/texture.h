@@ -16,7 +16,7 @@ public:
         //color_bgr,
         color_rgba,
         color_bgra,
-        color_r,
+        //color_r,
         greyscale,
 
         depth16,

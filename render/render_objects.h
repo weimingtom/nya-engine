@@ -39,8 +39,8 @@ public:
         return idx;
     }
 
-    template<typename t>
-    void apply_to_all(t applier)
+    template<typename ta>
+    void apply_to_all(ta applier)
     {
         for(int i=0;i<(int)m_objects.size();++i)
         {
