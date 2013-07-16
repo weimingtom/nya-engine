@@ -61,7 +61,6 @@ namespace nya_render
 #ifdef DIRECTX11
         ID3D11Buffer *vertex_loc;
         ID3D11Buffer *index_loc;
-        std::string layout;
 #else
         unsigned int vertex_loc;
         unsigned int index_loc;
@@ -241,37 +240,7 @@ void vbo::draw(unsigned int offset,unsigned int count)
     UINT zero_offset = 0;
     get_context()->IASetVertexBuffers(0,1,&vobj.vertex_loc,&vobj.vertex_stride,&zero_offset);
 
-    if(vobj.layout.empty())
-    {
-        char tmp[64];
-        if(!vobj.vertices.has)
-            return;
-
-        if(vobj.colors.has)
-        {
-            sprintf(tmp,"c%d%d",vobj.colors.dimension,vobj.colors.offset);
-            vobj.layout.append(tmp);
-        }
-        if(vobj.normals.has)
-        {
-            sprintf(tmp,"n%d",vobj.normals.offset);
-            vobj.layout.append(tmp);
-        }
-        for(int i=0;i<vbo_obj::max_tex_coord;++i)
-        {
-            const vbo_obj::attribute &tc=vobj.tcs[i];
-            if(!tc.has)
-                continue;
-
-            sprintf(tmp,"t%d_%d%d",i,tc.dimension,tc.offset);
-            vobj.layout.append(tmp);
-        }
-
-        sprintf(tmp,"p%d%d",vobj.vertices.dimension,vobj.vertices.offset);
-        vobj.layout.append(tmp);
-    }
-
-    ID3D11InputLayout *layout=get_layout(vobj.layout);
+    ID3D11InputLayout *layout=get_layout(current_verts);
     if(!layout)
     {
         std::vector<D3D11_INPUT_ELEMENT_DESC> desc;
@@ -332,7 +301,7 @@ void vbo::draw(unsigned int offset,unsigned int count)
             desc.push_back(d);
         }
 
-        layout=add_layout(vobj.layout,&desc[0],desc.size());
+        layout=add_layout(current_verts,&desc[0],desc.size());
 
         if(!layout)
             return;
@@ -492,7 +461,7 @@ void vbo::release()
         if(obj.vertex_loc)
             obj.vertex_loc->Release();
 
-        obj.layout.clear();
+        remove_layout(m_verts);
     }
 
     if(m_indices>=0)
@@ -779,7 +748,7 @@ void vbo::set_vertices(unsigned int offset,unsigned int dimension)
     vbo_obj &obj=vbo_obj::get(m_verts);
 
 #ifdef DIRECTX11
-    obj.layout.clear();
+    remove_layout(m_verts);
 #endif
 
     if(dimension==0 || dimension>4)
@@ -804,7 +773,7 @@ void vbo::set_normals(unsigned int offset)
     vbo_obj &obj=vbo_obj::get(m_verts);
 
 #ifdef DIRECTX11
-    obj.layout.clear();
+    remove_layout(m_verts);
 #endif
 
     obj.normals.has=true;
@@ -822,7 +791,7 @@ void vbo::set_tc(unsigned int tc_idx,unsigned int offset,unsigned int dimension)
     vbo_obj &obj=vbo_obj::get(m_verts);
 
 #ifdef DIRECTX11
-    obj.layout.clear();
+    remove_layout(m_verts);
 #endif
 
     vbo_obj::attribute &tc=obj.tcs[tc_idx];
@@ -845,7 +814,7 @@ void vbo::set_colors(unsigned int offset,unsigned int dimension)
     vbo_obj &obj=vbo_obj::get(m_verts);
 
 #ifdef DIRECTX11
-    obj.layout.clear();
+    remove_layout(m_verts);
 #endif
 
     if(dimension==0 || dimension>4)

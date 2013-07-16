@@ -69,6 +69,7 @@ public:
         CreateContext();
         CreateTargets();
 
+        m_height=int(m_renderTargetSize.Height);
         m_app.on_resize((unsigned int)m_renderTargetSize.Width,(unsigned int)m_renderTargetSize.Height);
         m_app.on_init_splash();
         m_time=nya_system::get_time();
@@ -103,9 +104,7 @@ public:
                 }
             }
 		    else
-		    {
 			    CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
-		    }
 	    }
     }
 	virtual void Uninitialize()
@@ -147,14 +146,18 @@ protected:
 
 	void OnPointerPressed(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args)
     {
+        m_app.on_mouse_move(int(args->CurrentPoint->Position.X),m_height-int(args->CurrentPoint->Position.Y));
+        m_app.on_mouse_button(nya_system::mouse_left,true);
     }
 
 	void OnPointerMoved(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args)
     {
+        m_app.on_mouse_move(int(args->CurrentPoint->Position.X),m_height-int(args->CurrentPoint->Position.Y));
     }
 
 	void OnPointerReleased(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args)
     {
+        m_app.on_mouse_button(nya_system::mouse_left,false);
     }
 
     void CreateContext()
@@ -250,7 +253,7 @@ protected:
     }
 
 private:
-    PhoneDirect3DApp(nya_system::app_responder &app): m_app(app),m_windowClosed(false),m_windowVisible(false),m_time(0) {}
+    PhoneDirect3DApp(nya_system::app_responder &app): m_app(app),m_windowClosed(false),m_windowVisible(false),m_time(0),m_height(0) {}
 
 private:
     nya_system::app_responder &m_app;
@@ -259,6 +262,7 @@ private:
 	bool m_windowClosed;
 	bool m_windowVisible;
     unsigned long m_time;
+    int m_height;
 
 private:
 	ID3D11Device *m_device;

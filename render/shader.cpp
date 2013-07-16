@@ -51,8 +51,8 @@ namespace nya_render
         ID3D11VertexShader *vertex_program;
         ID3D11PixelShader *pixel_program;
 
-        typedef std::map<std::string,ID3D11InputLayout*> layouts_map;
-        static layouts_map layouts;
+        typedef std::map<int,ID3D11InputLayout*> layouts_map;
+        shader_obj::layouts_map shader_obj::layouts;
 
         struct constants_buffer
         {
@@ -119,6 +119,32 @@ namespace nya_render
         static shader_obj &get(int idx) { return get_shader_objs().get(idx); }
         static void remove(int idx) { return get_shader_objs().remove(idx); }
 
+#ifdef DIRECTX11
+        static void remove_layout(int mesh_idx)
+        {
+            struct remover
+            {
+                int mesh_idx;
+
+                void apply(shader_obj &obj)
+                {
+                    layouts_map::iterator it=obj.layouts.find(mesh_idx);
+                    if(it!=obj.layouts.end())
+                    {
+                        if(it->second)
+                            it->second->Release();
+
+                        obj.layouts.erase(it);
+                    }
+                }
+            };
+
+            remover r;
+            r.mesh_idx=mesh_idx;
+            get_shader_objs().apply_to_all(r);
+        }
+#endif
+
     private:
         typedef render_objects<shader_obj> shader_objs;
         static shader_objs &get_shader_objs()
@@ -127,10 +153,6 @@ namespace nya_render
             return objs;
         }
     };
-
-#ifdef DIRECTX11
-    shader_obj::layouts_map shader_obj::layouts;
-#endif
 
 #ifndef DIRECTX11
   #ifndef NO_EXTENSIONS_INIT
@@ -333,19 +355,19 @@ bool check_init_shaders()
 #endif
 
 #ifdef DIRECTX11
-ID3D11InputLayout *get_layout(const std::string &layout)
+ID3D11InputLayout *get_layout(int mesh_idx)
 {
     if(current_shader<0)
         return 0;
 
-    shader_obj::layouts_map::iterator it=shader_obj::get(current_shader).layouts.find(layout);
+    shader_obj::layouts_map::iterator it=shader_obj::get(current_shader).layouts.find(mesh_idx);
     if(it==shader_obj::get(current_shader).layouts.end())
         return 0;
 
     return it->second;
 }
 
-ID3D11InputLayout *add_layout(const std::string &layout,
+ID3D11InputLayout *add_layout(int mesh_idx,
                               const D3D11_INPUT_ELEMENT_DESC*desc,size_t desc_size)
 {
     if(current_shader<0)
@@ -359,10 +381,13 @@ ID3D11InputLayout *add_layout(const std::string &layout,
     if(!out)
         return 0;
 
-    shdr.layouts[layout]=out;
+    shdr.layouts[mesh_idx]=out;
 
     return out;
 }
+
+void remove_layout(int mesh_idx) { shader_obj::remove_layout(mesh_idx); }
+
 #endif
 
 bool shader::add_program(program_type type,const char*code)
@@ -395,6 +420,14 @@ bool shader::add_program(program_type type,const char*code)
     shader_obj::uniforms_buffer &buf=(type==vertex)?shdr.vertex_uniforms:shdr.pixel_uniforms;
     for(size_t i=code_str.find("uniform");i!=std::string::npos;i=code_str.find("uniform",i+7))
     {
+        size_t prevln=code_str.rfind('\n',i);
+        if(prevln!=std::string::npos)
+        {
+            size_t comment=code_str.find("//",prevln);
+            if(comment<i)
+                continue;
+        }
+
         size_t type_from=i+8;
         while(code_str[type_from]<=' ') if(++type_from>=code_str.length()) return false;
         size_t type_to=type_from;
@@ -1107,6 +1140,9 @@ void shader::set_uniform3_array(unsigned int i,const float *f,unsigned int count
         return;
 
     const shader_obj::uniform &u=shdr.uniforms[i];
+    if(count>u.array_size)
+        count=u.array_size;
+
     shader_obj::uniforms_buffer &buf=(u.program_type==vertex)?shdr.vertex_uniforms:shdr.pixel_uniforms;
     for(int i=0,o=u.offset,o2=0;i<count;++i,o+=4,o2+=3)
     {
@@ -1140,6 +1176,9 @@ void shader::set_uniform4_array(unsigned int i,const float *f,unsigned int count
         return;
 
     const shader_obj::uniform &u=shdr.uniforms[i];
+    if(count>u.array_size)
+        count=u.array_size;
+
     shader_obj::uniforms_buffer &buf=(u.program_type==vertex)?shdr.vertex_uniforms:shdr.pixel_uniforms;
     memcpy(&buf.buffer[u.offset],f,sizeof(float)*4*count);
     buf.changed=true;
@@ -1168,6 +1207,9 @@ void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int coun
         return;
 
     const shader_obj::uniform &u=shdr.uniforms[i];
+    if(count>u.array_size)
+        count=u.array_size;
+
     shader_obj::uniforms_buffer &buf=(u.program_type==vertex)?shdr.vertex_uniforms:shdr.pixel_uniforms;
     memcpy(&buf.buffer[u.offset],f,sizeof(float)*16*count);
     buf.changed=true;
@@ -1200,6 +1242,11 @@ void shader::release()
 
     if(shdr.pixel_program)
         shdr.pixel_program->Release();
+
+    for(shader_obj::layouts_map::iterator it=shdr.layouts.begin();
+        it!=shdr.layouts.end();++it)
+        if(it->second)
+            it->second->Release();
 
     shdr.layouts.clear();
 

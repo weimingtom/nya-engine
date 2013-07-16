@@ -39,6 +39,18 @@ public:
         return idx;
     }
 
+    template<typename t>
+    void apply_to_all(t applier)
+    {
+        for(int i=0;i<(int)m_objects.size();++i)
+        {
+            if(m_objects[i].free)
+                continue;
+
+            applier.apply(m_objects[i].data);
+        }
+    }
+
 private:
     struct object
     {

@@ -93,8 +93,9 @@ namespace nya_render
     };
 
 #ifdef DIRECTX11
-    ID3D11InputLayout *get_layout(const std::string &layout);
-    ID3D11InputLayout *add_layout(const std::string &layout,
+    ID3D11InputLayout *get_layout(int mesh_idx);
+    ID3D11InputLayout *add_layout(int mesh_idx,
                                   const D3D11_INPUT_ELEMENT_DESC*desc,size_t desc_size);
+    void remove_layout(int mesh_idx);
 #endif
 }

@@ -185,6 +185,9 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 
     get_device()->CreateSamplerState(&sdesc,&texture_obj::get(m_tex).sampler_state);
 
+    m_width=width;
+    m_height=height;
+
 #else
     if(!m_max_tex_size)
     {
