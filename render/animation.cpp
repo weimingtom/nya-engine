@@ -53,7 +53,7 @@ animation::bone animation::get_bone(int idx,unsigned int time,bool looped) const
 
             if(i==frames_count)
             {
-                if(!looped || i==0)
+                if(!looped)
                     return prev.pos_rot;
 
                 next=&seq.frames[0];

@@ -8,7 +8,7 @@ namespace nya_scene
 
 bool animation::load(const char *name)
 {
-    if(!scene_shared::load(name))
+    if(!scene_shared<shared_animation>::load(name))
         return false;
 
     if(!m_shared.is_valid())
@@ -32,7 +32,7 @@ bool animation::load(const char *name)
 
 void animation::unload()
 {
-    scene_shared::unload();
+    scene_shared<shared_animation>::unload();
 
     m_range_from=m_range_to=0;
     m_speed=m_weight=1.0f;
@@ -104,7 +104,7 @@ bool animation::load_vmd(shared_animation &res,resource_data &data,const char* n
         if(bone_idx<0)
             continue;
 
-        const uint time=bone_frame.frame*60; //ToDo: adjust framerate
+        const uint time=bone_frame.frame*60;//33.6; //ToDo: adjust framerate
 
         nya_render::animation::bone bone;
         nya_render::animation::interpolation interpolation;

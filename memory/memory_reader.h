@@ -3,6 +3,7 @@
 #pragma once
 
 #include <cstddef>
+#include <memory.h>
 
 namespace nya_memory
 {

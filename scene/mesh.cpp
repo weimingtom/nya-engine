@@ -21,9 +21,9 @@ static std::string read_string(nya_memory::memory_reader &reader)
         reader.skip(size);
         return "";
     }
-    
+
     reader.skip(size);
-    
+
     return std::string(str,size);
 }
 
@@ -246,7 +246,7 @@ bool mesh::load_nms(shared_mesh &res,resource_data &data,const char* name)
 
 bool mesh::load(const char *name)
 {
-    if(!scene_shared::load(name))
+    if(!scene_shared<shared_mesh>::load(name))
         return false;
 
     if(!m_shared.is_valid())
@@ -269,7 +269,7 @@ bool mesh::load(const char *name)
 
 void mesh::unload()
 {
-    scene_shared::unload();
+    scene_shared<shared_mesh>::unload();
 
     for(size_t i=0;i<m_replaced_materials.size();++i)
         m_replaced_materials[i].release();
