@@ -24,12 +24,23 @@ typedef unsigned int uint;
 uint clamp(int v,uint from,uint to);
 float clamp(float v,float from,float to);
 
+struct point
+{
+    uint x;
+    uint y;
+
+    point(): x(0),y(0) {}
+    point(uint x,uint y): x(x),y(y) {}
+};
+
 struct rect
 {
     uint x;
     uint y;
     uint w;
     uint h;
+
+    bool check_point(const point &p) const { return check_point(p.x,p.y); }
 
     bool check_point(uint px, uint py) const
     {
@@ -71,6 +82,11 @@ public:
     virtual bool mouse_scroll(uint dx,uint dy);
 
 public:
+    virtual uint get_width() { return m_width; }
+    virtual uint get_height() { return m_height; }
+    virtual point get_mouse_pos() { return point(m_mouse_x,m_mouse_y); }
+
+public:
     struct event_data
     {
         virtual void free() {}
@@ -98,7 +114,7 @@ public:
     virtual void process_events(event &e);
 
 public:
-    layout(): m_x(0),m_y(0),m_width(0),m_height(0) {}
+    layout(): m_x(0),m_y(0),m_width(0),m_height(0),m_mouse_x(0),m_mouse_y(0) {}
 
     //non copiable
 private:
@@ -112,6 +128,8 @@ protected:
     int m_y;
     uint m_width;
     uint m_height;
+    uint m_mouse_x;
+    uint m_mouse_y;
 };
 
 class widget
@@ -127,6 +145,7 @@ public:
         m_pos_bottom=y;
 
         calc_pos_markers();
+        update_mouse_over();
     }
 
     virtual void set_size(uint width,uint height)
@@ -135,15 +154,15 @@ public:
         m_height=height;
 
         calc_pos_markers();
+        update_mouse_over();
     }
 
     virtual void set_visible(bool visible)
     {
-        if(m_mouse_over && m_visible && !visible)
-        {
-            on_mouse_left();
-            m_mouse_over=false;
-        }
+        if(m_visible==visible)
+            return;
+
+        update_mouse_over();
 
         m_visible=visible;
     }
@@ -156,6 +175,7 @@ public:
         m_align_bottom=bottom;
 
         calc_pos_markers();
+        update_mouse_over();
     }
 
     enum keep_aspect
@@ -169,9 +189,11 @@ public:
     {
         m_keep_aspect=a;
         calc_pos_markers();
+        update_mouse_over();
     }
 
     virtual bool is_visible() { return m_visible; }
+    virtual bool is_mouse_over() { return m_mouse_over; }
 
     virtual const char *get_id() { return m_id.c_str(); }
 
@@ -194,6 +216,8 @@ protected:
         m_parent_pos_y=y;
 
         m_cached_rect=false;
+
+        update_mouse_over();
     }
 
     virtual void parent_resized(uint width,uint height)
@@ -202,6 +226,27 @@ protected:
         m_parent_height=height;
 
         m_cached_rect=false;
+
+        update_mouse_over();
+    }
+
+protected:
+    virtual void update_mouse_over()
+    {
+        const bool over=m_parent?get_rect().check_point(m_parent->get_mouse_pos()):false;
+        if(over)
+        {
+            if(!m_mouse_over)
+            {
+                on_mouse_over();
+                m_mouse_over=true;
+            }
+        }
+        else if(m_mouse_over)
+        {
+            on_mouse_left();
+            m_mouse_over=false;
+        }
     }
 
 protected:
@@ -308,17 +353,6 @@ private:
 
 public:
     virtual void send_event(event &e);
-
-public:
-    virtual uint get_width() { return m_width; }
-    virtual uint get_height() { return m_height; }
-
-public:
-    layer(): m_width(0), m_height(0) {}
-
-private:
-    uint m_width;
-    uint m_height;
 
 private:
     typedef std::deque<event> events_deque;

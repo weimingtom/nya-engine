@@ -214,6 +214,9 @@ bool layout::mouse_button(layout::mbutton button,bool pressed)
 
 bool layout::mouse_move(uint x,uint y)
 {
+    m_mouse_x=x;
+    m_mouse_y=y;
+
     bool processed=false;
 
     for(widgets_list::reverse_iterator it=m_widgets.rbegin();
@@ -223,23 +226,9 @@ bool layout::mouse_move(uint x,uint y)
         if(!w->is_visible())
             continue;
 
-        bool inside=false;
-        if(!processed && w->get_rect().check_point(x,y))
-        {
-            if(!w->m_mouse_over)
-            {
-                w->on_mouse_over();
-                w->m_mouse_over=true;
-            }
-            inside=true;
-        }
-        else if(w->m_mouse_over)
-        {
-            w->on_mouse_left();
-            w->m_mouse_over=false;
-        }
+        w->update_mouse_over();
 
-        if(!processed && w->on_mouse_move(x,y,inside))
+        if(!processed && w->on_mouse_move(x,y,w->is_mouse_over()))
             processed=true;
     }
     //get_log()<<"mmove "<<(int)x<<" "<<(int)y<<"\n";
