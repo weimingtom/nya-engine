@@ -759,6 +759,15 @@ private:
     NSTimer *m_animation_timer;
     nya_system::app_responder *m_app;
     unsigned long m_time;
+
+    enum state
+    {
+        state_splash,
+        state_init,
+        state_draw
+    };
+
+    state m_state;
 }
 @end
 
@@ -769,17 +778,17 @@ private:
     m_app=responder;
 }
 
--(void)initTimer
+-(void)initView
 {
     m_animation_timer=[NSTimer timerWithTimeInterval:0.01 target:self 
                                        selector:@selector(animate:) userInfo:nil repeats:YES];
 
     [[self window] setAcceptsMouseMovedEvents:YES];
 
-    m_time=nya_system::get_time();
-
     [[NSRunLoop currentRunLoop] addTimer:m_animation_timer forMode:NSDefaultRunLoopMode];
     [[NSRunLoop currentRunLoop] addTimer:m_animation_timer forMode:NSEventTrackingRunLoopMode];
+
+    m_state=state_splash;
 }
 
 - (void)animate:(id)sender
@@ -789,12 +798,33 @@ private:
 
 - (void)drawRect:(NSRect)rect 
 {
-    unsigned long time=nya_system::get_time();
-    unsigned int dt=(unsigned int)(time-m_time);
-    m_time=time;
+    switch(m_state)
+    {
+        case state_splash:
+        {
+            m_app->on_init_splash();
+            m_app->on_splash(0);
+            m_state=state_init;
+        }
+        break;
 
-    m_app->on_process(dt);
-    m_app->on_draw();
+        case state_init:
+        {
+            m_app->on_init();
+            m_time=nya_system::get_time();
+            m_state=state_draw;
+        }
+        case state_draw:
+        {
+            unsigned long time=nya_system::get_time();
+            unsigned int dt=(unsigned int)(time-m_time);
+            m_time=time;
+
+            m_app->on_process(dt);
+            m_app->on_draw();
+        }
+        break;
+    }
 
     [[self openGLContext] flushBuffer];
 }
@@ -931,14 +961,7 @@ private:
 
     [view reshape];
 
-    m_app->on_init_splash();
-    m_app->on_splash(0);
-
-    [[view openGLContext] flushBuffer];
-
-    m_app->on_init();
-
-    [view initTimer];
+    [view initView];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification

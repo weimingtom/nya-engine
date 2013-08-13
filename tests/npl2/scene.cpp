@@ -476,11 +476,6 @@ void scene::draw()
     nya_render::blend::enable(nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
     nya_render::set_color(1.0,1.0,1.0,1.0);
 
-#ifndef OPENGL_ES
-    glEnable(GL_ALPHA_TEST);
-    glAlphaFunc(GL_GREATER,0.2f);
-#endif
-
     const tmb_model::locator *scene_loc=0;
 
     if(!m_anim_list.empty() && m_curr_anim!=m_anim_list.end())
@@ -660,10 +655,6 @@ void scene::draw()
             m_shader_scenery.unbind();
         }
     }
-
-#ifndef OPENGL_ES
-    glDisable(GL_ALPHA_TEST);
-#endif
 }
 
 void scene::set_imouto_attr(const char *key,const char *value,int num)
