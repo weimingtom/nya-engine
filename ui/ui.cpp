@@ -119,8 +119,11 @@ void layer::resize(uint width, uint height)
 
 void layer::process()
 {
-    for(events_deque::iterator it=m_events.begin();
-        it!=m_events.end();++it)
+    events_deque events=m_events;
+    m_events.clear();
+
+    for(events_deque::iterator it=events.begin();
+        it!=events.end();++it)
     {
         //get_log()<<"event: "<<it->sender.c_str()<<" "<<it->type.c_str()<<"\n";
         process_events(*it);
@@ -128,8 +131,6 @@ void layer::process()
         //layout::process_events(*it);
         it->free_data();
     }
-
-    m_events.clear();
 }
 
 void layout::process_events(layout::event &e)
