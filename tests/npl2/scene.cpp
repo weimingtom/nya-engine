@@ -283,14 +283,16 @@ void scene::init()
     
     "void main(void)"
     "{"
-    "  vec4 base=texture2D(base_map,tc.xy)*color;"
+    "  vec4 base=texture2D(base_map,tc.xy);"
 
     //"  float l=dot(normalize(vec3(0,0,1.0)),normalize(gl_TexCoord[1].xyz));"
     //"  float ls=dot(normalize(vec3(-0.3,0,1.0)),normalize(gl_TexCoord[1].xyz));"
     //"  gl_FragColor=vec4((0.15+max(0.0,l*0.85))*base.rgb+pow(max(ls,0.0),90.0)*vec3(0.06),base.a);"
     //"  gl_FragColor=vec4(base.rgb+pow(max(ls,0.0),90.0)*vec3(0.06),base.a);"
 
-    "  gl_FragColor=base*color*vcolor;"
+    "  vec4 frag=base*color*vcolor;"
+    "  if(frag.a<0.5) discard;"
+    "  gl_FragColor=frag;"
     //"  gl_FragColor=vcolor;"
     "}";
 
@@ -327,10 +329,12 @@ void scene::init()
      //"  float l=dot(normalize(vec3(0,0,1.0)),normalize(gl_TexCoord[1].xyz));"
      "  float ls=dot(normalize(vec3(-0.3,0,1.0)),normalize(normal.xyz));"
      //"  gl_FragColor=vec4((0.85+max(0.0,l*0.15))*base.rgb+pow(max(ls,0.0),90.0)*vec3(0.06),base.a);"
-     "  gl_FragColor=vec4(base.rgb+pow(max(ls,0.0),90.0)*vec3(0.06),base.a)*color;"
+     "  vec4 frag=vec4(base.rgb+pow(max(ls,0.0),90.0)*vec3(0.06),base.a)*color;"
      "\n#else\n"
-     "  gl_FragColor=base*color;"
+     "  vec4 frag=base*color;"
      "\n#endif\n"
+    "  if(frag.a<0.2) discard;"
+    "  gl_FragColor=frag;"
      //"  gl_FragColor=base;"
      "}";
 
@@ -362,7 +366,9 @@ void scene::init()
                                "void main(void)"
                                "{"
                                "  vec4 c=texture2D(base_map,tc.xy);"
-                               "  gl_FragColor=vec4(0.0,0.0,0.0,c.a*0.3);"
+                               "  c.a*=0.3;"
+                               "  if(c.a<0.2) discard;"
+                               "  gl_FragColor=vec4(0.0,0.0,0.0,c.a);"
                                "}");
     m_shbl_mat_uniform=m_shader_black.get_handler("bones");
 
@@ -475,11 +481,6 @@ void scene::draw()
     nya_render::depth_test::enable(nya_render::depth_test::less);
     nya_render::blend::enable(nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
     nya_render::set_color(1.0,1.0,1.0,1.0);
-
-#ifndef OPENGL_ES
-    glEnable(GL_ALPHA_TEST);
-    glAlphaFunc(GL_GREATER,0.2f);
-#endif
 
     const tmb_model::locator *scene_loc=0;
 
@@ -660,10 +661,6 @@ void scene::draw()
             m_shader_scenery.unbind();
         }
     }
-
-#ifndef OPENGL_ES
-    glDisable(GL_ALPHA_TEST);
-#endif
 }
 
 void scene::set_imouto_attr(const char *key,const char *value,int num)
