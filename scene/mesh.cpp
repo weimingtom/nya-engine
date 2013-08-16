@@ -630,7 +630,7 @@ void mesh::set_bone_rot(int bone_idx,const nya_math::quat &rot,bool additive)
 
 void mesh::update(unsigned int dt)
 {
-    if(m_anims.empty())
+    if(m_anims.empty() && m_bone_controls.empty())
         return;
 
     for(int i=0;i<(int)m_anims.size();++i)
@@ -652,29 +652,9 @@ void mesh::update(unsigned int dt)
         nya_math::vec3 pos;
         nya_math::quat rot;
 
-        const applied_anim &a=m_anims[0];
-        if(i<(int)a.bones_map.size() && a.bones_map[i]>=0)
+        if(!m_anims.empty())
         {
-            const unsigned int time=(unsigned int)a.time+a.anim->m_range_from;
-            const nya_render::animation::bone &b=
-                a.anim->m_shared->anim.get_bone(a.bones_map[i],time,a.anim->get_loop());
-
-            if(a.full_weight)
-            {
-                pos=b.pos;
-                rot=b.rot;
-            }
-            else
-            {
-                pos=b.pos*a.anim->m_weight;
-                rot=b.rot;
-                rot.apply_weight(a.anim->m_weight);
-            }
-        }
-
-        for(int j=1;j<(int)m_anims.size();++j)
-        {
-            const applied_anim &a=m_anims[j];
+            const applied_anim &a=m_anims[0];
             if(i<(int)a.bones_map.size() && a.bones_map[i]>=0)
             {
                 const unsigned int time=(unsigned int)a.time+a.anim->m_range_from;
@@ -683,15 +663,38 @@ void mesh::update(unsigned int dt)
 
                 if(a.full_weight)
                 {
-                    pos+=b.pos;
-                    rot=rot*b.rot;
+                    pos=b.pos;
+                    rot=b.rot;
                 }
                 else
                 {
-                    pos+=b.pos*a.anim->m_weight;
-                    nya_math::quat tmp=b.rot;
-                    tmp.apply_weight(a.anim->m_weight);
-                    rot=rot*tmp;
+                    pos=b.pos*a.anim->m_weight;
+                    rot=b.rot;
+                    rot.apply_weight(a.anim->m_weight);
+                }
+            }
+
+            for(int j=1;j<(int)m_anims.size();++j)
+            {
+                const applied_anim &a=m_anims[j];
+                if(i<(int)a.bones_map.size() && a.bones_map[i]>=0)
+                {
+                    const unsigned int time=(unsigned int)a.time+a.anim->m_range_from;
+                    const nya_render::animation::bone &b=
+                        a.anim->m_shared->anim.get_bone(a.bones_map[i],time,a.anim->get_loop());
+
+                    if(a.full_weight)
+                    {
+                        pos+=b.pos;
+                        rot=rot*b.rot;
+                    }
+                    else
+                    {
+                        pos+=b.pos*a.anim->m_weight;
+                        nya_math::quat tmp=b.rot;
+                        tmp.apply_weight(a.anim->m_weight);
+                        rot=rot*tmp;
+                    }
                 }
             }
         }
