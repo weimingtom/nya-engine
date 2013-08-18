@@ -380,6 +380,7 @@ void dx_apply_cull_face_state()
                 desc.CullMode=D3D11_CULL_FRONT;
 
             desc.FillMode=D3D11_FILL_SOLID;
+            desc.DepthClipEnable=true;
             get_device()->CreateRasterizerState(&desc,&cull_enabled);
 
             if(cull_enabled)
@@ -397,6 +398,7 @@ void dx_apply_cull_face_state()
             ZeroMemory(&desc,sizeof(desc));
             desc.CullMode=D3D11_CULL_NONE;
             desc.FillMode=D3D11_FILL_SOLID;
+            desc.DepthClipEnable=true;
             get_device()->CreateRasterizerState(&desc,&cull_disabled);
 
             if(cull_disabled)
