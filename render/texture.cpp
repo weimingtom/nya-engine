@@ -372,7 +372,8 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
         nya_memory::tmp_buffer_scoped buf(size*6);
         srdata.pSysMem=buf.get_data();
 
-        for(int i=0,unsigned char *to=(unsigned char *)buf.get_data();i<6;++i,to+=size)
+        unsigned char *to=(unsigned char *)buf.get_data();
+        for(int i=0;i<6;++i,to+=size)
         {
             dx_convert_to_format((const unsigned char *)data[i],to,height*width,format);
             srdatas[i].pSysMem=to;
