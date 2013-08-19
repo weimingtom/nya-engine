@@ -20,7 +20,33 @@ namespace
 namespace nya_render
 {
 
-#ifndef DIRECTX11
+#ifdef DIRECTX11
+void dx_convert_to_format(const unsigned char *from,unsigned char *to,size_t size,texture::color_format format)
+{
+    if(format==texture::color_rgb)
+    {
+        for(unsigned int i=0;i<size;++i)
+        {
+            memcpy(to,from,3);
+            *(to+3)=255;
+            to+=4;
+            from+=3;
+        }
+    }
+    else
+    {
+        for(unsigned int i=0;i<size;++i)
+        {
+            for(int j=0;j<3;++j,++to)
+                *(to)=*(from);
+
+            *(to)=255;
+            ++to;
+            ++from;
+        }
+    }
+}
+#else
 void gl_select_multitex_layer(int idx)
 {
     if(idx==active_layer)
@@ -79,6 +105,8 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 
     D3D11_SUBRESOURCE_DATA srdata;
     srdata.pSysMem=data;
+    srdata.SysMemPitch=width*4;
+    srdata.SysMemSlicePitch=0;
 
     switch(format)
     {
@@ -86,13 +114,9 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         case color_rgb:
         case color_rgba:
             desc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;
-            srdata.SysMemPitch=width*4;
         break;
 
-        case color_bgra:
-            desc.Format=DXGI_FORMAT_B8G8R8A8_UNORM;
-            srdata.SysMemPitch=width*4;
-        break;
+        case color_bgra: desc.Format=DXGI_FORMAT_B8G8R8A8_UNORM; break;
 /*
         case color_r:
             desc.Format=DXGI_FORMAT_R8_UNORM;
@@ -106,8 +130,6 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         default: return false;
     }
 
-    srdata.SysMemSlicePitch=srdata.SysMemPitch*height;
-
     desc.SampleDesc.Count=1;
     desc.Usage=D3D11_USAGE_DEFAULT;
     desc.BindFlags=D3D11_BIND_SHADER_RESOURCE|D3D11_BIND_RENDER_TARGET;
@@ -119,42 +141,9 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     ID3D11Texture2D *tex=0;
     if((format==color_rgb || format==greyscale) && data)
     {
-        nya_memory::tmp_buffer_scoped buf(srdata.SysMemSlicePitch);
+        nya_memory::tmp_buffer_scoped buf(srdata.SysMemPitch*height);
         srdata.pSysMem=buf.get_data();
-
-        typedef unsigned char uchar;
-        const uchar *from=(const uchar *)data;
-        uchar *to=(uchar *)buf.get_data();
-
-        if(format==color_rgb)
-        {
-            for(unsigned int h=0;h<height;++h)
-            {
-                for(unsigned int w=0;w<width;++w)
-                {
-                    memcpy(to,from,3);
-                    *(to+3)=255;
-                    to+=4;
-                    from+=3;
-                }
-            }
-        }
-        else
-        {
-            for(unsigned int h=0;h<height;++h)
-            {
-                for(unsigned int w=0;w<width;++w)
-                {
-                    for(int i=0;i<3;++i,++to)
-                        *(to)=*(from);
-
-                    *(to)=255;
-                    ++to;
-                    ++from;
-                }
-            }
-        }
-
+        dx_convert_to_format((unsigned char *)data,(unsigned char *)buf.get_data(),height*width,format);
         get_device()->CreateTexture2D(&desc,&srdata,&tex);
     }
     else
@@ -318,6 +307,110 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     }
 
 #ifdef DIRECTX11
+    if(!get_device())
+        return false;
+
+    if(m_tex>=0)
+        release();
+
+    D3D11_TEXTURE2D_DESC desc;
+    memset(&desc,0,sizeof(desc));
+
+    desc.Width=width;
+    desc.Height=height;
+    desc.MipLevels=1;
+    desc.ArraySize=6;
+
+    D3D11_SUBRESOURCE_DATA srdata;
+    srdata.pSysMem=data[0];
+    srdata.SysMemPitch=width*4;
+    srdata.SysMemSlicePitch=0;
+
+    switch(format)
+    {
+        case greyscale:
+        case color_rgb:
+        case color_rgba:
+            desc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;
+        break;
+
+        case color_bgra: desc.Format=DXGI_FORMAT_B8G8R8A8_UNORM; break;
+/*
+        case color_r:
+            desc.Format=DXGI_FORMAT_R8_UNORM;
+            srdata.SysMemPitch=width;
+        break;
+*/
+        case depth16: desc.Format=DXGI_FORMAT_D16_UNORM; break;
+        case depth24: desc.Format=DXGI_FORMAT_D24_UNORM_S8_UINT; break; //ToDo if data != 0
+        case depth32: desc.Format=DXGI_FORMAT_D32_FLOAT; break;
+
+        default: return false;
+    }
+
+    desc.SampleDesc.Count=1;
+    desc.Usage=D3D11_USAGE_DEFAULT;
+    desc.BindFlags=D3D11_BIND_SHADER_RESOURCE|D3D11_BIND_RENDER_TARGET;
+    if(data)
+        desc.MiscFlags=D3D11_RESOURCE_MISC_GENERATE_MIPS;
+
+    desc.MiscFlags|=D3D11_RESOURCE_MISC_TEXTURECUBE;
+
+    //desc.MiscFlags=D3D11_RESOURCE_MISC_GDI_COMPATIBLE;
+
+    D3D11_SUBRESOURCE_DATA srdatas[6];
+    for(int i=0;i<6;++i)
+    {
+        srdatas[i]=srdata;
+        srdatas[i].pSysMem=data[i];
+    }
+
+    ID3D11Texture2D *tex=0;
+    if((format==color_rgb || format==greyscale) && data)
+    {
+        size_t size=srdata.SysMemPitch*height;
+        nya_memory::tmp_buffer_scoped buf(size*6);
+        srdata.pSysMem=buf.get_data();
+
+        for(int i=0,unsigned char *to=(unsigned char *)buf.get_data();i<6;++i,to+=size)
+        {
+            dx_convert_to_format((const unsigned char *)data[i],to,height*width,format);
+            srdatas[i].pSysMem=to;
+        }
+
+        get_device()->CreateTexture2D(&desc,srdatas,&tex);
+    }
+    else
+        get_device()->CreateTexture2D(&desc,data?srdatas:0,&tex);
+
+    if(!tex)
+        return false;
+
+    ID3D11ShaderResourceView *srv;
+    get_device()->CreateShaderResourceView(tex,0,&srv);
+    tex->Release();
+    if(!srv)
+        return false;
+
+    D3D11_SAMPLER_DESC sdesc;
+    memset(&sdesc,0,sizeof(sdesc));
+	sdesc.Filter=D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sdesc.AddressU=D3D11_TEXTURE_ADDRESS_WRAP;
+	sdesc.AddressV=D3D11_TEXTURE_ADDRESS_WRAP;
+    sdesc.AddressW=D3D11_TEXTURE_ADDRESS_WRAP;
+    sdesc.ComparisonFunc=D3D11_COMPARISON_NEVER;
+    sdesc.MaxAnisotropy=0;
+    sdesc.MinLOD=0;
+    sdesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+    m_tex=texture_obj::add();
+    texture_obj::get(m_tex).srv=srv;
+
+    get_device()->CreateSamplerState(&sdesc,&texture_obj::get(m_tex).sampler_state);
+
+    m_width=width;
+    m_height=height;
+
 #else
     if(!m_max_tex_size)
     {
