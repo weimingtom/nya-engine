@@ -319,8 +319,11 @@ public:
         resources_map_iterator it;
         for(it=m_res_map.begin();it!=m_res_map.end();++it)
         {
-            if(it->second)
-                release_resource(it->second->res);
+            if(!it->second)
+                continue;
+
+            release_resource(it->second->res);
+            it->second->map_it=m_res_map.end();
         }
 
         m_res_map.clear();
@@ -399,6 +402,7 @@ public:
             if(it->second)
             {
                 get_log()<<"warning: unreleased resource: "<<it->first.c_str()<<"\n";
+                it->second->map_it=m_res_map.end();
                 ++unreleased_count;
             }
         }
