@@ -660,8 +660,6 @@ class shared_app
 public:
     void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing,nya_system::app_responder &app)
     {
-        [[NSAutoreleasePool alloc] init];
-
         [NSApplication sharedApplication];
 
         NSRect viewRect=NSMakeRect(x,y,w,h);
@@ -672,7 +670,7 @@ public:
         [m_window setTitle:title_str];
         [m_window setOpaque:YES];
 
-        [[NSWindowController alloc] initWithWindow:m_window];
+        NSWindowController *controller=[[NSWindowController alloc] initWithWindow:m_window];
 
         shared_app_delegate *delegate=[[shared_app_delegate alloc] init_with_responder:&app antialiasing:antialiasing];
 
@@ -682,6 +680,8 @@ public:
 
         [m_window orderFrontRegardless];
         [NSApp run];
+        [delegate release];
+        [controller release];
     }
 
     void start_fullscreen(unsigned int w,unsigned int h,nya_system::app_responder &app)
@@ -726,10 +726,12 @@ private:
         [menuItem setSubmenu:appMenu];
 
         [mainMenuBar addItem:menuItem];
+        [menuItem release];
 
         [NSApp performSelector:@selector(setAppleMenu:) withObject:appMenu];
         [appMenu release];
         [NSApp setMainMenu:mainMenuBar];
+        [mainMenuBar release];
     }
 
 public:

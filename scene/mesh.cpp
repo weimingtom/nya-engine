@@ -508,7 +508,7 @@ void mesh::anim_set_time(applied_anim &a,float t)
 
 void mesh::anim_update_mapping(applied_anim &a)
 {
-    if(!a.anim->m_shared.is_valid())
+    if(!a.anim.is_valid() || !a.anim->m_shared.is_valid())
         return;
 
     const nya_render::animation &ra=a.anim->m_shared->anim;
