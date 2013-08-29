@@ -84,7 +84,16 @@ public:
 private:
     void set() const;
     void unset() const;
-    static void set_skeleton(const nya_render::skeleton *skeleton) { m_skeleton=skeleton; }
+
+    static void set_skeleton(const nya_render::skeleton *skeleton)
+    {
+        if(!skeleton)
+            m_last_skeleton=m_skeleton;
+
+        m_skeleton=skeleton;
+    }
+
+    static void skeleton_changed(const nya_render::skeleton *skeleton) { if(skeleton==m_last_skeleton) m_last_skeleton=0; }
 
 private:
     int get_texture_slot(const char *semantic) const;
@@ -101,6 +110,7 @@ public:
 
 private:
     static const nya_render::skeleton *m_skeleton;
+    static const nya_render::skeleton *m_last_skeleton;
 };
 
 }

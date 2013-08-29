@@ -260,6 +260,7 @@ bool mesh::load(const char *name)
     m_anims.clear();
 
     m_skeleton=m_shared->skeleton;
+    shader::skeleton_changed(&m_skeleton);
 
     m_recalc_aabb=true;
     m_has_aabb=m_shared->aabb.delta*m_shared->aabb.delta>0.0001;
@@ -329,6 +330,8 @@ void mesh::draw(int idx) const
     }
 
     m_shared->vbo.unbind();
+
+    shader::set_skeleton(0);
 }
 
 int mesh::get_groups_count() const
@@ -723,6 +726,7 @@ void mesh::update(unsigned int dt)
     }
 
     m_skeleton.update();
+    shader::skeleton_changed(&m_skeleton);
 }
 
 const nya_math::aabb &mesh::get_aabb() const
