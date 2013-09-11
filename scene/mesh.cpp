@@ -173,7 +173,7 @@ bool mesh::load_nms_material_section(shared_mesh &res,const void *data,size_t si
                 sh.load(value.c_str());
                 m.set_shader(sh);
             }
-            else if(name=="nya_blend")
+            else if(name=="nya_blend" && value == "src_alpha:inv_src_alpha")
                 m.set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha); //ToDo
         }
 
