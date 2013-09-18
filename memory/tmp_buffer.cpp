@@ -84,27 +84,42 @@ public:
 
     static tmp_buffer *allocate_new(size_t size)
     {
-        tmp_buffer* first_free=0;
+        tmp_buffer* min_suit_buf=0;
+        tmp_buffer* max_buf=0;
+
         for(buffers_list::iterator it=m_buffers.begin();it!=m_buffers.end();++it)
         {
             tmp_buffer &buffer = *it;
             if(buffer.is_used())
                 continue;
 
-            if(buffer.get_actual_size()<=size)
+            if(min_suit_buf)
             {
-                buffer.allocate(size);
-                return &buffer;
+                if(buffer.get_actual_size()>=size && buffer.get_actual_size()< min_suit_buf->get_actual_size())
+                    min_suit_buf=&buffer;
             }
+            else
+                min_suit_buf=&buffer;
 
-            if(!first_free)
-                first_free = &buffer;
+            if(max_buf)
+            {
+                if(buffer.get_actual_size() > max_buf->get_actual_size())
+                    max_buf=&buffer;
+            }
+            else
+                max_buf=&buffer;
         }
 
-        if(first_free)
+        if(min_suit_buf)
         {
-            first_free->allocate(size);
-            return first_free;
+            min_suit_buf->allocate(size);
+            return min_suit_buf;
+        }
+
+        if(max_buf)
+        {
+            max_buf->allocate(size);
+            return max_buf;
         }
 
         m_buffers.push_back(tmp_buffer());
