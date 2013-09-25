@@ -178,16 +178,17 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     m_height=height;
 
 #else
-    if(!m_max_tex_size)
+    static int max_tex_size=0;
+    if(!max_tex_size)
     {
         GLint texSize;
         glGetIntegerv(GL_MAX_TEXTURE_SIZE, &texSize);
-        m_max_tex_size=texSize;
+        max_tex_size=texSize;
     }
 
-    if(width>m_max_tex_size || height>m_max_tex_size)
+    if(width>max_tex_size || height>max_tex_size)
     {
-        get_log()<<"Unable to build texture: width or height is too high, maximum is "<<m_max_tex_size<<"\n";
+        get_log()<<"Unable to build texture: width or height is too high, maximum is "<<max_tex_size<<"\n";
 	    release();
         return false;
     }
@@ -413,16 +414,17 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     m_height=height;
 
 #else
-    if(!m_max_tex_size)
+    static int max_tex_size=0;
+    if(!max_tex_size)
     {
         GLint texSize;
         glGetIntegerv(GL_MAX_TEXTURE_SIZE, &texSize);
-        m_max_tex_size=texSize;
+        max_tex_size=texSize;
     }
 
-    if(width>m_max_tex_size || height>m_max_tex_size)
+    if(width>max_tex_size || height>max_tex_size)
     {
-        get_log()<<"Unable to build cube texture: width or height is too high, maximum is "<<m_max_tex_size<<"\n";
+        get_log()<<"Unable to build cube texture: width or height is too high, maximum is "<<max_tex_size<<"\n";
 	    release();
         return false;
     }

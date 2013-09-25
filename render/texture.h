@@ -24,6 +24,7 @@ public:
         depth32
     };
 
+public:
     bool build_texture(const void *data,unsigned int width,unsigned int height,color_format format);
 
 	//order: positive_x,negative_x,positive_y,negative_y,positive_z,negative_z
@@ -38,20 +39,21 @@ public:
     static void apply();
 
 public:
-    void release();
-
     unsigned int get_width() const { return m_width; }
     unsigned int get_height() const { return m_height; }
+    color_format get_color_format() const { return m_format; }
 
 public:
-    texture(): m_tex(-1),m_width(0),m_height(0),m_max_tex_size(0) {}
+    void release();
+
+public:
+    texture(): m_tex(-1),m_width(0),m_height(0) {}
 
 private:
     int m_tex;
 
     unsigned int m_width;
     unsigned int m_height;
-    unsigned int m_max_tex_size;
 
 	color_format m_format;
 };

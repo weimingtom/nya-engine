@@ -15,6 +15,8 @@
 #include "shader.h"
 #include "platform_specific_gl.h"
 
+#include "memory/tmp_buffer.h"
+
 #ifdef DIRECTX11
     #include "shader.h"
 #endif
@@ -55,8 +57,7 @@ namespace nya_render
         attribute vertices;
         attribute colors;
         attribute normals;
-        const static unsigned int max_tex_coord=16;
-        attribute tcs[max_tex_coord];
+        attribute tcs[vbo::max_tex_coord];
 
 #ifdef DIRECTX11
         ID3D11Buffer *vertex_loc;
@@ -91,6 +92,10 @@ namespace nya_render
     #define vbo_glDeleteBuffers glDeleteBuffers
     #define vbo_glClientActiveTexture glClientActiveTexture
 
+    #ifndef OPENGL_ES
+        #define vbo_glGetBufferSubData glGetBufferSubData
+    #endif
+
     #ifndef GL_ARRAY_BUFFER_ARB
         #define GL_ARRAY_BUFFER_ARB GL_ARRAY_BUFFER
     #endif
@@ -115,6 +120,7 @@ namespace nya_render
     PFNGLBINDBUFFERARBPROC vbo_glBindBuffer;
     PFNGLBUFFERDATAARBPROC vbo_glBufferData;
     PFNGLBUFFERSUBDATAARBPROC vbo_glBufferSubData;
+    PFNGLGETBUFFERSUBDATAARBPROC vbo_glGetBufferSubData;
     PFNGLDELETEBUFFERSARBPROC vbo_glDeleteBuffers;
     PFNGLCLIENTACTIVETEXTUREARBPROC vbo_glClientActiveTexture;
   #endif
@@ -144,6 +150,10 @@ bool check_init_vbo()
 
     vbo_glBufferSubData = (PFNGLBUFFERSUBDATAARBPROC)  get_extension("glBufferSubData");
     if(!vbo_glBufferSubData)
+        return false;
+
+    vbo_glGetBufferSubData = (PFNGLGETBUFFERSUBDATAARBPROC)  get_extension("glGetBufferSubData");
+    if(!vbo_glGetBufferSubData)
         return false;
 
     vbo_glDeleteBuffers = (PFNGLDELETEBUFFERSARBPROC)  get_extension("glDeleteBuffers");
@@ -348,7 +358,7 @@ void vbo::draw(unsigned int offset,unsigned int count)
         glEnableClientState(GL_VERTEX_ARRAY);
         glVertexPointer(vobj.vertices.dimension,GL_FLOAT,vobj.vertex_stride,(void *)0);
 #endif
-        for(int i=0;i<vbo_obj::max_tex_coord;++i)
+        for(int i=0;i<vbo::max_tex_coord;++i)
         {
             const vbo_obj::attribute &tc=vobj.tcs[i];
             if(tc.has)
@@ -489,7 +499,7 @@ void vbo::release()
   #else
             glDisableClientState(GL_VERTEX_ARRAY);
   #endif
-            for(int i=0;i<vbo_obj::max_tex_coord;++i)
+            for(int i=0;i<vbo::max_tex_coord;++i)
             {
                 const vbo_obj::attribute &tc=obj.tcs[i];
                 if(tc.has)
@@ -782,7 +792,7 @@ void vbo::set_normals(unsigned int offset)
 
 void vbo::set_tc(unsigned int tc_idx,unsigned int offset,unsigned int dimension)
 {
-    if(tc_idx>=vbo_obj::max_tex_coord)
+    if(tc_idx>=vbo::max_tex_coord)
         return;
 
     if(m_verts<0)
@@ -834,6 +844,158 @@ void vbo::set_element_type(element_type type)
         m_verts=vbo_obj::add();
 
     vbo_obj::get(m_verts).element_type=type;
+}
+
+bool vbo::get_vertex_data( nya_memory::tmp_buffer_ref &data ) const
+{
+    data.free();
+    if(m_verts<0)
+        return false;
+
+    const vbo_obj &vobj=vbo_obj::get(m_verts);
+    if(!vobj.vertices.has || !vobj.vertex_loc )
+        return false;
+
+    size_t vbo_size=vobj.vertex_stride*vobj.verts_count;
+    if(!vbo_size)
+        return false;
+
+#ifdef DIRECTX11
+#else
+    data.allocate(vbo_size);
+    vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,vobj.vertex_loc);
+
+#ifdef OPENGL_ES
+    const GLvoid *buf=glMapBufferOES(GL_ARRAY_BUFFER,GL_WRITE_ONLY_OES);
+    if(!buf)
+        return false;
+
+    memcpy(data.get_data(),buf,vbo_size);
+    return glUnmapBufferOES(GL_ARRAY_BUFFER);
+#else
+    glGetBufferSubData(GL_ARRAY_BUFFER_ARB,0,vbo_size,data.get_data());
+#endif
+    current_verts=-1;
+#endif
+
+    return true;
+}
+
+bool vbo::get_index_data( nya_memory::tmp_buffer_ref &data ) const
+{
+    data.free();
+    if(m_indices<0)
+        return false;
+
+    const vbo_obj &obj=vbo_obj::get(m_indices);
+    size_t ind_size=obj.element_count*obj.element_size;
+    if(!ind_size)
+        return false;
+
+#ifdef DIRECTX11
+#else
+    data.allocate(ind_size);
+    vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,obj.index_loc);
+    current_inds=-1;
+
+  #ifdef OPENGL_ES
+    const GLvoid *buf=glMapBufferOES(GL_ARRAY_BUFFER,GL_WRITE_ONLY_OES);
+    if(!buf)
+        return false;
+
+    memcpy(data.get_data(),buf,ind_size);
+    return glUnmapBufferOES(GL_ARRAY_BUFFER);
+  #else
+    glGetBufferSubData(GL_ARRAY_BUFFER_ARB,0,ind_size,data.get_data());
+  #endif
+#endif
+
+    return true;
+}
+
+vbo::element_size vbo::get_element_size() const
+{
+    if(m_indices<0)
+        return index2b;
+
+    return vbo_obj::get(m_indices).element_size;
+}
+
+vbo::element_type vbo::get_element_type() const
+{
+    if(m_indices<0)
+    {
+        if(m_verts<0)
+            return triangles;
+
+        return vbo_obj::get(m_verts).element_type;
+    }
+
+    return vbo_obj::get(m_indices).element_type;
+}
+
+unsigned int vbo::get_vert_stride() const
+{
+    if(m_verts<0)
+        return false;
+
+    return vbo_obj::get(m_verts).vertex_stride;
+}
+
+unsigned int vbo::get_vert_offset() const
+{
+    if(m_verts<0)
+        return false;
+
+    return vbo_obj::get(m_verts).vertices.offset;
+}
+
+unsigned int vbo::get_vert_dimension() const
+{
+    if(m_verts<0)
+        return false;
+
+    return vbo_obj::get(m_verts).vertices.dimension;
+}
+
+unsigned int vbo::get_normals_offset() const
+{
+    if(m_verts<0)
+        return false;
+
+    return vbo_obj::get(m_verts).normals.offset;
+}
+
+unsigned int vbo::get_tc_offset(unsigned int idx) const
+{
+    if(m_verts<0 || idx>=vbo::max_tex_coord)
+        return false;
+
+    return vbo_obj::get(m_verts).tcs[idx].offset;
+}
+
+unsigned int vbo::get_tc_dimension(unsigned int idx) const
+{
+    if(m_verts<0 || idx>=vbo::max_tex_coord)
+        return false;
+
+    return vbo_obj::get(m_verts).tcs[idx].dimension;
+}
+
+unsigned int vbo::get_colors_offset() const
+{
+    if(m_verts<0)
+        return false;
+
+    return vbo_obj::get(m_verts).colors.offset;
+}
+
+unsigned int vbo::get_colors_dimension() const
+{
+    if(m_verts<0)
+        return false;
+
+    return vbo_obj::get(m_verts).colors.dimension;
 }
 
 }
