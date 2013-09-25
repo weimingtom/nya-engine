@@ -873,7 +873,7 @@ bool vbo::get_vertex_data( nya_memory::tmp_buffer_ref &data ) const
     memcpy(data.get_data(),buf,vbo_size);
     return glUnmapBufferOES(GL_ARRAY_BUFFER);
 #else
-    glGetBufferSubData(GL_ARRAY_BUFFER_ARB,0,vbo_size,data.get_data());
+    vbo_glGetBufferSubData(GL_ARRAY_BUFFER_ARB,0,vbo_size,data.get_data());
 #endif
     current_verts=-1;
 #endif
@@ -906,7 +906,7 @@ bool vbo::get_index_data( nya_memory::tmp_buffer_ref &data ) const
     memcpy(data.get_data(),buf,ind_size);
     return glUnmapBufferOES(GL_ARRAY_BUFFER);
   #else
-    glGetBufferSubData(GL_ARRAY_BUFFER_ARB,0,ind_size,data.get_data());
+    vbo_glGetBufferSubData(GL_ARRAY_BUFFER_ARB,0,ind_size,data.get_data());
   #endif
 #endif
 
