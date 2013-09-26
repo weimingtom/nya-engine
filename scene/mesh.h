@@ -61,6 +61,11 @@ public:
     void set_scale(float s) { set_scale(s,s,s); }
 
 public:
+    const nya_math::vec3 &get_pos() const { return m_transform.get_pos(); }
+    const nya_math::quat &get_rot() const { return m_transform.get_rot(); }
+    const nya_math::vec3 &get_scale() const { return m_transform.get_scale(); }
+
+public:
     int get_groups_count() const;
     const char *get_group_name(int group_idx) const;
     int get_material_idx(int group_idx) const;

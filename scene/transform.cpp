@@ -56,9 +56,7 @@ nya_math::aabb transform::transform_aabb(const nya_math::aabb &box) const
 void transform::apply() const
 {
     nya_math::mat4 mat=nya_scene::get_camera().get_view_matrix();
-    mat.translate(m_pos.x,m_pos.y,m_pos.z);
-    mat=nya_math::mat4(m_rot)*mat;
-    mat.scale(m_scale.x,m_scale.y,m_scale.z);
+    mat.translate(m_pos).rotate(m_rot).scale(m_scale.x,m_scale.y,m_scale.z);
 
     nya_render::set_modelview_matrix(mat);
 }

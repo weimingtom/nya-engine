@@ -19,7 +19,7 @@ public:
         line_strip
     };
 
-    enum element_size
+    enum index_size
     {
         index2b=2,
         index4b=4
@@ -36,7 +36,7 @@ public:
 
 public:
     bool set_vertex_data(const void*data,unsigned int vert_stride,unsigned int vert_count,usage_hint usage=static_draw);
-    bool set_index_data(const void*data,element_size size,unsigned int elements_count,usage_hint usage=static_draw);
+    bool set_index_data(const void*data,index_size size,unsigned int indices_count,usage_hint usage=static_draw);
     void set_element_type(element_type type);
     void set_vertices(unsigned int offset,unsigned int dimension);
     void set_normals(unsigned int offset);
@@ -46,8 +46,8 @@ public:
 public:
     bool get_vertex_data( nya_memory::tmp_buffer_ref &data ) const;
     bool get_index_data( nya_memory::tmp_buffer_ref &data ) const;
-    element_size get_element_size() const;
     element_type get_element_type() const;
+    unsigned int get_verts_count() const;
     unsigned int get_vert_stride() const;
     unsigned int get_vert_offset() const;
     unsigned int get_vert_dimension() const;
@@ -56,6 +56,8 @@ public:
     unsigned int get_tc_dimension(unsigned int idx) const;
     unsigned int get_colors_offset() const;
     unsigned int get_colors_dimension() const;
+    unsigned int get_indices_count() const;
+    index_size get_index_size() const;
 
 public:
     void bind() const { bind_verts(); bind_indices(); }

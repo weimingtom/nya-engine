@@ -64,7 +64,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     sh_.samplers_count=1;
     sh_.samplers["diffuse"]=0;
 
-    sh_.vertex="uniform vec3 bones_pos[200]; uniform vec4 bones_rot[200];"
+    sh_.vertex="uniform vec3 bones_pos[255]; uniform vec4 bones_rot[255];"
     "vec3 tr(vec3 pos,int idx) { vec4 q=bones_rot[idx];"
     "return bones_pos[idx]+pos+cross(q.xyz,cross(q.xyz,pos)+pos*q.w)*2.0; }"
     "varying vec2 tc;"

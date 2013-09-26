@@ -34,7 +34,7 @@ namespace nya_render
     struct vbo_obj
     {
         vbo::element_type element_type;
-        vbo::element_size element_size;
+        vbo::index_size element_size;
         unsigned int element_count;
         vbo::usage_hint elements_usage;
         unsigned int allocated_elements_count;
@@ -666,7 +666,7 @@ bool vbo::set_vertex_data(const void*data,unsigned int vert_stride,unsigned int 
     return true;
 }
 
-bool vbo::set_index_data(const void*data,element_size size,unsigned int elements_count,usage_hint usage)
+bool vbo::set_index_data(const void*data,index_size size,unsigned int indices_count,usage_hint usage)
 {
     if(m_verts<0)
         m_verts=vbo_obj::add();
@@ -674,7 +674,7 @@ bool vbo::set_index_data(const void*data,element_size size,unsigned int elements
     m_indices=m_verts;
     vbo_obj &obj=vbo_obj::get(m_indices);
 
-    const unsigned int buffer_size=elements_count*size;
+    const unsigned int buffer_size=indices_count*size;
     if(buffer_size==0 || !data)
     {
         get_log()<<"Unable to set indices: invalid data\n";
@@ -720,7 +720,7 @@ bool vbo::set_index_data(const void*data,element_size size,unsigned int elements
         vbo_glGenBuffers(1,&obj.index_loc);
         vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,obj.index_loc);
         vbo_glBufferData(GL_ELEMENT_ARRAY_BUFFER_ARB,buffer_size,data,gl_usage(usage));
-        obj.allocated_elements_count=elements_count;
+        obj.allocated_elements_count=indices_count;
         obj.elements_usage=usage;
         obj.element_size=size;
     }
@@ -728,10 +728,10 @@ bool vbo::set_index_data(const void*data,element_size size,unsigned int elements
     {
         vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,obj.index_loc);
 
-        if(elements_count>obj.allocated_elements_count || obj.element_size!=size || obj.elements_usage!=usage)
+        if(indices_count>obj.allocated_elements_count || obj.element_size!=size || obj.elements_usage!=usage)
         {
             vbo_glBufferData(GL_ELEMENT_ARRAY_BUFFER_ARB,buffer_size,data,gl_usage(usage));
-            obj.allocated_elements_count=elements_count;
+            obj.allocated_elements_count=indices_count;
             obj.elements_usage=usage;
             obj.element_size=size;
         }
@@ -745,7 +745,7 @@ bool vbo::set_index_data(const void*data,element_size size,unsigned int elements
     active_inds=-1;
 #endif
 
-    obj.element_count=elements_count;
+    obj.element_count=indices_count;
 
     return true;
 }
@@ -913,7 +913,7 @@ bool vbo::get_index_data( nya_memory::tmp_buffer_ref &data ) const
     return true;
 }
 
-vbo::element_size vbo::get_element_size() const
+vbo::index_size vbo::get_index_size() const
 {
     if(m_indices<0)
         return index2b;
@@ -937,7 +937,7 @@ vbo::element_type vbo::get_element_type() const
 unsigned int vbo::get_vert_stride() const
 {
     if(m_verts<0)
-        return false;
+        return 0;
 
     return vbo_obj::get(m_verts).vertex_stride;
 }
@@ -945,7 +945,7 @@ unsigned int vbo::get_vert_stride() const
 unsigned int vbo::get_vert_offset() const
 {
     if(m_verts<0)
-        return false;
+        return 0;
 
     return vbo_obj::get(m_verts).vertices.offset;
 }
@@ -953,7 +953,7 @@ unsigned int vbo::get_vert_offset() const
 unsigned int vbo::get_vert_dimension() const
 {
     if(m_verts<0)
-        return false;
+        return 0;
 
     return vbo_obj::get(m_verts).vertices.dimension;
 }
@@ -961,7 +961,7 @@ unsigned int vbo::get_vert_dimension() const
 unsigned int vbo::get_normals_offset() const
 {
     if(m_verts<0)
-        return false;
+        return 0;
 
     return vbo_obj::get(m_verts).normals.offset;
 }
@@ -969,7 +969,7 @@ unsigned int vbo::get_normals_offset() const
 unsigned int vbo::get_tc_offset(unsigned int idx) const
 {
     if(m_verts<0 || idx>=vbo::max_tex_coord)
-        return false;
+        return 0;
 
     return vbo_obj::get(m_verts).tcs[idx].offset;
 }
@@ -977,7 +977,7 @@ unsigned int vbo::get_tc_offset(unsigned int idx) const
 unsigned int vbo::get_tc_dimension(unsigned int idx) const
 {
     if(m_verts<0 || idx>=vbo::max_tex_coord)
-        return false;
+        return 0;
 
     return vbo_obj::get(m_verts).tcs[idx].dimension;
 }
@@ -985,7 +985,7 @@ unsigned int vbo::get_tc_dimension(unsigned int idx) const
 unsigned int vbo::get_colors_offset() const
 {
     if(m_verts<0)
-        return false;
+        return 0;
 
     return vbo_obj::get(m_verts).colors.offset;
 }
@@ -993,9 +993,25 @@ unsigned int vbo::get_colors_offset() const
 unsigned int vbo::get_colors_dimension() const
 {
     if(m_verts<0)
-        return false;
+        return 0;
 
     return vbo_obj::get(m_verts).colors.dimension;
+}
+
+unsigned int vbo::get_verts_count() const
+{
+    if(m_verts<0)
+        return 0;
+
+    return vbo_obj::get(m_verts).verts_count;
+}
+
+unsigned int vbo::get_indices_count() const
+{
+    if(m_indices<0)
+        return 0;
+
+    return vbo_obj::get(m_indices).element_count;
 }
 
 }
