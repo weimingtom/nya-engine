@@ -222,7 +222,7 @@ bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
     return true;
 }
 
-void texture::set(int slot) const
+void texture_internal::set(int slot) const
 {
     if(!m_shared.is_valid())
     {
@@ -236,7 +236,7 @@ void texture::set(int slot) const
     m_shared->tex.bind();
 }
 
-void texture::unset() const
+void texture_internal::unset() const
 {
     if(!m_shared.is_valid())
         return;
@@ -247,38 +247,38 @@ void texture::unset() const
 
 unsigned int texture::get_width() const
 {
-    if(!m_shared.is_valid())
+    if( !internal().get_shared_data().is_valid() )
         return 0;
 
-    return m_shared->tex.get_width();
+    return internal().get_shared_data()->tex.get_width();
 }
 
 unsigned int texture::get_height() const
 {
-    if(!m_shared.is_valid())
+    if(!internal().get_shared_data().is_valid())
         return 0;
-    
-    return m_shared->tex.get_height();
+
+    return internal().get_shared_data()->tex.get_height();
 }
 
 void texture::build(const void *data,unsigned int width,unsigned int height,color_format format)
 {
     if(!data)
 	{
-		unload();
+		m_internal.unload();
         return;
 	}
 
-    shared_resources::shared_resource_mutable_ref ref=get_shared_resources().create();
+    texture_internal::shared_resources::shared_resource_mutable_ref ref=m_internal.get_shared_resources().create();
     if(!ref.is_valid())
 	{
-		unload();
+		m_internal.unload();
         return;
 	}
 
     ref->tex.build_texture(data,width,height,format);
 
-    m_shared=ref;
+    m_internal.m_shared=ref;
 }
 
 }

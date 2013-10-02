@@ -73,15 +73,9 @@ struct shared_shader
     }
 };
 
-class shader: public scene_shared<shared_shader>
+class shader_internal: public scene_shared<shared_shader>
 {
-    friend class material;
-    friend class mesh;
-
 public:
-    static bool load_nya_shader(shared_shader &res,resource_data &data,const char* name);
-
-private:
     void set() const;
     void unset() const;
 
@@ -95,22 +89,48 @@ private:
 
     static void skeleton_changed(const nya_render::skeleton *skeleton) { if(skeleton==m_last_skeleton) m_last_skeleton=0; }
 
-private:
+public:
     int get_texture_slot(const char *semantic) const;
     int get_texture_slots_count() const;
 
-private:
+public:
     const shared_shader::uniform &get_uniform(int idx) const;
     void set_uniform_value(int idx,float f0,float f1,float f2,float f3) const;
     void set_uniform4_array(int idx,const float *array,int size) const;
     int get_uniforms_count() const;
 
-public:
-    shader() { default_load_function(load_nya_shader); }
-
 private:
     static const nya_render::skeleton *m_skeleton;
     static const nya_render::skeleton *m_last_skeleton;
+};
+
+class shader
+{
+public:
+    bool load(const char *name) { return m_internal.load(name); }
+    void unload() { return m_internal.unload(); }
+
+public:
+    void create(const shared_shader &res) { m_internal.create(res); }
+    
+public:
+    static void set_resources_prefix(const char *prefix) { shader_internal::set_resources_prefix(prefix); }
+    static void register_load_function(shader_internal::load_function function) { shader_internal::register_load_function(function); }
+
+public:
+    const char *get_name() const { return m_internal.get_name(); }
+
+public:
+    shader() { m_internal.default_load_function(load_nya_shader); }
+
+public:
+    static bool load_nya_shader(shared_shader &res,resource_data &data,const char* name);
+
+public:
+    const shader_internal &internal() const { return m_internal; }
+
+private:
+    shader_internal m_internal;
 };
 
 }

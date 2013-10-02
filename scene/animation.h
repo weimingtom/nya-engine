@@ -21,7 +21,7 @@ struct shared_animation
 
 class animation: public scene_shared<shared_animation>
 {
-    friend class mesh;
+    friend class mesh_internal;
 
 public:
     virtual bool load(const char *name);

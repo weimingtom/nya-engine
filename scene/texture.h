@@ -19,18 +19,36 @@ struct shared_texture
     }
 };
 
-class texture: public scene_shared<shared_texture>
+class texture_internal: public scene_shared<shared_texture>
 {
-    friend class material;
+    friend class texture;
 
 public:
-    static bool load_tga(shared_texture &res,resource_data &data,const char* name);
-
-private:
     void set(int slot=0) const;
     void unset() const;
 
 public:
+    texture_internal():m_last_slot(0) {}
+
+private:
+    mutable int m_last_slot;
+};
+
+class texture
+{
+public:
+    bool load(const char *name) { return m_internal.load(name); }
+    void unload() { return m_internal.unload(); }
+
+public:
+    void create(const shared_texture &res) { m_internal.create(res); }
+
+public:
+    static void set_resources_prefix(const char *prefix) { texture_internal::set_resources_prefix(prefix); }
+    static void register_load_function(texture_internal::load_function function) { texture_internal::register_load_function(function); }
+
+public:
+    const char *get_name() const { return internal().get_name(); }
     unsigned int get_width() const;
     unsigned int get_height() const;
 
@@ -39,10 +57,16 @@ public:
     void build(const void *data,unsigned int width,unsigned int height,color_format format);
 
 public:
-    texture():m_last_slot(0) { default_load_function(load_tga); }
+    texture() { internal().default_load_function(load_tga); }
+
+public:
+    static bool load_tga(shared_texture &res,resource_data &data,const char* name);
+    
+public:
+    const texture_internal &internal() const { return m_internal; }
 
 private:
-    mutable int m_last_slot;
+    texture_internal m_internal;
 };
 
 }

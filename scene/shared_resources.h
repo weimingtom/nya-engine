@@ -14,7 +14,7 @@ template<typename t>
 class scene_shared
 {
 public:
-    virtual bool load(const char *name)
+    bool load(const char *name)
     {
         if(!name)
         {
@@ -50,7 +50,7 @@ public:
         m_shared=ref;
     }
 
-    virtual void unload()
+    void unload()
     {
         if(m_shared.is_valid())
             m_shared.free();
@@ -157,6 +157,9 @@ protected:
         static shared_resources_manager manager;
         return manager;
     }
+
+public:
+    const shared_resource_ref &get_shared_data() const { return m_shared; }
 
 private:
     struct load_functions

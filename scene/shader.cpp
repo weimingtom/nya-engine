@@ -317,7 +317,7 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
     return load_nya_shader_internal(res,desc,data,name,false);
 }
 
-void shader::set() const
+void shader_internal::set() const
 {
     if(!m_shared.is_valid())
         return;
@@ -368,7 +368,7 @@ void shader::set() const
     }
 }
 
-void shader::unset() const
+void shader_internal::unset() const
 {
     if(!m_shared.is_valid())
         return;
@@ -376,7 +376,7 @@ void shader::unset() const
     m_shared->shdr.unbind();
 }
 
-int shader::get_texture_slot(const char *semantics) const
+int shader_internal::get_texture_slot(const char *semantics) const
 {
     if(!semantics || !m_shared.is_valid())
         return -1;
@@ -388,7 +388,7 @@ int shader::get_texture_slot(const char *semantics) const
     return it->second;
 }
 
-int shader::get_texture_slots_count() const
+int shader_internal::get_texture_slots_count() const
 {
     if(!m_shared.is_valid())
         return 0;
@@ -396,7 +396,7 @@ int shader::get_texture_slots_count() const
     return m_shared->samplers_count;
 }
 
-const shared_shader::uniform &shader::get_uniform(int idx) const
+const shared_shader::uniform &shader_internal::get_uniform(int idx) const
 {
     if(!m_shared.is_valid() || idx<0 || idx >=(int)m_shared->uniforms.size())
     {
@@ -407,7 +407,7 @@ const shared_shader::uniform &shader::get_uniform(int idx) const
     return m_shared->uniforms[idx];
 }
 
-void shader::set_uniform_value(int idx,float f0,float f1,float f2,float f3) const
+void shader_internal::set_uniform_value(int idx,float f0,float f1,float f2,float f3) const
 {
     if(!m_shared.is_valid() || idx<0 || idx >=(int)m_shared->uniforms.size())
         return;
@@ -426,7 +426,7 @@ void shader::set_uniform_value(int idx,float f0,float f1,float f2,float f3) cons
         m_shared->shdr.set_uniform(m_shared->uniforms[idx].location,f0,f1,f2,f3);
 }
 
-void shader::set_uniform4_array(int idx,const float *array,int size) const
+void shader_internal::set_uniform4_array(int idx,const float *array,int size) const
 {
     if(!m_shared.is_valid() || idx<0 || idx >=(int)m_shared->uniforms.size())
         return;
@@ -434,7 +434,7 @@ void shader::set_uniform4_array(int idx,const float *array,int size) const
     m_shared->shdr.set_uniform4_array(m_shared->uniforms[idx].location,array,size);
 }
 
-int shader::get_uniforms_count() const
+int shader_internal::get_uniforms_count() const
 {
     if(!m_shared.is_valid())
         return 0;
@@ -442,7 +442,7 @@ int shader::get_uniforms_count() const
     return (int)m_shared->uniforms.size();
 }
 
-const nya_render::skeleton *shader::m_skeleton=0;
-const nya_render::skeleton *shader::m_last_skeleton=0;
+const nya_render::skeleton *shader_internal::m_skeleton=0;
+const nya_render::skeleton *shader_internal::m_last_skeleton=0;
 
 }
