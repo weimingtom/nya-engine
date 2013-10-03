@@ -351,15 +351,21 @@ void shader_internal::set() const
 
             case shared_shader::bones_pos:
             {
-                if(m_skeleton && m_last_skeleton!=m_skeleton)
+                if(m_skeleton && m_last_skeleton_pos!=m_skeleton)
+                {
                     m_shared->shdr.set_uniform3_array(p.location,m_skeleton->get_pos_buffer(),m_skeleton->get_bones_count());
+                    m_last_skeleton_pos=m_skeleton;
+                }
             }
             break;
 
             case shared_shader::bones_rot:
             {
-                if(m_skeleton && m_last_skeleton!=m_skeleton)
+                if(m_skeleton && m_last_skeleton_rot!=m_skeleton)
+                {
                     m_shared->shdr.set_uniform4_array(p.location,m_skeleton->get_rot_buffer(),m_skeleton->get_bones_count());
+                    m_last_skeleton_rot=m_skeleton;
+                }
             }
             break;
 
@@ -443,6 +449,7 @@ int shader_internal::get_uniforms_count() const
 }
 
 const nya_render::skeleton *shader_internal::m_skeleton=0;
-const nya_render::skeleton *shader_internal::m_last_skeleton=0;
+const nya_render::skeleton *shader_internal::m_last_skeleton_pos=0;
+const nya_render::skeleton *shader_internal::m_last_skeleton_rot=0;
 
 }

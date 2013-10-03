@@ -79,15 +79,15 @@ public:
     void set() const;
     void unset() const;
 
-    static void set_skeleton(const nya_render::skeleton *skeleton)
+    static void set_skeleton(const nya_render::skeleton *skeleton) { m_skeleton=skeleton; }
+    static void skeleton_changed(const nya_render::skeleton *skeleton)
     {
-        if(!skeleton)
-            m_last_skeleton=m_skeleton;
+        if(skeleton==m_last_skeleton_pos)
+            m_last_skeleton_pos=0;
 
-        m_skeleton=skeleton;
+        if(skeleton==m_last_skeleton_rot)
+            m_last_skeleton_rot=0;
     }
-
-    static void skeleton_changed(const nya_render::skeleton *skeleton) { if(skeleton==m_last_skeleton) m_last_skeleton=0; }
 
 public:
     int get_texture_slot(const char *semantic) const;
@@ -101,7 +101,8 @@ public:
 
 private:
     static const nya_render::skeleton *m_skeleton;
-    static const nya_render::skeleton *m_last_skeleton;
+    static const nya_render::skeleton *m_last_skeleton_pos;
+    static const nya_render::skeleton *m_last_skeleton_rot;
 };
 
 class shader
