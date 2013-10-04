@@ -1,4 +1,4 @@
-//https://code.google.com/p/nya-engine/
+    //https://code.google.com/p/nya-engine/
 
 #include "mesh.h"
 #include "scene.h"
@@ -529,7 +529,7 @@ void mesh_internal::anim_update_mapping(applied_anim &a)
     a.bones_map.clear();
     a.bones_map.resize(m_skeleton.get_bones_count(),-1);
 
-    if(a.anim->m_mask)
+    if(a.anim->m_mask.is_valid())
     {
         typedef std::map<std::string,bool> map_data;
         map_data &d=a.anim->m_mask->data;
@@ -540,15 +540,6 @@ void mesh_internal::anim_update_mapping(applied_anim &a)
                 continue;
 
             a.bones_map[idx]=ra.get_bone_idx(it->first.c_str());
-        }
-
-        for(int j=0;j<int(a.anim->m_mask->data.size());++j)
-        {
-            const int idx=m_skeleton.get_bone_idx(ra.get_bone_name(j));
-            if(idx<0)
-                continue;
-
-            a.bones_map[idx]=j;
         }
     }
     else

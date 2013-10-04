@@ -21,11 +21,7 @@ bool animation::load(const char *name)
 
     update_version();
 
-    if(m_mask)
-    {
-        delete m_mask;
-        m_mask=0;
-    }
+    m_mask.free();
 
     return true;
 }
@@ -37,11 +33,7 @@ void animation::unload()
     m_range_from=m_range_to=0;
     m_speed=m_weight=1.0f;
 
-    if(m_mask)
-    {
-        delete m_mask;
-        m_mask=0;
-    }
+    m_mask.free();
 }
 
 bool animation::load_vmd(shared_animation &res,resource_data &data,const char* name)
@@ -161,17 +153,16 @@ void animation::mask_all(bool enabled)
 {
     if(enabled)
     {
-        if(m_mask)
+        if(m_mask.is_valid())
         {
-            delete m_mask;
-            m_mask=0;
+            m_mask.free();
             update_version();
         }
     }
     else
     {
-        if(!m_mask)
-            m_mask=new mask_data;
+        if(!m_mask.is_valid())
+            m_mask.allocate();
         else
             m_mask->data.clear();
 
@@ -198,7 +189,7 @@ void animation::add_mask(const char *name,bool enabled)
 
     if(enabled)
     {
-        if(!m_mask)
+        if(!m_mask.is_valid())
             return;
 
         m_mask->data[name]=true;
@@ -206,9 +197,9 @@ void animation::add_mask(const char *name,bool enabled)
     }
     else
     {
-        if(!m_mask)
+        if(!m_mask.is_valid())
         {
-            m_mask=new mask_data;
+            m_mask.allocate();
             for(int i=0;i<m_shared->anim.get_bones_count();++i)
                 m_mask->data[m_shared->anim.get_bone_name(i)]=true;
         }

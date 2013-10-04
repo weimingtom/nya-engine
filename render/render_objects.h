@@ -40,7 +40,7 @@ public:
     }
 
     template<typename ta>
-    void apply_to_all(ta applier)
+    void apply_to_all(ta &applier)
     {
         for(int i=0;i<(int)m_objects.size();++i)
         {

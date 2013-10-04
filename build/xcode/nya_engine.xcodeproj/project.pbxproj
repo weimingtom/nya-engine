@@ -179,6 +179,8 @@
 		F2FF5FDA16C15CCE00C6A705 /* transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2FF5FD716C15CCE00C6A705 /* transform.cpp */; };
 		F2FF5FDB16C15CCE00C6A705 /* transform.h in Headers */ = {isa = PBXBuildFile; fileRef = F2FF5FD816C15CCE00C6A705 /* transform.h */; };
 		F2FF5FDC16C15CCE00C6A705 /* transform.h in Headers */ = {isa = PBXBuildFile; fileRef = F2FF5FD816C15CCE00C6A705 /* transform.h */; };
+		F5B3578E17FE8E2C001175FE /* optional.h in Headers */ = {isa = PBXBuildFile; fileRef = F5B3578D17FE8E2C001175FE /* optional.h */; };
+		F5B3578F17FE8E2C001175FE /* optional.h in Headers */ = {isa = PBXBuildFile; fileRef = F5B3578D17FE8E2C001175FE /* optional.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -270,6 +272,7 @@
 		F2F0A0B21695F809007245BC /* matrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = matrix.cpp; path = ../../math/matrix.cpp; sourceTree = "<group>"; };
 		F2FF5FD716C15CCE00C6A705 /* transform.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = transform.cpp; path = ../../scene/transform.cpp; sourceTree = "<group>"; };
 		F2FF5FD816C15CCE00C6A705 /* transform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = transform.h; path = ../../scene/transform.h; sourceTree = "<group>"; };
+		F5B3578D17FE8E2C001175FE /* optional.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = optional.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -433,9 +436,10 @@
 		F259322015D858140092C7D8 /* memory */ = {
 			isa = PBXGroup;
 			children = (
-				F22ADA301694C15100B01B4A /* memory_reader.h */,
 				F259322115D858140092C7D8 /* memory.cpp */,
 				F259322215D858140092C7D8 /* memory.h */,
+				F22ADA301694C15100B01B4A /* memory_reader.h */,
+				F5B3578D17FE8E2C001175FE /* optional.h */,
 				F259322315D858140092C7D8 /* pool.h */,
 				F259322415D858140092C7D8 /* tmp_buffer.cpp */,
 				F259322515D858140092C7D8 /* tmp_buffer.h */,
@@ -517,6 +521,7 @@
 				F29B45FF16F3821500C4CC36 /* frustum.h in Headers */,
 				F2CA66FC172C700800965F9F /* render_objects.h in Headers */,
 				F2CA676A172D92CE00965F9F /* shaders_cache_provider.h in Headers */,
+				F5B3578F17FE8E2C001175FE /* optional.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -572,6 +577,7 @@
 				F29B45FE16F3821500C4CC36 /* frustum.h in Headers */,
 				F2CA66FB172C700800965F9F /* render_objects.h in Headers */,
 				F2CA6769172D92CE00965F9F /* shaders_cache_provider.h in Headers */,
+				F5B3578E17FE8E2C001175FE /* optional.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
