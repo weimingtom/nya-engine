@@ -16,6 +16,12 @@ int pmx_loader::read_idx(nya_memory::memory_reader &reader,int size)
     return 0;
 }
 
+struct pmx_edge_params
+{
+    float color[4];
+    float width;
+};
+
 bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data,const char* name)
 {
     if(!data.get_size())
@@ -43,9 +49,11 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     }
     
     const int vert_count=reader.read<int>();
-    
+    if(!vert_count)
+        return false;
+
     std::vector<vert> verts(vert_count);
-    
+
     for(int i=0;i<vert_count;++i)
     {
         vert &v=verts[i];
@@ -98,23 +106,24 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
                 
                 for(int j=2;j<4;++j)
                     v.bone_weight[j]=v.bone_idx[j]=0.0f;
-                
+
                 reader.skip(sizeof(float)*3*3);
                 break;
-                
+
             default: return false;
         }
-        
+
         reader.read<float>(); //edge
     }
-    
+
     res.vbo.set_vertex_data(&verts[0],sizeof(vert),vert_count);
-    res.vbo.set_vertices(0,3);
-    res.vbo.set_normals(sizeof(float)*3);
-    res.vbo.set_tc(0,sizeof(float)*6,2);
-    res.vbo.set_tc(1,sizeof(float)*8,4);
-    res.vbo.set_tc(2,sizeof(float)*12,4);
-    
+    int offset=0;
+    res.vbo.set_vertices(offset,3); offset+=sizeof(verts[0].pos);
+    res.vbo.set_normals(offset); offset+=sizeof(verts[0].normal);
+    res.vbo.set_tc(0,offset,2); offset+=sizeof(verts[0].tc);
+    res.vbo.set_tc(1,offset,4); offset+=sizeof(verts[0].bone_idx);
+    res.vbo.set_tc(2,offset,4);
+
     const int indices_count=reader.read<int>();
     if(header.index_size==2)
         res.vbo.set_index_data(reader.get_data(),nya_render::vbo::index2b,indices_count);
@@ -122,9 +131,9 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         res.vbo.set_index_data(reader.get_data(),nya_render::vbo::index4b,indices_count);
     else
         return false;
-    
+
     reader.skip(indices_count*header.index_size);
-    
+
     const int textures_count=reader.read<int>();
     std::vector<std::string> tex_names(textures_count);
     for(int i=0;i<textures_count;++i)
@@ -152,8 +161,8 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     }
     
     const int mat_count=reader.read<int>();
-    res.groups.resize(mat_count);
-    res.materials.resize(mat_count);
+    res.groups.resize(mat_count*2);
+    res.materials.resize(mat_count*2);
     
     std::string path(name);
     size_t p=path.rfind("/");
@@ -167,10 +176,14 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     for(int i=0,offset=0;i<mat_count;++i)
     {
         nya_scene::shared_mesh::group &g=res.groups[i];
+        nya_scene::material &m = res.materials[i];
+
         for(int j=0;j<2;++j)
         {
             const int name_len=reader.read<int>();
+            std::string name((const char*)reader.get_data(),name_len);
             reader.skip(name_len);
+            m.set_name(name.c_str());
         }
         
         std::string sh_defines;
@@ -189,10 +202,10 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         sprintf(buf,"#define k_a vec3(%f,%f,%f)\n",params.ambient[0],params.ambient[1],
                 params.ambient[2]);
         sh_defines.append(buf);
-        
-        reader.read<char>();//flag
-        reader.skip(sizeof(float)*4);//edge color
-        reader.read<float>();//edge size
+
+        const char flag=reader.read<char>();
+        pmx_edge_params edge=reader.read<pmx_edge_params>();
+
         const int tex_idx=read_idx(reader,header.texture_idx_size);
         const int sph_tex_idx=read_idx(reader,header.texture_idx_size);
         const int sph_mode=reader.read<char>();
@@ -205,21 +218,20 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
             toon_tex_idx=reader.read<char>();
         else
             return false;
-        
+
         const int comment_len=reader.read<int>();
         reader.skip(comment_len);
+
         g.offset=offset;
         g.count=reader.read<int>();
         g.material_idx=i;
         offset+=g.count;
-        
+
         nya_scene::shared_shader sh_;
         sh_.shdr.set_sampler("base",0);
         sh_.samplers_count=1;
         sh_.samplers["diffuse"]=0;
-        
-        nya_scene::material &m = res.materials[i];
-        
+
         if(tex_idx>=0 && tex_idx<(int)tex_names.size())
         {
             nya_scene::texture tex;
@@ -227,7 +239,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
             m.set_texture("diffuse",tex);
             //printf("tex %d %s ",tex_idx,tex_names[tex_idx].c_str());
         }
-        
+
         if(sph_tex_idx>=0 && sph_tex_idx<(int)tex_names.size())
         {
             const std::string &name=tex_names[sph_tex_idx];
@@ -250,24 +262,21 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
             }
         }
         //else
-        //printf("sp %d %d\n",sph_mode,sph_tex_idx);
-        
+        //    printf("sp %d %d\n",sph_mode,sph_tex_idx);
+
         nya_scene::shader sh;
         sh_.vertex=sh_defines+"varying vec4 tc;"
-        "uniform vec4 cam_pos;"
         "void main() { tc.xy=gl_MultiTexCoord0.xy;"
-        "vec3 u = normalize( gl_Vertex.xyz-cam_pos.xyz );"
-        "vec3 r = normalize(reflect( u, gl_Normal ));"
-        //"r.z+=1.0;"
-        "tc.zw = 0.5*r.xy/length(r) + 0.5;"
+        "vec3 r = normalize((gl_ModelViewProjectionMatrix * vec4(gl_Normal.xyz,0.0)).xyz);"
+        "r.z-=1.0; tc.zw = 0.5*r.xy/length(r) + 0.5;"
         "gl_Position=gl_ModelViewProjectionMatrix*gl_Vertex; }";
-        
+
         sh_.pixel=sh_defines+"varying vec4 tc;\n"
         "uniform sampler2D base;\n"
         "uniform sampler2D env;\n"
         "void main() {\n"
         "vec4 tm=texture2D(base,tc.xy);\n"
-        
+        "if(tm.a<0.001) discard;\n"
         "#ifdef spa\n"
         "   vec4 em=texture2D(env,tc.zw);\n"
         "   gl_FragColor=vec4(tm.rgb+em.rgb,tm.a); }\n"
@@ -280,14 +289,37 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         
         sh_.shdr.add_program(nya_render::shader::vertex,sh_.vertex.c_str());
         sh_.shdr.add_program(nya_render::shader::pixel,sh_.pixel.c_str());
-        sh_.predefines.resize(1);
-        sh_.predefines[0].type=nya_scene::shared_shader::camera_pos;
-        sh_.predefines[0].transform=nya_scene::shared_shader::local;
-        sh_.predefines[0].location=sh_.shdr.get_handler("cam_pos");
         sh.create(sh_);
         
         m.set_shader(sh);
         m.set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
+        m.set_cull_face(!(flag & (1<<0)),nya_render::cull_face::cw);
+
+        if(!(flag & (1<<4)))
+            continue;
+
+        nya_scene::shared_mesh::group &ge=res.groups[i+mat_count];
+        ge=g;
+        ge.material_idx+=mat_count;
+
+        nya_scene::material &me = res.materials[i+mat_count];
+
+        nya_scene::shared_shader she_;
+        nya_scene::shader she;
+
+        sprintf(buf,"%f",edge.width*0.02f);
+        she_.vertex="void main() { vec4 pos=gl_Vertex; pos.xyz+=gl_Normal*"+std::string(buf)+
+        "; gl_Position=gl_ModelViewProjectionMatrix*pos; }";
+        sprintf(buf,"%f,%f,%f,%f",edge.color[0],edge.color[1],edge.color[2],edge.color[3]);
+        she_.pixel="void main() { gl_FragColor=vec4("+std::string(buf)+"); }\n";
+
+        she_.shdr.add_program(nya_render::shader::vertex,she_.vertex.c_str());
+        she_.shdr.add_program(nya_render::shader::pixel,she_.pixel.c_str());
+        she.create(she_);
+
+        me.set_shader(she);
+        me.set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
+        me.set_cull_face(true,nya_render::cull_face::ccw);
     }
     
     return true;

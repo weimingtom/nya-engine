@@ -262,7 +262,8 @@ private:
     PmdDocument *doc=[[[self window] windowController] document];
     if(!doc->m_model_name.empty())
     {
-        nya_render::set_clear_color(0.2f,0.4f,0.5f,0.0f);
+        //nya_render::set_clear_color(0.2f,0.4f,0.5f,0.0f);
+        nya_render::set_clear_color(1.0f,1.0f,1.0f,0.0f);
         nya_render::depth_test::enable(nya_render::depth_test::less);
 
         nya_scene::texture::register_load_function(load_texture);
