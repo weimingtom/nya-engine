@@ -73,7 +73,9 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     "vec3 pos=mix(tr(gl_MultiTexCoord2.xyz,bone1),tr(gl_Vertex.xyz,bone0),gl_MultiTexCoord1.z);"
     "tc=gl_MultiTexCoord0.xy; gl_Position=gl_ModelViewProjectionMatrix*vec4(pos,1.0); }";
 
-    sh_.pixel="varying vec2 tc; uniform sampler2D base; void main() { gl_FragColor=texture2D(base,tc.xy); }";
+    sh_.pixel="varying vec2 tc; uniform sampler2D base; void main() { vec4 tm=texture2D(base,tc.xy);"
+              "if(tm.a<0.001) discard;\n"
+              " gl_FragColor=tm; }";
 
     sh_.shdr.add_program(nya_render::shader::vertex,sh_.vertex.c_str());
     sh_.shdr.add_program(nya_render::shader::pixel,sh_.pixel.c_str());
@@ -83,7 +85,29 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     sh_.predefines[1].type=nya_scene::shared_shader::bones_rot;
     sh_.predefines[1].location=sh_.shdr.get_handler("bones_rot");
     sh.create(sh_);
-
+    
+    nya_scene::shared_shader she_;
+    nya_scene::shader she;
+    
+    she_.vertex="uniform vec3 bones_pos[255]; uniform vec4 bones_rot[255];"
+    "vec3 tr(vec3 pos,int idx) { vec4 q=bones_rot[idx];"
+    "return bones_pos[idx]+pos+cross(q.xyz,cross(q.xyz,pos)+pos*q.w)*2.0; }"
+    "void main()"
+    "{  int bone0=int(gl_MultiTexCoord1.x); int bone1=int(gl_MultiTexCoord1.y);"
+    "vec3 pos=mix(tr(gl_MultiTexCoord2.xyz,bone1),tr(gl_Vertex.xyz,bone0),gl_MultiTexCoord1.z);"
+    "pos.xyz+=gl_Normal*0.01;"
+    "gl_Position=gl_ModelViewProjectionMatrix*vec4(pos,1.0); }";
+    she_.pixel="void main() { gl_FragColor=vec4(0.0,0.0,0.0,1.0); }\n";
+    
+    she_.shdr.add_program(nya_render::shader::vertex,she_.vertex.c_str());
+    she_.shdr.add_program(nya_render::shader::pixel,she_.pixel.c_str());
+    she_.predefines.resize(2);
+    she_.predefines[0].type=nya_scene::shared_shader::bones_pos;
+    she_.predefines[0].location=sh_.shdr.get_handler("bones_pos");
+    she_.predefines[1].type=nya_scene::shared_shader::bones_rot;
+    she_.predefines[1].location=sh_.shdr.get_handler("bones_rot");
+    she.create(she_);
+    
     std::string path(name);
     size_t p=path.rfind("/");
     if(p==std::string::npos)
@@ -100,7 +124,8 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         //const mmd_material_params params=
         reader.read<mmd_material_params>();
 
-        reader.skip(2); //toon_idx and edge_flag
+        reader.read<char>();//toon idx
+        const char edge_flag=reader.read<char>();//edge flag
 
         g.offset=ind_offset;
         g.count=reader.read<uint>();
@@ -122,9 +147,25 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         nya_scene::material &m = res.materials[i];
         m.set_texture("diffuse",tex);
 
+        printf("%d %d tex %s\n",i, edge_flag, tex_name.c_str());
+
         m.set_shader(sh);
         m.set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
-        //g.mat.set_cull_face(true,nya_render::cull_face::cw);
+        m.set_cull_face(edge_flag,nya_render::cull_face::cw);
+
+        if(!edge_flag)
+            continue;
+
+        res.groups.resize(res.groups.size()+1);
+        nya_scene::shared_mesh::group &ge=res.groups.back();
+        ge=res.groups[i];
+        ge.material_idx=int(res.materials.size());
+        res.materials.resize(res.materials.size()+1);
+        nya_scene::material &me = res.materials.back();
+
+        me.set_shader(she);
+        //me.set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
+        me.set_cull_face(true,nya_render::cull_face::ccw);
     }
 
     const ushort bones_count=reader.read<ushort>();

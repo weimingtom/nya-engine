@@ -22,6 +22,8 @@ public:
     void set() const;
     void unset() const;
 
+    void skeleton_changed(const nya_render::skeleton *skeleton) const { m_shader.internal().skeleton_changed(skeleton); }
+
 public:
     material_internal(): m_zwrite(true),m_color_write(true),m_blend(false),m_cull_face(false),m_cull_order(nya_render::cull_face::ccw),
     m_blend_src(nya_render::blend::one),m_blend_dst(nya_render::blend::zero) {}

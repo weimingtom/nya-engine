@@ -58,6 +58,8 @@ private:
     void draw_group(int idx) const;
     bool init_form_shared();
 
+    const material &mat(int idx) const;
+
 private:
     std::vector<int> m_replaced_materials_idx;
     std::vector<material> m_replaced_materials;

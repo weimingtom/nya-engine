@@ -387,8 +387,31 @@ ID3D11InputLayout *add_layout(int mesh_idx,
 }
 
 void remove_layout(int mesh_idx) { shader_obj::remove_layout(mesh_idx); }
-
+#else
+    void set_shader(int idx)
+    {
+        if(idx==active_shader)
+            return;
+        
+        if(!check_init_shaders())
+            return;
+        
+        if(idx<0)
+        {
+            glUseProgramObjectARB(0);
+            active_shader=-1;
+            return;
+        }
+        
+        shader_obj &shdr=shader_obj::get(idx);
+        glUseProgramObjectARB(shdr.program);
+        if(!shdr.program)
+            active_shader=-1;
+        else
+            active_shader=idx;
+    }
 #endif
+
 
 bool shader::add_program(program_type type,const char*code)
 {
@@ -870,7 +893,7 @@ bool shader::add_program(program_type type,const char*code)
 
         if(type==pixel)
         {
-            glUseProgramObjectARB(shdr.program);
+            set_shader(m_shdr);
 
             for(size_t i=0;i<m_samplers.size();++i)
             {
@@ -882,7 +905,7 @@ bool shader::add_program(program_type type,const char*code)
                     get_log()<<"Unable to set shader sampler \'"<<s.name.c_str()<<"\': probably not found\n";
             }
 
-            glUseProgramObjectARB(0);
+            set_shader(-1);
         }
 
         result=0;
@@ -927,31 +950,6 @@ bool shader::add_program(program_type type,const char*code)
 
 void shader::bind() const { current_shader=m_shdr; }
 void shader::unbind() { current_shader=-1; }
-
-#ifndef DIRECTX11
-void set_shader(int idx)
-{
-    if(idx==active_shader)
-        return;
-
-    if(!check_init_shaders())
-        return;
-
-    if(idx<0)
-    {
-        glUseProgramObjectARB(0);
-        active_shader=-1;
-        return;
-    }
-
-    shader_obj &shdr=shader_obj::get(idx);
-    glUseProgramObjectARB(shdr.program);
-    if(!shdr.program)
-        active_shader=-1;
-    else
-        active_shader=idx;
-}
-#endif
 
 void shader::apply()
 {

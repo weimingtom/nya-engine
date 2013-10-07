@@ -449,7 +449,5 @@ int shader_internal::get_uniforms_count() const
 }
 
 const nya_render::skeleton *shader_internal::m_skeleton=0;
-const nya_render::skeleton *shader_internal::m_last_skeleton_pos=0;
-const nya_render::skeleton *shader_internal::m_last_skeleton_rot=0;
 
 }

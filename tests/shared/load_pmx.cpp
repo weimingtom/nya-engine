@@ -161,8 +161,8 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     }
     
     const int mat_count=reader.read<int>();
-    res.groups.resize(mat_count*2);
-    res.materials.resize(mat_count*2);
+    res.groups.resize(mat_count);
+    res.materials.resize(mat_count);
     
     std::string path(name);
     size_t p=path.rfind("/");
@@ -172,7 +172,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         path.clear();
     else
         path.resize(p+1);
-    
+
     for(int i=0,offset=0;i<mat_count;++i)
     {
         nya_scene::shared_mesh::group &g=res.groups[i];
@@ -185,7 +185,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
             reader.skip(name_len);
             m.set_name(name.c_str());
         }
-        
+
         std::string sh_defines;
         
         pmx_material_params params=reader.read<pmx_material_params>();
@@ -203,7 +203,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
                 params.ambient[2]);
         sh_defines.append(buf);
 
-        const char flag=reader.read<char>();
+        const char unsigned flag=reader.read<unsigned char>();
         pmx_edge_params edge=reader.read<pmx_edge_params>();
 
         const int tex_idx=read_idx(reader,header.texture_idx_size);
@@ -298,11 +298,12 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         if(!(flag & (1<<4)))
             continue;
 
-        nya_scene::shared_mesh::group &ge=res.groups[i+mat_count];
-        ge=g;
-        ge.material_idx+=mat_count;
-
-        nya_scene::material &me = res.materials[i+mat_count];
+        res.groups.resize(res.groups.size()+1);
+        nya_scene::shared_mesh::group &ge=res.groups.back();
+        ge=res.groups[i];
+        ge.material_idx=int(res.materials.size());
+        res.materials.resize(res.materials.size()+1);
+        nya_scene::material &me = res.materials.back();
 
         nya_scene::shared_shader she_;
         nya_scene::shader she;

@@ -257,7 +257,9 @@ bool mesh_internal::init_form_shared()
     m_anims.clear();
     
     m_skeleton=m_shared->skeleton;
-    shader_internal::skeleton_changed(&m_skeleton);
+
+    for(int i=0;i<int(m_shared->materials.size());++i)
+        m_shared->materials[i].internal().skeleton_changed(&m_skeleton);
 
     m_recalc_aabb=true;
     m_has_aabb=m_shared->aabb.delta*m_shared->aabb.delta>0.0001;
@@ -293,27 +295,26 @@ void mesh::unload()
     m_internal.m_aabb=nya_math::aabb();
 }
 
+const material &mesh_internal::mat(int idx) const
+{
+    const int rep_idx=(m_replaced_materials_idx.empty()?
+                       -1:m_replaced_materials_idx[idx]);
+    if(rep_idx>=0)
+        return m_replaced_materials[rep_idx];
+
+    return m_shared->materials[idx];
+}
+
 void mesh_internal::draw_group(int idx) const
 {
     const shared_mesh::group &g=m_shared->groups[idx];
     if(g.material_idx>=m_shared->materials.size())
         return;
 
-    const int rep_idx=(m_replaced_materials_idx.empty()?
-                       -1:m_replaced_materials_idx[g.material_idx]);
-    if(rep_idx>=0)
-    {
-        m_replaced_materials[rep_idx].internal().set();
-        m_shared->vbo.draw(g.offset,g.count);
-        m_replaced_materials[rep_idx].internal().unset();
-    }
-    else
-    {
-        const material &mat=m_shared->materials[g.material_idx];
-        mat.internal().set();
-        m_shared->vbo.draw(g.offset,g.count);
-        mat.internal().unset();
-    }
+    const material &m=mat(g.material_idx);
+    m.internal().set();
+    m_shared->vbo.draw(g.offset,g.count);
+    m.internal().unset();
 }
 
 void mesh::draw(int idx) const
@@ -391,14 +392,7 @@ const material &mesh::get_material(int idx) const
         return invalid;
     }
 
-    if(!internal().m_replaced_materials.empty())
-    {
-        const int replace_idx=internal().m_replaced_materials_idx[idx];
-        if(replace_idx>=0)
-            return internal().m_replaced_materials[replace_idx];
-    }
-
-    return internal().m_shared->materials[idx];
+    return internal().mat(idx);
 }
 
 material &mesh::modify_material(int idx)
@@ -732,7 +726,9 @@ void mesh_internal::update(unsigned int dt)
     }
 
     m_skeleton.update();
-    shader_internal::skeleton_changed(&m_skeleton);
+
+    for(int i=0;i<int(m_shared->materials.size());++i)
+        mat(i).internal().skeleton_changed(&m_skeleton);
 }
 
 const nya_math::aabb &mesh::get_aabb() const

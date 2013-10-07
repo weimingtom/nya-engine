@@ -80,7 +80,8 @@ public:
     void unset() const;
 
     static void set_skeleton(const nya_render::skeleton *skeleton) { m_skeleton=skeleton; }
-    static void skeleton_changed(const nya_render::skeleton *skeleton)
+    void reset_skeleton() { m_last_skeleton_pos=0; m_last_skeleton_rot=0; }
+    void skeleton_changed(const nya_render::skeleton *skeleton) const
     {
         if(skeleton==m_last_skeleton_pos)
             m_last_skeleton_pos=0;
@@ -88,6 +89,8 @@ public:
         if(skeleton==m_last_skeleton_rot)
             m_last_skeleton_rot=0;
     }
+
+    shader_internal(): m_last_skeleton_pos(0),m_last_skeleton_rot(0) {}
 
 public:
     int get_texture_slot(const char *semantic) const;
@@ -101,19 +104,19 @@ public:
 
 private:
     static const nya_render::skeleton *m_skeleton;
-    static const nya_render::skeleton *m_last_skeleton_pos;
-    static const nya_render::skeleton *m_last_skeleton_rot;
+    const mutable nya_render::skeleton *m_last_skeleton_pos;
+    const mutable nya_render::skeleton *m_last_skeleton_rot;
 };
 
 class shader
 {
 public:
-    bool load(const char *name) { return m_internal.load(name); }
+    bool load(const char *name) { m_internal.reset_skeleton(); return m_internal.load(name); }
     void unload() { return m_internal.unload(); }
 
 public:
-    void create(const shared_shader &res) { m_internal.create(res); }
-    
+    void create(const shared_shader &res) { m_internal.reset_skeleton(); m_internal.create(res); }
+
 public:
     static void set_resources_prefix(const char *prefix) { shader_internal::set_resources_prefix(prefix); }
     static void register_load_function(shader_internal::load_function function) { shader_internal::register_load_function(function); }
