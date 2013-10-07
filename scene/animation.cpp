@@ -70,6 +70,7 @@ bool animation::load_vmd(shared_animation &res,resource_data &data,const char* n
         } bone_frame;
 
         bone_frame.name=std::string((const char*)reader.get_data(),15);
+        bone_frame.name.resize(strlen(bone_frame.name.c_str()));
         reader.skip(15);
         bone_frame.frame=reader.read<uint>();
         bone_frame.pos[0]=reader.read<float>();
@@ -96,7 +97,7 @@ bool animation::load_vmd(shared_animation &res,resource_data &data,const char* n
         if(bone_idx<0)
             continue;
 
-        const uint time=bone_frame.frame*60;//33.6; //ToDo: adjust framerate
+        const uint time=bone_frame.frame*33; //33.6
 
         nya_render::animation::bone bone;
         nya_render::animation::interpolation interpolation;

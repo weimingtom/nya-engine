@@ -103,9 +103,9 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     she_.shdr.add_program(nya_render::shader::pixel,she_.pixel.c_str());
     she_.predefines.resize(2);
     she_.predefines[0].type=nya_scene::shared_shader::bones_pos;
-    she_.predefines[0].location=sh_.shdr.get_handler("bones_pos");
+    she_.predefines[0].location=she_.shdr.get_handler("bones_pos");
     she_.predefines[1].type=nya_scene::shared_shader::bones_rot;
-    she_.predefines[1].location=sh_.shdr.get_handler("bones_rot");
+    she_.predefines[1].location=she_.shdr.get_handler("bones_rot");
     she.create(she_);
     
     std::string path(name);
@@ -147,8 +147,6 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         nya_scene::material &m = res.materials[i];
         m.set_texture("diffuse",tex);
 
-        printf("%d %d tex %s\n",i, edge_flag, tex_name.c_str());
-
         m.set_shader(sh);
         m.set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
         m.set_cull_face(edge_flag,nya_render::cull_face::cw);
@@ -174,7 +172,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
 
     for(ushort i=0;i<bones_count;++i)
     {
-        const std::string name((const char*)data.get_data(reader.get_offset()),20);
+        std::string name((i==0)?"origin":(const char*)data.get_data(reader.get_offset()));
         reader.skip(20);
         const short parent=reader.read<short>();
         reader.skip(5); //child,kind,ik target
@@ -184,8 +182,23 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         pos.y=reader.read<float>();
         pos.z=-reader.read<float>();
 
-        if(res.skeleton.add_bone(name.c_str(),pos,parent>0?parent:-1)!=i)
-            nya_log::get_log()<<"pmd load warning: invalid bone\n";
+        int idx=res.skeleton.add_bone(name.c_str(),pos,parent>0?parent:-1);
+        if(i!=idx)
+        {
+            if(idx>=0)
+            {
+                while(i>idx)
+                {
+                    name+='@'; //nya-engine doesn't support bones with the same names
+                    idx=res.skeleton.add_bone(name.c_str(),pos,parent>0?parent:-1);
+                }
+            }
+            else
+            {
+                nya_log::get_log()<<"pmd load error: invalid bone\n";
+                return false;
+            }
+        }
     }
 
     for(size_t i=0;i<vertices.size();i+=14)

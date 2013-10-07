@@ -58,7 +58,7 @@ struct shared_shader
 
     std::vector<uniform> uniforms;
 
-	shared_shader():samplers_count(0){}
+	shared_shader():samplers_count(0),last_skeleton_pos(0),last_skeleton_rot(0){}
 
     bool release()
     {
@@ -71,6 +71,10 @@ struct shared_shader
         samplers_count=0;
         return true;
     }
+
+    //cache
+    const mutable nya_render::skeleton *last_skeleton_pos;
+    const mutable nya_render::skeleton *last_skeleton_rot;
 };
 
 class shader_internal: public scene_shared<shared_shader>
@@ -80,17 +84,18 @@ public:
     void unset() const;
 
     static void set_skeleton(const nya_render::skeleton *skeleton) { m_skeleton=skeleton; }
-    void reset_skeleton() { m_last_skeleton_pos=0; m_last_skeleton_rot=0; }
+    void reset_skeleton() { if(!m_shared.is_valid()) return; m_shared->last_skeleton_pos=0; m_shared->last_skeleton_rot=0; }
     void skeleton_changed(const nya_render::skeleton *skeleton) const
     {
-        if(skeleton==m_last_skeleton_pos)
-            m_last_skeleton_pos=0;
+        if(!m_shared.is_valid())
+            return;
 
-        if(skeleton==m_last_skeleton_rot)
-            m_last_skeleton_rot=0;
+        if(skeleton==m_shared->last_skeleton_pos)
+            m_shared->last_skeleton_pos=0;
+
+        if(skeleton==m_shared->last_skeleton_rot)
+            m_shared->last_skeleton_rot=0;
     }
-
-    shader_internal(): m_last_skeleton_pos(0),m_last_skeleton_rot(0) {}
 
 public:
     int get_texture_slot(const char *semantic) const;
@@ -104,8 +109,6 @@ public:
 
 private:
     static const nya_render::skeleton *m_skeleton;
-    const mutable nya_render::skeleton *m_last_skeleton_pos;
-    const mutable nya_render::skeleton *m_last_skeleton_rot;
 };
 
 class shader

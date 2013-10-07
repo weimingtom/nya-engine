@@ -31,6 +31,9 @@ private:
 
     nya_scene::mesh m_mesh;
     viewer_camera m_camera;
+
+    NSTimer *m_animation_timer;
+    unsigned long m_last_time;
 }
 
 @end

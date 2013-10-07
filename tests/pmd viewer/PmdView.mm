@@ -7,6 +7,7 @@
 #include "load_pmd.h"
 
 #include "scene/camera.h"
+#include "system/system.h"
 
 void viewer_camera::add_rot(float dx,float dy)
 {
@@ -199,6 +200,11 @@ private:
         [openGLContext makeCurrentContext];
     }
 
+    m_animation_timer=[NSTimer timerWithTimeInterval:0.01 target:self
+                                            selector:@selector(animate:) userInfo:nil repeats:YES];
+    [[NSRunLoop currentRunLoop] addTimer:m_animation_timer forMode:NSDefaultRunLoopMode];
+    [[NSRunLoop currentRunLoop] addTimer:m_animation_timer forMode:NSEventTrackingRunLoopMode];
+
     return self;
 }
 
@@ -257,7 +263,36 @@ private:
     [self setNeedsDisplay: YES];
 }
 
-- (void)draw 
+- (void)animate:(id)sender
+{
+    PmdDocument *doc=[[[self window] windowController] document];
+    if(!doc)
+    {
+        [m_animation_timer invalidate];
+        return;
+    }
+
+    if(!doc->m_animation_name.empty())
+    {
+        nya_scene::animation anim;
+        anim.load(doc->m_animation_name.c_str());
+        m_mesh.set_anim(anim);
+        doc->m_animation_name.clear();
+
+        m_last_time=nya_system::get_time();
+    }
+
+    if(m_mesh.get_anim().is_valid())
+    {
+        unsigned long time=nya_system::get_time();
+        m_mesh.update(int(time-m_last_time));
+        m_last_time=time;
+
+        [self setNeedsDisplay:YES];
+    }
+}
+
+- (void)draw
 {
     PmdDocument *doc=[[[self window] windowController] document];
     if(!doc->m_model_name.empty())
@@ -265,13 +300,13 @@ private:
         //nya_render::set_clear_color(0.2f,0.4f,0.5f,0.0f);
         nya_render::set_clear_color(1.0f,1.0f,1.0f,0.0f);
         nya_render::depth_test::enable(nya_render::depth_test::less);
-
+        
         nya_scene::texture::register_load_function(load_texture);
         nya_scene::mesh::register_load_function(pmx_loader::load);
         nya_scene::mesh::register_load_function(pmd_loader::load);
         m_mesh.load(doc->m_model_name.c_str());
         nya_render::apply_state(true);
-
+        
         doc->m_model_name.clear();
     }
 
@@ -280,7 +315,7 @@ private:
     m_mesh.draw();
 }
 
-- (void)drawRect:(NSRect)rect 
+- (void)drawRect:(NSRect)rect
 {
 	[self draw];
 

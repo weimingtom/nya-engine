@@ -58,4 +58,35 @@
     [super dealloc];
 }
 
+-(IBAction)loadAnimation:(id)sender
+{
+    NSOpenPanel* openDlg = [NSOpenPanel openPanel];
+
+     NSArray *fileTypes = [NSArray arrayWithObjects:@"vmd",nil];
+    [openDlg setAllowedFileTypes:fileTypes];
+    [openDlg setAllowsMultipleSelection:NO];
+    [openDlg setCanChooseFiles:YES];
+    [openDlg setCanChooseDirectories:NO];
+
+    if ( [openDlg runModal] == NSOKButton )
+    {
+        NSArray* URLs = [openDlg URLs];
+        if([URLs count]<1)
+            return;
+
+        NSURL* fileName = [URLs objectAtIndex:0];
+        m_animation_name.assign(fileName.path.UTF8String);
+    }
+}
+
+- (BOOL)validateUserInterfaceItem:(id <NSValidatedUserInterfaceItem>)anItem
+{
+    SEL theAction = [anItem action];
+
+    if (theAction == @selector(loadAnimation:))
+        return YES;
+    else
+        return [super validateUserInterfaceItem:anItem];
+}
+
 @end
