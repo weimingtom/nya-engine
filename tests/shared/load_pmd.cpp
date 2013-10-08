@@ -248,7 +248,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
             }
 
             if(strcmp(name,"\x8d\xb6\x82\xd0\x82\xb4")==0 || strcmp(name,"\x89\x45\x82\xd0\x82\xb4")==0)
-                res.skeleton.add_ik_link(ik,link,0.002f,nya_math::constants::pi);
+                res.skeleton.add_ik_link(ik,link,0.001f,nya_math::constants::pi);
             else
                 res.skeleton.add_ik_link(ik,link);
         }

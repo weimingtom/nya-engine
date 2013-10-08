@@ -182,7 +182,7 @@ void skeleton::update_ik(int idx)
             nya_math::vec3 eff_pos=
             m_rot_tr[lnk_idx].rotate_inv(m_pos_tr[k.eff]-m_pos_tr[lnk_idx]);
 
-            const float eps=0.00001f;
+            const float eps=0.0001f;
 
             const nya_math::vec3 diff=eff_pos-target_pos;
             if(diff*diff<eps)
@@ -201,10 +201,11 @@ void skeleton::update_ik(int idx)
                 ang=k.fact;
 
             nya_math::vec3 axis=nya_math::vec3::cross(eff_pos,target_pos);
-            if(axis*axis<eps)
+            const float axis_len=axis.length();
+            if(axis_len<0.001f)
                 return;
 
-            axis.normalize();
+            axis*=(1.0f/axis_len);
 
             nya_math::quat rot(axis,ang);
 

@@ -16,7 +16,7 @@ private:
     void update();
 
 public:
-    viewer_camera(): m_rot_x(0.0f),m_rot_y(0.0f),m_pos(0.0f,0.0f,50.0f) {}
+    viewer_camera(): m_rot_x(0.0f),m_rot_y(0.0f),m_pos(0.0f,0.0f,22.0f) {}
 
 private:
     float m_rot_x;

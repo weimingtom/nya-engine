@@ -110,12 +110,6 @@ quat::quat(float pitch,float yaw,float roll)
 
 quat::quat(vec3 axis,float angle)
 {
-    if(fabsf(angle)<0.0001f)
-    {
-        quat();
-        return;
-    }
-
     angle*=0.5f;
 
     v=axis*sinf(angle);

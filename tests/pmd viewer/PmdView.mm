@@ -47,7 +47,7 @@ void viewer_camera::add_pos(float dx,float dy,float dz)
 
 void viewer_camera::set_aspect(float aspect)
 {
-    nya_scene::get_camera().set_proj(25.0,aspect,1.0,150.0);
+    nya_scene::get_camera().set_proj(55.0,aspect,1.0,150.0);
     update();
 }
 
