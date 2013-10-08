@@ -47,6 +47,9 @@ public:
     void release();
 
 public:
+    static unsigned int get_used_vmem_size();
+
+public:
     texture(): m_tex(-1),m_width(0),m_height(0) {}
 
 private:

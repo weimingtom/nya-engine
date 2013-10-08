@@ -88,6 +88,8 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         return false;
     }
 
+    unsigned int size=width*height;
+
 #ifdef DIRECTX11
     if(!get_device())
         return false;
@@ -113,19 +115,14 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         case greyscale:
         case color_rgb:
         case color_rgba:
-            desc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;
+            desc.Format=DXGI_FORMAT_R8G8B8A8_UNORM; size*=4;
         break;
 
-        case color_bgra: desc.Format=DXGI_FORMAT_B8G8R8A8_UNORM; break;
-/*
-        case color_r:
-            desc.Format=DXGI_FORMAT_R8_UNORM;
-            srdata.SysMemPitch=width;
-        break;
-*/
-        case depth16: desc.Format=DXGI_FORMAT_D16_UNORM; break;
-        case depth24: desc.Format=DXGI_FORMAT_D24_UNORM_S8_UINT; break; //ToDo if data != 0
-        case depth32: desc.Format=DXGI_FORMAT_D32_FLOAT; break;
+        case color_bgra: desc.Format=DXGI_FORMAT_B8G8R8A8_UNORM; size*=4; break;
+
+        case depth16: desc.Format=DXGI_FORMAT_D16_UNORM; size*=2; break;
+        case depth24: desc.Format=DXGI_FORMAT_D24_UNORM_S8_UINT; size*=4; break; //ToDo if data != 0
+        case depth32: desc.Format=DXGI_FORMAT_D32_FLOAT; size*=4; break;
 
         default: return false;
     }
@@ -199,20 +196,18 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 
     switch(format)
     {
-        case color_rgb: source_format=GL_RGB; gl_format=GL_RGB; break;
-        //case color_bgr: source_format=GL_RGB; gl_format=GL_BGR; break;
-        case color_rgba: source_format=GL_RGBA; gl_format=GL_RGBA; break;
-        case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; break;
-        //case color_r: source_format=GL_RED; gl_format=GL_RED; break;
+        case color_rgb: source_format=GL_RGB; gl_format=GL_RGB; size*=3; break;
+        case color_rgba: source_format=GL_RGBA; gl_format=GL_RGBA; size*=4; break;
+        case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; size*=4; break;
         case greyscale: source_format=GL_LUMINANCE; gl_format=GL_LUMINANCE; break;
 #ifdef OPENGL_ES
-        case depth16: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_SHORT; break;
-        case depth24: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; break;
-        case depth32: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; break;
+        case depth16: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_SHORT; size*=2; break;
+        case depth24: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; size*=4; break;
+        case depth32: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; size*=4; break;
 #else
-        case depth16: source_format=GL_DEPTH_COMPONENT16; gl_format=GL_DEPTH_COMPONENT; break;
-        case depth24: source_format=GL_DEPTH_COMPONENT24; gl_format=GL_DEPTH_COMPONENT; break;
-        case depth32: source_format=GL_DEPTH_COMPONENT32; gl_format=GL_DEPTH_COMPONENT; break;
+        case depth16: source_format=GL_DEPTH_COMPONENT16; gl_format=GL_DEPTH_COMPONENT; size*=2; break;
+        case depth24: source_format=GL_DEPTH_COMPONENT24; gl_format=GL_DEPTH_COMPONENT; size*=3; break;
+        case depth32: source_format=GL_DEPTH_COMPONENT32; gl_format=GL_DEPTH_COMPONENT; size*=4; break;
 #endif
     };
 
@@ -295,6 +290,8 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     glBindTexture(GL_TEXTURE_2D,0);
 #endif
 
+    texture_obj::get(m_tex).size=size;
+
     return true;
 }
 
@@ -306,6 +303,8 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 	    release();
         return false;
     }
+    
+    unsigned int size=width*height*6;
 
 #ifdef DIRECTX11
     if(!get_device())
@@ -332,19 +331,14 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
         case greyscale:
         case color_rgb:
         case color_rgba:
-            desc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;
+            desc.Format=DXGI_FORMAT_R8G8B8A8_UNORM; size*=4;
         break;
 
-        case color_bgra: desc.Format=DXGI_FORMAT_B8G8R8A8_UNORM; break;
-/*
-        case color_r:
-            desc.Format=DXGI_FORMAT_R8_UNORM;
-            srdata.SysMemPitch=width;
-        break;
-*/
-        case depth16: desc.Format=DXGI_FORMAT_D16_UNORM; break;
-        case depth24: desc.Format=DXGI_FORMAT_D24_UNORM_S8_UINT; break; //ToDo if data != 0
-        case depth32: desc.Format=DXGI_FORMAT_D32_FLOAT; break;
+        case color_bgra: desc.Format=DXGI_FORMAT_B8G8R8A8_UNORM; size*=4; break;
+
+        case depth16: desc.Format=DXGI_FORMAT_D16_UNORM; size*=2; break;
+        case depth24: desc.Format=DXGI_FORMAT_D24_UNORM_S8_UINT; size*=4; break; //ToDo if data != 0
+        case depth32: desc.Format=DXGI_FORMAT_D32_FLOAT; size*=4; break;
 
         default: return false;
     }
@@ -434,11 +428,9 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 
     switch(format)
     {
-        case color_rgb: source_format=GL_RGB; gl_format=GL_RGB; break;
-        //case color_bgr: source_format=GL_RGB; gl_format=GL_BGR; break;
-        case color_rgba: source_format=GL_RGBA; gl_format=GL_RGBA; break;
-        case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; break;
-        //case color_r: source_format=GL_RED; gl_format=GL_RED; break;
+        case color_rgb: source_format=GL_RGB; gl_format=GL_RGB; size*=3; break;
+        case color_rgba: source_format=GL_RGBA; gl_format=GL_RGBA; size*=4; break;
+        case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; size*=4; break;
         case greyscale: source_format=GL_LUMINANCE; gl_format=GL_LUMINANCE; break;
         default: break;
     };
@@ -493,6 +485,8 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 
     glBindTexture(GL_TEXTURE_CUBE_MAP,0);
 #endif
+
+    texture_obj::get(m_tex).size=size;
 
     return true;
 }
@@ -606,6 +600,27 @@ void texture::release()
     m_tex=-1;
     m_width=0;
     m_height=0;
+}
+
+struct size_counter
+{
+    unsigned int size;
+    void apply(const texture_obj &obj) {
+        size+=obj.size; }
+    size_counter(): size(0) {}
+};
+
+unsigned int texture_obj::get_used_vmem_size()
+{
+    size_counter counter;
+    get_texture_objs().apply_to_all(counter);
+
+    return counter.size;
+}
+
+unsigned int texture::get_used_vmem_size()
+{
+    return texture_obj::get_used_vmem_size();
 }
 
 }

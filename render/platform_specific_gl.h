@@ -67,21 +67,24 @@ namespace nya_render
 
     struct texture_obj
     {
+        unsigned int size;
+
 #ifdef DIRECTX11
         ID3D11ShaderResourceView* srv;
         ID3D11SamplerState* sampler_state;
 
-        texture_obj(): srv(0),sampler_state(0) {}
+        texture_obj(): srv(0),sampler_state(0),size(0) {}
 #else
         unsigned int tex_id;
         unsigned int gl_type;
 
-        texture_obj(): tex_id(0),gl_type(0) {}
+        texture_obj(): tex_id(0),gl_type(0),size(0) {}
 #endif
     public:
         static int add() { return get_texture_objs().add(); }
         static texture_obj &get(int idx) { return get_texture_objs().get(idx); }
         static void remove(int idx) { return get_texture_objs().remove(idx); }
+        static unsigned int get_used_vmem_size();
 
     private:
         typedef render_objects<texture_obj> texture_objs;
