@@ -175,7 +175,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     m_height=height;
 
 #else
-    static int max_tex_size=0;
+    static unsigned int max_tex_size=0;
     if(!max_tex_size)
     {
         GLint texSize;
@@ -408,7 +408,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     m_height=height;
 
 #else
-    static int max_tex_size=0;
+    static unsigned int max_tex_size=0;
     if(!max_tex_size)
     {
         GLint texSize;
