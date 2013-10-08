@@ -3,6 +3,7 @@ bin/
 *.pbxuser
 *.xcuserstate
 *.xcscheme
+*.xcbkptlist
 xcschememanagement.plist
 *.suo
 *.ncb
