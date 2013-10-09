@@ -525,27 +525,17 @@ void mesh_internal::anim_update_mapping(applied_anim &a)
 
     if(a.anim->m_mask.is_valid())
     {
-        typedef std::map<std::string,bool> map_data;
-        map_data &d=a.anim->m_mask->data;
-        for(map_data::iterator it=d.begin();it!=d.end();++it)
+        for(int j=0;j<int(m_skeleton.get_bones_count());++j)
         {
-            const int idx=m_skeleton.get_bone_idx(it->first.c_str());
-            if(idx<0)
-                continue;
-
-            a.bones_map[idx]=ra.get_bone_idx(it->first.c_str());
+            const char *bone_name=m_skeleton.get_bone_name(j);
+            if(a.anim->m_mask->data.find(bone_name)!=a.anim->m_mask->data.end())
+                a.bones_map[j]=ra.get_bone_idx(bone_name);
         }
     }
     else
     {
-        for(int j=0;j<int(ra.get_bones_count());++j)
-        {
-            int idx=m_skeleton.get_bone_idx(ra.get_bone_name(j));
-            if(idx<0)
-                continue;
-
-            a.bones_map[idx]=j;
-        }
+        for(int j=0;j<int(m_skeleton.get_bones_count());++j)
+            a.bones_map[j]=ra.get_bone_idx(m_skeleton.get_bone_name(j));
     }
 }
 

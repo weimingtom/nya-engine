@@ -172,7 +172,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
 
     for(ushort i=0;i<bones_count;++i)
     {
-        std::string name((i==0)?"origin":(const char*)data.get_data(reader.get_offset()));
+        std::string name((const char*)data.get_data(reader.get_offset()));
         reader.skip(20);
         const short parent=reader.read<short>();
         reader.skip(5); //child,kind,ik target
@@ -182,22 +182,10 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         pos.y=reader.read<float>();
         pos.z=-reader.read<float>();
 
-        int idx=res.skeleton.add_bone(name.c_str(),pos,parent>0?parent:-1);
-        if(i!=idx)
+        if(res.skeleton.add_bone(name.c_str(),pos,parent>0?parent:-1,true)!=i)
         {
-            if(idx>=0)
-            {
-                while(i>idx)
-                {
-                    name+='@'; //nya-engine doesn't support bones with the same names
-                    idx=res.skeleton.add_bone(name.c_str(),pos,parent>0?parent:-1);
-                }
-            }
-            else
-            {
-                nya_log::get_log()<<"pmd load error: invalid bone\n";
-                return false;
-            }
+            nya_log::get_log()<<"pmd load error: invalid bone\n";
+            return false;
         }
     }
 
@@ -253,6 +241,41 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
                 res.skeleton.add_ik_link(ik,link);
         }
     }
+
+    const ushort morphs_count=reader.read<ushort>();
+    for(ushort i=0;i<morphs_count;++i)
+    {
+        reader.skip(20);//name
+        const uint size=reader.read<uint>();
+        reader.read<uchar>();//type
+        reader.skip(size*(sizeof(uint)+sizeof(float)*3));
+    }
+
+    reader.skip(reader.read<uchar>()*sizeof(ushort));
+
+    const uchar bone_groups_count=reader.read<uchar>();
+    reader.skip(bone_groups_count*50);
+
+    reader.skip(reader.read<uint>()*(sizeof(ushort)+sizeof(uchar)));
+
+    if(!reader.get_remained())
+        return true;
+
+    if(reader.read<uchar>())
+    {
+        reader.skip(20);
+        reader.skip(256);
+        reader.skip(bones_count*20);
+
+        if(morphs_count>1)
+            reader.skip((morphs_count-1)*20);
+
+        reader.skip(bone_groups_count*50);
+    }
+
+    reader.skip(10*100);//toon
+
+    const uint rigid_bodys_count=reader.read<uint>();
 
     return true;
 }

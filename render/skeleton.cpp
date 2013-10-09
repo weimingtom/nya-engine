@@ -5,7 +5,7 @@
 namespace nya_render
 {
 
-int skeleton::add_bone(const char *name,const nya_math::vec3 &pos,int parent)
+int skeleton::add_bone(const char *name,const nya_math::vec3 &pos,int parent,bool allow_doublicate)
 {
     if(!name)
         return -1;
@@ -17,7 +17,7 @@ int skeleton::add_bone(const char *name,const nya_math::vec3 &pos,int parent)
     std::pair<index_map::iterator,bool> ret=
             m_bones_map.insert (std::pair<std::string,int>(name,bone_idx));
 
-    if(ret.second==false)
+    if(!allow_doublicate && ret.second==false)
         return ret.first->second;
 
     m_bones.resize(bone_idx+1);

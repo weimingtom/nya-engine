@@ -33,7 +33,7 @@ public:
     const float *get_rot_buffer() const;
 
 public:
-    int add_bone(const char *name,const nya_math::vec3 &pos,int parent_bone_idx=-1);
+    int add_bone(const char *name,const nya_math::vec3 &pos,int parent_bone_idx=-1,bool allow_doublicate=false);
 
 public:
     int add_ik(int target_bone_idx,int effect_bone_idx,int count,float fact);
