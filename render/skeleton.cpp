@@ -152,8 +152,8 @@ void skeleton::set_bone_transform(int bone_idx,const nya_math::vec3 &pos,const n
 
 void skeleton::update_bone(int idx)
 {
-    bone &b=m_bones[idx];
-    if(b.parent<=0)
+    const bone &b=m_bones[idx];
+    if(b.parent<0)
     {
         m_pos_tr[idx]=b.pos+b.offset;
         m_rot_tr[idx]=b.rot;

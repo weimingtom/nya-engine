@@ -182,7 +182,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         pos.y=reader.read<float>();
         pos.z=-reader.read<float>();
 
-        if(res.skeleton.add_bone(name.c_str(),pos,parent>0?parent:-1,true)!=i)
+        if(res.skeleton.add_bone(name.c_str(),pos,parent,true)!=i)
         {
             nya_log::get_log()<<"pmd load error: invalid bone\n";
             return false;
