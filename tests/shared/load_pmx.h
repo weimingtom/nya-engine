@@ -1,5 +1,7 @@
 //https://code.google.com/p/nya-engine/
 
+#include <vector>
+
 namespace nya_memory { class memory_reader; class tmp_buffer_ref; }
 namespace nya_scene { class shared_mesh; typedef nya_memory::tmp_buffer_ref resource_data; }
 
@@ -33,8 +35,24 @@ class pmx_loader
         float shininess;
         float ambient[3];
     };
+    
+    struct pmx_edge_params
+    {
+        float color[4];
+        float width;
+    };
 
     static int read_idx(nya_memory::memory_reader &reader,int size);
+
+    template<typename t> class flag
+    {
+    private:
+        t m_data;
+
+    public:
+        flag(t data) { m_data=data; }
+        bool c(t mask) const { return (m_data & mask)!=0; }
+    };
 
 public:
     static bool load(nya_scene::shared_mesh &res,nya_scene::resource_data &data,const char* name);

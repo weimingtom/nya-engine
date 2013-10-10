@@ -8,19 +8,13 @@ int pmx_loader::read_idx(nya_memory::memory_reader &reader,int size)
 {
     switch(size)
     {
-        case 1: return reader.read<unsigned char>();
-        case 2: return reader.read<unsigned short>();
+        case 1: return reader.read<char>();
+        case 2: return reader.read<short>();
         case 4: return reader.read<int>();
     }
-    
+
     return 0;
 }
-
-struct pmx_edge_params
-{
-    float color[4];
-    float width;
-};
 
 bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data,const char* name)
 {
@@ -322,6 +316,86 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         me.set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
         me.set_cull_face(true,nya_render::cull_face::ccw);
     }
-    
+
+    typedef unsigned short ushort;
+
+    const int bones_count=reader.read<int>();
+    for(int i=0;i<bones_count;++i)
+    {
+        const int name_len=reader.read<int>();
+        std::string name((const char*)reader.get_data(),name_len);
+        reader.skip(name_len);
+        reader.skip(reader.read<int>());
+
+        nya_math::vec3 pos;
+        pos.x=reader.read<float>();
+        pos.y=reader.read<float>();
+        pos.z=-reader.read<float>();
+
+        const int parent=read_idx(reader,header.bone_idx_size);
+        reader.read<int>(); //ToDo: transform order
+
+        const flag<ushort> f(reader.read<ushort>());
+        if(f.c(0x0001))
+            read_idx(reader,header.bone_idx_size);
+        else
+            reader.skip(sizeof(float)*3);
+
+        const bool has_add_rot=f.c(0x0100);
+        const bool has_add_pos=f.c(0x0200);
+        if(has_add_rot || has_add_pos)
+        {
+            read_idx(reader,header.bone_idx_size); //ToDo
+            reader.read<float>();
+        }
+
+        if(f.c(0x0400))
+            reader.skip(sizeof(float)*3); //ToDo
+        
+        if(f.c(0x0800))
+            reader.skip(sizeof(float)*3*2); //ToDo
+
+        if(f.c(0x2000))
+            reader.read<int>(); //ToDo
+
+        if(res.skeleton.add_bone(name.c_str(),pos,parent,true)!=i)
+        {
+            nya_log::get_log()<<"pmx load error: invalid bone\n";
+            return false;
+        }
+
+        const bool has_ik=f.c(0x0020);
+        if(has_ik)
+        {
+            const int eff=read_idx(reader,header.bone_idx_size);
+            const int count=reader.read<int>();
+            const float k=reader.read<float>();
+
+            const int ik=res.skeleton.add_ik(i,eff,count,k,true);
+            const int link_count=reader.read<int>();
+            for(int j=0;j<link_count;++j)
+            {
+                const int link=read_idx(reader,header.bone_idx_size);
+                if(reader.read<char>())
+                {
+                    nya_math::vec3 from;
+                    from.x=reader.read<float>();
+                    from.y=reader.read<float>();
+                    from.z=reader.read<float>();
+
+                    nya_math::vec3 to;
+                    to.x=reader.read<float>();
+                    to.y=reader.read<float>();
+                    to.z=reader.read<float>();
+
+                    //res.skeleton.add_ik_link(ik,link,-to.x,-from.x,true);
+                    res.skeleton.add_ik_link(ik,link,0.001f,nya_math::constants::pi,true); //ToDo
+                }
+                else
+                    res.skeleton.add_ik_link(ik,link,true);
+            }
+        }
+    }
+
     return true;
 }

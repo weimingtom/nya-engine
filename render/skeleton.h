@@ -36,9 +36,9 @@ public:
     int add_bone(const char *name,const nya_math::vec3 &pos,int parent_bone_idx=-1,bool allow_doublicate=false);
 
 public:
-    int add_ik(int target_bone_idx,int effect_bone_idx,int count,float fact);
-    void add_ik_link(int ik_idx,int bone_idx);
-    void add_ik_link(int ik_idx,int bone_idx,float limit_from,float limit_to);
+    int add_ik(int target_bone_idx,int effect_bone_idx,int count,float fact,bool allow_invalid=false);
+    void add_ik_link(int ik_idx,int bone_idx,bool allow_invalid=false);
+    void add_ik_link(int ik_idx,int bone_idx,float limit_from,float limit_to,bool allow_invalid=false);
 
 private:
     void update_bone(int idx);

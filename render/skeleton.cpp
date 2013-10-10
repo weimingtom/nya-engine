@@ -90,12 +90,12 @@ nya_math::quat skeleton::get_bone_rot(int idx) const
     return m_rot_tr[idx];
 }
 
-int skeleton::add_ik(int target_bone_idx,int effect_bone_idx,int count,float fact)
+int skeleton::add_ik(int target_bone_idx,int effect_bone_idx,int count,float fact,bool allow_invalid)
 {
-    if(target_bone_idx<0 || target_bone_idx>=(int)m_bones.size())
+    if(target_bone_idx<0 || (!allow_invalid && target_bone_idx>=(int)m_bones.size()))
         return -1;
 
-    if(effect_bone_idx<0 || effect_bone_idx>=(int)m_bones.size())
+    if(effect_bone_idx<0 || (!allow_invalid && effect_bone_idx>=(int)m_bones.size()))
         return -1;
 
     int ik_idx=(int)m_iks.size();
@@ -110,12 +110,12 @@ int skeleton::add_ik(int target_bone_idx,int effect_bone_idx,int count,float fac
     return ik_idx;
 }
 
-void skeleton::add_ik_link(int ik_idx,int bone_idx)
+void skeleton::add_ik_link(int ik_idx,int bone_idx,bool allow_invalid)
 {
     if(ik_idx<0 || ik_idx>=(int)m_iks.size())
         return;
 
-    if(bone_idx<0 || bone_idx>=(int)m_bones.size())
+    if(bone_idx<0 || (!allow_invalid && bone_idx>=(int)m_bones.size()))
         return;
 
     ik &k=m_iks[ik_idx];
@@ -124,12 +124,12 @@ void skeleton::add_ik_link(int ik_idx,int bone_idx)
     k.links.back().limit=false;
 }
 
-void skeleton::add_ik_link(int ik_idx,int bone_idx,float limit_from,float limit_to)
+void skeleton::add_ik_link(int ik_idx,int bone_idx,float limit_from,float limit_to,bool allow_invalid)
 {
     if(ik_idx<0 || ik_idx>=(int)m_iks.size())
         return;
 
-    if(bone_idx<0 || bone_idx>=(int)m_bones.size())
+    if(bone_idx<0 || (!allow_invalid && bone_idx>=(int)m_bones.size()))
         return;
 
     ik &k=m_iks[ik_idx];

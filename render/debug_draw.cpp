@@ -93,7 +93,7 @@ void debug_draw::draw() const
 {
     if(!m_initialised)
     {
-        m_vbo.set_colors(sizeof(float)*3,3);
+        m_vbo.set_colors(sizeof(float)*3,4);
         m_shader.add_program(shader::vertex,"varying vec4 color; void main() { color=gl_Color;"
                                            "gl_Position=gl_ModelViewProjectionMatrix*gl_Vertex; }");
         m_shader.add_program(shader::pixel,"varying vec4 color; void main() { gl_FragColor=color; }");
