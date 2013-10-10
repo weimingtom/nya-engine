@@ -57,7 +57,7 @@ private:
 
         int parent;
 
-        index_map::const_iterator map_it;
+        std::string name;
     };
 
     index_map m_bones_map;

@@ -27,7 +27,7 @@ int skeleton::add_bone(const char *name,const nya_math::vec3 &pos,int parent,boo
     bone &b=m_bones[bone_idx];
     b.pos_org=pos;
     b.parent=parent;
-    b.map_it=ret.first;
+    b.name.assign(name);
 
     if(parent>=0)
     {
@@ -67,11 +67,7 @@ const char *skeleton::get_bone_name(int idx) const
     if(idx<0 || idx>=(int)m_bones.size())
         return 0;
 
-    index_map::const_iterator it=m_bones[idx].map_it;
-    if(it==m_bones_map.end())
-        return 0;
-
-    return it->first.c_str();
+    return m_bones[idx].name.c_str();
 }
 
 nya_math::vec3 skeleton::get_bone_pos(int idx) const
