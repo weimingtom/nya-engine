@@ -3,6 +3,7 @@
 #include "load_pmx.h"
 #include "scene/mesh.h"
 #include "memory/memory_reader.h"
+#include "string_encoding.h"
 
 int pmx_loader::read_idx(nya_memory::memory_reader &reader,int size)
 {
@@ -52,10 +53,10 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     {
         vert &v=verts[i];
         
-        v.pos[0]=reader.read<float>();
-        v.pos[1]=reader.read<float>();
-        v.pos[2]=-reader.read<float>();
-        
+        v.pos[0][0]=reader.read<float>();
+        v.pos[0][1]=reader.read<float>();
+        v.pos[0][2]=-reader.read<float>();
+
         v.normal[0]=reader.read<float>();
         v.normal[1]=reader.read<float>();
         v.normal[2]=-reader.read<float>();
@@ -109,14 +110,6 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
 
         reader.read<float>(); //edge
     }
-
-    res.vbo.set_vertex_data(&verts[0],sizeof(vert),vert_count);
-    int offset=0;
-    res.vbo.set_vertices(offset,3); offset+=sizeof(verts[0].pos);
-    res.vbo.set_normals(offset); offset+=sizeof(verts[0].normal);
-    res.vbo.set_tc(0,offset,2); offset+=sizeof(verts[0].tc);
-    res.vbo.set_tc(1,offset,4); offset+=sizeof(verts[0].bone_idx);
-    res.vbo.set_tc(2,offset,4);
 
     const int indices_count=reader.read<int>();
     if(header.index_size==2)
@@ -259,13 +252,34 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         //    printf("sp %d %d\n",sph_mode,sph_tex_idx);
 
         nya_scene::shader sh;
-        sh_.vertex=sh_defines+"varying vec4 tc;"
+        sh_.vertex=sh_defines+"uniform vec3 bones_pos[255]; uniform vec4 bones_rot[255];"
+        "vec3 tr(vec3 pos,int idx) { vec4 q=bones_rot[idx];"
+        "return bones_pos[idx]+pos+cross(q.xyz,cross(q.xyz,pos)+pos*q.w)*2.0; }"
+        "vec3 trn(vec3 normal,int idx) { vec4 q=bones_rot[idx];"
+        "return normal+cross(q.xyz,cross(q.xyz,normal)+normal*q.w)*2.0; }"
+        "varying vec4 tc; varying vec3 normal;"
         "void main() { tc.xy=gl_MultiTexCoord0.xy;"
-        "vec3 r = normalize((gl_ModelViewProjectionMatrix * vec4(gl_Normal.xyz,0.0)).xyz);"
-        "r.z-=1.0; tc.zw = 0.5*r.xy/length(r) + 0.5;"
-        "gl_Position=gl_ModelViewProjectionMatrix*gl_Vertex; }";
 
-        sh_.pixel=sh_defines+"varying vec4 tc;\n"
+        "vec3 pos=tr(gl_Vertex.xyz,int(gl_MultiTexCoord1.x))*gl_MultiTexCoord2.x;"
+        "normal=trn(gl_Normal.xyz,int(gl_MultiTexCoord1.x))*gl_MultiTexCoord2.x;"
+
+        "if(gl_MultiTexCoord2.y>0.0) {"
+        "pos+=tr(gl_MultiTexCoord3.xyz,int(gl_MultiTexCoord1.y))*gl_MultiTexCoord2.y;"
+        "normal+=trn(gl_Normal.xyz,int(gl_MultiTexCoord1.y))*gl_MultiTexCoord2.y; }"
+
+        "if(gl_MultiTexCoord2.z>0.0) {"
+        "pos+=tr(gl_MultiTexCoord4.xyz,int(gl_MultiTexCoord1.z))*gl_MultiTexCoord2.z;"
+        "normal+=trn(gl_Normal.xyz,int(gl_MultiTexCoord1.z))*gl_MultiTexCoord2.z; }"
+        
+        "if(gl_MultiTexCoord2.w>0.0) {"
+        "pos+=tr(gl_MultiTexCoord5.xyz,int(gl_MultiTexCoord1.w))*gl_MultiTexCoord2.w;"
+        "normal+=trn(gl_Normal.xyz,int(gl_MultiTexCoord1.w))*gl_MultiTexCoord2.w; }"
+
+        "vec3 r = normalize((gl_ModelViewProjectionMatrix * vec4(normal,0.0)).xyz);"
+        "r.z-=1.0; tc.zw = 0.5*r.xy/length(r) + 0.5;"
+        "gl_Position=gl_ModelViewProjectionMatrix*vec4(pos,gl_Vertex.w); }";
+
+        sh_.pixel=sh_defines+"varying vec4 tc; varying vec3 normal;\n"
         "uniform sampler2D base;\n"
         "uniform sampler2D env;\n"
         "void main() {\n"
@@ -283,6 +297,11 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         
         sh_.shdr.add_program(nya_render::shader::vertex,sh_.vertex.c_str());
         sh_.shdr.add_program(nya_render::shader::pixel,sh_.pixel.c_str());
+        sh_.predefines.resize(2);
+        sh_.predefines[0].type=nya_scene::shared_shader::bones_pos;
+        sh_.predefines[0].location=sh_.shdr.get_handler("bones_pos");
+        sh_.predefines[1].type=nya_scene::shared_shader::bones_rot;
+        sh_.predefines[1].location=sh_.shdr.get_handler("bones_rot");
         sh.create(sh_);
         
         m.set_shader(sh);
@@ -303,13 +322,28 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         nya_scene::shader she;
 
         sprintf(buf,"%f",edge.width*0.02f);
-        she_.vertex="void main() { vec4 pos=gl_Vertex; pos.xyz+=gl_Normal*"+std::string(buf)+
-        "; gl_Position=gl_ModelViewProjectionMatrix*pos; }";
+        she_.vertex="uniform vec3 bones_pos[255]; uniform vec4 bones_rot[255];"
+        "vec3 tr(vec3 pos,int idx) { vec4 q=bones_rot[idx];"
+        "return bones_pos[idx]+pos+cross(q.xyz,cross(q.xyz,pos)+pos*q.w)*2.0; }"
+        "void main() {"
+        "vec3 offset=gl_Normal*"+std::string(buf)+";"
+
+        "vec3 pos=tr(gl_Vertex.xyz+offset,int(gl_MultiTexCoord1.x))*gl_MultiTexCoord2.x;"
+        "if(gl_MultiTexCoord2.y>0.0) pos+=tr(gl_MultiTexCoord3.xyz+offset,int(gl_MultiTexCoord1.y))*gl_MultiTexCoord2.y;"
+        "if(gl_MultiTexCoord2.z>0.0) pos+=tr(gl_MultiTexCoord4.xyz+offset,int(gl_MultiTexCoord1.z))*gl_MultiTexCoord2.z;"
+        "if(gl_MultiTexCoord2.w>0.0) pos+=tr(gl_MultiTexCoord5.xyz+offset,int(gl_MultiTexCoord1.w))*gl_MultiTexCoord2.w;"
+
+        "gl_Position=gl_ModelViewProjectionMatrix*vec4(pos,gl_Vertex.w); }";
         sprintf(buf,"%f,%f,%f,%f",edge.color[0],edge.color[1],edge.color[2],edge.color[3]);
         she_.pixel="void main() { gl_FragColor=vec4("+std::string(buf)+"); }\n";
 
         she_.shdr.add_program(nya_render::shader::vertex,she_.vertex.c_str());
         she_.shdr.add_program(nya_render::shader::pixel,she_.pixel.c_str());
+        she_.predefines.resize(2);
+        she_.predefines[0].type=nya_scene::shared_shader::bones_pos;
+        she_.predefines[0].location=she_.shdr.get_handler("bones_pos");
+        she_.predefines[1].type=nya_scene::shared_shader::bones_rot;
+        she_.predefines[1].location=she_.shdr.get_handler("bones_rot");
         she.create(she_);
 
         me.set_shader(she);
@@ -323,7 +357,8 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     for(int i=0;i<bones_count;++i)
     {
         const int name_len=reader.read<int>();
-        std::string name((const char*)reader.get_data(),name_len);
+        const std::string name=header.text_encoding?std::string((const char*)reader.get_data(),name_len):
+                                                           utf8_from_utf16le(reader.get_data(),name_len);
         reader.skip(name_len);
         reader.skip(reader.read<int>());
 
@@ -396,6 +431,31 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
             }
         }
     }
+
+    for(int i=0;i<vert_count;++i)
+    {
+        vert &v=verts[i];
+
+        for(int j=3;j>=0;--j)
+        if(v.bone_weight[j]>0.0f)
+        {
+            const nya_math::vec3 &p=res.skeleton.get_bone_pos(v.bone_idx[j]);
+            v.pos[j][0]=v.pos[0][0]-p.x;
+            v.pos[j][1]=v.pos[0][1]-p.y;
+            v.pos[j][2]=v.pos[0][2]-p.z;
+        }
+    }
+
+    res.vbo.set_vertex_data(&verts[0],sizeof(vert),vert_count);
+    int offset=0;
+    res.vbo.set_vertices(offset,3); offset+=sizeof(verts[0].pos[0]);
+    res.vbo.set_tc(3,offset,3); offset+=sizeof(verts[0].pos[1]);
+    res.vbo.set_tc(4,offset,3); offset+=sizeof(verts[0].pos[2]);
+    res.vbo.set_tc(5,offset,3); offset+=sizeof(verts[0].pos[3]);
+    res.vbo.set_normals(offset); offset+=sizeof(verts[0].normal);
+    res.vbo.set_tc(0,offset,2); offset+=sizeof(verts[0].tc);
+    res.vbo.set_tc(1,offset,4); offset+=sizeof(verts[0].bone_idx);
+    res.vbo.set_tc(2,offset,4); offset+=sizeof(verts[0].bone_weight);
 
     return true;
 }

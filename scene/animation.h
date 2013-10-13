@@ -46,7 +46,7 @@ private:
 
 public:
     animation(): m_looped(true),m_range_from(0),m_range_to(0),m_speed(1.0f),
-                 m_weight(1.0f),m_version(0) { register_load_function(load_vmd); }
+                 m_weight(1.0f),m_version(0) { default_load_function(load_vmd); }
 
 public:
     static bool load_vmd(shared_animation &res,resource_data &data,const char* name);

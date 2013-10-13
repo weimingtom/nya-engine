@@ -3,6 +3,7 @@
 #include "load_pmd.h"
 #include "scene/mesh.h"
 #include "memory/memory_reader.h"
+#include "string_encoding.h"
 
 bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data,const char* name)
 {
@@ -149,7 +150,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
 
         m.set_shader(sh);
         m.set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
-        m.set_cull_face(edge_flag,nya_render::cull_face::cw);
+        m.set_cull_face(true,nya_render::cull_face::cw);
 
         if(!edge_flag)
             continue;
@@ -172,7 +173,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
 
     for(ushort i=0;i<bones_count;++i)
     {
-        std::string name((const char*)data.get_data(reader.get_offset()));
+        std::string name=utf8_from_shiftjis(data.get_data(reader.get_offset()),20);
         reader.skip(20);
         const short parent=reader.read<short>();
         reader.skip(5); //child,kind,ik target
@@ -235,7 +236,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
                 continue;
             }
 
-            if(strcmp(name,"\x8d\xb6\x82\xd0\x82\xb4")==0 || strcmp(name,"\x89\x45\x82\xd0\x82\xb4")==0)
+            if(strcmp(name,"\xe5\xb7\xa6\xe3\x81\xb2\xe3\x81\x96")==0 || strcmp(name,"\xe5\x8f\xb3\xe3\x81\xb2\xe3\x81\x96")==0)
                 res.skeleton.add_ik_link(ik,link,0.001f,nya_math::constants::pi);
             else
                 res.skeleton.add_ik_link(ik,link);

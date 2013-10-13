@@ -21,7 +21,7 @@ class pmx_loader
 
     struct vert
     {
-        float pos[3];
+        float pos[4][3];
         float normal[3];
         float tc[2];
         float bone_idx[4];

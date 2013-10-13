@@ -1,6 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
-namespace nya_memory { class memory_reader; class tmp_buffer_ref; }
+namespace nya_memory { class tmp_buffer_ref; }
 namespace nya_scene { class shared_mesh; typedef nya_memory::tmp_buffer_ref resource_data; }
 
 class pmd_loader

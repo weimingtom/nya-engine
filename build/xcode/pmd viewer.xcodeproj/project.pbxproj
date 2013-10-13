@@ -20,6 +20,8 @@
 		F28DADA715D9AF830030D67B /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = F28DADA115D9AF830030D67B /* Credits.rtf */; };
 		F28DADA815D9AF830030D67B /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F28DADA315D9AF830030D67B /* InfoPlist.strings */; };
 		F28DADAF15D9AFB50030D67B /* libnya_engine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F28DADAE15D9AFA70030D67B /* libnya_engine.a */; };
+		F5D869B41809A303000C8791 /* string_encoding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5D869B11809A303000C8791 /* string_encoding.cpp */; };
+		F5D869B91809A551000C8791 /* load_vmd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5D869B71809A551000C8791 /* load_vmd.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,6 +64,11 @@
 		F28DADA215D9AF830030D67B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = "../../tests/pmd viewer/en.lproj/Credits.rtf"; sourceTree = "<group>"; };
 		F28DADA415D9AF830030D67B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = "../../tests/pmd viewer/en.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		F28DADA915D9AFA70030D67B /* nya_engine.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = nya_engine.xcodeproj; sourceTree = "<group>"; };
+		F5D869B11809A303000C8791 /* string_encoding.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = string_encoding.cpp; path = ../../tests/shared/string_encoding.cpp; sourceTree = "<group>"; };
+		F5D869B21809A303000C8791 /* string_encoding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = string_encoding.h; path = ../../tests/shared/string_encoding.h; sourceTree = "<group>"; };
+		F5D869B31809A303000C8791 /* moonspeak.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = moonspeak.h; path = ../../tests/shared/moonspeak.h; sourceTree = "<group>"; };
+		F5D869B71809A551000C8791 /* load_vmd.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = load_vmd.cpp; path = ../../tests/shared/load_vmd.cpp; sourceTree = "<group>"; };
+		F5D869B81809A551000C8791 /* load_vmd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = load_vmd.h; path = ../../tests/shared/load_vmd.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -119,17 +126,22 @@
 		F28DAD8D15D9AF330030D67B /* pmd viewer */ = {
 			isa = PBXGroup;
 			children = (
-				F20FADB8177CC06F00330FA5 /* load_pmx.cpp */,
-				F20FADB9177CC06F00330FA5 /* load_pmx.h */,
 				F20FADB6177CBF6400330FA5 /* load_pmd.cpp */,
 				F20FADB5177CBF6400330FA5 /* load_pmd.h */,
-				F28DAD8F15D9AF4E0030D67B /* PmdView.mm */,
-				F28DAD9015D9AF4E0030D67B /* PmdView.h */,
-				F28DAD9115D9AF4E0030D67B /* PmdDocument.mm */,
-				F28DAD9215D9AF4E0030D67B /* PmdDocument.h */,
-				F28DAD9315D9AF4E0030D67B /* PmdDocument.xib */,
-				F28DAD9515D9AF4E0030D67B /* MainMenu.xib */,
+				F20FADB8177CC06F00330FA5 /* load_pmx.cpp */,
+				F20FADB9177CC06F00330FA5 /* load_pmx.h */,
+				F5D869B71809A551000C8791 /* load_vmd.cpp */,
+				F5D869B81809A551000C8791 /* load_vmd.h */,
 				F28DAD9715D9AF4E0030D67B /* main.m */,
+				F28DAD9515D9AF4E0030D67B /* MainMenu.xib */,
+				F5D869B31809A303000C8791 /* moonspeak.h */,
+				F28DAD9215D9AF4E0030D67B /* PmdDocument.h */,
+				F28DAD9115D9AF4E0030D67B /* PmdDocument.mm */,
+				F28DAD9315D9AF4E0030D67B /* PmdDocument.xib */,
+				F28DAD9015D9AF4E0030D67B /* PmdView.h */,
+				F28DAD8F15D9AF4E0030D67B /* PmdView.mm */,
+				F5D869B11809A303000C8791 /* string_encoding.cpp */,
+				F5D869B21809A303000C8791 /* string_encoding.h */,
 				F28DAD9D15D9AF6B0030D67B /* Supporting files */,
 			);
 			name = "pmd viewer";
@@ -248,6 +260,8 @@
 				F28DAD9C15D9AF4E0030D67B /* main.m in Sources */,
 				F20FADB7177CBF6500330FA5 /* load_pmd.cpp in Sources */,
 				F20FADBA177CC06F00330FA5 /* load_pmx.cpp in Sources */,
+				F5D869B41809A303000C8791 /* string_encoding.cpp in Sources */,
+				F5D869B91809A551000C8791 /* load_vmd.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

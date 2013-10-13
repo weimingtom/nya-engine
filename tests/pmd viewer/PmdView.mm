@@ -5,6 +5,7 @@
 
 #include "load_pmx.h"
 #include "load_pmd.h"
+#include "load_vmd.h"
 
 #include "scene/camera.h"
 #include "system/system.h"
@@ -200,7 +201,7 @@ private:
         [openGLContext makeCurrentContext];
     }
 
-    m_animation_timer=[NSTimer timerWithTimeInterval:0.01 target:self
+    m_animation_timer=[NSTimer timerWithTimeInterval:1.0f/30 target:self
                                             selector:@selector(animate:) userInfo:nil repeats:YES];
     [[NSRunLoop currentRunLoop] addTimer:m_animation_timer forMode:NSDefaultRunLoopMode];
     [[NSRunLoop currentRunLoop] addTimer:m_animation_timer forMode:NSEventTrackingRunLoopMode];
@@ -232,7 +233,8 @@ private:
 
     m_mouse_old=pt;
 
-    [self setNeedsDisplay: YES];
+    if(!m_mesh.get_anim().is_valid())
+        [self setNeedsDisplay: YES];
 }
 
 - (void) rightMouseDragged: (NSEvent *) theEvent
@@ -245,14 +247,16 @@ private:
 
     m_mouse_old=pt;
 
-    [self setNeedsDisplay: YES];
+    if(!m_mesh.get_anim().is_valid())
+        [self setNeedsDisplay: YES];
 }
 
 - (void) scrollWheel: (NSEvent*) event
 {
     m_camera.add_pos(0.0f,0.0f,[event deltaY]);
 
-    [self setNeedsDisplay: YES];
+    if(!m_mesh.get_anim().is_valid())
+        [self setNeedsDisplay: YES];
 }
 
 -(void)reshape
@@ -260,7 +264,8 @@ private:
     nya_render::set_viewport(0,0,[self frame].size.width,[self frame].size.height);
     m_camera.set_aspect([self frame].size.width / [self frame].size.height);
 
-    [self setNeedsDisplay: YES];
+    if(!m_mesh.get_anim().is_valid())
+        [self setNeedsDisplay: YES];
 }
 
 - (void)animate:(id)sender
@@ -275,6 +280,7 @@ private:
     if(!doc->m_animation_name.empty())
     {
         nya_scene::animation anim;
+        nya_scene::animation::register_load_function(vmd_loader::load);
         anim.load(doc->m_animation_name.c_str());
         m_mesh.set_anim(anim);
         doc->m_animation_name.clear();
@@ -291,6 +297,8 @@ private:
         [self setNeedsDisplay:YES];
     }
 }
+
+//#include "render/debug_draw.h"
 
 - (void)draw
 {
@@ -313,6 +321,12 @@ private:
     nya_render::clear(true,true);
 
     m_mesh.draw();
+
+    nya_render::clear(false,true);
+    /*
+    static nya_render::debug_draw dd; dd.clear(); dd.set_point_size(3.0f);
+    dd.add_skeleton(m_mesh.get_skeleton(),nya_math::vec4(0.0,0.0,1.0,1.0));
+    dd.draw();*/
 }
 
 - (void)drawRect:(NSRect)rect

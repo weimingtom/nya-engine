@@ -105,7 +105,9 @@ void debug_draw::draw() const
 
     if(!m_point_verts.empty())
     {
+#ifndef OPENGL_ES
         glPointSize(m_point_size);
+#endif
         m_vbo.bind();
         m_vbo.set_element_type(vbo::points);
         m_vbo.set_vertex_data(&m_point_verts[0],sizeof(vert),int(m_point_verts.size()));
