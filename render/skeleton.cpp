@@ -106,27 +106,29 @@ int skeleton::add_ik(int target_bone_idx,int effect_bone_idx,int count,float fac
     return ik_idx;
 }
 
-void skeleton::add_ik_link(int ik_idx,int bone_idx,bool allow_invalid)
+bool skeleton::add_ik_link(int ik_idx,int bone_idx,bool allow_invalid)
 {
     if(ik_idx<0 || ik_idx>=(int)m_iks.size())
-        return;
+        return false;
 
     if(bone_idx<0 || (!allow_invalid && bone_idx>=(int)m_bones.size()))
-        return;
+        return false;
 
     ik &k=m_iks[ik_idx];
     k.links.resize(k.links.size()+1);
     k.links.back().idx=bone_idx;
     k.links.back().limit=false;
+
+    return true;
 }
 
-void skeleton::add_ik_link(int ik_idx,int bone_idx,float limit_from,float limit_to,bool allow_invalid)
+bool skeleton::add_ik_link(int ik_idx,int bone_idx,float limit_from,float limit_to,bool allow_invalid)
 {
     if(ik_idx<0 || ik_idx>=(int)m_iks.size())
-        return;
+        return false;
 
     if(bone_idx<0 || (!allow_invalid && bone_idx>=(int)m_bones.size()))
-        return;
+        return false;
 
     ik &k=m_iks[ik_idx];
     k.links.resize(k.links.size()+1);
@@ -134,6 +136,29 @@ void skeleton::add_ik_link(int ik_idx,int bone_idx,float limit_from,float limit_
     k.links.back().limit=true;
     k.links.back().limit_from=limit_from;
     k.links.back().limit_to=limit_to;
+
+    return true;
+}
+
+bool skeleton::add_bound(int bone_idx,int target_bone_idx,float k,bool pos,bool rot,bool allow_invalid)
+{
+    if(bone_idx<0 || (!allow_invalid && bone_idx>=(int)m_bones.size()))
+        return false;
+
+    if(target_bone_idx<0 || (!allow_invalid && target_bone_idx>=(int)m_bones.size()))
+        return false;
+
+    if(!pos && !rot)
+        return false;
+
+    m_bounds.resize(m_bounds.size()+1);
+    m_bounds.back().idx=bone_idx;
+    m_bounds.back().target=target_bone_idx;
+    m_bounds.back().k=k;
+    m_bounds.back().pos=pos;
+    m_bounds.back().rot=rot;
+
+    return true;
 }
 
 void skeleton::set_bone_transform(int bone_idx,const nya_math::vec3 &pos,const nya_math::quat &rot)
@@ -146,18 +171,30 @@ void skeleton::set_bone_transform(int bone_idx,const nya_math::vec3 &pos,const n
     b.rot=rot;
 }
 
-void skeleton::update_bone(int idx)
+void skeleton::update_bone(int idx,const nya_math::vec3 &pos,const nya_math::quat &rot)
 {
     const bone &b=m_bones[idx];
     if(b.parent<0)
     {
-        m_pos_tr[idx]=b.pos+b.offset;
-        m_rot_tr[idx]=b.rot;
+        m_pos_tr[idx]=pos+b.offset;
+        m_rot_tr[idx]=rot;
         return;
     }
 
-    m_pos_tr[idx]=m_pos_tr[b.parent] + m_rot_tr[b.parent].rotate(b.pos+b.offset);
-    m_rot_tr[idx]=m_rot_tr[b.parent]*b.rot;
+    m_pos_tr[idx]=m_pos_tr[b.parent] + m_rot_tr[b.parent].rotate(pos+b.offset);
+    m_rot_tr[idx]=m_rot_tr[b.parent]*rot;
+}
+
+void skeleton::update_bone_childs(int idx) //ToDo: better realisation
+{
+    for(int j=0;j<(int)m_bones.size();++j)
+    {
+        if(m_bones[j].parent==idx)
+        {
+            update_bone(j);
+            update_bone_childs(j);
+        }
+    }
 }
 
 void skeleton::update_ik(int idx)
@@ -228,6 +265,20 @@ void skeleton::update()
 
     for(int i=0;i<(int)m_iks.size();++i)
         update_ik(i);
+
+    for(int i=0;i<(int)m_bounds.size();++i)
+    {
+        const bound &b=m_bounds[i];
+        const bone &f=m_bones[b.idx];
+        bone &t=m_bones[b.target];
+
+        nya_math::quat tmp=f.rot;
+        if(b.rot)
+            tmp.apply_weight(b.k);
+
+        update_bone(b.target,t.pos,b.rot?(t.rot*tmp):t.rot);
+        update_bone_childs(b.target);
+    }
 }
 
 nya_math::vec3 skeleton::transform(int bone_idx,nya_math::vec3 point) const

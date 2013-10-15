@@ -270,7 +270,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         "if(gl_MultiTexCoord2.z>0.0) {"
         "pos+=tr(gl_MultiTexCoord4.xyz,int(gl_MultiTexCoord1.z))*gl_MultiTexCoord2.z;"
         "normal+=trn(gl_Normal.xyz,int(gl_MultiTexCoord1.z))*gl_MultiTexCoord2.z; }"
-        
+
         "if(gl_MultiTexCoord2.w>0.0) {"
         "pos+=tr(gl_MultiTexCoord5.xyz,int(gl_MultiTexCoord1.w))*gl_MultiTexCoord2.w;"
         "normal+=trn(gl_Normal.xyz,int(gl_MultiTexCoord1.w))*gl_MultiTexCoord2.w; }"
@@ -368,7 +368,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         pos.z=-reader.read<float>();
 
         const int parent=read_idx(reader,header.bone_idx_size);
-        reader.read<int>(); //ToDo: transform order
+        reader.read<int>();//transform order
 
         const flag<ushort> f(reader.read<ushort>());
         if(f.c(0x0001))
@@ -380,8 +380,9 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         const bool has_add_pos=f.c(0x0200);
         if(has_add_rot || has_add_pos)
         {
-            read_idx(reader,header.bone_idx_size); //ToDo
-            reader.read<float>();
+            const int src_idx=read_idx(reader,header.bone_idx_size);
+            const float k=reader.read<float>();
+            res.skeleton.add_bound(src_idx,i,k,has_add_pos,has_add_rot,true);
         }
 
         if(f.c(0x0400))

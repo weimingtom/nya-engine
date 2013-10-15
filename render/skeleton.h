@@ -37,11 +37,16 @@ public:
 
 public:
     int add_ik(int target_bone_idx,int effect_bone_idx,int count,float fact,bool allow_invalid=false);
-    void add_ik_link(int ik_idx,int bone_idx,bool allow_invalid=false);
-    void add_ik_link(int ik_idx,int bone_idx,float limit_from,float limit_to,bool allow_invalid=false);
+    bool add_ik_link(int ik_idx,int bone_idx,bool allow_invalid=false);
+    bool add_ik_link(int ik_idx,int bone_idx,float limit_from,float limit_to,bool allow_invalid=false);
+
+public:
+    bool add_bound(int bone_idx,int target_bone_idx,float k,bool bound_pos,bool bound_rot,bool allow_invalid=false);
 
 private:
-    void update_bone(int idx);
+    void update_bone(int idx,const nya_math::vec3 &pos,const nya_math::quat &rot);
+    void update_bone(int idx) { update_bone(idx,m_bones[idx].pos,m_bones[idx].rot); }
+    void update_bone_childs(int idx);
     void update_ik(int idx);
 
 private:
@@ -86,6 +91,19 @@ private:
     };
 
     std::vector<ik> m_iks;
+
+    struct bound
+    {
+        int idx;
+        int target;
+
+        float k;
+
+        bool pos;
+        bool rot;
+    };
+
+    std::vector<bound> m_bounds;
 };
 
 }
