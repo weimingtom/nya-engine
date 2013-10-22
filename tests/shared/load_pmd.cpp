@@ -25,22 +25,24 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     if(!reader.check_remained(pmd_vert_size*vert_count))
         return false;
 
-    std::vector<float> vertices(vert_count*14);
-    for(size_t i=0;i<vertices.size();i+=14)
+    std::vector<pmd_vertex> vertices(vert_count);
+    for(size_t i=0;i<vertices.size();++i)
     {
-        vertices[i+11]=vertices[i]=reader.read<float>();
-        vertices[i+12]=vertices[i+1]=reader.read<float>();
-        vertices[i+13]=vertices[i+2]=-reader.read<float>();
-        
-        for(int j=3;j<7;++j)
-            vertices[i+j]=reader.read<float>();
-        
-        vertices[i+7]=1.0f-reader.read<float>();
-        
-        vertices[i+8]=reader.read<ushort>();
-        vertices[i+9]=reader.read<ushort>();
-        vertices[i+10]=reader.read<uchar>()/100.0f;
-        
+        vertices[i].pos.x=reader.read<float>();
+        vertices[i].pos.y=reader.read<float>();
+        vertices[i].pos.z=-reader.read<float>();
+
+        vertices[i].normal[0]=reader.read<float>();
+        vertices[i].normal[1]=reader.read<float>();
+        vertices[i].normal[2]=reader.read<float>();
+
+        vertices[i].tc[0]=reader.read<float>();
+        vertices[i].tc[1]=1.0f-reader.read<float>();
+
+        vertices[i].bone_idx[0]=reader.read<ushort>();
+        vertices[i].bone_idx[1]=reader.read<ushort>();
+        vertices[i].bone_weight=reader.read<uchar>()/100.0f;
+
         reader.skip(1);
     }
     
@@ -53,7 +55,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     reader.skip(inds_size);
 
     const uint mat_count=reader.read<uint>();
-    if(!reader.check_remained(mat_count*(sizeof(mmd_material_params)+2+sizeof(uint)+20)))
+    if(!reader.check_remained(mat_count*(sizeof(pmd_material_params)+2+sizeof(uint)+20)))
         return false;
 
     res.groups.resize(mat_count);
@@ -123,7 +125,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         nya_scene::shared_mesh::group &g=res.groups[i];
 
         //const mmd_material_params params=
-        reader.read<mmd_material_params>();
+        reader.read<pmd_material_params>();
 
         reader.read<char>();//toon idx
         const char edge_flag=reader.read<char>();//edge flag
@@ -190,29 +192,6 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         }
     }
 
-    for(size_t i=0;i<vertices.size();i+=14)
-    {
-        const nya_math::vec3 bp0=res.skeleton.get_bone_pos(int(vertices[i+8]));
-
-        vertices[i]-=bp0.x;
-        vertices[i+1]-=bp0.y;
-        vertices[i+2]-=bp0.z;
-
-        const nya_math::vec3 bp1=res.skeleton.get_bone_pos(int(vertices[i+9]));
-
-        vertices[i+11]-=bp1.x;
-        vertices[i+12]-=bp1.y;
-        vertices[i+13]-=bp1.z;
-    }
-
-    res.vbo.set_vertex_data(&vertices[0],sizeof(float)*14,vert_count);
-    res.vbo.set_normals(3*sizeof(float));
-    res.vbo.set_tc(0,6*sizeof(float),2);
-    res.vbo.set_tc(1,8*sizeof(float),3); //skin info
-    res.vbo.set_tc(2,11*sizeof(float),3); //pos2
-
-    vertices.clear();
-
     const ushort iks_count=reader.read<ushort>();
     //if(!reader.check_remained(iks_count*()))
     //    return false;
@@ -244,13 +223,52 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     }
 
     const ushort morphs_count=reader.read<ushort>();
-    for(ushort i=0;i<morphs_count;++i)
+    std::vector<pmd_morph> morphs;
+    morphs.resize(morphs_count-1);
+    pmd_morph base_morph;
+    for(ushort i=0;i+1<morphs_count;)
     {
-        reader.skip(20);//name
+        const std::string name=utf8_from_shiftjis(data.get_data(reader.get_offset()),20);
+        reader.skip(20);
         const uint size=reader.read<uint>();
-        reader.read<uchar>();//type
-        reader.skip(size*(sizeof(uint)+sizeof(float)*3));
+        const uchar type=reader.read<uchar>();
+
+        pmd_morph &m=type?morphs[i]:base_morph;
+        if(type)
+            ++i;
+
+        m.name=name;
+        m.verts.resize(size);
+        for(uint j=0;j<size;++j)
+        {
+            pmd_morph_vertex &v=m.verts[j];
+
+            v.idx=reader.read<uint>();
+            v.pos.x=reader.read<float>();
+            v.pos.y=reader.read<float>();
+            v.pos.z=-reader.read<float>();
+        }
     }
+
+    for(int i=0;i<int(base_morph.verts.size());++i)
+    {
+        const pmd_morph_vertex &b=base_morph.verts[i];
+        vertices[b.idx].pos=b.pos;
+    }
+
+    for(size_t i=0;i<vertices.size();++i)
+    {
+        vertices[i].pos2=vertices[i].pos-res.skeleton.get_bone_pos(int(vertices[i].bone_idx[1]));
+        vertices[i].pos-=res.skeleton.get_bone_pos(int(vertices[i].bone_idx[0]));
+    }
+
+    res.vbo.set_vertex_data(&vertices[0],sizeof(vertices[0]),vert_count);
+    res.vbo.set_normals(3*sizeof(float));
+    res.vbo.set_tc(0,6*sizeof(float),2);
+    res.vbo.set_tc(1,8*sizeof(float),3); //skin info
+    res.vbo.set_tc(2,11*sizeof(float),3); //pos2
+    
+    vertices.clear();
 
     reader.skip(reader.read<uchar>()*sizeof(ushort));
 

@@ -48,18 +48,25 @@ void viewer_camera::add_pos(float dx,float dy,float dz)
 
 void viewer_camera::set_aspect(float aspect)
 {
-    nya_scene::get_camera().set_proj(55.0,aspect,1.0,150.0);
+    nya_scene::camera_proxy cam=nya_scene::get_camera();
+    if(cam.is_valid())
+        cam->set_proj(55.0,aspect,1.0,150.0);
+
     update();
 }
 
 void viewer_camera::update()
 {
-    nya_scene::get_camera().set_rot(m_rot_x,m_rot_y,0.0);
+    nya_scene::camera_proxy cam=nya_scene::get_camera();
+    if(!cam.is_valid())
+        return;
+
+    cam->set_rot(m_rot_x,m_rot_y,0.0);
 
     nya_math::quat rot(-m_rot_y*3.14f/180.0f,-m_rot_x*3.14f/180.0f,0.0f);
     nya_math::vec3 pos=rot.rotate(m_pos);
 
-    nya_scene::get_camera().set_pos(pos.x,pos.y+10.0f,pos.z);
+    cam->set_pos(pos.x,pos.y+10.0f,pos.z);
 }
 
 void flip_vertical(unsigned char *data,int width,int height,int bpp)

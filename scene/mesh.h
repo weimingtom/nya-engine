@@ -49,7 +49,11 @@ class mesh_internal: public scene_shared<shared_mesh>
 {
     friend class mesh;
 
+private:
     mesh_internal(): m_recalc_aabb(true), m_has_aabb(false) {}
+
+public:
+    const nya_scene_internal::transform &get_transform() const { return m_transform; }
 
 private:
     nya_scene_internal::transform m_transform;

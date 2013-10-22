@@ -35,6 +35,22 @@ public:
         m_ref->obj=obj;
     }
 
+    const t *get() const
+    {
+        if(!m_ref)
+            return 0;
+        
+        return &m_ref->obj;
+    };
+
+    t *get()
+    {
+        if(!m_ref)
+            return 0;
+        
+        return &m_ref->obj;
+    };
+
     void free()
     {
         if(!m_ref)

@@ -61,7 +61,7 @@ bool check_init_fbo()
 }
 #endif
 
-void fbo::set_color_target(const texture &tex)
+void fbo::set_color_target(const texture &tex,cubemap_side side)
 {
 #ifdef DIRECTX11
 #else
@@ -71,13 +71,28 @@ void fbo::set_color_target(const texture &tex)
     if(tex.m_tex<0)
         return;
 
+    int target=GL_TEXTURE_2D;
+    switch(side)
+    {
+        case cube_positive_x: target=GL_TEXTURE_CUBE_MAP_POSITIVE_X; break;
+        case cube_negative_x: target=GL_TEXTURE_CUBE_MAP_NEGATIVE_X; break;
+        case cube_positive_y: target=GL_TEXTURE_CUBE_MAP_POSITIVE_Y; break;
+        case cube_negative_y: target=GL_TEXTURE_CUBE_MAP_NEGATIVE_Y; break;
+        case cube_positive_z: target=GL_TEXTURE_CUBE_MAP_POSITIVE_Z; break;
+        case cube_negative_z: target=GL_TEXTURE_CUBE_MAP_NEGATIVE_Z; break;
+        default: break;
+    }
+
     const texture_obj &tex_obj=texture_obj::get(tex.m_tex);
 
-    if(tex_obj.gl_type!=GL_TEXTURE_2D)
-        return;
+    if(target==GL_TEXTURE_2D)
+    {
+        if(tex_obj.gl_type!=GL_TEXTURE_2D)
+            return;
 
-    if(m_color_target_idx==tex_obj.tex_id)
-        return;
+        if(m_color_target_idx==tex_obj.tex_id)
+            return;
+    }
 
     if(!m_fbo_idx)
         fbo_glGenFramebuffers(1,&m_fbo_idx);
@@ -92,13 +107,15 @@ void fbo::set_color_target(const texture &tex)
   #endif
     }
 
-    fbo_glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,tex_obj.tex_id,0);
+    fbo_glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,target,tex_obj.tex_id,0);
     fbo_glBindFramebuffer(GL_FRAMEBUFFER,default_fbo_idx);
 
     m_color_target_idx=tex_obj.tex_id;
 
 #endif
 }
+
+void fbo::set_color_target(const texture &tex) { set_color_target(tex,cubemap_side(-1)); }
 
 void fbo::set_depth_target(const texture &tex)
 {

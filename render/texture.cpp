@@ -15,6 +15,12 @@ namespace
     const unsigned int max_layers=16;
     int current_layers[max_layers]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
     int active_layers[max_layers]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+
+#ifndef DIREXTX11
+	const unsigned int cube_faces[]={GL_TEXTURE_CUBE_MAP_POSITIVE_X,GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+                                     GL_TEXTURE_CUBE_MAP_POSITIVE_Y,GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+                                     GL_TEXTURE_CUBE_MAP_POSITIVE_Z,GL_TEXTURE_CUBE_MAP_NEGATIVE_Z};
+#endif
 }
 
 namespace nya_render
@@ -297,9 +303,9 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 
 bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int height,color_format format)
 {
-    if(!data || width==0 || height==0)
+    if(width==0 || height==0)
     {
-        get_log()<<"Unable to build cube texture: invalid data/width/height\n";
+        get_log()<<"Unable to build cube texture: invalid width/height\n";
 	    release();
         return false;
     }
@@ -309,6 +315,8 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 #ifdef DIRECTX11
     if(!get_device())
         return false;
+
+    if(!data) return false; //ToDo
 
     if(m_tex>=0)
         release();
@@ -465,23 +473,27 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     glBindTexture(GL_TEXTURE_CUBE_MAP,texture_obj::get(m_tex).tex_id);
     active_layers[active_layer]=-1;
 
-#ifdef GL_GENERATE_MIPMAP
-    glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_GENERATE_MIPMAP,GL_TRUE);
-#endif
+    glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_R,GL_CLAMP_TO_EDGE);
 
-	const unsigned int cube_faces[]={GL_TEXTURE_CUBE_MAP_POSITIVE_X,GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
-									 GL_TEXTURE_CUBE_MAP_POSITIVE_Y,GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-									 GL_TEXTURE_CUBE_MAP_POSITIVE_Z,GL_TEXTURE_CUBE_MAP_NEGATIVE_Z};
+#ifdef GL_GENERATE_MIPMAP
+    if(data)
+        glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_GENERATE_MIPMAP,GL_TRUE);
+#endif
 
 	for(int i=0;i<sizeof(cube_faces)/sizeof(cube_faces[0]);++i)
-		glTexImage2D(cube_faces[i],0,source_format,width,height,0,gl_format,GL_UNSIGNED_BYTE,data[i]);
+		glTexImage2D(cube_faces[i],0,source_format,width,height,0,gl_format,GL_UNSIGNED_BYTE,data?data[i]:0);
 
 #ifndef GL_GENERATE_MIPMAP
-    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+    if(data)
+        glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 #endif
-
     glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+    if(data)
+        glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+    else
+        glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 
     glBindTexture(GL_TEXTURE_CUBE_MAP,0);
 #endif

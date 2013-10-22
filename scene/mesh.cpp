@@ -322,8 +322,11 @@ void mesh::draw(int idx) const
     if(!internal().m_shared.is_valid() || idx>=int(internal().m_shared->groups.size()))
         return;
 
-    if(internal().m_has_aabb && !get_camera().get_frustum().test_intersect(get_aabb()))
-        return;
+    if(internal().m_has_aabb)
+    {
+        if(get_camera().is_valid() && !get_camera()->get_frustum().test_intersect(get_aabb()))
+            return;
+    }
 
     nya_scene_internal::transform::set(internal().m_transform);
     shader_internal::set_skeleton(&internal().m_skeleton);

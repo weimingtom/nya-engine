@@ -32,6 +32,8 @@ namespace
     nya_render::state current_state;
     nya_render::state applied_state;
 
+    nya_render::rect viewport_rect;
+
 #ifdef DIRECTX11
 	float dx_clear_color[4]={0.0f};
 	float dx_clear_depth=1.0f;
@@ -105,6 +107,30 @@ void set_viewport(int x,int y,int w,int h)
 #else
 	glViewport(x,y,w,h);
 #endif
+
+    viewport_rect.x=x;
+    viewport_rect.y=y;
+    viewport_rect.width=w;
+    viewport_rect.height=h;
+}
+
+const rect &get_viewport()
+{
+    if(viewport_rect.width==viewport_rect.height)
+    {
+#ifdef DIRECTX11
+        //ToDo
+#else
+        int vport[4];
+        glGetIntegerv(GL_VIEWPORT,vport);
+        viewport_rect.x=vport[0];
+        viewport_rect.y=vport[1];
+        viewport_rect.width=vport[2];
+        viewport_rect.height=vport[3];
+#endif
+    }
+
+    return viewport_rect;
 }
 
 void set_projection_matrix(const nya_math::mat4 &mat)

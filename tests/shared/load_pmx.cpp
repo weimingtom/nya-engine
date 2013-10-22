@@ -53,9 +53,9 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     {
         vert &v=verts[i];
         
-        v.pos[0][0]=reader.read<float>();
-        v.pos[0][1]=reader.read<float>();
-        v.pos[0][2]=-reader.read<float>();
+        v.pos[0].x=reader.read<float>();
+        v.pos[0].y=reader.read<float>();
+        v.pos[0].z=-reader.read<float>();
 
         v.normal[0]=reader.read<float>();
         v.normal[1]=reader.read<float>();
@@ -252,7 +252,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         //    printf("sp %d %d\n",sph_mode,sph_tex_idx);
 
         nya_scene::shader sh;
-        sh_.vertex=sh_defines+"uniform vec3 bones_pos[255]; uniform vec4 bones_rot[255];"
+        sh_.vertex=sh_defines+"uniform vec3 bones_pos[256]; uniform vec4 bones_rot[256];"
         "vec3 tr(vec3 pos,int idx) { vec4 q=bones_rot[idx];"
         "return bones_pos[idx]+pos+cross(q.xyz,cross(q.xyz,pos)+pos*q.w)*2.0; }"
         "vec3 trn(vec3 normal,int idx) { vec4 q=bones_rot[idx];"
@@ -436,14 +436,10 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     for(int i=0;i<vert_count;++i)
     {
         vert &v=verts[i];
-
         for(int j=3;j>=0;--j)
-        if(v.bone_weight[j]>0.0f)
         {
-            const nya_math::vec3 &p=res.skeleton.get_bone_pos(v.bone_idx[j]);
-            v.pos[j][0]=v.pos[0][0]-p.x;
-            v.pos[j][1]=v.pos[0][1]-p.y;
-            v.pos[j][2]=v.pos[0][2]-p.z;
+            if(v.bone_weight[j]>0.0f)
+                v.pos[j]=v.pos[0]-res.skeleton.get_bone_pos(v.bone_idx[j]);
         }
     }
 

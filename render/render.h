@@ -15,7 +15,19 @@ void set_log(nya_log::log *l);
 nya_log::log &get_log();
 void log_gl_errors(const char *place=0);
 
+struct rect
+{
+    int x;
+    int y;
+    int width;
+    int height;
+
+    rect(): x(0), y(0), width(0), height(0) {}
+};
+
 void set_viewport(int x,int y,int width,int height);
+inline void set_viewport(const rect &r) { set_viewport(r.x,r.y,r.width,r.height); }
+const rect &get_viewport();
 
 struct scissor
 {

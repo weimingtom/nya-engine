@@ -242,7 +242,7 @@ bool tmp_buffer_scoped::copy_to(const void*data,size_t size,size_t offset)
     return m_buf->copy_to(data,size,offset);
 }
 
-tmp_buffer_scoped::tmp_buffer_scoped(size_t size): m_buf(m_buf->allocate_new(size)) {}
+tmp_buffer_scoped::tmp_buffer_scoped(size_t size): m_buf(tmp_buffer::allocate_new(size)) {}
 
 tmp_buffer_scoped::~tmp_buffer_scoped()
 {

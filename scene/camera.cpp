@@ -5,7 +5,8 @@
 
 namespace
 {
-    nya_scene::camera *active_camera=0;
+    nya_scene::camera default_camera;
+    nya_scene::camera_proxy active_camera(default_camera);
 }
 
 namespace nya_scene
@@ -15,7 +16,7 @@ void camera::set_proj(float fov,float aspect,float near,float far)
 {
     m_proj.identity();
     m_proj.perspective(fov,aspect,near,far);
-    if(this==active_camera)
+    if(this==active_camera.get())
         nya_render::set_projection_matrix(m_proj);
 
     m_recalc_frustum=true;
@@ -25,7 +26,7 @@ void camera::set_proj(float left,float right,float bottom,float top,float near,f
 {
     m_proj.identity();
     m_proj.frustrum(left,right,bottom,top,near,far);
-    if(this==active_camera)
+    if(this==active_camera.get())
         nya_render::set_projection_matrix(m_proj);
 
     m_recalc_frustum=true;
@@ -34,7 +35,7 @@ void camera::set_proj(float left,float right,float bottom,float top,float near,f
 void camera::set_proj(const nya_math::mat4 &mat)
 {
     m_proj=mat;
-    if(this==active_camera)
+    if(this==active_camera.get())
         nya_render::set_projection_matrix(m_proj);
 
     m_recalc_frustum=true;
@@ -88,22 +89,13 @@ const nya_math::frustum &camera::get_frustum() const
     return m_frustum;
 }
 
-void set_camera(camera &cam)
+void set_camera(const camera_proxy &cam)
 {
-    active_camera=&cam;
-    nya_render::set_projection_matrix(cam.get_proj_matrix());
+    active_camera=cam;
+    if(cam.is_valid())
+        nya_render::set_projection_matrix(cam->get_proj_matrix());
 }
 
-camera &get_camera()
-{
-    if(!active_camera)
-    {
-        static camera default_camera;
-        active_camera=&default_camera;
-        return default_camera;
-    }
-
-    return *active_camera;
-}
+const camera_proxy &get_camera() { return active_camera; }
 
 }

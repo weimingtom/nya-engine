@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "proxy.h"
 #include "math/matrix.h"
 #include "math/vector.h"
 #include "math/frustum.h"
@@ -44,7 +45,9 @@ private:
     mutable bool m_recalc_frustum;
 };
 
-void set_camera(camera &cam);
-camera &get_camera();
+typedef proxy<camera> camera_proxy;
+
+void set_camera(const camera_proxy &cam);
+const camera_proxy &get_camera();
 
 }

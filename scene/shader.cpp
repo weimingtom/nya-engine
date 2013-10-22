@@ -331,19 +331,25 @@ void shader_internal::set() const
         {
             case shared_shader::camera_pos:
             {
+                if(!get_camera().is_valid())
+                {
+                    m_shared->shdr.set_uniform(p.location,0.0f,0.0f,0.0f);
+                    break;
+                }
+
                 if(p.transform==shared_shader::local)
                 {
-                    const nya_math::vec3 v=nya_scene_internal::transform::get().inverse_transform(get_camera().get_pos());
+                    const nya_math::vec3 v=nya_scene_internal::transform::get().inverse_transform(get_camera()->get_pos());
                     m_shared->shdr.set_uniform(p.location,v.x,v.y,v.z);
                 }
                 else if(p.transform==shared_shader::local_rot)
                 {
-                    const nya_math::vec3 v=nya_scene_internal::transform::get().inverse_rot(get_camera().get_pos());
+                    const nya_math::vec3 v=nya_scene_internal::transform::get().inverse_rot(get_camera()->get_pos());
                     m_shared->shdr.set_uniform(p.location,v.x,v.y,v.z);
                 }
                 else
                 {
-                    const nya_math::vec3 v=get_camera().get_pos();
+                    const nya_math::vec3 v=get_camera()->get_pos();
                     m_shared->shdr.set_uniform(p.location,v.x,v.y,v.z);
                 }
             }

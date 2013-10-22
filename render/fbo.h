@@ -10,7 +10,19 @@ namespace nya_render
 class fbo
 {
 public:
+    enum cubemap_side
+    {
+        cube_positive_x,
+        cube_negative_x,
+        cube_positive_y,
+        cube_negative_y,
+        cube_positive_z,
+        cube_negative_z
+    };
+
+public:
     void set_color_target(const texture &tex);
+    void set_color_target(const texture &tex,cubemap_side side);
     void set_depth_target(const texture &tex);
 
 public:

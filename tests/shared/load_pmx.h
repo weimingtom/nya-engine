@@ -1,5 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
+#include "math/vector.h"
 #include <vector>
 
 namespace nya_memory { class memory_reader; class tmp_buffer_ref; }
@@ -21,7 +22,7 @@ class pmx_loader
 
     struct vert
     {
-        float pos[4][3];
+        nya_math::vec3 pos[4];
         float normal[3];
         float tc[2];
         float bone_idx[4];
