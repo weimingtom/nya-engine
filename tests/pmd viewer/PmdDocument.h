@@ -3,7 +3,7 @@
 #import <Cocoa/Cocoa.h>
 #include <string>
 
-@interface PmdDocument : NSDocument<NSValidatedUserInterfaceItem>
+@interface PmdDocument : NSDocument//<NSValidatedUserInterfaceItem>
 {
 @public
     std::string m_model_name;

@@ -224,9 +224,12 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
 
     const ushort morphs_count=reader.read<ushort>();
     std::vector<pmd_morph> morphs;
-    morphs.resize(morphs_count-1);
+
+    if(morphs_count>1)
+        morphs.resize(morphs_count-1);
+
     pmd_morph base_morph;
-    for(ushort i=0;i+1<morphs_count;)
+    for(ushort i=0;i<int(morphs.size());)
     {
         const std::string name=utf8_from_shiftjis(data.get_data(reader.get_offset()),20);
         reader.skip(20);

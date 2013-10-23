@@ -452,7 +452,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     res.vbo.set_normals(offset); offset+=sizeof(verts[0].normal);
     res.vbo.set_tc(0,offset,2); offset+=sizeof(verts[0].tc);
     res.vbo.set_tc(1,offset,4); offset+=sizeof(verts[0].bone_idx);
-    res.vbo.set_tc(2,offset,4); offset+=sizeof(verts[0].bone_weight);
+    res.vbo.set_tc(2,offset,4); //offset+=sizeof(verts[0].bone_weight);
 
     return true;
 }

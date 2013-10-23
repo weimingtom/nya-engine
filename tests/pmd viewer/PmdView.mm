@@ -206,12 +206,12 @@ private:
     {
         [self setOpenGLContext:openGLContext];
         [openGLContext makeCurrentContext];
-    }
 
-    m_animation_timer=[NSTimer timerWithTimeInterval:1.0f/30 target:self
+        m_animation_timer=[NSTimer timerWithTimeInterval:1.0f/30 target:self
                                             selector:@selector(animate:) userInfo:nil repeats:YES];
-    [[NSRunLoop currentRunLoop] addTimer:m_animation_timer forMode:NSDefaultRunLoopMode];
-    [[NSRunLoop currentRunLoop] addTimer:m_animation_timer forMode:NSEventTrackingRunLoopMode];
+        [[NSRunLoop currentRunLoop] addTimer:m_animation_timer forMode:NSDefaultRunLoopMode];
+        [[NSRunLoop currentRunLoop] addTimer:m_animation_timer forMode:NSEventTrackingRunLoopMode];
+    }
 
     return self;
 }
