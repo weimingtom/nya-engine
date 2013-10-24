@@ -365,8 +365,8 @@ public:
     //void free_all() { m_creator->free_all(); }
     void free_unused() { m_creator->free_unused(); }
     void should_unload_unused(bool unload) { m_creator->should_unload_unused(unload); }
-    bool reload_resource(const char *name) { m_creator->reload_resource(name); }
-    int reload_resources() { m_creator->reload_resources(); }
+    bool reload_resource(const char *name) { return m_creator->reload_resource(name); }
+    int reload_resources() { return m_creator->reload_resources(); }
 
     virtual ~shared_resources()
     {
