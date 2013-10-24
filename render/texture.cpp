@@ -475,7 +475,9 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+#ifndef OPENGL_ES
     glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_R,GL_CLAMP_TO_EDGE);
+#endif
 
 #ifdef GL_GENERATE_MIPMAP
     if(data)

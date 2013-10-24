@@ -818,7 +818,7 @@ void scene::release()
     m_shader.release();
     m_shader_scenery.release();
 
-    get_shared_anims().free_all();
+    //get_shared_anims().free_all();
 }
 
 scene &get_scene()
