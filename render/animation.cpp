@@ -52,18 +52,10 @@ animation::bone animation::get_bone(int idx,unsigned int time,bool looped) const
             int time_diff;
 
             if(i==frames_count)
-            {
-                if(!looped)
-                    return prev.pos_rot;
+                return prev.pos_rot;
 
-                next=&seq.frames[0];
-                time_diff=m_duration-prev.time+next->time;
-            }
-            else
-            {
-                next=&seq.frames[i];
-                time_diff=next->time-prev.time;
-            }
+            next=&seq.frames[i];
+            time_diff=next->time-prev.time;
 
             if(time_diff==0)
                 return next->pos_rot;
