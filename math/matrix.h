@@ -6,6 +6,7 @@ namespace nya_math
 {
 
 struct vec3;
+struct vec4;
 struct quat;
 
 struct mat4
@@ -23,6 +24,8 @@ struct mat4
     mat4 &perspective(float fov,float aspect,float near,float far); //fov in degrees
     mat4 &frustrum(float left,float right,float bottom,float top,float near,float far);
 
+    mat4 &invert();
+
     mat4 operator * (const mat4 &mat) const;
 
     mat4() { identity(); }
@@ -31,5 +34,6 @@ struct mat4
 
 vec3 operator * (const mat4 &m,const vec3 &v);
 vec3 operator * (const vec3 &v,const mat4 &m);
+vec4 operator * (const mat4 &m,const vec4 &v);
 
 }

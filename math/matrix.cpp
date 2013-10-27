@@ -124,6 +124,46 @@ mat4 &mat4::frustrum(float left,float right,float bottom,float top,float near,fl
     return *this=frust*(*this);
 }
 
+inline float get_cofactor(float m0,float m1,float m2,float m3,float m4,float m5,float m6,float m7,float m8)
+{
+    return m0*(m4*m8 - m5*m7) - m1*(m3*m8 - m5*m6) + m2*(m3*m7 - m4*m6);
+}
+
+mat4 &mat4::invert()
+{
+    const float c00=get_cofactor(m[1][1],m[1][2],m[1][3],m[2][1],m[2][2],m[2][3],m[3][1],m[3][2],m[3][3]);
+    const float c10=get_cofactor(m[1][0],m[1][2],m[1][3],m[2][0],m[2][2],m[2][3],m[3][0],m[3][2],m[3][3]);
+    const float c20=get_cofactor(m[1][0],m[1][1],m[1][3],m[2][0],m[2][1],m[2][3],m[3][0],m[3][1],m[3][3]);
+    const float c30=get_cofactor(m[1][0],m[1][1],m[1][2],m[2][0],m[2][1],m[2][2],m[3][0],m[3][1],m[3][2]);
+
+    const float d=m[0][0]*c00 - m[0][1]*c10 + m[0][2]*c20 - m[0][3]*c30;
+    if(fabs(d)<0.00001f)
+        return identity();
+
+    const float c01=get_cofactor(m[0][1],m[0][2],m[0][3],m[2][1],m[2][2],m[2][3],m[3][1],m[3][2],m[3][3]);
+    const float c11=get_cofactor(m[0][0],m[0][2],m[0][3],m[2][0],m[2][2],m[2][3],m[3][0],m[3][2],m[3][3]);
+    const float c21=get_cofactor(m[0][0],m[0][1],m[0][3],m[2][0],m[2][1],m[2][3],m[3][0],m[3][1],m[3][3]);
+    const float c31=get_cofactor(m[0][0],m[0][1],m[0][2],m[2][0],m[2][1],m[2][2],m[3][0],m[3][1],m[3][2]);
+
+    const float c02=get_cofactor(m[0][1],m[0][2],m[0][3],m[1][1],m[1][2],m[1][3],m[3][1],m[3][2],m[3][3]);
+    const float c12=get_cofactor(m[0][0],m[0][2],m[0][3],m[1][0],m[1][2],m[1][3],m[3][0],m[3][2],m[3][3]);
+    const float c22=get_cofactor(m[0][0],m[0][1],m[0][3],m[1][0],m[1][1],m[1][3],m[3][0],m[3][1],m[3][3]);
+    const float c32=get_cofactor(m[0][0],m[0][1],m[0][2],m[1][0],m[1][1],m[1][2],m[3][0],m[3][1],m[3][2]);
+
+    const float c03=get_cofactor(m[0][1],m[0][2],m[0][3],m[1][1],m[1][2],m[1][3],m[2][1],m[2][2],m[2][3]);
+    const float c13=get_cofactor(m[0][0],m[0][2],m[0][3],m[1][0],m[1][2],m[1][3],m[2][0],m[2][2],m[2][3]);
+    const float c23=get_cofactor(m[0][0],m[0][1],m[0][3],m[1][0],m[1][1],m[1][3],m[2][0],m[2][1],m[2][3]);
+    const float c33=get_cofactor(m[0][0],m[0][1],m[0][2],m[1][0],m[1][1],m[1][2],m[2][0],m[2][1],m[2][2]);
+
+    const float id=1.0f/d;
+    m[0][0]=id*c00; m[0][1]= -id*c01; m[0][2]=id*c02; m[0][3]= -id*c03;
+    m[1][0]= -id*c10; m[1][1]=id*c11; m[1][2]= -id*c12; m[1][3]=id*c13;
+    m[2][0]=id*c20; m[2][1]= -id*c21; m[2][2]=id*c22; m[2][3]= -id*c23;
+    m[3][0]= -id*c30; m[3][1]=id*c31; m[3][2]= -id*c32; m[3][3]=id*c33;
+
+    return *this;
+}
+
 mat4 mat4::operator*(const mat4 &mat) const
 {
     mat4 out;
@@ -166,6 +206,14 @@ vec3 operator * (const mat4 &m,const vec3 &v)
 	return vec3(m.m[0][0]*v.x+m.m[1][0]*v.y+m.m[2][0]*v.z+m.m[3][0],
 				m.m[0][1]*v.x+m.m[1][1]*v.y+m.m[2][1]*v.z+m.m[3][1],
 				m.m[0][2]*v.x+m.m[1][2]*v.y+m.m[2][2]*v.z+m.m[3][2]);
+}
+
+vec4 operator * (const mat4 &m,const vec4 &v)
+{
+    return vec4(m.m[0][0]*v.x+m.m[1][0]*v.y+m.m[2][0]*v.z+m.m[3][0]*v.w,
+				m.m[0][1]*v.x+m.m[1][1]*v.y+m.m[2][1]*v.z+m.m[3][1]*v.w,
+				m.m[0][2]*v.x+m.m[1][2]*v.y+m.m[2][2]*v.z+m.m[3][2]*v.w,
+                m.m[0][3]*v.x+m.m[1][3]*v.y+m.m[2][3]*v.z+m.m[3][3]*v.w);
 }
 
 mat4::mat4(const quat &q)

@@ -94,6 +94,8 @@ struct vec4
         *this *=(1.0f/len);
         return *this;
     }
+
+    vec3 xyz() const { return vec3(x,y,z); }
 };
 
 inline vec4 operator * ( float a, const vec4& v ) { return vec4(v.x*a,v.y*a,v.z*a,v.w*a); }
