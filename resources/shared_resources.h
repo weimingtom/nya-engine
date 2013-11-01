@@ -190,7 +190,7 @@ private:
 
         bool reload_resource(const char *name)
         {
-            if(!name || m_base)
+            if(!name || !m_base)
                 return false;
 
             resources_map_iterator it=m_res_map.find(name);

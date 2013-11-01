@@ -479,6 +479,7 @@ void mesh::set_anim(const animation_proxy & anim,int layer)
     a.anim=anim;
     a.time=0;
     a.version=0;
+    a.bones_map.clear();
 }
 
 void mesh_internal::anim_set_time(applied_anim &a,float t)
@@ -519,11 +520,12 @@ void mesh_internal::anim_set_time(applied_anim &a,float t)
 
 void mesh_internal::anim_update_mapping(applied_anim &a)
 {
+    a.bones_map.clear();
+
     if(!a.anim.is_valid() || !a.anim->m_shared.is_valid())
         return;
 
     const nya_render::animation &ra=a.anim->m_shared->anim;
-    a.bones_map.clear();
     a.bones_map.resize(m_skeleton.get_bones_count(),-1);
 
     if(a.anim->m_mask.is_valid())
