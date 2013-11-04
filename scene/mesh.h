@@ -136,6 +136,7 @@ public:
     void set_rot(float yaw,float pitch,float roll) { m_internal.m_transform.set_rot(yaw,pitch,roll); m_internal.m_recalc_aabb=true; }
     void set_rot(const nya_math::quat &rot) { m_internal.m_transform.set_rot(rot); m_internal.m_recalc_aabb=true; }
     void set_scale(float sx,float sy,float sz) { m_internal.m_transform.set_scale(sx,sy,sz); m_internal.m_recalc_aabb=true; }
+    void set_scale(const nya_math::vec3 &s) { m_internal.m_transform.set_scale(s.x,s.y,s.z); m_internal.m_recalc_aabb=true; }
     void set_scale(float s) { set_scale(s,s,s); }
 
 public:
