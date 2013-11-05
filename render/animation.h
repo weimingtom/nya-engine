@@ -28,6 +28,11 @@ public:
     int get_bones_count() const { return (int)m_bones.size(); }
     const char *get_bone_name(int idx) const;
 
+    int get_curve_idx(const char *name) const; //< 0 if invalid
+    float get_curve(int idx,unsigned int time,bool looped=true) const;
+    int get_cuves_count() const { return (int)m_curves.size(); }
+    const char *get_curve_name(int idx) const;
+
 public:
     int add_bone(const char *name); //create or return existing
     void add_bone_frame(int idx,unsigned int time,bone &b);
@@ -43,6 +48,10 @@ public:
     void add_bone_frame(int idx,unsigned int time,bone &b,interpolation &i);
 
 public:
+    int add_curve(const char *name); //create or return existing
+    void add_curve_frame(int idx,unsigned int time,float value);
+
+public:
     void release();
 
 public:
@@ -52,8 +61,10 @@ private:
     struct frame
     {
         unsigned int time;
-        bone pos_rot;
+        bone value;
         interpolation inter;
+
+        bone interpolate(const frame &prev,float k) const;
 
         frame(): time(0) {}
     };
@@ -62,12 +73,31 @@ private:
 
     struct sequence
     {
+        std::string name;
         std::vector<frame> frames;
-        index_map::const_iterator it;
     };
 
     index_map m_bones_map;
     std::vector<sequence> m_bones;
+
+    struct curve_frame
+    {
+        unsigned int time;
+        float value;
+
+        float interpolate(const curve_frame &prev,float k) const;
+
+        curve_frame(): time(0),value(0.0f) {}
+    };
+
+    struct curve_sequence
+    {
+        std::string name;
+        std::vector<curve_frame> frames;
+    };
+
+    index_map m_curves_map;
+    std::vector<curve_sequence> m_curves;
 
     unsigned int m_duration;
 };
