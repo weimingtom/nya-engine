@@ -294,7 +294,7 @@ void vbo::draw(unsigned int offset,unsigned int count)
             desc.push_back(d);
         }
 
-        for(int i=0;i<vbo_obj::max_tex_coord;++i)
+        for(int i=0;i<max_tex_coord;++i)
         {
             const vbo_obj::attribute &tc=vobj.tcs[i];
             if(!tc.has)
@@ -358,7 +358,7 @@ void vbo::draw(unsigned int offset,unsigned int count)
         glEnableClientState(GL_VERTEX_ARRAY);
         glVertexPointer(vobj.vertices.dimension,GL_FLOAT,vobj.vertex_stride,(void *)0);
 #endif
-        for(int i=0;i<vbo::max_tex_coord;++i)
+        for(int i=0;i<max_tex_coord;++i)
         {
             const vbo_obj::attribute &tc=vobj.tcs[i];
             if(tc.has)
@@ -499,7 +499,7 @@ void vbo::release()
   #else
             glDisableClientState(GL_VERTEX_ARRAY);
   #endif
-            for(int i=0;i<vbo::max_tex_coord;++i)
+            for(int i=0;i<max_tex_coord;++i)
             {
                 const vbo_obj::attribute &tc=obj.tcs[i];
                 if(tc.has)
@@ -792,7 +792,7 @@ void vbo::set_normals(unsigned int offset)
 
 void vbo::set_tc(unsigned int tc_idx,unsigned int offset,unsigned int dimension)
 {
-    if(tc_idx>=vbo::max_tex_coord)
+    if(tc_idx>=max_tex_coord)
         return;
 
     if(m_verts<0)
@@ -968,7 +968,7 @@ unsigned int vbo::get_normals_offset() const
 
 unsigned int vbo::get_tc_offset(unsigned int idx) const
 {
-    if(m_verts<0 || idx>=vbo::max_tex_coord)
+    if(m_verts<0 || idx>=max_tex_coord)
         return 0;
 
     return vbo_obj::get(m_verts).tcs[idx].offset;
@@ -976,7 +976,7 @@ unsigned int vbo::get_tc_offset(unsigned int idx) const
 
 unsigned int vbo::get_tc_dimension(unsigned int idx) const
 {
-    if(m_verts<0 || idx>=vbo::max_tex_coord)
+    if(m_verts<0 || idx>=max_tex_coord)
         return 0;
 
     return vbo_obj::get(m_verts).tcs[idx].dimension;
