@@ -72,9 +72,7 @@ vec3 quat::get_euler() const
     const float wz2=w*z2;
 
     if(ang>=constants::pi_2)
-    {
         return vec3(atan2f(xy2-wz2,1.0f-xx2+zz2),ang,0.0f);
-    }
 
     if(ang> -constants::pi_2)
     {

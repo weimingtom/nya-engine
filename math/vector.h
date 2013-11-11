@@ -7,6 +7,46 @@
 namespace nya_math
 {
 
+struct vec2
+{
+    float x;
+    float y;
+
+    vec2(): x(0),y(0) {}
+    vec2(float x,float y) { this->x=x; this->y=y; }
+    vec2(const float *v) { x=v[0]; y=v[1]; }
+
+    vec2 operator + (const vec2 &v) const { return vec2(x+v.x,y+v.y); }
+    vec2 operator - (const vec2 &v) const { return vec2(x-v.x,y-v.y); }
+    float operator * (const vec2 &v) const { return x*v.x+y*v.y; }
+
+    vec2 operator - () const { return vec2(-x,-y); }
+
+    vec2 operator *= (const float a) { x*=a; y*=a; return *this; }
+    vec2 operator /= (const float a) { x/=a; y/=a; return *this; }
+
+    vec2 operator += (const vec2 &v) { x+=v.x; y+=v.y; return *this; }
+    vec2 operator -= (const vec2 &v) { x-=v.x; y-=v.y; return *this; }
+
+    float length() const { return sqrtf(x*x+y*y); }
+
+    vec2 &abs() { x=fabsf(x); y=fabsf(y); return *this; }
+
+    vec2 &normalize()
+    {
+        float len=length();
+        if(len<0.00001f)
+            return *this;
+
+        *this *=(1.0f/len);
+        return *this;
+    }
+};
+
+inline vec2 operator * ( float a, const vec2& v ) { return vec2(v.x*a,v.y*a); }
+inline vec2 operator * ( const vec2& v, float a ) { return vec2(v.x*a,v.y*a); }
+inline vec2 operator / ( const vec2& v, float a ) { return vec2(v.x/a,v.y/a); }
+
 struct vec3
 {
     float x;

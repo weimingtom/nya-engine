@@ -208,6 +208,14 @@ vec3 operator * (const mat4 &m,const vec3 &v)
 				m.m[0][2]*v.x+m.m[1][2]*v.y+m.m[2][2]*v.z+m.m[3][2]);
 }
 
+vec4 operator * (const vec4 &v,const mat4 &m)
+{
+    return vec4(m.m[0][0]*v.x+m.m[0][1]*v.y+m.m[0][2]*v.z+m.m[0][3]*v.w,
+                m.m[1][0]*v.x+m.m[1][1]*v.y+m.m[1][2]*v.z+m.m[1][3]*v.w,
+                m.m[2][0]*v.x+m.m[2][1]*v.y+m.m[2][2]*v.z+m.m[2][3]*v.w,
+                m.m[3][0]*v.x+m.m[3][1]*v.y+m.m[3][2]*v.z+m.m[3][3]*v.w);
+}
+
 vec4 operator * (const mat4 &m,const vec4 &v)
 {
     return vec4(m.m[0][0]*v.x+m.m[1][0]*v.y+m.m[2][0]*v.z+m.m[3][0]*v.w,

@@ -34,6 +34,7 @@ struct mat4
 
 vec3 operator * (const mat4 &m,const vec3 &v);
 vec3 operator * (const vec3 &v,const mat4 &m);
+vec4 operator * (const vec4 &v,const mat4 &m);
 vec4 operator * (const mat4 &m,const vec4 &v);
 
 }
