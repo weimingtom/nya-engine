@@ -180,17 +180,18 @@ bool mesh::load_nms_material_section(shared_mesh &res,const void *data,size_t si
         const ushort vec4_count=reader.read<ushort>();
         for(ushort j=0;j<vec4_count;++j)
         {
-            read_string(reader);
-            reader.read<float>();
-            reader.read<float>();
-            reader.read<float>();
-            reader.read<float>();
+            const std::string name=read_string(reader);
+            const float r=reader.read<float>();
+            const float g=reader.read<float>();
+            const float b=reader.read<float>();
+            const float a=reader.read<float>();
+            m.set_param( m.get_param_idx(name.c_str()),r,g,b,a);
         }
 
         const ushort ints_count=reader.read<ushort>();
         for(ushort j=0;j<ints_count;++j)
         {
-            read_string(reader);
+            read_string(reader); //ToDo
             reader.read<int>();
         }
     }
