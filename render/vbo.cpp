@@ -237,7 +237,7 @@ int get_gl_element_type(vbo::element_type type)
 
 void vbo::draw(unsigned int offset,unsigned int count)
 {
-    if(current_verts<0)
+    if(current_verts<0 || !count)
         return;
 
     shader::apply();

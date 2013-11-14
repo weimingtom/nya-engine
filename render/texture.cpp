@@ -83,6 +83,17 @@ void gl_select_multitex_layer(int idx)
     texture::select_multitex_slot(idx);
 #endif
 }
+
+void setup_pack_alignment()
+{
+    static bool set=false;
+    if(set)
+        return;
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+    glPixelStorei(GL_PACK_ALIGNMENT,1);
+    set=true;
+}
 #endif
 
 bool texture::build_texture(const void *data,unsigned int width,unsigned int height,color_format format)
@@ -187,6 +198,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         GLint texSize;
         glGetIntegerv(GL_MAX_TEXTURE_SIZE, &texSize);
         max_tex_size=texSize;
+        setup_pack_alignment();
     }
 
     if(width>max_tex_size || height>max_tex_size)
@@ -254,6 +266,32 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     const bool pot=((width&(width-1))==0 && (height&(height-1))==0);
     const bool has_mipmap=(data && pot);
 
+    if(pot)
+    {
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
+    }
+    else
+    {
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+    }
+    
+    //if(format<depth16)
+    {
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+        
+        if(has_mipmap)
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+        else
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+    }/*
+      else
+      {
+      glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+      }*/
+
 #ifdef GL_GENERATE_MIPMAP
     if(has_mipmap)
         glTexParameteri(GL_TEXTURE_2D,GL_GENERATE_MIPMAP,GL_TRUE);
@@ -266,32 +304,6 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     if(has_mipmap)
         glGenerateMipmap(GL_TEXTURE_2D);
 #endif
-
-    if(pot)
-    {
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-    }
-    else
-    {
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
-    }
-
-    //if(format<depth16)
-    {
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-
-        if(has_mipmap)
-            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-        else
-            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-    }/*
-    else
-    {
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    }*/
 
     glBindTexture(GL_TEXTURE_2D,0);
 #endif
@@ -422,6 +434,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
         GLint texSize;
         glGetIntegerv(GL_MAX_TEXTURE_SIZE, &texSize);
         max_tex_size=texSize;
+        setup_pack_alignment();
     }
 
     if(width>max_tex_size || height>max_tex_size)
@@ -479,6 +492,12 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_R,GL_CLAMP_TO_EDGE);
 #endif
 
+    glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    if(data)
+        glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+    else
+        glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+
 #ifdef GL_GENERATE_MIPMAP
     if(data)
         glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_GENERATE_MIPMAP,GL_TRUE);
@@ -491,11 +510,6 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     if(data)
         glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 #endif
-    glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-    if(data)
-        glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-    else
-        glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 
     glBindTexture(GL_TEXTURE_CUBE_MAP,0);
 #endif
