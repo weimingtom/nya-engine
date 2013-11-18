@@ -182,7 +182,11 @@ private:
 };
 
 #ifdef _WIN32
-	int CALLBACK WinMain(HINSTANCE,HINSTANCE,LPSTR,int)
+    #ifdef WINDOWS_PHONE8
+        int main( Platform::Array<Platform::String^>^ args)
+    #else
+    	int CALLBACK WinMain(HINSTANCE,HINSTANCE,LPSTR,int)
+    #endif
 #else
 	int main(int argc, char **argv)
 #endif
