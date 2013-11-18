@@ -9,6 +9,14 @@
 
 #include "stdio.h"
 
+#ifdef _WIN32
+  #include <windows.h>
+  #ifdef _M_ARM
+    #define DIRECTX11
+    #define WINDOWS_PHONE8
+  #endif
+#endif
+
 #if defined _WIN32 && defined _M_ARM
     #define DIRECTX11
     #define WINDOWS_PHONE8
@@ -80,9 +88,11 @@ private:
             "}";
 #else
 			"varying vec4 color;"
-			"void main()"			"{"
+			"void main()"
+			"{"
 				"color=gl_Color;"
-                "gl_Position=gl_ModelViewProjectionMatrix*gl_Vertex;"			"}";
+                "gl_Position=gl_ModelViewProjectionMatrix*gl_Vertex;"
+			"}";
 #endif
 
 		const char *ps_code=
@@ -94,8 +104,10 @@ private:
             "}";
 #else
 			"varying vec4 color;"
-			"void main()"			"{"
-				"gl_FragColor=color;"			"}";
+			"void main()"
+			"{"
+				"gl_FragColor=color;"
+			"}";
 #endif
 
 		m_shader.add_program(nya_render::shader::vertex,vs_code);
