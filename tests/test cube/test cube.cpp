@@ -6,21 +6,10 @@
 #include "render/vbo.h"
 #include "render/shader.h"
 #include "render/render.h"
+#include "render/platform_specific_gl.h" 
+#include "system/shaders_cache_provider.h"
 
 #include "stdio.h"
-
-#ifdef _WIN32
-  #include <windows.h>
-  #ifdef _M_ARM
-    #define DIRECTX11
-    #define WINDOWS_PHONE8
-  #endif
-#endif
-
-#if defined _WIN32 && defined _M_ARM
-    #define DIRECTX11
-    #define WINDOWS_PHONE8
-#endif
 
 class test_cube: public nya_system::app
 {
@@ -74,6 +63,13 @@ private:
 		m_vbo.set_colors(sizeof(float)*3,3);
         m_vbo.set_index_data(indices,nya_render::vbo::index2b,
 			     sizeof(indices)/sizeof(unsigned short));
+
+#ifdef DIRECTX11
+        static nya_system::compiled_shaders_provider csp;
+        csp.set_load_path( nya_system::get_app_path() );
+        csp.set_save_path( nya_system::get_app_path() );
+        nya_render::set_compiled_shaders_provider( &csp );
+#endif
 
 		const char *vs_code=
 #ifdef DIRECTX11
