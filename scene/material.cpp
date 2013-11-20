@@ -157,6 +157,21 @@ const char *material::get_texture_semantics(int idx) const
     return internal().m_textures[idx].semantics.c_str();
 }
 
+const texture_proxy &material::get_texture(const char *semantics) const
+{
+    static texture_proxy invalid;
+    if(!semantics)
+        return invalid;
+
+    for(int i=0;i<int(internal().m_textures.size());++i)
+    {
+        if(internal().m_textures[i].semantics==semantics)
+            return  internal().m_textures[i].proxy;
+    }
+
+    return invalid;
+}
+
 const char *material::get_param_name(int idx) const
 {
     if(idx<0 || idx>=(int)internal().m_params.size())

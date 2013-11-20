@@ -121,6 +121,7 @@ public:
     int get_textures_count() const { return int(internal().m_textures.size()); }
     const texture_proxy &get_texture(int idx) const;
     const char *get_texture_semantics(int idx) const;
+    const texture_proxy &get_texture(const char *semantics) const;
 
     int get_params_count() const { return internal().m_shader.internal().get_uniforms_count(); }
     const char *get_param_name(int idx) const;
