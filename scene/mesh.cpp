@@ -136,6 +136,22 @@ bool mesh::load_nms_skeleton_section(shared_mesh &res,const void *data,size_t si
     return true;
 }
 
+nya_render::blend::mode blend_mode_from_string(const std::string &s)
+{
+    if(s=="src_alpha") return nya_render::blend::src_alpha;
+    if(s=="inv_src_alpha") return nya_render::blend::inv_src_alpha;
+    if(s=="src_color") return nya_render::blend::src_color;
+    if(s=="inv_src_color") return nya_render::blend::inv_src_color;
+    if(s=="dst_color") return nya_render::blend::dst_color;
+    if(s=="inv_dst_color") return nya_render::blend::inv_dst_color;
+    if(s=="dst_alpha") return nya_render::blend::dst_alpha;
+    if(s=="inv_dst_alpha") return nya_render::blend::inv_dst_alpha;
+    if(s=="zero") return nya_render::blend::zero;
+    if(s=="one") return nya_render::blend::one;
+
+    return nya_render::blend::one;
+}
+
 bool mesh::load_nms_material_section(shared_mesh &res,const void *data,size_t size)
 {
     nya_memory::memory_reader reader(data,size);
@@ -173,8 +189,17 @@ bool mesh::load_nms_material_section(shared_mesh &res,const void *data,size_t si
                 sh.load(value.c_str());
                 m.set_shader(sh);
             }
-            else if(name=="nya_blend" && value == "src_alpha:inv_src_alpha")
-                m.set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha); //ToDo
+            else if(name=="nya_blend")
+            {
+                size_t div=value.find(':');
+                if(div!=std::string::npos)
+                {
+                    std::string src=value;
+                    src.resize(div);
+                    std::string dst=value.substr(div+1);
+                    m.set_blend(true,blend_mode_from_string(src),blend_mode_from_string(dst));
+                }
+            }
         }
 
         const ushort vec4_count=reader.read<ushort>();
