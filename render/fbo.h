@@ -33,12 +33,10 @@ public:
     void unbind();
 
 public:
-    fbo():m_fbo_idx(0),m_color_target_idx(0),m_depth_target_idx(0){}
+    fbo(): m_fbo_idx(-1) {}
 
 private:
-    unsigned int m_fbo_idx;
-    unsigned int m_color_target_idx;
-    unsigned int m_depth_target_idx;
+    int m_fbo_idx;
 };
 
 }
