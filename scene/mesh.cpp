@@ -200,6 +200,15 @@ bool mesh::load_nms_material_section(shared_mesh &res,const void *data,size_t si
                     m.set_blend(true,blend_mode_from_string(src),blend_mode_from_string(dst));
                 }
             }
+            else if(name=="nya_cull")
+            {
+                if(value=="ccw")
+                    m.set_cull_face(true,nya_render::cull_face::ccw);
+                else if(value=="cw")
+                    m.set_cull_face(true,nya_render::cull_face::cw);
+            }
+            else if(name=="nya_zwrite")
+                m.set_zwrite(value=="true"||value=="1");
         }
 
         const ushort vec4_count=reader.read<ushort>();
