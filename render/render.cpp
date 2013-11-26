@@ -180,30 +180,13 @@ void clear(bool color,bool depth)
 	if(!get_context())
 		return;
 
-    //ToDo
-#ifdef WINDOWS_PHONE8
-    static ID3D11RenderTargetView* color_target=0;
-    static ID3D11DepthStencilView* depth_target=0;
-    if(!color_target)
-    	get_context()->OMGetRenderTargets(1,&color_target,&depth_target);
+    dx_target target=get_target();
 
-#else
-    ID3D11RenderTargetView* color_target=0;
-    ID3D11DepthStencilView* depth_target=0;
-	get_context()->OMGetRenderTargets(1,&color_target,&depth_target);
-#endif
+    if(color && target.color)
+		get_context()->ClearRenderTargetView(target.color,dx_clear_color);
 
-	if(color && color_target)
-    {
-		get_context()->ClearRenderTargetView(color_target,dx_clear_color);
-        color_target->Release();
-    }
-
-	if(depth && depth_target)
-    {
-		get_context()->ClearDepthStencilView(depth_target,D3D11_CLEAR_DEPTH,dx_clear_depth,0);
-        depth_target->Release();
-    }
+    if(depth && target.depth)
+        get_context()->ClearDepthStencilView(target.depth,D3D11_CLEAR_DEPTH,dx_clear_depth,0);
 #else
 	unsigned int mode=0;
 	if(color)

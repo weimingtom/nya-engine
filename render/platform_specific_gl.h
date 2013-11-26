@@ -70,10 +70,18 @@ namespace nya_render
         unsigned int size;
 
 #ifdef DIRECTX11
+        ID3D11Texture2D *tex;
         ID3D11ShaderResourceView* srv;
         ID3D11SamplerState* sampler_state;
+        ID3D11RenderTargetView *color_targets[6];
+        ID3D11DepthStencilView *depth_target;
+        DXGI_FORMAT dx_format;
 
-        texture_obj(): srv(0),sampler_state(0),size(0) {}
+        texture_obj(): tex(0),srv(0),sampler_state(0),size(0),depth_target(0)
+        {
+            for(int i=0;i<6;++i)
+                color_targets[i]=0;
+        }
 #else
         unsigned int tex_id;
         unsigned int gl_type;
@@ -100,5 +108,18 @@ namespace nya_render
     ID3D11InputLayout *add_layout(int mesh_idx,
                                   const D3D11_INPUT_ELEMENT_DESC*desc,size_t desc_size);
     void remove_layout(int mesh_idx);
+
+    struct dx_target
+    {
+        ID3D11RenderTargetView *color;
+        ID3D11DepthStencilView *depth;
+
+        dx_target(): color(0),depth(0) {}
+    };
+
+    dx_target get_default_target();
+    dx_target get_target();
+
+    void set_target(ID3D11RenderTargetView *color,ID3D11DepthStencilView *depth);
 #endif
 }

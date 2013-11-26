@@ -146,7 +146,11 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 
     desc.SampleDesc.Count=1;
     desc.Usage=D3D11_USAGE_DEFAULT;
-    desc.BindFlags=D3D11_BIND_SHADER_RESOURCE|D3D11_BIND_RENDER_TARGET;
+    if(format>=depth16)
+        desc.BindFlags=D3D11_BIND_DEPTH_STENCIL;//ToDo: D3D11_BIND_SHADER_RESOURCE
+    else
+        desc.BindFlags=D3D11_BIND_SHADER_RESOURCE|D3D11_BIND_RENDER_TARGET;
+
     if(data)
         desc.MiscFlags=D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
@@ -166,11 +170,14 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     if(!tex)
         return false;
 
-    ID3D11ShaderResourceView *srv;
-    get_device()->CreateShaderResourceView(tex,0,&srv);
-    tex->Release();
-    if(!srv)
-        return false;
+    ID3D11ShaderResourceView *srv=0;
+    if(format<depth16) //ToDo
+    {
+        get_device()->CreateShaderResourceView(tex,0,&srv);
+        tex->Release();
+        if(!srv)
+            return false;
+    }
 
     D3D11_SAMPLER_DESC sdesc;
     memset(&sdesc,0,sizeof(sdesc));
@@ -184,6 +191,8 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     sdesc.MaxLOD = D3D11_FLOAT32_MAX;
 
     m_tex=texture_obj::add();
+    texture_obj::get(m_tex).tex=tex;
+    texture_obj::get(m_tex).dx_format=desc.Format;
     texture_obj::get(m_tex).srv=srv;
 
     get_device()->CreateSamplerState(&sdesc,&texture_obj::get(m_tex).sampler_state);
@@ -328,8 +337,6 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     if(!get_device())
         return false;
 
-    if(!data) return false; //ToDo
-
     if(m_tex>=0)
         release();
 
@@ -342,7 +349,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     desc.ArraySize=6;
 
     D3D11_SUBRESOURCE_DATA srdata;
-    srdata.pSysMem=data[0];
+    srdata.pSysMem=data?data[0]:0;
     srdata.SysMemPitch=width*4;
     srdata.SysMemSlicePitch=0;
 
@@ -377,7 +384,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     for(int i=0;i<6;++i)
     {
         srdatas[i]=srdata;
-        srdatas[i].pSysMem=data[i];
+        srdatas[i].pSysMem=data?data[i]:0;
     }
 
     ID3D11Texture2D *tex=0;
@@ -420,6 +427,8 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     sdesc.MaxLOD = D3D11_FLOAT32_MAX;
 
     m_tex=texture_obj::add();
+    texture_obj::get(m_tex).tex=tex;
+    texture_obj::get(m_tex).dx_format=desc.Format;
     texture_obj::get(m_tex).srv=srv;
 
     get_device()->CreateSamplerState(&sdesc,&texture_obj::get(m_tex).sampler_state);

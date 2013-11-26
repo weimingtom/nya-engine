@@ -1,11 +1,14 @@
 //https://code.google.com/p/nya-engine/
 
 #include "fbo.h"
+#include "render.h"
 #include "platform_specific_gl.h"
 
 namespace
 {
 #ifdef DIRECTX11
+    nya_render::dx_target default_target;
+    nya_render::dx_target target;
 #else
     int default_fbo_idx=0;
 #endif
@@ -13,12 +16,54 @@ namespace
 
 namespace nya_render
 {
+
+#ifdef DIRECTX11
+    void init_default_target()
+    {
+        //ToDo
+//#ifdef WINDOWS_PHONE8
+        if(default_target.color)
+            return;
+//#endif
+        ID3D11RenderTargetView *color=0;
+        ID3D11DepthStencilView *depth=0;
+        get_context()->OMGetRenderTargets(1,&color,&depth);
+        if(color)
+            target.color=default_target.color=color;
+
+        if(depth)
+            target.depth=default_target.depth=depth;
+    }
+    
+    dx_target get_default_target() { init_default_target(); return default_target; }
+    dx_target get_target() { init_default_target(); return target; }
+
+    void set_target(ID3D11RenderTargetView *color,ID3D11DepthStencilView *depth)
+    {
+        if(!get_context())
+            return;
+
+        init_default_target();
+
+        target.color=color;
+        target.depth=depth;
+
+        if(color)
+            get_context()->OMSetRenderTargets(1,&color,depth);
+        else
+            get_context()->OMSetRenderTargets(0,0,depth);
+    }
+#endif
+
     struct fbo_obj
     {
         int color_tex_idx;
         int depth_tex_idx;
 
 #ifdef DIRECTX11
+        int cubemap_side;
+
+        fbo_obj(): color_tex_idx(-1),depth_tex_idx(-1),cubemap_side(-1) {}
 #else
         unsigned int fbo_idx;
 
@@ -101,7 +146,9 @@ void fbo::set_color_target(const texture &tex,cubemap_side side)
     fbo_obj &fbo=fbo_obj::get(m_fbo_idx);
     fbo.color_tex_idx=tex.m_tex;
 
-#ifndef DIRECTX11
+#ifdef DIRECTX11
+    fbo.cubemap_side=side;
+#else
     if(!fbo.fbo_idx)
     {
         if(!check_init_fbo())
@@ -109,10 +156,7 @@ void fbo::set_color_target(const texture &tex,cubemap_side side)
 
         fbo_glGenFramebuffers(1,&fbo.fbo_idx);
     }
-#endif
 
-#ifdef DIRECTX11
-#else
     if(!fbo.fbo_idx)
         return;
 
@@ -179,6 +223,51 @@ void fbo::bind()
     fbo_obj &fbo=fbo_obj::get(m_fbo_idx);
 
 #ifdef DIRECTX11
+    if(!get_device())
+        return;
+
+    ID3D11RenderTargetView *color=0;
+    ID3D11DepthStencilView *depth=0;
+
+    if(fbo.color_tex_idx>=0)
+    {
+        texture_obj &tex=texture_obj::get(fbo.color_tex_idx);
+        color=tex.color_targets[fbo.cubemap_side>=0?fbo.cubemap_side:0];
+        if(!color && tex.tex)
+        {
+            D3D11_RENDER_TARGET_VIEW_DESC rtvd;
+            rtvd.Format=tex.dx_format;
+            if(fbo.cubemap_side<0)
+            {
+	            rtvd.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2D;
+	            rtvd.Texture2D.MipSlice=0;
+            }
+            else
+            {
+                rtvd.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
+                rtvd.Texture2DArray.FirstArraySlice=fbo.cubemap_side;
+                rtvd.Texture2DArray.ArraySize=1;
+                rtvd.Texture2DArray.MipSlice=0;
+            }
+
+            get_device()->CreateRenderTargetView(tex.tex,&rtvd,&color);
+        }
+    }
+    
+    if(fbo.depth_tex_idx>=0)
+    {
+        texture_obj &tex=texture_obj::get(fbo.depth_tex_idx);
+        depth=tex.depth_target;
+        if(!tex.depth_target && tex.tex)
+        {
+            CD3D11_DEPTH_STENCIL_VIEW_DESC dsvd(D3D11_DSV_DIMENSION_TEXTURE2D);
+            dsvd.Format=tex.dx_format;
+            dsvd.Texture2D.MipSlice=0;
+            get_device()->CreateDepthStencilView(tex.tex,&dsvd,&tex.depth_target);
+        }
+    }
+
+    set_target(color,depth);
 #else
     if(!fbo.fbo_idx)
     {
@@ -271,6 +360,8 @@ void fbo::bind()
 void fbo::unbind()
 {
 #ifdef DIRECTX11
+    dx_target target=get_default_target();
+    set_target(target.color,target.depth);
 #else
     fbo_glBindFramebuffer(GL_FRAMEBUFFER,default_fbo_idx);
 #endif
