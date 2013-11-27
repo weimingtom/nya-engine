@@ -639,6 +639,24 @@ bool mesh_internal::is_anim_finished(int layer) const
 
 bool mesh::is_anim_finished(int layer) const { return internal().is_anim_finished(layer); }
 
+nya_math::vec3 mesh::get_bone_pos(int bone_idx,bool local)
+{
+    const nya_math::vec3 pos=internal().m_skeleton.get_bone_pos(bone_idx);
+    if(local)
+        return pos;
+
+    return internal().get_transform().transform_vec( pos );
+}
+
+nya_math::quat mesh::get_bone_rot(int bone_idx,bool local)
+{
+    const nya_math::quat rot=internal().m_skeleton.get_bone_rot(bone_idx);
+    if(local)
+        return rot;
+
+    return internal().get_transform().transform_quat( rot );
+}
+
 void mesh::set_bone_pos(int bone_idx,const nya_math::vec3 &pos,bool additive)
 {
     if(bone_idx<0 || bone_idx>=internal().m_skeleton.get_bones_count())

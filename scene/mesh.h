@@ -39,8 +39,24 @@ struct shared_mesh
         groups.clear();
         skeleton=nya_render::skeleton();
 
+        if(add_data)
+        {
+            delete add_data;
+            add_data=0;
+        }
+
         return true;
     }
+
+    shared_mesh(): add_data(0) {}
+
+    struct additional_data
+    {
+        virtual const char *type() { return 0; }
+        virtual ~additional_data() {}
+    };
+
+    additional_data *add_data;
 };
 
 typedef proxy<animation> animation_proxy;
@@ -160,6 +176,13 @@ public:
     const material &get_material(int material_idx) const;
     material &modify_material(int material_idx);
     void set_material(int material_idx,const material &mat);
+
+public:
+    int get_bone_idx(const char *name) { return internal().m_skeleton.get_bone_idx(name); }
+    nya_math::vec3 get_bone_pos(int bone_idx,bool local=false);
+    nya_math::quat get_bone_rot(int bone_idx,bool local=false);
+    nya_math::vec3 get_bone_pos(const char *name,bool local=false) { return get_bone_pos(get_bone_idx(name),local); }
+    nya_math::quat get_bone_rot(const char *name,bool local=false) { return get_bone_rot(get_bone_idx(name),local); }
 
 public:
     void set_bone_pos(int bone_idx,const nya_math::vec3 &pos,bool additive);
