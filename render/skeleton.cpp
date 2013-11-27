@@ -243,7 +243,7 @@ void skeleton::update_ik(int idx)
             nya_math::quat rot(axis,ang);
 
             if(k.links[l].limit)
-                rot.limit_angle(k.links[l].limit_from,k.links[l].limit_to);
+                rot.limit_pitch(k.links[l].limit_from,k.links[l].limit_to);
 
             rot.normalize();
 

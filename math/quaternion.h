@@ -32,7 +32,7 @@ struct quat
 
     vec3 get_euler() const; //pitch,yaw,roll
 
-    quat &limit_angle(float from,float to);
+    quat &limit_pitch(float from,float to);
 
     quat &normalize();
 

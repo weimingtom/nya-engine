@@ -55,36 +55,36 @@ vec3 quat::get_euler() const
     const float x2=v.x+v.x;
     const float y2=v.y+v.y;
     const float z2=v.z+v.z;
-    const float xz2=v.x*z2;
-    const float wy2=w*y2;
-
-    float temp=wy2-xz2;
+    const float yz2=v.y*z2;
+    const float wx2=w*x2;
+    
+    float temp=wx2-yz2;
     if(temp>=1.0f)
         temp=1.0f;
     else if(temp<=-1.0f)
         temp=-1.0f;
-
-    const float ang=asinf(temp);
-
-    const float xx2=v.x*x2;
+    
+    const float pitch=asinf(temp);
+    
+    const float yy2=v.y*y2;
     const float xy2=v.x*y2;
     const float zz2=v.z*z2;
     const float wz2=w*z2;
-
-    if(ang>=constants::pi_2)
-        return vec3(atan2f(xy2-wz2,1.0f-xx2+zz2),ang,0.0f);
-
-    if(ang> -constants::pi_2)
+    
+    if(pitch>=constants::pi_2)
+        return vec3(pitch,atan2f(xy2-wz2,1.0f-yy2-zz2),0.0f);
+    
+    if(pitch> -constants::pi_2)
     {
-        const float yz2=v.y*z2;
-        const float wx2=w*x2;
-        const float yy2=v.y*y2;
-
-        return vec3(atan2f(yz2+wx2,1.0f-xx2+yy2),ang,
-                    atan2f(xy2+wz2,1.0f-yy2+zz2));
+        const float xz2=v.x*z2;
+        const float wy2=w*y2;
+        const float xx2=v.x*x2;
+        
+        return vec3(pitch,atan2f(xz2+wy2,1.0f-yy2-xx2),
+                    atan2f(xy2+wz2,1.0f-xx2-zz2));
     }
-
-    return vec3(-atan2f(xy2-wz2,1.0f-xx2+zz2),ang,0.0f);
+    
+    return vec3(pitch,-atan2f(xy2-wz2,1.0f-yy2-zz2),0.0f);
 }
 
 quat::quat(float pitch,float yaw,float roll)
@@ -100,8 +100,8 @@ quat::quat(float pitch,float yaw,float roll)
     const float sin_z=sinf(roll);
     const float cos_z=cosf(roll);
 
-    v.x=sin_x*cos_y*cos_z - cos_x*sin_y*sin_z;
-    v.y=cos_x*sin_y*cos_z + sin_x*cos_y*sin_z;
+    v.x=sin_x*cos_y*cos_z + cos_x*sin_y*sin_z;
+    v.y=cos_x*sin_y*cos_z - sin_x*cos_y*sin_z;
     v.z=cos_x*cos_y*sin_z - sin_x*sin_y*cos_z;
     w  =cos_x*cos_y*cos_z + sin_x*sin_y*sin_z;
 }
@@ -114,19 +114,29 @@ quat::quat(vec3 axis,float angle)
     w=cosf(angle);
 }
 
-quat &quat::limit_angle(float from,float to)
+quat &quat::limit_pitch(float from,float to)
 {
-    vec3 ang=get_euler();
+    const float x2=v.x+v.x;
+    const float z2=v.z+v.z;
 
-    if(ang.x<from)
-        ang.x=from;
-    if(ang.x>to)
-        ang.x=to;
+    float temp=w*x2-v.y*z2;
+    if(temp>=1.0f)
+        temp=1.0f;
+    else if(temp<=-1.0f)
+        temp=-1.0f;
 
-    ang.y=0.0f;
-    ang.z=0.0f;
+    float pitch=asinf(temp);
+    if(pitch<from)
+        pitch=from;
+    if(pitch>to)
+        pitch=to;
 
-    return *this=quat(ang.x,ang.y,ang.z);
+    pitch*=0.5f;
+    v.x=sinf(pitch);
+    v.y=v.z=0.0f;
+    w=cosf(pitch);
+
+    return *this;
 }
 
 quat &quat::normalize()
