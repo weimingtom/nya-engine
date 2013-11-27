@@ -7,7 +7,6 @@
 #pragma once
 
 #include "log/log.h"
-#include "memory/pool.h"
 
 #include <string>
 #include <list>
@@ -342,8 +341,6 @@ public:
 private:
     typedef std::deque<event> events_deque;
     events_deque m_events;
-
-    //font m_default_font;
 };
 
 }
