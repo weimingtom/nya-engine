@@ -79,13 +79,6 @@ bool list::on_mouse_move(uint x,uint y,bool inside)
                     layout::event e;
 
                     e.type="mover_element";
-                    event_data *data=list_event_data::create();
-
-                    data->element=m_elements[num];
-                    data->idx=num;
-
-                    e.data=data;
-
                     send_event(get_id(),e);
                 }
 
@@ -165,16 +158,8 @@ bool list::on_mouse_button(layout::mbutton button,bool pressed)
         {
             if(has_events())
             {
-                //get_log()<<"Elem: "<<m_mover<<" "<<m_elements[m_mover].c_str()<<"\n";
                 layout::event e;
-
                 e.type="select_element";
-                event_data *data=list_event_data::create();
-
-                data->element=m_elements[m_mover];
-                data->idx=m_mover;
-
-                e.data=data;
 
                 send_event(get_id(),e);
             }

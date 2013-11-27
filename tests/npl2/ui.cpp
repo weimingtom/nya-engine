@@ -322,33 +322,32 @@ void ui::process_events(event &e)
     {
         if(e.type=="select_element")
         {
-            nya_ui::list::event_data *data=dynamic_cast<nya_ui::list::event_data*>(e.data);
-            if(!data)
+            const char *selected=m_customise_lst.get_selected_element();
+            if(!selected)
                 return;
 
             if(m_custom_mode==cos_up)
-                get_scene().set_imouto_attr(m_customise_group.c_str(),data->element.c_str(),0);
+                get_scene().set_imouto_attr(m_customise_group.c_str(),selected,0);
             else if(m_custom_mode==cos_dn)
-                get_scene().set_imouto_attr(m_customise_group.c_str(),data->element.c_str(),1);
+                get_scene().set_imouto_attr(m_customise_group.c_str(),selected,1);
             else
-                get_scene().set_imouto_attr(m_customise_group.c_str(),data->element.c_str());
+                get_scene().set_imouto_attr(m_customise_group.c_str(),selected);
 
             return;
         }
 
         if(e.type=="mover_element")
         {
-            //nya_log::get_log()<<"mover_element\n";
-            nya_ui::list::event_data *data=dynamic_cast<nya_ui::list::event_data*>(e.data);
-            if(!data)
+            const char *selected=m_customise_lst.get_mover_element();
+            if(!selected)
                 return;
 
             if(m_custom_mode==cos_up)
-                get_scene().set_imouto_preview(m_customise_group.c_str(),data->element.c_str(),0);
+                get_scene().set_imouto_preview(m_customise_group.c_str(),selected,0);
             else if(m_custom_mode==cos_dn)
-                get_scene().set_imouto_preview(m_customise_group.c_str(),data->element.c_str(),1);
+                get_scene().set_imouto_preview(m_customise_group.c_str(),selected,1);
             else
-                get_scene().set_imouto_preview(m_customise_group.c_str(),data->element.c_str());
+                get_scene().set_imouto_preview(m_customise_group.c_str(),selected);
 
             return;
         }
@@ -361,34 +360,27 @@ void ui::process_events(event &e)
 
     if(e.sender=="scenery_lst")
     {
-        if(e.type=="select_element" && e.data)
-        {
-            nya_ui::list::event_data *data=dynamic_cast<nya_ui::list::event_data*>(e.data);
-            if(data)
-                get_scene().set_bkg(data->element.c_str());
-        }
+        const char *selected=m_scenery_lst.get_selected_element();
+        if(!selected)
+            return;
+
+        get_scene().set_bkg(selected);
+        return;
     }
 
     if(e.sender=="anim_lst")
     {
-        if(e.type=="select_element" && e.data)
+        if(e.type=="select_element")
         {
-            nya_ui::list::event_data *data=dynamic_cast<nya_ui::list::event_data*>(e.data);
-            if(!data)
-                return;
-
-            get_scene().set_anim(data->idx);
+            get_scene().set_anim(m_anim_lst.get_selected_idx());
+            return;
         }
     }
 
     if(e.sender=="opac_sldr")
     {
-        if(e.type=="value_changed" && e.data)
+        if(e.type=="value_changed")
         {
-            nya_ui::slider::event_data *data=dynamic_cast<nya_ui::slider::event_data*>(e.data);
-            if(!data)
-                return;
-
             int num=-1;
             if(m_customise_group=="COSTUME" || m_customise_group=="UNDER")
             {
@@ -398,10 +390,8 @@ void ui::process_events(event &e)
                     num=1;
             }
 
-            get_scene().set_part_opacity(m_customise_group.c_str(),data->value,num);
-            //nya_log::get_log()<<data->value<<"\n";
+            get_scene().set_part_opacity(m_customise_group.c_str(),m_opac_slider.get_value(),num);
         }
-        //nya_log::get_log()<<e.type.c_str();
         return;
     }
 

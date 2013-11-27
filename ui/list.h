@@ -17,16 +17,13 @@ public:
             return;
 
         m_elements.push_back(name);
-
         update_rects();
     }
 
     virtual void remove_elements()
     {
         m_elements.clear();
-        m_scroll=0;
-        m_mover=0;
-        m_selected=0;
+        m_scroll=m_mover=m_selected=0;
         update_rects();
     }
 
@@ -63,8 +60,10 @@ public:
     }
 
     int get_selected_idx() { return m_selected; }
-
     const char *get_selected_element() { return get_element((uint)m_selected); }
+
+    int get_mover_idx() { return m_mover; }
+    const char *get_mover_element() { return get_element((uint)m_mover); }
 
     int get_elements_count() { return (int)m_elements.size(); }
 
@@ -72,10 +71,8 @@ public:
     virtual void set_scroll_size(uint scroll_area_width,uint scroll_width,
                                  uint scroll_height, uint button_height)
     {
-        m_scroll_area_width=scroll_area_width;
-        m_scroll_width=scroll_width;
-        m_scroll_height=scroll_height;
-        m_button_height=button_height;
+        m_scroll_area_width=scroll_area_width, m_scroll_width=scroll_width;
+        m_scroll_height=scroll_height, m_button_height=button_height;
         update_rects();
     }
 
@@ -84,18 +81,6 @@ public:
         m_entry_height=height;
         update_rects();
     }
-
-public:
-    struct event_data: public layout::event_data
-    {
-        std::string element;
-        int idx;
-
-        event_data(): idx(-1) {}
-    };
-
-protected:
-    typedef event_data_allocator<event_data> list_event_data;
 
 protected:
     virtual void draw(layer &l) {}
@@ -129,11 +114,8 @@ public:
     list(): m_scroll(0), m_scroll_max(0),  m_mouse_x(0), m_mouse_y(0),
             m_mouse_hold_y(0), m_scrolling(false), m_selected(-1), m_mover(-1)
     {
-        m_scroll_area_width=12;
-        m_scroll_width=m_scroll_area_width;
-        m_scroll_height=20;
-        m_button_height=16;
-        m_entry_height=18;
+        m_scroll_area_width=12,m_scroll_width=m_scroll_area_width;
+        m_scroll_height=20,m_button_height=16,m_entry_height=18;
     }
 
 protected:
@@ -158,8 +140,7 @@ protected:
     rect m_button_up_rect;
 
 protected:
-    typedef std::string element;
-    std::vector<element> m_elements;
+    std::vector<std::string> m_elements;
     int m_selected;
     int m_mover;
 };

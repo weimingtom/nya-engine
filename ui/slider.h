@@ -10,7 +10,7 @@ namespace nya_ui
 class slider: public widget
 {
 public:
-    void get_value();
+    float get_value() { return m_value; }
     void set_value(float value) { m_value=clamp(value,0.0f,1.0f); update_rects(); }
 
     virtual void set_size(uint width,uint height)
@@ -24,17 +24,6 @@ public:
         m_slider_size=size;
         update_rects();
     }
-
-public:
-    struct event_data: public layout::event_data
-    {
-        float value;
-
-        event_data(): value(0.0f) {}
-    };
-
-protected:
-    typedef event_data_allocator<event_data> slider_event_data;
 
 protected:
     void draw(layer &layer) {}
@@ -65,7 +54,7 @@ protected:
     }
 
 public:
-    slider(): m_value(0),m_mouse_pressed(false),m_mouse_last(0),m_slider_size(10),m_vertical(false){}
+    slider(): m_value(0),m_mouse_pressed(false),m_mouse_last(0),m_slider_size(10),m_vertical(false) {}
 
 protected:
     float m_value;

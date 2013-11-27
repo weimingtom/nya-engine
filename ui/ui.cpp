@@ -129,7 +129,6 @@ void layer::process()
         process_events(*it);
 
         //layout::process_events(*it);
-        it->free_data();
     }
 }
 

@@ -87,25 +87,10 @@ public:
     virtual point get_mouse_pos() { return point(m_mouse_x,m_mouse_y); }
 
 public:
-    struct event_data
-    {
-        virtual void free() {}
-    };
-
     struct event
     {
         std::string sender;
         std::string type;
-
-        event_data *data;
-
-        virtual void free_data()
-        {
-            if(data)
-                data->free();
-        }
-
-        event(): data(0) {}
     };
 
 public:
@@ -359,33 +344,6 @@ private:
     events_deque m_events;
 
     //font m_default_font;
-};
-
-template<typename ev_data>
-struct event_data_allocator: public ev_data
-{
-    static ev_data *create()
-    {
-        return get_allocator().allocate();
-    }
-
-    void free()
-    {
-        free_element(this);
-    }
-
-private:
-    typedef nya_memory::pool<event_data_allocator,32> allocator;
-    static allocator &get_allocator()
-    {
-        static nya_memory::pool<event_data_allocator,32> events;
-        return events;
-    }
-
-    static void free_element(event_data_allocator *data)
-    {
-        get_allocator().free(data);
-    }
 };
 
 }
