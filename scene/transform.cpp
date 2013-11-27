@@ -29,6 +29,21 @@ const transform &transform::get()
     return *active_transform;
 }
 
+nya_math::vec3 transform::transform_vec(const nya_math::vec3 &vec) const
+{
+    nya_math::vec3 out=vec;
+    out.x*=m_scale.x;
+    out.y*=m_scale.y;
+    out.z*=m_scale.z;
+
+    return m_pos+m_rot.rotate(out);
+}
+
+nya_math::quat transform::transform_quat(const nya_math::quat &quat) const
+{
+    return m_rot*quat;
+}
+
 nya_math::vec3 transform::inverse_transform(const nya_math::vec3 &vec) const
 {
     const float eps=0.0001f;

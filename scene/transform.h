@@ -31,6 +31,8 @@ public:
 public:
     nya_math::vec3 inverse_transform(const nya_math::vec3 &vec) const;
     nya_math::vec3 inverse_rot(const nya_math::vec3 &vec) const;
+    nya_math::vec3 transform_vec(const nya_math::vec3 &vec) const;
+    nya_math::quat transform_quat(const nya_math::quat &quat) const;
     nya_math::aabb transform_aabb(const nya_math::aabb &box) const;
 
 public:

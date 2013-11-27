@@ -16,7 +16,7 @@ void camera::set_proj(float fov,float aspect,float near,float far)
 {
     m_proj.identity();
     m_proj.perspective(fov,aspect,near,far);
-    if(this==active_camera.get())
+    if(this==active_camera.operator->())
         nya_render::set_projection_matrix(m_proj);
 
     m_recalc_frustum=true;
@@ -26,7 +26,7 @@ void camera::set_proj(float left,float right,float bottom,float top,float near,f
 {
     m_proj.identity();
     m_proj.frustrum(left,right,bottom,top,near,far);
-    if(this==active_camera.get())
+    if(this==active_camera.operator->())
         nya_render::set_projection_matrix(m_proj);
 
     m_recalc_frustum=true;
@@ -35,7 +35,7 @@ void camera::set_proj(float left,float right,float bottom,float top,float near,f
 void camera::set_proj(const nya_math::mat4 &mat)
 {
     m_proj=mat;
-    if(this==active_camera.get())
+    if(this==active_camera.operator->())
         nya_render::set_projection_matrix(m_proj);
 
     m_recalc_frustum=true;
