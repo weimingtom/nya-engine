@@ -65,7 +65,7 @@ bool vmd_loader::load(nya_scene::shared_animation &res,nya_scene::resource_data 
         if(bone_idx<0)
             continue;
 
-        const uint time=bone_frame.frame*33; //33.6
+        const uint time=bone_frame.frame*33.6;
 
         nya_render::animation::bone bone;
         nya_render::animation::interpolation interpolation;
@@ -86,6 +86,24 @@ bool vmd_loader::load(nya_scene::shared_animation &res,nya_scene::resource_data 
                                            bone_frame.bezier_rot[8]*c2f,bone_frame.bezier_rot[12]*c2f);
 
         res.anim.add_bone_frame(bone_idx,time,bone,interpolation);
+    }
+
+    const uint facial_frames_count=reader.read<uint>();
+    if(!reader.check_remained(facial_frames_count*(15+sizeof(uint)+sizeof(float))))
+        return false;
+
+    for(uint i=0;i<facial_frames_count;++i)
+    {
+        const std::string name=utf8_from_shiftjis(reader.get_data(),15);
+        reader.skip(15);
+        const uint frame=reader.read<uint>();
+        const float value=reader.read<float>();
+
+        const int curve_idx=res.anim.add_curve(name.c_str());
+        if(curve_idx<0)
+            continue;
+
+        res.anim.add_curve_frame(curve_idx,frame*33.6,value);
     }
 
     return true;
