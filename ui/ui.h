@@ -69,8 +69,8 @@ public:
     virtual bool mouse_scroll(uint dx,uint dy);
 
 public:
-    virtual uint get_width() { return m_width; }
-    virtual uint get_height() { return m_height; }
+    virtual uint get_width() { return m_rect.w; }
+    virtual uint get_height() { return m_rect.h; }
     virtual point get_mouse_pos() { return m_mouse_pos; }
 
 public:
@@ -91,16 +91,10 @@ public:
 
     virtual void process_events(const event &e);
 
-public:
-    layout(): m_x(0),m_y(0),m_width(0),m_height(0) {}
-
 protected:
     typedef std::list<widget*> widgets_list;
     widgets_list m_widgets;
-    int m_x;
-    int m_y;
-    uint m_width;
-    uint m_height;
+    rect m_rect;
     point m_mouse_pos;
 };
 

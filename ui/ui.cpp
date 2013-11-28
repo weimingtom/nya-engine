@@ -108,10 +108,10 @@ void layer::draw()
 
 void layer::resize(uint width, uint height)
 {
-    m_width=width;
-    m_height=height;
+    m_rect.w=width;
+    m_rect.h=height;
 
-    layout::resize(m_width,m_height);
+    layout::resize(m_rect.w,m_rect.h);
 }
 
 void layer::process(uint dt)
@@ -139,8 +139,8 @@ void layout::process_events(const layout::event &e)
 
 void layout::add_widget(widget &w)
 {
-    w.parent_moved(m_x,m_y);
-    w.parent_resized(m_width,m_height);
+    w.parent_moved(m_rect.x,m_rect.y);
+    w.parent_resized(m_rect.w,m_rect.h);
     w.calc_pos_markers();
 
     m_widgets.push_back(&w);
@@ -158,7 +158,7 @@ void layout::process_widgets(uint dt,layout &l)
 
 void layout::draw_widgets(layout &l)
 {
-    if(!m_width || !m_height)
+    if(!m_rect.w || !m_rect.h)
         return;
 
     for(widgets_list::iterator it=m_widgets.begin();
@@ -172,22 +172,22 @@ void layout::draw_widgets(layout &l)
 
 void layout::resize(uint width,uint height)
 {
-    m_width=width;
-    m_height=height;
+    m_rect.w=width;
+    m_rect.h=height;
 
     for(widgets_list::iterator it=m_widgets.begin();
         it!=m_widgets.end();++it)
-        (*it)->parent_resized(m_width,m_height);
+        (*it)->parent_resized(m_rect.w,m_rect.h);
 }
 
 void layout::move(int x,int y)
 {
-    m_x=x;
-    m_y=y;
+    m_rect.x=x;
+    m_rect.y=y;
 
     for(widgets_list::iterator it=m_widgets.begin();
         it!=m_widgets.end();++it)
-        (*it)->parent_moved(m_x,m_y);
+        (*it)->parent_moved(m_rect.x,m_rect.y);
 }
 
 bool layout::mouse_button(layout::mbutton button,bool pressed)
