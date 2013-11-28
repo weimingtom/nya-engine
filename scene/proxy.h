@@ -11,28 +11,15 @@ class proxy
 public:
     bool is_valid() const { return m_ref!=0; }
 
-    const t *operator -> () const
-    {
-        if(!m_ref)
-            return 0;
-
-        return &m_ref->obj;
-    };
-
-    t *operator -> ()
-    {
-        if(!m_ref)
-            return 0;
-
-        return &m_ref->obj;
-    };
+    const t *operator -> () const { return m_ref; };
+    t *operator -> () { return m_ref; };
 
     void set(const t &obj)
     {
         if(!m_ref)
             return;
 
-        m_ref->obj=obj;
+        *m_ref=obj;
     }
 
     void free()
@@ -40,10 +27,11 @@ public:
         if(!m_ref)
             return;
 
-        --m_ref->count;
-
-        if(m_ref->count<=0)
+        if(--(*m_ref_count)<=0)
+        {
             delete m_ref;
+            delete m_ref_count;
+        }
 
         m_ref=0;
     }
@@ -52,14 +40,16 @@ public:
 
     explicit proxy(const t &obj)
     {
-        m_ref=new ref(obj);
+        m_ref=new t(obj);
+        m_ref_count=new int(1);
     }
 
     proxy(const proxy &p)
     {
         m_ref=p.m_ref;
+        m_ref_count=p.m_ref_count;
         if(m_ref)
-            ++m_ref->count;
+            ++(*m_ref_count);
     }
 
     proxy &operator=(const proxy &p)
@@ -68,10 +58,12 @@ public:
 			return *this;
 
 		free();
-
         m_ref=p.m_ref;
         if(m_ref)
-            ++m_ref->count;
+        {
+            m_ref_count=p.m_ref_count;
+            ++(*m_ref_count);
+        }
 
         return *this;
     }
@@ -79,15 +71,8 @@ public:
     ~proxy() { free(); }
 
 private:
-    struct ref
-    {
-        int count;
-        t obj;
-
-		ref(const t &obj):count(1),obj(obj){}
-    };
-
-    ref *m_ref;
+    t *m_ref;
+    int *m_ref_count;
 };
 
 }
