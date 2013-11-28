@@ -4,10 +4,7 @@
 
 #include <string>
 
-namespace
-{
-    nya_log::log *ui_log=0;
-}
+namespace { nya_log::log *ui_log=0; }
 
 namespace nya_ui
 {
@@ -117,8 +114,9 @@ void layer::resize(uint width, uint height)
     layout::resize(m_width,m_height);
 }
 
-void layer::process()
+void layer::process(uint dt)
 {
+    process_widgets(dt,*this);
     events_deque events=m_events;
     m_events.clear();
 
@@ -151,6 +149,17 @@ void layout::add_widget(widget &w)
     w.m_parent=this;
 
     m_widgets.push_back(&w);
+}
+
+void layout::process_widgets(uint dt,layer &l)
+{
+    for(widgets_list::iterator it=m_widgets.begin();
+        it!=m_widgets.end();++it)
+    {
+        widget *w=*it;
+        if(w->m_visible)      //ToDo
+            w->process(dt,l);
+    }
 }
 
 void layout::draw_widgets(layer &l)

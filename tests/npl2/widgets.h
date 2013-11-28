@@ -114,8 +114,8 @@ private:
     uint m_height;
 };
 
-class button: public nya_ui::button { void draw(nya_ui::layer &layer); };
-class label: public nya_ui::label { void draw(nya_ui::layer &layer); };
+class button: public nya_ui::button { void draw(nya_ui::layer &layer) override; };
+class label: public nya_ui::label { void draw(nya_ui::layer &layer) override; };
 
 class panel: public nya_ui::panel
 {
@@ -134,7 +134,7 @@ public:
     void set_style(style &s) { m_style=s; }
 
 private:
-    void draw(nya_ui::layer &layer);
+    void draw(nya_ui::layer &layer) override;
 
 private:
     style m_style;
@@ -166,7 +166,7 @@ public:
     void set_style(style &s) { m_style=s; }
 
 private:
-    void draw(nya_ui::layer &layer);
+    void draw(nya_ui::layer &layer) override;
 
 private:
     style m_style;
@@ -221,7 +221,7 @@ public:
     void set_style(style &s) { m_style=s; }
 
 private:
-    void draw(nya_ui::layer &layer);
+    void draw(nya_ui::layer &layer) override;
     
 private:
     style m_style;

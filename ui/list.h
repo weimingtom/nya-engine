@@ -83,28 +83,28 @@ public:
     }
 
 protected:
-    virtual void draw(layer &l) {}
+    virtual void draw(layer &l) override {}
     virtual void update_rects();
 
 protected:
-    virtual bool on_mouse_move(uint x,uint y,bool inside);
-    virtual bool on_mouse_button(layout::mbutton button,bool pressed);
-    virtual bool on_mouse_scroll(uint x,uint y);
+    virtual bool on_mouse_move(uint x,uint y,bool inside) override;
+    virtual bool on_mouse_button(layout::mbutton button,bool pressed) override;
+    virtual bool on_mouse_scroll(uint x,uint y) override;
 
 protected:
-    virtual void parent_moved(int x,int y)
+    virtual void parent_moved(int x,int y) override
     {
         widget::parent_moved(x,y);
         update_rects();
     }
 
-    virtual void parent_resized(uint width,uint height)
+    virtual void parent_resized(uint width,uint height) override
     {
         widget::parent_resized(width,height);
         update_rects();
     }
 
-    virtual void calc_pos_markers()
+    virtual void calc_pos_markers() override
     {
         widget::calc_pos_markers();
         update_rects();

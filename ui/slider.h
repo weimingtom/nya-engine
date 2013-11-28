@@ -13,41 +13,41 @@ public:
     float get_value() { return m_value; }
     void set_value(float value) { m_value=clamp(value,0.0f,1.0f); update_rects(); }
 
-    virtual void set_size(uint width,uint height)
-    {
-        m_vertical=width<height;
-        widget::set_size(width,height);
-    }
-
     virtual void set_slider_size(uint size) //default is 10
     {
         m_slider_size=size;
         update_rects();
     }
 
-protected:
-    void draw(layer &layer) {}
-    void update_rects();
+    virtual void set_size(uint width,uint height) override
+    {
+        m_vertical=width<height;
+        widget::set_size(width,height);
+    }
 
 protected:
-    virtual bool on_mouse_move(uint x,uint y,bool inside);
-    virtual bool on_mouse_button(layout::mbutton button,bool pressed);
-    virtual bool on_mouse_scroll(uint x,uint y);
+    virtual void draw(layer &layer) override {}
+    virtual void update_rects();
 
 protected:
-    virtual void parent_moved(int x,int y)
+    virtual bool on_mouse_move(uint x,uint y,bool inside) override;
+    virtual bool on_mouse_button(layout::mbutton button,bool pressed) override;
+    virtual bool on_mouse_scroll(uint x,uint y) override;
+
+protected:
+    virtual void parent_moved(int x,int y) override
     {
         widget::parent_moved(x,y);
         update_rects();
     }
 
-    virtual void parent_resized(uint width,uint height)
+    virtual void parent_resized(uint width,uint height) override
     {
         widget::parent_resized(width,height);
         update_rects();
     }
 
-    virtual void calc_pos_markers()
+    virtual void calc_pos_markers() override
     {
         widget::calc_pos_markers();
         update_rects();

@@ -50,6 +50,7 @@ class layout
 public:
     virtual void add_widget(widget &w);
     virtual void draw_widgets(layer &l);
+    virtual void process_widgets(uint dt,layer &l);
     virtual void resize(uint width,uint height);
     virtual void move(int x,int y);
     virtual void remove_widget() {}
@@ -211,6 +212,7 @@ protected:
     virtual bool on_mouse_scroll(uint x,uint y) { return false; }
 
 protected:
+    virtual void process(uint dt,const layout &parent) {}
     virtual void draw(layer &l) {}
     virtual void process_events(layout::event &e) {}
 
@@ -305,7 +307,7 @@ class layer: public layout
 public:
     virtual void draw();
     virtual void resize(uint width,uint height);
-    virtual void process();
+    virtual void process(uint dt);
 
 private:
     virtual void process_events(event &e) {}

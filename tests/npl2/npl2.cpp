@@ -67,7 +67,7 @@ nya_log::get_log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n"
 	{
         get_scene().process(dt);
 
-	    m_ui.process();
+	    m_ui.process(dt);
 
 	    static unsigned int fps_counter=0;
 	    static unsigned int fps_update_timer=0;

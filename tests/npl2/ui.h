@@ -10,8 +10,8 @@ class ui: public nya_ui::layer
 {
 public:
     void init();
-    void draw();
-    void resize(uint width,uint height)
+    void draw() override;
+    void resize(uint width,uint height) override
     {
         widget_renderer::get().resize(width,height);
         nya_ui::layer::resize(width,height);
@@ -23,7 +23,7 @@ public:
     ui(): m_under_top(false),m_under_bottom(false) {}
 
 private:
-    virtual void process_events(event &e);
+    virtual void process_events(event &e) override;
 
 private:
     bool is_props_visible();
