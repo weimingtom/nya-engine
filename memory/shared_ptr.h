@@ -62,7 +62,7 @@ public:
 
     ~shared_ptr() { free(); }
 
-private:
+protected:
     t *m_ref;
     int *m_ref_count;
 };

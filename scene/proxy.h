@@ -2,81 +2,32 @@
 
 #pragma once
 
+#include "memory/shared_ptr.h"
+
 namespace nya_scene
 {
 
 template<typename t>
-class proxy
+class proxy: public nya_memory::shared_ptr<t>
 {
 public:
-    bool is_valid() const { return m_ref!=0; }
-
-    const t *operator -> () const { return m_ref; };
-    t *operator -> () { return m_ref; };
-
     proxy &create() { return *this=proxy(t()); }
     proxy &create(const t &obj) { return *this=proxy(obj); }
 
     proxy &set(const t &obj)
     {
-        if(!m_ref)
+        if(!nya_memory::shared_ptr<t>::m_ref)
             return *this;
 
-        *m_ref=obj;
+        *nya_memory::shared_ptr<t>::m_ref=obj;
         return *this;
     }
 
-    void free()
-    {
-        if(!m_ref)
-            return;
+    proxy(): nya_memory::shared_ptr<t>() {}
 
-        if(--(*m_ref_count)<=0)
-        {
-            delete m_ref;
-            delete m_ref_count;
-        }
+    explicit proxy(const t &obj): nya_memory::shared_ptr<t>(obj) {}
 
-        m_ref=0;
-    }
-
-    proxy(): m_ref(0) {}
-
-    explicit proxy(const t &obj)
-    {
-        m_ref=new t(obj);
-        m_ref_count=new int(1);
-    }
-
-    proxy(const proxy &p)
-    {
-        m_ref=p.m_ref;
-        m_ref_count=p.m_ref_count;
-        if(m_ref)
-            ++(*m_ref_count);
-    }
-
-    proxy &operator=(const proxy &p)
-    {
-		if(this==&p)
-			return *this;
-
-		free();
-        m_ref=p.m_ref;
-        if(m_ref)
-        {
-            m_ref_count=p.m_ref_count;
-            ++(*m_ref_count);
-        }
-
-        return *this;
-    }
-
-    ~proxy() { free(); }
-
-private:
-    t *m_ref;
-    int *m_ref_count;
+    proxy(const proxy &p): nya_memory::shared_ptr<t>(p) {}
 };
 
 }
