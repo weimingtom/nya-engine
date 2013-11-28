@@ -2,29 +2,17 @@
 
 #pragma once
 
-namespace nya_scene
+namespace nya_memory
 {
 
 template<typename t>
-class proxy
+class shared_ptr
 {
 public:
     bool is_valid() const { return m_ref!=0; }
 
     const t *operator -> () const { return m_ref; };
     t *operator -> () { return m_ref; };
-
-    proxy &create() { return *this=proxy(t()); }
-    proxy &create(const t &obj) { return *this=proxy(obj); }
-
-    proxy &set(const t &obj)
-    {
-        if(!m_ref)
-            return *this;
-
-        *m_ref=obj;
-        return *this;
-    }
 
     void free()
     {
@@ -40,15 +28,15 @@ public:
         m_ref=0;
     }
 
-    proxy(): m_ref(0) {}
+    shared_ptr(): m_ref(0) {}
 
-    explicit proxy(const t &obj)
+    explicit shared_ptr(const t &obj)
     {
         m_ref=new t(obj);
         m_ref_count=new int(1);
     }
 
-    proxy(const proxy &p)
+    shared_ptr(const shared_ptr &p)
     {
         m_ref=p.m_ref;
         m_ref_count=p.m_ref_count;
@@ -56,12 +44,12 @@ public:
             ++(*m_ref_count);
     }
 
-    proxy &operator=(const proxy &p)
+    shared_ptr &operator=(const shared_ptr &p)
     {
-		if(this==&p)
-			return *this;
+        if(this==&p)
+            return *this;
 
-		free();
+        free();
         m_ref=p.m_ref;
         if(m_ref)
         {
@@ -72,7 +60,7 @@ public:
         return *this;
     }
 
-    ~proxy() { free(); }
+    ~shared_ptr() { free(); }
 
 private:
     t *m_ref;

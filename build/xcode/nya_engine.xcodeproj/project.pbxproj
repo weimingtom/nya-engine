@@ -183,6 +183,8 @@
 		F55C5720180623B100FF6163 /* debug_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55C571D180623B100FF6163 /* debug_draw.cpp */; };
 		F55C5721180623B100FF6163 /* debug_draw.h in Headers */ = {isa = PBXBuildFile; fileRef = F55C571E180623B100FF6163 /* debug_draw.h */; };
 		F55C5722180623B100FF6163 /* debug_draw.h in Headers */ = {isa = PBXBuildFile; fileRef = F55C571E180623B100FF6163 /* debug_draw.h */; };
+		F5AFDF411846C81400457928 /* shared_ptr.h in Headers */ = {isa = PBXBuildFile; fileRef = F5AFDF401846C81400457928 /* shared_ptr.h */; };
+		F5AFDF421846C81400457928 /* shared_ptr.h in Headers */ = {isa = PBXBuildFile; fileRef = F5AFDF401846C81400457928 /* shared_ptr.h */; };
 		F5B3578E17FE8E2C001175FE /* optional.h in Headers */ = {isa = PBXBuildFile; fileRef = F5B3578D17FE8E2C001175FE /* optional.h */; };
 		F5B3578F17FE8E2C001175FE /* optional.h in Headers */ = {isa = PBXBuildFile; fileRef = F5B3578D17FE8E2C001175FE /* optional.h */; };
 /* End PBXBuildFile section */
@@ -278,6 +280,7 @@
 		F2FF5FD816C15CCE00C6A705 /* transform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = transform.h; path = ../../scene/transform.h; sourceTree = "<group>"; };
 		F55C571D180623B100FF6163 /* debug_draw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = debug_draw.cpp; sourceTree = "<group>"; };
 		F55C571E180623B100FF6163 /* debug_draw.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = debug_draw.h; sourceTree = "<group>"; };
+		F5AFDF401846C81400457928 /* shared_ptr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shared_ptr.h; sourceTree = "<group>"; };
 		F5B3578D17FE8E2C001175FE /* optional.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = optional.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -449,6 +452,7 @@
 				F22ADA301694C15100B01B4A /* memory_reader.h */,
 				F5B3578D17FE8E2C001175FE /* optional.h */,
 				F259322315D858140092C7D8 /* pool.h */,
+				F5AFDF401846C81400457928 /* shared_ptr.h */,
 				F259322415D858140092C7D8 /* tmp_buffer.cpp */,
 				F259322515D858140092C7D8 /* tmp_buffer.h */,
 			);
@@ -531,6 +535,7 @@
 				F2CA676A172D92CE00965F9F /* shaders_cache_provider.h in Headers */,
 				F5B3578F17FE8E2C001175FE /* optional.h in Headers */,
 				F55C5722180623B100FF6163 /* debug_draw.h in Headers */,
+				F5AFDF421846C81400457928 /* shared_ptr.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -588,6 +593,7 @@
 				F2CA6769172D92CE00965F9F /* shaders_cache_provider.h in Headers */,
 				F5B3578E17FE8E2C001175FE /* optional.h in Headers */,
 				F55C5721180623B100FF6163 /* debug_draw.h in Headers */,
+				F5AFDF411846C81400457928 /* shared_ptr.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
