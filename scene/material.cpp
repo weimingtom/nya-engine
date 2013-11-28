@@ -2,6 +2,8 @@
 
 #include "material.h"
 
+//ToDo: consistent material params/textures behavior
+
 namespace nya_scene
 {
 
@@ -92,13 +94,29 @@ void material_internal::unset() const
 
 void material::set_shader(const shader &shdr)
 {
+    std::vector<std::string> param_semantics;
+    param_semantics.resize(internal().m_shader.internal().get_uniforms_count());
+    for(int i=0;i<int(param_semantics.size());++i)
+        param_semantics[i]=internal().m_shader.internal().get_uniform(i).name;
+
+    std::vector<material_internal::param_holder> params=internal().m_params;
+
     m_internal.m_shader=shdr;
 
     for(size_t i=0;i<internal().m_textures.size();++i)
         m_internal.m_textures[i].slot=internal().m_shader.internal().get_texture_slot(internal().m_textures[i].semantics.c_str());
 
     m_internal.m_params.clear();
-    m_internal.m_params.resize(m_internal.m_shader.internal().get_uniforms_count());
+    m_internal.m_params.resize(internal().m_shader.internal().get_uniforms_count());
+
+    for(int i=0;i<int(param_semantics.size());++i)
+    {
+        const int idx=get_param_idx(param_semantics[i].c_str());
+        if(idx<0)
+            continue;
+
+        m_internal.m_params[idx]=params[i];
+    }
 }
 
 void material::set_texture(const char *semantics,const texture &tex)
