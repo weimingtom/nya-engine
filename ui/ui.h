@@ -49,8 +49,8 @@ class layout
 {
 public:
     virtual void add_widget(widget &w);
-    virtual void draw_widgets(layer &l);
-    virtual void process_widgets(uint dt,layer &l);
+    virtual void draw_widgets(layout &l);
+    virtual void process_widgets(uint dt,layout &l);
     virtual void resize(uint width,uint height);
     virtual void move(int x,int y);
     virtual void remove_widget() {}
@@ -71,13 +71,13 @@ public:
 public:
     virtual uint get_width() { return m_width; }
     virtual uint get_height() { return m_height; }
-    virtual point get_mouse_pos() { return point(m_mouse_x,m_mouse_y); }
+    virtual point get_mouse_pos() { return m_mouse_pos; }
 
 public:
     struct event { std::string sender; std::string type; };
 
 public:
-    virtual void send_event(event &e) { printf("send_event %s %s\n",e.sender.c_str(),e.type.c_str() ); }
+    virtual void send_event(const event &e) {}
     void send_event(const char *sender_id,const char *event)
     {
         if(!sender_id || !event)
@@ -89,10 +89,10 @@ public:
         send_event(e);
     }
 
-    virtual void process_events(event &e);
+    virtual void process_events(const event &e);
 
 public:
-    layout(): m_x(0),m_y(0),m_width(0),m_height(0),m_mouse_x(0),m_mouse_y(0) {}
+    layout(): m_x(0),m_y(0),m_width(0),m_height(0) {}
 
 protected:
     typedef std::list<widget*> widgets_list;
@@ -101,8 +101,7 @@ protected:
     int m_y;
     uint m_width;
     uint m_height;
-    uint m_mouse_x;
-    uint m_mouse_y;
+    point m_mouse_pos;
 };
 
 class widget
@@ -171,7 +170,7 @@ public:
 protected:
     virtual void parent_moved(int x,int y)
     {
-        m_parent_pos_x=x, m_parent_pos_y=y;
+        m_parent_rect.x=x, m_parent_rect.y=y;
 
         m_cached_rect=false;
         update_mouse_over();
@@ -179,7 +178,7 @@ protected:
 
     virtual void parent_resized(uint width,uint height)
     {
-        m_parent_width=width, m_parent_height=height;
+        m_parent_rect.w=width, m_parent_rect.h=height;
 
         m_cached_rect=false;
         update_mouse_over();
@@ -188,7 +187,7 @@ protected:
 protected:
     virtual void update_mouse_over()
     {
-        const bool over=m_parent?get_rect().check_point(m_parent->get_mouse_pos()):false;
+        const bool over=get_rect().check_point(m_mouse_pos);
         if(over)
         {
             if(!m_mouse_over)
@@ -207,26 +206,29 @@ protected:
 protected:
     virtual void on_mouse_over() { send_to_parent("mouse_over"); }
     virtual void on_mouse_left() { send_to_parent("mouse_left"); }
-    virtual bool on_mouse_move(uint x,uint y,bool inside) { return false; }
+    virtual bool on_mouse_move(uint x,uint y,bool inside) { m_mouse_pos.x=x; m_mouse_pos.y=y; return false; }
     virtual bool on_mouse_button(layout::mbutton button,bool pressed) { return false; }
     virtual bool on_mouse_scroll(uint x,uint y) { return false; }
 
 protected:
-    virtual void process(uint dt,const layout &parent) {}
-    virtual void draw(layer &l) {}
-    virtual void process_events(layout::event &e) {}
-
-protected:
-    virtual void send_to_parent(layout::event &e)
+    virtual void process(uint dt,layout &parent)
     {
-        if(!m_parent)
+        if(m_events_to_parent.empty())
             return;
 
-        m_parent->send_event(e); printf("send_to_parent %s %s\n",e.sender.c_str(),e.type.c_str() );
+        events_deque events=m_events_to_parent;
+        m_events_to_parent.clear();
+
+        for(events_deque::const_iterator it=events.begin();it!=events.end();++it)
+            parent.send_event(*it);
     }
 
-    void send_to_parent(const char *event) { if(!m_id.empty()) send_to_parent(m_id.c_str(),event); }
+    virtual void draw(layout &l) {}
+    virtual void process_events(const layout::event &e) {}
 
+protected:
+    virtual void send_to_parent(const layout::event &e) { m_events_to_parent.push_back(e); }
+    void send_to_parent(const char *event) { if(!m_id.empty()) send_to_parent(m_id.c_str(),event); }
     void send_to_parent(const char *sender,const char *event)
     {
         if(!sender || !event)
@@ -245,14 +247,14 @@ protected:
     virtual void calc_pos_markers()
     {
         if(m_align_right)
-            m_pos_right=m_parent_width-m_width-m_pos_left;
+            m_pos_right=m_parent_rect.w-m_width-m_pos_left;
         else if(!m_align_left)
-            m_center_x=m_parent_width/2-(m_pos_left+m_width/2);
+            m_center_x=m_parent_rect.w/2-(m_pos_left+m_width/2);
 
         if(m_align_top)
-            m_pos_top=m_parent_height-m_height-m_pos_bottom;
+            m_pos_top=m_parent_rect.h-m_height-m_pos_bottom;
         else if(!m_align_bottom)
-            m_center_y=m_parent_height/2-(m_pos_bottom+m_height/2);
+            m_center_y=m_parent_rect.h/2-(m_pos_bottom+m_height/2);
 
         m_cached_rect=false;
     }
@@ -260,8 +262,6 @@ protected:
 public:
     widget(): m_pos_left(0),m_pos_right(0),m_pos_top(0),m_pos_bottom(0),
               m_center_x(0),m_center_y(0),m_width(0),m_height(0),
-              m_parent(0), m_parent_pos_x(0),m_parent_pos_y(0),
-              m_parent_width(0),m_parent_height(0),
               m_align_left(true),m_align_right(false),
               m_align_top(false),m_align_bottom(true),
               m_keep_aspect(none),m_visible(true), m_mouse_pressed(false),
@@ -269,6 +269,10 @@ public:
 
 protected:
     std::string m_id;
+
+    point m_mouse_pos;
+    
+    rect m_parent_rect;
 
     int m_pos_left;
     int m_pos_right;
@@ -279,13 +283,6 @@ protected:
 
     uint m_width;
     uint m_height;
-
-    layout *m_parent;
-
-    int m_parent_pos_x;
-    int m_parent_pos_y;
-    uint m_parent_width;
-    uint m_parent_height;
 
     bool m_align_left;
     bool m_align_right;
@@ -300,6 +297,10 @@ protected:
 
     bool m_cached_rect;
     rect m_rect;
+
+private:
+    typedef std::deque<layout::event> events_deque;
+    events_deque m_events_to_parent;
 };
 
 class layer: public layout
@@ -310,10 +311,10 @@ public:
     virtual void process(uint dt);
 
 private:
-    virtual void process_events(event &e) {}
+    virtual void process_events(const event &e) {}
 
 public:
-    virtual void send_event(event &e);
+    virtual void send_event(const event &e);
 
 private:
     typedef std::deque<event> events_deque;

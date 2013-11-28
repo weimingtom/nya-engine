@@ -14,8 +14,14 @@ public:
     virtual void set_size(uint width,uint height) override;
 
 protected:
-    virtual void draw(layer &l) override { layout::draw_widgets(l); }
-    virtual void process_events(layout::event &e) override;
+    virtual void draw(layout &l) override { layout::draw_widgets(l); }
+    virtual void process(uint dt,layout &parent) override
+    {
+        layout::process_widgets(dt,*this);
+        widget::process(dt,parent);
+    }
+
+    virtual void process_events(const layout::event &e) override;
     virtual void parent_resized(uint width,uint height) override;
     virtual void parent_moved(int x,int y) override;
     virtual void calc_pos_markers() override;
@@ -34,6 +40,7 @@ protected:
     virtual bool on_mouse_move(uint x,uint y,bool inside) override
     {
         layout::mouse_move(x,y);
+        widget::on_mouse_move(x,y,inside);
         return inside;
     }
 
@@ -50,7 +57,7 @@ protected:
     }
 
 public:
-    virtual void send_event(event &e) override { send_to_parent(e); }
+    virtual void send_event(const event &e) override { send_to_parent(e); }
 
 protected:
     void update_layout_rect();

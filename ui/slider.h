@@ -26,7 +26,7 @@ public:
     }
 
 protected:
-    virtual void draw(layer &layer) override {}
+    virtual void draw(layout &l) override {}
     virtual void update_rects();
 
 protected:

@@ -5,7 +5,7 @@
 namespace nya_ui
 {
 
-void panel::process_events(layout::event &e)
+void panel::process_events(const layout::event &e)
 {
     layout::process_events(e);
 }

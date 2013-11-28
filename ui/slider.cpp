@@ -27,6 +27,7 @@ void slider::update_rects()
 
 bool slider::on_mouse_move(uint x,uint y,bool inside)
 {
+    widget::on_mouse_move(x,y,inside);
     float last_value=m_value;
 
     if(m_vertical)

@@ -19,7 +19,7 @@ public:
     }
 
 protected:
-    virtual void draw(layer &l) override {}
+    virtual void draw(layout &l) override {}
 
     virtual bool on_mouse_button(layout::mbutton button,bool pressed) override
     {

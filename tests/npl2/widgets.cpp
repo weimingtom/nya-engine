@@ -265,7 +265,7 @@ void widget_renderer::remove_scissor()
     nya_render::scissor::disable();
 }
 
-void button::draw(nya_ui::layer &layer)
+void button::draw(nya_ui::layout &l)
 {
     nya_ui::rect r=get_rect();
     if(!r.w || !r.h)
@@ -292,7 +292,7 @@ void button::draw(nya_ui::layer &layer)
         widget_renderer::get().draw_text(r.x+r.w/2,r.y+r.h/2,m_text.c_str(),widget_renderer::center,widget_renderer::center);
 }
 
-void label::draw(nya_ui::layer &layer)
+void label::draw(nya_ui::layout &l)
 {
     nya_ui::rect r=get_rect();
     if(!r.w || !r.h)
@@ -304,7 +304,7 @@ void label::draw(nya_ui::layer &layer)
     widget_renderer::get().draw_text(r.x+r.w/2,r.y+r.h/2,m_text.c_str(),widget_renderer::center,widget_renderer::center);
 }
 
-void panel::draw(nya_ui::layer &layer)
+void panel::draw(nya_ui::layout &l)
 {
     nya_ui::rect r=get_rect();
     if(!r.w || !r.h)
@@ -312,10 +312,10 @@ void panel::draw(nya_ui::layer &layer)
 
     widget_renderer::get().draw_rect(r,m_style.panel);
 
-    nya_ui::panel::draw(layer);
+    nya_ui::panel::draw(l);
 }
 
-void slider::draw(nya_ui::layer &layer)
+void slider::draw(nya_ui::layout &l)
 {
     nya_ui::rect r=get_rect();
     if(!r.w || !r.h)
@@ -325,7 +325,7 @@ void slider::draw(nya_ui::layer &layer)
     widget_renderer::get().draw_rect(m_slider_rect,m_style.slider);
 }
 
-void list::draw(nya_ui::layer &layer)
+void list::draw(nya_ui::layout &l)
 {
     nya_ui::rect r=get_rect();
     if(!r.w || !r.h)
@@ -334,12 +334,12 @@ void list::draw(nya_ui::layer &layer)
     widget_renderer::get().draw_rect(r,m_style.list);
     widget_renderer::get().draw_rect(m_scroll_area_rect,m_style.scroll_area);
     
-    if(m_button_up_rect.check_point(m_mouse_x,m_mouse_y))
+    if(m_button_up_rect.check_point(m_mouse_pos))
         widget_renderer::get().draw_rect(m_button_up_rect,m_style.button_up_hl);
     else
         widget_renderer::get().draw_rect(m_button_up_rect,m_style.button_up);
     
-    if(m_button_down_rect.check_point(m_mouse_x,m_mouse_y))
+    if(m_button_down_rect.check_point(m_mouse_pos))
         widget_renderer::get().draw_rect(m_button_down_rect,m_style.button_dn_hl);
     else
         widget_renderer::get().draw_rect(m_button_down_rect,m_style.button_dn);
@@ -351,7 +351,7 @@ void list::draw(nya_ui::layer &layer)
     
     if(er.h*m_elements.size()>r.h)
     {
-        if(m_scroll_rect.check_point(m_mouse_x,m_mouse_y))
+        if(m_scroll_rect.check_point(m_mouse_pos))
             widget_renderer::get().draw_rect(m_scroll_rect,m_style.scroll_hl);
         else
             widget_renderer::get().draw_rect(m_scroll_rect,m_style.scroll);

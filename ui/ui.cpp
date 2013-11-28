@@ -31,39 +31,39 @@ const rect &widget::get_rect()
     int x,y,w,h;
     if(m_align_left)
     {
-        x=m_pos_left+m_parent_pos_x;
+        x=m_pos_left+m_parent_rect.x;
         if(m_align_right)
-            w=m_parent_width-m_pos_right-m_pos_left;
+            w=m_parent_rect.w-m_pos_right-m_pos_left;
         else
             w=m_width;
     }
     else if(m_align_right)
     {
-        x=m_parent_pos_x+m_parent_width-m_width-m_pos_right;
+        x=m_parent_rect.x+m_parent_rect.w-m_width-m_pos_right;
         w=m_width;
     }
     else
     {
-        x=m_parent_pos_x+m_parent_width/2-m_center_x-m_width/2;
+        x=m_parent_rect.x+m_parent_rect.w/2-m_center_x-m_width/2;
         w=m_width;
     }
     
     if(m_align_bottom)
     {
-        y=m_pos_bottom+m_parent_pos_y;
+        y=m_pos_bottom+m_parent_rect.y;
         if(m_align_top)
-            h=m_parent_height-m_pos_top-m_pos_bottom;
+            h=m_parent_rect.h-m_pos_top-m_pos_bottom;
         else
             h=m_height;
     }
     else if(m_align_top)
     {
-        y=m_parent_pos_y+m_parent_height-m_height-m_pos_top;
+        y=m_parent_rect.y+m_parent_rect.h-m_height-m_pos_top;
         h=m_height;
     }
     else
     {
-        y=m_parent_pos_y+m_parent_height/2-m_center_y-m_height/2;
+        y=m_parent_rect.y+m_parent_rect.h/2-m_center_y-m_height/2;
         h=m_height;
     }
     
@@ -76,16 +76,16 @@ const rect &widget::get_rect()
         w=h*m_width/m_height;
     }
     
-    if(x<m_parent_pos_x)
-        x=m_parent_pos_x;
-    if(y<m_parent_pos_y)
-        y=m_parent_pos_y;
+    if(x<m_parent_rect.x)
+        x=m_parent_rect.x;
+    if(y<m_parent_rect.y)
+        y=m_parent_rect.y;
     
-    const int cw=m_parent_pos_x-x+m_parent_width;
+    const int cw=m_parent_rect.x-x+m_parent_rect.w;
     if(w>cw)
         w=cw;
     
-    const int ch=m_parent_pos_y-y+m_parent_height;
+    const int ch=m_parent_rect.y-y+m_parent_rect.h;
     if(h>ch)
         h=ch;
     
@@ -117,20 +117,17 @@ void layer::resize(uint width, uint height)
 void layer::process(uint dt)
 {
     process_widgets(dt,*this);
+    if(m_events.empty())
+        return;
+
     events_deque events=m_events;
     m_events.clear();
 
-    for(events_deque::iterator it=events.begin();
-        it!=events.end();++it)
-    {
-        //get_log()<<"event: "<<it->sender.c_str()<<" "<<it->type.c_str()<<"\n";
+    for(events_deque::iterator it=events.begin();it!=events.end();++it)
         process_events(*it);
-
-        //layout::process_events(*it);
-    }
 }
 
-void layout::process_events(layout::event &e)
+void layout::process_events(const layout::event &e)
 {
     for(widgets_list::iterator it=m_widgets.begin();
         it!=m_widgets.end();++it)
@@ -146,23 +143,20 @@ void layout::add_widget(widget &w)
     w.parent_resized(m_width,m_height);
     w.calc_pos_markers();
 
-    w.m_parent=this;
-
     m_widgets.push_back(&w);
 }
 
-void layout::process_widgets(uint dt,layer &l)
+void layout::process_widgets(uint dt,layout &l)
 {
     for(widgets_list::iterator it=m_widgets.begin();
         it!=m_widgets.end();++it)
     {
         widget *w=*it;
-        if(w->m_visible)      //ToDo
-            w->process(dt,l);
+        w->process(dt,l);
     }
 }
 
-void layout::draw_widgets(layer &l)
+void layout::draw_widgets(layout &l)
 {
     if(!m_width || !m_height)
         return;
@@ -216,15 +210,14 @@ bool layout::mouse_button(layout::mbutton button,bool pressed)
                 processed=true;
         }
     }
-    //get_log()<<"mbutton"<<(int)button<<" "<<(int)pressed<<"\n";
 
     return processed;
 }
 
 bool layout::mouse_move(uint x,uint y)
 {
-    m_mouse_x=x;
-    m_mouse_y=y;
+    m_mouse_pos.x=x;
+    m_mouse_pos.y=y;
 
     bool processed=false;
 
@@ -240,7 +233,6 @@ bool layout::mouse_move(uint x,uint y)
         if(!processed && w->on_mouse_move(x,y,w->is_mouse_over()))
             processed=true;
     }
-    //get_log()<<"mmove "<<(int)x<<" "<<(int)y<<"\n";
 
     return processed;
 }
@@ -279,7 +271,7 @@ bool layout::mouse_scroll(uint dx,uint dy)
     return processed;
 }
 
-void layer::send_event(event &e)
+void layer::send_event(const event &e)
 {
     m_events.push_back(e);
 

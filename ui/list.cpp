@@ -53,8 +53,7 @@ void list::update_rects()
 
 bool list::on_mouse_move(uint x,uint y,bool inside)
 {
-    m_mouse_x=x;
-    m_mouse_y=y;
+    widget::on_mouse_move(x,y,inside);
 
     bool mleft=false;
     if(inside && x<m_scroll_area_rect.x)
@@ -67,7 +66,7 @@ bool list::on_mouse_move(uint x,uint y,bool inside)
 
         int num=0;
         if(m_entry_height>0)
-            num=(r.h-(m_mouse_y-r.y)+scrl)/m_entry_height;
+            num=(r.h-(m_mouse_pos.y-r.y)+scrl)/m_entry_height;
 
         if(num<(int)m_elements.size())
         {
@@ -91,7 +90,7 @@ bool list::on_mouse_move(uint x,uint y,bool inside)
 
     if(m_scrolling)
     {
-        const int new_scroll=m_scroll_max-(m_mouse_y
+        const int new_scroll=m_scroll_max-(m_mouse_pos.y
                 -m_scroll_area_rect.y-m_scroll_rect.h/2);
         m_scroll=clamp(new_scroll,0,m_scroll_max);
         update_rects();
@@ -114,15 +113,15 @@ bool list::on_mouse_button(layout::mbutton button,bool pressed)
 
         if(m_entry_height*m_elements.size()>r.h)
         {
-            if(m_scroll_rect.check_point(m_mouse_x,m_mouse_y)
-               || m_scroll_area_rect.check_point(m_mouse_x,m_mouse_y))
+            if(m_scroll_rect.check_point(m_mouse_pos)
+               || m_scroll_area_rect.check_point(m_mouse_pos))
             {
                 m_scrolling=true;
-                on_mouse_move(m_mouse_x,m_mouse_y,true);
+                on_mouse_move(m_mouse_pos.x,m_mouse_pos.y,true);
                 return true;
             }
 
-            if(m_button_up_rect.check_point(m_mouse_x,m_mouse_y))
+            if(m_button_up_rect.check_point(m_mouse_pos))
             {
                 const int delta=(int)ceilf(m_scroll_max*0.1f);
                 m_scroll=clamp(m_scroll-delta,0,m_scroll_max);
@@ -130,7 +129,7 @@ bool list::on_mouse_button(layout::mbutton button,bool pressed)
                 return true;
             }
 
-            if(m_button_down_rect.check_point(m_mouse_x,m_mouse_y))
+            if(m_button_down_rect.check_point(m_mouse_pos))
             {
                 const int delta=(int)ceilf(m_scroll_max*0.1f);
                 m_scroll=clamp(m_scroll+delta,0,m_scroll_max);
@@ -145,7 +144,7 @@ bool list::on_mouse_button(layout::mbutton button,bool pressed)
             send_to_parent("select_element");
         }
 
-        m_mouse_hold_y=m_mouse_y;
+        m_mouse_hold_y=m_mouse_pos.y;
     }
 
     return true;
@@ -161,7 +160,7 @@ bool list::on_mouse_scroll(uint x,uint y)
         m_scroll=clamp(m_scroll-delta,0,m_scroll_max);
         update_rects();
 
-        on_mouse_move(m_mouse_x,m_mouse_y,true);
+        on_mouse_move(m_mouse_pos.x,m_mouse_pos.y,true);
     }
 
     return true;

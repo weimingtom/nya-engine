@@ -83,7 +83,7 @@ public:
     }
 
 protected:
-    virtual void draw(layer &l) override {}
+    virtual void draw(layout &l) override {}
     virtual void update_rects();
 
 protected:
@@ -111,8 +111,7 @@ protected:
     }
 
 public:
-    list(): m_scroll(0), m_scroll_max(0),  m_mouse_x(0), m_mouse_y(0),
-            m_mouse_hold_y(0), m_scrolling(false), m_selected(-1), m_mover(-1)
+    list(): m_scroll(0),m_scroll_max(0),m_mouse_hold_y(0),m_scrolling(false),m_selected(-1),m_mover(-1)
     {
         m_scroll_area_width=12,m_scroll_width=m_scroll_area_width;
         m_scroll_height=20,m_button_height=16,m_entry_height=18;
@@ -128,8 +127,6 @@ protected:
 protected:
     uint m_scroll;
     uint m_scroll_max;
-    uint m_mouse_x;
-    uint m_mouse_y;
     uint m_mouse_hold_y;
     bool m_scrolling;
 

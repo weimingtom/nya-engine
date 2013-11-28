@@ -23,7 +23,7 @@ public:
     ui(): m_under_top(false),m_under_bottom(false) {}
 
 private:
-    virtual void process_events(event &e) override;
+    virtual void process_events(const event &e) override;
 
 private:
     bool is_props_visible();

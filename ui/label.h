@@ -19,7 +19,7 @@ public:
     }
 
 protected:
-    virtual void draw(layer &l) override {}
+    virtual void draw(layout &l) override {}
 
 protected:
     std::string m_text;

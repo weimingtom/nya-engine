@@ -316,7 +316,7 @@ void ui::modal(bool enabled,int x,int y)
         m_mod_box.set_pos(x-offset,y-offset);
 }
 
-void ui::process_events(event &e)
+void ui::process_events(const event &e)
 {
     if(e.sender=="customise_lst")
     {
