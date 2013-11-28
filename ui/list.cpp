@@ -73,16 +73,8 @@ bool list::on_mouse_move(uint x,uint y,bool inside)
         {
             if(num!=m_mover)
             {
-                if(has_events())
-                {
-                    //get_log()<<"Mover: "<<num<<" "<<m_elements[num].c_str()<<"\n";
-                    layout::event e;
-
-                    e.type="mover_element";
-                    send_event(get_id(),e);
-                }
-
                 m_mover=num;
+                send_to_parent("mover_element");
             }
         }
         else
@@ -93,15 +85,8 @@ bool list::on_mouse_move(uint x,uint y,bool inside)
 
     if(mleft && m_mover>=0)
     {
-        if(has_events())
-        {
-            //get_log()<<"Mleft\n";
-            layout::event e;
-            e.type="mleft_elements";
-            send_event(get_id(),e);
-        }
-
         m_mover=-1;
+        send_to_parent("mleft_elements");
     }
 
     if(m_scrolling)
@@ -156,15 +141,8 @@ bool list::on_mouse_button(layout::mbutton button,bool pressed)
 
         if(m_mover>=0 && m_mover<(int)m_elements.size())
         {
-            if(has_events())
-            {
-                layout::event e;
-                e.type="select_element";
-
-                send_event(get_id(),e);
-            }
-
             m_selected=m_mover;
+            send_to_parent("select_element");
         }
 
         m_mouse_hold_y=m_mouse_y;

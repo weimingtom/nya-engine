@@ -395,9 +395,9 @@ void ui::process_events(event &e)
         return;
     }
 
-    if(e.type!="mouse_left_btn_down")
+    if(e.type!="button_pressed")
         return;
-    
+
     if(e.sender=="under_top")
     {
         m_under_top=!m_under_top;

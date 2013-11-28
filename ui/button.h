@@ -21,45 +21,12 @@ public:
 protected:
     virtual void draw(layer &l) {}
 
-    virtual void on_mouse_over()
-    {
-        if(!has_events())
-            return;
-
-        layout::event e;
-        e.type="mouse_over";
-        send_event(get_id(),e);
-    }
-
-    virtual void on_mouse_left()
-    {
-        if(!has_events())
-            return;
-
-        layout::event e;
-        e.type="mouse_left";
-        send_event(get_id(),e);
-    }
-
     virtual bool on_mouse_button(layout::mbutton button,bool pressed)
     {
-        if(!has_events())
-            return true;
-
-        layout::event e;
-
-        if(pressed)
-            e.type="mouse_left_btn_down";
-        else
-            e.type="mouse_left_btn_up";
-
-        send_event(get_id(),e);
+        send_to_parent(pressed?"mouse_btn_down":"mouse_btn_up");
 
         if(!pressed && m_mouse_over)
-        {
-            e.type="button_pressed";
-            send_event(get_id(),e);
-        }
+            send_to_parent("button_pressed");
 
         return true;
     }

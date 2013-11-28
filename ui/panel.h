@@ -30,8 +30,7 @@ public:
     }
 
 protected:
-    //virtual void on_mouse_over();
-    virtual void on_mouse_left() { layout::mouse_left(); }
+    virtual void on_mouse_left() { layout::mouse_left(); widget::on_mouse_left(); }
     virtual bool on_mouse_move(uint x,uint y,bool inside)
     {
         layout::mouse_move(x,y);
@@ -51,7 +50,7 @@ protected:
     }
 
 public:
-    virtual void send_event(event &e) {  widget::send_event(e.sender.c_str(),e); }
+    virtual void send_event(event &e) { send_to_parent(e); }
 
 protected:
     void update_layout_rect();
