@@ -241,22 +241,59 @@ private:
     events_deque m_events_to_parent;
 };
 
+class widget_proxy: public nya_memory::shared_ptr<widget>
+{
+public:
+    void set_id(const char *id) { if(ptr::m_ref) ptr::m_ref->set_id(id); }
+    void set_pos(int x,int y) { if(ptr::m_ref) ptr::m_ref->set_pos(x,y); }
+    void set_size(uint w,uint h) { if(ptr::m_ref) ptr::m_ref->set_size(w,h); }
+    void set_visible(bool visible) { if(ptr::m_ref) ptr::m_ref->set_visible(visible); }
+    void set_align(bool left,bool right,bool top,bool bottom)
+    {
+        if(ptr::m_ref)
+            ptr::m_ref->set_align(left,right,top,bottom);
+    }
+
+    void set_keep_aspect(widget::keep_aspect a) { if(ptr::m_ref) ptr::m_ref->set_keep_aspect(a); }
+    bool is_visible() { return ptr::m_ref?ptr::m_ref->is_visible():false; }
+    bool is_mouse_over() { return ptr::m_ref?ptr::m_ref->is_mouse_over():false; }
+
+    const char *get_id() { return ptr::m_ref?ptr::m_ref->get_id():0; }
+
+    void get_pos(int &x,int &y) { if(ptr::m_ref) ptr::m_ref->get_pos(x,y); }
+    void get_size(uint &w,uint &h) { if(ptr::m_ref) ptr::m_ref->get_size(w,h); }
+
+public:
+    widget_proxy(): ptr() {}
+    template<typename t> explicit widget_proxy(const t &obj)
+    {
+        m_ref=new t(obj);
+        m_ref_count=new int(1);
+    }
+
+    widget_proxy(const widget_proxy &p): ptr(p) {}
+
+private:
+    typedef nya_memory::shared_ptr<widget> ptr;
+};
+
 class layout
 {
 public:
-    virtual void add_widget(widget &w);
+    template<typename t> void add_widget(const t &w) { add_widget_proxy(widget_proxy(w)); }
+    virtual void add_widget_proxy(const widget_proxy &w);
     virtual void draw_widgets(layout &l);
     virtual void process_widgets(uint dt,layout &l);
     virtual void resize(uint width,uint height);
     virtual void move(int x,int y);
     virtual void remove_widget() {}
-    
+
 public:
     virtual bool mouse_button(mouse_button button,bool pressed);
     virtual bool mouse_move(uint x,uint y);
     virtual void mouse_left();
     virtual bool mouse_scroll(uint dx,uint dy);
-    
+
 public:
     virtual uint get_width() { return m_rect.w; }
     virtual uint get_height() { return m_rect.h; }
@@ -268,17 +305,17 @@ public:
     {
         if(!sender_id || !event)
             return;
-        
+
         nya_ui::event e;
         e.sender.assign(sender_id);
         e.type.assign(event);
         send_event(e);
     }
-    
+
     virtual void process_events(const event &e);
-    
+
 protected:
-    typedef std::list<widget*> widgets_list;
+    typedef std::list<widget_proxy> widgets_list;
     widgets_list m_widgets;
     rect m_rect;
     point m_mouse_pos;

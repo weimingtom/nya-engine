@@ -145,18 +145,18 @@ void layout::process_events(const event &e)
     for(widgets_list::iterator it=m_widgets.begin();
         it!=m_widgets.end();++it)
     {
-        widget *w=*it;
-        w->process_events(e);
+        if(it->is_valid())
+            (*it)->process_events(e);
     }
 }
 
-void layout::add_widget(widget &w)
+void layout::add_widget_proxy(const widget_proxy &w)
 {
-    w.parent_moved(m_rect.x,m_rect.y);
-    w.parent_resized(m_rect.w,m_rect.h);
-    w.calc_pos_markers();
+    m_widgets.push_back(w);
 
-    m_widgets.push_back(&w);
+    m_widgets.back()->parent_moved(m_rect.x,m_rect.y);
+    m_widgets.back()->parent_resized(m_rect.w,m_rect.h);
+    m_widgets.back()->calc_pos_markers();
 }
 
 void layout::process_widgets(uint dt,layout &l)
@@ -164,8 +164,9 @@ void layout::process_widgets(uint dt,layout &l)
     for(widgets_list::iterator it=m_widgets.begin();
         it!=m_widgets.end();++it)
     {
-        widget *w=*it;
-        w->process(dt,l);
+        widget_proxy &w=*it;
+        if(w.is_valid())
+            w->process(dt,l);
     }
 }
 
@@ -177,8 +178,8 @@ void layout::draw_widgets(layout &l)
     for(widgets_list::iterator it=m_widgets.begin();
         it!=m_widgets.end();++it)
     {
-        widget *w=*it;
-        if(w->m_visible)
+        widget_proxy &w=*it;
+        if(w.is_visible()) //also means valid
             w->draw(l);
     }
 }
@@ -190,7 +191,11 @@ void layout::resize(uint width,uint height)
 
     for(widgets_list::iterator it=m_widgets.begin();
         it!=m_widgets.end();++it)
-        (*it)->parent_resized(m_rect.w,m_rect.h);
+    {
+        widget_proxy &w=*it;
+        if(w.is_valid())
+            w->parent_resized(m_rect.w,m_rect.h);
+    }
 }
 
 void layout::move(int x,int y)
@@ -200,7 +205,11 @@ void layout::move(int x,int y)
 
     for(widgets_list::iterator it=m_widgets.begin();
         it!=m_widgets.end();++it)
-        (*it)->parent_moved(m_rect.x,m_rect.y);
+    {
+        widget_proxy &w=*it;
+        if(w.is_valid())
+            w->parent_moved(m_rect.x,m_rect.y);
+    }
 }
 
 bool layout::mouse_button(enum mouse_button button,bool pressed)
@@ -210,8 +219,8 @@ bool layout::mouse_button(enum mouse_button button,bool pressed)
     for(widgets_list::reverse_iterator it=m_widgets.rbegin();
           it!=m_widgets.rend();++it)
     {
-        widget *w=*it;
-        if(!w->is_visible())
+        widget_proxy &w=*it;
+        if(!w.is_visible()) //visible also means valid
             continue;
 
         if(((w->m_mouse_over && !processed) || !pressed)
@@ -237,8 +246,8 @@ bool layout::mouse_move(uint x,uint y)
     for(widgets_list::reverse_iterator it=m_widgets.rbegin();
           it!=m_widgets.rend();++it)
     {
-        widget *w=*it;
-        if(!w->is_visible())
+        widget_proxy &w=*it;
+        if(!w.is_visible()) //also means valid
             continue;
 
         w->update_mouse_over();
@@ -255,8 +264,8 @@ void layout::mouse_left()
     for(widgets_list::iterator it=m_widgets.begin();
         it!=m_widgets.end();++it)
     {
-        widget *w=*it;
-        if(w->m_mouse_over)
+        widget_proxy &w=*it;
+        if(w.is_mouse_over()) //also means valid
         {
             w->on_mouse_left();
             w->m_mouse_over=false;
@@ -270,8 +279,8 @@ bool layout::mouse_scroll(uint dx,uint dy)
     for(widgets_list::iterator it=m_widgets.begin();
         it!=m_widgets.end();++it)
     {
-        widget *w=*it;
-        if(!w->is_visible())
+        widget_proxy &w=*it;
+        if(!w.is_visible()) //also means valid
             continue;
 
         if(w->m_mouse_over)

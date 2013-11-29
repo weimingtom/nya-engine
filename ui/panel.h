@@ -27,12 +27,12 @@ protected:
     virtual void calc_pos_markers() override;
 
 public:
-    virtual void add_widget(widget &w) override
+    virtual void add_widget_proxy(const widget_proxy &w) override
     {
-        if(&w==this)
+        if(w.operator->()==this)
             return;
 
-        layout::add_widget(w);
+        layout::add_widget_proxy(w);
     }
 
 protected:
