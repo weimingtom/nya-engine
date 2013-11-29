@@ -21,7 +21,7 @@ public:
 protected:
     virtual void draw(layout &l) override {}
 
-    virtual bool on_mouse_button(layout::mbutton button,bool pressed) override
+    virtual bool on_mouse_button(mouse_button button,bool pressed) override
     {
         send_to_parent(pressed?"mouse_btn_down":"mouse_btn_up");
 

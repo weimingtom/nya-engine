@@ -103,7 +103,7 @@ bool list::on_mouse_move(uint x,uint y,bool inside)
     return false;
 }
 
-bool list::on_mouse_button(layout::mbutton button,bool pressed)
+bool list::on_mouse_button(mouse_button button,bool pressed)
 {
     m_scrolling=false;
 

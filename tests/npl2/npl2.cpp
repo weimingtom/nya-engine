@@ -124,7 +124,7 @@ nya_log::get_log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n"
     {
         if(button==nya_system::mouse_left)
         {
-            if(!m_ui.mouse_button(nya_ui::layout::left_button,pressed) || !pressed)
+            if(!m_ui.mouse_button(nya_ui::left_button,pressed) || !pressed)
                 m_mouse_drag.left=pressed;
         }
         else if(button==nya_system::mouse_right)

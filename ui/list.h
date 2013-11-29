@@ -88,7 +88,7 @@ protected:
 
 protected:
     virtual bool on_mouse_move(uint x,uint y,bool inside) override;
-    virtual bool on_mouse_button(layout::mbutton button,bool pressed) override;
+    virtual bool on_mouse_button(mouse_button button,bool pressed) override;
     virtual bool on_mouse_scroll(uint x,uint y) override;
 
 protected:

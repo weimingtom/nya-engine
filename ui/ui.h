@@ -43,61 +43,16 @@ struct rect
     rect(uint x,uint y,uint w,uint h): x(x),y(y),w(w),h(h) {}
 };
 
-class layer;
-class widget;
-class layout
+struct event { std::string sender; std::string type; };
+
+enum mouse_button
 {
-public:
-    virtual void add_widget(widget &w);
-    virtual void draw_widgets(layout &l);
-    virtual void process_widgets(uint dt,layout &l);
-    virtual void resize(uint width,uint height);
-    virtual void move(int x,int y);
-    virtual void remove_widget() {}
-
-public:
-    enum mbutton
-    {
-        left_button,
-        middle_button,
-        right_button
-    };
-
-    virtual bool mouse_button(mbutton button,bool pressed);
-    virtual bool mouse_move(uint x,uint y);
-    virtual void mouse_left();
-    virtual bool mouse_scroll(uint dx,uint dy);
-
-public:
-    virtual uint get_width() { return m_rect.w; }
-    virtual uint get_height() { return m_rect.h; }
-    virtual point get_mouse_pos() { return m_mouse_pos; }
-
-public:
-    struct event { std::string sender; std::string type; };
-
-public:
-    virtual void send_event(const event &e) {}
-    void send_event(const char *sender_id,const char *event)
-    {
-        if(!sender_id || !event)
-            return;
-
-        layout::event e;
-        e.sender.assign(sender_id);
-        e.type.assign(event);
-        send_event(e);
-    }
-
-    virtual void process_events(const event &e);
-
-protected:
-    typedef std::list<widget*> widgets_list;
-    widgets_list m_widgets;
-    rect m_rect;
-    point m_mouse_pos;
+    left_button,
+    middle_button,
+    right_button
 };
 
+class layout;
 class widget
 {
     friend class layout;
@@ -201,34 +156,23 @@ protected:
     virtual void on_mouse_over() { send_to_parent("mouse_over"); }
     virtual void on_mouse_left() { send_to_parent("mouse_left"); }
     virtual bool on_mouse_move(uint x,uint y,bool inside) { m_mouse_pos.x=x; m_mouse_pos.y=y; return false; }
-    virtual bool on_mouse_button(layout::mbutton button,bool pressed) { return false; }
+    virtual bool on_mouse_button(mouse_button button,bool pressed) { return false; }
     virtual bool on_mouse_scroll(uint x,uint y) { return false; }
 
 protected:
-    virtual void process(uint dt,layout &parent)
-    {
-        if(m_events_to_parent.empty())
-            return;
-
-        events_deque events=m_events_to_parent;
-        m_events_to_parent.clear();
-
-        for(events_deque::const_iterator it=events.begin();it!=events.end();++it)
-            parent.send_event(*it);
-    }
-
+    virtual void process(uint dt,layout &parent);
     virtual void draw(layout &l) {}
-    virtual void process_events(const layout::event &e) {}
+    virtual void process_events(const event &e) {}
 
 protected:
-    virtual void send_to_parent(const layout::event &e) { m_events_to_parent.push_back(e); }
+    virtual void send_to_parent(const event &e) { m_events_to_parent.push_back(e); }
     void send_to_parent(const char *event) { if(!m_id.empty()) send_to_parent(m_id.c_str(),event); }
     void send_to_parent(const char *sender,const char *event)
     {
         if(!sender || !event)
             return;
 
-        layout::event e;
+        nya_ui::event e;
         e.sender.assign(sender);
         e.type.assign(event);
         send_to_parent(e);
@@ -293,8 +237,51 @@ protected:
     rect m_rect;
 
 private:
-    typedef std::deque<layout::event> events_deque;
+    typedef std::deque<event> events_deque;
     events_deque m_events_to_parent;
+};
+
+class layout
+{
+public:
+    virtual void add_widget(widget &w);
+    virtual void draw_widgets(layout &l);
+    virtual void process_widgets(uint dt,layout &l);
+    virtual void resize(uint width,uint height);
+    virtual void move(int x,int y);
+    virtual void remove_widget() {}
+    
+public:
+    virtual bool mouse_button(mouse_button button,bool pressed);
+    virtual bool mouse_move(uint x,uint y);
+    virtual void mouse_left();
+    virtual bool mouse_scroll(uint dx,uint dy);
+    
+public:
+    virtual uint get_width() { return m_rect.w; }
+    virtual uint get_height() { return m_rect.h; }
+    virtual point get_mouse_pos() { return m_mouse_pos; }
+
+public:
+    virtual void send_event(const event &e) {}
+    void send_event(const char *sender_id,const char *event)
+    {
+        if(!sender_id || !event)
+            return;
+        
+        nya_ui::event e;
+        e.sender.assign(sender_id);
+        e.type.assign(event);
+        send_event(e);
+    }
+    
+    virtual void process_events(const event &e);
+    
+protected:
+    typedef std::list<widget*> widgets_list;
+    widgets_list m_widgets;
+    rect m_rect;
+    point m_mouse_pos;
 };
 
 class layer: public layout

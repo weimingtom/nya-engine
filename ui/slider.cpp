@@ -68,7 +68,7 @@ bool slider::on_mouse_move(uint x,uint y,bool inside)
     return inside;
 }
 
-bool slider::on_mouse_button(layout::mbutton button,bool pressed)
+bool slider::on_mouse_button(mouse_button button,bool pressed)
 {
     m_mouse_pressed=pressed;
 

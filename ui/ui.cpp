@@ -101,6 +101,19 @@ const rect &widget::get_rect()
     return m_rect;
 }
 
+void widget::process(uint dt,layout &parent)
+{
+    if(m_events_to_parent.empty())
+        return;
+
+    events_deque events=m_events_to_parent;
+    m_events_to_parent.clear();
+
+    for(events_deque::const_iterator it=events.begin();it!=events.end();++it)
+        parent.send_event(*it);
+}
+
+
 void layer::draw()
 {
     draw_widgets(*this);
@@ -127,7 +140,7 @@ void layer::process(uint dt)
         process_events(*it);
 }
 
-void layout::process_events(const layout::event &e)
+void layout::process_events(const event &e)
 {
     for(widgets_list::iterator it=m_widgets.begin();
         it!=m_widgets.end();++it)
@@ -190,7 +203,7 @@ void layout::move(int x,int y)
         (*it)->parent_moved(m_rect.x,m_rect.y);
 }
 
-bool layout::mouse_button(layout::mbutton button,bool pressed)
+bool layout::mouse_button(enum mouse_button button,bool pressed)
 {
     bool processed=false;
 

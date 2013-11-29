@@ -21,7 +21,7 @@ protected:
         widget::process(dt,parent);
     }
 
-    virtual void process_events(const layout::event &e) override;
+    virtual void process_events(const event &e) override;
     virtual void parent_resized(uint width,uint height) override;
     virtual void parent_moved(int x,int y) override;
     virtual void calc_pos_markers() override;
@@ -50,7 +50,7 @@ protected:
         return true;
     }
 
-    virtual bool on_mouse_button(layout::mbutton button,bool pressed) override
+    virtual bool on_mouse_button(enum mouse_button button,bool pressed) override
     {
         layout::mouse_button(button,pressed);
         return true;
