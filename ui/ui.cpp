@@ -23,6 +23,7 @@ float clamp(float v,float from,float to)
     return v;
 }
 
+
 const rect &widget::get_rect()
 {
     if(m_cached_rect)
@@ -152,6 +153,9 @@ void layout::process_events(const event &e)
 
 void layout::add_widget_proxy(const widget_proxy &w)
 {
+    if(!w.is_valid())
+        return;
+
     m_widgets.push_back(w);
 
     m_widgets.back()->parent_moved(m_rect.x,m_rect.y);
@@ -293,6 +297,7 @@ bool layout::mouse_scroll(uint dx,uint dy)
     return processed;
 }
 
+
 void layer::send_event(const event &e)
 {
     m_events.push_back(e);
@@ -302,6 +307,7 @@ void layer::send_event(const event &e)
     if(m_events.size()>msg_limit)
         m_events.pop_front();
 }
+
 
 void set_log(nya_log::log *l)
 {

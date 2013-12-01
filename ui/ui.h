@@ -265,28 +265,40 @@ public:
 
 public:
     widget_proxy(): ptr() {}
-    template<typename t> explicit widget_proxy(const t &obj)
-    {
-        m_ref=new t(obj);
-        m_ref_count=new int(1);
-    }
-
     widget_proxy(const widget_proxy &p): ptr(p) {}
 
 private:
     typedef nya_memory::shared_ptr<widget> ptr;
 };
 
+template<typename t>
+class widget_base_proxy: public widget_proxy
+{
+public:
+    const t *operator -> () const { return m_ref; };
+    t *operator -> () { return m_ref; };
+
+public:
+    widget_base_proxy(): widget_proxy() {}
+    explicit widget_base_proxy(const t &obj)
+    {
+        m_ref=new t(obj);
+        m_ref_count=new int(1);
+    }
+
+    widget_base_proxy(const widget_base_proxy &p): widget_proxy(p) {}
+};
+
 class layout
 {
 public:
-    template<typename t> void add_widget(const t &w) { add_widget_proxy(widget_proxy(w)); }
+    template<typename t> void add_widget(const t &w) { add_widget_proxy(widget_base_proxy<t>(w)); }
     virtual void add_widget_proxy(const widget_proxy &w);
     virtual void draw_widgets(layout &l);
     virtual void process_widgets(uint dt,layout &l);
     virtual void resize(uint width,uint height);
     virtual void move(int x,int y);
-    virtual void remove_widget() {}
+    virtual void remove_widgets() { m_widgets.clear(); }
 
 public:
     virtual bool mouse_button(mouse_button button,bool pressed);

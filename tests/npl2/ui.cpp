@@ -19,7 +19,7 @@ void ui::init()
 
     int xpos=offset;
 
-    static button customize_btn;
+    button customize_btn;
     customize_btn.set_id("customize_btn");
     customize_btn.set_text("Customize");
     customize_btn.set_pos(xpos,offset);
@@ -28,7 +28,7 @@ void ui::init()
 
     xpos+=btn_width+offset;
 
-    static button anim_btn;
+    button anim_btn;
     anim_btn.set_id("anim_btn");
     anim_btn.set_text("Anims");
     anim_btn.set_pos(xpos,offset);
@@ -37,14 +37,14 @@ void ui::init()
 
     xpos+=btn_width+offset;
 
-    static button scenery_btn;
+    button scenery_btn;
     scenery_btn.set_id("scenery_btn");
     scenery_btn.set_text("Scenery");
     scenery_btn.set_pos(xpos,offset);
     scenery_btn.set_size(btn_width,btn_height);
     add_widget(scenery_btn);
 
-    static button options_btn;
+    button options_btn;
     options_btn.set_id("options_btn");
     options_btn.set_text("Options");
     options_btn.set_align(false,true,false,true);
@@ -147,7 +147,7 @@ void ui::init()
     m_mod_box.set_size(modal_box_width,modal_box_height);
     m_cos_modal.add_widget(m_mod_box);
 
-    static button cos_mod_btn[3];
+    button cos_mod_btn[3];
     for(int i=0;i<3;++i)
     {
         button &btn=cos_mod_btn[i];
@@ -172,13 +172,13 @@ void ui::init()
     m_props_pnl.set_visible(false);
     add_widget(m_props_pnl);
 
-    static label opac_lbl;
+    label opac_lbl;
     opac_lbl.set_text("Opacity");
     opac_lbl.set_pos(0,props_height-btn_height-offset);
     opac_lbl.set_size(btn_width,btn_height);
     m_props_pnl.add_widget(opac_lbl);
 
-    static button opac_reset_btn;
+    button opac_reset_btn;
     opac_reset_btn.set_id("opac_reset_btn");
     opac_reset_btn.set_text("Reset all");
     opac_reset_btn.set_pos(props_width-(btn_width+offset),props_height-(btn_height+offset));
@@ -202,20 +202,20 @@ void ui::init()
     m_under_pnl.set_visible(false);
     m_props_pnl.add_widget(m_under_pnl);
 
-    static label under_lbl;
+    label under_lbl;
     under_lbl.set_text("Under toggle");
     under_lbl.set_pos(0,btn_height+offset*1.5);
     under_lbl.set_size(btn_width*1.5,btn_height);
     m_under_pnl.add_widget(under_lbl);
 
-    static button under_top;
+    button under_top;
     under_top.set_id("under_top");
     under_top.set_text("Top");
     under_top.set_pos(offset,offset);
     under_top.set_size(btn_width,btn_height);
     m_under_pnl.add_widget(under_top);
 
-    static button under_btm;
+    button under_btm;
     under_btm.set_id("under_btm");
     under_btm.set_text("Bottom");
     under_btm.set_pos(offset*2+btn_width,offset);
