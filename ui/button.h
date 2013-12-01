@@ -35,6 +35,4 @@ protected:
     std::string m_text;
 };
 
-typedef widget_base_proxy<button> button_proxy;
-
 }

@@ -25,6 +25,4 @@ protected:
     std::string m_text;
 };
 
-typedef widget_base_proxy<label> label_proxy;
-
 }

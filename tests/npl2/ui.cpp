@@ -59,18 +59,18 @@ void ui::init()
     
     const uint buttons_pnl_h=(btn_height+offset)*4;
 
-    uint it=0;
+    m_customise_lst.create();
     get_attribute_manager().reset_iterator();
     const char *atr=get_attribute_manager().iterate_next();
     if(atr)
     {
-        m_customise_lst.add_element("none");
+        m_customise_lst->add_element("none");
 
         get_attribute_manager().iterate_elements(atr);
         const char *elem=get_attribute_manager().iterate_next_element();
         while(elem)
         {
-            m_customise_lst.add_element(elem);
+            m_customise_lst->add_element(elem);
 
             elem=get_attribute_manager().iterate_next_element();
         }
@@ -81,14 +81,14 @@ void ui::init()
 
     //const char *def_group=atr;
 
-    panel customize_pnl;
-    customize_pnl.set_id("customize_pnl");
-    customize_pnl.set_align(true,false,true,true);
-    customize_pnl.set_pos(offset,panel_pos_y);
-    customize_pnl.set_size(panel_width,panel_height);
-    customize_pnl.set_visible(false);
+    m_customize_pnl.create();
+    m_customize_pnl.set_id("customize_pnl");
+    m_customize_pnl.set_align(true,false,true,true);
+    m_customize_pnl.set_pos(offset,panel_pos_y);
+    m_customize_pnl.set_size(panel_width,panel_height);
+    m_customize_pnl.set_visible(false);
 
-    while(atr && it<max_customize_btns)
+    while(atr)
     {
         if(strcmp(atr,"BG")==0)
         {
@@ -96,45 +96,48 @@ void ui::init()
             continue;
         }
 
-        m_customize_btns[it].id.assign(atr);
-        button &btn=m_customize_btns[it].btn;
+        button btn;
         btn.set_id(atr);
         if(strcmp(atr,"COORDINATE")==0)
             btn.set_text("SET");
         else
             btn.set_text(atr);
 
-        uint x=it%3;
-        uint y=it/3;
+        const int idx=int(m_customize_groups.size());
+
+        uint x=idx%3;
+        uint y=idx/3;
 
         uint cust_btn_width=btn_width-4;
 
         btn.set_pos(offset+(cust_btn_width+offset)*x,buttons_pnl_h+offset-(btn_height+offset)*(y+1));
         btn.set_size(cust_btn_width,btn_height);
-        customize_pnl.add_widget(btn);
+        m_customize_pnl->add_widget(btn);
+
+        m_customize_groups.push_back(atr);
 
         atr=get_attribute_manager().iterate_next();
-        ++it;
     }
 
     m_customise_lst.set_align(true,false,true,true);
     m_customise_lst.set_id("customise_lst");
     m_customise_lst.set_pos(offset,offset+buttons_pnl_h);
     m_customise_lst.set_size(panel_width-offset*2,panel_height-offset*2-buttons_pnl_h);
-    customize_pnl.add_widget(m_customise_lst);
-    add_widget(customize_pnl);
+    m_customize_pnl->add_widget_proxy(m_customise_lst);
+    add_widget_proxy(m_customize_pnl);
 
     panel::style modal_bg;
     modal_bg.panel.border=false;
     modal_bg.panel.solid=true;
     modal_bg.panel.solid_color.set(0,0,0,0.7);
 
-    m_cos_modal.set_align(true,false,true,true);
-    m_cos_modal.set_pos(offset,panel_pos_y);
-    m_cos_modal.set_size(panel_width,panel_height);
-    m_cos_modal.set_style(modal_bg);
-    m_cos_modal.set_visible(false);
-    add_widget(m_cos_modal);
+    panel cos_modal;
+    cos_modal.set_id("cos_modal");
+    cos_modal.set_align(true,false,true,true);
+    cos_modal.set_pos(offset,panel_pos_y);
+    cos_modal.set_size(panel_width,panel_height);
+    cos_modal.set_style(modal_bg);
+    cos_modal.set_visible(false);
 
     const int modal_box_width=btn_width+offset*2;
     const int modal_box_height=btn_height*3+offset*4;
@@ -144,56 +147,60 @@ void ui::init()
     mod_box_bg.panel.solid_color=mod_box_bg.panel.border_color;
     mod_box_bg.panel.solid_color.a=0.3;
 
-    m_mod_box.set_pos(20,40);
-    m_mod_box.set_style(mod_box_bg);
-    m_mod_box.set_size(modal_box_width,modal_box_height);
-    m_cos_modal.add_widget(m_mod_box);
+    panel mod_box;
+    mod_box.set_id("mod_box");
+    mod_box.set_pos(20,40);
+    mod_box.set_style(mod_box_bg);
+    mod_box.set_size(modal_box_width,modal_box_height);
+    mod_box.set_visible(false);
 
-    button cos_mod_btn[3];
-    for(int i=0;i<3;++i)
+    const char *modal_captions[]={"BOTH","BOTTOM","TOP"};
+    for(int i=0;i<sizeof(modal_captions)/sizeof(modal_captions[0]);++i)
     {
-        button &btn=cos_mod_btn[i];
+        button btn;
         btn.set_pos(offset,(offset+btn_height)*i+offset);
         btn.set_size(btn_width,btn_height);
-        m_mod_box.add_widget(btn);
+        btn.set_text(modal_captions[i]);
 
         std::string id("cos_mod_btn");
         id.push_back('0'+i);
         btn.set_id(id.c_str());
+        mod_box.add_widget(btn);
     }
 
-    cos_mod_btn[2].set_text("TOP");
-    cos_mod_btn[1].set_text("BOTTOM");
-    cos_mod_btn[0].set_text("BOTH");
+    add_widget(cos_modal);
+    add_widget(mod_box);
 
     const int props_width=200;
     const int props_height=100;
-    m_props_pnl.set_align(false,true,true,false);
-    m_props_pnl.set_pos(get_width()-offset-props_width,get_height()-props_height-offset);
-    m_props_pnl.set_size(props_width,props_height);
-    m_props_pnl.set_visible(false);
-    add_widget(m_props_pnl);
+    panel props_pnl;
+    props_pnl.set_id("props_pnl");
+    props_pnl.set_align(false,true,true,false);
+    props_pnl.set_pos(get_width()-offset-props_width,get_height()-props_height-offset);
+    props_pnl.set_size(props_width,props_height);
+    props_pnl.set_visible(false);
 
     label opac_lbl;
     opac_lbl.set_text("Opacity");
     opac_lbl.set_pos(0,props_height-btn_height-offset);
     opac_lbl.set_size(btn_width,btn_height);
-    m_props_pnl.add_widget(opac_lbl);
+    props_pnl.add_widget(opac_lbl);
 
     button opac_reset_btn;
     opac_reset_btn.set_id("opac_reset_btn");
     opac_reset_btn.set_text("Reset all");
     opac_reset_btn.set_pos(props_width-(btn_width+offset),props_height-(btn_height+offset));
     opac_reset_btn.set_size(btn_width,btn_height);
-    m_props_pnl.add_widget(opac_reset_btn);
+    props_pnl.add_widget(opac_reset_btn);
 
     const int slider_height=10;
     const int slider_width=props_width-offset*2;
     const int slider_y=props_height-btn_height-slider_height-offset*2;
+    m_opac_slider.create();
     m_opac_slider.set_id("opac_sldr");
     m_opac_slider.set_pos(offset,slider_y);
     m_opac_slider.set_size(slider_width,slider_height);
-    m_props_pnl.add_widget(m_opac_slider);
+    props_pnl.add_widget_proxy(m_opac_slider);
 
 
     panel::style under_pnl_style;
@@ -227,8 +234,9 @@ void ui::init()
     under_btm.set_size(btn_width,btn_height);
     under_pnl.add_widget(under_btm);
 
-    m_props_pnl.add_widget(under_pnl);
+    props_pnl.add_widget(under_pnl);
 
+    add_widget(props_pnl);
 
     //if(m_imouto)
     //    m_customise_lst.select_element(m_imouto->get_attrib(def_group));
@@ -240,15 +248,16 @@ void ui::init()
     anim_pnl.set_size(panel_width,panel_height);
     anim_pnl.set_visible(false);
 
-    m_anim_lst.set_align(true,false,true,true);
+    m_anim_lst.create();
     m_anim_lst.set_id("anim_lst");
+    m_anim_lst.set_align(true,false,true,true);
     m_anim_lst.set_pos(offset,offset);
     m_anim_lst.set_size(panel_width-offset*2,panel_height-offset*2);
 
     for(uint i=0;i<get_scene().get_anims_count();++i)
-        m_anim_lst.add_element(get_scene().get_anim_name(i));
+        m_anim_lst->add_element(get_scene().get_anim_name(i));
 
-    anim_pnl.add_widget(m_anim_lst);
+    anim_pnl.add_widget_proxy(m_anim_lst);
 
     add_widget(anim_pnl);
 
@@ -259,17 +268,18 @@ void ui::init()
     scenery_pnl.set_size(panel_width,panel_height);
     scenery_pnl.set_visible(false);
 
+    m_scenery_lst.create();
     m_scenery_lst.set_align(true,false,true,true);
     m_scenery_lst.set_id("scenery_lst");
     m_scenery_lst.set_pos(offset,offset);
     m_scenery_lst.set_size(panel_width-offset*2,panel_height-offset*2);
-    
-    m_scenery_lst.add_element("none");
+
+    m_scenery_lst->add_element("none");
     get_attribute_manager().iterate_elements("BG");
     while(const char *atr=get_attribute_manager().iterate_next_element())
-        m_scenery_lst.add_element(atr);
+        m_scenery_lst->add_element(atr);
 
-    scenery_pnl.add_widget(m_scenery_lst);
+    scenery_pnl.add_widget_proxy(m_scenery_lst);
     add_widget(scenery_pnl);
 }
 
@@ -299,7 +309,7 @@ void ui::update_props_panel()
 {
     const bool visible=is_props_visible();
 
-    m_props_pnl.set_visible(visible);
+    get_widget("props_pnl").set_visible(visible);
 
     if(!visible)
         return;
@@ -316,27 +326,34 @@ void ui::update_props_panel()
             num=1;
     }
 
+    if(!m_opac_slider.is_valid())
+        return;
+
     const float value=get_scene().get_part_opacity(m_customise_group.c_str(),num);
-    m_opac_slider.set_value(value);
+    m_opac_slider->set_value(value);
 }
 
 void ui::modal(bool enabled,int x,int y)
 {
-    m_cos_modal.set_visible(enabled);
+    get_widget("cos_modal").set_visible(enabled);
+    get_widget("mod_box").set_visible(enabled);
 
     const int offset=6;
 
+    int px,py;
+    get_widget("cos_modal").get_pos(px,py);
+
     if(enabled)
-        m_mod_box.set_pos(x-offset,y-offset);
+        get_widget("mod_box").set_pos(x+px-offset,y+py-offset);
 }
 
 void ui::process_events(const nya_ui::event &e)
 {
-    if(e.sender=="customise_lst")
+    if(e.sender=="customise_lst" && m_customise_lst.is_valid())
     {
         if(e.type=="select_element")
         {
-            const char *selected=m_customise_lst.get_selected_element();
+            const char *selected=m_customise_lst->get_selected_element();
             if(!selected)
                 return;
 
@@ -352,7 +369,7 @@ void ui::process_events(const nya_ui::event &e)
 
         if(e.type=="mover_element")
         {
-            const char *selected=m_customise_lst.get_mover_element();
+            const char *selected=m_customise_lst->get_mover_element();
             if(!selected)
                 return;
 
@@ -372,9 +389,9 @@ void ui::process_events(const nya_ui::event &e)
         return;
     }
 
-    if(e.sender=="scenery_lst")
+    if(e.sender=="scenery_lst" && m_scenery_lst.is_valid())
     {
-        const char *selected=m_scenery_lst.get_selected_element();
+        const char *selected=m_scenery_lst->get_selected_element();
         if(!selected)
             return;
 
@@ -384,16 +401,16 @@ void ui::process_events(const nya_ui::event &e)
 
     if(e.sender=="anim_lst")
     {
-        if(e.type=="select_element")
+        if(e.type=="select_element" && m_anim_lst.is_valid())
         {
-            get_scene().set_anim(m_anim_lst.get_selected_idx());
+            get_scene().set_anim(m_anim_lst->get_selected_idx());
             return;
         }
     }
 
     if(e.sender=="opac_sldr")
     {
-        if(e.type=="value_changed")
+        if(e.type=="value_changed" && m_opac_slider.is_valid())
         {
             int num=-1;
             if(m_customise_group=="COSTUME" || m_customise_group=="UNDER")
@@ -404,7 +421,7 @@ void ui::process_events(const nya_ui::event &e)
                     num=1;
             }
 
-            get_scene().set_part_opacity(m_customise_group.c_str(),m_opac_slider.get_value(),num);
+            get_scene().set_part_opacity(m_customise_group.c_str(),m_opac_slider->get_value(),num);
         }
         return;
     }
@@ -426,46 +443,46 @@ void ui::process_events(const nya_ui::event &e)
         return;
     }
 
-    if(e.sender=="cos_mod_btn0")
+    if(e.sender=="cos_mod_btn0" && m_customise_lst.is_valid())
     {
         m_custom_mode=none;
         modal(false,0,0);
     
         const char *atr=get_scene().get_imouto_attr(m_customise_group.c_str());
         if(atr)
-            m_customise_lst.select_element(atr);
+            m_customise_lst->select_element(atr);
         
         return;
     }
 
-    if(e.sender=="cos_mod_btn1")
+    if(e.sender=="cos_mod_btn1" && m_customise_lst.is_valid())
     {
         m_custom_mode=cos_dn;
         modal(false,0,0);
         
         const char *atr=get_scene().get_imouto_attr(m_customise_group.c_str(),1);
         if(atr)
-            m_customise_lst.select_element(atr);
+            m_customise_lst->select_element(atr);
         
         return;
     }
 
-    if(e.sender=="cos_mod_btn2")
+    if(e.sender=="cos_mod_btn2" && m_customise_lst.is_valid())
     {
         m_custom_mode=cos_up;
         modal(false,0,0);
 
         const char *atr=get_scene().get_imouto_attr(m_customise_group.c_str(),0);
         if(atr)
-            m_customise_lst.select_element(atr);
+            m_customise_lst->select_element(atr);
         
         return;
     }
 
-    if(e.sender=="opac_reset_btn")
+    if(e.sender=="opac_reset_btn" && m_opac_slider.is_valid())
     {
         get_scene().reset_parts_opacity();
-        m_opac_slider.set_value(1.0f);
+        m_opac_slider->set_value(1.0f);
         return;
     }
 
@@ -499,27 +516,28 @@ void ui::process_events(const nya_ui::event &e)
         return;
     }
 
-    for(int i=0;i<max_customize_btns;++i)
+    if(m_customize_pnl.is_valid() && m_customise_lst.is_valid())
+    for(int i=0;i<int(m_customize_groups.size());++i)
     {
-        if(e.sender!=m_customize_btns[i].id)
+        if(e.sender!=m_customize_groups[i])
             continue;
 
         m_custom_mode=none;
 
-        m_customise_lst.remove_elements();
+        m_customise_lst->remove_elements();
         if(e.sender!="BODY" && e.sender!="HAIR" && e.sender!="EYE" && e.sender!="COORDINATE")
-            m_customise_lst.add_element("none");
+            m_customise_lst->add_element("none");
 
         m_customise_group=e.sender;
-        
+
         if(m_customise_group=="COSTUME" || m_customise_group=="UNDER")
         {
-            for(int i=0;i<max_customize_btns;++i)
+            for(int i=0;i<int(m_customize_groups.size());++i)
             {
-                if(m_customize_btns[i].id==m_customise_group)
+                if(m_customize_groups[i]==m_customise_group)
                 {
                     int x,y;
-                    m_customize_btns[i].btn.get_pos(x,y);
+                    m_customize_pnl->get_widget(m_customize_groups[i].c_str()).get_pos(x,y);
                     modal(true,x,y);
                     break;
                 }
@@ -531,15 +549,14 @@ void ui::process_events(const nya_ui::event &e)
         const char *elem=get_attribute_manager().iterate_next_element();
         while(elem)
         {
-            m_customise_lst.add_element(elem);
+            m_customise_lst->add_element(elem);
 
             elem=get_attribute_manager().iterate_next_element();
         }
 
         update_props_panel();
-        
-        int num=-1;
 
+        int num=-1;
         if(m_custom_mode==cos_up)
             num=0;
         else if(m_custom_mode==cos_dn)
@@ -547,7 +564,7 @@ void ui::process_events(const nya_ui::event &e)
 
         const char *atr=get_scene().get_imouto_attr(m_customise_group.c_str(),num);
         if(atr)
-            m_customise_lst.select_element(atr);
+            m_customise_lst->select_element(atr);
 
         return;
     }

@@ -63,6 +63,4 @@ protected:
     void update_layout_rect();
 };
 
-typedef widget_base_proxy<panel> panel_proxy;
-
 }

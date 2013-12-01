@@ -275,24 +275,36 @@ template<typename t>
 class widget_base_proxy: public widget_proxy
 {
 public:
-    const t *operator -> () const { return m_ref; };
-    t *operator -> () { return m_ref; };
+    widget_base_proxy &create()
+    {
+        free();
+
+        m_ref=new t;
+        m_ref_count=new int(1);
+
+        return *this;
+    }
+
+public:
+    const t *operator -> () const { return static_cast<const t*>(m_ref); };
+    t *operator -> () { return static_cast<t*>(m_ref); };
 
 public:
     widget_base_proxy(): widget_proxy() {}
-    explicit widget_base_proxy(const t &obj)
-    {
-        m_ref=new t(obj);
-        m_ref_count=new int(1);
-    }
-
     widget_base_proxy(const widget_base_proxy &p): widget_proxy(p) {}
 };
 
 class layout
 {
 public:
-    template<typename t> void add_widget(const t &w) { add_widget_proxy(widget_base_proxy<t>(w)); }
+    template<typename t> void add_widget(const t &w)
+    {
+        widget_base_proxy<t> wp;
+        wp.create();
+        *(wp.operator->())=w;
+        add_widget_proxy(wp);
+    }
+
     virtual void add_widget_proxy(const widget_proxy &w);
     widget_proxy get_widget(const char *name);
     virtual void draw_widgets(layout &l);

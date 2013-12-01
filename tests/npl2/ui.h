@@ -31,23 +31,12 @@ private:
     void modal(bool enabled,int x,int y);
 
 private:
-    panel m_props_pnl;
-    slider m_opac_slider;
+    nya_ui::widget_base_proxy<slider> m_opac_slider;
 
     bool m_under_top;
     bool m_under_bottom;
 
-    panel m_cos_modal;
-    panel m_mod_box;
-
-    struct customize_btn
-    {
-        std::string id;
-        button btn;
-    };
-
-    static const uint max_customize_btns=32;
-    customize_btn m_customize_btns[max_customize_btns];
+    nya_ui::widget_base_proxy<panel> m_customize_pnl;
 
     enum custom_mode
     {
@@ -57,11 +46,11 @@ private:
     };
 
     custom_mode m_custom_mode;
-
     std::string m_customise_group;
+    std::vector<std::string> m_customize_groups;
 
 private:
-    list m_customise_lst;
-    list m_anim_lst;
-    list m_scenery_lst;
+    nya_ui::widget_base_proxy<list> m_customise_lst;
+    nya_ui::widget_base_proxy<list> m_anim_lst;
+    nya_ui::widget_base_proxy<list> m_scenery_lst;
 };
