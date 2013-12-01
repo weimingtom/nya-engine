@@ -294,6 +294,7 @@ class layout
 public:
     template<typename t> void add_widget(const t &w) { add_widget_proxy(widget_base_proxy<t>(w)); }
     virtual void add_widget_proxy(const widget_proxy &w);
+    widget_proxy get_widget(const char *name);
     virtual void draw_widgets(layout &l);
     virtual void process_widgets(uint dt,layout &l);
     virtual void resize(uint width,uint height);

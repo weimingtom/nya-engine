@@ -142,4 +142,6 @@ protected:
     int m_mover;
 };
 
+typedef widget_base_proxy<list> list_proxy;
+
 }

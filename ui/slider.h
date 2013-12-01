@@ -67,4 +67,6 @@ protected:
     bool m_vertical;
 };
 
+typedef widget_base_proxy<slider> slider_proxy;
+
 }

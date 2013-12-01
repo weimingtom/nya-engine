@@ -163,6 +163,26 @@ void layout::add_widget_proxy(const widget_proxy &w)
     m_widgets.back()->calc_pos_markers();
 }
 
+widget_proxy layout::get_widget(const char *name)
+{
+    if(!name)
+        return widget_proxy();
+
+    for(widgets_list::iterator it=m_widgets.begin();
+        it!=m_widgets.end();++it)
+    {
+        widget_proxy &w=*it;
+        const char *id=w.get_id();
+        if(!id)
+            continue;
+
+        if(strcmp(name,id)==0)
+            return w;
+    }
+
+    return widget_proxy();
+}
+
 void layout::process_widgets(uint dt,layout &l)
 {
     for(widgets_list::iterator it=m_widgets.begin();

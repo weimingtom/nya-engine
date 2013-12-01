@@ -31,14 +31,9 @@ private:
     void modal(bool enabled,int x,int y);
 
 private:
-    panel m_anim_pnl;
-    panel m_customize_pnl;
-    panel m_scenery_pnl;
-
     panel m_props_pnl;
     slider m_opac_slider;
 
-    panel m_under_pnl;
     bool m_under_top;
     bool m_under_bottom;
 

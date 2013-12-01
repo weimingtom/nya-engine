@@ -56,20 +56,8 @@ void ui::init()
     const int panel_pos_y=2*offset+btn_height;
 
     unsigned int panel_height=get_height()-panel_pos_y-offset;
-
-    m_customize_pnl.set_align(true,false,true,true);
-    m_customize_pnl.set_pos(offset,panel_pos_y);
-    m_customize_pnl.set_size(panel_width,panel_height);
-    m_customize_pnl.set_visible(false);
-    add_widget(m_customize_pnl);
-
+    
     const uint buttons_pnl_h=(btn_height+offset)*4;
-
-    m_customise_lst.set_align(true,false,true,true);
-    m_customise_lst.set_id("customise_lst");
-    m_customise_lst.set_pos(offset,offset+buttons_pnl_h);
-    m_customise_lst.set_size(panel_width-offset*2,panel_height-offset*2-buttons_pnl_h);
-    m_customize_pnl.add_widget(m_customise_lst);
 
     uint it=0;
     get_attribute_manager().reset_iterator();
@@ -92,6 +80,13 @@ void ui::init()
     }
 
     //const char *def_group=atr;
+
+    panel customize_pnl;
+    customize_pnl.set_id("customize_pnl");
+    customize_pnl.set_align(true,false,true,true);
+    customize_pnl.set_pos(offset,panel_pos_y);
+    customize_pnl.set_size(panel_width,panel_height);
+    customize_pnl.set_visible(false);
 
     while(atr && it<max_customize_btns)
     {
@@ -116,11 +111,18 @@ void ui::init()
 
         btn.set_pos(offset+(cust_btn_width+offset)*x,buttons_pnl_h+offset-(btn_height+offset)*(y+1));
         btn.set_size(cust_btn_width,btn_height);
-        m_customize_pnl.add_widget(btn);
+        customize_pnl.add_widget(btn);
 
         atr=get_attribute_manager().iterate_next();
         ++it;
     }
+
+    m_customise_lst.set_align(true,false,true,true);
+    m_customise_lst.set_id("customise_lst");
+    m_customise_lst.set_pos(offset,offset+buttons_pnl_h);
+    m_customise_lst.set_size(panel_width-offset*2,panel_height-offset*2-buttons_pnl_h);
+    customize_pnl.add_widget(m_customise_lst);
+    add_widget(customize_pnl);
 
     panel::style modal_bg;
     modal_bg.panel.border=false;
@@ -193,69 +195,82 @@ void ui::init()
     m_opac_slider.set_size(slider_width,slider_height);
     m_props_pnl.add_widget(m_opac_slider);
 
+
     panel::style under_pnl_style;
     under_pnl_style.panel.border=false;
     const int under_pnl_height=slider_y;
-    m_under_pnl.set_pos(0,0);
-    m_under_pnl.set_size(props_width,under_pnl_height);
-    m_under_pnl.set_style(under_pnl_style);
-    m_under_pnl.set_visible(false);
-    m_props_pnl.add_widget(m_under_pnl);
+
+    panel under_pnl;
+    under_pnl.set_id("under_pnl");
+    under_pnl.set_pos(0,0);
+    under_pnl.set_size(props_width,under_pnl_height);
+    under_pnl.set_style(under_pnl_style);
+    under_pnl.set_visible(false);
 
     label under_lbl;
     under_lbl.set_text("Under toggle");
     under_lbl.set_pos(0,btn_height+offset*1.5);
     under_lbl.set_size(btn_width*1.5,btn_height);
-    m_under_pnl.add_widget(under_lbl);
+    under_pnl.add_widget(under_lbl);
 
     button under_top;
     under_top.set_id("under_top");
     under_top.set_text("Top");
     under_top.set_pos(offset,offset);
     under_top.set_size(btn_width,btn_height);
-    m_under_pnl.add_widget(under_top);
+    under_pnl.add_widget(under_top);
 
     button under_btm;
     under_btm.set_id("under_btm");
     under_btm.set_text("Bottom");
     under_btm.set_pos(offset*2+btn_width,offset);
     under_btm.set_size(btn_width,btn_height);
-    m_under_pnl.add_widget(under_btm);
+    under_pnl.add_widget(under_btm);
+
+    m_props_pnl.add_widget(under_pnl);
+
 
     //if(m_imouto)
     //    m_customise_lst.select_element(m_imouto->get_attrib(def_group));
 
-    m_anim_pnl.set_align(true,false,true,true);
-    m_anim_pnl.set_pos(offset,panel_pos_y);
-    m_anim_pnl.set_size(panel_width,panel_height);
-    m_anim_pnl.set_visible(false);
-    add_widget(m_anim_pnl);
+    panel anim_pnl;
+    anim_pnl.set_id("anim_pnl");
+    anim_pnl.set_align(true,false,true,true);
+    anim_pnl.set_pos(offset,panel_pos_y);
+    anim_pnl.set_size(panel_width,panel_height);
+    anim_pnl.set_visible(false);
 
     m_anim_lst.set_align(true,false,true,true);
     m_anim_lst.set_id("anim_lst");
     m_anim_lst.set_pos(offset,offset);
     m_anim_lst.set_size(panel_width-offset*2,panel_height-offset*2);
-    m_anim_pnl.add_widget(m_anim_lst);
 
     for(uint i=0;i<get_scene().get_anims_count();++i)
         m_anim_lst.add_element(get_scene().get_anim_name(i));
 
-    m_scenery_pnl.set_align(true,false,true,true);
-    m_scenery_pnl.set_pos(offset,panel_pos_y);
-    m_scenery_pnl.set_size(panel_width,panel_height);
-    m_scenery_pnl.set_visible(false);
-    add_widget(m_scenery_pnl);
+    anim_pnl.add_widget(m_anim_lst);
+
+    add_widget(anim_pnl);
+
+    panel scenery_pnl;
+    scenery_pnl.set_id("scenery_pnl");
+    scenery_pnl.set_align(true,false,true,true);
+    scenery_pnl.set_pos(offset,panel_pos_y);
+    scenery_pnl.set_size(panel_width,panel_height);
+    scenery_pnl.set_visible(false);
 
     m_scenery_lst.set_align(true,false,true,true);
     m_scenery_lst.set_id("scenery_lst");
     m_scenery_lst.set_pos(offset,offset);
     m_scenery_lst.set_size(panel_width-offset*2,panel_height-offset*2);
-    m_scenery_pnl.add_widget(m_scenery_lst);
-
+    
     m_scenery_lst.add_element("none");
     get_attribute_manager().iterate_elements("BG");
     while(const char *atr=get_attribute_manager().iterate_next_element())
         m_scenery_lst.add_element(atr);
+
+    scenery_pnl.add_widget(m_scenery_lst);
+    add_widget(scenery_pnl);
 }
 
 void ui::draw()
@@ -270,7 +285,7 @@ void ui::draw()
 
 bool ui::is_props_visible()
 {
-    if(!m_customize_pnl.is_visible())
+    if(!get_widget("customize_pnl").is_visible())
         return false;
 
     if(m_customise_group=="BODY" || m_customise_group=="HAIR"
@@ -288,10 +303,9 @@ void ui::update_props_panel()
 
     if(!visible)
         return;
-    
-    bool under=(m_customise_group=="UNDER");
-    
-    m_under_pnl.set_visible(under);
+
+    const bool under=(m_customise_group=="UNDER");
+    get_widget("under_pnl").set_visible(under);
 
     int num=-1;
     if(m_customise_group=="COSTUME" || under)
@@ -457,30 +471,30 @@ void ui::process_events(const nya_ui::event &e)
 
     if(e.sender=="customize_btn")
     {
-        m_customize_pnl.set_visible(!m_customize_pnl.is_visible());
+        get_widget("customize_pnl").set_visible(!get_widget("customize_pnl").is_visible());
         update_props_panel();
-        m_anim_pnl.set_visible(false);
-        m_scenery_pnl.set_visible(false);
+        get_widget("anim_pnl").set_visible(false);
+        get_widget("scenery_pnl").set_visible(false);
         modal(false,0,0);
         return;
     }
 
     if(e.sender=="anim_btn")
     {
-        m_customize_pnl.set_visible(false);
+        get_widget("customize_pnl").set_visible(false);
         update_props_panel();
-        m_anim_pnl.set_visible(!m_anim_pnl.is_visible());
-        m_scenery_pnl.set_visible(false);
+        get_widget("anim_pnl").set_visible(!get_widget("anim_pnl").is_visible());
+        get_widget("scenery_pnl").set_visible(false);
         modal(false,0,0);
         return;
     }
 
     if(e.sender=="scenery_btn")
     {
-        m_customize_pnl.set_visible(false);
+        get_widget("customize_pnl").set_visible(false);
         update_props_panel();
-        m_anim_pnl.set_visible(false);
-        m_scenery_pnl.set_visible(!m_scenery_pnl.is_visible());
+        get_widget("anim_pnl").set_visible(false);
+        get_widget("scenery_pnl").set_visible(!get_widget("scenery_pnl").is_visible());
         modal(false,0,0);
         return;
     }
