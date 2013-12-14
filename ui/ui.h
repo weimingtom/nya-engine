@@ -198,6 +198,9 @@ protected:
     }
 
 public:
+    virtual const char *get_type() { return 0; } //manual RTTI
+
+public:
     widget(): m_pos_left(0),m_pos_right(0),m_pos_top(0),m_pos_bottom(0),
               m_center_x(0),m_center_y(0),m_width(0),m_height(0),
               m_align_left(true),m_align_right(false),
@@ -353,7 +356,7 @@ public:
     virtual void resize(uint width,uint height);
     virtual void process(uint dt);
 
-private:
+public:
     virtual void process_events(const event &e) {}
 
 public:

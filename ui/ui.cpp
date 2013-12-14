@@ -247,12 +247,12 @@ bool layout::mouse_button(enum mouse_button button,bool pressed)
         if(!w.is_visible()) //visible also means valid
             continue;
 
-        if(((w->m_mouse_over && !processed) || !pressed)
+        if(((w->is_mouse_over() && !processed) || !pressed)
             && w->m_mouse_pressed!=pressed)
         {
-            w->on_mouse_button(button,pressed);
+            const bool result=w->on_mouse_button(button,pressed);
             w->m_mouse_pressed=pressed;
-            if(pressed)
+            if(pressed && result)
                 processed=true;
         }
     }
@@ -307,7 +307,7 @@ bool layout::mouse_scroll(uint dx,uint dy)
         if(!w.is_visible()) //also means valid
             continue;
 
-        if(w->m_mouse_over)
+        if(w->is_mouse_over())
         {
             if(w->on_mouse_scroll(dx,dy))
                 processed=true;

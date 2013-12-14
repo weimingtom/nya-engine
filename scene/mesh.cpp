@@ -292,6 +292,7 @@ bool mesh_internal::init_form_shared()
     m_anims.clear();
     
     m_skeleton=m_shared->skeleton;
+    m_bone_controls.clear();
 
     for(int i=0;i<int(m_shared->materials.size());++i)
         m_shared->materials[i].internal().skeleton_changed(&m_skeleton);
