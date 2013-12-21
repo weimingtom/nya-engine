@@ -5,8 +5,8 @@
 #include "log/log.h"
 #include "math/matrix.h"
 
-class ID3D11Device;
-class ID3D11DeviceContext;
+struct ID3D11Device;
+struct ID3D11DeviceContext;
 
 namespace nya_render
 {

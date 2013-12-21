@@ -375,6 +375,9 @@ ID3D11InputLayout *add_layout(int mesh_idx,
 
     shader_obj &shdr=shader_obj::get(current_shader);
 
+	if(!shdr.compiled[shader::vertex].get_data())
+		return 0;
+
     ID3D11InputLayout *out=0;
 	get_device()->CreateInputLayout(desc,desc_size,shdr.compiled[shader::vertex].get_data(),
                                     shdr.compiled[shader::vertex].get_size(),&out);

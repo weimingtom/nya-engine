@@ -26,21 +26,21 @@ float clamp(float v,float from,float to);
 
 struct point
 {
-    uint x; uint y;
+    int x; int y;
 
     point(): x(0),y(0) {}
-    point(uint x,uint y): x(x),y(y) {}
+    point(int x,int y): x(x),y(y) {}
 };
 
 struct rect
 {
-    uint x; uint y; uint w; uint h;
+    int x; int y; uint w; uint h;
 
     bool check_point(const point &p) const { return check_point(p.x,p.y); }
-    bool check_point(uint px, uint py) const { return !(px<x || py<y || px>x+w || py>y+h); }
+    bool check_point(int px, int py) const { return !(px<x || py<y || px>x+int(w) || py>y+int(h)); }
 
     rect(): x(0),y(0),w(0),h(0) {}
-    rect(uint x,uint y,uint w,uint h): x(x),y(y),w(w),h(h) {}
+    rect(int x,int y,uint w,uint h): x(x),y(y),w(w),h(h) {}
 };
 
 struct event { std::string sender; std::string type; };

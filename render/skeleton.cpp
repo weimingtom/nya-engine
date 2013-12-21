@@ -86,6 +86,14 @@ nya_math::quat skeleton::get_bone_rot(int idx) const
     return m_rot_tr[idx];
 }
 
+nya_math::vec3 skeleton::get_bone_original_pos(int idx) const
+{
+    if(idx<0 || idx>=(int)m_bones.size())
+        return nya_math::vec3();
+
+    return m_bones[idx].pos_org;
+}
+
 int skeleton::add_ik(int target_bone_idx,int effect_bone_idx,int count,float fact,bool allow_invalid)
 {
     if(target_bone_idx<0 || (!allow_invalid && target_bone_idx>=(int)m_bones.size()))

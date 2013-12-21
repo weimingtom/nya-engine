@@ -23,6 +23,7 @@ public:
 
     nya_math::vec3 get_bone_pos(int idx) const;
     nya_math::quat get_bone_rot(int idx) const;
+    nya_math::vec3 get_bone_original_pos(int idx) const;
 
     void set_bone_transform(int bone_idx,const nya_math::vec3 &pos,
                                                 const nya_math::quat &rot);

@@ -76,12 +76,13 @@ const rect &widget::get_rect()
     {
         w=h*m_width/m_height;
     }
-    
+
+    /*
     if(x<m_parent_rect.x)
         x=m_parent_rect.x;
     if(y<m_parent_rect.y)
         y=m_parent_rect.y;
-    
+
     const int cw=m_parent_rect.x-x+m_parent_rect.w;
     if(w>cw)
         w=cw;
@@ -89,11 +90,12 @@ const rect &widget::get_rect()
     const int ch=m_parent_rect.y-y+m_parent_rect.h;
     if(h>ch)
         h=ch;
-    
+    */
+
     m_rect=rect();
-    
-    if(x>0) m_rect.x=x;
-    if(y>0) m_rect.y=y;
+
+    m_rect.x=x;
+    m_rect.y=y;
     if(w>0) m_rect.w=w;
     if(h>0) m_rect.h=h;
     
@@ -111,7 +113,7 @@ void widget::process(uint dt,layout &parent)
     m_events_to_parent.clear();
 
     for(events_deque::const_iterator it=events.begin();it!=events.end();++it)
-        parent.send_event(*it);
+        parent.send_event(*it);//,printf("e %s %s\n",it->sender.c_str(),it->type.c_str());
 }
 
 

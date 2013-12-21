@@ -640,9 +640,10 @@ bool mesh_internal::is_anim_finished(int layer) const
 
 bool mesh::is_anim_finished(int layer) const { return internal().is_anim_finished(layer); }
 
-nya_math::vec3 mesh::get_bone_pos(int bone_idx,bool local)
+nya_math::vec3 mesh::get_bone_pos(int bone_idx,bool local,bool ignore_animations)
 {
-    const nya_math::vec3 pos=internal().m_skeleton.get_bone_pos(bone_idx);
+    const nya_math::vec3 pos=ignore_animations?internal().m_skeleton.get_bone_original_pos(bone_idx):
+                                               internal().m_skeleton.get_bone_pos(bone_idx);
     if(local)
         return pos;
 

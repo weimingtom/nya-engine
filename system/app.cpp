@@ -144,15 +144,25 @@ protected:
         m_windowVisible=args->Visible;
     }
 
+	float get_resolution_scale()
+	{
+		 //ToDo: DeviceExtendedProperties.GetValue("PhysicalScreenResolution");
+
+		const int rs = (int)Windows::Graphics::Display::DisplayProperties::ResolutionScale;
+		return (rs>0)?rs/100.0f:1.0f;
+	}
+
 	void OnPointerPressed(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args)
     {
-        m_app.on_mouse_move(int(args->CurrentPoint->Position.X),m_height-int(args->CurrentPoint->Position.Y));
+		static float rs = get_resolution_scale();
+        m_app.on_mouse_move(int(args->CurrentPoint->Position.X*rs),m_height-int(args->CurrentPoint->Position.Y*rs));
         m_app.on_mouse_button(nya_system::mouse_left,true);
     }
 
 	void OnPointerMoved(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args)
     {
-        m_app.on_mouse_move(int(args->CurrentPoint->Position.X),m_height-int(args->CurrentPoint->Position.Y));
+		static float rs = get_resolution_scale();
+		m_app.on_mouse_move(int(args->CurrentPoint->Position.X*rs),m_height-int(args->CurrentPoint->Position.Y*rs));
     }
 
 	void OnPointerReleased(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args)
@@ -189,8 +199,8 @@ protected:
     {
 	    m_windowBounds = m_window->Bounds;
 
-	    m_renderTargetSize.Width = ConvertDipsToPixels(m_windowBounds.Width);
-	    m_renderTargetSize.Height = ConvertDipsToPixels(m_windowBounds.Height);
+	    m_renderTargetSize.Width = int(m_windowBounds.Width * get_resolution_scale());
+	    m_renderTargetSize.Height = int(m_windowBounds.Height * get_resolution_scale());
 
 	    DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {0};
 	    swapChainDesc.Width=static_cast<UINT>(m_renderTargetSize.Width);
@@ -244,12 +254,6 @@ protected:
         m_context->OMSetRenderTargets(1,&m_renderTargetView,m_depthStencilView);
 
         nya_render::set_viewport(0,0,(int)m_renderTargetSize.Width,(int)m_renderTargetSize.Height);
-    }
-
-    float ConvertDipsToPixels(float dips)
-    {
-	    static const float dipsPerInch=96.0f;
-	    return floor(dips*DisplayProperties::LogicalDpi/dipsPerInch+0.5f);
     }
 
 private:

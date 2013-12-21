@@ -179,9 +179,10 @@ public:
 
 public:
     int get_bone_idx(const char *name) { return internal().m_skeleton.get_bone_idx(name); }
-    nya_math::vec3 get_bone_pos(int bone_idx,bool local=false);
+    nya_math::vec3 get_bone_pos(int bone_idx,bool local=false,bool ignore_animations=false);
     nya_math::quat get_bone_rot(int bone_idx,bool local=false);
-    nya_math::vec3 get_bone_pos(const char *name,bool local=false) { return get_bone_pos(get_bone_idx(name),local); }
+    nya_math::vec3 get_bone_pos(const char *name,bool local=false,bool ignore_animations=false)
+                   { return get_bone_pos(get_bone_idx(name),local,ignore_animations); }
     nya_math::quat get_bone_rot(const char *name,bool local=false) { return get_bone_rot(get_bone_idx(name),local); }
 
 public:
