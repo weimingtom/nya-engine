@@ -51,12 +51,12 @@ void list::update_rects()
     m_scroll_max=scroll_max;
 }
 
-bool list::on_mouse_move(uint x,uint y,bool inside)
+bool list::on_mouse_move(uint x,uint y)
 {
-    widget::on_mouse_move(x,y,inside);
+    widget::on_mouse_move(x,y);
 
     bool mleft=false;
-    if(inside && x<m_scroll_area_rect.x)
+    if(is_mouse_over() && x<m_scroll_area_rect.x)
     {
         rect r=get_rect();
 
@@ -117,7 +117,7 @@ bool list::on_mouse_button(mouse_button button,bool pressed)
                || m_scroll_area_rect.check_point(m_mouse_pos))
             {
                 m_scrolling=true;
-                on_mouse_move(m_mouse_pos.x,m_mouse_pos.y,true);
+                on_mouse_move(m_mouse_pos.x,m_mouse_pos.y);
                 return true;
             }
 
@@ -160,7 +160,7 @@ bool list::on_mouse_scroll(uint x,uint y)
         m_scroll=clamp(m_scroll-delta,0,m_scroll_max);
         update_rects();
 
-        on_mouse_move(m_mouse_pos.x,m_mouse_pos.y,true);
+        on_mouse_move(m_mouse_pos.x,m_mouse_pos.y);
     }
 
     return true;

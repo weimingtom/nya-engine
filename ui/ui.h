@@ -155,7 +155,7 @@ protected:
 protected:
     virtual void on_mouse_over() { send_to_parent("mouse_over"); }
     virtual void on_mouse_left() { send_to_parent("mouse_left"); }
-    virtual bool on_mouse_move(uint x,uint y,bool inside) { m_mouse_pos.x=x; m_mouse_pos.y=y; return false; }
+    virtual bool on_mouse_move(uint x,uint y) { m_mouse_pos.x=x; m_mouse_pos.y=y; update_mouse_over(); return false; }
     virtual bool on_mouse_button(mouse_button button,bool pressed) { return false; }
     virtual bool on_mouse_scroll(uint x,uint y) { return false; }
 

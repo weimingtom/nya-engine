@@ -25,9 +25,9 @@ void slider::update_rects()
     }
 }
 
-bool slider::on_mouse_move(uint x,uint y,bool inside)
+bool slider::on_mouse_move(uint x,uint y)
 {
-    widget::on_mouse_move(x,y,inside);
+    widget::on_mouse_move(x,y);
     float last_value=m_value;
 
     if(m_vertical)
@@ -65,7 +65,7 @@ bool slider::on_mouse_move(uint x,uint y,bool inside)
         update_rects();
     }
 
-    return inside;
+    return is_mouse_over();
 }
 
 bool slider::on_mouse_button(mouse_button button,bool pressed)
@@ -73,9 +73,9 @@ bool slider::on_mouse_button(mouse_button button,bool pressed)
     m_mouse_pressed=pressed;
 
     if(m_vertical)
-        on_mouse_move(0,m_mouse_last,true);
+        on_mouse_move(0,m_mouse_last);
     else
-        on_mouse_move(m_mouse_last,0,true);
+        on_mouse_move(m_mouse_last,0);
 
     return true;
 }

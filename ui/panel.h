@@ -37,11 +37,11 @@ public:
 
 protected:
     virtual void on_mouse_left() override { layout::mouse_left(); widget::on_mouse_left(); }
-    virtual bool on_mouse_move(uint x,uint y,bool inside) override
+    virtual bool on_mouse_move(uint x,uint y) override
     {
         layout::mouse_move(x,y);
-        widget::on_mouse_move(x,y,inside);
-        return inside;
+        widget::on_mouse_move(x,y);
+        return is_mouse_over();
     }
 
     virtual bool on_mouse_scroll(uint dx,uint dy) override

@@ -25,7 +25,7 @@ protected:
     {
         send_to_parent(pressed?"mouse_btn_down":"mouse_btn_up");
 
-        if(!pressed && m_mouse_over)
+        if(!pressed && is_mouse_over())
             send_to_parent("button_pressed");
 
         return true;

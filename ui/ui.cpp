@@ -276,9 +276,7 @@ bool layout::mouse_move(uint x,uint y)
         if(!w.is_visible()) //also means valid
             continue;
 
-        w->update_mouse_over();
-
-        if(!processed && w->on_mouse_move(x,y,w->is_mouse_over()))
+        if(!processed && w->on_mouse_move(x,y))
             processed=true;
     }
 
