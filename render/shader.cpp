@@ -557,8 +557,17 @@ bool shader::add_program(program_type type,const char*code)
         for(size_t i=0;i<shdr.uniforms.size();++i)
         {
             const shader_obj::uniform &u=shdr.uniforms[i];
-            if(!((type==vertex && u.vs_offset>=0) || (type==pixel && u.ps_offset>=0)))
-                continue;
+
+            if(type==vertex)
+            {
+                if(u.vs_offset<0)
+                    continue;
+            }
+            else if(type==pixel)
+            {
+                if(u.ps_offset<0)
+                    continue;
+            }
 
             switch(u.dimension)
             {
