@@ -98,7 +98,11 @@ namespace nya_render
             for(int i=0;i<int(uniforms.size());++i)
             {
                 if(uniforms[i].name==name)
-                    return uniforms[i];
+                {
+                    uniforms.push_back(uniforms[i]);
+                    uniforms.erase(uniforms.begin()+i);
+                    return uniforms.back();
+                }
             }
 
             uniforms.resize(uniforms.size()+1);
