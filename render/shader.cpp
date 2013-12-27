@@ -83,13 +83,28 @@ namespace nya_render
         struct uniform
         {
             std::string name;
-            shader::program_type program_type;
-            int offset;
+            int vs_offset;
+            int ps_offset;
             int dimension;
             int array_size;
+
+            uniform(): vs_offset(-1), ps_offset(-1) {}
         };
 
         std::vector<uniform> uniforms;
+
+        uniform &add_uniform(const std::string &name)
+        {
+            for(int i=0;i<int(uniforms.size());++i)
+            {
+                if(uniforms[i].name==name)
+                    return uniforms[i];
+            }
+
+            uniforms.resize(uniforms.size()+1);
+            uniforms.back().name=name;
+            return uniforms.back();
+        }
 #else
     public:
         shader_obj(): program(0)
@@ -483,37 +498,49 @@ bool shader::add_program(program_type type,const char*code)
 
         if(type_name.compare("float")>=0)
         {
-            shdr.uniforms.resize(shdr.uniforms.size()+1);
-            shader_obj::uniform &u=shdr.uniforms.back();
-            u.name=name;
-            u.program_type=type;
-            u.offset=(int)buf.buffer.size();
-            u.array_size=count;
+            shader_obj::uniform &u=shdr.add_uniform(name);
+            if(type==vertex)
+                u.vs_offset=(int)buf.buffer.size();
+            else
+                u.ps_offset=(int)buf.buffer.size();
 
             char dim=(type_name.length()==6)?type_name[5]:'\0';
 
+            int dimension=1;
             switch(dim)
             {
             case '2':
-                u.dimension=2;
+                dimension=2;
                 buf.buffer.resize(buf.buffer.size()+4*count,0.0f);
                 break;
 
             case '3':
-                u.dimension=3;
+                dimension=3;
                 buf.buffer.resize(buf.buffer.size()+4*count,0.0f);
                 break;
 
             case '4':
-                u.dimension=4;
+                dimension=4;
                 buf.buffer.resize(buf.buffer.size()+4*count,0.0f);
                 break;
 
             default:
-                u.dimension=1;
+                dimension=1;
                 buf.buffer.resize(buf.buffer.size()+4,0.0f);
                 break;
             };
+
+            if(u.vs_offset>=0 && u.ps_offset>=0) //ToDo: log error
+            {
+                if(u.array_size!=count)
+                    return false;
+
+                if(u.dimension!=dimension)
+                    return false;
+            }
+
+            u.array_size=count;
+            u..dimension=dimension;
 
             buf.changed=true;
         }
@@ -530,7 +557,7 @@ bool shader::add_program(program_type type,const char*code)
         for(size_t i=0;i<shdr.uniforms.size();++i)
         {
             const shader_obj::uniform &u=shdr.uniforms[i];
-            if(u.program_type!=type)
+            if((type==vertex) && u.vs_offset<0)
                 continue;
 
             switch(u.dimension)
@@ -1110,12 +1137,22 @@ void shader::set_uniform(unsigned int i,float f0,float f1,float f2,float f3) con
         return;
 
     const shader_obj::uniform &u=shdr.uniforms[i];
-    shader_obj::uniforms_buffer &buf=(u.program_type==vertex)?shdr.vertex_uniforms:shdr.pixel_uniforms;
-    buf.buffer[u.offset]=f0;
-    buf.buffer[u.offset+1]=f1;
-    buf.buffer[u.offset+2]=f2;
-    buf.buffer[u.offset+3]=f3;
-    buf.changed=true;
+    if(u.vs_offset>=0)
+    {
+        shdr.vertex_uniforms.buffer[u.vs_offset]=f0;
+        shdr.vertex_uniforms.buffer[u.vs_offset+1]=f1;
+        shdr.vertex_uniforms.buffer[u.vs_offset+2]=f2;
+        shdr.vertex_uniforms.buffer[u.vs_offset+3]=f3;
+        shdr.vertex_uniforms.changed=true;
+    }
+    if(u.ps_offset>=0)
+    {
+        shdr.pixel_uniforms.buffer[u.ps_offset]=f0;
+        shdr.pixel_uniforms.buffer[u.ps_offset+1]=f1;
+        shdr.pixel_uniforms.buffer[u.ps_offset+2]=f2;
+        shdr.pixel_uniforms.buffer[u.ps_offset+3]=f3;
+        shdr.pixel_uniforms.changed=true;
+    }
 
 #else
     if(m_shdr<0)
@@ -1144,11 +1181,23 @@ void shader::set_uniform3_array(unsigned int i,const float *f,unsigned int count
     if(count>u.array_size)
         count=u.array_size;
 
-    shader_obj::uniforms_buffer &buf=(u.program_type==vertex)?shdr.vertex_uniforms:shdr.pixel_uniforms;
-    for(int i=0,o=u.offset,o2=0;i<count;++i,o+=4,o2+=3)
+    if(u.vs_offset>=0)
     {
-        for(int j=0;j<3;++j)
-            buf.buffer[o+j]=f[o2+j];
+        for(int i=0,o=u.vs_offset,o2=0;i<count;++i,o+=4,o2+=3)
+        {
+            for(int j=0;j<3;++j)
+                shdr.vertex_uniforms.buffer[o+j]=f[o2+j];
+        }
+        shdr.vertex_uniforms.changed=true;
+    }
+    if(u.ps_offset>=0)
+    {
+        for(int i=0,o=u.ps_offset,o2=0;i<count;++i,o+=4,o2+=3)
+        {
+            for(int j=0;j<3;++j)
+                shdr.pixel_uniforms.buffer[o+j]=f[o2+j];
+        }
+        shdr.pixel_uniforms.changed=true;
     }
 
     buf.changed=true;
@@ -1180,9 +1229,17 @@ void shader::set_uniform4_array(unsigned int i,const float *f,unsigned int count
     if(count>u.array_size)
         count=u.array_size;
 
-    shader_obj::uniforms_buffer &buf=(u.program_type==vertex)?shdr.vertex_uniforms:shdr.pixel_uniforms;
-    memcpy(&buf.buffer[u.offset],f,sizeof(float)*4*count);
-    buf.changed=true;
+    if(u.vs_offset>=0)
+    {
+        memcpy(&shdr.vertex_uniforms.buffer[u.vs_offset],f,sizeof(float)*4*count);
+        shdr.vertex_uniforms.changed=true;
+    }
+    
+    if(u.ps_offset>=0)
+    {
+        memcpy(&shdr.pixel_uniforms.buffer[u.ps_offset],f,sizeof(float)*4*count);
+        shdr.pixel_uniforms.changed=true;
+    }
 
 #else
     if(m_shdr<0)
@@ -1210,10 +1267,18 @@ void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int coun
     const shader_obj::uniform &u=shdr.uniforms[i];
     if(count>u.array_size)
         count=u.array_size;
-
-    shader_obj::uniforms_buffer &buf=(u.program_type==vertex)?shdr.vertex_uniforms:shdr.pixel_uniforms;
-    memcpy(&buf.buffer[u.offset],f,sizeof(float)*16*count);
-    buf.changed=true;
+    
+    if(u.vs_offset>=0)
+    {
+        memcpy(&shdr.vertex_uniforms.buffer[u.vs_offset],f,sizeof(float)*16*count);
+        shdr.vertex_uniforms.changed=true;
+    }
+    
+    if(u.ps_offset>=0)
+    {
+        memcpy(&shdr.pixel_uniforms.buffer[u.ps_offset],f,sizeof(float)*16*count);
+        shdr.pixel_uniforms.changed=true;
+    }
 
 #else
     if(m_shdr<0)
