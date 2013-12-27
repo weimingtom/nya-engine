@@ -1200,8 +1200,6 @@ void shader::set_uniform3_array(unsigned int i,const float *f,unsigned int count
         shdr.pixel_uniforms.changed=true;
     }
 
-    buf.changed=true;
-
 #else
     if(m_shdr<0)
         return;
