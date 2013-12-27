@@ -540,7 +540,7 @@ bool shader::add_program(program_type type,const char*code)
             }
 
             u.array_size=count;
-            u..dimension=dimension;
+            u.dimension=dimension;
 
             buf.changed=true;
         }
