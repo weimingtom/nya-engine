@@ -560,6 +560,9 @@ bool shader::add_program(program_type type,const char*code)
             if((type==vertex) && u.vs_offset<0)
                 continue;
 
+            if((type==pixel) && u.ps_offset<0)
+                continue;
+
             switch(u.dimension)
             {
             case 2:
