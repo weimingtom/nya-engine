@@ -861,6 +861,7 @@ bool vbo::get_vertex_data( nya_memory::tmp_buffer_ref &data ) const
         return false;
 
 #ifdef DIRECTX11
+    return false;
 #else
     data.allocate(vbo_size);
     vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,vobj.vertex_loc);
@@ -893,6 +894,7 @@ bool vbo::get_index_data( nya_memory::tmp_buffer_ref &data ) const
         return false;
 
 #ifdef DIRECTX11
+    return false;
 #else
     data.allocate(ind_size);
     vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,obj.index_loc);

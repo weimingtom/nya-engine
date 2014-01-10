@@ -2,6 +2,8 @@
 
 #pragma once
 
+namespace nya_memory { class tmp_buffer_ref; }
+
 namespace nya_render
 {
 
@@ -39,6 +41,7 @@ public:
     static void apply();
 
 public:
+    bool get_data( nya_memory::tmp_buffer_ref &data ) const;
     unsigned int get_width() const { return m_width; }
     unsigned int get_height() const { return m_height; }
     color_format get_color_format() const { return m_format; }

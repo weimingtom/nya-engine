@@ -4,9 +4,7 @@
 #include "render.h"
 #include "platform_specific_gl.h"
 
-#ifdef DIRECTX11
-    #include "memory/tmp_buffer.h"
-#endif
+#include "memory/tmp_buffer.h"
 
 namespace
 {
@@ -127,11 +125,14 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     srdata.SysMemPitch=width*4;
     srdata.SysMemSlicePitch=0;
 
+    m_format=format;
+
     switch(format)
     {
         case greyscale:
         case color_rgb:
         case color_rgba:
+            m_format=color_rgba;
             desc.Format=DXGI_FORMAT_R8G8B8A8_UNORM; size*=4;
         break;
 
@@ -223,15 +224,16 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 
     switch(format)
     {
-        case color_rgb: source_format=GL_RGB; gl_format=GL_RGB; size*=3; break;
         case color_rgba: source_format=GL_RGBA; gl_format=GL_RGBA; size*=4; break;
         case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; size*=4; break;
         case greyscale: source_format=GL_LUMINANCE; gl_format=GL_LUMINANCE; break;
 #ifdef OPENGL_ES
+        case color_rgb: source_format=GL_RGB; gl_format=GL_RGB; size*=4; break; //stored internally as rgba
         case depth16: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_SHORT; size*=2; break;
         case depth24: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; size*=4; break;
         case depth32: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; size*=4; break;
 #else
+        case color_rgb: source_format=GL_RGB; gl_format=GL_RGB; size*=3; break;
         case depth16: source_format=GL_DEPTH_COMPONENT16; gl_format=GL_DEPTH_COMPONENT; size*=2; break;
         case depth24: source_format=GL_DEPTH_COMPONENT24; gl_format=GL_DEPTH_COMPONENT; size*=3; break;
         case depth32: source_format=GL_DEPTH_COMPONENT32; gl_format=GL_DEPTH_COMPONENT; size*=4; break;
@@ -257,7 +259,15 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     m_height=height;
 	texture_obj::get(m_tex).gl_type=GL_TEXTURE_2D;
 	m_format=format;
-    
+
+#ifdef OPENGL_ES
+    if(m_format==depth24)
+        m_format=depth32;
+
+    if(m_format==color_rgb)
+        m_format=color_rgba;
+#endif
+
     if(active_layers[active_layer]>=0)
     {
         if(texture_obj::get(active_layers[active_layer]).gl_type!=GL_TEXTURE_2D)
@@ -586,6 +596,70 @@ void texture::apply()
         glBindTexture(tex.gl_type,tex.tex_id);
 #endif
     }
+}
+
+bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
+{
+    if(m_tex<0)
+        return false;
+
+    const texture_obj &tex=texture_obj::get(m_tex);
+    if(!tex.size)
+        return false;
+
+#ifdef DIRECTX11
+    return false;
+#else
+    data.allocate(tex.size);
+    
+    gl_select_multitex_layer(0);
+    glBindTexture(tex.gl_type,tex.tex_id);
+    active_layers[0]=-1;
+
+  #ifdef OPENGL_ES
+    GLint prev_fbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING,&prev_fbo);
+
+    static GLuint copy_fbo=0;
+    if(!copy_fbo)
+        glGenFramebuffers(1,&copy_fbo);
+
+    glBindFramebuffer(GL_FRAMEBUFFER,copy_fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,tex.tex_id,0);
+
+    rect prev_vp=get_viewport();
+    set_viewport(0,0,m_width,m_height);
+
+    switch(m_format)
+    {
+        case color_rgb: glReadPixels(0,0,m_width,m_height,GL_RGB,GL_UNSIGNED_BYTE,data.get_data()); break;
+        case color_rgba: glReadPixels(0,0,m_width,m_height,GL_RGBA,GL_UNSIGNED_BYTE,data.get_data()); break;
+        case color_bgra: glReadPixels(0,0,m_width,m_height,GL_BGRA,GL_UNSIGNED_BYTE,data.get_data()); break;
+        case greyscale: glReadPixels(0,0,m_width,m_height,GL_LUMINANCE,GL_UNSIGNED_BYTE,data.get_data()); break;
+
+        default:
+            glBindFramebuffer(GL_FRAMEBUFFER, prev_fbo);
+            set_viewport(prev_vp);
+            return false;
+    };
+
+    glBindFramebuffer(GL_FRAMEBUFFER, prev_fbo);
+    set_viewport(prev_vp);
+  #else
+    switch(m_format)
+    {
+        case color_rgb: glGetTexImage(tex.gl_type,0,GL_RGB,GL_UNSIGNED_BYTE,data.get_data()); break;
+        case color_rgba: glGetTexImage(tex.gl_type,0,GL_RGBA,GL_UNSIGNED_BYTE,data.get_data()); break;
+        case color_bgra: glGetTexImage(tex.gl_type,0,GL_BGRA,GL_UNSIGNED_BYTE,data.get_data()); break;
+        case greyscale: glGetTexImage(tex.gl_type,0,GL_LUMINANCE,GL_UNSIGNED_BYTE,data.get_data()); break;
+
+        default: return false;
+            //glGetTexImage(tex.gl_type,0,GL_DEPTH_COMPONENT,GL_DEPTH_COMPONENT,data.get_data()); break;
+    };
+  #endif
+#endif
+
+    return true;
 }
 
 void texture::release()
