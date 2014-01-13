@@ -252,8 +252,15 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     if(m_tex<0)
         m_tex=texture_obj::add();
 
-    if(!texture_obj::get(m_tex).tex_id || texture_obj::get(m_tex).gl_type!=GL_TEXTURE_2D)
+    if(!texture_obj::get(m_tex).tex_id)
+    {
         glGenTextures(1,&texture_obj::get(m_tex).tex_id);
+    }
+    else if(texture_obj::get(m_tex).gl_type!=GL_TEXTURE_2D)
+    {
+        glDeleteTextures(1,&texture_obj::get(m_tex).tex_id);
+        glGenTextures(1,&texture_obj::get(m_tex).tex_id);
+    }
 
     m_width=width;
     m_height=height;
@@ -340,7 +347,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 	    release();
         return false;
     }
-    
+
     unsigned int size=width*height*6;
 
 #ifdef DIRECTX11
@@ -488,8 +495,15 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     if(m_tex<0)
         m_tex=texture_obj::add();
 
-    if(!texture_obj::get(m_tex).tex_id || texture_obj::get(m_tex).gl_type!=GL_TEXTURE_CUBE_MAP)
+    if(!texture_obj::get(m_tex).tex_id)
+    {
         glGenTextures(1,&texture_obj::get(m_tex).tex_id);
+    }
+    else if(texture_obj::get(m_tex).gl_type!=GL_TEXTURE_CUBE_MAP)
+    {
+        glDeleteTextures(1,&texture_obj::get(m_tex).tex_id);
+        glGenTextures(1,&texture_obj::get(m_tex).tex_id);
+    }
 
     m_width=width;
     m_height=height;
