@@ -538,6 +538,28 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     return true;
 }
 
+bool texture::build_cubemap(const void *data,unsigned int width,unsigned int height,color_format format)
+{
+    if(!data)
+        return build_cubemap((const void **)0,width,height,format);
+
+    unsigned int side_size=width*height;
+    switch (format)
+    {
+        case color_rgb: side_size*=3; break;
+        case color_rgba:
+        case color_bgra: side_size*=4; break;
+        case greyscale: break;
+        default: return false;
+    }
+
+    const char *data_ptr=(const char *)data;
+    const void *data_ptrs[6]={data_ptr,data_ptr+=side_size,data_ptr+=side_size,
+                              data_ptr+=side_size,data_ptr+=side_size,data_ptr+=side_size};
+
+    return build_cubemap(data_ptrs,width,height,format);
+}
+
 void texture::bind() const { current_layers[current_layer]=m_tex; }
 
 void texture::unbind() { current_layers[current_layer]=-1; }
@@ -608,7 +630,35 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
         return false;
 
 #ifdef DIRECTX11
-    return false;
+	if(!get_context() || !get_device())
+		return false;
+
+	D3D11_MAPPED_SUBRESOURCE mappedSubResource;
+	ID3D11Texture2D* copy_tex=0;
+
+    D3D11_TEXTURE2D_DESC description;
+    tex.tex->GetDesc( &description );
+    description.BindFlags=0;
+    description.CPUAccessFlags=D3D11_CPU_ACCESS_READ;
+    description.Usage=D3D11_USAGE_STAGING;
+
+    HRESULT hr=get_device()->CreateTexture2D(&description,0,&copy_tex);
+    if(FAILED(hr) || !copy_tex)
+		return false;
+ 
+	get_context()->CopyResource(copy_tex,tex.tex);
+    D3D11_MAPPED_SUBRESOURCE resource;
+    hr = get_context()->Map(copy_tex,0,D3D11_MAP_READ,0,&resource );
+	if(FAILED(hr))
+		return false;
+
+	data.allocate(tex.size);
+	data.copy_to(resource.pData,tex.size);
+
+	get_context()->Unmap(copy_tex,0);
+	copy_tex->Release();
+
+    return true;
 #else
     data.allocate(tex.size);
     

@@ -31,6 +31,8 @@ public:
 
 	//order: positive_x,negative_x,positive_y,negative_y,positive_z,negative_z
 	bool build_cubemap(const void *data[6],unsigned int width,unsigned int height,color_format format);
+	bool build_cubemap(const void *data,unsigned int width,unsigned int height,color_format format);
+	//bool build_cubemap(std::nullptr_t data,unsigned int width,unsigned int height,color_format format);
 
 public:
     void bind() const;
