@@ -647,7 +647,6 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
 	if(!get_context() || !get_device())
 		return false;
 
-	D3D11_MAPPED_SUBRESOURCE mappedSubResource;
 	ID3D11Texture2D* copy_tex=0;
 
     D3D11_TEXTURE2D_DESC description;

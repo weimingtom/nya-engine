@@ -500,7 +500,7 @@ bool shader::add_program(program_type type,const char*code)
         for(size_t c=i;c<=last;++c)
             code_str[c]=' ';
 
-        if(type_name.compare("float")>=0)
+		if(type_name.compare(0,5,"float")==0)
         {
             shader_obj::uniform &u=shdr.add_uniform(name);
             if(type==vertex)
@@ -547,6 +547,25 @@ bool shader::add_program(program_type type,const char*code)
             u.dimension=dimension;
 
             buf.changed=true;
+        }
+        else if(type_name=="sampler2D")
+        {
+            int reg=-1;
+            for(int i=0;i<int(m_samplers.size());++i)
+            {
+				if(m_samplers[i].name==name)
+                {
+					reg=m_samplers[i].layer;
+                    break;
+                }
+            }
+
+            if(reg<0) //ToDo: log error
+                return false;
+
+            char buf[512];
+            sprintf(buf,"Texture2D %s: register(t%d); SamplerState %s_nya_st: register(s%d);\n",name.c_str(),reg,name.c_str(),reg);
+            code_final.append(buf);
         }
     }
 
@@ -1191,12 +1210,12 @@ void shader::set_uniform3_array(unsigned int i,const float *f,unsigned int count
         return;
 
     const shader_obj::uniform &u=shdr.uniforms[i];
-    if(count>u.array_size)
+    if(int(count)>u.array_size)
         count=u.array_size;
 
     if(u.vs_offset>=0)
     {
-        for(int i=0,o=u.vs_offset,o2=0;i<count;++i,o+=4,o2+=3)
+        for(int i=0,o=u.vs_offset,o2=0;i<int(count);++i,o+=4,o2+=3)
         {
             for(int j=0;j<3;++j)
                 shdr.vertex_uniforms.buffer[o+j]=f[o2+j];
@@ -1205,7 +1224,7 @@ void shader::set_uniform3_array(unsigned int i,const float *f,unsigned int count
     }
     if(u.ps_offset>=0)
     {
-        for(int i=0,o=u.ps_offset,o2=0;i<count;++i,o+=4,o2+=3)
+        for(int i=0,o=u.ps_offset,o2=0;i<int(count);++i,o+=4,o2+=3)
         {
             for(int j=0;j<3;++j)
                 shdr.pixel_uniforms.buffer[o+j]=f[o2+j];
@@ -1237,7 +1256,7 @@ void shader::set_uniform4_array(unsigned int i,const float *f,unsigned int count
         return;
 
     const shader_obj::uniform &u=shdr.uniforms[i];
-    if(count>u.array_size)
+    if(int(count)>u.array_size)
         count=u.array_size;
 
     if(u.vs_offset>=0)
@@ -1276,7 +1295,7 @@ void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int coun
         return;
 
     const shader_obj::uniform &u=shdr.uniforms[i];
-    if(count>u.array_size)
+    if(int(count)>u.array_size)
         count=u.array_size;
     
     if(u.vs_offset>=0)

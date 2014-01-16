@@ -305,7 +305,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
         [aContext release];
 
         animating=NO;
-        animationFrameInterval=2;
+        animationFrameInterval=1;
         m_time=0;
         self.displayLink = nil;
 
@@ -324,7 +324,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
         [(EAGLView *)self.view setFramebuffer];
         responder->on_splash(0);
-        [(EAGLView *)self.view presentFramebuffer];
+        [self present_frame];
 
         responder->on_init();
     }
@@ -466,6 +466,13 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
         responder->on_draw();
     }
 
+    [self present_frame];
+}
+
+-(void)present_frame
+{
+    const GLenum attachments[] = { GL_DEPTH_ATTACHMENT, GL_COLOR_ATTACHMENT0 };
+    glDiscardFramebufferEXT(GL_FRAMEBUFFER , sizeof(attachments)/sizeof(GLenum), attachments);
     [(EAGLView *)self.view presentFramebuffer];
 }
 
