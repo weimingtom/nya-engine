@@ -215,7 +215,7 @@ void tmp_buffer_ref::allocate(size_t size)
     if(m_buf)
         m_buf->free();
 
-    m_buf=m_buf->allocate_new(size);
+    m_buf=tmp_buffer::allocate_new(size);
 }
 
 void tmp_buffer_ref::free()

@@ -42,7 +42,7 @@ float bezier::get(float x) const
     const int idx=(int)x;
 
     if(idx>=div_count)
-        return m_y[idx+1];
+        return m_y[div_count];
 
     if(idx<0)
         return m_y[0];

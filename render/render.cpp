@@ -464,7 +464,7 @@ void dx_apply_depth_state()
 
     } static depth_state_cache;
 
-    D3D11_COMPARISON_FUNC dx_depth_comparsion;
+    D3D11_COMPARISON_FUNC dx_depth_comparsion=D3D11_COMPARISON_ALWAYS;
     switch(current_state.depth_comparsion)
     {
         case depth_test::never: dx_depth_comparsion=D3D11_COMPARISON_NEVER; break;
