@@ -175,9 +175,7 @@ bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
                 if(cur+channels>last || to>out_last)
                     return false;
 
-                for(;out<to;out+=channels)
-                    memcpy(out,cur,channels);
-
+                while(out<to) memcpy(out,cur,channels),out+=channels;
                 cur+=channels;
             }
             else // raw
