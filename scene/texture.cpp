@@ -171,8 +171,7 @@ bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
 
             if(*cur & 0x80)
             {
-                const uchar len= *cur++ -127;
-                const uchar *to=out+len*channels;
+                const uchar *to=out+(*cur++ -127)*channels;
                 if(cur+channels>last || to>out_last)
                     return false;
 
@@ -183,14 +182,12 @@ bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
             }
             else // raw
             {
-                const uchar len= *cur++ +1;
-                const size_t size=channels*len;
-                const uchar *to=out+size;
-                if(cur+size>last || to>out_last)
+                const size_t size=(*cur++ +1)*channels;
+                if(cur+size>last || out+size>out_last)
                     return false;
 
-                for(;out<to;out+=channels,cur+=channels)
-                    memcpy(out,cur,channels);
+                memcpy(out,cur,size);
+                cur+=size,out+=size;
             }
         }
 
