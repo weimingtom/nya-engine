@@ -52,7 +52,7 @@ public:
         return m_offset+size<=m_size;
     }
 
-    void skip(size_t offset) { m_offset+=offset; }
+    bool skip(size_t offset) { m_offset+=offset; return offset<m_size; }
 
     bool seek(size_t offset) { m_offset=offset; return offset<m_size; }
 

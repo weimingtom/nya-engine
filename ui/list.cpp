@@ -56,7 +56,7 @@ bool list::on_mouse_move(uint x,uint y)
     widget::on_mouse_move(x,y);
 
     bool mleft=false;
-    if(is_mouse_over() && x<m_scroll_area_rect.x)
+    if(is_mouse_over() && int(x)<m_scroll_area_rect.x)
     {
         rect r=get_rect();
 

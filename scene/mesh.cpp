@@ -29,6 +29,9 @@ static std::string read_string(nya_memory::memory_reader &reader)
 
 bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size)
 {
+    if(!data || !size)
+        return false;
+
     nya_memory::memory_reader reader(data,size);
 
     typedef unsigned int uint;
@@ -75,7 +78,8 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size)
         return false;
 
     res.vbo.set_vertex_data(reader.get_data(),vertex_stride,verts_count);
-    reader.skip(verts_count*vertex_stride);
+    if(!reader.skip(verts_count*vertex_stride))
+        return false;
 
     const uchar index_size=reader.read<uchar>();
     if(index_size)
@@ -120,6 +124,9 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size)
 
 bool mesh::load_nms_skeleton_section(shared_mesh &res,const void *data,size_t size)
 {
+    if(!data || !size)
+        return false;
+
     nya_memory::memory_reader reader(data,size);
 
     const int bones_count=reader.read<int>();
@@ -154,6 +161,9 @@ nya_render::blend::mode blend_mode_from_string(const std::string &s)
 
 bool mesh::load_nms_material_section(shared_mesh &res,const void *data,size_t size)
 {
+    if(!data || !size)
+        return false;
+
     nya_memory::memory_reader reader(data,size);
 
     typedef unsigned short ushort;

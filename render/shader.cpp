@@ -943,10 +943,9 @@ bool shader::add_program(program_type type,const char*code)
             glGetObjectParam(shdr.program,GL_OBJECT_INFO_LOG_LENGTH_ARB,&log_len);
             if (log_len>0)
             {
-                GLchar *log = new GLchar[log_len];
-                glGetInfoLogARB(shdr.program,log_len,&log_len,log);
-                get_log()<<log<<"\n";
-                delete(log);
+                std::string log(log_len,0);
+                glGetInfoLogARB(shdr.program,log_len,&log_len,&log[0]);
+                get_log()<<log.c_str()<<"\n";
             }
 
             shdr.program=0; //??
@@ -984,10 +983,9 @@ bool shader::add_program(program_type type,const char*code)
             glGetObjectParam(shdr.program,GL_OBJECT_INFO_LOG_LENGTH_ARB,&log_len);
             if (log_len>0)
             {
-                GLchar *log = new GLchar[log_len];
-                glGetInfoLogARB(shdr.program,log_len,&log_len,log);
-                get_log()<<log<<"\n";
-                delete(log);
+                std::string log(log_len,0);
+                glGetInfoLogARB(shdr.program,log_len,&log_len,&log[0]);
+                get_log()<<log.c_str()<<"\n";
             }
             shdr.program=0; //??
             return false;

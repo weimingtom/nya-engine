@@ -560,16 +560,17 @@ bool texture::build_cubemap(const void *data,unsigned int width,unsigned int hei
     unsigned int side_size=width*height;
     switch (format)
     {
+        case color_rgba: case color_bgra: side_size*=4; break;
         case color_rgb: side_size*=3; break;
-        case color_rgba:
-        case color_bgra: side_size*=4; break;
         case greyscale: break;
+
         default: return false;
     }
 
     const char *data_ptr=(const char *)data;
-    const void *data_ptrs[6]={data_ptr,data_ptr+=side_size,data_ptr+=side_size,
-                              data_ptr+=side_size,data_ptr+=side_size,data_ptr+=side_size};
+    const void *data_ptrs[6];
+    for(int i=0;i<6;++i,data_ptr+=side_size)
+        data_ptrs[i]=data_ptr;
 
     return build_cubemap(data_ptrs,width,height,format);
 }

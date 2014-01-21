@@ -353,10 +353,10 @@ void vbo::draw(unsigned int offset,unsigned int count)
 
 #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
         glEnableVertexAttribArray(vertex_attribute);
-        glVertexAttribPointer(vertex_attribute,vobj.vertices.dimension,GL_FLOAT,0,vobj.vertex_stride,(void *)(vobj.vertices.offset));
+        glVertexAttribPointer(vertex_attribute,vobj.vertices.dimension,GL_FLOAT,0,vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.vertices.offset));
 #else
         glEnableClientState(GL_VERTEX_ARRAY);
-        glVertexPointer(vobj.vertices.dimension,GL_FLOAT,vobj.vertex_stride,(void *)0);
+        glVertexPointer(vobj.vertices.dimension,GL_FLOAT,vobj.vertex_stride,(void*)0);
 #endif
         for(int i=0;i<max_tex_coord;++i)
         {
@@ -365,10 +365,10 @@ void vbo::draw(unsigned int offset,unsigned int count)
             {
   #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
                 glEnableVertexAttribArray(tc0_attribute+i);
-                glVertexAttribPointer(tc0_attribute+i,tc.dimension,GL_FLOAT,0,vobj.vertex_stride,(void *)(tc.offset));
+                glVertexAttribPointer(tc0_attribute+i,tc.dimension,GL_FLOAT,0,vobj.vertex_stride,(void*)(ptrdiff_t)(tc.offset));
   #else
                 vbo_glClientActiveTexture(GL_TEXTURE0_ARB+i);
-                glTexCoordPointer(tc.dimension,GL_FLOAT,vobj.vertex_stride,(void *)(tc.offset));
+                glTexCoordPointer(tc.dimension,GL_FLOAT,vobj.vertex_stride,(void*)(ptrdiff_t)(tc.offset));
                 glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   #endif
             }
@@ -387,10 +387,10 @@ void vbo::draw(unsigned int offset,unsigned int count)
         {
   #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
             glEnableVertexAttribArray(normal_attribute);
-            glVertexAttribPointer(normal_attribute,3,GL_FLOAT,1,vobj.vertex_stride,(void *)(vobj.normals.offset));
+            glVertexAttribPointer(normal_attribute,3,GL_FLOAT,1,vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.normals.offset));
   #else
             glEnableClientState(GL_NORMAL_ARRAY);
-            glNormalPointer(GL_FLOAT,vobj.vertex_stride,(void *)(vobj.normals.offset));
+            glNormalPointer(GL_FLOAT,vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.normals.offset));
   #endif
         }
         else if(active_verts>=0 && vbo_obj::get(active_verts).normals.has)
@@ -406,10 +406,10 @@ void vbo::draw(unsigned int offset,unsigned int count)
         {
   #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
             glEnableVertexAttribArray(color_attribute);
-            glVertexAttribPointer(color_attribute,vobj.colors.dimension,GL_FLOAT,0,vobj.vertex_stride,(void *)(vobj.colors.offset));
+            glVertexAttribPointer(color_attribute,vobj.colors.dimension,GL_FLOAT,0,vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.colors.offset));
   #else
             glEnableClientState(GL_COLOR_ARRAY);
-            glColorPointer(vobj.colors.dimension,GL_FLOAT,vobj.vertex_stride,(void *)(vobj.colors.offset));
+            glColorPointer(vobj.colors.dimension,GL_FLOAT,vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.colors.offset));
   #endif
         }
         else if(active_verts>=0 && vbo_obj::get(active_verts).colors.has)
@@ -442,7 +442,7 @@ void vbo::draw(unsigned int offset,unsigned int count)
 
         const int gl_elem=get_gl_element_type(iobj.element_type);
         const unsigned int gl_elem_type=(iobj.element_size==index4b?GL_UNSIGNED_INT:GL_UNSIGNED_SHORT);
-        glDrawElements(gl_elem,count,gl_elem_type,(void*)(offset*iobj.element_size));
+        glDrawElements(gl_elem,count,gl_elem_type,(void*)(ptrdiff_t)(offset*iobj.element_size));
     }
     else
     {
