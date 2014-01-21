@@ -648,6 +648,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 #else
 
 #include <Cocoa/Cocoa.h>
+#include <GLKit/GLKit.h>
 
 @interface shared_app_delegate : NSObject <NSApplicationDelegate>
 {
@@ -966,7 +967,11 @@ private:
         return;
 
     if(m_antialiasing)
+#ifdef GL_MULTISAMPLE
+        glEnable(GL_MULTISAMPLE);
+#else
         glEnable(GL_MULTISAMPLE_ARB);
+#endif
 
     [view reshape];
 
