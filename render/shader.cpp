@@ -410,21 +410,21 @@ ID3D11InputLayout *add_layout(int mesh_idx,
 
 void remove_layout(int mesh_idx) { shader_obj::remove_layout(mesh_idx); }
 #else
-    void set_shader(int idx)
+    void set_shader(int idx,bool ignore_cache=false)
     {
-        if(idx==active_shader)
+        if(idx==active_shader && !ignore_cache)
             return;
-        
+
         if(!check_init_shaders())
             return;
-        
+
         if(idx<0)
         {
             glUseProgramObjectARB(0);
             active_shader=-1;
             return;
         }
-        
+
         shader_obj &shdr=shader_obj::get(idx);
         glUseProgramObjectARB(shdr.program);
         if(!shdr.program)
@@ -1013,7 +1013,7 @@ bool shader::add_program(program_type type,const char*code)
 void shader::bind() const { current_shader=m_shdr; }
 void shader::unbind() { current_shader=-1; }
 
-void shader::apply()
+void shader::apply(bool ignore_cache)
 {
 #ifdef DIRECTX11
     if(current_shader<0)
@@ -1059,7 +1059,7 @@ void shader::apply()
             get_context()->UpdateSubresource(shdr.vertex_uniforms.dx_buffer,0,NULL,&shdr.vertex_uniforms.buffer[0],0,0);
         }
 
-        if(current_shader!=active_shader)
+        if(current_shader!=active_shader || ignore_cache)
         {
             get_context()->VSSetConstantBuffers(0,1,&shdr.constants.dx_buffer);
             get_context()->VSSetConstantBuffers(1,1,&shdr.vertex_uniforms.dx_buffer);
@@ -1075,7 +1075,7 @@ void shader::apply()
             get_context()->UpdateSubresource(shdr.pixel_uniforms.dx_buffer,0,NULL,&shdr.pixel_uniforms.buffer[0],0,0);
         }
 
-        if(current_shader!=active_shader)
+        if(current_shader!=active_shader || ignore_cache)
         {
             get_context()->PSSetConstantBuffers(2,1,&shdr.pixel_uniforms.dx_buffer);
             get_context()->PSSetShader(shdr.pixel_program,nullptr,0);
@@ -1084,7 +1084,7 @@ void shader::apply()
 
     active_shader=current_shader;
 #else
-    set_shader(current_shader);
+    set_shader(current_shader,ignore_cache);
 
   #ifdef SUPPORT_OLD_SHADERS
     if(current_shader<0)

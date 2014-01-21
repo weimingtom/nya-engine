@@ -1,6 +1,8 @@
 //https://code.google.com/p/nya-engine/
 
 #include "render.h"
+#include "texture.h"
+#include "shader.h"
 #include "transform.h"
 #include "platform_specific_gl.h"
 
@@ -602,6 +604,13 @@ void apply_state(bool ignore_cache)
     if(c.color_write!=a.color_write || ignore_cache)
         glColorMask(c.color_write,c.color_write,c.color_write,c.color_write);
 #endif
+
+    if(ignore_cache)
+    {
+        texture::apply(true);
+        shader::apply(true);
+    }
+
     a=c;
 }
 

@@ -26,7 +26,7 @@ public:
     void bind() const;
     static void unbind();
 
-    static void apply();
+    static void apply(bool ignore_cache=false);
 
 public:
     void set_sampler(const char*name,unsigned int layer);

@@ -40,7 +40,7 @@ public:
 
     static void select_multitex_slot(unsigned int idx);
 
-    static void apply();
+    static void apply(bool ignore_cache=false);
 
 public:
     bool get_data( nya_memory::tmp_buffer_ref &data ) const;

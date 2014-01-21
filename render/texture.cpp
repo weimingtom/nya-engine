@@ -586,7 +586,7 @@ void texture::select_multitex_slot(unsigned int idx)
     current_layer=idx;
 }
 
-void texture::apply()
+void texture::apply(bool ignore_cache)
 {
 #ifdef DIRECTX11
     if(!get_context())
@@ -595,7 +595,7 @@ void texture::apply()
 
     for(unsigned int i=0;i<max_layers;++i)
     {
-        if(current_layers[i]==active_layers[i])
+        if(current_layers[i]==active_layers[i] && !ignore_cache)
             continue;
 
 #ifdef DIRECTX11
