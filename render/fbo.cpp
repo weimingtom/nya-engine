@@ -234,8 +234,8 @@ void fbo::bind()
     if(fbo.color_tex_idx>=0)
     {
         texture_obj &tex=texture_obj::get(fbo.color_tex_idx);
-        color=tex.color_targets[fbo.cubemap_side>=0?fbo.cubemap_side:0];
-        if(!color && tex.tex)
+        ID3D11RenderTargetView *&tex_color=tex.color_targets[fbo.cubemap_side>=0?fbo.cubemap_side:0];
+        if(!tex_color && tex.tex)
         {
             D3D11_RENDER_TARGET_VIEW_DESC rtvd;
             rtvd.Format=tex.dx_format;
@@ -252,14 +252,14 @@ void fbo::bind()
                 rtvd.Texture2DArray.MipSlice=0;
             }
 
-            get_device()->CreateRenderTargetView(tex.tex,&rtvd,&color);
+            get_device()->CreateRenderTargetView(tex.tex,&rtvd,&tex_color);
         }
+        color=tex_color;
     }
-    
+
     if(fbo.depth_tex_idx>=0)
     {
         texture_obj &tex=texture_obj::get(fbo.depth_tex_idx);
-        depth=tex.depth_target;
         if(!tex.depth_target && tex.tex)
         {
             CD3D11_DEPTH_STENCIL_VIEW_DESC dsvd(D3D11_DSV_DIMENSION_TEXTURE2D);
@@ -267,6 +267,7 @@ void fbo::bind()
             dsvd.Texture2D.MipSlice=0;
             get_device()->CreateDepthStencilView(tex.tex,&dsvd,&tex.depth_target);
         }
+        depth=tex.depth_target;
     }
 
     set_target(color,depth);
