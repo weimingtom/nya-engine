@@ -1057,7 +1057,7 @@ void shader::apply(bool ignore_cache)
             get_context()->UpdateSubresource(shdr.vertex_uniforms.dx_buffer,0,NULL,&shdr.vertex_uniforms.buffer[0],0,0);
         }
 
-        if(current_shader!=active_shader || ignore_cache)
+        //if(current_shader!=active_shader || ignore_cache) //saved state not work in xaml applications, ToDo: fix
         {
             get_context()->VSSetConstantBuffers(0,1,&shdr.constants.dx_buffer);
             get_context()->VSSetConstantBuffers(1,1,&shdr.vertex_uniforms.dx_buffer);
@@ -1073,7 +1073,7 @@ void shader::apply(bool ignore_cache)
             get_context()->UpdateSubresource(shdr.pixel_uniforms.dx_buffer,0,NULL,&shdr.pixel_uniforms.buffer[0],0,0);
         }
 
-        if(current_shader!=active_shader || ignore_cache)
+        //if(current_shader!=active_shader || ignore_cache) //saved state not work in xaml applications, ToDo: fix
         {
             get_context()->PSSetConstantBuffers(2,1,&shdr.pixel_uniforms.dx_buffer);
             get_context()->PSSetShader(shdr.pixel_program,nullptr,0);
