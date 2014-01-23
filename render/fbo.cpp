@@ -38,7 +38,7 @@ namespace nya_render
     dx_target get_default_target() { init_default_target(); return default_target; }
     dx_target get_target() { init_default_target(); return target; }
 
-    void set_target(ID3D11RenderTargetView *color,ID3D11DepthStencilView *depth)
+    void set_target(ID3D11RenderTargetView *color,ID3D11DepthStencilView *depth,bool default)
     {
         if(!get_context())
             return;
@@ -47,6 +47,8 @@ namespace nya_render
 
         target.color=color;
         target.depth=depth;
+        if(default)
+            default_target=target;
 
         if(color)
             get_context()->OMSetRenderTargets(1,&color,depth);
