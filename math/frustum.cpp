@@ -64,16 +64,16 @@ frustum::frustum(const mat4 &m)
     {
         const int idx=i+i;
         plane &p=m_planes[idx];
-        p.n.x=m.m[0][3]-m.m[0][i];
-        p.n.y=m.m[1][3]-m.m[1][i];
-        p.n.z=m.m[2][3]-m.m[2][i];
-        p.d=m.m[3][3]-m.m[3][i];
+        p.n.x=m[0][3]-m[0][i];
+        p.n.y=m[1][3]-m[1][i];
+        p.n.z=m[2][3]-m[2][i];
+        p.d=m[3][3]-m[3][i];
 
         plane &p2=m_planes[idx+1];
-        p2.n.x=m.m[0][3]+m.m[0][i];
-        p2.n.y=m.m[1][3]+m.m[1][i];
-        p2.n.z=m.m[2][3]+m.m[2][i];
-        p2.d=m.m[3][3]+m.m[3][i];
+        p2.n.x=m[0][3]+m[0][i];
+        p2.n.y=m[1][3]+m[1][i];
+        p2.n.z=m[2][3]+m[2][i];
+        p2.d=m[3][3]+m[3][i];
     }
 
 	for(int i=0;i<6;++i)

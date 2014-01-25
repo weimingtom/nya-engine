@@ -28,6 +28,9 @@ struct mat4
 
     mat4 operator * (const mat4 &mat) const;
 
+    const float *const operator [] (int i) const { return m[i]; }
+    float *const operator [] (int i) { return m[i]; }
+
     mat4() { identity(); }
     mat4(const quat &q);
 };

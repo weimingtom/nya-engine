@@ -57,25 +57,25 @@ mat4 &mat4::rotate(float angle,float x,float y,float z)
 
     mat4 rot;
 
-    rot.m[0][0]=(one_minus_cos*xx)+cos_a;
-    rot.m[0][1]=(one_minus_cos*xy)-zs;
-    rot.m[0][2]=(one_minus_cos*zx)+ys;
-    rot.m[0][3]=0;
+    rot[0][0]=(one_minus_cos*xx)+cos_a;
+    rot[0][1]=(one_minus_cos*xy)-zs;
+    rot[0][2]=(one_minus_cos*zx)+ys;
+    rot[0][3]=0;
 
-    rot.m[1][0]=(one_minus_cos*xy)+zs;
-    rot.m[1][1]=(one_minus_cos*yy)+cos_a;
-    rot.m[1][2]=(one_minus_cos*yz)-xs;
-    rot.m[1][3]=0;
+    rot[1][0]=(one_minus_cos*xy)+zs;
+    rot[1][1]=(one_minus_cos*yy)+cos_a;
+    rot[1][2]=(one_minus_cos*yz)-xs;
+    rot[1][3]=0;
 
-    rot.m[2][0]=(one_minus_cos*zx)-ys;
-    rot.m[2][1]=(one_minus_cos*yz)+xs;
-    rot.m[2][2]=(one_minus_cos*zz)+cos_a;
-    rot.m[2][3]=0;
+    rot[2][0]=(one_minus_cos*zx)-ys;
+    rot[2][1]=(one_minus_cos*yz)+xs;
+    rot[2][2]=(one_minus_cos*zz)+cos_a;
+    rot[2][3]=0;
 
-    rot.m[3][0]=0;
-    rot.m[3][1]=0;
-    rot.m[3][2]=0;
-    rot.m[3][3]=1.0f;
+    rot[3][0]=0;
+    rot[3][1]=0;
+    rot[3][2]=0;
+    rot[3][3]=1.0f;
 
     return *this=rot*(*this);
 }
@@ -107,19 +107,19 @@ mat4 &mat4::frustrum(float left,float right,float bottom,float top,float near,fl
 
     mat4 frust;
 
-    frust.m[0][0]=2.0f*near/dx;
-    frust.m[0][1]=frust.m[0][2]=frust.m[0][3]=0;
+    frust[0][0]=2.0f*near/dx;
+    frust[0][1]=frust[0][2]=frust[0][3]=0;
 
-    frust.m[1][1]=2.0f*near/dy;
-    frust.m[1][0]=frust.m[1][2]=frust.m[1][3]=0;
+    frust[1][1]=2.0f*near/dy;
+    frust[1][0]=frust[1][2]=frust[1][3]=0;
 
-    frust.m[2][0]=(right+left)/dx;
-    frust.m[2][1]=(top+bottom)/dy;
-    frust.m[2][2]= -(near+far)/dz;
-    frust.m[2][3]= -1.0f;
+    frust[2][0]=(right+left)/dx;
+    frust[2][1]=(top+bottom)/dy;
+    frust[2][2]= -(near+far)/dz;
+    frust[2][3]= -1.0f;
 
-    frust.m[3][2]= -2.0f*near*far/dz;
-    frust.m[3][0]=frust.m[3][1]=frust.m[3][3]=0;
+    frust[3][2]= -2.0f*near*far/dz;
+    frust[3][0]=frust[3][1]=frust[3][3]=0;
 
     return *this=frust*(*this);
 }
@@ -172,10 +172,10 @@ mat4 mat4::operator*(const mat4 &mat) const
     {
         for(int j=0;j<4;++j)
         {
-            out.m[i][j]=(m[i][0]*mat.m[0][j])+
-                        (m[i][1]*mat.m[1][j])+
-                        (m[i][2]*mat.m[2][j])+
-                        (m[i][3]*mat.m[3][j]);
+            out[i][j]=(m[i][0]*mat[0][j])+
+                        (m[i][1]*mat[1][j])+
+                        (m[i][2]*mat[2][j])+
+                        (m[i][3]*mat[3][j]);
         }
     }
 
@@ -196,32 +196,32 @@ mat4 &mat4::scale(float sx,float sy,float sz)
 
 vec3 operator * (const vec3 &v,const mat4 &m)
 {
-	return vec3(m.m[0][0]*v.x+m.m[0][1]*v.y+m.m[0][2]*v.z+m.m[0][3],
-				m.m[1][0]*v.x+m.m[1][1]*v.y+m.m[1][2]*v.z+m.m[1][3],
-				m.m[2][0]*v.x+m.m[2][1]*v.y+m.m[2][2]*v.z+m.m[2][3]);
+	return vec3(m[0][0]*v.x+m[0][1]*v.y+m[0][2]*v.z+m[0][3],
+				m[1][0]*v.x+m[1][1]*v.y+m[1][2]*v.z+m[1][3],
+				m[2][0]*v.x+m[2][1]*v.y+m[2][2]*v.z+m[2][3]);
 }
 
 vec3 operator * (const mat4 &m,const vec3 &v)
 {
-	return vec3(m.m[0][0]*v.x+m.m[1][0]*v.y+m.m[2][0]*v.z+m.m[3][0],
-				m.m[0][1]*v.x+m.m[1][1]*v.y+m.m[2][1]*v.z+m.m[3][1],
-				m.m[0][2]*v.x+m.m[1][2]*v.y+m.m[2][2]*v.z+m.m[3][2]);
+	return vec3(m[0][0]*v.x+m[1][0]*v.y+m[2][0]*v.z+m[3][0],
+				m[0][1]*v.x+m[1][1]*v.y+m[2][1]*v.z+m[3][1],
+				m[0][2]*v.x+m[1][2]*v.y+m[2][2]*v.z+m[3][2]);
 }
 
 vec4 operator * (const vec4 &v,const mat4 &m)
 {
-    return vec4(m.m[0][0]*v.x+m.m[0][1]*v.y+m.m[0][2]*v.z+m.m[0][3]*v.w,
-                m.m[1][0]*v.x+m.m[1][1]*v.y+m.m[1][2]*v.z+m.m[1][3]*v.w,
-                m.m[2][0]*v.x+m.m[2][1]*v.y+m.m[2][2]*v.z+m.m[2][3]*v.w,
-                m.m[3][0]*v.x+m.m[3][1]*v.y+m.m[3][2]*v.z+m.m[3][3]*v.w);
+    return vec4(m[0][0]*v.x+m[0][1]*v.y+m[0][2]*v.z+m[0][3]*v.w,
+                m[1][0]*v.x+m[1][1]*v.y+m[1][2]*v.z+m[1][3]*v.w,
+                m[2][0]*v.x+m[2][1]*v.y+m[2][2]*v.z+m[2][3]*v.w,
+                m[3][0]*v.x+m[3][1]*v.y+m[3][2]*v.z+m[3][3]*v.w);
 }
 
 vec4 operator * (const mat4 &m,const vec4 &v)
 {
-    return vec4(m.m[0][0]*v.x+m.m[1][0]*v.y+m.m[2][0]*v.z+m.m[3][0]*v.w,
-				m.m[0][1]*v.x+m.m[1][1]*v.y+m.m[2][1]*v.z+m.m[3][1]*v.w,
-				m.m[0][2]*v.x+m.m[1][2]*v.y+m.m[2][2]*v.z+m.m[3][2]*v.w,
-                m.m[0][3]*v.x+m.m[1][3]*v.y+m.m[2][3]*v.z+m.m[3][3]*v.w);
+    return vec4(m[0][0]*v.x+m[1][0]*v.y+m[2][0]*v.z+m[3][0]*v.w,
+				m[0][1]*v.x+m[1][1]*v.y+m[2][1]*v.z+m[3][1]*v.w,
+				m[0][2]*v.x+m[1][2]*v.y+m[2][2]*v.z+m[3][2]*v.w,
+                m[0][3]*v.x+m[1][3]*v.y+m[2][3]*v.z+m[3][3]*v.w);
 }
 
 mat4::mat4(const quat &q)
