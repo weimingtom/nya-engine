@@ -25,6 +25,12 @@ public:
         index4b=4
     };
 
+    enum vertex_atrib_type
+    {
+        float16,
+        float32
+    };
+
     enum usage_hint
     {
         static_draw,
@@ -39,7 +45,7 @@ public:
     bool set_index_data(const void*data,index_size size,unsigned int indices_count,usage_hint usage=static_draw);
     void set_element_type(element_type type);
     void set_vertices(unsigned int offset,unsigned int dimension);
-    void set_normals(unsigned int offset);
+    void set_normals(unsigned int offset,vertex_atrib_type=float32);
     void set_tc(unsigned int tc_idx,unsigned int offset,unsigned int dimension);
     void set_colors(unsigned int offset,unsigned int dimension);
 

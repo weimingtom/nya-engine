@@ -50,8 +50,9 @@ namespace nya_render
             bool has;
             short dimension;
             unsigned int offset;
-            
-            attribute(): has(false) {}
+            vbo::vertex_atrib_type type;
+
+            attribute(): has(false), type(vbo::float32) {}
         };
 
         attribute vertices;
@@ -233,6 +234,21 @@ int get_gl_element_type(vbo::element_type type)
 
     return -1;
 }
+
+int get_gl_element_type(vbo::vertex_atrib_type type)
+{
+    switch(type)
+    {
+        case vbo::float32: return GL_FLOAT;
+#ifdef OPENGL_ES
+        case vbo::float16: return GL_HALF_FLOAT_OES;
+#else
+        case vbo::float16: return GL_HALF_FLOAT_ARB;
+#endif
+    }
+
+    return GL_FLOAT;
+}
 #endif
 
 void vbo::draw(unsigned int offset,unsigned int count)
@@ -387,10 +403,10 @@ void vbo::draw(unsigned int offset,unsigned int count)
         {
   #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
             glEnableVertexAttribArray(normal_attribute);
-            glVertexAttribPointer(normal_attribute,3,GL_FLOAT,1,vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.normals.offset));
+            glVertexAttribPointer(normal_attribute,3,get_gl_element_type(vobj.normals.type),1,vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.normals.offset));
   #else
             glEnableClientState(GL_NORMAL_ARRAY);
-            glNormalPointer(GL_FLOAT,vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.normals.offset));
+            glNormalPointer(get_gl_element_type(vobj.normals.type),vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.normals.offset));
   #endif
         }
         else if(active_verts>=0 && vbo_obj::get(active_verts).normals.has)
@@ -775,7 +791,7 @@ void vbo::set_vertices(unsigned int offset,unsigned int dimension)
         active_verts=-1;
 }
 
-void vbo::set_normals(unsigned int offset)
+void vbo::set_normals(unsigned int offset,vertex_atrib_type type)
 {
     if(m_verts<0)
         m_verts=vbo_obj::add();
@@ -788,6 +804,7 @@ void vbo::set_normals(unsigned int offset)
 
     obj.normals.has=true;
     obj.normals.offset=offset;
+    obj.normals.type=type;
 }
 
 void vbo::set_tc(unsigned int tc_idx,unsigned int offset,unsigned int dimension)
