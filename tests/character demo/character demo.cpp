@@ -170,7 +170,7 @@ private:
 	    m_scene.init();
 	}
 
-	void on_process(unsigned int dt)
+	void on_frame(unsigned int dt)
 	{
         m_scene.process(dt);
 
@@ -189,12 +189,8 @@ private:
             fps_update_timer%=1000;
             fps_counter=0;
 	    }
-	}
 
-	void on_draw()
-	{
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
         m_scene.draw();
 	}
 

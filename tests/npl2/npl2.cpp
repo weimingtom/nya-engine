@@ -63,11 +63,13 @@ nya_log::get_log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n"
 	    m_ui.init();
 	}
 
-	void on_process(unsigned int dt)
+	void on_frame(unsigned int dt)
 	{
         get_scene().process(dt);
+        get_scene().draw();
 
 	    m_ui.process(dt);
+        m_ui.draw();
 
 	    static unsigned int fps_counter=0;
 	    static unsigned int fps_update_timer=0;
@@ -80,18 +82,12 @@ nya_log::get_log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n"
             char name[255];
             sprintf(name,"npl2 %d fps",fps_counter);
             set_title(name);
-            
+
             //nya_log::get_log()<<name<<"\n";
 
             fps_update_timer%=1000;
             fps_counter=0;
 	    }
-	}
-
-	void on_draw()
-	{
-        get_scene().draw();
-        m_ui.draw();
 	}
 
     void on_mouse_move(int x,int y)

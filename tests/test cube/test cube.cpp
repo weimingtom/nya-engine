@@ -110,9 +110,23 @@ private:
 		m_shader.add_program(nya_render::shader::pixel,ps_code);
 	}
 
-	void on_process(unsigned int dt)
+	void on_frame(unsigned int dt)
 	{
+        nya_render::clear(true,true);
+
 		m_rot+=dt*0.05f;
+
+		nya_math::mat4 mv;
+		mv.translate(0,0,-2.0f);
+		mv.rotate(30.0f,1.0f,0.0f,0.0f);
+		mv.rotate(m_rot,0.0f,1.0f,0.0f);
+		nya_render::set_modelview_matrix(mv);
+
+		m_shader.bind();
+		m_vbo.bind();
+		m_vbo.draw();
+		m_vbo.unbind();
+		m_shader.unbind();
 
 	    static unsigned int fps_counter=0;
 	    static unsigned int fps_update_timer=0;
@@ -129,23 +143,6 @@ private:
             fps_update_timer%=1000;
             fps_counter=0;
 	    }
-	}
-
-	void on_draw()
-	{
-        nya_render::clear(true,true);
-
-		nya_math::mat4 mv;
-		mv.translate(0,0,-2.0f);
-		mv.rotate(30.0f,1.0f,0.0f,0.0f);
-		mv.rotate(m_rot,0.0f,1.0f,0.0f);
-		nya_render::set_modelview_matrix(mv);
-
-		m_shader.bind();
-		m_vbo.bind();
-		m_vbo.draw();
-		m_vbo.unbind();
-		m_shader.unbind();
 	}
 
     void on_resize(unsigned int w,unsigned int h)
