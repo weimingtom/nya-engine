@@ -95,8 +95,7 @@ public:
 
 			    CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
 
-                m_app.on_process(dt);
-                m_app.on_draw();
+                m_app.on_frame(dt);
 
                 if(m_swap_chain->Present(1, 0)==DXGI_ERROR_DEVICE_REMOVED)
                 {
@@ -590,8 +589,7 @@ public:
                 unsigned int dt=(unsigned)(time-m_time);
                 m_time=time;
 
-                app.on_process(dt);
-                app.on_draw();
+                app.on_frame(dt);
 
   #ifdef DIRECTX11
 				m_swap_chain->Present(0,0);
@@ -1043,8 +1041,7 @@ public:
             unsigned int dt=(unsigned)(time-m_time);
             m_time=time;
 
-            app.on_process(dt);
-            app.on_draw();
+            app.on_frame(dt);
 
             glXSwapBuffers(m_dpy,m_win);
         }

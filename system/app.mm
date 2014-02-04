@@ -461,10 +461,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
     nya_system::app_responder *responder=shared_app::get_app().get_responder();
     if(responder)
-    {
-        responder->on_process(dt);
-        responder->on_draw();
-    }
+        responder->on_frame(dt);
 
     [self present_frame];
 }
@@ -826,12 +823,9 @@ private:
         }
         case state_draw:
         {
-            unsigned long time=nya_system::get_time();
-            unsigned int dt=(unsigned int)(time-m_time);
+            const unsigned long time=nya_system::get_time();
+            m_app->on_frame((unsigned int)(time-m_time));
             m_time=time;
-
-            m_app->on_process(dt);
-            m_app->on_draw();
         }
         break;
     }

@@ -20,8 +20,7 @@ public:
     virtual void on_init_splash()=0;
     virtual void on_splash(unsigned int dt)=0;
     virtual void on_init()=0;
-    virtual void on_process(unsigned int dt)=0;
-    virtual void on_draw()=0;
+    virtual void on_frame(unsigned int dt)=0;
     virtual void on_free()=0;
 
 public:
