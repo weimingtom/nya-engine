@@ -92,8 +92,8 @@ size_t tga::decode_header(const void *data,size_t size)
     this->height=height;
     this->channels=channels;
     this->rle=rle;
-    this->horisontal_flip=imagedescriptor&0x10;
-    this->vertical_flip=imagedescriptor&0x20;
+    this->horisontal_flip=(imagedescriptor&0x10)!=0;
+    this->vertical_flip=(imagedescriptor&0x20)!=0;
     this->data=reader.get_data();
     this->compressed_size=reader.get_remained();
     this->uncompressed_size=color_data_size;
@@ -279,7 +279,7 @@ void tga::flip_vertical(const void *from_data,void *to_data)
     else
     {
         const uchar *from=(const uchar*)from_data;
-        for(int offset=0;offset<uncompressed_size;offset+=line_size)
+        for(size_t offset=0;offset<uncompressed_size;offset+=line_size)
         {
             const uchar *ha=from+offset;
             uchar *hb=to+top-offset;
@@ -304,7 +304,7 @@ void tga::flip_horisontal(const void *from_data,void *to_data)
     {
         uchar tmp[4];
 
-        for(int offset=0;offset<uncompressed_size;offset+=line_size)
+        for(size_t offset=0;offset<uncompressed_size;offset+=line_size)
         {
             uchar *ha=to+offset;
             uchar *hb=ha+line_size-channels;
@@ -323,7 +323,7 @@ void tga::flip_horisontal(const void *from_data,void *to_data)
     {
         const uchar *from=(const uchar*)from_data;
 
-        for(int offset=0;offset<uncompressed_size;offset+=line_size)
+        for(size_t offset=0;offset<uncompressed_size;offset+=line_size)
         {
             const uchar *ha=from+offset;
             uchar *hb=to+offset+line_size-channels;
