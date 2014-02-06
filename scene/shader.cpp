@@ -4,7 +4,7 @@
 #include "scene.h"
 #include "camera.h"
 #include "transform.h"
-#include "render.h"
+#include "render/render.h"
 #include <string.h>
 
 namespace nya_scene
