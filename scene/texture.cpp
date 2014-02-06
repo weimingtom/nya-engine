@@ -3,6 +3,7 @@
 #include "texture.h"
 #include "memory/memory_reader.h"
 #include "memory/tmp_buffer.h"
+#include "formats/tga.h"
 
 namespace nya_scene
 {
@@ -21,131 +22,18 @@ void rgb_to_bgr(unsigned char *data,size_t data_size)
     }
 }
 
-void flip_horisontal(unsigned char *data,int width,int height,int bpp)
-{
-    if(!data)
-        return;
-
-    const int line_size=width*bpp;
-    const int half=line_size/2;
-    const int size=line_size*height;
-
-    unsigned char tmp[4];
-
-    for(int offset=0;offset<size;offset+=line_size)
-    {
-        unsigned char *ha=data+offset;
-        unsigned char *hb=ha+line_size-bpp;
-
-        for(int w=0;w<half;w+=bpp)
-        {
-            unsigned char *a=ha+w;
-            unsigned char *b=hb-w;
-            memcpy(tmp,a,bpp);
-            memcpy(a,b,bpp);
-            memcpy(b,tmp,bpp);
-        }
-    }
-}
-
-void flip_vertical(unsigned char *data,int width,int height,int bpp)
-{
-    if(!data)
-        return;
-
-    const int line_size=width*bpp;
-    const int top=line_size*(height-1);
-    const int half=line_size*height/2;
-
-    unsigned char tmp[4];
-
-    for(int offset=0;offset<half;offset+=line_size)
-    {
-        unsigned char *ha=data+offset;
-        unsigned char *hb=data+top-offset;
-
-        for(int w=0;w<line_size;w+=bpp)
-        {
-            unsigned char *a=ha+w;
-            unsigned char *b=hb+w;
-            memcpy(tmp,a,bpp);
-            memcpy(a,b,bpp);
-            memcpy(b,tmp,bpp);
-        }
-    }
-}
-
 bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
 {
     if(!data.get_size())
         return false;
 
-    nya_memory::memory_reader reader(data.get_data(),data.get_size());
-
-    const char id_length=reader.read<char>();
-    if(!reader.skip(id_length))
-        return false;
-
-    const char colourmaptype=reader.read<char>();
-    if(colourmaptype!=0)
-        return false;
-
-    const char datatypecode=reader.read<char>();
-    const short colourmaporigin=reader.read<short>();
-    if(colourmaporigin!=0)
-        return false;
-
-    const short colourmaplength=reader.read<short>();
-    if(colourmaplength!=0)
-        return false;
-
-    const char colourmapdepth=reader.read<char>();
-    if(colourmapdepth!=0)
-        return false;
-
-    //const short x_origin=
-        reader.read<short>();
-    //const short y_origin=
-        reader.read<short>();
-
-    const short width=reader.read<short>();
-    const short height=reader.read<short>();
-    const char bitsperpixel=reader.read<char>();
-    const char imagedescriptor=reader.read<char>();
-
-    int channels=0;
-    bool rle=false;
-
-    switch(bitsperpixel)
-    {
-        case 32:
-            if(datatypecode==10)
-                channels=4,rle=true;
-            else if(datatypecode==2)
-                channels=4;
-        break;
-
-        case 24:
-            if(datatypecode==10)
-                channels=3,rle=true;
-            else if(datatypecode==2)
-                channels=3;
-        break;
-
-        case 8:
-            if(datatypecode==11)
-                channels=1,rle=true;
-            else if(datatypecode==3)
-                channels=1;
-            break;
-    }
-
-    const size_t color_data_size=width*height*channels;
-    if(!color_data_size)
+    nya_formats::tga tga;
+    const size_t header_size=tga.decode_header(data.get_data(),data.get_size());
+    if(!header_size)
         return false;
 
     nya_render::texture::color_format color_format;
-    switch(channels)
+    switch(tga.channels)
     {
         case 4: color_format=nya_render::texture::color_bgra; break;
         case 3: color_format=nya_render::texture::color_rgb; break;
@@ -155,68 +43,67 @@ bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
 
     typedef unsigned char uchar;
 
-    if(rle)
+    nya_memory::tmp_buffer_ref tmp_data;
+    const void *color_data=tga.data;
+    if(tga.rle)
     {
-        nya_memory::tmp_buffer_scoped color_data(color_data_size);
-
-        const uchar *cur=(uchar*)reader.get_data();
-        uchar *out=(uchar*)color_data.get_data();
-        const uchar *const last=cur+reader.get_remained();
-        const uchar *const out_last=out+color_data_size;
-
-        while(out<out_last)
+        tmp_data.allocate(tga.uncompressed_size);
+        if(!tga.decode_rle(tmp_data.get_data()))
         {
-            if(cur>=last)
-                return false;
-
-            if(*cur & 0x80)
-            {
-                const uchar *to=out+(*cur++ -127)*channels;
-                if(cur+channels>last || to>out_last)
-                    return false;
-
-                while(out<to) memcpy(out,cur,channels),out+=channels;
-                cur+=channels;
-            }
-            else // raw
-            {
-                const size_t size=(*cur++ +1)*channels;
-                if(cur+size>last || out+size>out_last)
-                    return false;
-
-                memcpy(out,cur,size);
-                cur+=size,out+=size;
-            }
+            tmp_data.free();
+            return false;
         }
 
-        if(color_format==nya_render::texture::color_rgb)
-            rgb_to_bgr((uchar*)color_data.get_data(),color_data_size);
-
-        if(imagedescriptor & 0x10)
-            flip_horisontal((uchar*)color_data.get_data(),width,height,channels);
-
-        if(imagedescriptor & 0x20)
-            flip_vertical((uchar*)color_data.get_data(),width,height,channels);
-
-        res.tex.build_texture(color_data.get_data(),width,height,color_format);
+        color_data=tmp_data.get_data();
     }
-    else
+    else if(header_size+tga.uncompressed_size>data.get_size())
+        return false;
+
+    if(tga.channels==3 || tga.horisontal_flip || tga.vertical_flip)
     {
-        if(!reader.check_remained(color_data_size))
-            return false;
+        if(!tmp_data.get_data())
+        {
+            tmp_data.allocate(tga.uncompressed_size);
 
-        if(color_format==nya_render::texture::color_rgb)
-            rgb_to_bgr((uchar*)reader.get_data(),color_data_size);
+            if(tga.horisontal_flip || tga.vertical_flip)
+            {
+                if(tga.horisontal_flip)
+                    tga.flip_horisontal(color_data,tmp_data.get_data());
 
-        if(imagedescriptor & 0x10)
-            flip_horisontal((uchar*)reader.get_data(),width,height,channels);
+                if(tga.vertical_flip)
+                    tga.flip_vertical(color_data,tmp_data.get_data());
+            }
+            else
+                tmp_data.copy_to(color_data,tga.uncompressed_size);
 
-        if(imagedescriptor & 0x20)
-            flip_vertical((uchar*)reader.get_data(),width,height,channels);
+            color_data=tmp_data.get_data();
+        }
+        else
+        {
+            if(tga.horisontal_flip)
+                tga.flip_horisontal(tmp_data.get_data(),tmp_data.get_data());
 
-        res.tex.build_texture(reader.get_data(),width,height,color_format);
+            if(tga.vertical_flip)
+                tga.flip_vertical(tmp_data.get_data(),tmp_data.get_data());
+        }
+
+        if(tga.channels==3)
+            rgb_to_bgr((uchar*)color_data,tga.uncompressed_size);
     }
 
+    //const uchar *original_rle=(const uchar *)tga.data;
+    nya_memory::tmp_buffer_scoped test(tga.uncompressed_size*2);
+    tga.data=color_data;
+    tga.compressed_size=tga.encode_rle(test.get_data(),tga.uncompressed_size*2);
+    nya_memory::tmp_buffer_scoped test2(tga.uncompressed_size);
+    tga.data=test.get_data();
+    tga.rle=true;
+    tga.decode_rle(test2.get_data());
+    color_data=test2.get_data();
+    //const uchar *encoded_rle=(const uchar *)tga.data;
+
+    res.tex.build_texture(color_data,tga.width,tga.height,color_format);
+    tmp_data.free();
     data.free();
 
     return true;

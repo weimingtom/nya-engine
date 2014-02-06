@@ -25,6 +25,7 @@ struct shared_shader
         camera_pos=0,
         bones_pos,
         bones_rot,
+        viewport,
 
         predefines_count
     };

@@ -161,6 +161,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\formats\tga.cpp" />
     <ClCompile Include="..\..\log\html_log.cpp" />
     <ClCompile Include="..\..\log\log.cpp" />
     <ClCompile Include="..\..\log\plain_file_log.cpp" />
@@ -237,6 +238,7 @@
     <ClCompile Include="..\..\ui\ui.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\formats\tga.h" />
     <ClInclude Include="..\..\log\html_log.h" />
     <ClInclude Include="..\..\log\log.h" />
     <ClInclude Include="..\..\log\plain_file_log.h" />

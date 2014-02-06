@@ -27,7 +27,7 @@ static std::string read_string(nya_memory::memory_reader &reader)
     return std::string(str,size);
 }
 
-bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size)
+bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size,int version)
 {
     if(!data || !size)
         return false;
@@ -57,12 +57,14 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size)
 
         const uchar type=reader.read<uchar>();
         const uchar dimension=reader.read<uchar>();
+        const uchar data_type=version>1?reader.read<uchar>():nya_render::vbo::float32;
+
         read_string(reader); //semantics
 
-        switch(type)
+        switch(type) //ToDo: data_type for all types
         {
             case pos: res.vbo.set_vertices(vertex_stride,dimension); break;
-            case normal: res.vbo.set_normals(vertex_stride); break;
+            case normal: res.vbo.set_normals(vertex_stride,nya_render::vbo::vertex_atrib_type(data_type)); break;
             case color: res.vbo.set_colors(vertex_stride,dimension); break;
             default: res.vbo.set_tc(type-tc0,vertex_stride,dimension); break;
         };
@@ -108,12 +110,15 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size)
             shared_mesh::group &g=res.groups[j];
             g.name=read_string(reader);
 
-            const nya_math::vec3 aabb_min=reader.read<nya_math::vec3>(); //ToDo
+            const nya_math::vec3 aabb_min=reader.read<nya_math::vec3>();
             const nya_math::vec3 aabb_max=reader.read<nya_math::vec3>();
+            g.aabb.delta=(aabb_max-aabb_min)*0.5f;
+            g.aabb.origin=aabb_min+res.aabb.delta;
 
             g.material_idx=reader.read<ushort>();
             g.offset=reader.read<uint>();
             g.count=reader.read<uint>();
+            g.elem_type=version>1?nya_render::vbo::element_type(reader.read<uchar>()):nya_render::vbo::triangles;
         }
 
         break; //ToDo: load all lods
@@ -133,7 +138,7 @@ bool mesh::load_nms_skeleton_section(shared_mesh &res,const void *data,size_t si
     for(int i=0;i<bones_count;++i)
     {
         const std::string name=read_string(reader);
-        const nya_math::quat rot=reader.read<nya_math::quat>(); //ToDo
+        const nya_math::quat rot=reader.read<nya_math::quat>(); //ToDo ?
         const nya_math::vec3 pos=reader.read<nya_math::vec3>();
         const int parent=reader.read<int>();
 
@@ -251,8 +256,12 @@ bool mesh::load_nms(shared_mesh &res,resource_data &data,const char* name)
 
     typedef unsigned int uint;
 
-    if(reader.read<uint>()!=1)
+    uint version=reader.read<uint>();
+    if(version!=1 && version!=2)
+    {
+        nya_log::get_log()<<"nms load error: unsupported version: "<<version<<"\n";
         return false;
+    }
 
     enum section_type
     {
@@ -275,7 +284,7 @@ bool mesh::load_nms(shared_mesh &res,resource_data &data,const char* name)
 
         switch(type)
         {
-            case mesh_data: load_nms_mesh_section(res,reader.get_data(),size); break;
+            case mesh_data: load_nms_mesh_section(res,reader.get_data(),size,version); break;
             case skeleton: load_nms_skeleton_section(res,reader.get_data(),size); break;
             case materials: load_nms_material_section(res,reader.get_data(),size); break;
             default: nya_log::get_log()<<"nms load warning: unknown chunk type\n";
@@ -351,7 +360,7 @@ const material &mesh_internal::mat(int idx) const
     return m_shared->materials[idx];
 }
 
-void mesh_internal::draw_group(int idx) const
+void mesh_internal::draw_group(int idx) const //ToDo: check aabb for groups
 {
     const shared_mesh::group &g=m_shared->groups[idx];
     if(g.material_idx>=m_shared->materials.size())

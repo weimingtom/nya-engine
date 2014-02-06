@@ -4,6 +4,7 @@
 #include "scene.h"
 #include "camera.h"
 #include "transform.h"
+#include "render.h"
 #include <string.h>
 
 namespace nya_scene
@@ -238,6 +239,12 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
                                     p.name=name;
                                     p.transform=transform;
                                 }
+                                else if(semantics=="nya viewport")
+                                {
+                                    shader_description::predefined &p=desc.predefines[shared_shader::viewport];
+                                    p.name=name;
+                                    p.transform=transform;
+                                }
                             }
                             else if(desc.uniforms.find(semantics)==desc.uniforms.end())
                             {
@@ -372,6 +379,13 @@ void shader_internal::set() const
                     m_shared->shdr.set_uniform4_array(p.location,m_skeleton->get_rot_buffer(),m_skeleton->get_bones_count());
                     m_shared->last_skeleton_rot=m_skeleton;
                 }
+            }
+            break;
+
+            case shared_shader::viewport:
+            {
+                nya_render::rect r=nya_render::get_viewport();
+                m_shared->shdr.set_uniform(p.location,float(r.x),float(r.y),float(r.width),float(r.height));
             }
             break;
 

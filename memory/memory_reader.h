@@ -3,7 +3,7 @@
 #pragma once
 
 #include <cstddef>
-#include <memory.h>
+#include <string.h>
 
 namespace nya_memory
 {
@@ -47,7 +47,7 @@ public:
         return true;
     }
 
-    bool check_remained(size_t size)
+    bool check_remained(size_t size) const
     {
         return m_offset+size<=m_size;
     }
@@ -56,9 +56,9 @@ public:
 
     bool seek(size_t offset) { m_offset=offset; return offset<m_size; }
 
-    size_t get_offset() { return m_offset; }
+    size_t get_offset() const { return m_offset; }
 
-    size_t get_remained()
+    size_t get_remained() const
     {
         if(m_offset>=m_size)
             return 0;
@@ -66,7 +66,7 @@ public:
         return m_size-m_offset;
     }
 
-    const void *get_data() 
+    const void *get_data()  const
     {
         if(m_offset>=m_size)
             return 0;

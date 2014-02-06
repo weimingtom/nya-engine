@@ -22,9 +22,11 @@ struct shared_mesh
     struct group
     {
         std::string name;
+        nya_math::aabb aabb;
         unsigned int material_idx;
         unsigned int offset;
         unsigned int count;
+        nya_render::vbo::element_type elem_type;
     };
 
     std::vector<group> groups;
@@ -213,7 +215,7 @@ public:
     mesh() { internal().default_load_function(load_nms); }
 
 public:
-    static bool load_nms_mesh_section(shared_mesh &res,const void *data,size_t size);
+    static bool load_nms_mesh_section(shared_mesh &res,const void *data,size_t size,int version);
     static bool load_nms_skeleton_section(shared_mesh &res,const void *data,size_t size);
     static bool load_nms_material_section(shared_mesh &res,const void *data,size_t size);
 

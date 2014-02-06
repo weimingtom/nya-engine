@@ -25,6 +25,9 @@
     <Filter Include="system">
       <UniqueIdentifier>{89c2673a-f0c9-420f-84d4-c9ccb2a2258e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="formats">
+      <UniqueIdentifier>{75230e9e-19f9-4c4f-b91f-679535dca4c3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\log\html_log.cpp">
@@ -140,6 +143,9 @@
     </ClCompile>
     <ClCompile Include="..\..\system\shaders_cache_provider.cpp">
       <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\formats\tga.cpp">
+      <Filter>formats</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -286,6 +292,9 @@
     </ClInclude>
     <ClInclude Include="..\..\system\shaders_cache_provider.h">
       <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\formats\tga.h">
+      <Filter>formats</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
