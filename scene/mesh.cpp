@@ -87,7 +87,7 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size,i
     if(index_size)
     {
         uint inds_count=reader.read<uint>();
-        if(!reader.check_remained(inds_count*sizeof(ushort)))
+        if(!reader.check_remained(inds_count*index_size))
             return false;
 
         switch(index_size)
