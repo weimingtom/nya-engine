@@ -12,8 +12,8 @@ namespace nya_math
 mat4 &mat4::identity()
 {
     for(int i=0;i<4;++i)
-        for(int j=0;j<4;++j)
-            m[i][j]=0.0f;
+    for(int j=0;j<4;++j)
+        m[i][j]=0.0f;
 
     m[0][0]=m[1][1]=m[2][2]=m[3][3]=1.0f;
 
@@ -33,7 +33,7 @@ mat4 &mat4::translate(const nya_math::vec3 &v)
     for(int i=0;i<4;++i)
         m[3][i]+=m[0][i]*v.x+m[1][i]*v.y+m[2][i]*v.z;
         
-        return *this;
+    return *this;
 }
 
 mat4 &mat4::rotate(float angle,float x,float y,float z)
@@ -164,32 +164,32 @@ mat4 &mat4::invert()
     return *this;
 }
 
+mat4 &mat4::transpose()
+{
+    float temp;
+    for(int i=0;i<4;++i)
+    for(int j=i+1;j<4;++j)
+        temp=m[i][j],m[i][j]=m[j][i],m[j][i]=temp;
+
+    return *this;
+}
+
 mat4 mat4::operator*(const mat4 &mat) const
 {
     mat4 out;
-
     for(int i=0;i<4;++i)
-    {
-        for(int j=0;j<4;++j)
-        {
-            out[i][j]=(m[i][0]*mat[0][j])+
-                        (m[i][1]*mat[1][j])+
-                        (m[i][2]*mat[2][j])+
-                        (m[i][3]*mat[3][j]);
-        }
-    }
-
+    for(int j=0;j<4;++j)
+        out[i][j]=(m[i][0]*mat[0][j])+
+                    (m[i][1]*mat[1][j])+
+                    (m[i][2]*mat[2][j])+
+                    (m[i][3]*mat[3][j]);
     return out;
 }
 
 mat4 &mat4::scale(float sx,float sy,float sz)
 {
     for(int i=0;i<4;++i)
-    {
-        m[0][i]*=sx;
-        m[1][i]*=sy;
-        m[2][i]*=sz;
-    }
+        m[0][i]*=sx,m[1][i]*=sy,m[2][i]*=sz;
 
     return *this;
 }

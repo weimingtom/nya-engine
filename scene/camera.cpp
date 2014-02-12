@@ -2,6 +2,8 @@
 
 #include "camera.h"
 #include "render/render.h"
+#include "math/quaternion.h"
+#include "math/constants.h"
 
 namespace
 {
@@ -41,24 +43,25 @@ void camera::set_proj(const nya_math::mat4 &mat)
     m_recalc_frustum=true;
 }
 
-void camera::set_pos(float x,float y,float z)
+void camera::set_pos(const nya_math::vec3 &pos)
 {
-    m_pos.x=x;
-    m_pos.y=y;
-    m_pos.z=z;
+    m_pos=pos;
 
+    m_recalc_view=true;
+    m_recalc_frustum=true;
+}
+
+void camera::set_rot(const nya_math::quat &rot)
+{
+    m_rot=rot;
     m_recalc_view=true;
     m_recalc_frustum=true;
 }
 
 void camera::set_rot(float yaw,float pitch,float roll)
 {
-    m_rot.y=yaw;
-    m_rot.x=pitch;
-    m_rot.z=roll;
-
-    m_recalc_view=true;
-    m_recalc_frustum=true;
+    const float a2r=nya_math::constants::pi/180.0f;
+    set_rot(nya_math::quat(pitch*a2r,yaw*a2r,roll*a2r));
 }
 
 const nya_math::mat4 &camera::get_view_matrix() const
@@ -67,11 +70,12 @@ const nya_math::mat4 &camera::get_view_matrix() const
     {
         m_recalc_view=false;
 
-        m_view.identity();
-        m_view.rotate(m_rot.z,0,0,1);
-        m_view.rotate(m_rot.x,1,0,0);
-        m_view.rotate(m_rot.y,0,1,0);
-        m_view.translate(-m_pos.x,-m_pos.y,-m_pos.z);
+        nya_math::quat rot=m_rot;
+        rot.v.x=-rot.v.x;
+        rot.v.y=-rot.v.y;
+        m_view=nya_math::mat4(rot);
+        m_view.transpose();
+        m_view.translate(-m_pos);
     }
 
     return m_view;

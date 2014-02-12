@@ -25,6 +25,7 @@ struct mat4
     mat4 &frustrum(float left,float right,float bottom,float top,float near,float far);
 
     mat4 &invert();
+    mat4 &transpose();
 
     mat4 operator * (const mat4 &mat) const;
 

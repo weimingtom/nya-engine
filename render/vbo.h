@@ -44,10 +44,10 @@ public:
     bool set_vertex_data(const void*data,unsigned int vert_stride,unsigned int vert_count,usage_hint usage=static_draw);
     bool set_index_data(const void*data,index_size size,unsigned int indices_count,usage_hint usage=static_draw);
     void set_element_type(element_type type);
-    void set_vertices(unsigned int offset,unsigned int dimension);
+    void set_vertices(unsigned int offset,unsigned int dimension,vertex_atrib_type=float32);
     void set_normals(unsigned int offset,vertex_atrib_type=float32);
-    void set_tc(unsigned int tc_idx,unsigned int offset,unsigned int dimension);
-    void set_colors(unsigned int offset,unsigned int dimension);
+    void set_tc(unsigned int tc_idx,unsigned int offset,unsigned int dimension,vertex_atrib_type=float32);
+    void set_colors(unsigned int offset,unsigned int dimension,vertex_atrib_type=float32);
 
 public:
     bool get_vertex_data( nya_memory::tmp_buffer_ref &data ) const;

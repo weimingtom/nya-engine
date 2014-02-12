@@ -369,10 +369,10 @@ void vbo::draw(unsigned int offset,unsigned int count)
 
 #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
         glEnableVertexAttribArray(vertex_attribute);
-        glVertexAttribPointer(vertex_attribute,vobj.vertices.dimension,GL_FLOAT,0,vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.vertices.offset));
+        glVertexAttribPointer(vertex_attribute,vobj.vertices.dimension,get_gl_element_type(vobj.vertices.type),0,vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.vertices.offset));
 #else
         glEnableClientState(GL_VERTEX_ARRAY);
-        glVertexPointer(vobj.vertices.dimension,GL_FLOAT,vobj.vertex_stride,(void*)0);
+        glVertexPointer(vobj.vertices.dimension,get_gl_element_type(vobj.vertices.type),vobj.vertex_stride,(void*)0);
 #endif
         for(int i=0;i<max_tex_coord;++i)
         {
@@ -381,10 +381,10 @@ void vbo::draw(unsigned int offset,unsigned int count)
             {
   #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
                 glEnableVertexAttribArray(tc0_attribute+i);
-                glVertexAttribPointer(tc0_attribute+i,tc.dimension,GL_FLOAT,0,vobj.vertex_stride,(void*)(ptrdiff_t)(tc.offset));
+                glVertexAttribPointer(tc0_attribute+i,tc.dimension,get_gl_element_type(tc.type),0,vobj.vertex_stride,(void*)(ptrdiff_t)(tc.offset));
   #else
                 vbo_glClientActiveTexture(GL_TEXTURE0_ARB+i);
-                glTexCoordPointer(tc.dimension,GL_FLOAT,vobj.vertex_stride,(void*)(ptrdiff_t)(tc.offset));
+                glTexCoordPointer(tc.dimension,get_gl_element_type(tc.type),vobj.vertex_stride,(void*)(ptrdiff_t)(tc.offset));
                 glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   #endif
             }
@@ -422,10 +422,10 @@ void vbo::draw(unsigned int offset,unsigned int count)
         {
   #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
             glEnableVertexAttribArray(color_attribute);
-            glVertexAttribPointer(color_attribute,vobj.colors.dimension,GL_FLOAT,0,vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.colors.offset));
+            glVertexAttribPointer(color_attribute,vobj.colors.dimension,get_gl_element_type(vobj.colors.type),0,vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.colors.offset));
   #else
             glEnableClientState(GL_COLOR_ARRAY);
-            glColorPointer(vobj.colors.dimension,GL_FLOAT,vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.colors.offset));
+            glColorPointer(vobj.colors.dimension,get_gl_element_type(vobj.colors.type),vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.colors.offset));
   #endif
         }
         else if(active_verts>=0 && vbo_obj::get(active_verts).colors.has)
@@ -766,7 +766,7 @@ bool vbo::set_index_data(const void*data,index_size size,unsigned int indices_co
     return true;
 }
 
-void vbo::set_vertices(unsigned int offset,unsigned int dimension)
+void vbo::set_vertices(unsigned int offset,unsigned int dimension,vertex_atrib_type type)
 {
     if(m_verts<0)
         m_verts=vbo_obj::add();
@@ -786,6 +786,7 @@ void vbo::set_vertices(unsigned int offset,unsigned int dimension)
     obj.vertices.has=true;
     obj.vertices.offset=offset;
     obj.vertices.dimension=dimension;
+    obj.vertices.type=type;
 
     if(m_verts==active_verts)
         active_verts=-1;
@@ -807,7 +808,7 @@ void vbo::set_normals(unsigned int offset,vertex_atrib_type type)
     obj.normals.type=type;
 }
 
-void vbo::set_tc(unsigned int tc_idx,unsigned int offset,unsigned int dimension)
+void vbo::set_tc(unsigned int tc_idx,unsigned int offset,unsigned int dimension,vertex_atrib_type type)
 {
     if(tc_idx>=max_tex_coord)
         return;
@@ -831,9 +832,10 @@ void vbo::set_tc(unsigned int tc_idx,unsigned int offset,unsigned int dimension)
     tc.has=true;
     tc.offset=offset;
     tc.dimension=dimension;
+    tc.type=type;
 }
 
-void vbo::set_colors(unsigned int offset,unsigned int dimension)
+void vbo::set_colors(unsigned int offset,unsigned int dimension,vertex_atrib_type type)
 {
     if(m_verts<0)
         m_verts=vbo_obj::add();
@@ -853,6 +855,7 @@ void vbo::set_colors(unsigned int offset,unsigned int dimension)
     obj.colors.has=true;
     obj.colors.offset=offset;
     obj.colors.dimension=dimension;
+    obj.colors.type=type;
 }
 
 void vbo::set_element_type(element_type type)
