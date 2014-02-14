@@ -368,7 +368,7 @@ void mesh_internal::draw_group(int idx) const //ToDo: check aabb for groups
 
     const material &m=mat(g.material_idx);
     m.internal().set();
-    m_shared->vbo.draw(g.offset,g.count);
+    m_shared->vbo.draw(g.offset,g.count,g.elem_type);
     m.internal().unset();
 }
 

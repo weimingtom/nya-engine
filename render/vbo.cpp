@@ -183,12 +183,23 @@ void vbo::draw()
         return;
 
     if(current_inds>=0)
-        draw(vbo_obj::get(current_inds).element_count);
+        draw(0,vbo_obj::get(current_inds).element_count,vbo_obj::get(current_inds).element_type);
     else
-        draw(vbo_obj::get(current_verts).verts_count);
+        draw(0,vbo_obj::get(current_verts).verts_count,vbo_obj::get(current_verts).element_type);
 }
 
 void vbo::draw(unsigned int count) { draw(0,count); }
+
+void vbo::draw(unsigned int offset,unsigned int count)
+{
+    if(current_verts<0)
+        return;
+
+    if(current_inds>=0)
+        draw(offset,count,vbo_obj::get(current_inds).element_type);
+    else
+        draw(offset,count,vbo_obj::get(current_verts).element_type);
+}
 
 #ifdef DIRECTX11
 DXGI_FORMAT get_dx_format(int dimension)
@@ -251,7 +262,7 @@ int get_gl_element_type(vbo::vertex_atrib_type type)
 }
 #endif
 
-void vbo::draw(unsigned int offset,unsigned int count)
+void vbo::draw(unsigned int offset,unsigned int count,element_type el_type)
 {
     if(current_verts<0 || !count)
         return;
@@ -333,14 +344,13 @@ void vbo::draw(unsigned int offset,unsigned int count)
             return;
     }
 	get_context()->IASetInputLayout(layout);
+    set_dx_topology(el_type);
 
     if(current_inds>=0)
     {
         vbo_obj &iobj=vbo_obj::get(current_inds);
         if(offset+count>iobj.element_count)
             return;
-
-        set_dx_topology(iobj.element_type);
 
         switch(iobj.element_size)
         {
@@ -354,8 +364,6 @@ void vbo::draw(unsigned int offset,unsigned int count)
 	{
         if(offset+count>vobj.verts_count)
             return;
-
-        set_dx_topology(vobj.element_type);
 
 		get_context()->Draw(count,offset);
 	}
@@ -440,6 +448,7 @@ void vbo::draw(unsigned int offset,unsigned int count)
         active_verts=current_verts;
     }
 
+    const int gl_elem=get_gl_element_type(el_type);
     if(current_inds>=0)
     {
         vbo_obj &iobj=vbo_obj::get(current_inds);
@@ -456,7 +465,6 @@ void vbo::draw(unsigned int offset,unsigned int count)
             active_inds=current_inds;
         }
 
-        const int gl_elem=get_gl_element_type(iobj.element_type);
         const unsigned int gl_elem_type=(iobj.element_size==index4b?GL_UNSIGNED_INT:GL_UNSIGNED_SHORT);
         glDrawElements(gl_elem,count,gl_elem_type,(void*)(ptrdiff_t)(offset*iobj.element_size));
     }
@@ -465,7 +473,6 @@ void vbo::draw(unsigned int offset,unsigned int count)
         if(offset+count>vobj.verts_count)
             return;
 
-        const int gl_elem=get_gl_element_type(vobj.element_type);
         glDrawArrays(gl_elem,offset,count);
     }
 #endif

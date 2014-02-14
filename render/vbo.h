@@ -77,6 +77,7 @@ public:
     static void draw();
     static void draw(unsigned int count);
     static void draw(unsigned int offset,unsigned int count);
+    static void draw(unsigned int offset,unsigned int count,element_type forced_element_type);
 
 public:
     void release();
