@@ -27,6 +27,8 @@ struct shared_mesh
         unsigned int offset;
         unsigned int count;
         nya_render::vbo::element_type elem_type;
+
+        group(): material_idx(0),offset(0),count(0),elem_type(nya_render::vbo::triangles) {}
     };
 
     std::vector<group> groups;
