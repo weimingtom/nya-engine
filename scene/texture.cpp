@@ -4,6 +4,7 @@
 #include "memory/memory_reader.h"
 #include "memory/tmp_buffer.h"
 #include "formats/tga.h"
+#include "formats/dds.h"
 
 namespace nya_scene
 {
@@ -20,6 +21,41 @@ void rgb_to_bgr(unsigned char *data,size_t data_size)
         data[i]=data2[i];
         data2[i]=tmp;
     }
+}
+
+bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
+{
+    if(!data.get_size())
+        return false;
+
+    if(data.get_size()<4)
+        return false;
+
+    if(memcmp(data.get_data(),"DDS ",4)!=0)
+        return false;
+
+    nya_formats::dds dds;
+    const size_t header_size=dds.decode_header(data.get_data(),data.get_size());
+    if(!header_size)
+        return false;
+
+    switch(dds.pf)
+    {
+        case nya_formats::dds::dxt1: res.tex.build_texture(dds.data,dds.width,dds.height,nya_render::texture::dxt1,dds.mipmap_count); break;
+        case nya_formats::dds::dxt2:
+        case nya_formats::dds::dxt3: res.tex.build_texture(dds.data,dds.width,dds.height,nya_render::texture::dxt3,dds.mipmap_count); break;
+        case nya_formats::dds::dxt4:
+        case nya_formats::dds::dxt5: res.tex.build_texture(dds.data,dds.width,dds.height,nya_render::texture::dxt5,dds.mipmap_count); break;
+        case nya_formats::dds::bgra: res.tex.build_texture(dds.data,dds.width,dds.height,nya_render::texture::color_bgra,dds.mipmap_count); break;
+        case nya_formats::dds::bgr:
+            rgb_to_bgr((unsigned char*)dds.data,dds.data_size);
+            res.tex.build_texture(dds.data,dds.width,dds.height, nya_render::texture::color_rgb,dds.mipmap_count);
+            break;
+
+        default: return false;
+    }
+
+    return true;
 }
 
 bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)

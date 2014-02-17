@@ -57,11 +57,12 @@ public:
     void build(const void *data,unsigned int width,unsigned int height,color_format format);
 
 public:
-    texture() { internal().default_load_function(load_tga); }
+    texture() { internal().default_load_function(load_tga); internal().default_load_function(load_dds); }
 
 public:
     static bool load_tga(shared_texture &res,resource_data &data,const char* name);
-    
+    static bool load_dds(shared_texture &res,resource_data &data,const char* name);
+
 public:
     const texture_internal &internal() const { return m_internal; }
 

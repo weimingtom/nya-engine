@@ -179,6 +179,10 @@
 		F2FF5FDA16C15CCE00C6A705 /* transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2FF5FD716C15CCE00C6A705 /* transform.cpp */; };
 		F2FF5FDB16C15CCE00C6A705 /* transform.h in Headers */ = {isa = PBXBuildFile; fileRef = F2FF5FD816C15CCE00C6A705 /* transform.h */; };
 		F2FF5FDC16C15CCE00C6A705 /* transform.h in Headers */ = {isa = PBXBuildFile; fileRef = F2FF5FD816C15CCE00C6A705 /* transform.h */; };
+		F5398EE518AFF94A00E41909 /* dds.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5398EE318AFF94A00E41909 /* dds.cpp */; };
+		F5398EE618AFF94A00E41909 /* dds.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5398EE318AFF94A00E41909 /* dds.cpp */; };
+		F5398EE718AFF94A00E41909 /* dds.h in Headers */ = {isa = PBXBuildFile; fileRef = F5398EE418AFF94A00E41909 /* dds.h */; };
+		F5398EE818AFF94A00E41909 /* dds.h in Headers */ = {isa = PBXBuildFile; fileRef = F5398EE418AFF94A00E41909 /* dds.h */; };
 		F5528B10189AC6FA001FE865 /* tga.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5528B0E189AC6FA001FE865 /* tga.cpp */; };
 		F5528B11189AC6FA001FE865 /* tga.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5528B0E189AC6FA001FE865 /* tga.cpp */; };
 		F5528B12189AC6FA001FE865 /* tga.h in Headers */ = {isa = PBXBuildFile; fileRef = F5528B0F189AC6FA001FE865 /* tga.h */; };
@@ -282,6 +286,8 @@
 		F2F0A0B21695F809007245BC /* matrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = matrix.cpp; path = ../../math/matrix.cpp; sourceTree = "<group>"; };
 		F2FF5FD716C15CCE00C6A705 /* transform.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = transform.cpp; path = ../../scene/transform.cpp; sourceTree = "<group>"; };
 		F2FF5FD816C15CCE00C6A705 /* transform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = transform.h; path = ../../scene/transform.h; sourceTree = "<group>"; };
+		F5398EE318AFF94A00E41909 /* dds.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dds.cpp; path = ../../formats/dds.cpp; sourceTree = "<group>"; };
+		F5398EE418AFF94A00E41909 /* dds.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dds.h; path = ../../formats/dds.h; sourceTree = "<group>"; };
 		F5528B0E189AC6FA001FE865 /* tga.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tga.cpp; path = ../../formats/tga.cpp; sourceTree = "<group>"; };
 		F5528B0F189AC6FA001FE865 /* tga.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tga.h; path = ../../formats/tga.h; sourceTree = "<group>"; };
 		F55C571D180623B100FF6163 /* debug_draw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = debug_draw.cpp; sourceTree = "<group>"; };
@@ -488,6 +494,8 @@
 		F5528B0D189AC5B8001FE865 /* formats */ = {
 			isa = PBXGroup;
 			children = (
+				F5398EE318AFF94A00E41909 /* dds.cpp */,
+				F5398EE418AFF94A00E41909 /* dds.h */,
 				F5528B0E189AC6FA001FE865 /* tga.cpp */,
 				F5528B0F189AC6FA001FE865 /* tga.h */,
 			);
@@ -524,6 +532,7 @@
 				F23AB53A168DBA16004B116E /* stdout_log.h in Headers */,
 				F23AB53B168DBA16004B116E /* memory.h in Headers */,
 				F23AB53C168DBA16004B116E /* pool.h in Headers */,
+				F5398EE818AFF94A00E41909 /* dds.h in Headers */,
 				F23AB53D168DBA16004B116E /* tmp_buffer.h in Headers */,
 				F23AB53E168DBA16004B116E /* slider.h in Headers */,
 				F23AB53F168DBA16004B116E /* label.h in Headers */,
@@ -583,6 +592,7 @@
 				F259325415D858140092C7D8 /* stdout_log.h in Headers */,
 				F259325615D858140092C7D8 /* memory.h in Headers */,
 				F259325715D858140092C7D8 /* pool.h in Headers */,
+				F5398EE718AFF94A00E41909 /* dds.h in Headers */,
 				F259325915D858140092C7D8 /* tmp_buffer.h in Headers */,
 				F241A70E160292B1004646EB /* slider.h in Headers */,
 				F241A710160292B1004646EB /* label.h in Headers */,
@@ -702,6 +712,7 @@
 				F22AD9FF16946EC000B01B4A /* mesh.cpp in Sources */,
 				F22ADA0116946EC000B01B4A /* scene.cpp in Sources */,
 				F2F0A09C1695A758007245BC /* skeleton.cpp in Sources */,
+				F5398EE618AFF94A00E41909 /* dds.cpp in Sources */,
 				F2F0A0A01695A758007245BC /* animation.cpp in Sources */,
 				F2F0A0AC1695A794007245BC /* quaternion.cpp in Sources */,
 				F2F0A0B01695A794007245BC /* bezier.cpp in Sources */,
@@ -749,6 +760,7 @@
 				F259325515D858140092C7D8 /* memory.cpp in Sources */,
 				F259325815D858140092C7D8 /* tmp_buffer.cpp in Sources */,
 				F25932BB15D865BF0092C7D8 /* app.mm in Sources */,
+				F5398EE518AFF94A00E41909 /* dds.cpp in Sources */,
 				F241A70F160292B1004646EB /* slider.cpp in Sources */,
 				F22AD9FE16946EC000B01B4A /* mesh.cpp in Sources */,
 				F22ADA0016946EC000B01B4A /* scene.cpp in Sources */,

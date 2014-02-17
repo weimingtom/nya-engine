@@ -6,6 +6,8 @@
 
 #include "memory/tmp_buffer.h"
 
+//ToDo: include mips size in texture size, use size of mip0 in get_data
+
 namespace
 {
     unsigned int current_layer=0;
@@ -82,6 +84,32 @@ void gl_select_multitex_layer(int idx)
 #endif
 }
 
+void gl_setup_texture(int target,bool clamp,bool has_mips)
+{
+    if(clamp || target==GL_TEXTURE_CUBE_MAP)
+    {
+        glTexParameteri(target,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+        glTexParameteri(target,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+
+#ifndef OPENGL_ES
+        if(target==GL_TEXTURE_CUBE_MAP)
+            glTexParameteri(target,GL_TEXTURE_WRAP_R,GL_CLAMP_TO_EDGE);
+#endif
+    }
+    else
+    {
+        glTexParameteri(target,GL_TEXTURE_WRAP_S,GL_REPEAT);
+        glTexParameteri(target,GL_TEXTURE_WRAP_T,GL_REPEAT);
+    }
+
+    glTexParameteri(target,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+
+    if(has_mips)
+        glTexParameteri(target,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+    else
+        glTexParameteri(target,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+}
+
 void setup_pack_alignment()
 {
     static bool set=false;
@@ -94,7 +122,7 @@ void setup_pack_alignment()
 }
 #endif
 
-bool texture::build_texture(const void *data,unsigned int width,unsigned int height,color_format format)
+bool texture::build_texture(const void *data,unsigned int width,unsigned int height,color_format format,int mip_count)
 {
     if(width==0 || height==0)
     {
@@ -102,6 +130,9 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 	    release();
         return false;
     }
+
+    if(!data)
+        mip_count=0;
 
     unsigned int size=width*height;
 
@@ -221,31 +252,35 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     unsigned int source_format=0;
     unsigned int gl_format=0;
     unsigned int precision=GL_UNSIGNED_BYTE;
+    unsigned int channels=0;
+    unsigned int source_channels=0;
 
     switch(format)
     {
-        case color_rgba: source_format=GL_RGBA; gl_format=GL_RGBA; size*=4; break;
-        case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; size*=4; break;
-        case greyscale: source_format=GL_LUMINANCE; gl_format=GL_LUMINANCE; break;
+        case color_rgba: source_format=GL_RGBA; gl_format=GL_RGBA; source_channels=channels=4; break;
+        case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; source_channels=channels=4; break;
+        case greyscale: source_format=GL_LUMINANCE; gl_format=GL_LUMINANCE; source_channels=channels=1; break;
 #ifdef OPENGL_ES
-        case color_rgb: source_format=GL_RGB; gl_format=GL_RGB; size*=4; break; //stored internally as rgba
-        case depth16: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_SHORT; size*=2; break;
-        case depth24: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; size*=4; break;
-        case depth32: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; size*=4; break;
+        case color_rgb: source_format=GL_RGB; gl_format=GL_RGB; source_channels=3; channels=4; break; //stored internally as rgba
+        case depth16: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_SHORT; source_channels=channels=2; break;
+        case depth24: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; source_channels=channels=4; break;
+        case depth32: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; source_channels=channels=4; break;
 #else
-        case color_rgb: source_format=GL_RGB; gl_format=GL_RGB; size*=3; break;
-        case depth16: source_format=GL_DEPTH_COMPONENT16; gl_format=GL_DEPTH_COMPONENT; size*=2; break;
-        case depth24: source_format=GL_DEPTH_COMPONENT24; gl_format=GL_DEPTH_COMPONENT; size*=3; break;
-        case depth32: source_format=GL_DEPTH_COMPONENT32; gl_format=GL_DEPTH_COMPONENT; size*=4; break;
+        case color_rgb: source_format=GL_RGB; gl_format=GL_RGB; source_channels=channels=3; break;
+        case depth16: source_format=GL_DEPTH_COMPONENT16; gl_format=GL_DEPTH_COMPONENT; source_channels=channels=2; break;
+        case depth24: source_format=GL_DEPTH_COMPONENT24; gl_format=GL_DEPTH_COMPONENT; source_channels=channels=3; break;
+        case depth32: source_format=GL_DEPTH_COMPONENT32; gl_format=GL_DEPTH_COMPONENT; source_channels=channels=4; break;
 #endif
     };
 
-    if(!source_format || !gl_format)
+    if(!source_format || !gl_format || !channels || !source_channels)
     {
         get_log()<<"Unable to build texture: unsuppored color format\n";
 	    release();
         return false;
     }
+
+    size*=channels;
 
 	//bool create_new=(!m_tex_id || m_width!=width || m_height!=height || m_type!=texture_2d || m_format!=format);
 
@@ -290,51 +325,161 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     */
 
     const bool pot=((width&(width-1))==0 && (height&(height-1))==0);
-    const bool has_mipmap=(data && pot);
+    const bool has_mipmap=(data && pot && mip_count!=1 && mip_count!=0);
 
-    if(pot)
-    {
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-    }
-    else
-    {
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
-    }
-    
-    //if(format<depth16)
-    {
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-        
-        if(has_mipmap)
-            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-        else
-            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-    }/*
-      else
-      {
-      glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-      glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-      }*/
+    gl_setup_texture(GL_TEXTURE_2D,!pot,has_mipmap);
 
-#ifdef GL_GENERATE_MIPMAP
-    if(has_mipmap)
-        glTexParameteri(GL_TEXTURE_2D,GL_GENERATE_MIPMAP,GL_TRUE);
-#endif
-	//if(create_new)
-	    glTexImage2D(GL_TEXTURE_2D,0,source_format,width,height,0,gl_format,precision,data);
-	//else
+  #ifdef GL_GENERATE_MIPMAP
+    if(has_mipmap && mip_count<0) glTexParameteri(GL_TEXTURE_2D,GL_GENERATE_MIPMAP,GL_TRUE);
+  #endif
+    unsigned int w=width,h=height;
+    const char *data_pointer=(const char*)data;
+    for(int i=0;i<(mip_count<1?1:mip_count);++i,w/=2,h/=2)
+    {
+	    glTexImage2D(GL_TEXTURE_2D,i,source_format,w,h,0,gl_format,precision,data_pointer);
+        data_pointer+=width*height*source_channels;
+    }
+
 	//	glTexSubImage2D(GL_TEXTURE_2D,0,0,0,width,height,gl_format,precision,data);
-#ifndef GL_GENERATE_MIPMAP
-    if(has_mipmap)
-        glGenerateMipmap(GL_TEXTURE_2D);
-#endif
+  #ifndef GL_GENERATE_MIPMAP
+    if(has_mipmap && mip_count<0) glGenerateMipmap(GL_TEXTURE_2D);
+  #endif
 
     glBindTexture(GL_TEXTURE_2D,0);
 #endif
 
+    m_compressed=false;
     texture_obj::get(m_tex).size=size;
+
+    return true;
+}
+
+bool texture::build_texture(const void *data,unsigned int width,unsigned int height,compressed_format format,int mips_count)
+{
+#if defined(OPENGL_ES) //ToDo
+    return 0;
+#endif
+
+    if(!data || !width || !height || mips_count==0)
+        return false;
+
+    const bool pot=((width&(width-1))==0 && (height&(height-1))==0);
+    if(!pot)
+        return false;
+
+    if(format==dxt1 || format==dxt3 || format==dxt5)
+    {
+        if(!is_dxt_supported())
+            return false;
+    }
+
+#ifdef DIRECTX11
+#elif !defined(OPENGL_ES)
+    static unsigned int max_tex_size=0;
+    if(!max_tex_size)
+    {
+        GLint texSize;
+        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &texSize);
+        max_tex_size=texSize;
+        setup_pack_alignment();
+    }
+
+    if(width>max_tex_size || height>max_tex_size)
+    {
+        get_log()<<"Unable to build texture: width or height is too high, maximum is "<<max_tex_size<<"\n";
+	    release();
+        return false;
+    }
+
+    if(m_tex<0)
+        m_tex=texture_obj::add();
+
+    if(!texture_obj::get(m_tex).tex_id)
+    {
+        glGenTextures(1,&texture_obj::get(m_tex).tex_id);
+    }
+    else if(texture_obj::get(m_tex).gl_type!=GL_TEXTURE_2D)
+    {
+        glDeleteTextures(1,&texture_obj::get(m_tex).tex_id);
+        glGenTextures(1,&texture_obj::get(m_tex).tex_id);
+    }
+
+    m_width=width;
+    m_height=height;
+	texture_obj::get(m_tex).gl_type=GL_TEXTURE_2D;
+
+    if(active_layers[active_layer]>=0)
+    {
+        if(texture_obj::get(active_layers[active_layer]).gl_type!=GL_TEXTURE_2D)
+            glBindTexture(texture_obj::get(active_layers[active_layer]).gl_type,0);
+    }
+
+    glBindTexture(GL_TEXTURE_2D,texture_obj::get(m_tex).tex_id);
+    active_layers[active_layer]=-1;
+
+    gl_setup_texture(GL_TEXTURE_2D,false,mips_count!=1);
+
+    if(mips_count>0)
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAX_LEVEL,mips_count<7?mips_count:7); //ToDo
+
+  #ifdef GL_GENERATE_MIPMAP
+    if(mips_count<0) glTexParameteri(GL_TEXTURE_2D,GL_GENERATE_MIPMAP,GL_TRUE);
+  #endif
+
+    unsigned int full_size=0;
+    unsigned int w=width,h=height;
+    const char *data_pointer=(const char*)data;
+    for(int i=0;i<(mips_count<0?1:mips_count);++i,w/=2,h/=2)
+    {
+        unsigned int size=0;
+        switch (format)
+        {
+            case dxt1:
+                size=(w>4?w:4)/4 * (h>4?h:4)/4 * 8;
+                glCompressedTexImage2D(GL_TEXTURE_2D,i,GL_COMPRESSED_RGBA_S3TC_DXT1_EXT,w,h,0,size,data_pointer);
+                break;
+
+            case dxt3:
+                size=(w>4?w:4)/4 * (h>4?h:4)/4 * 16;
+                glCompressedTexImage2D(GL_TEXTURE_2D,i,GL_COMPRESSED_RGBA_S3TC_DXT3_EXT,w,h,0,size,data_pointer);
+                break;
+
+            case dxt5:
+                size=(w>4?w:4)/4 * (h>4?h:4)/4 * 16;
+                glCompressedTexImage2D(GL_TEXTURE_2D,i,GL_COMPRESSED_RGBA_S3TC_DXT5_EXT,w,h,0,size,data_pointer);
+                break;
+
+            default: break;
+        }
+        data_pointer+=size;
+    }
+
+  #ifndef GL_GENERATE_MIPMAP
+    if(mips_count<0) glGenerateMipmap(GL_TEXTURE_2D);
+  #endif
+
+    glBindTexture(GL_TEXTURE_2D,0);
+    if(!full_size)
+        return false;
+
+    texture_obj::get(m_tex).size=full_size;
+#endif
+
+	m_compressed_format=format;
+    m_compressed=true;
+
+    return true;
+}
+
+bool texture::is_dxt_supported()
+{
+#ifdef OPENGL_ES
+    return false;
+#endif
+
+#ifdef DIRECTX11 //ToDo
+    return false;
+#endif
 
     return true;
 }
@@ -519,36 +664,24 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     glBindTexture(GL_TEXTURE_CUBE_MAP,texture_obj::get(m_tex).tex_id);
     active_layers[active_layer]=-1;
 
-    glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
-#ifndef OPENGL_ES
-    glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_R,GL_CLAMP_TO_EDGE);
-#endif
+    gl_setup_texture(GL_TEXTURE_CUBE_MAP,true,data);
 
-    glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-    if(data)
-        glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-    else
-        glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-
-#ifdef GL_GENERATE_MIPMAP
-    if(data)
-        glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_GENERATE_MIPMAP,GL_TRUE);
-#endif
+  #ifdef GL_GENERATE_MIPMAP
+    if(data) glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_GENERATE_MIPMAP,GL_TRUE);
+  #endif
 
 	for(int i=0;i<sizeof(cube_faces)/sizeof(cube_faces[0]);++i)
 		glTexImage2D(cube_faces[i],0,source_format,width,height,0,gl_format,GL_UNSIGNED_BYTE,data?data[i]:0);
 
-#ifndef GL_GENERATE_MIPMAP
-    if(data)
-        glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-#endif
+  #ifndef GL_GENERATE_MIPMAP
+    if(data) glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+  #endif
 
     glBindTexture(GL_TEXTURE_CUBE_MAP,0);
 #endif
 
+    m_compressed=false;
     texture_obj::get(m_tex).size=size;
-
     return true;
 }
 
