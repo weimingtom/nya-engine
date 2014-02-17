@@ -4,12 +4,9 @@
 #include "render/render.h"
 #include "camera.h"
 
-namespace
-{
-    const nya_scene_internal::transform *active_transform=0;
-}
+namespace { const nya_scene::transform *active_transform=0; }
 
-namespace nya_scene_internal
+namespace nya_scene
 {
 
 void transform::set(const transform &tr)

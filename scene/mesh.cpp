@@ -383,7 +383,7 @@ void mesh::draw(int idx) const
             return;
     }
 
-    nya_scene_internal::transform::set(internal().m_transform);
+    transform::set(internal().m_transform);
     shader_internal::set_skeleton(&internal().m_skeleton);
 
     internal().m_shared->vbo.bind();

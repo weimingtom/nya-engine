@@ -73,10 +73,10 @@ private:
     mesh_internal(): m_recalc_aabb(true), m_has_aabb(false) {}
 
 public:
-    const nya_scene_internal::transform &get_transform() const { return m_transform; }
+    const transform &get_transform() const { return m_transform; }
 
 private:
-    nya_scene_internal::transform m_transform;
+    transform m_transform;
 
 private:
     void draw_group(int idx) const;
@@ -152,7 +152,7 @@ public:
 
 public:
     void set_pos(float x,float y,float z) { m_internal.m_transform.set_pos(x,y,z); m_internal.m_recalc_aabb=true; }
-    void set_pos(const nya_math::vec3 &pos) { m_internal.m_transform.set_pos(pos.x,pos.y,pos.z); m_internal.m_recalc_aabb=true; }
+    void set_pos(const nya_math::vec3 &pos) { m_internal.m_transform.set_pos(pos); m_internal.m_recalc_aabb=true; }
     void set_rot(float yaw,float pitch,float roll) { m_internal.m_transform.set_rot(yaw,pitch,roll); m_internal.m_recalc_aabb=true; }
     void set_rot(const nya_math::quat &rot) { m_internal.m_transform.set_rot(rot); m_internal.m_recalc_aabb=true; }
     void set_scale(float sx,float sy,float sz) { m_internal.m_transform.set_scale(sx,sy,sz); m_internal.m_recalc_aabb=true; }

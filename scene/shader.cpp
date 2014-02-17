@@ -346,12 +346,12 @@ void shader_internal::set() const
 
                 if(p.transform==shared_shader::local)
                 {
-                    const nya_math::vec3 v=nya_scene_internal::transform::get().inverse_transform(get_camera()->get_pos());
+                    const nya_math::vec3 v=transform::get().inverse_transform(get_camera()->get_pos());
                     m_shared->shdr.set_uniform(p.location,v.x,v.y,v.z);
                 }
                 else if(p.transform==shared_shader::local_rot)
                 {
-                    const nya_math::vec3 v=nya_scene_internal::transform::get().inverse_rot(get_camera()->get_pos());
+                    const nya_math::vec3 v=transform::get().inverse_rot(get_camera()->get_pos());
                     m_shared->shdr.set_uniform(p.location,v.x,v.y,v.z);
                 }
                 else
@@ -440,12 +440,12 @@ void shader_internal::set_uniform_value(int idx,float f0,float f1,float f2,float
 
     if(m_shared->uniforms[idx].transform==shared_shader::local)
     {
-        nya_math::vec3 v=nya_scene_internal::transform::get().inverse_transform(nya_math::vec3(f0,f1,f2));
+        nya_math::vec3 v=transform::get().inverse_transform(nya_math::vec3(f0,f1,f2));
         m_shared->shdr.set_uniform(m_shared->uniforms[idx].location,v.x,v.y,v.z,f3);
     }
     else if(m_shared->uniforms[idx].transform==shared_shader::local_rot)
     {
-        nya_math::vec3 v=nya_scene_internal::transform::get().inverse_rot(nya_math::vec3(f0,f1,f2));
+        nya_math::vec3 v=transform::get().inverse_rot(nya_math::vec3(f0,f1,f2));
         m_shared->shdr.set_uniform(m_shared->uniforms[idx].location,v.x,v.y,v.z,f3);
     }
     else

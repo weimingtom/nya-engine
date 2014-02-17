@@ -8,7 +8,7 @@
 #include "math/constants.h"
 #include "math/frustum.h"
 
-namespace nya_scene_internal
+namespace nya_scene
 {
 
 class transform
@@ -19,6 +19,7 @@ public:
 
 public:
     void set_pos(float x,float y,float z) { m_pos.x=x; m_pos.y=y; m_pos.z=z; }
+    void set_pos(const nya_math::vec3 &p) { m_pos=p; }
     void set_rot(const nya_math::quat &q) { m_rot=q; }
     void set_rot(float yaw,float pitch,float roll) { m_rot=nya_math::quat(deg2rad(pitch),deg2rad(yaw),deg2rad(roll)); }
     void set_scale(float sx,float sy,float sz) { m_scale.x=sx; m_scale.y=sy; m_scale.z=sz; }
