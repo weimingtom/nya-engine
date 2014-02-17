@@ -6,8 +6,6 @@
 
 #include "memory/tmp_buffer.h"
 
-//ToDo: include mips size in texture size, use size of mip0 in get_data
-
 namespace
 {
     unsigned int current_layer=0;
@@ -25,6 +23,44 @@ namespace
 
 namespace nya_render
 {
+
+int get_bpp(texture::color_format format)
+{
+    switch(format)
+    {
+        case texture::color_rgba: return 32;
+        case texture::color_bgra: return 32;
+        case texture::greyscale: return 8;
+        case texture::color_rgb: return 24;
+        case texture::depth16: return 16;
+#ifdef DIRECTX11
+        case texture::depth24: return 32;
+#else
+        case texture::depth24: return 24;
+#endif
+        case texture::depth32: return 32;
+    };
+}
+
+unsigned int get_tex_memory_size(unsigned int width,unsigned int height,texture::color_format format,int mip_count)
+{
+    unsigned int size=width*height*(get_bpp(format)/8);
+    unsigned int full_size=0;
+    if(mip_count>0)
+    {
+        for(int i=0;i<mip_count;++i,size/=4)
+            full_size+=size;
+    }
+    else if(mip_count<0)
+    {
+        for(unsigned int w=width,h=height;w>1 && h>1;w/=2,h/=2,size/=4)
+            full_size+=size;
+    }
+    else
+        full_size=size;
+
+    return full_size;
+}
 
 #ifdef DIRECTX11
 void dx_convert_to_format(const unsigned char *from,unsigned char *to,size_t size,texture::color_format format)
@@ -134,8 +170,6 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     if(!data)
         mip_count=0;
 
-    unsigned int size=width*height;
-
 #ifdef DIRECTX11
     if(!get_device())
         return false;
@@ -164,14 +198,14 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         case color_rgb:
         case color_rgba:
             m_format=color_rgba;
-            desc.Format=DXGI_FORMAT_R8G8B8A8_UNORM; size*=4;
+            desc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;
         break;
 
-        case color_bgra: desc.Format=DXGI_FORMAT_B8G8R8A8_UNORM; size*=4; break;
+        case color_bgra: desc.Format=DXGI_FORMAT_B8G8R8A8_UNORM; break;
 
-        case depth16: desc.Format=DXGI_FORMAT_D16_UNORM; size*=2; break;
-        case depth24: desc.Format=DXGI_FORMAT_D24_UNORM_S8_UINT; size*=4; break; //ToDo if data != 0
-        case depth32: desc.Format=DXGI_FORMAT_D32_FLOAT; size*=4; break;
+        case depth16: desc.Format=DXGI_FORMAT_D16_UNORM; break;
+        case depth24: desc.Format=DXGI_FORMAT_D24_UNORM_S8_UINT; break; //ToDo if data != 0
+        case depth32: desc.Format=DXGI_FORMAT_D32_FLOAT; break;
 
         default: return false;
     }
@@ -252,35 +286,34 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     unsigned int source_format=0;
     unsigned int gl_format=0;
     unsigned int precision=GL_UNSIGNED_BYTE;
-    unsigned int channels=0;
     unsigned int source_channels=0;
 
     switch(format)
     {
-        case color_rgba: source_format=GL_RGBA; gl_format=GL_RGBA; source_channels=channels=4; break;
-        case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; source_channels=channels=4; break;
-        case greyscale: source_format=GL_LUMINANCE; gl_format=GL_LUMINANCE; source_channels=channels=1; break;
+        case color_rgba: source_format=GL_RGBA; gl_format=GL_RGBA; break;
+        case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; break;
+        case greyscale: source_format=GL_LUMINANCE; gl_format=GL_LUMINANCE; break;
 #ifdef OPENGL_ES
-        case color_rgb: source_format=GL_RGB; gl_format=GL_RGB; source_channels=3; channels=4; break; //stored internally as rgba
-        case depth16: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_SHORT; source_channels=channels=2; break;
-        case depth24: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; source_channels=channels=4; break;
-        case depth32: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; source_channels=channels=4; break;
+        case color_rgb: source_format=GL_RGB; gl_format=GL_RGB; break; //stored internally as rgba
+        case depth16: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_SHORT; break;
+        case depth24: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; break;
+        case depth32: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; break;
 #else
-        case color_rgb: source_format=GL_RGB; gl_format=GL_RGB; source_channels=channels=3; break;
-        case depth16: source_format=GL_DEPTH_COMPONENT16; gl_format=GL_DEPTH_COMPONENT; source_channels=channels=2; break;
-        case depth24: source_format=GL_DEPTH_COMPONENT24; gl_format=GL_DEPTH_COMPONENT; source_channels=channels=3; break;
-        case depth32: source_format=GL_DEPTH_COMPONENT32; gl_format=GL_DEPTH_COMPONENT; source_channels=channels=4; break;
+        case color_rgb: source_format=GL_RGB; gl_format=GL_RGB; break;
+        case depth16: source_format=GL_DEPTH_COMPONENT16; gl_format=GL_DEPTH_COMPONENT; break;
+        case depth24: source_format=GL_DEPTH_COMPONENT24; gl_format=GL_DEPTH_COMPONENT; break;
+        case depth32: source_format=GL_DEPTH_COMPONENT32; gl_format=GL_DEPTH_COMPONENT; break;
 #endif
     };
 
-    if(!source_format || !gl_format || !channels || !source_channels)
+    source_channels=get_bpp(format)/8;
+
+    if(!source_format || !gl_format || !source_channels)
     {
         get_log()<<"Unable to build texture: unsuppored color format\n";
 	    release();
         return false;
     }
-
-    size*=channels;
 
 	//bool create_new=(!m_tex_id || m_width!=width || m_height!=height || m_type!=texture_2d || m_format!=format);
 
@@ -349,7 +382,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 #endif
 
     m_compressed=false;
-    texture_obj::get(m_tex).size=size;
+    texture_obj::get(m_tex).size=get_tex_memory_size(m_width,m_height,m_format,mip_count);
 
     return true;
 }
@@ -493,8 +526,6 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
         return false;
     }
 
-    unsigned int size=width*height*6;
-
 #ifdef DIRECTX11
     if(!get_device())
         return false;
@@ -520,14 +551,14 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
         case greyscale:
         case color_rgb:
         case color_rgba:
-            desc.Format=DXGI_FORMAT_R8G8B8A8_UNORM; size*=4;
+            desc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;
         break;
 
-        case color_bgra: desc.Format=DXGI_FORMAT_B8G8R8A8_UNORM; size*=4; break;
+        case color_bgra: desc.Format=DXGI_FORMAT_B8G8R8A8_UNORM; break;
 
-        case depth16: desc.Format=DXGI_FORMAT_D16_UNORM; size*=2; break;
-        case depth24: desc.Format=DXGI_FORMAT_D24_UNORM_S8_UINT; size*=4; break; //ToDo if data != 0
-        case depth32: desc.Format=DXGI_FORMAT_D32_FLOAT; size*=4; break;
+        case depth16: desc.Format=DXGI_FORMAT_D16_UNORM; break;
+        case depth24: desc.Format=DXGI_FORMAT_D24_UNORM_S8_UINT; break; //ToDo if data != 0
+        case depth32: desc.Format=DXGI_FORMAT_D32_FLOAT; break;
 
         default: return false;
     }
@@ -620,9 +651,9 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 
     switch(format)
     {
-        case color_rgb: source_format=GL_RGB; gl_format=GL_RGB; size*=3; break;
-        case color_rgba: source_format=GL_RGBA; gl_format=GL_RGBA; size*=4; break;
-        case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; size*=4; break;
+        case color_rgb: source_format=GL_RGB; gl_format=GL_RGB; break;
+        case color_rgba: source_format=GL_RGBA; gl_format=GL_RGBA; break;
+        case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; break;
         case greyscale: source_format=GL_LUMINANCE; gl_format=GL_LUMINANCE; break;
         default: break;
     };
@@ -633,6 +664,14 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 	    release();
         return false;
     }
+
+#ifdef OPENGL_ES
+    if(m_format==depth24)
+        m_format=depth32;
+
+    if(m_format==color_rgb)
+        m_format=color_rgba;
+#endif
 
 	if(m_format!=format)
 		release();
@@ -681,7 +720,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 #endif
 
     m_compressed=false;
-    texture_obj::get(m_tex).size=size;
+    texture_obj::get(m_tex).size=get_tex_memory_size(m_width,m_height,m_format,-1)*6;
     return true;
 }
 
@@ -774,7 +813,8 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
         return false;
 
     const texture_obj &tex=texture_obj::get(m_tex);
-    if(!tex.size)
+    unsigned int size=m_width*m_height*get_bpp(m_format)/8;
+    if(!size)
         return false;
 
 #ifdef DIRECTX11
@@ -799,15 +839,15 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
 	if(FAILED(hr))
 		return false;
 
-	data.allocate(tex.size);
-	data.copy_to(resource.pData,tex.size);
+	data.allocate(size);
+	data.copy_to(resource.pData,size);
 
 	get_context()->Unmap(copy_tex,0);
 	copy_tex->Release();
 
     return true;
 #else
-    data.allocate(tex.size);
+    data.allocate(size);
     
     gl_select_multitex_layer(0);
     glBindTexture(tex.gl_type,tex.tex_id);
