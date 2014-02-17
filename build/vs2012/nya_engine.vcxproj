@@ -161,6 +161,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\formats\dds.cpp" />
     <ClCompile Include="..\..\formats\tga.cpp" />
     <ClCompile Include="..\..\log\html_log.cpp" />
     <ClCompile Include="..\..\log\log.cpp" />
@@ -238,6 +239,7 @@
     <ClCompile Include="..\..\ui\ui.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\formats\dds.h" />
     <ClInclude Include="..\..\formats\tga.h" />
     <ClInclude Include="..\..\log\html_log.h" />
     <ClInclude Include="..\..\log\log.h" />
@@ -253,6 +255,7 @@
     <ClInclude Include="..\..\memory\memory_mapper.h" />
     <ClInclude Include="..\..\memory\memory_reader.h" />
     <ClInclude Include="..\..\memory\pool.h" />
+    <ClInclude Include="..\..\memory\shared_ptr.h" />
     <ClInclude Include="..\..\memory\tmp_buffer.h" />
     <ClInclude Include="..\..\render\animation.h" />
     <ClInclude Include="..\..\render\fbo.h" />
