@@ -8,7 +8,7 @@
 #include "platform_specific_gl.h"
 #include "render.h"
 
-#define CACHE_UNIFORM_CHANGES
+//#define CACHE_UNIFORM_CHANGES
 
 #ifdef OPENGL_ES
     #define GLhandleARB GLuint
