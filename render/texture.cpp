@@ -9,20 +9,21 @@
 namespace nya_render
 {
 
-static unsigned int current_layer=0;
-static unsigned int active_layer=0;
-static const unsigned int max_layers=16;
-static int current_layers[max_layers]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
-static int active_layers[max_layers]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+namespace
+{
+    unsigned int current_layer=0;
+    unsigned int active_layer=0;
+    const unsigned int max_layers=16;
+    int current_layers[max_layers]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+    int active_layers[max_layers]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 
 #ifndef DIRECTX11
-	const static unsigned int cube_faces[]={GL_TEXTURE_CUBE_MAP_POSITIVE_X,GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+	const unsigned int cube_faces[]={GL_TEXTURE_CUBE_MAP_POSITIVE_X,GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
                                      GL_TEXTURE_CUBE_MAP_POSITIVE_Y,GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
                                      GL_TEXTURE_CUBE_MAP_POSITIVE_Z,GL_TEXTURE_CUBE_MAP_NEGATIVE_Z};
   #ifndef NO_EXTENSIONS_INIT
-    static PFNGLCOMPRESSEDTEXIMAGE2DARBPROC glCompressedTexImage2D=0;
+    PFNGLCOMPRESSEDTEXIMAGE2DARBPROC glCompressedTexImage2D=0;
   #endif
-
 #endif
 
 int get_bpp(texture::color_format format)
@@ -160,6 +161,7 @@ void setup_pack_alignment()
     set=true;
 }
 #endif
+}
 
 bool texture::build_texture(const void *data,unsigned int width,unsigned int height,color_format format,int mip_count)
 {
