@@ -561,12 +561,12 @@ int gl_usage(vbo::usage_hint usage)
 {
     switch(usage)
     {
-        case vbo::static_draw: return GL_STATIC_DRAW_ARB;
-        case vbo::dynamic_draw: return GL_DYNAMIC_DRAW_ARB;
-        case vbo::stream_draw: return GL_STREAM_DRAW_ARB;
+        case vbo::static_draw: return GL_STATIC_DRAW;
+        case vbo::dynamic_draw: return GL_DYNAMIC_DRAW;
+        case vbo::stream_draw: return GL_STREAM_DRAW;
     }
 
-    return GL_DYNAMIC_DRAW_ARB;
+    return GL_DYNAMIC_DRAW;
 }
 #endif
 
