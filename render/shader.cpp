@@ -8,6 +8,8 @@
 #include "platform_specific_gl.h"
 #include "render.h"
 
+#define CACHE_UNIFORM_CHANGES
+
 #ifdef OPENGL_ES
     #define GLhandleARB GLuint
 #endif
@@ -1175,13 +1177,17 @@ void shader::set_uniform(unsigned int i,float f0,float f1,float f2,float f3) con
     if(u.vs_offset>=0)
     {
         float *f=&shdr.vertex_uniforms.buffer[u.vs_offset];
+#ifdef CACHE_UNIFORM_CHANGES
         if(f[0]!=f0 || f[1]!=f1 || f[2]!=f2 || f[3]!=f3)
+#endif
             f[0]=f0,f[1]=f1,f[2]=f2,f[3]=f3,shdr.vertex_uniforms.changed=true;
     }
     if(u.ps_offset>=0)
     {
         float *f=&shdr.pixel_uniforms.buffer[u.ps_offset];
+#ifdef CACHE_UNIFORM_CHANGES
         if(f[0]!=f0 || f[1]!=f1 || f[2]!=f2 || f[3]!=f3)
+#endif
             f[0]=f0,f[1]=f1,f[2]=f2,f[3]=f3,shdr.pixel_uniforms.changed=true;
     }
 
@@ -1217,9 +1223,10 @@ void shader::set_uniform3_array(unsigned int i,const float *f,unsigned int count
         const int size=sizeof(float)*3;
         for(int i=0,o=u.vs_offset,o2=0;i<int(count);++i,o+=4,o2+=3)
         {
+#ifdef CACHE_UNIFORM_CHANGES
             if(memcmp(&shdr.vertex_uniforms.buffer[o],&f[o2],size)==0)
                 continue;
-
+#endif
             memcpy(&shdr.vertex_uniforms.buffer[o],&f[o2],size);
             shdr.vertex_uniforms.changed=true;
         }
@@ -1229,9 +1236,10 @@ void shader::set_uniform3_array(unsigned int i,const float *f,unsigned int count
         const int size=sizeof(float)*3;
         for(int i=0,o=u.ps_offset,o2=0;i<int(count);++i,o+=4,o2+=3)
         {
+#ifdef CACHE_UNIFORM_CHANGES
             if(memcmp(&shdr.pixel_uniforms.buffer[o],&f[o2],size)==0)
                 continue;
-
+#endif
             memcpy(&shdr.pixel_uniforms.buffer[o],&f[o2],size);
             shdr.pixel_uniforms.changed=true;
         }
@@ -1267,7 +1275,9 @@ void shader::set_uniform4_array(unsigned int i,const float *f,unsigned int count
     if(u.vs_offset>=0)
     {
         const size_t size=sizeof(float)*4*count;
+#ifdef CACHE_UNIFORM_CHANGES
         if(memcmp(&shdr.vertex_uniforms.buffer[u.vs_offset],f,size)!=0)
+#endif
         {
             memcpy(&shdr.vertex_uniforms.buffer[u.vs_offset],f,size);
             shdr.vertex_uniforms.changed=true;
@@ -1276,7 +1286,9 @@ void shader::set_uniform4_array(unsigned int i,const float *f,unsigned int count
     if(u.ps_offset>=0)
     {
         const size_t size=sizeof(float)*4*count;
+#ifdef CACHE_UNIFORM_CHANGES
         if(memcmp(&shdr.pixel_uniforms.buffer[u.ps_offset],f,size)!=0)
+#endif
         {
             memcpy(&shdr.pixel_uniforms.buffer[u.ps_offset],f,size);
             shdr.pixel_uniforms.changed=true;
@@ -1313,7 +1325,9 @@ void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int coun
     if(u.vs_offset>=0)
     {
         const size_t size=sizeof(float)*16*count;
+#ifdef CACHE_UNIFORM_CHANGES
         if(memcmp(&shdr.vertex_uniforms.buffer[u.vs_offset],f,size)!=0)
+#endif
         {
             memcpy(&shdr.vertex_uniforms.buffer[u.vs_offset],f,size);
             shdr.vertex_uniforms.changed=true;
@@ -1322,7 +1336,9 @@ void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int coun
     if(u.ps_offset>=0)
     {
         const size_t size=sizeof(float)*16*count;
+#ifdef CACHE_UNIFORM_CHANGES
         if(memcmp(&shdr.pixel_uniforms.buffer[u.ps_offset],f,size)!=0)
+#endif
         {
             memcpy(&shdr.pixel_uniforms.buffer[u.ps_offset],f,size);
             shdr.pixel_uniforms.changed=true;
