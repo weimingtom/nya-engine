@@ -19,7 +19,7 @@ static int active_layers[max_layers]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 	const static unsigned int cube_faces[]={GL_TEXTURE_CUBE_MAP_POSITIVE_X,GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
                                      GL_TEXTURE_CUBE_MAP_POSITIVE_Y,GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
                                      GL_TEXTURE_CUBE_MAP_POSITIVE_Z,GL_TEXTURE_CUBE_MAP_NEGATIVE_Z};
-  #if !defined NO_EXTENSIONS_INIT
+  #ifndef NO_EXTENSIONS_INIT
     static PFNGLCOMPRESSEDTEXIMAGE2DARBPROC glCompressedTexImage2D=0;
   #endif
 
@@ -41,6 +41,8 @@ int get_bpp(texture::color_format format)
 #endif
         case texture::depth32: return 32;
     };
+
+    return 0;
 }
 
 unsigned int get_tex_memory_size(unsigned int width,unsigned int height,texture::color_format format,int mip_count)
@@ -711,7 +713,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     glBindTexture(GL_TEXTURE_CUBE_MAP,texture_obj::get(m_tex).tex_id);
     active_layers[active_layer]=-1;
 
-    gl_setup_texture(GL_TEXTURE_CUBE_MAP,true,data);
+    gl_setup_texture(GL_TEXTURE_CUBE_MAP,true,data!=0);
 
   #ifdef GL_GENERATE_MIPMAP
     if(data) glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_GENERATE_MIPMAP,GL_TRUE);
