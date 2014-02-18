@@ -15,6 +15,7 @@ namespace
 #else
     int default_fbo_idx=0;
 #endif
+}
 
 #ifdef DIRECTX11
 void init_default_target()
@@ -56,6 +57,8 @@ void set_target(ID3D11RenderTargetView *color,ID3D11DepthStencilView *depth,bool
 }
 #endif
 
+namespace
+{
 struct fbo_obj
 {
     int color_tex_idx;
