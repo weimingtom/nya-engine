@@ -21,16 +21,16 @@
     #include "shader.h"
 #endif
 
+namespace nya_render
+{
+
 namespace
 {
     int current_verts=-1;
     int active_verts=-1;
     int current_inds=-1;
     int active_inds=-1;
-}
 
-namespace nya_render
-{
     struct vbo_obj
     {
         vbo::element_type element_type;
@@ -84,122 +84,6 @@ namespace nya_render
         }
     };
 
-#ifndef DIRECTX11
-  #ifdef NO_EXTENSIONS_INIT
-    #define vbo_glGenBuffers glGenBuffers
-    #define vbo_glBindBuffer glBindBuffer
-    #define vbo_glBufferData glBufferData
-    #define vbo_glBufferSubData glBufferSubData
-    #define vbo_glDeleteBuffers glDeleteBuffers
-    #define vbo_glClientActiveTexture glClientActiveTexture
-
-    #ifndef OPENGL_ES
-        #define vbo_glGetBufferSubData glGetBufferSubData
-    #endif
-
-    #ifndef GL_ARRAY_BUFFER_ARB
-        #define GL_ARRAY_BUFFER_ARB GL_ARRAY_BUFFER
-    #endif
-
-    #ifndef GL_DYNAMIC_DRAW_ARB
-        #define GL_DYNAMIC_DRAW_ARB GL_DYNAMIC_DRAW
-    #endif
-
-    #ifndef GL_STATIC_DRAW_ARB
-        #define GL_STATIC_DRAW_ARB GL_STATIC_DRAW
-    #endif
-
-    #ifndef GL_STREAM_DRAW_ARB
-        #define GL_STREAM_DRAW_ARB GL_STREAM_DRAW
-    #endif
-
-    #ifndef GL_ELEMENT_ARRAY_BUFFER_ARB
-        #define GL_ELEMENT_ARRAY_BUFFER_ARB GL_ELEMENT_ARRAY_BUFFER
-    #endif
-  #else
-    PFNGLGENBUFFERSARBPROC vbo_glGenBuffers;
-    PFNGLBINDBUFFERARBPROC vbo_glBindBuffer;
-    PFNGLBUFFERDATAARBPROC vbo_glBufferData;
-    PFNGLBUFFERSUBDATAARBPROC vbo_glBufferSubData;
-    PFNGLGETBUFFERSUBDATAARBPROC vbo_glGetBufferSubData;
-    PFNGLDELETEBUFFERSARBPROC vbo_glDeleteBuffers;
-    PFNGLCLIENTACTIVETEXTUREARBPROC vbo_glClientActiveTexture;
-  #endif
-
-bool check_init_vbo()
-{
-    static bool initialised=false;
-    static bool failed=true;
-    if(initialised)
-        return !failed;
-
-    //if(!has_extension("GL_ARB_vertex_buffer_object"))
-    //    return false;
-
-#ifndef NO_EXTENSIONS_INIT
-    vbo_glGenBuffers = (PFNGLGENBUFFERSARBPROC) get_extension("glGenBuffers");
-    if(!vbo_glGenBuffers)
-        return false;
-
-    vbo_glBindBuffer = (PFNGLBINDBUFFERARBPROC) get_extension("glBindBuffer");
-    if(!vbo_glBindBuffer)
-        return false;
-
-    vbo_glBufferData = (PFNGLBUFFERDATAARBPROC)  get_extension("glBufferData");
-    if(!vbo_glBufferData)
-        return false;
-
-    vbo_glBufferSubData = (PFNGLBUFFERSUBDATAARBPROC)  get_extension("glBufferSubData");
-    if(!vbo_glBufferSubData)
-        return false;
-
-    vbo_glGetBufferSubData = (PFNGLGETBUFFERSUBDATAARBPROC)  get_extension("glGetBufferSubData");
-    if(!vbo_glGetBufferSubData)
-        return false;
-
-    vbo_glDeleteBuffers = (PFNGLDELETEBUFFERSARBPROC)  get_extension("glDeleteBuffers");
-    if(!vbo_glDeleteBuffers)
-        return false;
-
-    vbo_glClientActiveTexture = (PFNGLCLIENTACTIVETEXTUREARBPROC)  get_extension("glClientActiveTexture");
-    if(!vbo_glClientActiveTexture)
-        return false;
-#endif
-
-    initialised=true;
-    failed=false;
-
-    return true;
-}
-#endif
-
-void vbo::bind_verts() const { current_verts=m_verts; }
-void vbo::bind_indices() const { current_inds=m_indices; }
-void vbo::unbind() { current_verts=current_inds=-1; }
-
-void vbo::draw()
-{
-    if(current_verts<0)
-        return;
-
-    if(current_inds>=0)
-        draw(0,vbo_obj::get(current_inds).element_count,vbo_obj::get(current_inds).element_type);
-    else
-        draw(0,vbo_obj::get(current_verts).verts_count,vbo_obj::get(current_verts).element_type);
-}
-
-void vbo::draw(unsigned int count) { draw(0,count); }
-
-void vbo::draw(unsigned int offset,unsigned int count)
-{
-    if(current_verts<0)
-        return;
-
-    if(current_inds>=0)
-        draw(offset,count,vbo_obj::get(current_inds).element_type);
-    else
-        draw(offset,count,vbo_obj::get(current_verts).element_type);
-}
 
 #ifdef DIRECTX11
 DXGI_FORMAT get_dx_format(int dimension)
@@ -260,7 +144,91 @@ int get_gl_element_type(vbo::vertex_atrib_type type)
 
     return GL_FLOAT;
 }
+
+  #ifndef NO_EXTENSIONS_INIT
+    PFNGLGENBUFFERSARBPROC vbo_glGenBuffers;
+    PFNGLBINDBUFFERARBPROC vbo_glBindBuffer;
+    PFNGLBUFFERDATAARBPROC vbo_glBufferData;
+    PFNGLBUFFERSUBDATAARBPROC vbo_glBufferSubData;
+    PFNGLGETBUFFERSUBDATAARBPROC vbo_glGetBufferSubData;
+    PFNGLDELETEBUFFERSARBPROC vbo_glDeleteBuffers;
+    PFNGLCLIENTACTIVETEXTUREARBPROC vbo_glClientActiveTexture;
+  #endif
+
+  #ifndef GL_ARRAY_BUFFER
+    #define GL_ARRAY_BUFFER GL_ARRAY_BUFFER_ARB
+  #endif
+
+  #ifndef GL_DYNAMIC_DRAW
+    #define GL_DYNAMIC_DRAW GL_DYNAMIC_DRAW_ARB
+  #endif
+
+  #ifndef GL_STATIC_DRAW
+    #define GL_STATIC_DRAW GL_STATIC_DRAW_ARB
+  #endif
+
+  #ifndef GL_STREAM_DRAW
+    #define GL_STREAM_DRAW GL_STREAM_DRAW_ARB
+  #endif
+
+  #ifndef GL_ELEMENT_ARRAY_BUFFER
+    #define GL_ELEMENT_ARRAY_BUFFER GL_ELEMENT_ARRAY_BUFFER_ARB
+  #endif
+
+bool check_init_vbo()
+{
+    static bool initialised=false;
+    static bool failed=true;
+    if(initialised)
+        return !failed;
+
+    //if(!has_extension("GL_ARB_vertex_buffer_object"))
+    //    return false;
+
+#ifndef NO_EXTENSIONS_INIT
+    if(!(glGenBuffers=(PFNGLGENBUFFERSARBPROC)get_extension("glGenBuffers"))) return false;
+    if(!(glBindBuffer=(PFNGLBINDBUFFERARBPROC)get_extension("glBindBuffer"))) return false;
+    if(!(glBufferData=(PFNGLBUFFERDATAARBPROC)get_extension("glBufferData"))) return false;
+    if(!(glBufferSubData=(PFNGLBUFFERSUBDATAARBPROC)get_extension("glBufferSubData"))) return false;
+    if(!(glGetBufferSubData=(PFNGLGETBUFFERSUBDATAARBPROC)get_extension("glGetBufferSubData"))) return false;
+    if(!(glDeleteBuffers=(PFNGLDELETEBUFFERSARBPROC)get_extension("glDeleteBuffers"))) return false;
+    if(!(glClientActiveTexture=(PFNGLCLIENTACTIVETEXTUREARBPROC)get_extension("glClientActiveTexture"))) return false;
 #endif
+
+    initialised=true,failed=false;
+    return true;
+}
+#endif
+
+}
+
+void vbo::bind_verts() const { current_verts=m_verts; }
+void vbo::bind_indices() const { current_inds=m_indices; }
+void vbo::unbind() { current_verts=current_inds=-1; }
+
+void vbo::draw()
+{
+    if(current_verts<0)
+        return;
+
+    if(current_inds>=0)
+        draw(0,vbo_obj::get(current_inds).element_count,vbo_obj::get(current_inds).element_type);
+    else
+        draw(0,vbo_obj::get(current_verts).verts_count,vbo_obj::get(current_verts).element_type);
+}
+
+void vbo::draw(unsigned int count) { draw(0,count); }
+
+void vbo::draw(unsigned int offset,unsigned int count)
+{
+    if(current_verts<0)
+        return;
+
+    if(current_inds>=0)
+        draw(offset,count,vbo_obj::get(current_inds).element_type);
+    else
+        draw(offset,count,vbo_obj::get(current_verts).element_type);
+}
 
 void vbo::draw(unsigned int offset,unsigned int count,element_type el_type)
 {
@@ -373,7 +341,7 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type)
         if(!vobj.vertices.has)
             return;
 
-        vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,vobj.vertex_loc);
+        glBindBuffer(GL_ARRAY_BUFFER,vobj.vertex_loc);
 
 #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
         glEnableVertexAttribArray(vertex_attribute);
@@ -391,7 +359,7 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type)
                 glEnableVertexAttribArray(tc0_attribute+i);
                 glVertexAttribPointer(tc0_attribute+i,tc.dimension,get_gl_element_type(tc.type),0,vobj.vertex_stride,(void*)(ptrdiff_t)(tc.offset));
   #else
-                vbo_glClientActiveTexture(GL_TEXTURE0_ARB+i);
+                glClientActiveTexture(GL_TEXTURE0_ARB+i);
                 glTexCoordPointer(tc.dimension,get_gl_element_type(tc.type),vobj.vertex_stride,(void*)(ptrdiff_t)(tc.offset));
                 glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   #endif
@@ -401,7 +369,7 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type)
   #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
                 glDisableVertexAttribArray(tc0_attribute+i);
   #else
-                vbo_glClientActiveTexture(GL_TEXTURE0_ARB+i);
+                glClientActiveTexture(GL_TEXTURE0_ARB+i);
                 glDisableClientState(GL_TEXTURE_COORD_ARRAY);
   #endif
             }
@@ -458,9 +426,9 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type)
         if(current_inds!=active_inds)
         {
             if(current_inds>=0)
-                vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,iobj.index_loc);
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,iobj.index_loc);
             else
-                vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,0);
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
 
             active_inds=current_inds;
         }
@@ -530,7 +498,7 @@ void vbo::release()
   #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
                     glDisableVertexAttribArray(tc0_attribute+i);
   #else
-                    vbo_glClientActiveTexture(GL_TEXTURE0_ARB+i);
+                    glClientActiveTexture(GL_TEXTURE0_ARB+i);
                     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
   #endif
                 }
@@ -561,7 +529,7 @@ void vbo::release()
             current_verts=-1;
 
         if(obj.vertex_loc)
-            vbo_glDeleteBuffers(1,&obj.vertex_loc);
+            glDeleteBuffers(1,&obj.vertex_loc);
     }
 
     if(m_indices>=0)
@@ -570,7 +538,7 @@ void vbo::release()
 
         if(active_inds==m_indices)
         {
-            vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,0);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
             active_inds=-1;
         }
 
@@ -578,7 +546,7 @@ void vbo::release()
             current_inds=-1;
 
         if(obj.index_loc)
-            vbo_glDeleteBuffers(1,&obj.index_loc);
+            glDeleteBuffers(1,&obj.index_loc);
     }
 #endif
 
@@ -653,28 +621,28 @@ bool vbo::set_vertex_data(const void*data,unsigned int vert_stride,unsigned int 
             return false;
         }
 
-        vbo_glGenBuffers(1,&obj.vertex_loc);
-        vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,obj.vertex_loc);
-        vbo_glBufferData(GL_ARRAY_BUFFER_ARB,size,data,gl_usage(usage));
+        glGenBuffers(1,&obj.vertex_loc);
+        glBindBuffer(GL_ARRAY_BUFFER,obj.vertex_loc);
+        glBufferData(GL_ARRAY_BUFFER,size,data,gl_usage(usage));
         obj.allocated_verts_count=vert_count;
         obj.vertex_usage=usage;
         obj.vertex_stride=vert_stride;
     }
     else
     {
-        vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,obj.vertex_loc);
+        glBindBuffer(GL_ARRAY_BUFFER,obj.vertex_loc);
 
         if(vert_count>obj.allocated_verts_count || obj.vertex_stride!=vert_stride || obj.vertex_usage!=usage)
         {
-            vbo_glBufferData(GL_ARRAY_BUFFER_ARB,size,data,gl_usage(usage));
+            glBufferData(GL_ARRAY_BUFFER,size,data,gl_usage(usage));
             obj.allocated_verts_count=vert_count;
             obj.vertex_usage=usage;
             obj.vertex_stride=vert_stride;
         }
         else
         {
-            vbo_glBufferData(GL_ARRAY_BUFFER_ARB,obj.allocated_verts_count*obj.vertex_stride,0,gl_usage(obj.vertex_usage));
-            vbo_glBufferSubData(GL_ARRAY_BUFFER_ARB,0,size,data);
+            glBufferData(GL_ARRAY_BUFFER,obj.allocated_verts_count*obj.vertex_stride,0,gl_usage(obj.vertex_usage));
+            glBufferSubData(GL_ARRAY_BUFFER,0,size,data);
         }
     }
 
@@ -740,28 +708,28 @@ bool vbo::set_index_data(const void*data,index_size size,unsigned int indices_co
             return false;
         }
 
-        vbo_glGenBuffers(1,&obj.index_loc);
-        vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,obj.index_loc);
-        vbo_glBufferData(GL_ELEMENT_ARRAY_BUFFER_ARB,buffer_size,data,gl_usage(usage));
+        glGenBuffers(1,&obj.index_loc);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,obj.index_loc);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER,buffer_size,data,gl_usage(usage));
         obj.allocated_elements_count=indices_count;
         obj.elements_usage=usage;
         obj.element_size=size;
     }
     else
     {
-        vbo_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB,obj.index_loc);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,obj.index_loc);
 
         if(indices_count>obj.allocated_elements_count || obj.element_size!=size || obj.elements_usage!=usage)
         {
-            vbo_glBufferData(GL_ELEMENT_ARRAY_BUFFER_ARB,buffer_size,data,gl_usage(usage));
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER,buffer_size,data,gl_usage(usage));
             obj.allocated_elements_count=indices_count;
             obj.elements_usage=usage;
             obj.element_size=size;
         }
         else
         {
-            vbo_glBufferData(GL_ELEMENT_ARRAY_BUFFER_ARB,obj.allocated_elements_count*obj.element_size,0,gl_usage(obj.elements_usage));
-            vbo_glBufferSubData(GL_ELEMENT_ARRAY_BUFFER_ARB,0,buffer_size,data);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER,obj.allocated_elements_count*obj.element_size,0,gl_usage(obj.elements_usage));
+            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER,0,buffer_size,data);
         }
     }
 
@@ -891,7 +859,7 @@ bool vbo::get_vertex_data( nya_memory::tmp_buffer_ref &data ) const
     return false;
 #else
     data.allocate(vbo_size);
-    vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,vobj.vertex_loc);
+    glBindBuffer(GL_ARRAY_BUFFER,vobj.vertex_loc);
 
 #ifdef OPENGL_ES
     const GLvoid *buf=glMapBufferOES(GL_ARRAY_BUFFER,GL_WRITE_ONLY_OES);
@@ -901,7 +869,7 @@ bool vbo::get_vertex_data( nya_memory::tmp_buffer_ref &data ) const
     memcpy(data.get_data(),buf,vbo_size);
     return glUnmapBufferOES(GL_ARRAY_BUFFER);
 #else
-    vbo_glGetBufferSubData(GL_ARRAY_BUFFER_ARB,0,vbo_size,data.get_data());
+    glGetBufferSubData(GL_ARRAY_BUFFER,0,vbo_size,data.get_data());
 #endif
     current_verts=-1;
 #endif
@@ -924,7 +892,7 @@ bool vbo::get_index_data( nya_memory::tmp_buffer_ref &data ) const
     return false;
 #else
     data.allocate(ind_size);
-    vbo_glBindBuffer(GL_ARRAY_BUFFER_ARB,obj.index_loc);
+    glBindBuffer(GL_ARRAY_BUFFER,obj.index_loc);
     current_inds=-1;
 
   #ifdef OPENGL_ES
@@ -935,7 +903,7 @@ bool vbo::get_index_data( nya_memory::tmp_buffer_ref &data ) const
     memcpy(data.get_data(),buf,ind_size);
     return glUnmapBufferOES(GL_ARRAY_BUFFER);
   #else
-    vbo_glGetBufferSubData(GL_ARRAY_BUFFER_ARB,0,ind_size,data.get_data());
+    glGetBufferSubData(GL_ARRAY_BUFFER,0,ind_size,data.get_data());
   #endif
 #endif
 
