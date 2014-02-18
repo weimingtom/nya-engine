@@ -1,7 +1,7 @@
 //https://code.google.com/p/nya-engine/
 
 /*
-    ToDo: more log
+    ToDo: more log, cleanup ARB
 */
 
 #include "shader.h"
@@ -28,16 +28,16 @@
     #include "transform.h"
 #endif
 
+namespace nya_render
+{
+
 namespace
 {
-    nya_render::compiled_shaders_provider *render_csp=0;
+    compiled_shaders_provider *render_csp=0;
 
     int current_shader=-1;
     int active_shader=-1;
-}
 
-namespace nya_render
-{
     void set_compiled_shaders_provider(compiled_shaders_provider *csp) { render_csp=csp; }
 
     struct shader_obj
@@ -372,6 +372,7 @@ bool check_init_shaders()
     return true;
 }
 #endif
+}
 
 #ifdef DIRECTX11
 ID3D11InputLayout *get_layout(int mesh_idx)
@@ -433,7 +434,6 @@ void remove_layout(int mesh_idx) { shader_obj::remove_layout(mesh_idx); }
             active_shader=idx;
     }
 #endif
-
 
 bool shader::add_program(program_type type,const char*code)
 {
