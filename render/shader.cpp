@@ -1174,19 +1174,15 @@ void shader::set_uniform(unsigned int i,float f0,float f1,float f2,float f3) con
     const shader_obj::uniform &u=shdr.uniforms[i];
     if(u.vs_offset>=0)
     {
-        shdr.vertex_uniforms.buffer[u.vs_offset]=f0;
-        shdr.vertex_uniforms.buffer[u.vs_offset+1]=f1;
-        shdr.vertex_uniforms.buffer[u.vs_offset+2]=f2;
-        shdr.vertex_uniforms.buffer[u.vs_offset+3]=f3;
-        shdr.vertex_uniforms.changed=true;
+        float *f=&shdr.vertex_uniforms.buffer[u.vs_offset];
+        if(f[0]!=f0 || f[1]!=f1 || f[2]!=f2 || f[3]!=f3)
+            f[0]=f0,f[1]=f1,f[2]=f2,f[3]=f3,shdr.vertex_uniforms.changed=true;
     }
     if(u.ps_offset>=0)
     {
-        shdr.pixel_uniforms.buffer[u.ps_offset]=f0;
-        shdr.pixel_uniforms.buffer[u.ps_offset+1]=f1;
-        shdr.pixel_uniforms.buffer[u.ps_offset+2]=f2;
-        shdr.pixel_uniforms.buffer[u.ps_offset+3]=f3;
-        shdr.pixel_uniforms.changed=true;
+        float *f=&shdr.pixel_uniforms.buffer[u.ps_offset];
+        if(f[0]!=f0 || f[1]!=f1 || f[2]!=f2 || f[3]!=f3)
+            f[0]=f0,f[1]=f1,f[2]=f2,f[3]=f3,shdr.pixel_uniforms.changed=true;
     }
 
 #else
@@ -1218,21 +1214,27 @@ void shader::set_uniform3_array(unsigned int i,const float *f,unsigned int count
 
     if(u.vs_offset>=0)
     {
+        const int size=sizeof(float)*3;
         for(int i=0,o=u.vs_offset,o2=0;i<int(count);++i,o+=4,o2+=3)
         {
-            for(int j=0;j<3;++j)
-                shdr.vertex_uniforms.buffer[o+j]=f[o2+j];
+            if(memcmp(&shdr.vertex_uniforms.buffer[o],&f[o2],size)==0)
+                continue;
+
+            memcpy(&shdr.vertex_uniforms.buffer[o],&f[o2],size);
+            shdr.vertex_uniforms.changed=true;
         }
-        shdr.vertex_uniforms.changed=true;
     }
     if(u.ps_offset>=0)
     {
+        const int size=sizeof(float)*3;
         for(int i=0,o=u.ps_offset,o2=0;i<int(count);++i,o+=4,o2+=3)
         {
-            for(int j=0;j<3;++j)
-                shdr.pixel_uniforms.buffer[o+j]=f[o2+j];
+            if(memcmp(&shdr.pixel_uniforms.buffer[o],&f[o2],size)==0)
+                continue;
+
+            memcpy(&shdr.pixel_uniforms.buffer[o],&f[o2],size);
+            shdr.pixel_uniforms.changed=true;
         }
-        shdr.pixel_uniforms.changed=true;
     }
 
 #else
@@ -1264,14 +1266,21 @@ void shader::set_uniform4_array(unsigned int i,const float *f,unsigned int count
 
     if(u.vs_offset>=0)
     {
-        memcpy(&shdr.vertex_uniforms.buffer[u.vs_offset],f,sizeof(float)*4*count);
-        shdr.vertex_uniforms.changed=true;
+        const size_t size=sizeof(float)*4*count;
+        if(memcmp(&shdr.vertex_uniforms.buffer[u.vs_offset],f,size)!=0)
+        {
+            memcpy(&shdr.vertex_uniforms.buffer[u.vs_offset],f,size);
+            shdr.vertex_uniforms.changed=true;
+        }
     }
-    
     if(u.ps_offset>=0)
     {
-        memcpy(&shdr.pixel_uniforms.buffer[u.ps_offset],f,sizeof(float)*4*count);
-        shdr.pixel_uniforms.changed=true;
+        const size_t size=sizeof(float)*4*count;
+        if(memcmp(&shdr.pixel_uniforms.buffer[u.ps_offset],f,size)!=0)
+        {
+            memcpy(&shdr.pixel_uniforms.buffer[u.ps_offset],f,size);
+            shdr.pixel_uniforms.changed=true;
+        }
     }
 
 #else
@@ -1300,17 +1309,24 @@ void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int coun
     const shader_obj::uniform &u=shdr.uniforms[i];
     if(int(count)>u.array_size)
         count=u.array_size;
-    
+
     if(u.vs_offset>=0)
     {
-        memcpy(&shdr.vertex_uniforms.buffer[u.vs_offset],f,sizeof(float)*16*count);
-        shdr.vertex_uniforms.changed=true;
+        const size_t size=sizeof(float)*16*count;
+        if(memcmp(&shdr.vertex_uniforms.buffer[u.vs_offset],f,size)!=0)
+        {
+            memcpy(&shdr.vertex_uniforms.buffer[u.vs_offset],f,size);
+            shdr.vertex_uniforms.changed=true;
+        }
     }
-    
     if(u.ps_offset>=0)
     {
-        memcpy(&shdr.pixel_uniforms.buffer[u.ps_offset],f,sizeof(float)*16*count);
-        shdr.pixel_uniforms.changed=true;
+        const size_t size=sizeof(float)*16*count;
+        if(memcmp(&shdr.pixel_uniforms.buffer[u.ps_offset],f,size)!=0)
+        {
+            memcpy(&shdr.pixel_uniforms.buffer[u.ps_offset],f,size);
+            shdr.pixel_uniforms.changed=true;
+        }
     }
 
 #else
