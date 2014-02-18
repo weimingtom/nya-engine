@@ -40,8 +40,6 @@ namespace
     int current_shader=-1;
     int active_shader=-1;
 
-    void set_compiled_shaders_provider(compiled_shaders_provider *csp) { render_csp=csp; }
-
     struct shader_obj
     {
 #ifdef DIRECTX11
@@ -375,6 +373,8 @@ bool check_init_shaders()
 }
 #endif
 }
+
+void set_compiled_shaders_provider(compiled_shaders_provider *csp) { render_csp=csp; }
 
 #ifdef DIRECTX11
 ID3D11InputLayout *get_layout(int mesh_idx)
