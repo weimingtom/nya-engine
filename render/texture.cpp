@@ -394,10 +394,6 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 
 bool texture::build_texture(const void *data,unsigned int width,unsigned int height,compressed_format format,int mips_count)
 {
-#if defined(OPENGL_ES) //ToDo
-    return 0;
-#endif
-
     if(!data || !width || !height || mips_count==0)
         return false;
 
