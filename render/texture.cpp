@@ -150,7 +150,7 @@ void gl_setup_texture(int target,bool clamp,bool has_mips)
         glTexParameteri(target,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 }
 
-void setup_pack_alignment()
+void gl_setup_pack_alignment()
 {
     static bool set=false;
     if(set)
@@ -159,6 +159,19 @@ void setup_pack_alignment()
     glPixelStorei(GL_UNPACK_ALIGNMENT,1);
     glPixelStorei(GL_PACK_ALIGNMENT,1);
     set=true;
+}
+
+unsigned int gl_get_max_tex_size()
+{
+    static unsigned int max_tex_size=0;
+    if(!max_tex_size)
+    {
+        GLint texSize;
+        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &texSize);
+        max_tex_size=texSize;
+    }
+
+    return max_tex_size;
 }
 #endif
 }
@@ -272,18 +285,9 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     m_height=height;
 
 #else
-    static unsigned int max_tex_size=0;
-    if(!max_tex_size)
+    if(width>gl_get_max_tex_size() || height>gl_get_max_tex_size())
     {
-        GLint texSize;
-        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &texSize);
-        max_tex_size=texSize;
-        setup_pack_alignment();
-    }
-
-    if(width>max_tex_size || height>max_tex_size)
-    {
-        get_log()<<"Unable to build texture: width or height is too high, maximum is "<<max_tex_size<<"\n";
+        get_log()<<"Unable to build texture: width or height is too high, maximum is "<<gl_get_max_tex_size()<<"\n";
 	    release();
         return false;
     }
@@ -357,14 +361,10 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     glBindTexture(GL_TEXTURE_2D,texture_obj::get(m_tex).tex_id);
     active_layers[active_layer]=-1;
 
-    /*
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-    */
-
     const bool pot=((width&(width-1))==0 && (height&(height-1))==0);
     const bool has_mipmap=(data && pot && mip_count!=1 && mip_count!=0);
 
+    if(!pot) gl_setup_pack_alignment();
     gl_setup_texture(GL_TEXTURE_2D,!pot,has_mipmap);
 
   #ifdef GL_GENERATE_MIPMAP
@@ -409,18 +409,9 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 
 #ifdef DIRECTX11
 #elif !defined(OPENGL_ES)
-    static unsigned int max_tex_size=0;
-    if(!max_tex_size)
+    if(width>gl_get_max_tex_size() || height>gl_get_max_tex_size())
     {
-        GLint texSize;
-        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &texSize);
-        max_tex_size=texSize;
-        setup_pack_alignment();
-    }
-
-    if(width>max_tex_size || height>max_tex_size)
-    {
-        get_log()<<"Unable to build texture: width or height is too high, maximum is "<<max_tex_size<<"\n";
+        get_log()<<"Unable to build texture: width or height is too high, maximum is "<<gl_get_max_tex_size()<<"\n";
 	    release();
         return false;
     }
@@ -451,6 +442,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     glBindTexture(GL_TEXTURE_2D,texture_obj::get(m_tex).tex_id);
     active_layers[active_layer]=-1;
 
+    if(!pot) gl_setup_pack_alignment();
     gl_setup_texture(GL_TEXTURE_2D,false,mips_count!=1);
 
   #ifdef GL_GENERATE_MIPMAP
@@ -635,18 +627,9 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     m_height=height;
 
 #else
-    static unsigned int max_tex_size=0;
-    if(!max_tex_size)
+    if(width>gl_get_max_tex_size() || height>gl_get_max_tex_size())
     {
-        GLint texSize;
-        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &texSize);
-        max_tex_size=texSize;
-        setup_pack_alignment();
-    }
-
-    if(width>max_tex_size || height>max_tex_size)
-    {
-        get_log()<<"Unable to build cube texture: width or height is too high, maximum is "<<max_tex_size<<"\n";
+        get_log()<<"Unable to build cube texture: width or height is too high, maximum is "<<gl_get_max_tex_size()<<"\n";
 	    release();
         return false;
     }
@@ -708,17 +691,21 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     glBindTexture(GL_TEXTURE_CUBE_MAP,texture_obj::get(m_tex).tex_id);
     active_layers[active_layer]=-1;
 
-    gl_setup_texture(GL_TEXTURE_CUBE_MAP,true,data!=0);
+    const bool pot=((width&(width-1))==0 && (height&(height-1))==0);
+    const bool has_mipmap=(data && pot);
+
+    if(!pot) gl_setup_pack_alignment();
+    gl_setup_texture(GL_TEXTURE_CUBE_MAP,true,has_mipmap);
 
   #ifdef GL_GENERATE_MIPMAP
-    if(data) glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_GENERATE_MIPMAP,GL_TRUE);
+    if(has_mipmap) glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_GENERATE_MIPMAP,GL_TRUE);
   #endif
 
 	for(int i=0;i<sizeof(cube_faces)/sizeof(cube_faces[0]);++i)
 		glTexImage2D(cube_faces[i],0,source_format,width,height,0,gl_format,GL_UNSIGNED_BYTE,data?data[i]:0);
 
   #ifndef GL_GENERATE_MIPMAP
-    if(data) glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+    if(has_mipmap) glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
   #endif
 
     glBindTexture(GL_TEXTURE_CUBE_MAP,0);
