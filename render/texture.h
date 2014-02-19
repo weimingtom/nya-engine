@@ -23,8 +23,18 @@ public:
 
         depth16,
         depth24,
-        depth32
+        depth32,
+
+        //if is_dxt_supported()
+        dxt1,
+        dxt3,
+        dxt5,
+
+        dxt2=dxt3,
+        dxt4=dxt5
     };
+
+    static bool is_dxt_supported();
 
 public:
     //mip_count=-1 means "generate mipmaps". You have to provide a single mip or a complete mipmap pyramid instead
@@ -34,20 +44,6 @@ public:
 	bool build_cubemap(const void *data[6],unsigned int width,unsigned int height,color_format format);
 	bool build_cubemap(const void *data,unsigned int width,unsigned int height,color_format format);
 	//bool build_cubemap(std::nullptr_t data,unsigned int width,unsigned int height,color_format format);
-
-public:
-    enum compressed_format
-    {
-        dxt1,
-        dxt3,
-        dxt5,
-
-        dxt2=dxt3,
-        dxt4=dxt5
-    };
-
-    bool build_texture(const void *data,unsigned int width,unsigned int height,compressed_format format,int mip_count=1);
-    static bool is_dxt_supported();
 
 public:
     void bind() const;
@@ -70,7 +66,7 @@ public:
     static unsigned int get_used_vmem_size();
 
 public:
-    texture(): m_tex(-1),m_width(0),m_height(0),m_compressed(false) {}
+    texture(): m_tex(-1),m_width(0),m_height(0) {}
 
 private:
     int m_tex;
@@ -79,8 +75,6 @@ private:
     unsigned int m_height;
 
 	color_format m_format;
-    compressed_format m_compressed_format;
-    bool m_compressed;
 };
 
 }

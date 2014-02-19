@@ -6,6 +6,8 @@
 
 #include "memory/tmp_buffer.h"
 
+//ToDo: mipmaps and dxt support for cubemaps, mipmaps support in dx11
+
 namespace nya_render
 {
 
@@ -41,6 +43,10 @@ int get_bpp(texture::color_format format)
         case texture::depth24: return 24;
 #endif
         case texture::depth32: return 32;
+
+        case texture::dxt1: return 4;
+        case texture::dxt3: return 8;
+        case texture::dxt5: return 8;
     };
 
     return 0;
@@ -57,7 +63,7 @@ unsigned int get_tex_memory_size(unsigned int width,unsigned int height,texture:
     }
     else if(mip_count<0)
     {
-        for(unsigned int w=width,h=height;w>1 && h>1;w/=2,h/=2,size/=4)
+        for(unsigned int w=width,h=height;w>=1 && h>=1;w/=2,h/=2,size/=4)
             full_size+=size;
     }
     else
@@ -185,6 +191,17 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         return false;
     }
 
+    const bool pot=((width&(width-1))==0 && (height&(height-1))==0);
+
+    if(format==dxt1 || format==dxt3 || format==dxt5)
+    {
+        if(!pot || !data || mip_count==0)
+            return false;
+
+        if(!is_dxt_supported())
+            return false;
+    }
+
     if(!data)
         mip_count=0;
 
@@ -225,13 +242,19 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         case depth24: desc.Format=DXGI_FORMAT_D24_UNORM_S8_UINT; break; //ToDo if data != 0
         case depth32: desc.Format=DXGI_FORMAT_D32_FLOAT; break;
 
+        case dxt1: desc.Format=DXGI_FORMAT_BC1_UNORM; break;
+        case dxt3: desc.Format=DXGI_FORMAT_BC2_UNORM; break;
+        case dxt5: desc.Format=DXGI_FORMAT_BC3_UNORM; break;
+
         default: return false;
     }
 
     desc.SampleDesc.Count=1;
     desc.Usage=D3D11_USAGE_DEFAULT;
-    if(format>=depth16)
+    if(format==depth16 || format==depth24 || format==depth32)
         desc.BindFlags=D3D11_BIND_DEPTH_STENCIL;//ToDo: D3D11_BIND_SHADER_RESOURCE
+    else if(format==dxt1 || format==dxt3 || format==dxt5)
+        desc.BindFlags=D3D11_BIND_SHADER_RESOURCE;
     else
         desc.BindFlags=D3D11_BIND_SHADER_RESOURCE|D3D11_BIND_RENDER_TARGET;
 
@@ -292,32 +315,30 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         return false;
     }
 
-    unsigned int source_format=0;
-    unsigned int gl_format=0;
-    unsigned int precision=GL_UNSIGNED_BYTE;
-    unsigned int source_channels=0;
-
+    unsigned int source_format=0,gl_format=0,precision=GL_UNSIGNED_BYTE;
     switch(format)
     {
-        case color_rgba: source_format=GL_RGBA; gl_format=GL_RGBA; break;
+        case color_rgb: source_format=gl_format=GL_RGB; break; //in es stored internally as rgba
+        case color_rgba: source_format=gl_format=GL_RGBA; break;
         case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; break;
-        case greyscale: source_format=GL_LUMINANCE; gl_format=GL_LUMINANCE; break;
+        case greyscale: source_format=gl_format=GL_LUMINANCE; break;
 #ifdef OPENGL_ES
-        case color_rgb: source_format=GL_RGB; gl_format=GL_RGB; break; //stored internally as rgba
-        case depth16: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_SHORT; break;
-        case depth24: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; break;
-        case depth32: source_format=GL_DEPTH_COMPONENT; gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; break;
+        case depth16: source_format=gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_SHORT; break;
+        case depth24: source_format=gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; break;
+        case depth32: source_format=gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; break;
 #else
-        case color_rgb: source_format=GL_RGB; gl_format=GL_RGB; break;
         case depth16: source_format=GL_DEPTH_COMPONENT16; gl_format=GL_DEPTH_COMPONENT; break;
         case depth24: source_format=GL_DEPTH_COMPONENT24; gl_format=GL_DEPTH_COMPONENT; break;
         case depth32: source_format=GL_DEPTH_COMPONENT32; gl_format=GL_DEPTH_COMPONENT; break;
+
+        case dxt1: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT1_EXT; break;
+        case dxt3: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT3_EXT; break;
+        case dxt5: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT5_EXT; break;
 #endif
     };
 
-    source_channels=get_bpp(format)/8;
-
-    if(!source_format || !gl_format || !source_channels)
+    const unsigned int source_bpp=get_bpp(format);
+    if(!source_format || !gl_format || !source_bpp)
     {
         get_log()<<"Unable to build texture: unsuppored color format\n";
 	    release();
@@ -361,7 +382,6 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     glBindTexture(GL_TEXTURE_2D,texture_obj::get(m_tex).tex_id);
     active_layers[active_layer]=-1;
 
-    const bool pot=((width&(width-1))==0 && (height&(height-1))==0);
     const bool has_mipmap=(data && pot && mip_count!=1 && mip_count!=0);
 
     if(!pot) gl_setup_pack_alignment();
@@ -372,10 +392,33 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
   #endif
     unsigned int w=width,h=height;
     const char *data_pointer=(const char*)data;
-    for(int i=0;i<(mip_count<1?1:mip_count);++i,w/=2,h/=2)
+    for(int i=0;i<(mip_count<=0?1:mip_count);++i,w=w>1?w/=2:1,h=h>1?h/=2:1)
     {
-	    glTexImage2D(GL_TEXTURE_2D,i,source_format,w,h,0,gl_format,precision,data_pointer);
-        data_pointer+=width*height*source_channels;
+        unsigned int size=0;
+        switch (format)
+        {
+            case color_rgb:
+            case color_bgra:
+            case color_rgba:
+            case greyscale:
+            case depth16:
+            case depth24:
+            case depth32:
+                size=w*h*(source_bpp/8);
+                glTexImage2D(GL_TEXTURE_2D,i,source_format,w,h,0,gl_format,precision,data_pointer);
+                break;
+
+  #ifndef OPENGL_ES
+            case dxt1:
+            case dxt3:
+            case dxt5:
+                size=(w>4?w:4)/4 * (h>4?h:4)/4 * source_bpp*2;
+                glCompressedTexImage2D(GL_TEXTURE_2D,i,gl_format,w,h,0,size,data_pointer);
+                break;
+  #endif
+            default: break;
+        }
+        data_pointer+=size;
     }
 
 	//	glTexSubImage2D(GL_TEXTURE_2D,0,0,0,width,height,gl_format,precision,data);
@@ -386,132 +429,26 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     glBindTexture(GL_TEXTURE_2D,0);
 #endif
 
-    m_compressed=false;
     texture_obj::get(m_tex).size=get_tex_memory_size(m_width,m_height,m_format,mip_count);
-
-    return true;
-}
-
-bool texture::build_texture(const void *data,unsigned int width,unsigned int height,compressed_format format,int mips_count)
-{
-    if(!data || !width || !height || mips_count==0)
-        return false;
-
-    const bool pot=((width&(width-1))==0 && (height&(height-1))==0);
-    if(!pot)
-        return false;
-
-    if(format==dxt1 || format==dxt3 || format==dxt5)
-    {
-        if(!is_dxt_supported())
-            return false;
-    }
-
-#ifdef DIRECTX11
-#elif !defined(OPENGL_ES)
-    if(width>gl_get_max_tex_size() || height>gl_get_max_tex_size())
-    {
-        get_log()<<"Unable to build texture: width or height is too high, maximum is "<<gl_get_max_tex_size()<<"\n";
-	    release();
-        return false;
-    }
-
-    if(m_tex<0)
-        m_tex=texture_obj::add();
-
-    if(!texture_obj::get(m_tex).tex_id)
-    {
-        glGenTextures(1,&texture_obj::get(m_tex).tex_id);
-    }
-    else if(texture_obj::get(m_tex).gl_type!=GL_TEXTURE_2D)
-    {
-        glDeleteTextures(1,&texture_obj::get(m_tex).tex_id);
-        glGenTextures(1,&texture_obj::get(m_tex).tex_id);
-    }
-
-    m_width=width;
-    m_height=height;
-	texture_obj::get(m_tex).gl_type=GL_TEXTURE_2D;
-
-    if(active_layers[active_layer]>=0)
-    {
-        if(texture_obj::get(active_layers[active_layer]).gl_type!=GL_TEXTURE_2D)
-            glBindTexture(texture_obj::get(active_layers[active_layer]).gl_type,0);
-    }
-
-    glBindTexture(GL_TEXTURE_2D,texture_obj::get(m_tex).tex_id);
-    active_layers[active_layer]=-1;
-
-    if(!pot) gl_setup_pack_alignment();
-    gl_setup_texture(GL_TEXTURE_2D,false,mips_count!=1);
-
-  #ifdef GL_GENERATE_MIPMAP
-    if(mips_count<0) glTexParameteri(GL_TEXTURE_2D,GL_GENERATE_MIPMAP,GL_TRUE);
-  #endif
-
-    unsigned int full_size=0;
-    unsigned int w=width,h=height;
-    const char *data_pointer=(const char*)data;
-    for(int i=0;i<(mips_count<0?1:mips_count);++i,w=w>1?w/=2:1,h=h>1?h/=2:1)
-    {
-        unsigned int size=0;
-        switch (format)
-        {
-            case dxt1:
-                size=(w>4?w:4)/4 * (h>4?h:4)/4 * 8;
-                glCompressedTexImage2D(GL_TEXTURE_2D,i,GL_COMPRESSED_RGBA_S3TC_DXT1_EXT,w,h,0,size,data_pointer);
-                break;
-
-            case dxt3:
-                size=(w>4?w:4)/4 * (h>4?h:4)/4 * 16;
-                glCompressedTexImage2D(GL_TEXTURE_2D,i,GL_COMPRESSED_RGBA_S3TC_DXT3_EXT,w,h,0,size,data_pointer);
-                break;
-
-            case dxt5:
-                size=(w>4?w:4)/4 * (h>4?h:4)/4 * 16;
-                glCompressedTexImage2D(GL_TEXTURE_2D,i,GL_COMPRESSED_RGBA_S3TC_DXT5_EXT,w,h,0,size,data_pointer);
-                break;
-
-            default: break;
-        }
-        data_pointer+=size;
-    }
-
-  #ifndef GL_GENERATE_MIPMAP
-    if(mips_count<0) glGenerateMipmap(GL_TEXTURE_2D);
-  #endif
-
-    glBindTexture(GL_TEXTURE_2D,0);
-    if(!full_size)
-        return false;
-
-    texture_obj::get(m_tex).size=full_size;
-#endif
-
-	m_compressed_format=format;
-    m_compressed=true;
 
     return true;
 }
 
 bool texture::is_dxt_supported()
 {
-#ifdef OPENGL_ES
-    return false;
-#endif
-
-#ifndef NO_EXTENSIONS_INIT
+#ifdef DIRECTX11
+    return true;
+#elif defined OPENGL_ES
+    return true;
+#else
+  #ifndef NO_EXTENSIONS_INIT
     if(!glCompressedTexImage2D)
         glCompressedTexImage2D=(PFNGLCOMPRESSEDTEXIMAGE2DARBPROC)get_extension("glCompressedTexImage2D");
 
     return glCompressedTexImage2D!=0;
-#endif
-
-#ifdef DIRECTX11 //ToDo
-    return false;
-#endif
-
+  #endif
     return true;
+#endif
 }
 
 bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int height,color_format format)
@@ -711,7 +648,6 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     glBindTexture(GL_TEXTURE_CUBE_MAP,0);
 #endif
 
-    m_compressed=false;
     texture_obj::get(m_tex).size=get_tex_memory_size(m_width,m_height,m_format,-1)*6;
     return true;
 }
@@ -802,6 +738,9 @@ void texture::apply(bool ignore_cache)
 bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
 {
     if(m_tex<0)
+        return false;
+
+    if(m_format>=dxt1)
         return false;
 
     const texture_obj &tex=texture_obj::get(m_tex);
