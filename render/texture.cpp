@@ -457,9 +457,6 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 
     gl_setup_texture(GL_TEXTURE_2D,false,mips_count!=1);
 
-    if(mips_count>0)
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAX_LEVEL,mips_count<7?mips_count:7); //ToDo
-
   #ifdef GL_GENERATE_MIPMAP
     if(mips_count<0) glTexParameteri(GL_TEXTURE_2D,GL_GENERATE_MIPMAP,GL_TRUE);
   #endif
@@ -467,7 +464,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     unsigned int full_size=0;
     unsigned int w=width,h=height;
     const char *data_pointer=(const char*)data;
-    for(int i=0;i<(mips_count<0?1:mips_count);++i,w/=2,h/=2)
+    for(int i=0;i<(mips_count<0?1:mips_count);++i,w=w>1?w/=2:1,h=h>1?h/=2:1)
     {
         unsigned int size=0;
         switch (format)
