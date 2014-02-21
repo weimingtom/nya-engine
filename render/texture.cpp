@@ -191,19 +191,21 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         return false;
     }
 
-    const bool pot=((width&(width-1))==0 && (height&(height-1))==0);
-
     if(format==dxt1 || format==dxt3 || format==dxt5)
     {
-        if(!pot || !data || mip_count==0)
+        if(!data || mip_count==0)
             return false;
 
         if(!is_dxt_supported())
             return false;
     }
 
+    const bool pot=((width&(width-1))==0 && (height&(height-1))==0);
+
     if(!data)
         mip_count=0;
+    else if(!pot)
+        mip_count=1;
 
 #ifdef DIRECTX11
     if(!get_device())
