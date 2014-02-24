@@ -123,6 +123,8 @@ public:
     const char *get_texture_semantics(int idx) const;
     const texture_proxy &get_texture(const char *semantics) const;
 
+    const char *get_shader_name() const { return internal().m_shader.get_name(); }
+
     int get_params_count() const { return internal().m_shader.internal().get_uniforms_count(); }
     const char *get_param_name(int idx) const;
     int get_param_idx(const char *name) const;
