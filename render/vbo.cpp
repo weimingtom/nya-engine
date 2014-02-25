@@ -309,6 +309,9 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type)
             desc.push_back(d);
         }
 
+        if(desc.empty())
+            return;
+
         layout=add_layout(current_verts,&desc[0],desc.size());
 
         if(!layout)
