@@ -22,7 +22,7 @@ public:
             return false;
         }
 
-        const std::string final_name=get_resources_prefix()+name;
+        const std::string final_name=get_resources_prefix_str()+name;
         if(m_shared.is_valid())
         {
             const char *res_name=m_shared.get_name();
@@ -59,7 +59,8 @@ public:
     const char *get_name() const { return m_shared.get_name(); }
 
 public:
-    static void set_resources_prefix(const char *prefix) { get_resources_prefix().assign(prefix?prefix:""); }
+    static void set_resources_prefix(const char *prefix) { get_resources_prefix_str().assign(prefix?prefix:""); }
+    static const char *get_resources_prefix() { get_resources_prefix_str().c_str(); }
 
 public:
     static int reload_all_resources() { return get_shared_resources().reload_resources(); }
@@ -69,10 +70,10 @@ public:
         if(!name)
             return false;
 
-        if(get_resources_prefix().empty())
+        if(get_resources_prefix_str().empty())
             return get_shared_resources().reload_resource(name);
 
-        return get_shared_resources().reload_resource((get_resources_prefix()+name).c_str());
+        return get_shared_resources().reload_resource((get_resources_prefix_str()+name).c_str());
     }
 
 public:
@@ -189,7 +190,7 @@ private:
     }
 
 private:
-    static std::string &get_resources_prefix()
+    static std::string &get_resources_prefix_str()
     {
         static std::string prefix;
         return prefix;
