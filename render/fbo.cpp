@@ -9,12 +9,8 @@ namespace nya_render
 
 namespace
 {
-#ifdef DIRECTX11
-    nya_render::dx_target default_target;
-    nya_render::dx_target target;
-#else
-    int default_fbo_idx=0;
-#endif
+    DIRECTX11_ONLY(nya_render::dx_target default_target,target);
+    OPENGL_ONLY(int default_fbo_idx=0);
 }
 
 #ifdef DIRECTX11

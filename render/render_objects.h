@@ -51,6 +51,17 @@ public:
         }
     }
 
+    void invalidate()
+    {
+        for(int i=0;i<(int)m_objects.size();++i)
+        {
+            if(m_objects[i].free)
+                continue;
+
+            m_objects[i].data=t();
+        }
+    }
+
 private:
     struct object
     {

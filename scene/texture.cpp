@@ -149,14 +149,12 @@ void texture_internal::set(int slot) const
 {
     if(!m_shared.is_valid())
     {
-        nya_render::texture::select_multitex_slot(slot);
-        nya_render::texture::unbind();
+        nya_render::texture::unbind(slot);
         return;
     }
 
     m_last_slot=slot;
-    nya_render::texture::select_multitex_slot(slot);
-    m_shared->tex.bind();
+    m_shared->tex.bind(slot);
 }
 
 void texture_internal::unset() const
@@ -164,8 +162,7 @@ void texture_internal::unset() const
     if(!m_shared.is_valid())
         return;
 
-    nya_render::texture::select_multitex_slot(m_last_slot);
-    m_shared->tex.unbind();
+    m_shared->tex.unbind(m_last_slot);
 }
 
 unsigned int texture::get_width() const

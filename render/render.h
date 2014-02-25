@@ -151,5 +151,4 @@ void set_device(ID3D11Device *device);
 
 ID3D11DeviceContext *get_context();
 void set_context(ID3D11DeviceContext *context);
-
 }

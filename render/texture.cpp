@@ -14,7 +14,8 @@ namespace nya_render
 namespace
 {
     unsigned int current_layer=0;
-    unsigned int active_layer=0;
+    OPENGL_ONLY(unsigned int active_layer=0);
+
     const unsigned int max_layers=16;
     int current_layers[max_layers]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
     int active_layers[max_layers]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
@@ -37,11 +38,8 @@ int get_bpp(texture::color_format format)
         case texture::greyscale: return 8;
         case texture::color_rgb: return 24;
         case texture::depth16: return 16;
-#ifdef DIRECTX11
-        case texture::depth24: return 32;
-#else
-        case texture::depth24: return 24;
-#endif
+        DIRECTX11_ONLY(case texture::depth24: return 32);
+        OPENGL_ONLY(case texture::depth24: return 24);
         case texture::depth32: return 32;
 
         case texture::dxt1: return 4;
@@ -677,17 +675,9 @@ bool texture::build_cubemap(const void *data,unsigned int width,unsigned int hei
     return build_cubemap(data_ptrs,width,height,format);
 }
 
-void texture::bind() const { current_layers[current_layer]=m_tex; }
+void texture::bind(unsigned int layer) const { if(layer>=max_layers) return; current_layers[layer]=m_tex; }
 
-void texture::unbind() { current_layers[current_layer]=-1; }
-
-void texture::select_multitex_slot(unsigned int idx)
-{
-    if(idx>=max_layers)
-        return;
-
-    current_layer=idx;
-}
+void texture::unbind(unsigned int layer) { if(layer>=max_layers) return; current_layers[layer]=-1; }
 
 void texture::apply(bool ignore_cache)
 {

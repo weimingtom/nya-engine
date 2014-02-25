@@ -74,6 +74,7 @@ namespace
         static int add() { return get_vbo_objs().add(); }
         static vbo_obj &get(int idx) { return get_vbo_objs().get(idx); }
         static void remove(int idx) { return get_vbo_objs().remove(idx); }
+        static void invalidate() { return get_vbo_objs().invalidate(); }
 
     private:
         typedef render_objects<vbo_obj> vbo_objs;
@@ -201,6 +202,8 @@ bool check_init_vbo()
 #endif
 
 }
+
+void invalidate_vbos() { vbo_obj::invalidate(); }
 
 void vbo::bind_verts() const { current_verts=m_verts; }
 void vbo::bind_indices() const { current_inds=m_indices; }

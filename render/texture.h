@@ -46,10 +46,8 @@ public:
 	//bool build_cubemap(std::nullptr_t data,unsigned int width,unsigned int height,color_format format);
 
 public:
-    void bind() const;
-    static void unbind();
-
-    static void select_multitex_slot(unsigned int idx);
+    void bind(unsigned int layer) const;
+    static void unbind(unsigned int layer);
 
     static void apply(bool ignore_cache=false);
 

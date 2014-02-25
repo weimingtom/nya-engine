@@ -137,6 +137,7 @@ namespace
         static int add() { return get_shader_objs().add(); }
         static shader_obj &get(int idx) { return get_shader_objs().get(idx); }
         static void remove(int idx) { return get_shader_objs().remove(idx); }
+        static void invalidate() { return get_shader_objs().invalidate(); DIRECTX11_ONLY(remove_layouts()); }
 
 #ifdef DIRECTX11
         static void remove_layout(int mesh_idx)
@@ -161,6 +162,12 @@ namespace
             remover r;
             r.mesh_idx=mesh_idx;
             get_shader_objs().apply_to_all(r);
+        }
+
+        static void remove_layouts()
+        {
+            struct remover{ void apply(shader_obj &obj) { obj.layouts.clear(); } };
+            remover r; get_shader_objs().apply_to_all(r);
         }
 #endif
 
@@ -373,6 +380,8 @@ bool check_init_shaders()
 }
 #endif
 }
+
+void invalidate_shaders() { shader_obj::invalidate(); }
 
 void set_compiled_shaders_provider(compiled_shaders_provider *csp) { render_csp=csp; }
 

@@ -47,6 +47,14 @@
     #define ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
 #endif
 
+#ifdef DIRECTX11
+    #define DIRECTX11_ONLY(...) __VA_ARGS__
+    #define OPENGL_ONLY(...)
+#else
+    #define DIRECTX11_ONLY(...)
+    #define OPENGL_ONLY(...) __VA_ARGS__
+#endif
+
 namespace nya_render
 {
 #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
@@ -93,6 +101,7 @@ namespace nya_render
         static texture_obj &get(int idx) { return get_texture_objs().get(idx); }
         static void remove(int idx) { return get_texture_objs().remove(idx); }
         static unsigned int get_used_vmem_size();
+        static void invalidate() { get_texture_objs().invalidate(); }
 
     private:
         typedef render_objects<texture_obj> texture_objs;
@@ -122,4 +131,14 @@ namespace nya_render
 
     void set_target(ID3D11RenderTargetView *color,ID3D11DepthStencilView *depth,bool default=false);
 #endif
+
+    void invalidate_shaders();
+    void invalidate_vbos();
+
+    inline void invalidate_resources() //on context loss, etc
+    {
+        texture_obj::invalidate();
+        invalidate_shaders();
+        invalidate_vbos();
+    }
 }

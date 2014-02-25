@@ -61,8 +61,7 @@ void material_internal::set() const
 
         if(!m_textures[i].proxy.is_valid())
         {
-            nya_render::texture::select_multitex_slot(m_textures[i].slot);
-            nya_render::texture::unbind();
+            nya_render::texture::unbind(m_textures[i].slot);
             continue;
         }
 
