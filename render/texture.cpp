@@ -123,8 +123,6 @@ void gl_select_multitex_layer(int idx)
 
     tex_glActiveTexture=(PFNGLACTIVETEXTUREARBPROC)get_extension("glActiveTexture");
     initialised=true;
-
-    texture::select_multitex_slot(idx);
 #endif
 }
 
