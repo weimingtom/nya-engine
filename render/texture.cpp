@@ -13,7 +13,6 @@ namespace nya_render
 
 namespace
 {
-    unsigned int current_layer=0;
     OPENGL_ONLY(unsigned int active_layer=0);
 
     const unsigned int max_layers=16;
