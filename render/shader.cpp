@@ -256,34 +256,27 @@ bool check_init_shaders()
         return !failed;
 
   #ifndef NO_EXTENSIONS_INIT
-    glGenProgramsARB                = (PFNGLGENPROGRAMSARBPROC)               get_extension ( "glGenProgramsARB" );
-    if(!glGenProgramsARB)
-    {
-        return false;
-    }
-
-    glDeleteProgramsARB             = (PFNGLDELETEPROGRAMSARBPROC)            get_extension ( "glDeleteProgramsARB" );
-    glBindProgramARB                = (PFNGLBINDPROGRAMARBPROC)               get_extension ( "glBindProgramARB" );
-    glDeleteObjectARB         = (PFNGLDELETEOBJECTARBPROC)         get_extension ( "glDeleteObjectARB" );
-    glDetachObjectARB         = (PFNGLDETACHOBJECTARBPROC)         get_extension ( "glDetachObjectARB" );
-    glCreateShaderObjectARB   = (PFNGLCREATESHADEROBJECTARBPROC)   get_extension ( "glCreateShaderObjectARB" );
-    glShaderSourceARB         = (PFNGLSHADERSOURCEARBPROC)         get_extension ( "glShaderSourceARB" );
-    glCompileShaderARB        = (PFNGLCOMPILESHADERARBPROC)        get_extension ( "glCompileShaderARB" );
-    glCreateProgramObjectARB  = (PFNGLCREATEPROGRAMOBJECTARBPROC)  get_extension ( "glCreateProgramObjectARB" );
-    glAttachObjectARB         = (PFNGLATTACHOBJECTARBPROC)         get_extension ( "glAttachObjectARB" );
-    glLinkProgramARB          = (PFNGLLINKPROGRAMARBPROC)          get_extension ( "glLinkProgramARB" );
-    glUseProgramObjectARB     = (PFNGLUSEPROGRAMOBJECTARBPROC)     get_extension ( "glUseProgramObjectARB" );
-    glValidateProgramARB      = (PFNGLVALIDATEPROGRAMARBPROC)      get_extension ( "glValidateProgramARB" );
-    glUniform4fARB            = (PFNGLUNIFORM4FARBPROC)            get_extension ( "glUniform4fARB" );
-    glUniform1iARB            = (PFNGLUNIFORM1IARBPROC)            get_extension ( "glUniform1iARB" );
-    glUniform3fvARB           = (PFNGLUNIFORM3FVARBPROC)           get_extension ( "glUniform3fvARB" );
-    glUniform4fvARB           = (PFNGLUNIFORM4FVARBPROC)           get_extension ( "glUniform4fvARB" );
-    glUniformMatrix2fvARB     = (PFNGLUNIFORMMATRIX2FVARBPROC)     get_extension ( "glUniformMatrix2fvARB" );
-    glUniformMatrix3fvARB     = (PFNGLUNIFORMMATRIX3FVARBPROC)     get_extension ( "glUniformMatrix3fvARB" );
-    glUniformMatrix4fvARB     = (PFNGLUNIFORMMATRIX4FVARBPROC)     get_extension ( "glUniformMatrix4fvARB" );
-    glGetObjectParameterivARB = (PFNGLGETOBJECTPARAMETERIVARBPROC) get_extension ( "glGetObjectParameterivARB" );
-    glGetInfoLogARB           = (PFNGLGETINFOLOGARBPROC)           get_extension ( "glGetInfoLogARB" );
-    glGetUniformLocationARB   = (PFNGLGETUNIFORMLOCATIONARBPROC)   get_extension ( "glGetUniformLocationARB" );
+    if(!(glGenProgramsARB          =(PFNGLGENPROGRAMSARBPROC)          get_extension("glGenPrograms"))) return false;
+    if(!(glDeleteProgramsARB       =(PFNGLDELETEPROGRAMSARBPROC)       get_extension("glDeletePrograms"))) return false;
+    if(!(glBindProgramARB          =(PFNGLBINDPROGRAMARBPROC)          get_extension("glBindProgram"))) return false;
+    if(!(glDeleteObjectARB         =(PFNGLDELETEOBJECTARBPROC)         get_extension("glDeleteObject"))) return false;
+    if(!(glDetachObjectARB         =(PFNGLDETACHOBJECTARBPROC)         get_extension("glDetachObject"))) return false;
+    if(!(glCreateShaderObjectARB   =(PFNGLCREATESHADEROBJECTARBPROC)   get_extension("glCreateShaderObject"))) return false;
+    if(!(glShaderSourceARB         =(PFNGLSHADERSOURCEARBPROC)         get_extension("glShaderSource"))) return false;
+    if(!(glCompileShaderARB        =(PFNGLCOMPILESHADERARBPROC)        get_extension("glCompileShader"))) return false;
+    if(!(glCreateProgramObjectARB  =(PFNGLCREATEPROGRAMOBJECTARBPROC)  get_extension("glCreateProgramObject"))) return false;
+    if(!(glAttachObjectARB         =(PFNGLATTACHOBJECTARBPROC)         get_extension("glAttachObject"))) return false;
+    if(!(glLinkProgramARB          =(PFNGLLINKPROGRAMARBPROC)          get_extension("glLinkProgram"))) return false;
+    if(!(glUseProgramObjectARB     =(PFNGLUSEPROGRAMOBJECTARBPROC)     get_extension("glUseProgramObject" ))) return false;
+    if(!(glValidateProgramARB      =(PFNGLVALIDATEPROGRAMARBPROC)      get_extension("glValidateProgram" ))) return false;
+    if(!(glUniform4fARB            =(PFNGLUNIFORM4FARBPROC)            get_extension("glUniform4f"))) return false;
+    if(!(glUniform1iARB            =(PFNGLUNIFORM1IARBPROC)            get_extension("glUniform1i"))) return false;
+    if(!(glUniform3fvARB           =(PFNGLUNIFORM3FVARBPROC)           get_extension("glUniform3fv"))) return false;
+    if(!(glUniform4fvARB           =(PFNGLUNIFORM4FVARBPROC)           get_extension("glUniform4fv"))) return false;
+    if(!(glUniformMatrix4fvARB     =(PFNGLUNIFORMMATRIX4FVARBPROC)     get_extension("glUniformMatrix4fv"))) return false;
+    if(!(glGetObjectParameterivARB =(PFNGLGETOBJECTPARAMETERIVARBPROC) get_extension("glGetObjectParameteriv"))) return false;
+    if(!(glGetInfoLogARB           =(PFNGLGETINFOLOGARBPROC)           get_extension("glGetInfoLog"))) return false;
+    if(!(glGetUniformLocationARB   =(PFNGLGETUNIFORMLOCATIONARBPROC)   get_extension("glGetUniformLocation"))) return false;
   #endif
     failed=false;
     initialised=true;
