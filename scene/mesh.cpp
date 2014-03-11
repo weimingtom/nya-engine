@@ -730,18 +730,18 @@ void mesh_internal::update(unsigned int dt)
             if(i<(int)a.bones_map.size() && a.bones_map[i]>=0)
             {
                 const unsigned int time=(unsigned int)a.time+a.anim->m_range_from;
-                const nya_render::animation::bone &b=
-                    a.anim->m_shared->anim.get_bone(a.bones_map[i],time,a.anim->get_loop());
+                const nya_math::vec3 bone_pos=a.anim->m_shared->anim.get_bone_pos(a.bones_map[i],time,a.anim->get_loop());
+                const nya_math::quat bone_rot=a.anim->m_shared->anim.get_bone_rot(a.bones_map[i],time,a.anim->get_loop());
 
                 if(a.full_weight)
                 {
-                    pos=b.pos;
-                    rot=b.rot;
+                    pos=bone_pos;
+                    rot=bone_rot;
                 }
                 else
                 {
-                    pos=b.pos*a.anim->m_weight;
-                    rot=b.rot;
+                    pos=bone_pos*a.anim->m_weight;
+                    rot=bone_rot;
                     rot.apply_weight(a.anim->m_weight);
                 }
             }
@@ -752,18 +752,18 @@ void mesh_internal::update(unsigned int dt)
                 if(i<(int)a.bones_map.size() && a.bones_map[i]>=0)
                 {
                     const unsigned int time=(unsigned int)a.time+a.anim->m_range_from;
-                    const nya_render::animation::bone &b=
-                        a.anim->m_shared->anim.get_bone(a.bones_map[i],time,a.anim->get_loop());
+                    const nya_math::vec3 bone_pos=a.anim->m_shared->anim.get_bone_pos(a.bones_map[i],time,a.anim->get_loop());
+                    const nya_math::quat bone_rot=a.anim->m_shared->anim.get_bone_rot(a.bones_map[i],time,a.anim->get_loop());
 
                     if(a.full_weight)
                     {
-                        pos+=b.pos;
-                        rot=rot*b.rot;
+                        pos+=bone_pos;
+                        rot=rot*bone_rot;
                     }
                     else
                     {
-                        pos+=b.pos*a.anim->m_weight;
-                        nya_math::quat tmp=b.rot;
+                        pos+=bone_pos*a.anim->m_weight;
+                        nya_math::quat tmp=bone_rot;
                         tmp.apply_weight(a.anim->m_weight);
                         rot=rot*tmp;
                     }

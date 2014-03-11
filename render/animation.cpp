@@ -5,7 +5,8 @@
 namespace
 {
 
-template<typename t_map,typename t_data> int add_bone_curve(const char *name,t_map &map,t_data &data)
+template<typename t_map,typename t_data,typename t_names_data> int add_bone_curve(const char *name,
+                                                               t_map &map,t_data &data,t_names_data&names)
 {
     if(!name)
         return -1;
@@ -19,7 +20,8 @@ template<typename t_map,typename t_data> int add_bone_curve(const char *name,t_m
 
     map[name]=idx;
     data.resize(idx+1);
-    data.back().name.assign(name);
+    names.resize(idx+1);
+    names.back().assign(name);
 
     return idx;
 }
@@ -30,16 +32,16 @@ template<typename t_list,typename t_frame> void add_frame(t_list &seq,const t_fr
     if(time>duration)
         duration=time;
 
-    for(int i=(int)seq.frames.size()-1;i>=0;--i)
+    for(int i=(int)seq.size()-1;i>=0;--i)
     {
-        if(seq.frames[i].time<time)
+        if(seq[i].time<time)
         {
-            seq.frames.insert(seq.frames.begin()+i+1,f);
+            seq.insert(seq.begin()+i+1,f);
             return;
         }
     }
 
-    seq.frames.push_back(f);
+    seq.push_back(f);
 }
 
 template<typename t_map> int get_idx(const char *name,t_map &map)
@@ -77,17 +79,17 @@ template<typename t_value,typename t_data,typename t_frame> t_value get_value(in
     // via additional frames map with constant quantity
     
     const t_data &seq=data[idx];
-    
-    const unsigned int frames_count=(unsigned int)seq.frames.size();
+
+    const unsigned int frames_count=(unsigned int)seq.size();
     for(unsigned int i=frames_count;i>0;--i)
     {
-        const t_frame &prev=seq.frames[i-1];
+        const t_frame &prev=seq[i-1];
         if(prev.time<=time)
         {
             if(i==frames_count)
                 return prev.value;
 
-            const t_frame &next=seq.frames[i];
+            const t_frame &next=seq[i];
             const int time_diff=next.time-prev.time;
             
             if(time_diff==0)
@@ -98,7 +100,7 @@ template<typename t_value,typename t_data,typename t_frame> t_value get_value(in
     }
 
     if(frames_count)
-        return seq.frames[0].value;
+        return seq[0].value;
 
     return t_value();
 }
@@ -111,41 +113,44 @@ namespace nya_render
 
 int animation::get_bone_idx(const char *name) const { return get_idx(name,m_bones_map); }
 
-animation::bone animation::get_bone(int idx,unsigned int time,bool looped) const
+nya_math::vec3 animation::get_bone_pos(int idx,unsigned int time,bool looped) const
 {
-    return get_value<bone,sequence,frame>(idx,time,looped,m_bones,m_duration);
+    return get_value<nya_math::vec3,pos_sequence,pos_frame>(idx,time,looped,m_pos_sequences,m_duration);
 }
 
-animation::bone animation::frame::interpolate(const frame &prev,float k) const
+nya_math::quat animation::get_bone_rot(int idx,unsigned int time,bool looped) const
 {
-    bone b;
-
-    float lerp=inter.pos_x.get(k);
-    b.pos.x=value.pos.x*lerp+prev.value.pos.x*(1.0f-lerp);
-
-    lerp=inter.pos_y.get(k);
-    b.pos.y=value.pos.y*lerp+prev.value.pos.y*(1.0f-lerp);
-
-    lerp=inter.pos_z.get(k);
-    b.pos.z=value.pos.z*lerp+prev.value.pos.z*(1.0f-lerp);
-
-    lerp=inter.rot.get(k);
-    b.rot=nya_math::quat::slerp(prev.value.rot,value.rot,lerp);
-
-    return b;
+    return get_value<nya_math::quat,rot_sequence,rot_frame>(idx,time,looped,m_rot_sequences,m_duration);
 }
+
+nya_math::vec3 animation::pos_frame::interpolate(const pos_frame &prev,float k) const
+{
+    nya_math::vec3 p;
+
+    float lerp=inter.x.get(k);
+    p.x=value.x*lerp+prev.value.x*(1.0f-lerp);
+
+    lerp=inter.y.get(k);
+    p.y=value.y*lerp+prev.value.y*(1.0f-lerp);
+
+    lerp=inter.z.get(k);
+    p.z=value.z*lerp+prev.value.z*(1.0f-lerp);
+
+    return p;
+}
+
+nya_math::quat animation::rot_frame::interpolate(const rot_frame &prev,float k) const
+               { return nya_math::quat::slerp(prev.value,value,inter.get(k)); }
 
 float animation::curve_frame::interpolate(const curve_frame &prev,float k) const
-{
-    return value*k+prev.value*(1.0f-k);
-}
+                                   { return value*k+prev.value*(1.0f-k); }
 
 const char *animation::get_bone_name(int idx) const
 {
-    if(idx<0 || idx>=(int)m_bones.size())
+    if(idx<0 || idx>=(int)m_bone_names.size())
         return 0;
 
-    return m_bones[idx].name.c_str();
+    return m_bone_names[idx].c_str();
 }
 
 int animation::get_curve_idx(const char *name) const { return get_idx(name,m_curves_map); }
@@ -157,34 +162,46 @@ float animation::get_curve(int idx,unsigned int time,bool looped) const
 
 const char *animation::get_curve_name(int idx) const
 {
-    if(idx<0 || idx>=(int)m_curves.size())
+    if(idx<0 || idx>=(int)m_curve_names.size())
         return 0;
 
-    return m_curves[idx].name.c_str();
+    return m_curve_names[idx].c_str();
 }
 
-int animation::add_bone(const char *name) { return add_bone_curve(name,m_bones_map,m_bones); }
-
-void animation::add_bone_frame(int idx,unsigned int time,bone &b)
+int animation::add_bone(const char *name)
 {
-    interpolation i;
-    add_bone_frame(idx,time,b,i);
+    const int idx=add_bone_curve(name,m_bones_map,m_pos_sequences,m_bone_names);
+    if(idx>=m_rot_sequences.size())
+        m_rot_sequences.resize(idx+1);
+
+    return idx;
 }
 
-void animation::add_bone_frame(int idx,unsigned int time,bone &b,interpolation &i)
+void animation::add_bone_pos_frame(int bone_idx,unsigned int time,const nya_math::vec3 &pos,const pos_interpolation &interpolation)
 {
-    if(idx<0 || idx>=(int)m_bones.size())
+    if(bone_idx<0 || bone_idx>=(int)m_pos_sequences.size())
         return;
 
-    frame f;
-    f.time=time;
-    f.value=b;
-    f.inter=i;
-
-    add_frame(m_bones[idx],f,time,m_duration);
+    pos_frame pf;
+    pf.time=time;
+    pf.value=pos;
+    pf.inter=interpolation;
+    add_frame(m_pos_sequences[bone_idx],pf,time,m_duration);
 }
 
-int animation::add_curve(const char *name) { return add_bone_curve(name,m_curves_map,m_curves); }
+void animation::add_bone_rot_frame(int bone_idx,unsigned int time,const nya_math::quat &rot,const nya_math::bezier &interpolation)
+{
+    if(bone_idx<0 || bone_idx>=(int)m_rot_sequences.size())
+        return;
+
+    rot_frame rf;
+    rf.time=time;
+    rf.value=rot;
+    rf.inter=interpolation;
+    add_frame(m_rot_sequences[bone_idx],rf,time,m_duration);
+}
+
+int animation::add_curve(const char *name) { return add_bone_curve(name,m_curves_map,m_curves,m_curve_names); }
 
 void animation::add_curve_frame(int idx,unsigned int time,float value)
 {
@@ -196,15 +213,6 @@ void animation::add_curve_frame(int idx,unsigned int time,float value)
     f.value=value;
 
     add_frame(m_curves[idx],f,time,m_duration);
-}
-
-void animation::release()
-{
-    m_bones_map.clear();
-    m_bones.clear();
-    m_curves_map.clear();
-    m_curves.clear();
-    m_duration=0;
 }
 
 }

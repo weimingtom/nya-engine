@@ -67,25 +67,23 @@ bool vmd_loader::load(nya_scene::shared_animation &res,nya_scene::resource_data 
 
         const uint time=bone_frame.frame*33.6;
 
-        nya_render::animation::bone bone;
-        nya_render::animation::interpolation interpolation;
+        nya_render::animation::pos_interpolation pos_inter;
 
-        bone.pos=nya_math::vec3(bone_frame.pos);
-        bone.rot=nya_math::quat(bone_frame.rot);
+        pos_inter.x=nya_math::bezier(bone_frame.bezier_x[0]*c2f,bone_frame.bezier_x[4]*c2f,
+                                     bone_frame.bezier_x[8]*c2f,bone_frame.bezier_x[12]*c2f);
 
-        interpolation.pos_x=nya_math::bezier(bone_frame.bezier_x[0]*c2f,bone_frame.bezier_x[4]*c2f,
-                                             bone_frame.bezier_x[8]*c2f,bone_frame.bezier_x[12]*c2f);
+        pos_inter.y=nya_math::bezier(bone_frame.bezier_y[0]*c2f,bone_frame.bezier_y[4]*c2f,
+                                     bone_frame.bezier_y[8]*c2f,bone_frame.bezier_y[12]*c2f);
 
-        interpolation.pos_y=nya_math::bezier(bone_frame.bezier_y[0]*c2f,bone_frame.bezier_y[4]*c2f,
-                                             bone_frame.bezier_y[8]*c2f,bone_frame.bezier_y[12]*c2f);
+        pos_inter.z=nya_math::bezier(bone_frame.bezier_z[0]*c2f,bone_frame.bezier_z[4]*c2f,
+                                     bone_frame.bezier_z[8]*c2f,bone_frame.bezier_z[12]*c2f);
 
-        interpolation.pos_z=nya_math::bezier(bone_frame.bezier_z[0]*c2f,bone_frame.bezier_z[4]*c2f,
-                                             bone_frame.bezier_z[8]*c2f,bone_frame.bezier_z[12]*c2f);
+        res.anim.add_bone_pos_frame(bone_idx,time,bone_frame.pos,pos_inter);
 
-        interpolation.rot=nya_math::bezier(bone_frame.bezier_rot[0]*c2f,bone_frame.bezier_rot[4]*c2f,
-                                           bone_frame.bezier_rot[8]*c2f,bone_frame.bezier_rot[12]*c2f);
+        const nya_math::bezier rot_inter=nya_math::bezier(bone_frame.bezier_rot[0]*c2f,bone_frame.bezier_rot[4]*c2f,
+                                                          bone_frame.bezier_rot[8]*c2f,bone_frame.bezier_rot[12]*c2f);
 
-        res.anim.add_bone_frame(bone_idx,time,bone,interpolation);
+        res.anim.add_bone_rot_frame(bone_idx,time,bone_frame.rot,rot_inter);
     }
 
     const uint facial_frames_count=reader.read<uint>();
