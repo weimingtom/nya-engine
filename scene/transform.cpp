@@ -43,14 +43,11 @@ nya_math::quat transform::transform_quat(const nya_math::quat &quat) const
 
 nya_math::vec3 transform::inverse_transform(const nya_math::vec3 &vec) const
 {
-    const float eps=0.0001f;
-    if(m_scale*m_scale<eps)
-        return nya_math::vec3();
-
     nya_math::vec3 out=m_rot.rotate_inv(vec-m_pos);
-    out.x/=m_scale.x;
-    out.y/=m_scale.y;
-    out.z/=m_scale.z;
+    const float eps=0.0001f;
+    out.x=fabsf(m_scale.x)>eps?out.x/=m_scale.x:0.0f;
+    out.y=fabsf(m_scale.y)>eps?out.y/=m_scale.y:0.0f;
+    out.z=fabsf(m_scale.z)>eps?out.z/=m_scale.z:0.0f;
 
     return out;
 }
