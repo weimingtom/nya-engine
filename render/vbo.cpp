@@ -73,17 +73,8 @@ namespace
         static void invalidate_all() { return get_vbo_objs().invalidate_all(); }
         static void release_all() { return get_vbo_objs().release_all(); }
 
-        DIRECTX11_ONLY(static void release_all());
-
     public:
-        void release()
-        {
-            DIRECTX11_ONLY(if(vertex_loc) vertex_loc->Release());
-            DIRECTX11_ONLY(if(index_loc) index_loc->Release());
-            OPENGL_ONLY(if(vertex_loc) glDeleteBuffers(1,&vertex_loc));
-            OPENGL_ONLY(if(index_loc) glDeleteBuffers(1,&index_loc));
-            *this=vbo_obj();
-        }
+        void release();
 
     private:
         typedef render_objects<vbo_obj> vbo_objs;
@@ -213,6 +204,15 @@ bool check_init_vbo()
 
 void invalidate_vbos() { vbo_obj::invalidate_all(); }
 void release_vbos() { vbo_obj::release_all(); active_verts=current_verts=-1; }
+
+void vbo_obj::release()
+{
+    DIRECTX11_ONLY(if(vertex_loc) vertex_loc->Release());
+    DIRECTX11_ONLY(if(index_loc) index_loc->Release());
+    OPENGL_ONLY(if(vertex_loc) glDeleteBuffers(1,&vertex_loc));
+    OPENGL_ONLY(if(index_loc) glDeleteBuffers(1,&index_loc));
+    *this=vbo_obj();
+}
 
 void vbo::bind_verts() const { current_verts=m_verts; }
 void vbo::bind_indices() const { current_inds=m_indices; }
