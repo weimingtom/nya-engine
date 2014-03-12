@@ -160,36 +160,7 @@ namespace
         }
 #endif
     public:
-        void release()
-        {
-#ifdef DIRECTX11
-            if(vertex_program) vertex_program->Release());
-            if(pixel_program) pixel_program->Release());
-
-            for(layouts_map::iterator it=layouts.begin();it!=layouts.end();++it)
-                if(it->second)
-                    it->second->Release();
-
-            layouts.clear();
-
-            if(constants.dx_buffer) constants.dx_buffer->Release();
-            if(vertex_uniforms.dx_buffer) vertex_uniforms.dx_buffer->Release();
-            if(pixel_uniforms.dx_buffer) pixel_uniforms.dx_buffer->Release();
-#else
-            for(int i=0;i<shader::program_types_count;++i)
-            {
-                if(!objects[i])
-                    continue;
-
-                glDetachObjectARB(program,objects[i]);
-                glDeleteObjectARB(objects[i]);
-            }
-
-            if( program )
-                glDeleteObjectARB(program);
-#endif
-            *this=shader_obj();
-        }
+        void release();
 
     private:
         typedef render_objects<shader_obj> shader_objs;
@@ -307,6 +278,37 @@ bool check_init_shaders()
 
 void invalidate_shaders() { shader_obj::invalidate_all(); }
 void release_shaders() { shader_obj::release_all(); current_shader=active_shader=-1; }
+
+void shader_obj::release()
+{
+#ifdef DIRECTX11
+    if(vertex_program) vertex_program->Release());
+    if(pixel_program) pixel_program->Release());
+
+    for(layouts_map::iterator it=layouts.begin();it!=layouts.end();++it)
+        if(it->second)
+            it->second->Release();
+
+    layouts.clear();
+
+    if(constants.dx_buffer) constants.dx_buffer->Release();
+    if(vertex_uniforms.dx_buffer) vertex_uniforms.dx_buffer->Release();
+    if(pixel_uniforms.dx_buffer) pixel_uniforms.dx_buffer->Release();
+#else
+    for(int i=0;i<shader::program_types_count;++i)
+    {
+        if(!objects[i])
+            continue;
+
+        glDetachObjectARB(program,objects[i]);
+        glDeleteObjectARB(objects[i]);
+    }
+
+    if( program )
+        glDeleteObjectARB(program);
+#endif
+    *this=shader_obj();
+}
 
 void set_compiled_shaders_provider(compiled_shaders_provider *csp) { render_csp=csp; }
 
