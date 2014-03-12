@@ -60,13 +60,9 @@ namespace
         attribute normals;
         attribute tcs[vbo::max_tex_coord];
 
-#ifdef DIRECTX11
-        ID3D11Buffer *vertex_loc;
-        ID3D11Buffer *index_loc;
-#else
-        unsigned int vertex_loc;
-        unsigned int index_loc;
-#endif
+        DIRECTX11_ONLY(ID3D11Buffer *vertex_loc,index_loc);
+        OPENGL_ONLY(unsigned int vertex_loc,index_loc);
+
         vbo_obj(): vertex_loc(0), index_loc(0),element_type(vbo::triangles),element_count(0),allocated_elements_count(0),
                    verts_count(0),allocated_verts_count(0) {}
 
@@ -74,7 +70,20 @@ namespace
         static int add() { return get_vbo_objs().add(); }
         static vbo_obj &get(int idx) { return get_vbo_objs().get(idx); }
         static void remove(int idx) { return get_vbo_objs().remove(idx); }
-        static void invalidate() { return get_vbo_objs().invalidate(); }
+        static void invalidate_all() { return get_vbo_objs().invalidate_all(); }
+        static void release_all() { return get_vbo_objs().release_all(); }
+
+        DIRECTX11_ONLY(static void release_all());
+
+    public:
+        void release()
+        {
+            DIRECTX11_ONLY(if(vertex_loc) vertex_loc->Release());
+            DIRECTX11_ONLY(if(index_loc) index_loc->Release());
+            OPENGL_ONLY(if(vertex_loc) glDeleteBuffers(1,&vertex_loc));
+            OPENGL_ONLY(if(index_loc) glDeleteBuffers(1,&index_loc));
+            *this=vbo_obj();
+        }
 
     private:
         typedef render_objects<vbo_obj> vbo_objs;
@@ -84,7 +93,6 @@ namespace
             return objs;
         }
     };
-
 
 #ifdef DIRECTX11
 DXGI_FORMAT get_dx_format(int dimension)
@@ -203,7 +211,8 @@ bool check_init_vbo()
 
 }
 
-void invalidate_vbos() { vbo_obj::invalidate(); }
+void invalidate_vbos() { vbo_obj::invalidate_all(); }
+void release_vbos() { vbo_obj::release_all(); active_verts=current_verts=-1; }
 
 void vbo::bind_verts() const { current_verts=m_verts; }
 void vbo::bind_indices() const { current_inds=m_indices; }
@@ -454,37 +463,7 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type)
 
 void vbo::release()
 {
-#ifdef DIRECTX11
-    if(m_verts>=0)
-    {
-        vbo_obj &obj=vbo_obj::get(m_verts);
-
-        if(active_verts==m_verts)
-            active_verts=-1;
-
-        if(current_verts==m_verts)
-            current_verts=-1;
-
-        if(obj.vertex_loc)
-            obj.vertex_loc->Release();
-
-        remove_layout(m_verts);
-    }
-
-    if(m_indices>=0)
-    {
-        vbo_obj &obj=vbo_obj::get(m_indices);
-
-        if(active_inds==m_indices)
-            active_inds=-1;
-
-        if(current_inds==m_verts)
-            current_inds=-1;
-
-        if(obj.index_loc)
-            obj.index_loc->Release();
-    }
-#else
+#ifndef DIRECTX11
     if(m_verts>=0)
     {
         vbo_obj &obj=vbo_obj::get(m_verts);
@@ -527,37 +506,22 @@ void vbo::release()
                 glDisableClientState(GL_COLOR_ARRAY);
   #endif
             }
-
-            active_verts=-1;
         }
-
-        if(current_verts==m_verts)
-            current_verts=-1;
-
-        if(obj.vertex_loc)
-            glDeleteBuffers(1,&obj.vertex_loc);
     }
 
-    if(m_indices>=0)
-    {
-        vbo_obj &obj=vbo_obj::get(m_indices);
-
-        if(active_inds==m_indices)
-        {
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
-            active_inds=-1;
-        }
-
-        if(current_inds==m_verts)
-            current_inds=-1;
-
-        if(obj.index_loc)
-            glDeleteBuffers(1,&obj.index_loc);
-    }
+    if(m_indices>=0 && active_inds==m_indices)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
 #endif
-
     if(m_verts>=0)
+    {
+        if(active_verts==m_verts) active_verts=-1;
+        if(current_verts==m_verts) current_verts=-1;
+        DIRECTX11_ONLY(remove_layout(m_verts));
         vbo_obj::remove(m_verts);
+    }
+
+    if(active_inds==m_indices) active_inds=-1;
+    if(current_inds==m_indices) current_inds=-1;
 
     m_indices=m_verts=-1;
 }

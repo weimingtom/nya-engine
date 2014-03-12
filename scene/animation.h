@@ -29,6 +29,9 @@ public:
     virtual void unload();
 
 public:
+    void create(const shared_animation &res);
+
+public:
     void set_range(unsigned int from,unsigned int to);
     void set_weight(float weight) { m_weight=weight; }
     void set_speed(float speed) { m_speed=speed; }

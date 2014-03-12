@@ -78,6 +78,10 @@ public:
     static int add() { return get_fbo_objs().add(); }
     static fbo_obj &get(int idx) { return get_fbo_objs().get(idx); }
     static void remove(int idx) { return get_fbo_objs().remove(idx); }
+    static void release_all() { return get_fbo_objs().release_all(); }
+
+public:
+    void release() { OPENGL_ONLY(if(fbo_idx) glDeleteFramebuffers(1,&fbo_idx)); }
 
 private:
     typedef render_objects<fbo_obj> fbo_objs;
@@ -119,6 +123,8 @@ bool check_init_fbo()
 }
 #endif
 }
+
+void release_fbos() { fbo_obj::release_all(); }
 
 void fbo::set_color_target(const texture &tex,cubemap_side side)
 {
@@ -183,14 +189,7 @@ void fbo::release()
 		return;
 
     const fbo_obj &fbo=fbo_obj::get(m_fbo_idx);
-
-#ifndef DIRECTX11
-    if(fbo.fbo_idx)
-    {
-        glBindFramebuffer(GL_FRAMEBUFFER,default_fbo_idx);
-        glDeleteFramebuffers(1,&fbo.fbo_idx);
-    }
-#endif
+    OPENGL_ONLY(if(fbo.fbo_idx) glBindFramebuffer(GL_FRAMEBUFFER,default_fbo_idx));
 
     fbo_obj::remove(m_fbo_idx);
     m_fbo_idx=-1;

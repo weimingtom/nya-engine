@@ -17,7 +17,7 @@ public:
     void remove(int idx)
     {
         m_objects[idx].free=true;
-        m_objects[idx].data=t();
+        m_objects[idx].data.release();
         m_free.push_back(idx);
     }
 
@@ -28,6 +28,7 @@ public:
             const int idx=m_free.back();
             m_free.pop_back();
             m_objects[idx].free=false;
+            //m_objects[idx].data=t(); //not counting on release
 
             return idx;
         }
@@ -51,7 +52,18 @@ public:
         }
     }
 
-    void invalidate()
+    void release_all()
+    {
+        for(int i=0;i<(int)m_objects.size();++i)
+        {
+            if(m_objects[i].free)
+                continue;
+
+            m_objects[i].data.release();
+        }
+    }
+
+    void invalidate_all()
     {
         for(int i=0;i<(int)m_objects.size();++i)
         {

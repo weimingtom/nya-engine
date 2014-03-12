@@ -101,7 +101,11 @@ namespace nya_render
         static texture_obj &get(int idx) { return get_texture_objs().get(idx); }
         static void remove(int idx) { return get_texture_objs().remove(idx); }
         static unsigned int get_used_vmem_size();
-        static void invalidate() { get_texture_objs().invalidate(); }
+        static void invalidate_all() { get_texture_objs().invalidate_all(); }
+        static void release_all() { get_texture_objs().release_all(); }
+
+    public:
+        void release();
 
     private:
         typedef render_objects<texture_obj> texture_objs;
@@ -132,12 +136,24 @@ namespace nya_render
     void set_target(ID3D11RenderTargetView *color,ID3D11DepthStencilView *depth,bool default=false);
 #endif
 
+    void release_vbos();
+    void release_shaders();
+    void release_fbos();
+
+    inline void release_resources()
+    {
+        texture_obj::release_all();
+        release_shaders();
+        release_vbos();
+        release_fbos();
+    }
+
     void invalidate_shaders();
     void invalidate_vbos();
 
     inline void invalidate_resources() //on context loss, etc
     {
-        texture_obj::invalidate();
+        texture_obj::invalidate_all();
         invalidate_shaders();
         invalidate_vbos();
     }

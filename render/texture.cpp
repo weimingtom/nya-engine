@@ -840,12 +840,6 @@ void texture::release()
         if(current_layers[i]==m_tex)
             current_layers[i]=-1;
     }
-
-    if(texture_obj::get(m_tex).srv)
-        texture_obj::get(m_tex).srv->Release();
-
-    if(texture_obj::get(m_tex).sampler_state)
-        texture_obj::get(m_tex).sampler_state->Release();
 #else
     for(unsigned int i=0;i<max_layers;++i)
     {
@@ -859,9 +853,6 @@ void texture::release()
         if(current_layers[i]==m_tex)
             current_layers[i]=-1;
     }
-
-    if(texture_obj::get(m_tex).tex_id)
-	    glDeleteTextures(1,&texture_obj::get(m_tex).tex_id);
 #endif
     texture_obj::remove(m_tex);
 
@@ -870,12 +861,17 @@ void texture::release()
     m_height=0;
 }
 
+namespace
+{
+
 struct size_counter
 {
     unsigned int size;
     void apply(const texture_obj &obj) {
         size+=obj.size; }
     size_counter(): size(0) {}
+};
+
 };
 
 unsigned int texture_obj::get_used_vmem_size()
@@ -889,6 +885,14 @@ unsigned int texture_obj::get_used_vmem_size()
 unsigned int texture::get_used_vmem_size()
 {
     return texture_obj::get_used_vmem_size();
+}
+
+void texture_obj::release()
+{
+    DIRECTX11_ONLY(if(srv) srv->Release());
+    DIRECTX11_ONLY(if(sampler_state) sampler_state->Release());
+    OPENGL_ONLY(if(tex_id) glDeleteTextures(1,&tex_id));
+    *this=texture_obj();
 }
 
 }

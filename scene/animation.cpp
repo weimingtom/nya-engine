@@ -16,11 +16,8 @@ bool animation::load(const char *name)
 
     m_range_from=0;
     m_range_to=m_shared->anim.get_duration();
-
     m_speed=m_weight=1.0f;
-
     update_version();
-
     m_mask.free();
 
     return true;
@@ -33,6 +30,17 @@ void animation::unload()
     m_range_from=m_range_to=0;
     m_speed=m_weight=1.0f;
 
+    m_mask.free();
+}
+
+void animation::create(const shared_animation &res)
+{
+    scene_shared::create(res);
+
+    m_range_from=0;
+    m_range_to=m_shared->anim.get_duration();
+    m_speed=m_weight=1.0f;
+    update_version();
     m_mask.free();
 }
 

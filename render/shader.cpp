@@ -36,9 +36,7 @@ namespace nya_render
 namespace
 {
     compiled_shaders_provider *render_csp=0;
-
-    int current_shader=-1;
-    int active_shader=-1;
+    int current_shader=-1,active_shader=-1;
 
     struct shader_obj
     {
@@ -117,9 +115,7 @@ namespace
                 objects[i]=0;
 
 #ifdef SUPPORT_OLD_SHADERS
-            mat_mvp=-1;
-            mat_mv=-1;
-            mat_p=-1;
+            mat_mvp=mat_mv=mat_p=-1;
 #endif
         }
 
@@ -128,16 +124,15 @@ namespace
         GLhandleARB objects[shader::program_types_count];
 
 #ifdef SUPPORT_OLD_SHADERS
-        int mat_mvp;
-        int mat_mv;
-        int mat_p;
+        int mat_mvp,mat_mv,mat_p;
 #endif
 #endif
     public:
         static int add() { return get_shader_objs().add(); }
         static shader_obj &get(int idx) { return get_shader_objs().get(idx); }
         static void remove(int idx) { return get_shader_objs().remove(idx); }
-        static void invalidate() { return get_shader_objs().invalidate(); DIRECTX11_ONLY(remove_layouts()); }
+        static void invalidate_all() { return get_shader_objs().invalidate_all(); }
+        static void release_all() { return get_shader_objs().release_all(); }
 
 #ifdef DIRECTX11
         static void remove_layout(int mesh_idx)
@@ -163,13 +158,38 @@ namespace
             r.mesh_idx=mesh_idx;
             get_shader_objs().apply_to_all(r);
         }
-
-        static void remove_layouts()
-        {
-            struct remover{ void apply(shader_obj &obj) { obj.layouts.clear(); } };
-            remover r; get_shader_objs().apply_to_all(r);
-        }
 #endif
+    public:
+        void release()
+        {
+#ifdef DIRECTX11
+            if(vertex_program) vertex_program->Release());
+            if(pixel_program) pixel_program->Release());
+
+            for(layouts_map::iterator it=layouts.begin();it!=layouts.end();++it)
+                if(it->second)
+                    it->second->Release();
+
+            layouts.clear();
+
+            if(constants.dx_buffer) constants.dx_buffer->Release();
+            if(vertex_uniforms.dx_buffer) vertex_uniforms.dx_buffer->Release();
+            if(pixel_uniforms.dx_buffer) pixel_uniforms.dx_buffer->Release();
+#else
+            for(int i=0;i<shader::program_types_count;++i)
+            {
+                if(!objects[i])
+                    continue;
+
+                glDetachObjectARB(program,objects[i]);
+                glDeleteObjectARB(objects[i]);
+            }
+
+            if( program )
+                glDeleteObjectARB(program);
+#endif
+            *this=shader_obj();
+        }
 
     private:
         typedef render_objects<shader_obj> shader_objs;
@@ -285,7 +305,8 @@ bool check_init_shaders()
 #endif
 }
 
-void invalidate_shaders() { shader_obj::invalidate(); }
+void invalidate_shaders() { shader_obj::invalidate_all(); }
+void release_shaders() { shader_obj::release_all(); current_shader=active_shader=-1; }
 
 void set_compiled_shaders_provider(compiled_shaders_provider *csp) { render_csp=csp; }
 
@@ -302,6 +323,7 @@ ID3D11InputLayout *get_layout(int mesh_idx)
     return it->second;
 }
 
+ID3D11InputLayout *add_layout(int mesh_idx,const D3D11_INPUT_ELEMENT_DESC*desc,size_t desc_size)
 ID3D11InputLayout *add_layout(int mesh_idx,
                               const D3D11_INPUT_ELEMENT_DESC*desc,size_t desc_size)
 {
@@ -320,6 +342,8 @@ ID3D11InputLayout *add_layout(int mesh_idx,
         return 0;
 
     shdr.layouts[mesh_idx]=out;
+
+	printf("layout added for mesh %d shader %d\n",mesh_idx,current_shader);
 
     return out;
 }
@@ -1274,62 +1298,12 @@ void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int coun
 void shader::release()
 {
     m_samplers.clear();
-
     if(m_shdr<0)
         return;
 
-    shader_obj &shdr=shader_obj::get(m_shdr);
-
-#ifdef DIRECTX11
-    if(shdr.vertex_program)
-        shdr.vertex_program->Release();
-
-    if(shdr.pixel_program)
-        shdr.pixel_program->Release();
-
-    for(shader_obj::layouts_map::iterator it=shdr.layouts.begin();
-        it!=shdr.layouts.end();++it)
-        if(it->second)
-            it->second->Release();
-
-    shdr.layouts.clear();
-
-    if(shdr.constants.dx_buffer)
-        shdr.constants.dx_buffer->Release();
-
-    if(shdr.vertex_uniforms.dx_buffer)
-        shdr.vertex_uniforms.dx_buffer->Release();
-
-    if(shdr.pixel_uniforms.dx_buffer)
-        shdr.pixel_uniforms.dx_buffer->Release();
-
-    shdr.constants = shader_obj::constants_buffer();
-    shdr.vertex_uniforms = shader_obj::uniforms_buffer();
-    shdr.pixel_uniforms = shader_obj::uniforms_buffer();
-
-    if(m_shdr==active_shader)
-        active_shader=-1;
-#else
-    if(m_shdr==active_shader)
-        set_shader(-1);
-
-    if(!shdr.program)
-        return;
-
-    for(int i=0;i<program_types_count;++i)
-    {
-        if(!shdr.objects[i])
-            continue;
-
-        glDetachObjectARB(shdr.program,shdr.objects[i]);
-        glDeleteObjectARB(shdr.objects[i]);
-    }
-
-    glDeleteObjectARB(shdr.program);
-#endif
-
-    if(m_shdr==current_shader)
-        current_shader=-1;
+    OPENGL_ONLY(if(m_shdr==active_shader) set_shader(-1));
+    if(m_shdr==active_shader) active_shader=-1;
+    if(m_shdr==current_shader) current_shader=-1;
 
     shader_obj::remove(m_shdr);
     m_shdr=-1;
