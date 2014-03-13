@@ -624,10 +624,10 @@ void set_context(ID3D11DeviceContext *context)
     if(!context)
         return;
 
-    apply_state(true);
     dx_apply_depth_state(true);
     dx_apply_cull_face_state(true);
     dx_apply_blend_state(true);
+    apply_state(true);
 }
 #endif
 
