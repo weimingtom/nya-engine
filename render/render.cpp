@@ -620,12 +620,14 @@ void set_context(ID3D11DeviceContext *context)
 
     invalidate_resources();
     applied_state=current_state=nya_render::state();
+    render_context=context;
+    if(!context)
+        return;
+
     apply_state(true);
     dx_apply_depth_state(true);
     dx_apply_cull_face_state(true);
     dx_apply_blend_state(true);
-
-    render_context=context;
 }
 #endif
 
