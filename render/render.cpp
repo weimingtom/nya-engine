@@ -304,12 +304,6 @@ D3D11_BLEND dx_blend_mode(blend::mode m)
 
 void dx_apply_blend_state(bool discard_cached=false)
 {
-    if(!current_state.blend)
-    {
-        get_context()->OMSetBlendState(0,0,current_state.color_write?0xffffffff:0);
-        return;
-    }
-
     class
     {
     public:
@@ -353,6 +347,12 @@ void dx_apply_blend_state(bool discard_cached=false)
 
     if(discard_cached)
         blend_state_cache=decltype(blend_state_cache)();
+
+    if(!current_state.blend)
+    {
+        get_context()->OMSetBlendState(0,0,current_state.color_write?0xffffffff:0);
+        return;
+    }
 
     ID3D11BlendState *state=blend_state_cache.get(dx_blend_mode(current_state.blend_src),
                                                   dx_blend_mode(current_state.blend_dst));
