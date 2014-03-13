@@ -282,8 +282,8 @@ void release_shaders() { shader_obj::release_all(); current_shader=active_shader
 void shader_obj::release()
 {
 #ifdef DIRECTX11
-    if(vertex_program) vertex_program->Release());
-    if(pixel_program) pixel_program->Release());
+    if(vertex_program) vertex_program->Release();
+    if(pixel_program) pixel_program->Release();
 
     for(layouts_map::iterator it=layouts.begin();it!=layouts.end();++it)
         if(it->second)
@@ -326,8 +326,6 @@ ID3D11InputLayout *get_layout(int mesh_idx)
 }
 
 ID3D11InputLayout *add_layout(int mesh_idx,const D3D11_INPUT_ELEMENT_DESC*desc,size_t desc_size)
-ID3D11InputLayout *add_layout(int mesh_idx,
-                              const D3D11_INPUT_ELEMENT_DESC*desc,size_t desc_size)
 {
     if(current_shader<0)
         return 0;
