@@ -114,7 +114,7 @@ public:
     static void release_all() { return get_fbo_objs().release_all(); }
 
 public:
-    void release() { OPENGL_ONLY(if(fbo_idx) glDeleteFramebuffers(1,&fbo_idx)); }
+    void release() { OPENGL_ONLY(if(fbo_idx) glDeleteFramebuffers(1,&fbo_idx)); *this=fbo_obj(); }
 
 private:
     typedef render_objects<fbo_obj> fbo_objs;
