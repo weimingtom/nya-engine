@@ -362,44 +362,40 @@ void dx_apply_blend_state(bool discard_cached=false)
 
 void dx_apply_cull_face_state(bool discard_cached=false)
 {
+    static ID3D11RasterizerState *cull_enabled=0;
+    if(!cull_enabled || discard_cached)
+    {
+        D3D11_RASTERIZER_DESC desc;
+        ZeroMemory(&desc,sizeof(desc));
+        if(current_state.cull_order==cull_face::cw)
+            desc.CullMode=D3D11_CULL_BACK;
+        else
+            desc.CullMode=D3D11_CULL_FRONT;
+
+        desc.FillMode=D3D11_FILL_SOLID;
+        desc.DepthClipEnable=true;
+        get_device()->CreateRasterizerState(&desc,&cull_enabled);
+    }
+
+    static ID3D11RasterizerState *cull_disabled=0;
+    if(!cull_disabled || discard_cached)
+    {
+        D3D11_RASTERIZER_DESC desc;
+        ZeroMemory(&desc,sizeof(desc));
+        desc.CullMode=D3D11_CULL_NONE;
+        desc.FillMode=D3D11_FILL_SOLID;
+        desc.DepthClipEnable=true;
+        get_device()->CreateRasterizerState(&desc,&cull_disabled);
+    }
+
     if(current_state.cull_face)
     {
-        static ID3D11RasterizerState *cull_enabled=0;
-        if(!cull_enabled || discard_cached)
-        {
-            D3D11_RASTERIZER_DESC desc;
-            ZeroMemory(&desc,sizeof(desc));
-            if(current_state.cull_order==cull_face::cw)
-                desc.CullMode=D3D11_CULL_BACK;
-            else
-                desc.CullMode=D3D11_CULL_FRONT;
-
-            desc.FillMode=D3D11_FILL_SOLID;
-            desc.DepthClipEnable=true;
-            get_device()->CreateRasterizerState(&desc,&cull_enabled);
-
-            if(cull_enabled)
-                get_context()->RSSetState(cull_enabled);
-        }
-        else
+        if(cull_enabled)
             get_context()->RSSetState(cull_enabled);
     }
     else
     {
-        static ID3D11RasterizerState *cull_disabled=0;
-        if(!cull_disabled || discard_cached)
-        {
-            D3D11_RASTERIZER_DESC desc;
-            ZeroMemory(&desc,sizeof(desc));
-            desc.CullMode=D3D11_CULL_NONE;
-            desc.FillMode=D3D11_FILL_SOLID;
-            desc.DepthClipEnable=true;
-            get_device()->CreateRasterizerState(&desc,&cull_disabled);
-
-            if(cull_disabled)
-                get_context()->RSSetState(cull_disabled);
-        }
-        else
+        if(cull_disabled)
             get_context()->RSSetState(cull_disabled);
     }
 }
