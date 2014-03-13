@@ -302,7 +302,7 @@ D3D11_BLEND dx_blend_mode(blend::mode m)
     return D3D11_BLEND_ONE;
 }
 
-void dx_apply_blend_state(bool discard_cached)
+void dx_apply_blend_state(bool discard_cached=false)
 {
     if(!current_state.blend)
     {
