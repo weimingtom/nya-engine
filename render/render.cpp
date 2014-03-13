@@ -8,6 +8,9 @@
 
 #include <map>
 
+namespace nya_render
+{
+
 namespace
 {
     nya_log::log *render_log=0;
@@ -22,37 +25,6 @@ namespace
 	float dx_clear_depth=1.0f;
 #endif
 }
-
-#ifdef DIRECTX11
-
-namespace
-{
-	ID3D11Device *render_device=0;
-	ID3D11DeviceContext *render_context=0;
-}
-
-namespace nya_render
-{
-	ID3D11Device *get_device() { return render_device; }
-    void set_device(ID3D11Device *device) { render_device=device; }
-
-	ID3D11DeviceContext *get_context() { return render_context; }
-	void set_context(ID3D11DeviceContext *context)
-    {
-        if(render_context!=context)
-        {
-            invalidate_resources();
-            applied_state=current_state=nya_render::state();
-        }
-
-        render_context=context;
-    }
-}
-
-#endif
-
-namespace nya_render
-{
 
 void set_log(nya_log::log *l)
 {
@@ -330,7 +302,7 @@ D3D11_BLEND dx_blend_mode(blend::mode m)
     return D3D11_BLEND_ONE;
 }
 
-void dx_apply_blend_state()
+void dx_apply_blend_state(bool discard_cached)
 {
     if(!current_state.blend)
     {
@@ -379,18 +351,21 @@ void dx_apply_blend_state()
 
     } static blend_state_cache;
 
+    if(discard_cached)
+        blend_state_cache=decltype(blend_state_cache)();
+
     ID3D11BlendState *state=blend_state_cache.get(dx_blend_mode(current_state.blend_src),
                                                   dx_blend_mode(current_state.blend_dst));
     const float blend_factor[]={1.0f,1.0f,1.0f,1.0f};
     nya_render::get_context()->OMSetBlendState(state,blend_factor,current_state.color_write?0xffffffff:0);
 }
 
-void dx_apply_cull_face_state()
+void dx_apply_cull_face_state(bool discard_cached=false)
 {
     if(current_state.cull_face)
     {
         static ID3D11RasterizerState *cull_enabled=0;
-        if(!cull_enabled)
+        if(!cull_enabled || discard_cached)
         {
             D3D11_RASTERIZER_DESC desc;
             ZeroMemory(&desc,sizeof(desc));
@@ -412,7 +387,7 @@ void dx_apply_cull_face_state()
     else
     {
         static ID3D11RasterizerState *cull_disabled=0;
-        if(!cull_disabled)
+        if(!cull_disabled || discard_cached)
         {
             D3D11_RASTERIZER_DESC desc;
             ZeroMemory(&desc,sizeof(desc));
@@ -429,7 +404,7 @@ void dx_apply_cull_face_state()
     }
 }
 
-void dx_apply_depth_state()
+void dx_apply_depth_state(bool discard_cached=false)
 {
     class
     {
@@ -474,6 +449,9 @@ void dx_apply_depth_state()
         cache_map m_map;
 
     } static depth_state_cache;
+
+    if(discard_cached)
+        depth_state_cache=decltype(depth_state_cache)();
 
     D3D11_COMPARISON_FUNC dx_depth_comparsion=D3D11_COMPARISON_ALWAYS;
     switch(current_state.depth_comparsion)
@@ -622,5 +600,34 @@ void apply_state(bool ignore_cache)
 
     a=c;
 }
+
+
+#ifdef DIRECTX11
+namespace
+{
+    ID3D11Device *render_device=0;
+    ID3D11DeviceContext *render_context=0;
+}
+
+ID3D11Device *get_device() { return render_device; }
+void set_device(ID3D11Device *device) { render_device=device; }
+
+ID3D11DeviceContext *get_context() { return render_context; }
+void set_context(ID3D11DeviceContext *context)
+{
+    if(render_context==context)
+        return;
+
+    invalidate_resources();
+    applied_state=current_state=nya_render::state();
+    apply_state(true);
+    dx_apply_depth_state(true);
+    dx_apply_cull_face_state(true);
+    dx_apply_blend_state(true);
+
+    render_context=context;
+}
+#endif
+
 
 }
