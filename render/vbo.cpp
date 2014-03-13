@@ -60,7 +60,7 @@ namespace
         attribute normals;
         attribute tcs[vbo::max_tex_coord];
 
-        DIRECTX11_ONLY(ID3D11Buffer *vertex_loc,index_loc);
+        DIRECTX11_ONLY(ID3D11Buffer *vertex_loc,*index_loc);
         OPENGL_ONLY(unsigned int vertex_loc,index_loc);
 
         vbo_obj(): vertex_loc(0), index_loc(0),element_type(vbo::triangles),element_count(0),allocated_elements_count(0),
