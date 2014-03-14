@@ -343,8 +343,6 @@ ID3D11InputLayout *add_layout(int mesh_idx,const D3D11_INPUT_ELEMENT_DESC*desc,s
 
     shdr.layouts[mesh_idx]=out;
 
-	printf("layout added for mesh %d shader %d\n",mesh_idx,current_shader);
-
     return out;
 }
 
