@@ -174,7 +174,7 @@ protected:
 	    UINT creationFlags=D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 
     #if defined(_DEBUG)
-	    creationFlags|=D3D11_CREATE_DEVICE_DEBUG;
+	    //creationFlags|=D3D11_CREATE_DEVICE_DEBUG;
     #endif
 	    D3D_FEATURE_LEVEL featureLevels[] = 
 	    {
