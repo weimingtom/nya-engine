@@ -43,20 +43,20 @@ private:
             f[0]=f0; f[1]=f1;
             f[2]=f2; f[3]=f3;
         }
-        
-        param() { for(int i=0;i<4;++i) f[i]=0.0f; }
+
+        param() { set(0.0f,0.0f,0.0f,0.0f); }
         param(float f0,float f1,float f2,float f3) { set(f0,f1,f2,f3); }
-        
+
     private:
         float f[4];
     };
-    
+
     typedef proxy<param> param_proxy;
-    
+
     class param_array
     {
         friend class material_internal;
-        
+
     public:
         void set_count(int count) { m_params.resize(count); }
         int get_count() const { return (int)m_params.size(); }

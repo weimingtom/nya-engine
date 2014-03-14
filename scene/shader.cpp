@@ -6,6 +6,7 @@
 #include "transform.h"
 #include "render/render.h"
 #include <string.h>
+#include <cstdlib>
 
 namespace nya_scene
 {
@@ -199,6 +200,7 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
                             std::string semantics=std::string(&text[begin],i-begin);
 
                             shared_shader::transform_type transform=shared_shader::none;
+                            float default_value[4]={0.0,0.0,0.0,0.0};
                             for(begin=std::string::npos;i<data_size;++i)
                             {
                                 if(text[i]=='\n' || text[i]=='\r')
@@ -217,6 +219,20 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
 
                                 if(text[i]==':')
                                     begin=i+1;
+                                else if(text[i]=='=')
+                                {
+                                    ++i;
+                                    for(int j=0;j<4;++j)
+                                    {
+                                        while(i<data_size && (text[i]==' ' || text[i]=='\t' || text[i]==',')) ++i;
+                                        if(text[i]=='\n' || text[i]=='\r' || text[i]==':' ) break;
+                                        default_value[j]=atof(&text[i]);
+                                        while(i<data_size && ((text[i]>= '0' && text[i]<='9') || text[i]=='.' || text[i]=='-')) ++i;
+                                        if(text[i]=='\n' || text[i]=='\r' || text[i]==':' ) break;
+                                    }
+
+                                    default_value[0]=default_value[0];
+                                }
                             }
 
                             if(check=='p')
@@ -252,6 +268,7 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
                                 res.uniforms.resize(res.uniforms.size()+1);
                                 res.uniforms.back().name=semantics;
                                 res.uniforms.back().transform=transform;
+                                res.uniforms.back().default_value=default_value;
                             }
                         }
 
@@ -436,6 +453,9 @@ const shared_shader::uniform &shader_internal::get_uniform(int idx) const
 void shader_internal::set_uniform_value(int idx,float f0,float f1,float f2,float f3) const
 {
     if(!m_shared.is_valid() || idx<0 || idx >=(int)m_shared->uniforms.size())
+        return;
+
+    if(m_shared->uniforms[idx].location<0)
         return;
 
     if(m_shared->uniforms[idx].transform==shared_shader::local)

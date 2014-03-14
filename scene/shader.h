@@ -53,6 +53,7 @@ struct shared_shader
         std::string name;
         int location;
         transform_type transform;
+        nya_math::vec4 default_value;
 
         uniform(): location(-1), transform(none) {}
     };

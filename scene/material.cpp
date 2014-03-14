@@ -98,7 +98,7 @@ void material::set_shader(const shader &shdr)
     for(int i=0;i<int(param_semantics.size());++i)
         param_semantics[i]=internal().m_shader.internal().get_uniform(i).name;
 
-    std::vector<material_internal::param_holder> params=internal().m_params;
+    std::vector<material_internal::param_holder> params=internal().m_params; //saves previously setted params
 
     m_internal.m_shader=shdr;
 
@@ -107,6 +107,12 @@ void material::set_shader(const shader &shdr)
 
     m_internal.m_params.clear();
     m_internal.m_params.resize(internal().m_shader.internal().get_uniforms_count());
+
+    for(int i=0;i<shdr.internal().get_uniforms_count();++i)
+    {
+        const nya_math::vec4 &v=shdr.internal().get_uniform(i).default_value;
+        set_param(i,v.x,v.y,v.z,v.w);
+    }
 
     for(int i=0;i<int(param_semantics.size());++i)
     {
