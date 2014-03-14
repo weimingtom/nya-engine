@@ -304,6 +304,9 @@ D3D11_BLEND dx_blend_mode(blend::mode m)
 
 void dx_apply_blend_state(bool discard_cached=false)
 {
+    if(!get_device() || !get_context())
+        return;
+
     class
     {
     public:
@@ -334,7 +337,7 @@ void dx_apply_blend_state(bool discard_cached=false)
             blend_desc.RenderTarget[0]=desc;
 
             ID3D11BlendState *state;
-            nya_render::get_device()->CreateBlendState(&blend_desc,&state);
+            get_device()->CreateBlendState(&blend_desc,&state);
             m_map[hsh]=state;
             return state;
         }
@@ -362,6 +365,9 @@ void dx_apply_blend_state(bool discard_cached=false)
 
 void dx_apply_cull_face_state(bool discard_cached=false)
 {
+    if(!get_device() || !get_context())
+        return;
+
     static ID3D11RasterizerState *cull_enabled=0;
     if(!cull_enabled || discard_cached)
     {
@@ -402,6 +408,9 @@ void dx_apply_cull_face_state(bool discard_cached=false)
 
 void dx_apply_depth_state(bool discard_cached=false)
 {
+    if(!get_device() || !get_context())
+        return;
+
     class
     {
     public:
@@ -435,7 +444,7 @@ void dx_apply_depth_state(bool discard_cached=false)
             desc.BackFace.StencilFunc=D3D11_COMPARISON_ALWAYS;
 
             ID3D11DepthStencilState *state;
-            nya_render::get_device()->CreateDepthStencilState(&desc,&state);
+            get_device()->CreateDepthStencilState(&desc,&state);
             m_map[hsh]=state;
             return state;
         }
@@ -489,13 +498,7 @@ unsigned int gl_blend_mode(blend::mode m)
 
 void apply_state(bool ignore_cache)
 {
-#ifdef DIRECTX11
-    if(!get_context())
-        return;
-
-    if(!get_device())
-        return;
-#endif
+    DIRECTX11_ONLY(if(!get_context() || !get_device()) return);
 
     const state &c=current_state;
     state &a=applied_state;
@@ -606,7 +609,22 @@ namespace
 }
 
 ID3D11Device *get_device() { return render_device; }
-void set_device(ID3D11Device *device) { render_device=device; }
+void set_device(ID3D11Device *device)
+{
+    if(render_device==device)
+        return;
+
+    invalidate_resources();
+    applied_state=current_state=nya_render::state();
+    render_device=device;
+    if(!device)
+        return;
+
+    dx_apply_depth_state(true);
+    dx_apply_cull_face_state(true);
+    dx_apply_blend_state(true);
+    apply_state(true);
+}
 
 ID3D11DeviceContext *get_context() { return render_context; }
 void set_context(ID3D11DeviceContext *context)
