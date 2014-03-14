@@ -150,11 +150,13 @@ namespace nya_render
 
     void invalidate_shaders();
     void invalidate_vbos();
+    void invalidate_fbos();
 
     inline void invalidate_resources() //on context loss, etc
     {
         texture_obj::invalidate_all();
         invalidate_shaders();
         invalidate_vbos();
+        invalidate_fbos();
     }
 }

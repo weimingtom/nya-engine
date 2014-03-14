@@ -112,6 +112,7 @@ public:
     static fbo_obj &get(int idx) { return get_fbo_objs().get(idx); }
     static void remove(int idx) { return get_fbo_objs().remove(idx); }
     static void release_all() { return get_fbo_objs().release_all(); }
+    static void invalidate_all() { return get_fbo_objs().invalidate_all(); }
 
 public:
     void release() { OPENGL_ONLY(if(fbo_idx) glDeleteFramebuffers(1,&fbo_idx)); *this=fbo_obj(); }
@@ -126,6 +127,7 @@ private:
 };
 
 void release_fbos() { fbo_obj::release_all(); }
+void invalidate_fbos() { fbo_obj::invalidate_all(); }
 
 void fbo::set_color_target(const texture &tex,cubemap_side side)
 {
