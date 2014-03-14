@@ -226,7 +226,7 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
                                     {
                                         while(i<data_size && (text[i]==' ' || text[i]=='\t' || text[i]==',')) ++i;
                                         if(text[i]=='\n' || text[i]=='\r' || text[i]==':' ) { --i; break; }
-                                        default_value[j]=atof(&text[i]);
+                                        default_value[j]=(float)atof(&text[i]);
                                         while(i<data_size && ((text[i]>= '0' && text[i]<='9') || text[i]=='.' || text[i]=='-')) ++i;
                                         if(text[i]=='\n' || text[i]=='\r' || text[i]==':' ) { --i; break; }
                                     }
