@@ -225,10 +225,10 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
                                     for(int j=0;j<4;++j)
                                     {
                                         while(i<data_size && (text[i]==' ' || text[i]=='\t' || text[i]==',')) ++i;
-                                        if(text[i]=='\n' || text[i]=='\r' || text[i]==':' ) break;
+                                        if(text[i]=='\n' || text[i]=='\r' || text[i]==':' ) { --i; break; }
                                         default_value[j]=atof(&text[i]);
                                         while(i<data_size && ((text[i]>= '0' && text[i]<='9') || text[i]=='.' || text[i]=='-')) ++i;
-                                        if(text[i]=='\n' || text[i]=='\r' || text[i]==':' ) break;
+                                        if(text[i]=='\n' || text[i]=='\r' || text[i]==':' ) { --i; break; }
                                     }
 
                                     default_value[0]=default_value[0];
