@@ -44,7 +44,7 @@ const nya_math::mat4 &transform::get_modelviewprojection_matrix()
     if(!m_recalc_mvp)
         return m_modelviewproj;
 
-    m_modelviewproj=m_modelview*m_projection;
+    m_modelviewproj=m_modelview*get_projection_matrix();
     m_recalc_mvp=false;
 
     return m_modelviewproj;
