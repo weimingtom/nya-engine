@@ -5,6 +5,16 @@
 #include "memory/memory_reader.h"
 #include "string_encoding.h"
 
+namespace
+{
+
+struct add_data: public pmx_loader::additional_data, nya_scene::shared_mesh::additional_data
+{
+    const char *type() { return "pmx"; }
+};
+
+}
+
 int pmx_loader::read_idx(nya_memory::memory_reader &reader,int size)
 {
     switch(size)
@@ -433,6 +443,96 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         }
     }
 
+    add_data *ad=new add_data;
+    res.add_data=ad;
+
+    const int morphs_count=reader.read<int>();
+    ad->morphs.resize(morphs_count);
+
+    for(int i=0;i<morphs_count;++i)
+    {
+        pmx_morph &m=ad->morphs[i];
+        const int name_len=reader.read<int>();
+        m.name=header.text_encoding?std::string((const char*)reader.get_data(),name_len):
+                                                    utf8_from_utf16le(reader.get_data(),name_len);
+        reader.skip(name_len);
+        reader.skip(reader.read<int>());
+
+        m.type=morph_type(reader.read<char>());
+
+        //printf("%d name %s %d\n",i,m.name.c_str(),m.type);
+
+        const char morph_type=reader.read<char>();
+        switch(morph_type)
+        {
+            case 0:
+            {
+                const int size=reader.read<int>(); //ToDo: group morph
+                for(int j=0;j<size;++j)
+                {
+                    read_idx(reader,header.morph_idx_size);
+                    reader.read<float>();
+                }
+            }
+            break;
+
+            case 1:
+            {
+                const int size=reader.read<int>();
+                m.verts.resize(size);
+                for(int j=0;j<size;++j)
+                {
+                    pmx_morph_vertex &v=m.verts[j];
+                    v.idx=read_idx(reader,header.index_size);
+                    v.pos.x=reader.read<float>();
+                    v.pos.y=reader.read<float>();
+                    v.pos.z=-reader.read<float>();
+                }
+            }
+            break;
+
+            case 2:
+            {
+                return false;
+                const int size=reader.read<int>(); //ToDo: bone morph
+                for(int j=0;j<size;++j)
+                {
+                    read_idx(reader,header.bone_idx_size);
+                    reader.skip(sizeof(float)*(4+3));
+                }
+            }
+
+            case 3:
+            case 4:
+            case 5:
+            case 6:
+            case 7:
+            {
+                const int size=reader.read<int>(); //ToDo: uv morph
+                for(int j=0;j<size;++j)
+                {
+                    read_idx(reader,header.index_size);
+                    reader.skip(sizeof(float)*4);
+                }
+            }
+            break;
+
+            case 8:
+            {
+                const int size=reader.read<int>(); //ToDo: material morph
+                for(int j=0;j<size;++j)
+                {
+                    read_idx(reader,header.material_idx_size);
+                    reader.read<char>();
+                    reader.skip(sizeof(float)*(4+4+3+4+1+4+4+4));
+                }
+            }
+            break;
+
+            default: return false;
+        }
+    }
+
     for(int i=0;i<vert_count;++i)
     {
         vert &v=verts[i];
@@ -442,7 +542,14 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
                 v.pos[j]=v.pos[0]-res.skeleton.get_bone_pos(v.bone_idx[j]);
         }
     }
-
+/*
+    const pmx_morph &m=morphs[58];
+    for(int i=0;i<int(m.verts.size());++i)
+    {
+        const pmx_morph_vertex &v=m.verts[i];
+        verts[v.idx].pos[0]+=v.pos;
+    }
+*/
     res.vbo.set_vertex_data(&verts[0],sizeof(vert),vert_count);
     int offset=0;
     res.vbo.set_vertices(offset,3); offset+=sizeof(verts[0].pos[0]);
@@ -455,4 +562,20 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     res.vbo.set_tc(2,offset,4); //offset+=sizeof(verts[0].bone_weight);
 
     return true;
+}
+
+const pmx_loader::additional_data *pmx_loader::get_additional_data(const nya_scene::mesh &m)
+{
+    if(!m.internal().get_shared_data().is_valid())
+        return 0;
+
+    nya_scene::shared_mesh::additional_data *d=m.internal().get_shared_data()->add_data;
+    if(!d)
+        return 0;
+
+    const char *type=d->type();
+    if(!type || strcmp(type,"pmx")!=0)
+        return 0;
+
+    return static_cast<pmx_loader::additional_data*>(static_cast<add_data*>(d));
 }

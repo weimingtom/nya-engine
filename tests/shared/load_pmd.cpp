@@ -229,7 +229,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         morphs.resize(morphs_count-1);
 
     pmd_morph base_morph;
-    for(ushort i=0;i<int(morphs.size());)
+    for(ushort i=0;i<ushort(morphs.size());)
     {
         const std::string name=utf8_from_shiftjis(data.get_data(reader.get_offset()),20);
         reader.skip(20);
@@ -239,6 +239,8 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         pmd_morph &m=type?morphs[i]:base_morph;
         if(type)
             ++i;
+        
+        printf("name %s %d\n",name.c_str(),type);
 
         m.name=name;
         m.verts.resize(size);

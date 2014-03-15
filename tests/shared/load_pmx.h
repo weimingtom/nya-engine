@@ -2,9 +2,10 @@
 
 #include "math/vector.h"
 #include <vector>
+#include <string>
 
 namespace nya_memory { class memory_reader; class tmp_buffer_ref; }
-namespace nya_scene { class shared_mesh; typedef nya_memory::tmp_buffer_ref resource_data; }
+namespace nya_scene { class mesh; class shared_mesh; typedef nya_memory::tmp_buffer_ref resource_data; }
 
 class pmx_loader
 {
@@ -57,4 +58,34 @@ class pmx_loader
 
 public:
     static bool load(nya_scene::shared_mesh &res,nya_scene::resource_data &data,const char* name);
+
+public:
+    struct pmx_morph_vertex
+    {
+        unsigned short idx;
+        nya_math::vec3 pos;
+    };
+
+    enum morph_type
+    {
+        morph_base=0,
+        morph_brow,
+        morph_eye,
+        morph_mouth,
+        morph_other
+    };
+
+    struct pmx_morph
+    {
+        morph_type type;
+        std::string name;
+        std::vector<pmx_morph_vertex> verts;
+    };
+
+    struct additional_data
+    {
+        std::vector<pmx_morph> morphs;
+    };
+
+    static const additional_data *get_additional_data(const nya_scene::mesh &m);
 };

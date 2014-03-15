@@ -2,7 +2,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-#include "scene/mesh.h"
+#include "mmd_mesh.h"
 
 class viewer_camera
 {
@@ -29,7 +29,7 @@ private:
 {
     NSPoint m_mouse_old;
 
-    nya_scene::mesh m_mesh;
+    mmd_mesh m_mesh;
     viewer_camera m_camera;
 
     NSTimer *m_animation_timer;

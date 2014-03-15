@@ -20,6 +20,7 @@
 		F28DADA715D9AF830030D67B /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = F28DADA115D9AF830030D67B /* Credits.rtf */; };
 		F28DADA815D9AF830030D67B /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F28DADA315D9AF830030D67B /* InfoPlist.strings */; };
 		F28DADAF15D9AFB50030D67B /* libnya_engine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F28DADAE15D9AFA70030D67B /* libnya_engine.a */; };
+		F53786FE18D2EEE600A93F17 /* mmd_mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53786FC18D2EEE600A93F17 /* mmd_mesh.cpp */; };
 		F5D869B41809A303000C8791 /* string_encoding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5D869B11809A303000C8791 /* string_encoding.cpp */; };
 		F5D869B91809A551000C8791 /* load_vmd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5D869B71809A551000C8791 /* load_vmd.cpp */; };
 /* End PBXBuildFile section */
@@ -64,6 +65,8 @@
 		F28DADA215D9AF830030D67B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = "../../tests/pmd viewer/en.lproj/Credits.rtf"; sourceTree = "<group>"; };
 		F28DADA415D9AF830030D67B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = "../../tests/pmd viewer/en.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		F28DADA915D9AFA70030D67B /* nya_engine.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = nya_engine.xcodeproj; sourceTree = "<group>"; };
+		F53786FC18D2EEE600A93F17 /* mmd_mesh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mmd_mesh.cpp; path = ../../tests/shared/mmd_mesh.cpp; sourceTree = "<group>"; };
+		F53786FD18D2EEE600A93F17 /* mmd_mesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mmd_mesh.h; path = ../../tests/shared/mmd_mesh.h; sourceTree = "<group>"; };
 		F5D869B11809A303000C8791 /* string_encoding.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = string_encoding.cpp; path = ../../tests/shared/string_encoding.cpp; sourceTree = "<group>"; };
 		F5D869B21809A303000C8791 /* string_encoding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = string_encoding.h; path = ../../tests/shared/string_encoding.h; sourceTree = "<group>"; };
 		F5D869B31809A303000C8791 /* moonspeak.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = moonspeak.h; path = ../../tests/shared/moonspeak.h; sourceTree = "<group>"; };
@@ -126,6 +129,8 @@
 		F28DAD8D15D9AF330030D67B /* pmd viewer */ = {
 			isa = PBXGroup;
 			children = (
+				F53786FC18D2EEE600A93F17 /* mmd_mesh.cpp */,
+				F53786FD18D2EEE600A93F17 /* mmd_mesh.h */,
 				F20FADB6177CBF6400330FA5 /* load_pmd.cpp */,
 				F20FADB5177CBF6400330FA5 /* load_pmd.h */,
 				F20FADB8177CC06F00330FA5 /* load_pmx.cpp */,
@@ -259,6 +264,7 @@
 				F28DAD9915D9AF4E0030D67B /* PmdDocument.mm in Sources */,
 				F28DAD9C15D9AF4E0030D67B /* main.m in Sources */,
 				F20FADB7177CBF6500330FA5 /* load_pmd.cpp in Sources */,
+				F53786FE18D2EEE600A93F17 /* mmd_mesh.cpp in Sources */,
 				F20FADBA177CC06F00330FA5 /* load_pmx.cpp in Sources */,
 				F5D869B41809A303000C8791 /* string_encoding.cpp in Sources */,
 				F5D869B91809A551000C8791 /* load_vmd.cpp in Sources */,

@@ -3,8 +3,6 @@
 #import "PmdView.h"
 #import "PmdDocument.h"
 
-#include "load_pmx.h"
-#include "load_pmd.h"
 #include "load_vmd.h"
 
 #include "scene/camera.h"
@@ -40,8 +38,8 @@ void viewer_camera::add_pos(float dx,float dy,float dz)
     if(m_pos.z<5.0f)
         m_pos.z=5.0f;
 
-    if(m_pos.z>100.0f)
-        m_pos.z=100.0f;
+    if(m_pos.z>200.0f)
+        m_pos.z=200.0f;
 
     update();
 }
@@ -50,7 +48,7 @@ void viewer_camera::set_aspect(float aspect)
 {
     nya_scene::camera_proxy cam=nya_scene::get_camera();
     if(cam.is_valid())
-        cam->set_proj(55.0,aspect,1.0,150.0);
+        cam->set_proj(55.0,aspect,1.0,300.0);
 
     update();
 }
@@ -317,8 +315,6 @@ private:
         nya_render::depth_test::enable(nya_render::depth_test::less);
         
         nya_scene::texture::register_load_function(load_texture);
-        nya_scene::mesh::register_load_function(pmx_loader::load);
-        nya_scene::mesh::register_load_function(pmd_loader::load);
         m_mesh.load(doc->m_model_name.c_str());
         nya_render::apply_state(true);
         
@@ -329,11 +325,10 @@ private:
 
     m_mesh.draw();
 
-    nya_render::clear(false,true);
-    /*
-    static nya_render::debug_draw dd; dd.clear(); dd.set_point_size(3.0f);
-    dd.add_skeleton(m_mesh.get_skeleton(),nya_math::vec4(0.0,0.0,1.0,1.0));
-    dd.draw();*/
+    //nya_render::clear(false,true);
+    //static nya_render::debug_draw dd; dd.clear(); dd.set_point_size(3.0f);
+    //dd.add_skeleton(m_mesh.get_skeleton(),nya_math::vec4(0.0,0.0,1.0,1.0));
+    //dd.draw();
 }
 
 - (void)drawRect:(NSRect)rect

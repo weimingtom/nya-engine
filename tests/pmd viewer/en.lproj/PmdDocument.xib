@@ -2,9 +2,9 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="7.10">
 	<data>
 		<int key="IBDocument.SystemTarget">1080</int>
-		<string key="IBDocument.SystemVersion">12F37</string>
+		<string key="IBDocument.SystemVersion">12F45</string>
 		<string key="IBDocument.InterfaceBuilderVersion">3084</string>
-		<string key="IBDocument.AppKitVersion">1187.39</string>
+		<string key="IBDocument.AppKitVersion">1187.40</string>
 		<string key="IBDocument.HIToolboxVersion">626.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -54,7 +54,6 @@
 							<string key="NSFrameSize">{600, 800}</string>
 							<reference key="NSSuperview" ref="568628114"/>
 							<reference key="NSWindow"/>
-							<reference key="NSNextKeyView"/>
 							<object class="NSOpenGLPixelFormat" key="NSPixelFormat">
 								<object class="NSMutableData" key="NSPixelAttributes">
 									<bytes key="NS.bytes">AAAABQAAAEgAAAAIAAAADwAAAAsAAAAIAAAADAAAABgAAAA4AAAAAgAAADcAAAABAAAAAA</bytes>
