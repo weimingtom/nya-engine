@@ -116,15 +116,9 @@ const rect &get_viewport()
     return viewport_rect;
 }
 
-void set_projection_matrix(const nya_math::mat4 &mat)
-{
-    transform::get().set_projection_matrix(mat);
-}
-
-void set_modelview_matrix(const nya_math::mat4 &mat)
-{
-    transform::get().set_modelview_matrix(mat);
-}
+void set_projection_matrix(const nya_math::mat4 &mat) { transform::get().set_projection_matrix(mat); }
+void set_modelview_matrix(const nya_math::mat4 &mat) { transform::get().set_modelview_matrix(mat); }
+void set_orientation_matrix(const nya_math::mat4 &mat) { transform::get().set_orientation_matrix(mat); }
 
 void set_color(float r,float g,float b,float a)
 {
