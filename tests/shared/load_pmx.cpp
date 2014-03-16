@@ -387,9 +387,10 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         b.pos.x=reader.read<float>();
         b.pos.y=reader.read<float>();
         b.pos.z=-reader.read<float>();
+        b.idx=i;
 
         b.parent=read_idx(reader,header.bone_idx_size);
-        reader.read<int>();//ToDo: transform order
+        b.order=reader.read<int>();
 
         const flag<ushort> f(reader.read<ushort>()); //ToDo
         if(f.c(0x0001))
@@ -442,14 +443,41 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         }
     }
 
-    std::sort(bones.begin(),bones.end());
+    for(int i=0;i<int(bones.size());++i)
+        if(bones[i].parent>=0)
+            bones[i].parent_name=bones[bones[i].parent].name;
+
+    //dumb sort
+    for(int i=0;i<int(bones.size());++i) //ToDo: less dumb
+    {
+        bool had_sorted=false;
+        for(int j=0;j<int(bones.size());++j)
+        {
+            const int p=bones[j].parent;
+            if(p>j)
+            {
+                had_sorted=true;
+                std::swap(bones[j], bones[p]);
+                for(int k=0;k<bones.size();++k)
+                    if(bones[k].parent==j || bones[k].parent==p)
+                        bones[k].parent=pmx_bone::parent_idx_by_name(bones[k].parent_name,bones);
+            }
+        }
+
+        if(!had_sorted)
+            break;
+    }
+
+    std::vector<int> old_bones(bones_count);
+    for(int i=0;i<bones_count;++i)
+        old_bones[bones[i].idx]=i;
 
     for(int i=0;i<bones_count;++i)
     {
         const pmx_bone &b=bones[i];
 
         if(b.bound.has_pos || b.bound.has_rot)
-            res.skeleton.add_bound(b.bound.src_idx,i,b.bound.k,b.bound.has_pos,b.bound.has_rot,true);
+            res.skeleton.add_bound(old_bones[b.bound.src_idx],i,b.bound.k,b.bound.has_pos,b.bound.has_rot,true);
 
         if(res.skeleton.add_bone(b.name.c_str(),b.pos,b.parent,true)!=i)
         {
@@ -459,17 +487,17 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
 
         if(b.ik.has)
         {
-            const int ik=res.skeleton.add_ik(i,b.ik.eff_idx,b.ik.count,b.ik.k,true);
+            const int ik=res.skeleton.add_ik(i,old_bones[b.ik.eff_idx],b.ik.count,b.ik.k,true);
             for(int j=0;j<int(b.ik.links.size());++j)
             {
                 const pmx_bone::ik_link &l=b.ik.links[j];
                 if(l.has_limits)
                 {
                     //res.skeleton.add_ik_link(ik,link,-to.x,-from.x,true);
-                    res.skeleton.add_ik_link(ik,l.idx,0.001f,nya_math::constants::pi,true); //ToDo
+                    res.skeleton.add_ik_link(ik,old_bones[l.idx],0.001f,nya_math::constants::pi,true); //ToDo
                 }
                 else
-                    res.skeleton.add_ik_link(ik,l.idx,true);
+                    res.skeleton.add_ik_link(ik,old_bones[l.idx],true);
             }
         }
     }
@@ -582,7 +610,20 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         }
     }
 /*
-    const pmx_morph &m=morphs[58];
+    std::map<int,int> test;
+
+    for(int i=0;i<vert_count;++i)
+    {
+        vert &v=verts[i];
+        for(int j=3;j>=0;--j)
+        {
+            if(v.bone_weight[j]>0.0f)
+                test[v.bone_idx[j]]=0;
+        }
+    }
+*/
+/*
+    const pmx_morph &m=ad->morphs[58];
     for(int i=0;i<int(m.verts.size());++i)
     {
         const pmx_morph_vertex &v=m.verts[i];

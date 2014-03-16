@@ -47,7 +47,10 @@ class pmx_loader
     struct pmx_bone
     {
         std::string name;
+        int idx;
         int parent;
+        std::string parent_name;
+        int order;
         nya_math::vec3 pos;
 
         struct
@@ -76,7 +79,14 @@ class pmx_loader
             std::vector<ik_link> links;
         } ik;
 
-        bool operator < (const pmx_bone &b) const { return parent<b.parent; }
+        template<typename t> static int parent_idx_by_name(const std::string &name,t bones)
+        {
+            for(int i=0;i<int(bones.size());++i)
+                if(bones[i].name==name)
+                    return i;
+
+            return -1;
+        }
     };
 
     static int read_idx(nya_memory::memory_reader &reader,int size);
