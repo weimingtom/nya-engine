@@ -5,6 +5,8 @@
 #include "memory/memory_reader.h"
 #include "string_encoding.h"
 
+//#include "resources/file_resources_provider.h"
+
 namespace
 {
 
@@ -44,8 +46,6 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         return false;
     
     const pmx_header header=reader.read<pmx_header>();
-    if(header.extended_uv>0)
-        return false; //ToDo
     
     for(int i=0;i<4;++i)
     {
@@ -73,7 +73,8 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         
         v.tc[0]=reader.read<float>();
         v.tc[1]=1.0-reader.read<float>();
-        
+        reader.skip(header.extended_uv*sizeof(float)*4);
+
         switch(reader.read<char>())
         {
             case 0:
@@ -147,16 +148,22 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
              */
             
             const char *data=(const char*)reader.get_data();
-            tex_names[i].resize(str_len/2);
-            for(int j=0;j<str_len/2;++j)
-                tex_names[i][j]=data[j*2];
+            //for(int j=0;j<str_len;++j) printf("%c",data[j]); printf("\n");
+
+            for(int j=0;j<str_len;++j)
+            {
+                if(data[j]!=0)
+                    tex_names[i].push_back(data[j]);
+            }
         }
         else
             tex_names[i]=std::string((const char*)reader.get_data(),str_len);
         
         reader.skip(str_len);
     }
-    
+
+    //printf("_________\n");
+
     const int mat_count=reader.read<int>();
     res.groups.resize(mat_count);
     res.materials.resize(mat_count);
@@ -169,6 +176,8 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         path.clear();
     else
         path.resize(p+1);
+
+    //nya_resources::file_resources_provider frp; frp.set_folder(path.c_str()); for(nya_resources::resource_info *fri=frp.first_res_info();fri;fri=fri->get_next()) printf("%s\n",fri->get_name());
 
     for(int i=0,offset=0;i<mat_count;++i)
     {
@@ -364,81 +373,103 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     typedef unsigned short ushort;
 
     const int bones_count=reader.read<int>();
+    std::vector<pmx_bone> bones(bones_count);
     for(int i=0;i<bones_count;++i)
     {
+        pmx_bone &b=bones[i];
+
         const int name_len=reader.read<int>();
-        const std::string name=header.text_encoding?std::string((const char*)reader.get_data(),name_len):
-                                                           utf8_from_utf16le(reader.get_data(),name_len);
+        b.name=header.text_encoding?std::string((const char*)reader.get_data(),name_len):
+        utf8_from_utf16le(reader.get_data(),name_len);
         reader.skip(name_len);
         reader.skip(reader.read<int>());
 
-        nya_math::vec3 pos;
-        pos.x=reader.read<float>();
-        pos.y=reader.read<float>();
-        pos.z=-reader.read<float>();
+        b.pos.x=reader.read<float>();
+        b.pos.y=reader.read<float>();
+        b.pos.z=-reader.read<float>();
 
-        const int parent=read_idx(reader,header.bone_idx_size);
-        reader.read<int>();//transform order
+        b.parent=read_idx(reader,header.bone_idx_size);
+        reader.read<int>();//ToDo: transform order
 
-        const flag<ushort> f(reader.read<ushort>());
+        const flag<ushort> f(reader.read<ushort>()); //ToDo
         if(f.c(0x0001))
             read_idx(reader,header.bone_idx_size);
         else
             reader.skip(sizeof(float)*3);
 
-        const bool has_add_rot=f.c(0x0100);
-        const bool has_add_pos=f.c(0x0200);
-        if(has_add_rot || has_add_pos)
+        b.bound.has_rot=f.c(0x0100);
+        b.bound.has_pos=f.c(0x0200);
+        if(b.bound.has_rot || b.bound.has_pos)
         {
-            const int src_idx=read_idx(reader,header.bone_idx_size);
-            const float k=reader.read<float>();
-            res.skeleton.add_bound(src_idx,i,k,has_add_pos,has_add_rot,true);
+            b.bound.src_idx=read_idx(reader,header.bone_idx_size);
+            b.bound.k=reader.read<float>();
         }
 
         if(f.c(0x0400))
             reader.skip(sizeof(float)*3); //ToDo
-        
+
         if(f.c(0x0800))
             reader.skip(sizeof(float)*3*2); //ToDo
 
         if(f.c(0x2000))
             reader.read<int>(); //ToDo
 
-        if(res.skeleton.add_bone(name.c_str(),pos,parent,true)!=i)
+        b.ik.has=f.c(0x0020);
+        if(b.ik.has)
+        {
+            b.ik.eff_idx=read_idx(reader,header.bone_idx_size);
+            b.ik.count=reader.read<int>();
+            b.ik.k=reader.read<float>();
+
+            const int link_count=reader.read<int>();
+            b.ik.links.resize(link_count);
+            for(int j=0;j<link_count;++j)
+            {
+                pmx_bone::ik_link &l=b.ik.links[j];
+                l.idx=read_idx(reader,header.bone_idx_size);
+                l.has_limits=reader.read<char>();
+                if(l.has_limits)
+                {
+                    l.from.x=reader.read<float>();
+                    l.from.y=reader.read<float>();
+                    l.from.z=reader.read<float>();
+
+                    l.to.x=reader.read<float>();
+                    l.to.y=reader.read<float>();
+                    l.to.z=reader.read<float>();
+                }
+            }
+        }
+    }
+
+    std::sort(bones.begin(),bones.end());
+
+    for(int i=0;i<bones_count;++i)
+    {
+        const pmx_bone &b=bones[i];
+
+        if(b.bound.has_pos || b.bound.has_rot)
+            res.skeleton.add_bound(b.bound.src_idx,i,b.bound.k,b.bound.has_pos,b.bound.has_rot,true);
+
+        if(res.skeleton.add_bone(b.name.c_str(),b.pos,b.parent,true)!=i)
         {
             nya_log::get_log()<<"pmx load error: invalid bone\n";
             return false;
         }
 
-        const bool has_ik=f.c(0x0020);
-        if(has_ik)
+        if(b.ik.has)
         {
-            const int eff=read_idx(reader,header.bone_idx_size);
-            const int count=reader.read<int>();
-            const float k=reader.read<float>();
-
-            const int ik=res.skeleton.add_ik(i,eff,count,k,true);
-            const int link_count=reader.read<int>();
-            for(int j=0;j<link_count;++j)
+            const int ik=res.skeleton.add_ik(i,b.ik.eff_idx,b.ik.count,b.ik.k,true);
+            for(int j=0;j<int(b.ik.links.size());++j)
             {
-                const int link=read_idx(reader,header.bone_idx_size);
-                if(reader.read<char>())
+                const pmx_bone::ik_link &l=b.ik.links[j];
+                if(l.has_limits)
                 {
-                    nya_math::vec3 from;
-                    from.x=reader.read<float>();
-                    from.y=reader.read<float>();
-                    from.z=reader.read<float>();
-
-                    nya_math::vec3 to;
-                    to.x=reader.read<float>();
-                    to.y=reader.read<float>();
-                    to.z=reader.read<float>();
-
                     //res.skeleton.add_ik_link(ik,link,-to.x,-from.x,true);
-                    res.skeleton.add_ik_link(ik,link,0.001f,nya_math::constants::pi,true); //ToDo
+                    res.skeleton.add_ik_link(ik,l.idx,0.001f,nya_math::constants::pi,true); //ToDo
                 }
                 else
-                    res.skeleton.add_ik_link(ik,link,true);
+                    res.skeleton.add_ik_link(ik,l.idx,true);
             }
         }
     }
@@ -493,14 +524,22 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
 
             case 2:
             {
-                return false;
                 const int size=reader.read<int>(); //ToDo: bone morph
                 for(int j=0;j<size;++j)
                 {
                     read_idx(reader,header.bone_idx_size);
-                    reader.skip(sizeof(float)*(4+3));
+                    nya_math::vec3 pos;
+                    pos.x=reader.read<float>();
+                    pos.y=reader.read<float>();
+                    pos.z=-reader.read<float>();
+                    nya_math::quat rot;
+                    rot.v.x=-reader.read<float>();
+                    rot.v.y=-reader.read<float>();
+                    rot.v.z=reader.read<float>();
+                    rot.w=reader.read<float>();
                 }
             }
+            break;
 
             case 3:
             case 4:

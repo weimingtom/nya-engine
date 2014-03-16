@@ -44,6 +44,41 @@ class pmx_loader
         float width;
     };
 
+    struct pmx_bone
+    {
+        std::string name;
+        int parent;
+        nya_math::vec3 pos;
+
+        struct
+        {
+            bool has_pos;
+            bool has_rot;
+            int src_idx;
+            float k;
+        } bound;
+
+        struct ik_link
+        {
+            int idx;
+            bool has_limits;
+            nya_math::vec3 from;
+            nya_math::vec3 to;
+        };
+
+        struct
+        {
+            bool has;
+            int eff_idx;
+            int count;
+            float k;
+            
+            std::vector<ik_link> links;
+        } ik;
+
+        bool operator < (const pmx_bone &b) const { return parent<b.parent; }
+    };
+
     static int read_idx(nya_memory::memory_reader &reader,int size);
 
     template<typename t> class flag
