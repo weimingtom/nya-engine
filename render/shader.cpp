@@ -822,7 +822,9 @@ bool shader::add_program(program_type type,const char*code)
         }
     }
 
+#ifdef OPENGL_ES
     code_final.append("precision mediump float;\n");
+#endif
     code_final.append(code_str);
 
     code=code_final.c_str();

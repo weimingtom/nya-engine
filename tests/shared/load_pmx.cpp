@@ -345,7 +345,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         "vec3 tr(vec3 pos,int idx) { vec4 q=bones_rot[idx];"
         "return bones_pos[idx]+pos+cross(q.xyz,cross(q.xyz,pos)+pos*q.w)*2.0; }"
         "void main() {"
-        "vec3 offset=gl_Normal*"+std::string(buf)+";"
+        "vec3 offset=gl_Normal.xyz*"+std::string(buf)+";"
 
         "vec3 pos=tr(gl_Vertex.xyz+offset,int(gl_MultiTexCoord1.x))*gl_MultiTexCoord2.x;"
         "if(gl_MultiTexCoord2.y>0.0) pos+=tr(gl_MultiTexCoord3.xyz+offset,int(gl_MultiTexCoord1.y))*gl_MultiTexCoord2.y;"
