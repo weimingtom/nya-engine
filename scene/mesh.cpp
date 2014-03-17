@@ -38,8 +38,8 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size,i
     typedef unsigned short ushort;
     typedef unsigned char uchar;
 
-    const nya_math::vec3 aabb_min(reader.read<float>(),reader.read<float>(),reader.read<float>());
-    const nya_math::vec3 aabb_max(reader.read<float>(),reader.read<float>(),reader.read<float>());
+    const nya_math::vec3 aabb_min=reader.read<nya_math::vec3>();
+    const nya_math::vec3 aabb_max=reader.read<nya_math::vec3>();
     res.aabb.delta=(aabb_max-aabb_min)*0.5f;
     res.aabb.origin=aabb_min+res.aabb.delta;
 
@@ -113,7 +113,7 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size,i
             const nya_math::vec3 aabb_min=reader.read<nya_math::vec3>();
             const nya_math::vec3 aabb_max=reader.read<nya_math::vec3>();
             g.aabb.delta=(aabb_max-aabb_min)*0.5f;
-            g.aabb.origin=aabb_min+res.aabb.delta;
+            g.aabb.origin=aabb_min+g.aabb.delta;
 
             g.material_idx=reader.read<ushort>();
             g.offset=reader.read<uint>();
@@ -360,11 +360,16 @@ const material &mesh_internal::mat(int idx) const
     return m_shared->materials[idx];
 }
 
-void mesh_internal::draw_group(int idx) const //ToDo: check aabb for groups
+void mesh_internal::draw_group(int idx) const
 {
     const shared_mesh::group &g=m_shared->groups[idx];
     if(g.material_idx>=m_shared->materials.size())
         return;
+
+    //ToDo: check aabb for groups
+    //if(g.aabb.delta*g.aabb.delta>0.0001)
+    //    if(get_camera().is_valid() && !get_camera()->get_frustum().test_intersect(g.aabb))
+    //        return;
 
     const material &m=mat(g.material_idx);
     m.internal().set();
