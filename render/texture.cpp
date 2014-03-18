@@ -15,9 +15,9 @@ namespace
 {
     OPENGL_ONLY(unsigned int active_layer=0);
 
-    const unsigned int max_layers=16;
-    int current_layers[max_layers]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
-    int active_layers[max_layers]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+    const unsigned int max_layers=8;
+    int current_layers[max_layers]={-1,-1,-1,-1,-1,-1,-1,-1};
+    int active_layers[max_layers]={-1,-1,-1,-1,-1,-1,-1,-1};
 
 #ifndef DIRECTX11
 	const unsigned int cube_faces[]={GL_TEXTURE_CUBE_MAP_POSITIVE_X,GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
