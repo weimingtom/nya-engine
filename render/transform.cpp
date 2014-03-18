@@ -13,7 +13,7 @@ namespace nya_render
 void transform::set_orientation_matrix(const nya_math::mat4 &mat)
 {
     m_orientation=mat;
-    m_orientated_proj=m_orientation*m_projection;
+    m_orientated_proj=m_projection*m_orientation;
     m_has_orientation=true;
 }
 
@@ -21,7 +21,7 @@ void transform::set_projection_matrix(const nya_math::mat4 &mat)
 {
     m_projection=mat, m_recalc_mvp=true;
     if(m_has_orientation)
-        m_orientated_proj=m_orientation*m_projection;
+        m_orientated_proj=m_projection*m_orientation;
 
 #ifndef MANUAL_MATRICES_ASSIGN
     glMatrixMode(GL_PROJECTION);
