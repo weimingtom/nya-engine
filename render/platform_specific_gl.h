@@ -135,6 +135,7 @@ namespace nya_render
 
     void set_target(ID3D11RenderTargetView *color,ID3D11DepthStencilView *depth,bool default=false);
 #endif
+    void reset_vbo_state();
 
     void release_vbos();
     void release_shaders();

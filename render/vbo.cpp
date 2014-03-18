@@ -202,8 +202,9 @@ bool check_init_vbo()
 
 }
 
+void reset_vbo_state() { active_verts=active_inds=-1; }
 void invalidate_vbos() { vbo_obj::invalidate_all(); }
-void release_vbos() { vbo_obj::release_all(); active_verts=current_verts=-1; }
+void release_vbos() { vbo_obj::release_all(); reset_vbo_state(); current_verts=current_inds=-1; }
 
 void vbo_obj::release()
 {

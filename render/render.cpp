@@ -589,6 +589,7 @@ void apply_state(bool ignore_cache)
     {
         texture::apply(true);
         shader::apply(true);
+        reset_vbo_state();
     }
 
     a=c;
