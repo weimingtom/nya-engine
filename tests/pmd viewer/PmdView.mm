@@ -151,9 +151,11 @@ public:
         {
             NSOpenGLPixelFormatAttribute pixelFormatAttributes[] =
             {
+                NSOpenGLPFAAccelerated,
                 NSOpenGLPFADoubleBuffer,
                 NSOpenGLPFADepthSize, 32,
                 NSOpenGLPFASampleBuffers,1,NSOpenGLPFASamples,2,
+                //NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
                 0
             };
 
@@ -194,6 +196,14 @@ private:
 };
 
 @implementation PmdView
+
+- (void)prepareOpenGL
+{
+    [super prepareOpenGL];
+    int vsync=true;
+    [[self openGLContext] setValues:&vsync forParameter:NSOpenGLCPSwapInterval];
+    [[self openGLContext] makeCurrentContext];
+}
 
 -(id)initWithCoder:(NSCoder *)aDecoder
 {
@@ -269,8 +279,9 @@ private:
     nya_render::set_viewport(0,0,[self frame].size.width,[self frame].size.height);
     m_camera.set_aspect([self frame].size.width / [self frame].size.height);
 
-    if(!m_mesh.get_anim().is_valid())
-        [self setNeedsDisplay: YES];
+    [[self openGLContext] update];
+    nya_render::apply_state(true);
+    [self setNeedsDisplay: YES];
 }
 
 - (void)animate:(id)sender
@@ -333,6 +344,8 @@ private:
 
 - (void)drawRect:(NSRect)rect
 {
+    [[self openGLContext] makeCurrentContext];
+
 	[self draw];
 
     [[ self openGLContext ] flushBuffer];

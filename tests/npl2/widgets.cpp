@@ -86,7 +86,7 @@ void widget_renderer::draw_text(uint x,uint y,const char *text
     nya_render::set_color(1.0f,1.0f,1.0f,1.0f);
     
     m_text_shader.bind();
-    m_font_tex->bind();
+    m_font_tex->bind(0);
 
     const int str_len=(int)text_str.size();
     
@@ -197,7 +197,7 @@ void widget_renderer::draw_text(uint x,uint y,const char *text
     m_font_vbo.draw();
     m_font_vbo.unbind();
 
-    m_font_tex->unbind();
+    m_font_tex->unbind(0);
     m_text_shader.unbind();
 }
 

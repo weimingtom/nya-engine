@@ -341,7 +341,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         nya_scene::shader she;
 
         sprintf(buf,"%f",edge.width*0.02f);
-        she_.vertex="uniform vec3 bones_pos[255]; uniform vec4 bones_rot[255];"
+        she_.vertex="uniform vec3 bones_pos[256]; uniform vec4 bones_rot[256];"
         "vec3 tr(vec3 pos,int idx) { vec4 q=bones_rot[idx];"
         "return bones_pos[idx]+pos+cross(q.xyz,cross(q.xyz,pos)+pos*q.w)*2.0; }"
         "void main() {"

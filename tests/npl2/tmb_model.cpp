@@ -367,7 +367,7 @@ void tmb_model::draw(bool use_materials,bool cull_face,int group) const
         else
             nya_render::cull_face::disable();
 
-        m_textures[mat.tex_idx].bind();
+        m_textures[mat.tex_idx].bind(0);
 
         //glColor4fv(mat.color);
         m_vbo.draw(mat.vert_offset,mat.vert_count);
