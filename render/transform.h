@@ -15,9 +15,12 @@ public:
     void set_orientation_matrix(const nya_math::mat4 &mat);
 
 public:
-    const nya_math::mat4 &get_projection_matrix() { return m_has_orientation?m_orientated_proj:m_projection; }
-    const nya_math::mat4 &get_modelview_matrix() { return m_modelview; }
-    const nya_math::mat4 &get_modelviewprojection_matrix();
+    const nya_math::mat4 &get_projection_matrix() const { return m_has_orientation?m_orientated_proj:m_projection; }
+    const nya_math::mat4 &get_modelview_matrix() const { return m_modelview; }
+    const nya_math::mat4 &get_modelviewprojection_matrix() const;
+
+    const nya_math::mat4 &get_orientation_matrix() const { return m_orientation; }
+    bool has_orientation_matrix() const { return m_has_orientation; }
 
 public:
     static transform &get()
@@ -36,8 +39,8 @@ private:
     nya_math::mat4 m_orientation;
     nya_math::mat4 m_orientated_proj;
 
-    bool m_recalc_mvp;
-    nya_math::mat4 m_modelviewproj;
+    mutable bool m_recalc_mvp;
+    mutable nya_math::mat4 m_modelviewproj;
 };
 
 }

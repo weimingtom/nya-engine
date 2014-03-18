@@ -39,7 +39,7 @@ void transform::set_modelview_matrix(const nya_math::mat4 &mat)
 #endif
 }
 
-const nya_math::mat4 &transform::get_modelviewprojection_matrix()
+const nya_math::mat4 &transform::get_modelviewprojection_matrix() const
 {
     if(!m_recalc_mvp)
         return m_modelviewproj;

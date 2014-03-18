@@ -4,6 +4,7 @@
 #include "render/render.h"
 #include "math/quaternion.h"
 #include "math/constants.h"
+#include "render/transform.h"
 
 namespace
 {
@@ -87,7 +88,10 @@ const nya_math::frustum &camera::get_frustum() const
     {
         m_recalc_frustum=false;
 
-        m_frustum=nya_math::frustum(get_view_matrix()*get_proj_matrix());
+        if(nya_render::transform::get().has_orientation_matrix())
+            m_frustum=nya_math::frustum(get_view_matrix()*get_proj_matrix()*nya_render::transform::get().get_orientation_matrix());
+        else
+            m_frustum=nya_math::frustum(get_view_matrix()*get_proj_matrix());
     }
 
     return m_frustum;
