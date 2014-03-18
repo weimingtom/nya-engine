@@ -20,7 +20,7 @@ public:
     void set_anim_time(unsigned int time,int layer=0) { m_mesh.set_anim_time(time,layer); }
 
     //int get_morph_name();
-    void set_morph(int idx,float value,bool override=false)
+    void set_morph(int idx,float value,bool override)
     {
         if(idx<0 || idx>=int(m_morphs.size()))
             return;
