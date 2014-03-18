@@ -13,9 +13,11 @@ public:
     bool load(const char *name);
     void unload();
 
-    void set_anim(const nya_scene::animation &anim,int layer=0) { m_mesh.set_anim(anim,layer); }
-    void set_anim(const nya_scene::animation_proxy & anim,int layer=0) { m_mesh.set_anim(anim,layer); }
+    void set_anim(const nya_scene::animation &anim,int layer=0);
     const nya_scene::animation_proxy & get_anim(int layer=0) const { return m_mesh.get_anim(layer); }
+    unsigned int get_anim_time(int layer=0) const { return m_mesh.get_anim_time(layer); }
+    bool is_anim_finished(int layer=0) const { return m_mesh.is_anim_finished(layer); }
+    void set_anim_time(unsigned int time,int layer=0) { m_mesh.set_anim_time(time,layer); }
 
     //int get_morph_name();
     void set_morph(int idx,float value,bool override=false)
@@ -53,4 +55,7 @@ private:
     };
 
     std::vector<morph> m_morphs;
+
+    struct applied_anim { int layer; std::vector<int> curves_map; };
+    std::vector<applied_anim> m_anims;
 };

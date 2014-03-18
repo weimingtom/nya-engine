@@ -37,9 +37,6 @@ bool mmd_mesh::load(const char *name)
             m_vbo.set_tc(i,vbo.get_tc_offset(i),vbo.get_tc_dimension(i));
     }
 
-    set_morph(58,1.0f);
-    update(0);
-
     return true;
 }
 
@@ -52,19 +49,64 @@ void mmd_mesh::unload()
     m_morphs.clear();
 }
 
+void mmd_mesh::set_anim(const nya_scene::animation &anim,int layer)
+{
+    m_mesh.set_anim(anim,layer);
+    int idx=-1;
+    for(int i=0;i<int(m_anims.size());++i)
+    {
+        if(m_anims[i].layer==layer)
+        {
+            idx=i;
+            break;
+        }
+    }
+
+    if(idx<0)
+    {
+        idx=int(m_anims.size());
+        m_anims.resize(idx+1);
+    }
+
+    m_anims[idx].curves_map.clear();
+    m_anims[idx].curves_map.resize(m_morphs.size());
+    if(!anim.get_shared_data().is_valid())
+        return;
+
+    if(m_pmx_data)
+    {
+        for(int i=0;i<int(m_morphs.size());++i)
+            m_anims[idx].curves_map[i]=anim.get_shared_data()->anim.get_curve_idx(m_pmx_data->morphs[i].name.c_str());
+    }
+}
+
 void mmd_mesh::update(unsigned int dt)
 {
     m_mesh.update(dt);
 
-    const nya_scene::animation_proxy &ap=get_anim(0); //ToDo: all layers
-    if(ap.is_valid())
+    for(int i=0;i<m_anims.size();++i)
     {
-        if(ap->get_shared_data().is_valid())
+        const nya_scene::animation_proxy &ap=get_anim(m_anims[i].layer);
+        if(ap.is_valid())
         {
-            const nya_render::animation &a=ap->get_shared_data()->anim;
-            //a.g
+            if(ap->get_shared_data().is_valid())
+            {
+                const nya_render::animation &a=ap->get_shared_data()->anim;
+                if(i==0)
+                {
+                    for(int j=0;j<m_anims[i].curves_map.size();++j)
+                        m_morphs[j].value=a.get_curve(m_anims[i].curves_map[j],m_mesh.get_anim_time(m_anims[i].layer))*ap->get_weight();
+                }
+                else
+                {
+                    for(int j=0;j<m_anims[i].curves_map.size();++j)
+                        m_morphs[j].value+=a.get_curve(m_anims[i].curves_map[j],m_mesh.get_anim_time(m_anims[i].layer))*ap->get_weight();
+                }
+            }
         }
     }
+
+    //not optimal, just for testing
 
     int stride=m_vbo.get_vert_stride()/4;
     if(!stride)
@@ -74,7 +116,7 @@ void mmd_mesh::update(unsigned int dt)
     for(int i=0;i<m_morphs.size();++i)
     {
         float delta=m_morphs[i].value-m_morphs[i].last_value;
-        if(fabsf(delta)<0.01f)
+        if(fabsf(delta)<0.02f)
             continue;
 
         if(m_pmx_data)

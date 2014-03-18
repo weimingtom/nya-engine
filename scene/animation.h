@@ -37,6 +37,7 @@ public:
     void set_speed(float speed) { m_speed=speed; }
 
     unsigned int get_duration() const;
+    float get_weight() const { return m_weight; }
     void set_loop(bool looped) { m_looped=looped; }
     bool get_loop() const { return m_looped; }
 
