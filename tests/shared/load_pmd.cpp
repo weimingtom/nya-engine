@@ -5,6 +5,16 @@
 #include "memory/memory_reader.h"
 #include "string_encoding.h"
 
+namespace
+{
+
+struct add_data: public pmd_loader::additional_data, nya_scene::shared_mesh::additional_data
+{
+    const char *type() { return "pmd"; }
+};
+
+}
+
 bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data,const char* name)
 {
     nya_memory::memory_reader reader(data.get_data(),data.get_size());
@@ -222,45 +232,49 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         }
     }
 
+
+
+    add_data *ad=new add_data;
+    res.add_data=ad;
+
     const ushort morphs_count=reader.read<ushort>();
-    std::vector<pmd_morph> morphs;
-
     if(morphs_count>1)
-        morphs.resize(morphs_count-1);
+        ad->morphs.resize(morphs_count-1);
 
-    pmd_morph base_morph;
-    for(ushort i=0;i<ushort(morphs.size());)
+    pmd_morph_data::morph base_morph;
+    for(ushort i=0;i<ushort(ad->morphs.size());)
     {
         const std::string name=utf8_from_shiftjis(data.get_data(reader.get_offset()),20);
         reader.skip(20);
         const uint size=reader.read<uint>();
         const uchar type=reader.read<uchar>();
 
-        pmd_morph &m=type?morphs[i]:base_morph;
+        pmd_morph_data::morph &m=type?ad->morphs[i]:base_morph;
         if(type)
             ++i;
-        
-        printf("name %s %d\n",name.c_str(),type);
+
+        //printf("name %s %d\n",name.c_str(),type);
 
         m.name=name;
         m.verts.resize(size);
         for(uint j=0;j<size;++j)
         {
-            pmd_morph_vertex &v=m.verts[j];
+            pmd_morph_data::morph_vertex &v=m.verts[j];
 
-            v.idx=reader.read<uint>();
+            const uint idx=reader.read<uint>();
+            v.idx=type?base_morph.verts[idx].idx:idx;
             v.pos.x=reader.read<float>();
             v.pos.y=reader.read<float>();
             v.pos.z=-reader.read<float>();
         }
     }
-
+/*
     for(int i=0;i<int(base_morph.verts.size());++i)
     {
-        const pmd_morph_vertex &b=base_morph.verts[i];
+        const pmd_morph_data::morph_vertex &b=base_morph.verts[i];
         vertices[b.idx].pos=b.pos;
     }
-
+*/
     for(size_t i=0;i<vertices.size();++i)
     {
         vertices[i].pos2=vertices[i].pos-res.skeleton.get_bone_pos(int(vertices[i].bone_idx[1]));
@@ -268,11 +282,11 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     }
 
     res.vbo.set_vertex_data(&vertices[0],sizeof(vertices[0]),vert_count);
-    res.vbo.set_normals(3*sizeof(float));
-    res.vbo.set_tc(0,6*sizeof(float),2);
-    res.vbo.set_tc(1,8*sizeof(float),3); //skin info
-    res.vbo.set_tc(2,11*sizeof(float),3); //pos2
-    
+    res.vbo.set_tc(2,3*sizeof(float),3); //pos2
+    res.vbo.set_normals(6*sizeof(float));
+    res.vbo.set_tc(0,9*sizeof(float),2);
+    res.vbo.set_tc(1,11*sizeof(float),3); //skin info
+
     vertices.clear();
 
     reader.skip(reader.read<uchar>()*sizeof(ushort));
@@ -302,4 +316,20 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     const uint rigid_bodys_count=reader.read<uint>();
 
     return true;
+}
+
+const pmd_loader::additional_data *pmd_loader::get_additional_data(const nya_scene::mesh &m)
+{
+    if(!m.internal().get_shared_data().is_valid())
+        return 0;
+
+    nya_scene::shared_mesh::additional_data *d=m.internal().get_shared_data()->add_data;
+    if(!d)
+        return 0;
+
+    const char *type=d->type();
+    if(!type || strcmp(type,"pmd")!=0)
+        return 0;
+
+    return static_cast<pmd_loader::additional_data*>(static_cast<add_data*>(d));
 }

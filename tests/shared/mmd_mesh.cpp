@@ -9,7 +9,7 @@ bool mmd_mesh::load(const char *name)
 
     m_vbo.release();
     m_vertex_data.clear();
-    m_pmx_data=0;
+    m_morph_data=0;
     m_morphs.clear();
 
     if(!m_mesh.load(name))
@@ -24,9 +24,17 @@ bool mmd_mesh::load(const char *name)
     buf.copy_from(&m_vertex_data[0],m_vertex_data.size()*4);
     buf.free();
 
-    m_pmx_data=pmx_loader::get_additional_data(m_mesh);
-    if(m_pmx_data)
-        m_morphs.resize(m_pmx_data->morphs.size());
+    m_morph_data=pmd_loader::get_additional_data(m_mesh);
+    if(!m_morph_data)
+    {
+        if((m_morph_data=pmx_loader::get_additional_data(m_mesh)))
+           m_pos_count=4;
+    }
+    else
+        m_pos_count=2;
+
+    if(m_morph_data)
+        m_morphs.resize(m_morph_data->morphs.size());
 
     m_vbo.set_vertex_data(&m_vertex_data[0],vbo.get_vert_stride(),vbo.get_verts_count());
     m_vbo.set_vertices(vbo.get_vert_offset(),vbo.get_vert_dimension());
@@ -44,7 +52,7 @@ void mmd_mesh::unload()
 {
     m_mesh.unload();
     m_vertex_data.clear();
-    m_pmx_data=0;
+    m_morph_data=0;
     m_vbo.release();
     m_morphs.clear();
 }
@@ -73,10 +81,10 @@ void mmd_mesh::set_anim(const nya_scene::animation &anim,int layer)
     if(!anim.get_shared_data().is_valid())
         return;
 
-    if(m_pmx_data)
+    if(m_morph_data)
     {
         for(int i=0;i<int(m_morphs.size());++i)
-            m_anims[idx].curves_map[i]=anim.get_shared_data()->anim.get_curve_idx(m_pmx_data->morphs[i].name.c_str());
+            m_anims[idx].curves_map[i]=anim.get_shared_data()->anim.get_curve_idx(m_morph_data->morphs[i].name.c_str());
     }
 }
 
@@ -129,13 +137,13 @@ void mmd_mesh::update(unsigned int dt)
         if(fabsf(delta)<0.02f)
             continue;
 
-        if(m_pmx_data)
+        if(m_morph_data)
         {
-            const pmx_loader::pmx_morph &m=m_pmx_data->morphs[i];
+            const pmd_morph_data::morph &m=m_morph_data->morphs[i];
             for(int j=0;j<int(m.verts.size());++j)
             {
                 int base=m.verts[j].idx*stride;
-                for(int k=0;k<4*3;k+=3)
+                for(int k=0;k<m_pos_count*3;k+=3)
                 {
                     m_vertex_data[base+k]+=m.verts[j].pos.x*delta;
                     m_vertex_data[base+k+1]+=m.verts[j].pos.y*delta;

@@ -510,14 +510,14 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
 
     for(int i=0;i<morphs_count;++i)
     {
-        pmx_morph &m=ad->morphs[i];
+        pmd_morph_data::morph &m=ad->morphs[i];
         const int name_len=reader.read<int>();
         m.name=header.text_encoding?std::string((const char*)reader.get_data(),name_len):
                                                     utf8_from_utf16le(reader.get_data(),name_len);
         reader.skip(name_len);
         reader.skip(reader.read<int>());
 
-        m.type=morph_type(reader.read<char>());
+        m.type=pmd_morph_data::morph_type(reader.read<char>());
 
         //printf("%d name %s %d\n",i,m.name.c_str(),m.type);
 
@@ -541,7 +541,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
                 m.verts.resize(size);
                 for(int j=0;j<size;++j)
                 {
-                    pmx_morph_vertex &v=m.verts[j];
+                    pmd_morph_data::morph_vertex &v=m.verts[j];
                     v.idx=read_idx(reader,header.index_size);
                     v.pos.x=reader.read<float>();
                     v.pos.y=reader.read<float>();

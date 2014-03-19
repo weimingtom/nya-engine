@@ -37,13 +37,13 @@ public:
     void set_rot(const nya_math::quat &rot) { m_mesh.set_rot(rot); }
     void set_scale(float scale) { m_mesh.set_scale(scale); }
 
-    mmd_mesh(): m_pmx_data(0) {}
+    mmd_mesh(): m_morph_data(0), m_pos_count(0) {}
 
 private:
     nya_scene::mesh m_mesh;
     nya_render::vbo m_vbo;
     std::vector<float> m_vertex_data;
-    const pmx_loader::additional_data *m_pmx_data;
+    const pmd_morph_data *m_morph_data;
 
     struct morph
     {
@@ -58,4 +58,6 @@ private:
 
     struct applied_anim { int layer; std::vector<int> curves_map; };
     std::vector<applied_anim> m_anims;
+
+    int m_pos_count;
 };
