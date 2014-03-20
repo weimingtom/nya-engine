@@ -889,7 +889,7 @@ void texture_obj::release()
 {
     DIRECTX11_ONLY(if(srv) srv->Release());
     DIRECTX11_ONLY(if(sampler_state) sampler_state->Release());
-    DIRECTX11_ONLY(for(int i=0;i<6;++i) if(tex.color_targets[i]) tex.color_targets[i]->Release());
+    DIRECTX11_ONLY(for(int i=0;i<6;++i) if(color_targets[i]) color_targets[i]->Release());
     DIRECTX11_ONLY(if(depth_target) depth_target->Release());
     DIRECTX11_ONLY(if(tex) tex->Release());
     OPENGL_ONLY(if(tex_id) glDeleteTextures(1,&tex_id));
