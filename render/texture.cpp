@@ -278,7 +278,6 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     if(format<depth16) //ToDo
     {
         get_device()->CreateShaderResourceView(tex,0,&srv);
-        tex->Release();
         if(!srv)
             return false;
     }
@@ -535,7 +534,6 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 
     ID3D11ShaderResourceView *srv;
     get_device()->CreateShaderResourceView(tex,0,&srv);
-    tex->Release();
     if(!srv)
         return false;
 
@@ -891,6 +889,9 @@ void texture_obj::release()
 {
     DIRECTX11_ONLY(if(srv) srv->Release());
     DIRECTX11_ONLY(if(sampler_state) sampler_state->Release());
+    DIRECTX11_ONLY(for(int i=0;i<6;++6) if(tex.color_targets[i]) tex.color_targets[i]->Release());
+    DIRECTX11_ONLY(if(depth_target) depth_target->Release());
+    DIRECTX11_ONLY(if(tex) tex->Release());
     OPENGL_ONLY(if(tex_id) glDeleteTextures(1,&tex_id));
     *this=texture_obj();
 }
