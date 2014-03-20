@@ -140,6 +140,7 @@ namespace nya_render
     void release_vbos();
     void release_shaders();
     void release_fbos();
+    void release_states();
 
     inline void release_resources()
     {
@@ -147,6 +148,7 @@ namespace nya_render
         release_shaders();
         release_vbos();
         release_fbos();
+        release_states();
     }
 
     void invalidate_shaders();

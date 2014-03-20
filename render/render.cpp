@@ -277,6 +277,74 @@ const state &get_aplied_state()
 }
 
 #ifdef DIRECTX11
+
+class cull_face_state_class
+{
+public:
+    void apply()
+    {
+        if(!get_device() || !get_context())
+            return;
+
+        if(!m_cull_enabled)
+        {
+            D3D11_RASTERIZER_DESC desc;
+            ZeroMemory(&desc,sizeof(desc));
+            if(current_state.cull_order==cull_face::cw)
+                desc.CullMode=D3D11_CULL_BACK;
+            else
+                desc.CullMode=D3D11_CULL_FRONT;
+
+            desc.FillMode=D3D11_FILL_SOLID;
+            desc.DepthClipEnable=true;
+            get_device()->CreateRasterizerState(&desc,&m_cull_enabled);
+        }
+
+
+        if(!m_cull_disabled)
+        {
+            D3D11_RASTERIZER_DESC desc;
+            ZeroMemory(&desc,sizeof(desc));
+            desc.CullMode=D3D11_CULL_NONE;
+            desc.FillMode=D3D11_FILL_SOLID;
+            desc.DepthClipEnable=true;
+            get_device()->CreateRasterizerState(&desc,&m_cull_disabled);
+        }
+
+        if(current_state.cull_face)
+        {
+            if(m_cull_enabled)
+                get_context()->RSSetState(m_cull_enabled);
+        }
+        else
+        {
+            if(m_cull_disabled)
+                get_context()->RSSetState(m_cull_disabled);
+        }
+    }
+
+    cull_face_state_class(): m_cull_enabled(0), m_cull_disabled(0) {}
+
+    void release()
+    {
+        if(m_cull_enabled)
+            m_cull_enabled->Release();
+
+        if(m_cull_disabled)
+            m_cull_disabled->Release();
+
+        m_cull_enabled=m_cull_disabled=0;
+    }
+
+private:
+    ID3D11RasterizerState *m_cull_enabled;
+    ID3D11RasterizerState *m_cull_disabled;
+
+} cull_face_state;
+
+namespace
+{
+
 D3D11_BLEND dx_blend_mode(blend::mode m)
 {
     switch(m)
@@ -296,179 +364,150 @@ D3D11_BLEND dx_blend_mode(blend::mode m)
     return D3D11_BLEND_ONE;
 }
 
-void dx_apply_blend_state(bool discard_cached=false)
+class
 {
-    if(!get_device() || !get_context())
-        return;
-
-    class
+public:
+    ID3D11BlendState *get(D3D11_BLEND src,D3D11_BLEND dst)
     {
-    public:
-        ID3D11BlendState *get(D3D11_BLEND src,D3D11_BLEND dst)
+        unsigned int hsh=src;
+        hsh+=128*dst;
+
+        cache_map::iterator it=m_map.find(hsh);
+        if(it!=m_map.end())
+            return it->second;
+
+        const D3D11_RENDER_TARGET_BLEND_DESC desc=
         {
-            unsigned int hsh=src;
-            hsh+=128*dst;
+            true,
+            src,
+            dst,
+            D3D11_BLEND_OP_ADD,
+            D3D11_BLEND_ONE,
+            D3D11_BLEND_ZERO,
+            D3D11_BLEND_OP_ADD,
+            D3D11_COLOR_WRITE_ENABLE_ALL
+        };
 
-            cache_map::iterator it=m_map.find(hsh);
-            if(it!=m_map.end())
-                return it->second;
+        D3D11_BLEND_DESC blend_desc;
+        blend_desc.AlphaToCoverageEnable=false;
+        blend_desc.IndependentBlendEnable=false;
+        blend_desc.RenderTarget[0]=desc;
 
-            const D3D11_RENDER_TARGET_BLEND_DESC desc=
-            {
-                true,
-                src,
-                dst,
-                D3D11_BLEND_OP_ADD,
-                D3D11_BLEND_ONE,
-                D3D11_BLEND_ZERO,
-                D3D11_BLEND_OP_ADD,
-                D3D11_COLOR_WRITE_ENABLE_ALL
-            };
+        ID3D11BlendState *state;
+        get_device()->CreateBlendState(&blend_desc,&state);
+        m_map[hsh]=state;
+        return state;
+    }
 
-            D3D11_BLEND_DESC blend_desc;
-            blend_desc.AlphaToCoverageEnable=false;
-            blend_desc.IndependentBlendEnable=false;
-            blend_desc.RenderTarget[0]=desc;
+    void apply()
+    {
+        if(!get_device() || !get_context())
+            return;
 
-            ID3D11BlendState *state;
-            get_device()->CreateBlendState(&blend_desc,&state);
-            m_map[hsh]=state;
-            return state;
+        if(!current_state.blend)
+        {
+            get_context()->OMSetBlendState(0,0,current_state.color_write?0xffffffff:0);
+            return;
         }
 
-    private:
-        typedef std::map<unsigned int,ID3D11BlendState*> cache_map;
-        cache_map m_map;
-
-    } static blend_state_cache;
-
-    if(discard_cached)
-        blend_state_cache=decltype(blend_state_cache)();
-
-    if(!current_state.blend)
-    {
-        get_context()->OMSetBlendState(0,0,current_state.color_write?0xffffffff:0);
-        return;
+        ID3D11BlendState *state=get(dx_blend_mode(current_state.blend_src),
+                                                        dx_blend_mode(current_state.blend_dst));
+        const float blend_factor[]={1.0f,1.0f,1.0f,1.0f};
+        nya_render::get_context()->OMSetBlendState(state,blend_factor,current_state.color_write?0xffffffff:0);
     }
 
-    ID3D11BlendState *state=blend_state_cache.get(dx_blend_mode(current_state.blend_src),
-                                                  dx_blend_mode(current_state.blend_dst));
-    const float blend_factor[]={1.0f,1.0f,1.0f,1.0f};
-    nya_render::get_context()->OMSetBlendState(state,blend_factor,current_state.color_write?0xffffffff:0);
-}
+    void release()
+    {
+        if(get_context())
+            get_context()->OMSetBlendState(0,0,0xffffffff);
 
-void dx_apply_cull_face_state(bool discard_cached=false)
+        for(auto &s:m_map) if(s.second) s.second->Release();
+        m_map.clear();
+    }
+
+private:
+    typedef std::map<unsigned int,ID3D11BlendState*> cache_map;
+    cache_map m_map;
+
+} blend_state;
+
+class
 {
-    if(!get_device() || !get_context())
-        return;
-
-    static ID3D11RasterizerState *cull_enabled=0;
-    if(!cull_enabled || discard_cached)
+public:
+    ID3D11DepthStencilState *get(bool test,bool write,D3D11_COMPARISON_FUNC comparsion)
     {
-        D3D11_RASTERIZER_DESC desc;
-        ZeroMemory(&desc,sizeof(desc));
-        if(current_state.cull_order==cull_face::cw)
-            desc.CullMode=D3D11_CULL_BACK;
-        else
-            desc.CullMode=D3D11_CULL_FRONT;
+        unsigned int hsh=0;
+        if(test) hsh=1;
+        if(write) hsh+=2;
+        hsh+=4*comparsion;
 
-        desc.FillMode=D3D11_FILL_SOLID;
-        desc.DepthClipEnable=true;
-        get_device()->CreateRasterizerState(&desc,&cull_enabled);
+        cache_map::iterator it=m_map.find(hsh);
+        if(it!=m_map.end())
+            return it->second;
+
+        D3D11_DEPTH_STENCIL_DESC desc;
+        desc.DepthEnable=test;
+        desc.DepthWriteMask=write?D3D11_DEPTH_WRITE_MASK_ALL:D3D11_DEPTH_WRITE_MASK_ZERO;
+        desc.DepthFunc=comparsion;
+        desc.StencilEnable=true;
+        desc.StencilReadMask=0xFF;
+        desc.StencilWriteMask=0xFF;
+
+        desc.FrontFace.StencilFailOp=D3D11_STENCIL_OP_KEEP;
+        desc.FrontFace.StencilDepthFailOp=D3D11_STENCIL_OP_INCR;
+        desc.FrontFace.StencilPassOp=D3D11_STENCIL_OP_KEEP;
+        desc.FrontFace.StencilFunc=D3D11_COMPARISON_ALWAYS;
+
+        desc.BackFace.StencilFailOp=D3D11_STENCIL_OP_KEEP;
+        desc.BackFace.StencilDepthFailOp=D3D11_STENCIL_OP_DECR;
+        desc.BackFace.StencilPassOp=D3D11_STENCIL_OP_KEEP;
+        desc.BackFace.StencilFunc=D3D11_COMPARISON_ALWAYS;
+
+        ID3D11DepthStencilState *state;
+        get_device()->CreateDepthStencilState(&desc,&state);
+        m_map[hsh]=state;
+        return state;
     }
 
-    static ID3D11RasterizerState *cull_disabled=0;
-    if(!cull_disabled || discard_cached)
+    void apply()
     {
-        D3D11_RASTERIZER_DESC desc;
-        ZeroMemory(&desc,sizeof(desc));
-        desc.CullMode=D3D11_CULL_NONE;
-        desc.FillMode=D3D11_FILL_SOLID;
-        desc.DepthClipEnable=true;
-        get_device()->CreateRasterizerState(&desc,&cull_disabled);
-    }
+        if(!get_device() || !get_context())
+            return;
 
-    if(current_state.cull_face)
-    {
-        if(cull_enabled)
-            get_context()->RSSetState(cull_enabled);
-    }
-    else
-    {
-        if(cull_disabled)
-            get_context()->RSSetState(cull_disabled);
-    }
-}
-
-void dx_apply_depth_state(bool discard_cached=false)
-{
-    if(!get_device() || !get_context())
-        return;
-
-    class
-    {
-    public:
-        ID3D11DepthStencilState *get(bool test,bool write,D3D11_COMPARISON_FUNC comparsion)
+        D3D11_COMPARISON_FUNC dx_depth_comparsion=D3D11_COMPARISON_ALWAYS;
+        switch(current_state.depth_comparsion)
         {
-            unsigned int hsh=0;
-            if(test) hsh=1;
-            if(write) hsh+=2;
-            hsh+=4*comparsion;
-
-            cache_map::iterator it=m_map.find(hsh);
-            if(it!=m_map.end())
-                return it->second;
-
-            D3D11_DEPTH_STENCIL_DESC desc;
-            desc.DepthEnable=test;
-            desc.DepthWriteMask=write?D3D11_DEPTH_WRITE_MASK_ALL:D3D11_DEPTH_WRITE_MASK_ZERO;
-            desc.DepthFunc=comparsion;
-            desc.StencilEnable=true;
-            desc.StencilReadMask=0xFF;
-            desc.StencilWriteMask=0xFF;
-
-            desc.FrontFace.StencilFailOp=D3D11_STENCIL_OP_KEEP;
-            desc.FrontFace.StencilDepthFailOp=D3D11_STENCIL_OP_INCR;
-            desc.FrontFace.StencilPassOp=D3D11_STENCIL_OP_KEEP;
-            desc.FrontFace.StencilFunc=D3D11_COMPARISON_ALWAYS;
-
-            desc.BackFace.StencilFailOp=D3D11_STENCIL_OP_KEEP;
-            desc.BackFace.StencilDepthFailOp=D3D11_STENCIL_OP_DECR;
-            desc.BackFace.StencilPassOp=D3D11_STENCIL_OP_KEEP;
-            desc.BackFace.StencilFunc=D3D11_COMPARISON_ALWAYS;
-
-            ID3D11DepthStencilState *state;
-            get_device()->CreateDepthStencilState(&desc,&state);
-            m_map[hsh]=state;
-            return state;
+            case depth_test::never: dx_depth_comparsion=D3D11_COMPARISON_NEVER; break;
+            case depth_test::less: dx_depth_comparsion=D3D11_COMPARISON_LESS; break;
+            case depth_test::equal: dx_depth_comparsion=D3D11_COMPARISON_EQUAL; break;
+            case depth_test::greater: dx_depth_comparsion=D3D11_COMPARISON_GREATER; break;
+            case depth_test::not_less: dx_depth_comparsion=D3D11_COMPARISON_GREATER_EQUAL; break;
+            case depth_test::not_equal: dx_depth_comparsion=D3D11_COMPARISON_NOT_EQUAL; break;
+            case depth_test::not_greater: dx_depth_comparsion=D3D11_COMPARISON_LESS_EQUAL; break;
+            case depth_test::allways: dx_depth_comparsion=D3D11_COMPARISON_ALWAYS; break;
         }
 
-    private:
-        typedef std::map<unsigned int,ID3D11DepthStencilState*> cache_map;
-        cache_map m_map;
-
-    } static depth_state_cache;
-
-    if(discard_cached)
-        depth_state_cache=decltype(depth_state_cache)();
-
-    D3D11_COMPARISON_FUNC dx_depth_comparsion=D3D11_COMPARISON_ALWAYS;
-    switch(current_state.depth_comparsion)
-    {
-        case depth_test::never: dx_depth_comparsion=D3D11_COMPARISON_NEVER; break;
-        case depth_test::less: dx_depth_comparsion=D3D11_COMPARISON_LESS; break;
-        case depth_test::equal: dx_depth_comparsion=D3D11_COMPARISON_EQUAL; break;
-        case depth_test::greater: dx_depth_comparsion=D3D11_COMPARISON_GREATER; break;
-        case depth_test::not_less: dx_depth_comparsion=D3D11_COMPARISON_GREATER_EQUAL; break;
-        case depth_test::not_equal: dx_depth_comparsion=D3D11_COMPARISON_NOT_EQUAL; break;
-        case depth_test::not_greater: dx_depth_comparsion=D3D11_COMPARISON_LESS_EQUAL; break;
-        case depth_test::allways: dx_depth_comparsion=D3D11_COMPARISON_ALWAYS; break;
+        ID3D11DepthStencilState *state=get(current_state.depth_test,current_state.zwrite,dx_depth_comparsion);
+        nya_render::get_context()->OMSetDepthStencilState(state,1);
     }
 
-    ID3D11DepthStencilState *state=depth_state_cache.get(current_state.depth_test,
-                                                         current_state.zwrite,dx_depth_comparsion);
-    nya_render::get_context()->OMSetDepthStencilState(state,1);
+    void release()
+    {
+        if(get_context())
+           get_context()->OMSetDepthStencilState(0,0);
+
+        for(auto &s:m_map) if(s.second) s.second->Release();
+        m_map.clear();
+    }
+
+private:
+    typedef std::map<unsigned int,ID3D11DepthStencilState*> cache_map;
+    cache_map m_map;
+
+} depth_state;
+
 }
+
 #else
 unsigned int gl_blend_mode(blend::mode m)
 {
@@ -508,15 +547,15 @@ void apply_state(bool ignore_cache)
     //ToDo: color
     
     if(c.cull_order!=a.cull_order || c.cull_face!=a.cull_face || ignore_cache)
-        dx_apply_cull_face_state();
+        cull_face_state.apply();
 
     if(c.blend!=a.blend || c.blend_src!=a.blend_src || c.blend_dst!=a.blend_dst
                                 || c.color_write!=a.color_write || ignore_cache)
-        dx_apply_blend_state();
+        blend_state.apply();
 
     if(c.depth_test!=a.depth_test || c.depth_comparsion!=a.depth_comparsion 
                                      || c.zwrite!= a.zwrite || ignore_cache)
-        dx_apply_depth_state();
+        depth_state.apply();
 #else
     if(c.color[0]!=a.color[0] || c.color[1]!=a.color[1] || c.color[2]!=a.color[2]
                                         || c.color[3]!=a.color[3] || ignore_cache)
@@ -601,6 +640,24 @@ namespace
 {
     ID3D11Device *render_device=0;
     ID3D11DeviceContext *render_context=0;
+
+void discard_state()
+{
+    invalidate_resources();
+    applied_state=current_state=nya_render::state();
+
+    cull_face_state=cull_face_state_class();
+    depth_state=decltype(depth_state)();
+    blend_state=decltype(blend_state)();
+}
+
+}
+
+void release_states()
+{
+    depth_state.release();
+    cull_face_state.release();
+    blend_state.release();
 }
 
 ID3D11Device *get_device() { return render_device; }
@@ -609,16 +666,8 @@ void set_device(ID3D11Device *device)
     if(render_device==device)
         return;
 
-    invalidate_resources();
-    applied_state=current_state=nya_render::state();
+    discard_state();
     render_device=device;
-    if(!device)
-        return;
-
-    dx_apply_depth_state(true);
-    dx_apply_cull_face_state(true);
-    dx_apply_blend_state(true);
-    apply_state(true);
 }
 
 ID3D11DeviceContext *get_context() { return render_context; }
@@ -627,16 +676,8 @@ void set_context(ID3D11DeviceContext *context)
     if(render_context==context)
         return;
 
-    invalidate_resources();
-    applied_state=current_state=nya_render::state();
+    discard_state();
     render_context=context;
-    if(!context)
-        return;
-
-    dx_apply_depth_state(true);
-    dx_apply_cull_face_state(true);
-    dx_apply_blend_state(true);
-    apply_state(true);
 }
 #endif
 
