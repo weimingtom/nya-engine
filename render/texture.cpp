@@ -255,7 +255,8 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     else
         desc.BindFlags=D3D11_BIND_SHADER_RESOURCE|D3D11_BIND_RENDER_TARGET;
 
-    if(data)
+    const bool has_mipmap=(data && pot && mip_count!=1 && mip_count!=0);
+    if(has_mipmap && mip_count<0)
         desc.MiscFlags=D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
     //desc.MiscFlags=D3D11_RESOURCE_MISC_GDI_COMPATIBLE;
@@ -275,7 +276,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         return false;
 
     ID3D11ShaderResourceView *srv=0;
-    if(format<depth16) //ToDo
+    if(format<depth16 || format>depth32) //ToDo
     {
         get_device()->CreateShaderResourceView(tex,0,&srv);
         if(!srv)
@@ -284,14 +285,19 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 
     D3D11_SAMPLER_DESC sdesc;
     memset(&sdesc,0,sizeof(sdesc));
-	sdesc.Filter=D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    sdesc.Filter=D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	sdesc.AddressU=D3D11_TEXTURE_ADDRESS_WRAP;
 	sdesc.AddressV=D3D11_TEXTURE_ADDRESS_WRAP;
     sdesc.AddressW=D3D11_TEXTURE_ADDRESS_WRAP;
     sdesc.ComparisonFunc=D3D11_COMPARISON_NEVER;
     sdesc.MaxAnisotropy=0;
     sdesc.MinLOD=0;
-    sdesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+#ifdef WINDOWS_PHONE8
+    sdesc.MaxLOD=D3D11_FLOAT32_MAX;
+#else
+    sdesc.MaxLOD=mip_count>=1?mip_count:has_mipmap?D3D11_FLOAT32_MAX:1;
+#endif
 
     m_tex=texture_obj::add();
     texture_obj::get(m_tex).tex=tex;
