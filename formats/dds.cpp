@@ -52,8 +52,11 @@ size_t dds::decode_header(const void *data,size_t size)
         return 0;
 
     mipmap_count=reader.read<uint>();
-    if(mipmap_count<1)
-        return 0;
+    if(!mipmap_count)
+    {
+        need_generate_mipmaps=true;
+        mipmap_count=1;
+    }
 
     reader.skip(44);
 
