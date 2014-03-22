@@ -313,7 +313,46 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
 
     reader.skip(10*100);//toon
 
-    const uint rigid_bodys_count=reader.read<uint>();
+    const uint rigid_bodies_count=reader.read<uint>();
+    ad->rigid_bodies.resize(rigid_bodies_count);
+    for(uint i=0;i<rigid_bodies_count;++i)
+    {
+        pmd_phys_data::rigid_body &rb=ad->rigid_bodies[i];
+        rb.name=utf8_from_shiftjis(data.get_data(reader.get_offset()),20);
+        reader.skip(20);
+        rb.bone=reader.read<short>();
+        rb.collision_group=reader.read<uchar>();
+        rb.collision_mask=reader.read<ushort>();
+        rb.type=reader.read<uchar>();
+        rb.size=reader.read<nya_math::vec3>();
+        rb.location=reader.read<nya_math::vec3>();
+        rb.rotation=reader.read<nya_math::vec3>();
+        rb.mass=reader.read<float>();
+        rb.vel_attenuation=reader.read<float>();
+        rb.rot_attenuation=reader.read<float>();
+        rb.bounce=reader.read<float>();
+        rb.friction=reader.read<float>();
+        rb.mode=reader.read<uchar>();
+    }
+
+    const uint joints_count=reader.read<uint>();
+    ad->joints.resize(joints_count);
+    for(uint i=0;i<joints_count;++i)
+    {
+        pmd_phys_data::joint &j=ad->joints[i];
+        j.name=utf8_from_shiftjis(data.get_data(reader.get_offset()),20);
+        reader.skip(20);
+        j.rigid_src=reader.read<uint>();
+        j.rigid_dst=reader.read<uint>();
+        j.location=reader.read<nya_math::vec3>();
+        j.rotation=reader.read<nya_math::vec3>();
+        j.location_max=reader.read<nya_math::vec3>();
+        j.location_min=reader.read<nya_math::vec3>();
+        j.rotation_max=reader.read<nya_math::vec3>();
+        j.rotation_min=reader.read<nya_math::vec3>();
+        j.location_spring=reader.read<nya_math::vec3>();
+        j.rotation_spring=reader.read<nya_math::vec3>();
+    }
 
     return true;
 }

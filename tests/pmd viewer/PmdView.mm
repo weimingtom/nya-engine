@@ -48,7 +48,7 @@ void viewer_camera::set_aspect(float aspect)
 {
     nya_scene::camera_proxy cam=nya_scene::get_camera();
     if(cam.is_valid())
-        cam->set_proj(55.0,aspect,1.0,300.0);
+        cam->set_proj(55.0,aspect,1.0,2000.0);
 
     update();
 }
@@ -326,6 +326,7 @@ private:
         nya_render::depth_test::enable(nya_render::depth_test::less);
         
         nya_scene::texture::register_load_function(load_texture);
+        nya_scene::texture::register_load_function(nya_scene::texture::load_dds);
         m_mesh.load(doc->m_model_name.c_str());
         nya_render::apply_state(true);
         

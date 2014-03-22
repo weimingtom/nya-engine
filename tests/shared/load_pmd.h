@@ -36,6 +36,46 @@ struct pmd_morph_data
     std::vector<morph> morphs;
 };
 
+struct pmd_phys_data
+{
+    struct rigid_body
+    {
+        std::string name;
+        short bone;
+        unsigned char collision_group;
+        unsigned short collision_mask;
+        unsigned char type;
+        nya_math::vec3 size;
+        nya_math::vec3 location;
+        nya_math::vec3 rotation;
+        float mass;
+        float vel_attenuation;
+        float rot_attenuation;
+        float bounce;
+        float friction;
+        unsigned char mode;
+    };
+
+    std::vector<rigid_body> rigid_bodies;
+
+    struct joint
+    {
+        std::string name;
+        unsigned int rigid_src;
+        unsigned int rigid_dst;
+        nya_math::vec3 location;
+        nya_math::vec3 rotation;
+        nya_math::vec3 location_max;
+        nya_math::vec3 location_min;
+        nya_math::vec3 rotation_max;
+        nya_math::vec3 rotation_min;
+        nya_math::vec3 location_spring;
+        nya_math::vec3 rotation_spring;
+    };
+
+    std::vector<joint> joints;
+};
+
 class pmd_loader
 {
     struct pmd_material_params
@@ -60,7 +100,7 @@ public:
     static bool load(nya_scene::shared_mesh &res,nya_scene::resource_data &data,const char* name);
 
 public:
-    struct additional_data: public pmd_morph_data
+    struct additional_data: public pmd_morph_data, pmd_phys_data
     {
     };
 

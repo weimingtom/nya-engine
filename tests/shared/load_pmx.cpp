@@ -35,9 +35,10 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         return false;
 
     nya_memory::memory_reader reader(data.get_data(),data.get_size());
-    if(!reader.test("PMX ",4))
+    if(!reader.test("PMX",3))
         return false;
-    
+
+    reader.skip(1);
     if(reader.read<float>()!=2.0f)
         return false;
     
@@ -72,7 +73,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         v.normal[2]=-reader.read<float>();
         
         v.tc[0]=reader.read<float>();
-        v.tc[1]=1.0-reader.read<float>();
+        v.tc[1]=1.0f-reader.read<float>();
         reader.skip(header.extended_uv*sizeof(float)*4);
 
         switch(reader.read<char>())
