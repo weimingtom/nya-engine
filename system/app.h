@@ -37,8 +37,7 @@ protected:
     virtual void on_init_splash() {}
     virtual void on_init() {}
     virtual void on_splash(unsigned int dt) {}
-    virtual void on_process(unsigned int dt) {}
-    virtual void on_draw() {}
+    virtual void on_frame(unsigned int dt) {}
     virtual void on_free() {}
 
 protected:

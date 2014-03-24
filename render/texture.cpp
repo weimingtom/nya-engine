@@ -733,9 +733,6 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
     if(m_tex<0)
         return false;
 
-    if(m_format>=dxt1)
-        return false;
-
     const texture_obj &tex=texture_obj::get(m_tex);
     unsigned int size=m_width*m_height*get_bpp(m_format)/8;
     if(!size)
@@ -744,6 +741,9 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
 #ifdef DIRECTX11
 	if(!get_context() || !get_device())
 		return false;
+
+    if(m_format>=dxt1)
+        return false;
 
 	ID3D11Texture2D* copy_tex=0;
 
@@ -771,13 +771,16 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
 
     return true;
 #else
+  #ifdef OPENGL_ES
+    if(m_format>=dxt1)
+        return false;
+
     data.allocate(size);
     
     gl_select_multitex_layer(0);
     glBindTexture(tex.gl_type,tex.tex_id);
     active_layers[0]=-1;
 
-  #ifdef OPENGL_ES
     GLint prev_fbo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING,&prev_fbo);
 
@@ -807,7 +810,20 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
     glBindFramebuffer(GL_FRAMEBUFFER, prev_fbo);
     set_viewport(prev_vp);
   #else
-    switch(m_format)
+    color_format format=m_format;
+    if(format>=dxt1)
+    {
+        size=m_width*m_height*4;
+        format=color_bgra;
+    }
+
+    data.allocate(size);
+
+    gl_select_multitex_layer(0);
+    glBindTexture(tex.gl_type,tex.tex_id);
+    active_layers[0]=-1;
+
+    switch(format)
     {
         case color_rgb: glGetTexImage(tex.gl_type,0,GL_RGB,GL_UNSIGNED_BYTE,data.get_data()); break;
         case color_rgba: glGetTexImage(tex.gl_type,0,GL_RGBA,GL_UNSIGNED_BYTE,data.get_data()); break;
