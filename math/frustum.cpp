@@ -30,7 +30,10 @@ aabb::aabb(const aabb &b,const vec3 &p,const quat &q,const vec3 &s)
         if(t.z>delta.z) delta.z=t.z;
     }
 
-    origin=b.origin+p;
+    origin.x*=s.x;
+    origin.y*=s.y;
+    origin.z*=s.z;
+    origin=q.rotate(b.origin)+p;
 }
 
 bool frustum::test_intersect(const aabb &box) const
