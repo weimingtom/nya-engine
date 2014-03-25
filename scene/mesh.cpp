@@ -707,6 +707,9 @@ void mesh::update(unsigned int dt) { m_internal.update(dt); }
 
 void mesh_internal::update(unsigned int dt)
 {
+    if(!m_shared.is_valid())
+        return;
+
     if(m_anims.empty() && m_bone_controls.empty())
         return;
 
@@ -729,51 +732,22 @@ void mesh_internal::update(unsigned int dt)
         nya_math::vec3 pos;
         nya_math::quat rot;
 
-        if(!m_anims.empty())
+        for(int j=0;j<(int)m_anims.size();++j)
         {
-            const applied_anim &a=m_anims[0];
-            if(i<(int)a.bones_map.size() && a.bones_map[i]>=0)
-            {
-                const unsigned int time=(unsigned int)a.time+a.anim->m_range_from;
-                const nya_math::vec3 bone_pos=a.anim->m_shared->anim.get_bone_pos(a.bones_map[i],time,a.anim->get_loop());
-                const nya_math::quat bone_rot=a.anim->m_shared->anim.get_bone_rot(a.bones_map[i],time,a.anim->get_loop());
+            const applied_anim &a=m_anims[j];
+            if(i>=(int)a.bones_map.size() || a.bones_map[i]<0)
+                continue;
 
-                if(a.full_weight)
-                {
-                    pos=bone_pos;
-                    rot=bone_rot;
-                }
-                else
-                {
-                    pos=bone_pos*a.anim->m_weight;
-                    rot=bone_rot;
-                    rot.apply_weight(a.anim->m_weight);
-                }
-            }
+            const unsigned int time=(unsigned int)a.time+a.anim->m_range_from;
+            nya_math::vec3 bone_pos=a.anim->m_shared->anim.get_bone_pos(a.bones_map[i],time,a.anim->get_loop());
+            nya_math::quat bone_rot=a.anim->m_shared->anim.get_bone_rot(a.bones_map[i],time,a.anim->get_loop());
+            if(!a.full_weight)
+                bone_pos*=a.anim->m_weight,bone_rot.apply_weight(a.anim->m_weight);
 
-            for(int j=1;j<(int)m_anims.size();++j)
-            {
-                const applied_anim &a=m_anims[j];
-                if(i<(int)a.bones_map.size() && a.bones_map[i]>=0)
-                {
-                    const unsigned int time=(unsigned int)a.time+a.anim->m_range_from;
-                    const nya_math::vec3 bone_pos=a.anim->m_shared->anim.get_bone_pos(a.bones_map[i],time,a.anim->get_loop());
-                    const nya_math::quat bone_rot=a.anim->m_shared->anim.get_bone_rot(a.bones_map[i],time,a.anim->get_loop());
-
-                    if(a.full_weight)
-                    {
-                        pos+=bone_pos;
-                        rot=rot*bone_rot;
-                    }
-                    else
-                    {
-                        pos+=bone_pos*a.anim->m_weight;
-                        nya_math::quat tmp=bone_rot;
-                        tmp.apply_weight(a.anim->m_weight);
-                        rot=rot*tmp;
-                    }
-                }
-            }
+            if(j==0)
+                pos=bone_pos,rot=bone_rot;
+            else
+                pos+=bone_pos,rot=rot*bone_rot;
         }
 
         bone_control_map::const_iterator it=m_bone_controls.find(i);
