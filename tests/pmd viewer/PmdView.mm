@@ -241,7 +241,6 @@ private:
     return NO;
 }
 
-
 - (void) mouseDown: (NSEvent *) theEvent
 {
     NSPoint pt=[theEvent locationInWindow];
@@ -382,6 +381,29 @@ private:
     shared_context::get().free();
 
     [super dealloc];
+}
+
+@end
+
+@implementation MorphsWindow
+
+-(id)init
+{
+    if(self = [super init])
+    {
+        [NSBundle loadNibNamed:@"MorphsConfig" owner:self];
+    }
+
+    return self;
+}
+
+-(void)displayWindow
+{
+    if(![m_window isVisible])
+    {
+        [m_window setIsVisible:YES];
+        [m_window orderFront:nil];
+    }
 }
 
 @end

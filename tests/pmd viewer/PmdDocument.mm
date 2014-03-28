@@ -1,8 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
 #import "PmdDocument.h"
-#import "PmdView.h"
-
 #include "resources/resources.h"
 
 @implementation PmdDocument
@@ -77,6 +75,14 @@
         NSURL* fileName = [URLs objectAtIndex:0];
         m_animation_name.assign(fileName.path.UTF8String);
     }
+}
+
+-(IBAction)morphWindow:(id)sender
+{
+    if (!m_morphs_window)
+        m_morphs_window = [[MorphsWindow alloc] init];
+
+    [m_morphs_window displayWindow];
 }
 
 - (BOOL)validateUserInterfaceItem:(id <NSValidatedUserInterfaceItem>)anItem

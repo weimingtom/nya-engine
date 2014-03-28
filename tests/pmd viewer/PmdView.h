@@ -37,3 +37,11 @@ private:
 }
 
 @end
+
+@interface MorphsWindow : NSObject {
+    IBOutlet NSWindow *m_window;
+}
+
+- (void)displayWindow;
+
+@end

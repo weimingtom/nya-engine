@@ -23,6 +23,7 @@
 		F53786FE18D2EEE600A93F17 /* mmd_mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53786FC18D2EEE600A93F17 /* mmd_mesh.cpp */; };
 		F5D869B41809A303000C8791 /* string_encoding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5D869B11809A303000C8791 /* string_encoding.cpp */; };
 		F5D869B91809A551000C8791 /* load_vmd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5D869B71809A551000C8791 /* load_vmd.cpp */; };
+		F5EA4D3C18E62C930015B54D /* MorphsConfig.xib in Resources */ = {isa = PBXBuildFile; fileRef = F5EA4D3A18E62C930015B54D /* MorphsConfig.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -72,6 +73,7 @@
 		F5D869B31809A303000C8791 /* moonspeak.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = moonspeak.h; path = ../../tests/shared/moonspeak.h; sourceTree = "<group>"; };
 		F5D869B71809A551000C8791 /* load_vmd.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = load_vmd.cpp; path = ../../tests/shared/load_vmd.cpp; sourceTree = "<group>"; };
 		F5D869B81809A551000C8791 /* load_vmd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = load_vmd.h; path = ../../tests/shared/load_vmd.h; sourceTree = "<group>"; };
+		F5EA4D3B18E62C930015B54D /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = "../../tests/pmd viewer/en.lproj/MorphsConfig.xib"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -143,6 +145,7 @@
 				F28DAD9215D9AF4E0030D67B /* PmdDocument.h */,
 				F28DAD9115D9AF4E0030D67B /* PmdDocument.mm */,
 				F28DAD9315D9AF4E0030D67B /* PmdDocument.xib */,
+				F5EA4D3A18E62C930015B54D /* MorphsConfig.xib */,
 				F28DAD9015D9AF4E0030D67B /* PmdView.h */,
 				F28DAD8F15D9AF4E0030D67B /* PmdView.mm */,
 				F5D869B11809A303000C8791 /* string_encoding.cpp */,
@@ -245,6 +248,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F5EA4D3C18E62C930015B54D /* MorphsConfig.xib in Resources */,
 				F28DAD9A15D9AF4E0030D67B /* PmdDocument.xib in Resources */,
 				F28DAD9B15D9AF4E0030D67B /* MainMenu.xib in Resources */,
 				F28DADA615D9AF830030D67B /* AppIcon.icns in Resources */,
@@ -312,6 +316,14 @@
 				F28DADA415D9AF830030D67B /* en */,
 			);
 			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		F5EA4D3A18E62C930015B54D /* MorphsConfig.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F5EA4D3B18E62C930015B54D /* en */,
+			);
+			name = MorphsConfig.xib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
