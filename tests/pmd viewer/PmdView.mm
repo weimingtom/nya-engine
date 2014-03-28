@@ -219,10 +219,28 @@ private:
                                             selector:@selector(animate:) userInfo:nil repeats:YES];
         [[NSRunLoop currentRunLoop] addTimer:m_animation_timer forMode:NSDefaultRunLoopMode];
         [[NSRunLoop currentRunLoop] addTimer:m_animation_timer forMode:NSEventTrackingRunLoopMode];
+
+        [self registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType,nil]];
     }
 
     return self;
 }
+
+- (NSDragOperation)draggingEntered:(id < NSDraggingInfo >)sender { return NSDragOperationGeneric; }
+
+- (BOOL)performDragOperation:(id < NSDraggingInfo >)sender
+{
+    NSArray *draggedFilenames = [[sender draggingPasteboard] propertyListForType:NSFilenamesPboardType];
+    if ([[[draggedFilenames objectAtIndex:0] pathExtension] caseInsensitiveCompare:@"vmd"]==NSOrderedSame)
+    {
+        NSURL *url = [NSURL fileURLWithPath:[draggedFilenames objectAtIndex:0]];
+        [self loadAnim: [url path].UTF8String];
+        return YES;
+    }
+
+    return NO;
+}
+
 
 - (void) mouseDown: (NSEvent *) theEvent
 {
@@ -284,6 +302,16 @@ private:
     [self setNeedsDisplay: YES];
 }
 
+-(void)loadAnim:(const std::string &)name
+{
+    nya_scene::animation anim;
+    nya_scene::animation::register_load_function(vmd_loader::load);
+    anim.load(name.c_str());
+    m_mesh.set_anim(anim);
+
+    m_last_time=nya_system::get_time();
+}
+
 - (void)animate:(id)sender
 {
     PmdDocument *doc=[[[self window] windowController] document];
@@ -295,13 +323,8 @@ private:
 
     if(!doc->m_animation_name.empty())
     {
-        nya_scene::animation anim;
-        nya_scene::animation::register_load_function(vmd_loader::load);
-        anim.load(doc->m_animation_name.c_str());
-        m_mesh.set_anim(anim);
+        [self loadAnim: doc->m_animation_name];
         doc->m_animation_name.clear();
-
-        m_last_time=nya_system::get_time();
     }
 
     if(m_mesh.get_anim().is_valid())
