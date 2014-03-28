@@ -4,6 +4,7 @@ xcuserdata
 *.pbxuser
 *.xcuserstate
 *.xcscheme
+*.xccheckout
 *.xcbkptlist
 xcschememanagement.plist
 *.suo
