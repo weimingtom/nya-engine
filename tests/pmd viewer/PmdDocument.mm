@@ -88,7 +88,7 @@
     if (!m_morphs_window)
         m_morphs_window = [[MorphsWindow alloc] init];
 
-    [m_morphs_window displayWindow:m_mesh];
+    [m_morphs_window displayWindow:m_mesh view:m_view];
 }
 
 - (BOOL)validateUserInterfaceItem:(id <NSValidatedUserInterfaceItem>)anItem

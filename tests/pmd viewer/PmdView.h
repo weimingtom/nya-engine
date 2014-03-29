@@ -38,11 +38,24 @@ private:
 
 @end
 
-@interface MorphsWindow : NSObject {
+@interface MorphsWindow : NSObject
+{
     IBOutlet NSWindow *m_window;
+    IBOutlet NSTableView *m_table;
     mmd_mesh *m_mesh;
+    PmdView *m_view;
+
+    struct morph
+    {
+        float value;
+        bool override;
+
+        morph(): value(0.0f),override(false) {}
+    };
+
+    std::vector<morph> m_morphs;
 }
 
--(void)displayWindow:(mmd_mesh *)mesh;
+-(void)displayWindow:(mmd_mesh *)mesh view:(PmdView *)view;
 
 @end

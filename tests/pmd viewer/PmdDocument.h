@@ -11,6 +11,7 @@
     std::string m_animation_name;
 
     mmd_mesh *m_mesh;
+    PmdView *m_view;
 
 @private
     MorphsWindow *m_morphs_window;

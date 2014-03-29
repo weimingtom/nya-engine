@@ -354,6 +354,7 @@ private:
 
         doc->m_model_name.clear();
         doc->m_mesh=&m_mesh;
+        doc->m_view=self;
     }
 
     nya_render::clear(true,true);
@@ -398,14 +399,66 @@ private:
     return self;
 }
 
--(void)displayWindow:(mmd_mesh *)mesh;
+-(void)displayWindow:(mmd_mesh *)mesh view:(PmdView *)view
 {
     m_mesh=mesh;
+    m_view=view;
     if(![m_window isVisible])
     {
         [m_window setIsVisible:YES];
         [m_window orderFront:nil];
     }
+
+    if(!m_mesh)
+        return;
+
+    m_morphs.resize(m_mesh->get_morphs_count());
+    for(int i=0;i<m_mesh->get_morphs_count();++i)
+        m_mesh->set_morph(i,0.0f,false);
+
+    [m_table reloadData];
+}
+
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)pTableViewObj
+{
+    if(!m_mesh)
+        return 0;
+
+    return m_mesh->get_morphs_count();
+}
+
+- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row
+{
+    if(!m_mesh)
+        return nil;
+
+    const char *name=m_mesh->get_morph_name(int(row));
+    if(!name)
+        return nil;
+
+    if([[tableColumn identifier] isEqualToString:@"name"])
+        return [NSString stringWithUTF8String:name];
+
+    if([[tableColumn identifier] isEqualToString:@"value"])
+        return [NSNumber numberWithFloat:m_morphs[row].value];
+
+    return [NSNumber numberWithBool:m_morphs[row].override];
+}
+
+- (void)tableView:(NSTableView *)tableView setObjectValue:(id)value forTableColumn:(NSTableColumn *)column row:(NSInteger)row
+{
+    if(!m_mesh)
+        return;
+
+    if([[column identifier] isEqualToString:@"value"])
+        m_morphs[row].value=[value floatValue];
+
+    if([[column identifier] isEqualToString:@"override"])
+        m_morphs[row].override=[value boolValue];
+
+    m_mesh->set_morph(int(row),m_morphs[row].value/100.0f,m_morphs[row].override);
+    m_mesh->update(0);
+    [m_view setNeedsDisplay: YES];
 }
 
 @end
