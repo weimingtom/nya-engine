@@ -10,9 +10,12 @@
     std::string m_model_name;
     std::string m_animation_name;
 
+    mmd_mesh *m_mesh;
+
 @private
     MorphsWindow *m_morphs_window;
 }
+
 -(IBAction)loadAnimation:(id)sender;
 -(BOOL)validateUserInterfaceItem:(id <NSValidatedUserInterfaceItem>)anItem;
 

@@ -18,5 +18,6 @@
                 <autoresizingMask key="autoresizingMask"/>
             </view>
         </window>
+        <userDefaultsController representsSharedInstance="YES" id="yqF-36-wQ4"/>
     </objects>
 </document>

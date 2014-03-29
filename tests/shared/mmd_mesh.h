@@ -37,6 +37,8 @@ public:
     void set_rot(const nya_math::quat &rot) { m_mesh.set_rot(rot); }
     void set_scale(float scale) { m_mesh.set_scale(scale); }
 
+    const char *get_name() const { return m_mesh.get_name(); }
+
     mmd_mesh(): m_morph_data(0), m_pos_count(0) {}
 
 private:

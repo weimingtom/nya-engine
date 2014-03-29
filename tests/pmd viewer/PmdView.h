@@ -40,8 +40,9 @@ private:
 
 @interface MorphsWindow : NSObject {
     IBOutlet NSWindow *m_window;
+    mmd_mesh *m_mesh;
 }
 
-- (void)displayWindow;
+-(void)displayWindow:(mmd_mesh *)mesh;
 
 @end

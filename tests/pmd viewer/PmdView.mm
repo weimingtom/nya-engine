@@ -351,8 +351,9 @@ private:
         nya_scene::texture::register_load_function(nya_scene::texture::load_dds);
         m_mesh.load(doc->m_model_name.c_str());
         nya_render::apply_state(true);
-        
+
         doc->m_model_name.clear();
+        doc->m_mesh=&m_mesh;
     }
 
     nya_render::clear(true,true);
@@ -397,8 +398,9 @@ private:
     return self;
 }
 
--(void)displayWindow
+-(void)displayWindow:(mmd_mesh *)mesh;
 {
+    m_mesh=mesh;
     if(![m_window isVisible])
     {
         [m_window setIsVisible:YES];

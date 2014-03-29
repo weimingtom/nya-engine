@@ -58,6 +58,9 @@
 
 -(IBAction)loadAnimation:(id)sender
 {
+    if(!m_mesh)
+        return;
+
     NSOpenPanel* openDlg = [NSOpenPanel openPanel];
 
      NSArray *fileTypes = [NSArray arrayWithObjects:@"vmd",nil];
@@ -79,10 +82,13 @@
 
 -(IBAction)morphWindow:(id)sender
 {
+    if(!m_mesh)
+        return;
+
     if (!m_morphs_window)
         m_morphs_window = [[MorphsWindow alloc] init];
 
-    [m_morphs_window displayWindow];
+    [m_morphs_window displayWindow:m_mesh];
 }
 
 - (BOOL)validateUserInterfaceItem:(id <NSValidatedUserInterfaceItem>)anItem
