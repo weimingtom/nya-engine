@@ -48,6 +48,9 @@
 
 - (void)close
 {
+    if(m_morphs_window)
+        [m_morphs_window release];
+
     [super close];
 }
 
@@ -85,9 +88,14 @@
     if(!m_mesh)
         return;
 
-    if (!m_morphs_window)
-        m_morphs_window = [[MorphsWindow alloc] init];
+    if(m_morphs_window)
+    {
+        [m_morphs_window release];
+        m_morphs_window=0;
+        return;
+    }
 
+    m_morphs_window = [[MorphsWindow alloc] init];
     [m_morphs_window displayWindow:m_mesh view:m_view];
 }
 

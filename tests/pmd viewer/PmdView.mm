@@ -399,6 +399,12 @@ private:
     return self;
 }
 
+-(void) dealloc
+{
+    [m_window close];
+    [super dealloc];
+}
+
 -(void)displayWindow:(mmd_mesh *)mesh view:(PmdView *)view
 {
     m_mesh=mesh;
