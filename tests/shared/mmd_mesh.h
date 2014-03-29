@@ -38,6 +38,14 @@ public:
     void set_scale(float scale) { m_mesh.set_scale(scale); }
 
     const char *get_name() const { return m_mesh.get_name(); }
+    int get_morphs_count() const { return (int)m_morphs.size(); }
+    const char *get_morph_name(int idx)
+    {
+        if(!m_morph_data || idx<0 || idx>=get_morphs_count())
+            return 0;
+
+        return m_morph_data->morphs[idx].name.c_str();
+    }
 
     mmd_mesh(): m_morph_data(0), m_pos_count(0) {}
 
