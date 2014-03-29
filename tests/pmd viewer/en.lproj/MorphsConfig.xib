@@ -15,23 +15,23 @@
         <window title="Morphs" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" animationBehavior="default" id="QvC-M9-y7g">
             <windowStyleMask key="styleMask" titled="YES" miniaturizable="YES" resizable="YES" texturedBackground="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="196" y="240" width="303" height="538"/>
+            <rect key="contentRect" x="690" y="216" width="303" height="600"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1440" height="878"/>
             <value key="minSize" type="size" width="285" height="250"/>
             <value key="maxSize" type="size" width="285" height="65535"/>
             <view key="contentView" id="EiT-Mj-1SZ">
-                <rect key="frame" x="0.0" y="0.0" width="303" height="538"/>
+                <rect key="frame" x="0.0" y="0.0" width="303" height="600"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <scrollView autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="FJo-We-zfX">
-                        <rect key="frame" x="-1" y="0.0" width="304" height="514"/>
+                        <rect key="frame" x="-1" y="-6" width="304" height="582"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <clipView key="contentView" id="BxP-Ku-TuH">
-                            <rect key="frame" x="1" y="17" width="302" height="496"/>
+                            <rect key="frame" x="1" y="17" width="302" height="564"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="none" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" headerView="qVT-VN-eci" id="0ps-2D-GPG">
-                                    <rect key="frame" x="0.0" y="0.0" width="302" height="496"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="302" height="564"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <size key="intercellSpacing" width="3" height="2"/>
                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -73,6 +73,7 @@
                                         </tableColumn>
                                     </tableColumns>
                                     <connections>
+                                        <action selector="sliderMoved:" target="-2" id="ctx-FQ-W90"/>
                                         <outlet property="dataSource" destination="-2" id="jJy-Gq-fwz"/>
                                     </connections>
                                 </tableView>
@@ -93,7 +94,7 @@
                         </tableHeaderView>
                     </scrollView>
                     <button id="fAW-sE-5nY">
-                        <rect key="frame" x="214" y="513" width="89" height="25"/>
+                        <rect key="frame" x="214" y="575" width="89" height="25"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="square" title="Reset" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="hZz-sh-RAH">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>

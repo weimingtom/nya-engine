@@ -123,14 +123,12 @@
                 <menuItem title="Edit" id="217">
                     <menu key="submenu" title="Edit" autoenablesItems="NO" id="205">
                         <items>
-                            <menuItem title="Load animation" id="532">
-                                <modifierMask key="keyEquivalentModifierMask"/>
+                            <menuItem title="Load animation" keyEquivalent="a" id="532">
                                 <connections>
                                     <action selector="loadAnimation:" target="-1" id="536"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Morphs" id="JV7-vs-aUh">
-                                <modifierMask key="keyEquivalentModifierMask"/>
+                            <menuItem title="Morphs" keyEquivalent="m" id="JV7-vs-aUh">
                                 <connections>
                                     <action selector="morphWindow:" target="-1" id="8o6-Ks-CRg"/>
                                 </connections>
@@ -156,11 +154,6 @@
                             <menuItem title="Delete" enabled="NO" id="202">
                                 <connections>
                                     <action selector="delete:" target="-1" id="235"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Select All" enabled="NO" keyEquivalent="a" id="198">
-                                <connections>
-                                    <action selector="selectAll:" target="-1" id="232"/>
                                 </connections>
                             </menuItem>
                         </items>
