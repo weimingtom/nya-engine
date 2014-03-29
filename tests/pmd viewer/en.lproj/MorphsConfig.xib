@@ -100,6 +100,9 @@
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
+                        <connections>
+                            <action selector="resetAll:" target="-2" id="wg3-4i-dks"/>
+                        </connections>
                     </button>
                 </subviews>
             </view>

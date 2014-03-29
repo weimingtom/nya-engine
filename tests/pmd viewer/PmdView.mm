@@ -419,10 +419,7 @@ private:
         return;
 
     m_morphs.resize(m_mesh->get_morphs_count());
-    for(int i=0;i<m_mesh->get_morphs_count();++i)
-        m_mesh->set_morph(i,0.0f,false);
-
-    [m_table reloadData];
+    [self resetAll:self];
 }
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)pTableViewObj
@@ -465,6 +462,19 @@ private:
     m_mesh->set_morph(int(row),m_morphs[row].value/100.0f,m_morphs[row].override);
     m_mesh->update(0);
     [m_view setNeedsDisplay: YES];
+}
+
+-(IBAction)resetAll:(id)sender
+{
+    for(int i=0;i<int(m_morphs.size());++i)
+    {
+        m_morphs[i]=morph();
+        m_mesh->set_morph(i,0.0f,false);
+    }
+
+    m_mesh->update(0);
+    [m_view setNeedsDisplay: YES];
+    [m_table reloadData];
 }
 
 @end
