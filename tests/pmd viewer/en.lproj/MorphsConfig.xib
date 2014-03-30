@@ -99,6 +99,7 @@
                         <buttonCell key="cell" type="square" title="Reset" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="hZz-sh-RAH">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
+                            <string key="keyEquivalent">r</string>
                         </buttonCell>
                         <connections>
                             <action selector="resetAll:" target="-2" id="wg3-4i-dks"/>
