@@ -15,7 +15,7 @@ public:
     {
         t a;
         size_t size=sizeof(t);
-        if(m_offset>m_size-size)
+        if(size>m_size-m_offset)
         {
             m_offset=m_size;
             memset(&a,0,size);
@@ -30,7 +30,7 @@ public:
 
     bool test(const void*data,size_t size)
     {
-        if(m_offset>m_size-size)
+        if(size>m_size-m_offset)
         {
             //m_offset=m_size;
             return false;
@@ -46,9 +46,19 @@ public:
         return true;
     }
 
-    bool check_remained(size_t size) const { return m_offset<=m_size-size; }
+    bool check_remained(size_t size) const { return size<=m_size-m_offset; }
 
-    bool seek(size_t offset) { m_offset=offset; return m_offset<m_size; }
+    bool seek(size_t offset)
+    {
+        if(offset>=m_size)
+        {
+            m_offset=m_size;
+            return false;
+        }
+
+        m_offset=offset;
+        return true;
+    }
 
     bool skip(size_t offset)
     {
