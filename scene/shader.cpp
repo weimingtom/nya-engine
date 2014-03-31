@@ -237,29 +237,20 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
 
                             if(check=='p')
                             {
-                                if(semantics=="nya camera position")
+                                const char *predefined_semantics[]={"nya camera position","nya bones pos","nya bones rot","nya viewport",
+                                                                    "nya model pos","nya model rot","nya model scale"};
+
+                                char predefined_count_static_assert[sizeof(predefined_semantics)/sizeof(predefined_semantics[0])
+                                                                                        ==shared_shader::predefines_count?1:-1];
+                                predefined_count_static_assert[0]=0;
+                                for(int i=0;i<shared_shader::predefines_count;++i)
                                 {
-                                    shader_description::predefined &p=desc.predefines[shared_shader::camera_pos];
-                                    p.name=name;
-                                    p.transform=transform;
-                                }
-                                else if(semantics=="nya bones pos")
-                                {
-                                    shader_description::predefined &p=desc.predefines[shared_shader::bones_pos];
-                                    p.name=name;
-                                    p.transform=transform;
-                                }
-                                else if(semantics=="nya bones rot")
-                                {
-                                    shader_description::predefined &p=desc.predefines[shared_shader::bones_rot];
-                                    p.name=name;
-                                    p.transform=transform;
-                                }
-                                else if(semantics=="nya viewport")
-                                {
-                                    shader_description::predefined &p=desc.predefines[shared_shader::viewport];
-                                    p.name=name;
-                                    p.transform=transform;
+                                    if(semantics==predefined_semantics[i])
+                                    {
+                                        desc.predefines[i].name=name;
+                                        desc.predefines[i].transform=transform;
+                                        break;
+                                    }
                                 }
                             }
                             else if(desc.uniforms.find(semantics)==desc.uniforms.end())
@@ -406,7 +397,29 @@ void shader_internal::set() const
             }
             break;
 
-            default: break;
+            case shared_shader::model_pos:
+            {
+                const nya_math::vec3 v=transform::get().get_pos();
+                m_shared->shdr.set_uniform(p.location,v.x,v.y,v.z);
+            }
+            break;
+
+            case shared_shader::model_rot:
+            {
+                const nya_math::quat v=transform::get().get_rot();
+                m_shared->shdr.set_uniform(p.location,v.v.x,v.v.y,v.v.z,v.w);
+                printf("%f %f %f %f\n",v.v.x,v.v.y,v.v.z,v.w);
+            }
+            break;
+
+            case shared_shader::model_scale:
+            {
+                const nya_math::vec3 v=transform::get().get_scale();
+                m_shared->shdr.set_uniform(p.location,v.x,v.y,v.z);
+            }
+            break;
+
+            case shared_shader::predefines_count: break;
         }
     }
 }

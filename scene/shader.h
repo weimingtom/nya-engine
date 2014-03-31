@@ -26,6 +26,9 @@ struct shared_shader
         bones_pos,
         bones_rot,
         viewport,
+        model_pos,
+        model_rot,
+        model_scale,
 
         predefines_count
     };
