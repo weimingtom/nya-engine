@@ -408,7 +408,6 @@ void shader_internal::set() const
             {
                 const nya_math::quat v=transform::get().get_rot();
                 m_shared->shdr.set_uniform(p.location,v.v.x,v.v.y,v.v.z,v.w);
-                printf("%f %f %f %f\n",v.v.x,v.v.y,v.v.z,v.w);
             }
             break;
 
