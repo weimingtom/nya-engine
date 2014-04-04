@@ -52,6 +52,9 @@ public:
     static void apply(bool ignore_cache=false);
 
 public:
+    void set_wrap(bool repeat_s,bool repeat_t);
+
+public:
     bool get_data( nya_memory::tmp_buffer_ref &data ) const;
     unsigned int get_width() const { return m_width; }
     unsigned int get_height() const { return m_height; }

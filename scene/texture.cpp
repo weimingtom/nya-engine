@@ -40,18 +40,35 @@ bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
         return false;
 
     const int mipmap_count=dds.need_generate_mipmaps?-1:dds.mipmap_count;
+    nya_render::texture::color_format cf;
     switch(dds.pf)
     {
-        case nya_formats::dds::dxt1: res.tex.build_texture(dds.data,dds.width,dds.height,nya_render::texture::dxt1,mipmap_count); break;
+        case nya_formats::dds::dxt1: cf=nya_render::texture::dxt1; break;
         case nya_formats::dds::dxt2:
-        case nya_formats::dds::dxt3: res.tex.build_texture(dds.data,dds.width,dds.height,nya_render::texture::dxt3,mipmap_count); break;
+        case nya_formats::dds::dxt3: cf=nya_render::texture::dxt3; break;
         case nya_formats::dds::dxt4:
-        case nya_formats::dds::dxt5: res.tex.build_texture(dds.data,dds.width,dds.height,nya_render::texture::dxt5,mipmap_count); break;
-        case nya_formats::dds::bgra: res.tex.build_texture(dds.data,dds.width,dds.height,nya_render::texture::color_bgra,mipmap_count); break;
+        case nya_formats::dds::dxt5: cf=nya_render::texture::dxt5; break;
+        case nya_formats::dds::bgra: cf=nya_render::texture::color_bgra; break;
         case nya_formats::dds::bgr:
             rgb_to_bgr((unsigned char*)dds.data,dds.data_size);
-            res.tex.build_texture(dds.data,dds.width,dds.height, nya_render::texture::color_rgb,mipmap_count);
+            cf=nya_render::texture::dxt1;
             break;
+
+        default: return false;
+    }
+
+    switch(dds.type)
+    {
+        case nya_formats::dds::texture_2d: res.tex.build_texture(dds.data,dds.width,dds.height,cf,mipmap_count); break;
+
+        case nya_formats::dds::texture_cube: //ToDo: mipmap_count
+        {
+            const void *data[6];
+            for(int i=0;i<6;++i)
+                data[i]=(const char *)dds.data+i*dds.data_size/6;
+            res.tex.build_cubemap(data,dds.width,dds.height,cf);
+        }
+        break;
 
         default: return false;
     }

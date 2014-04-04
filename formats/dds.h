@@ -15,6 +15,14 @@ struct dds
     unsigned int mipmap_count;
     bool need_generate_mipmaps;
 
+    enum texture_type
+    {
+        texture_2d,
+        texture_cube
+    };
+
+    texture_type type;
+
     enum pixel_format
     {
         dxt1,

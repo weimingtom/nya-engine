@@ -237,7 +237,7 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
 
                             if(check=='p')
                             {
-                                const char *predefined_semantics[]={"nya camera position","nya bones pos","nya bones rot","nya viewport",
+                                const char *predefined_semantics[]={"nya camera position","nya camera rotation","nya bones pos","nya bones rot","nya viewport",
                                                                     "nya model pos","nya model rot","nya model scale"};
 
                                 char predefined_count_static_assert[sizeof(predefined_semantics)/sizeof(predefined_semantics[0])
@@ -369,6 +369,21 @@ void shader_internal::set() const
                 }
             }
             break;
+
+            case shared_shader::camera_rot:
+            {
+                if(!get_camera().is_valid())
+                {
+                    m_shared->shdr.set_uniform(p.location,0.0f,0.0f,0.0f);
+                    break;
+                }
+
+                //if(p.transform==shared_shader::none) //ToDo
+                {
+                    const nya_math::quat v=get_camera()->get_rot();
+                    m_shared->shdr.set_uniform(p.location,v.v.x,v.v.y,v.v.z,v.w);
+                }
+            }
 
             case shared_shader::bones_pos:
             {

@@ -63,6 +63,7 @@ size_t dds::decode_header(const void *data,size_t size)
     const uint dds_fourcc=0x00000004;
     const uint dds_rgb=0x00000040;
     const uint dds_alpha=0x00000001;
+    const uint dds_cubemap=0x00000200;
 
     const dds_pixel_format pf=reader.read<dds_pixel_format>();
     if(pf.flags & dds_fourcc)
@@ -79,7 +80,7 @@ size_t dds::decode_header(const void *data,size_t size)
 
         for(uint i=0,w=width,h=height;i<mipmap_count;++i,w/=2,h/=2)
         {
-            uint s=(w>4?w:4)/4 * (h>4?h:4)/4 * this->pf==dxt1?8:16;
+            uint s=(w>4?w:4)/4 * (h>4?h:4)/4 * (this->pf==dxt1?8:16);
             if(i==0) this->mip0_data_size=s;
             this->data_size+=s;
         }
@@ -108,7 +109,20 @@ size_t dds::decode_header(const void *data,size_t size)
     else
         return 0;
 
+    unsigned int caps1=reader.read<unsigned int>();
+    unsigned int caps2=reader.read<unsigned int>();
+
+    type=texture_2d;
+    if(caps2 & dds_cubemap)
+    {
+        type=texture_cube;
+        this->data_size*=6;
+    }
+
     reader.seek(128);
+    if(!reader.check_remained(this->data_size))
+        return 0;
+
     this->data=reader.get_data();
 
     return reader.get_offset();

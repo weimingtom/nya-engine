@@ -462,6 +462,16 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
         return false;
     }
 
+    const bool is_dxt=(format==dxt1 || format==dxt3 || format==dxt5);
+    if(is_dxt)
+    {
+        if(!data)// || mip_count==0) //ToDo
+            return false;
+
+        if(!is_dxt_supported())
+            return false;
+    }
+
 #ifdef DIRECTX11
     if(!get_device())
         return false;
@@ -581,6 +591,10 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
         case color_rgba: source_format=GL_RGBA; gl_format=GL_RGBA; break;
         case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; break;
         case greyscale: source_format=GL_LUMINANCE; gl_format=GL_LUMINANCE; break;
+
+        case dxt1: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT1_EXT; break;
+        case dxt3: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT3_EXT; break;
+        case dxt5: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT5_EXT; break;
         default: break;
     };
 
@@ -639,8 +653,17 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     if(has_mipmap) glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_GENERATE_MIPMAP,GL_TRUE);
   #endif
 
+    const unsigned int source_bpp=get_bpp(format);
+    if(!source_bpp)
+        return false;
+
 	for(int i=0;i<sizeof(cube_faces)/sizeof(cube_faces[0]);++i)
-		glTexImage2D(cube_faces[i],0,source_format,width,height,0,gl_format,GL_UNSIGNED_BYTE,data?data[i]:0);
+    {
+        if(is_dxt)
+            glCompressedTexImage2D(cube_faces[i],0,gl_format,width,height,0,width*height*source_bpp/8,data[i]);
+        else
+            glTexImage2D(cube_faces[i],0,source_format,width,height,0,gl_format,GL_UNSIGNED_BYTE,data?data[i]:0);
+    }
 
   #ifndef GL_GENERATE_MIPMAP
     if(has_mipmap) glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
@@ -658,16 +681,7 @@ bool texture::build_cubemap(const void *data,unsigned int width,unsigned int hei
     if(!data)
         return build_cubemap((const void **)0,width,height,format);
 
-    unsigned int side_size=width*height;
-    switch (format)
-    {
-        case color_rgba: case color_bgra: side_size*=4; break;
-        case color_rgb: side_size*=3; break;
-        case greyscale: break;
-
-        default: return false;
-    }
-
+    unsigned int side_size=width*height*get_bpp(format)/8;
     const char *data_ptr=(const char *)data;
     const void *data_ptrs[6];
     for(int i=0;i<6;++i,data_ptr+=side_size)
@@ -879,6 +893,23 @@ void texture::release()
     m_tex=-1;
     m_width=0;
     m_height=0;
+}
+
+void texture::set_wrap(bool repeat_s,bool repeat_t)
+{
+    if(m_tex<0)
+        return;
+
+    const texture_obj &tex=texture_obj::get(m_tex);
+
+#ifndef DIRECTX11
+    const bool pot=((m_width&(m_width-1))==0 && (m_height&(m_height-1))==0);
+
+    glBindTexture(tex.gl_type,tex.tex_id);
+    glTexParameteri(tex.gl_type,GL_TEXTURE_WRAP_S,repeat_s&&pot?GL_REPEAT:GL_CLAMP_TO_EDGE);
+    glTexParameteri(tex.gl_type,GL_TEXTURE_WRAP_T,repeat_t&&pot?GL_REPEAT:GL_CLAMP_TO_EDGE);
+    active_layers[0]=-1;
+#endif
 }
 
 namespace

@@ -23,6 +23,7 @@ struct shared_shader
     enum predefined_values
     {
         camera_pos=0,
+        camera_rot,
         bones_pos,
         bones_rot,
         viewport,

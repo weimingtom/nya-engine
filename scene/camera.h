@@ -31,6 +31,7 @@ public:
 
 public:
 	const nya_math::vec3 &get_pos() const { return m_pos; }
+	const nya_math::quat &get_rot() const { return m_rot; }
 
 public:
     camera(): m_recalc_view(true), m_recalc_frustum(true) {}
