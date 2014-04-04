@@ -79,12 +79,12 @@ public:
 public:
     typedef bool (*load_function)(t &sh,resource_data &data,const char *name);
 
-    static void register_load_function(load_function function)
+    static void register_load_function(load_function function,bool clear_default)
     {
         if(!function)
             return;
 
-        if(get_load_functions().has_default)
+        if(get_load_functions().has_default && clear_default)
         {
             get_load_functions().f.clear();
             get_load_functions().has_default=false;

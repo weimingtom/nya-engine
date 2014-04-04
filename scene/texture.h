@@ -45,7 +45,7 @@ public:
 
 public:
     static void set_resources_prefix(const char *prefix) { texture_internal::set_resources_prefix(prefix); }
-    static void register_load_function(texture_internal::load_function function) { texture_internal::register_load_function(function); }
+    static void register_load_function(texture_internal::load_function function,bool clear_default=true) { texture_internal::register_load_function(function,clear_default); }
 
 public:
     const char *get_name() const { return internal().get_name(); }

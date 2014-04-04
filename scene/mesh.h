@@ -169,7 +169,7 @@ public:
 
 public:
     static void set_resources_prefix(const char *prefix) { mesh_internal::set_resources_prefix(prefix); }
-    static void register_load_function(mesh_internal::load_function function) { mesh_internal::register_load_function(function); }
+    static void register_load_function(mesh_internal::load_function function,bool clear_default=true) { mesh_internal::register_load_function(function,clear_default); }
 
 public:
     int get_groups_count() const;

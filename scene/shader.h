@@ -128,7 +128,7 @@ public:
 
 public:
     static void set_resources_prefix(const char *prefix) { shader_internal::set_resources_prefix(prefix); }
-    static void register_load_function(shader_internal::load_function function) { shader_internal::register_load_function(function); }
+    static void register_load_function(shader_internal::load_function function,bool clear_default=true) { shader_internal::register_load_function(function,clear_default); }
 
 public:
     const char *get_name() const { return m_internal.get_name(); }

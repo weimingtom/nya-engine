@@ -4,8 +4,8 @@
 
 bool mmd_mesh::load(const char *name)
 {
-    nya_scene::mesh::register_load_function(pmx_loader::load);
-    nya_scene::mesh::register_load_function(pmd_loader::load);
+    nya_scene::mesh::register_load_function(pmx_loader::load,false);
+    nya_scene::mesh::register_load_function(pmd_loader::load,false);
 
     m_vbo.release();
     m_vertex_data.clear();
