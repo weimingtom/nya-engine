@@ -103,7 +103,7 @@ size_t dds::decode_header(const void *data,size_t size)
             return 0;
 
         this->mip0_data_size=width*height*(pf.bpp/4);
-        for(uint i=0,w=width,h=height;i<mipmap_count;++i,w>1?w/=2:1,h>1?h/=2:1)
+        for(uint i=0,w=width,h=height;i<mipmap_count;++i,w>1?w=w/2:w=1,h>1?h/=2:w=1)
             this->data_size+=w*h*(pf.bpp/4);
     }
     else
