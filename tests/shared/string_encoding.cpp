@@ -58,7 +58,7 @@ std::string utf8_from_utf16le(const void *data,unsigned int size)
 std::string utf8_from_shiftjis(const void *data,unsigned int size)
 {
     if (!data || !size)
-        return false;
+        return std::string();
 
     typedef unsigned short ushort;
     std::vector<ushort> utf16;

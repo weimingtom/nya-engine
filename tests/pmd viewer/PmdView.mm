@@ -304,7 +304,7 @@ private:
 -(void)loadAnim:(const std::string &)name
 {
     nya_scene::animation anim;
-    nya_scene::animation::register_load_function(vmd_loader::load);
+    nya_scene::animation::register_load_function(vmd_loader::load,true);
     anim.load(name.c_str());
     m_mesh.set_anim(anim);
 

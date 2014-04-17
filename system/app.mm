@@ -933,9 +933,9 @@ private:
     {
         NSOpenGLPFADoubleBuffer,
         NSOpenGLPFADepthSize, 32,
-        NSOpenGLPFASampleBuffers,1,NSOpenGLPFASamples,m_antialiasing,
+        NSOpenGLPFASampleBuffers,1,NSOpenGLPFASamples,0,
         0
-    };
+    };  attrs_aniso[6]=m_antialiasing;
 
     NSWindow *window=shared_app::get_window();
 
