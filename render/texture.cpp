@@ -337,6 +337,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         case dxt3: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT3_EXT; break;
         case dxt5: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT5_EXT; break;
 #endif
+        default: break;
     };
 
     const unsigned int source_bpp=get_bpp(format);
@@ -592,9 +593,11 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
         case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; break;
         case greyscale: source_format=GL_LUMINANCE; gl_format=GL_LUMINANCE; break;
 
+#ifndef OPENGL_ES
         case dxt1: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT1_EXT; break;
         case dxt3: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT3_EXT; break;
         case dxt5: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT5_EXT; break;
+#endif
         default: break;
     };
 
