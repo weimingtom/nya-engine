@@ -16,7 +16,7 @@ class scene_shared
 public:
     bool load(const char *name)
     {
-        if(!name)
+        if(!name || !name[0])
         {
             unload();
             return false;
