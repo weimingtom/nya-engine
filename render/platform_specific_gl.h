@@ -84,8 +84,9 @@ namespace nya_render
         ID3D11RenderTargetView *color_targets[6];
         ID3D11DepthStencilView *depth_target;
         DXGI_FORMAT dx_format;
+        bool has_mipmaps;
 
-        texture_obj(): tex(0),srv(0),sampler_state(0),size(0),depth_target(0)
+        texture_obj(): tex(0),srv(0),sampler_state(0),size(0),depth_target(0),has_mipmaps(false)
         {
             for(int i=0;i<6;++i)
                 color_targets[i]=0;
