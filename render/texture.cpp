@@ -19,6 +19,10 @@ namespace
     int current_layers[max_layers]={-1,-1,-1,-1,-1,-1,-1,-1};
     int active_layers[max_layers]={-1,-1,-1,-1,-1,-1,-1,-1};
 
+    texture::filter default_min_filter=texture::filter_linear;
+    texture::filter default_mag_filter=texture::filter_linear;
+    texture::filter default_mip_filter=texture::filter_linear;
+
 #ifndef DIRECTX11
 	const unsigned int cube_faces[]={GL_TEXTURE_CUBE_MAP_POSITIVE_X,GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
                                      GL_TEXTURE_CUBE_MAP_POSITIVE_Y,GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
@@ -125,6 +129,37 @@ void gl_select_multitex_layer(int idx)
 #endif
 }
 
+void gl_setup_filtration(int target,bool has_mips,texture::filter minif,texture::filter magnif,texture::filter mip)
+{
+    glTexParameteri(target,GL_TEXTURE_MAG_FILTER,minif==texture::filter_nearest?GL_NEAREST:GL_LINEAR);
+
+    GLint filter;
+
+    if(has_mips)
+    {
+        if(minif==texture::filter_nearest)
+        {
+            if(mip==texture::filter_nearest)
+                filter=GL_NEAREST_MIPMAP_NEAREST;
+            else
+                filter=GL_NEAREST_MIPMAP_LINEAR;
+        }
+        else
+        {
+            if(mip==texture::filter_nearest)
+                filter=GL_LINEAR_MIPMAP_NEAREST;
+            else
+                filter=GL_LINEAR_MIPMAP_LINEAR;
+        }
+    }
+    else if(magnif==texture::filter_nearest)
+        filter=GL_NEAREST;
+    else
+        filter=GL_LINEAR;
+
+    glTexParameteri(target,GL_TEXTURE_MIN_FILTER,filter);
+}
+
 void gl_setup_texture(int target,bool clamp,bool has_mips)
 {
     if(clamp || target==GL_TEXTURE_CUBE_MAP)
@@ -143,12 +178,7 @@ void gl_setup_texture(int target,bool clamp,bool has_mips)
         glTexParameteri(target,GL_TEXTURE_WRAP_T,GL_REPEAT);
     }
 
-    glTexParameteri(target,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-
-    if(has_mips)
-        glTexParameteri(target,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-    else
-        glTexParameteri(target,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+    gl_setup_filtration(target,has_mips,default_min_filter,default_mag_filter,default_mip_filter);
 }
 
 void gl_setup_pack_alignment()
@@ -433,6 +463,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 #endif
 
     texture_obj::get(m_tex).size=get_tex_memory_size(m_width,m_height,m_format,mip_count);
+    texture_obj::get(m_tex).has_mipmaps=has_mipmap;
 
     return true;
 }
@@ -676,6 +707,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 #endif
 
     texture_obj::get(m_tex).size=get_tex_memory_size(m_width,m_height,m_format,-1)*6;
+    texture_obj::get(m_tex).has_mipmaps=has_mipmap;
     return true;
 }
 
@@ -913,6 +945,27 @@ void texture::set_wrap(bool repeat_s,bool repeat_t)
     glTexParameteri(tex.gl_type,GL_TEXTURE_WRAP_T,repeat_t&&pot?GL_REPEAT:GL_CLAMP_TO_EDGE);
     active_layers[0]=-1;
 #endif
+}
+
+void texture::set_filter(filter minification,filter magnification,filter mipmap)
+{
+    if(m_tex<0)
+        return;
+
+    const texture_obj &tex=texture_obj::get(m_tex);
+
+#ifndef DIRECTX11
+    glBindTexture(tex.gl_type,tex.tex_id);
+    gl_setup_filtration(tex.gl_type,tex.has_mipmaps,minification,magnification,mipmap);
+    active_layers[0]=-1;
+#endif
+}
+
+void texture::set_default_filter(filter minification,filter magnification,filter mipmap)
+{
+    default_min_filter=minification;
+    default_mag_filter=magnification;
+    default_mip_filter=mipmap;
 }
 
 namespace

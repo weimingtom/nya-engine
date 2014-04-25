@@ -54,6 +54,16 @@ public:
 public:
     void set_wrap(bool repeat_s,bool repeat_t);
 
+    enum filter
+    {
+        filter_nearest,
+        filter_linear,
+        //filter_aniso
+    };
+
+    void set_filter(filter minification,filter magnification,filter mipmap);
+    static void set_default_filter(filter minification,filter magnification,filter mipmap);
+
 public:
     bool get_data( nya_memory::tmp_buffer_ref &data ) const;
     unsigned int get_width() const { return m_width; }
