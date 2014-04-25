@@ -704,10 +704,10 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
   #endif
 
     glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+    texture_obj::get(m_tex).has_mipmaps=has_mipmap;
 #endif
 
     texture_obj::get(m_tex).size=get_tex_memory_size(m_width,m_height,m_format,-1)*6;
-    texture_obj::get(m_tex).has_mipmaps=has_mipmap;
     return true;
 }
 
