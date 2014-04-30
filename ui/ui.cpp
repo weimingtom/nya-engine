@@ -3,6 +3,7 @@
 #include "ui/ui.h"
 
 #include <string>
+#include <string.h>
 
 namespace { nya_log::log *ui_log=0; }
 

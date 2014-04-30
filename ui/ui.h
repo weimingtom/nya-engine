@@ -13,6 +13,10 @@
 #include <list>
 #include <deque>
 
+#if defined(__GNUC__) && GCC_VERSION < 40700
+    #define override
+#endif
+
 namespace nya_ui
 {
 

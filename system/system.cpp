@@ -105,7 +105,7 @@ const char *get_app_path()
         readlink("/proc/self/exe",path,max_path);
 
         int last_slash=0;
-        for(int i=0;i<max_path-1 && path[i];++i)
+        for(unsigned int i=0;i<max_path-1 && path[i];++i)
         {
             if(path[i]=='/')
                 last_slash=i;

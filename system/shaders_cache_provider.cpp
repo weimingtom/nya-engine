@@ -3,6 +3,9 @@
 #include "shaders_cache_provider.h"
 #include "render/platform_specific_gl.h"
 
+#include <string.h>
+#include <stdio.h>
+
 #ifdef DIRECTX11
     #include "resources/resources.h"
 #endif
@@ -72,7 +75,7 @@ std::string compiled_shaders_provider::crc(const char *text)
             unsigned int crc=i;
             for(int j=0;j<8;j++)
                 crc=crc&1?(crc>>1)^0xEDB88320UL:crc>>1;
- 
+
             crc_table[i]=crc;
         };
 

@@ -60,7 +60,7 @@ public:
 
 public:
     static void set_resources_prefix(const char *prefix) { get_resources_prefix_str().assign(prefix?prefix:""); }
-    static const char *get_resources_prefix() { get_resources_prefix_str().c_str(); }
+    static const char *get_resources_prefix() { return get_resources_prefix_str().c_str(); }
 
 public:
     static int reload_all_resources() { return get_shared_resources().reload_resources(); }

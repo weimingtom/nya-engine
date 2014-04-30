@@ -242,7 +242,7 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
 
                                 char predefined_count_static_assert[sizeof(predefined_semantics)/sizeof(predefined_semantics[0])
                                                                                         ==shared_shader::predefines_count?1:-1];
-                                predefined_count_static_assert[0]=0;
+                                predefined_count_static_assert[0]=predefined_count_static_assert[0];
                                 for(int i=0;i<shared_shader::predefines_count;++i)
                                 {
                                     if(semantics==predefined_semantics[i])

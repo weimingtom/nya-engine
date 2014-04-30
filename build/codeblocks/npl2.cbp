@@ -7,23 +7,22 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="debug">
-				<Option output="..\..\bin\linux_debug\npl2" prefix_auto="1" extension_auto="1" />
-				<Option object_output="..\..\obj\linux_debug\" />
+				<Option output="../../bin/linux_debug/npl2" prefix_auto="1" extension_auto="1" />
+				<Option object_output="../../obj/linux_debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
 				<Linker>
-					<Add library="..\..\bin\linux_debug\libnya_engine.a" />
+					<Add library="../../bin/linux_debug/libnya_engine.a" />
 					<Add library="GL" />
 					<Add library="GLU" />
-					<Add library="IL" />
 				</Linker>
 			</Target>
 			<Target title="release">
-				<Option output="..\..\bin\linux_release\npl2" prefix_auto="1" extension_auto="1" />
-				<Option object_output="..\..\obj\linux_release\" />
+				<Option output="../../bin/linux_release/npl2" prefix_auto="1" extension_auto="1" />
+				<Option object_output="../../obj/linux_release/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -31,15 +30,14 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add library="..\..\bin\linux_release\libnya_engine.a" />
+					<Add library="../../bin/linux_release/libnya_engine.a" />
 					<Add library="GL" />
 					<Add library="GLU" />
-					<Add library="IL" />
 				</Linker>
 			</Target>
 			<Target title="release win32">
-				<Option output="..\..\bin\win_release\npl2" prefix_auto="1" extension_auto="1" />
-				<Option object_output="..\..\obj\win_release\" />
+				<Option output="../../bin/win_release/npl2" prefix_auto="1" extension_auto="1" />
+				<Option object_output="../../obj/win_release/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -47,7 +45,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add library="..\..\bin\win_release\libnya_engine.a" />
+					<Add library="../../bin/win_release/libnya_engine.a" />
 					<Add library="opengl32" />
 					<Add library="glu32" />
 					<Add library="devil" />
@@ -58,25 +56,31 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
-			<Add directory="..\..\" />
+			<Add directory="../../" />
 		</Compiler>
-		<Unit filename="..\..\tests\npl2\attributes.cpp" />
-		<Unit filename="..\..\tests\npl2\attributes.h" />
-		<Unit filename="..\..\tests\npl2\character.cpp" />
-		<Unit filename="..\..\tests\npl2\character.h" />
-		<Unit filename="..\..\tests\npl2\config.cpp" />
-		<Unit filename="..\..\tests\npl2\config.h" />
-		<Unit filename="..\..\tests\npl2\npl2.cpp" />
-		<Unit filename="..\..\tests\npl2\pl2_resources_provider.cpp" />
-		<Unit filename="..\..\tests\npl2\pl2_resources_provider.h" />
-		<Unit filename="..\..\tests\npl2\scene.cpp" />
-		<Unit filename="..\..\tests\npl2\scene.h" />
-		<Unit filename="..\..\tests\npl2\tmb_model.cpp" />
-		<Unit filename="..\..\tests\npl2\tmb_model.h" />
-		<Unit filename="..\..\tests\npl2\tsb_anim.cpp" />
-		<Unit filename="..\..\tests\npl2\tsb_anim.h" />
-		<Unit filename="..\..\tests\npl2\ui.cpp" />
-		<Unit filename="..\..\tests\npl2\ui.h" />
+		<Unit filename="../../tests/npl2/animation.cpp" />
+		<Unit filename="../../tests/npl2/animation.h" />
+		<Unit filename="../../tests/npl2/attributes.cpp" />
+		<Unit filename="../../tests/npl2/attributes.h" />
+		<Unit filename="../../tests/npl2/character.cpp" />
+		<Unit filename="../../tests/npl2/character.h" />
+		<Unit filename="../../tests/npl2/config.cpp" />
+		<Unit filename="../../tests/npl2/config.h" />
+		<Unit filename="../../tests/npl2/npl2.cpp" />
+		<Unit filename="../../tests/npl2/pl2_resources_provider.cpp" />
+		<Unit filename="../../tests/npl2/pl2_resources_provider.h" />
+		<Unit filename="../../tests/npl2/scene.cpp" />
+		<Unit filename="../../tests/npl2/scene.h" />
+		<Unit filename="../../tests/npl2/shared_textures.cpp" />
+		<Unit filename="../../tests/npl2/shared_textures.h" />
+		<Unit filename="../../tests/npl2/tmb_model.cpp" />
+		<Unit filename="../../tests/npl2/tmb_model.h" />
+		<Unit filename="../../tests/npl2/tsb_anim.cpp" />
+		<Unit filename="../../tests/npl2/tsb_anim.h" />
+		<Unit filename="../../tests/npl2/ui.cpp" />
+		<Unit filename="../../tests/npl2/ui.h" />
+		<Unit filename="../../tests/npl2/widgets.cpp" />
+		<Unit filename="../../tests/npl2/widgets.h" />
 		<Extensions>
 			<envvars />
 			<code_completion />
