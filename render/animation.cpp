@@ -171,7 +171,7 @@ const char *animation::get_curve_name(int idx) const
 int animation::add_bone(const char *name)
 {
     const int idx=add_bone_curve(name,m_bones_map,m_pos_sequences,m_bone_names);
-    if(idx>=m_rot_sequences.size())
+    if(idx>=int(m_rot_sequences.size()))
         m_rot_sequences.resize(idx+1);
 
     return idx;

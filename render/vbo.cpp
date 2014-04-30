@@ -366,7 +366,7 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type)
         glEnableClientState(GL_VERTEX_ARRAY);
         glVertexPointer(vobj.vertices.dimension,get_gl_element_type(vobj.vertices.type),vobj.vertex_stride,(void*)0);
 #endif
-        for(int i=0;i<max_tex_coord;++i)
+        for(unsigned int i=0;i<max_tex_coord;++i)
         {
             const vbo_obj::attribute &tc=vobj.tcs[i];
             if(tc.has)
@@ -476,7 +476,7 @@ void vbo::release()
   #else
             glDisableClientState(GL_VERTEX_ARRAY);
   #endif
-            for(int i=0;i<max_tex_coord;++i)
+            for(unsigned int i=0;i<max_tex_coord;++i)
             {
                 const vbo_obj::attribute &tc=obj.tcs[i];
                 if(tc.has)

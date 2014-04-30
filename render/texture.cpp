@@ -102,7 +102,7 @@ void dx_convert_to_format(const unsigned char *from,unsigned char *to,size_t siz
 #else
 void gl_select_multitex_layer(int idx)
 {
-    if(idx==active_layer)
+    if(idx==int(active_layer))
         return;
 
     active_layer=idx;
@@ -425,7 +425,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
   #endif
     unsigned int w=width,h=height;
     const char *data_pointer=(const char*)data;
-    for(int i=0;i<(mip_count<=0?1:mip_count);++i,w=w>1?w/=2:1,h=h>1?h/=2:1)
+    for(int i=0;i<(mip_count<=0?1:mip_count);++i,w=w>1?w/2:1,h=h>1?h/2:1)
     {
         unsigned int size=0;
         switch (format)
@@ -691,7 +691,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     if(!source_bpp)
         return false;
 
-	for(int i=0;i<sizeof(cube_faces)/sizeof(cube_faces[0]);++i)
+	for(int i=0;i<int(sizeof(cube_faces)/sizeof(cube_faces[0]));++i)
     {
         if(is_dxt)
             glCompressedTexImage2D(cube_faces[i],0,gl_format,width,height,0,width*height*source_bpp/8,data[i]);

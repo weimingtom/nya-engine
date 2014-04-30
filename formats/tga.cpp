@@ -4,6 +4,7 @@
 #include "memory/memory_reader.h"
 #include "memory/tmp_buffer.h"
 #include "resources/resources.h"
+#include <stdio.h>
 
 namespace nya_formats
 {
@@ -457,7 +458,7 @@ bool tga_file::flip_horisontal()
 
     m_header.flip_horisontal(&m_data[0],&m_data[0]);
     m_header.horisontal_flip=!m_header.horisontal_flip;
-    
+
     return true;
 }
 

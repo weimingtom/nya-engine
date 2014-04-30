@@ -45,9 +45,9 @@ nya_math::vec3 transform::inverse_transform(const nya_math::vec3 &vec) const
 {
     nya_math::vec3 out=m_rot.rotate_inv(vec-m_pos);
     const float eps=0.0001f;
-    out.x=fabsf(m_scale.x)>eps?out.x/=m_scale.x:0.0f;
-    out.y=fabsf(m_scale.y)>eps?out.y/=m_scale.y:0.0f;
-    out.z=fabsf(m_scale.z)>eps?out.z/=m_scale.z:0.0f;
+    out.x=fabsf(m_scale.x)>eps?out.x/m_scale.x:0.0f;
+    out.y=fabsf(m_scale.y)>eps?out.y/m_scale.y:0.0f;
+    out.z=fabsf(m_scale.z)>eps?out.z/m_scale.z:0.0f;
 
     return out;
 }
