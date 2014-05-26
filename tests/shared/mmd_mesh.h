@@ -20,13 +20,13 @@ public:
     void set_anim_time(unsigned int time,int layer=0) { m_mesh.set_anim_time(time,layer); }
 
     //int get_morph_name();
-    void set_morph(int idx,float value,bool override)
+    void set_morph(int idx,float value,bool overriden)
     {
         if(idx<0 || idx>=int(m_morphs.size()))
             return;
 
         m_morphs[idx].value=value;
-        m_morphs[idx].override=override;
+        m_morphs[idx].overriden=overriden;
     }
 
     void update(unsigned int dt);
@@ -66,11 +66,11 @@ private:
 
     struct morph
     {
-        bool override;
+        bool overriden;
         float value;
         float last_value;
 
-        morph(): override(false), value(0.0f), last_value(0.0f) {}
+        morph(): overriden(false), value(0.0f), last_value(0.0f) {}
     };
 
     std::vector<morph> m_morphs;

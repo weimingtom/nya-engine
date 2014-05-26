@@ -104,7 +104,7 @@ void mmd_mesh::update(unsigned int dt)
                 {
                     for(int j=0;j<m_anims[i].curves_map.size();++j)
                     {
-                        if(m_morphs[j].override)
+                        if(m_morphs[j].overriden)
                             continue;
 
                         m_morphs[j].value=a.get_curve(m_anims[i].curves_map[j],m_mesh.get_anim_time(m_anims[i].layer))*ap->get_weight();
@@ -114,7 +114,7 @@ void mmd_mesh::update(unsigned int dt)
                 {
                     for(int j=0;j<m_anims[i].curves_map.size();++j)
                     {
-                        if(m_morphs[j].override)
+                        if(m_morphs[j].overriden)
                             continue;
 
                         m_morphs[j].value+=a.get_curve(m_anims[i].curves_map[j],m_mesh.get_anim_time(m_anims[i].layer))*ap->get_weight();
