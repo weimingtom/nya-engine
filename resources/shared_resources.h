@@ -6,6 +6,7 @@
 #include "memory/pool.h"
 #include <map>
 #include <string>
+#include <algorithm>
 
 namespace nya_resources
 {
@@ -119,7 +120,11 @@ private:
             if(!name || !m_base)
                 return shared_resource_ref();
 
-            std::pair<resources_map_iterator,bool> ir = m_res_map.insert(std::make_pair(std::string(name),(res_holder*)0));
+            std::string name_str(name);
+            if(m_force_lowercase)
+                std::transform(name_str.begin(),name_str.end(),name_str.begin(),::tolower);
+
+            std::pair<resources_map_iterator,bool> ir = m_res_map.insert(std::make_pair(name_str,(res_holder*)0));
             if(ir.second)
             {
                 res_holder *holder=m_res_pool.allocate();
@@ -334,8 +339,8 @@ private:
         bool has_refs() { return m_ref_count>0; }
 
     public:
-        shared_resources_creator(shared_resources *base):m_base(base),
-                                 m_should_unload_unused(true),m_ref_count(1) {}
+        shared_resources_creator(shared_resources *base): m_base(base),m_should_unload_unused(true),
+                                                          m_force_lowercase(true), m_ref_count(1) {}
     private:
         typedef std::map<std::string,res_holder*> resources_map;
         typedef typename resources_map::iterator resources_map_iterator;
@@ -356,6 +361,7 @@ private:
     private:
         shared_resources *m_base;
         bool m_should_unload_unused;
+        bool m_force_lowercase;
         size_t m_ref_count;
     };
 
@@ -371,6 +377,7 @@ public:
 public:
     //void free_all() { m_creator->free_all(); }
     void free_unused() { m_creator->free_unused(); }
+    void force_lowercase(bool force) { m_creator->m_force_lowercase=force; }
     void should_unload_unused(bool unload) { m_creator->should_unload_unused(unload); }
     bool reload_resource(const char *name) { return m_creator->reload_resource(name); }
     int reload_resources() { return m_creator->reload_resources(); }
