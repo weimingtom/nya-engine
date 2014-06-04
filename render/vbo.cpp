@@ -645,28 +645,28 @@ bool vbo::set_index_data(const void*data,index_size size,unsigned int indices_co
     }
 
 #ifdef DIRECTX11
-	if(!get_device())
-	{
-		get_log()<<"Unable to set indices: invalid directx device, use nya_render::set_device()\n";
-		return false;
-	}
+    if(!get_device())
+    {
+        get_log()<<"Unable to set indices: invalid directx device, use nya_render::set_device()\n";
+        return false;
+    }
 
-	if(obj.index_loc)
-	{
-		//ToDo: release or refill
-	}
+    if(obj.index_loc)
+    {
+        //ToDo: release or refill
+    }
 
-	D3D11_SUBRESOURCE_DATA index_buffer_data={0};
-	index_buffer_data.pSysMem=data;
-	index_buffer_data.SysMemPitch=0;
-	index_buffer_data.SysMemSlicePitch=0;
-	CD3D11_BUFFER_DESC index_buffer_desc(buffer_size,D3D11_BIND_INDEX_BUFFER);
-	if(nya_render::get_device()->CreateBuffer(&index_buffer_desc,&index_buffer_data,&obj.index_loc)<0)
-	{
-		get_log()<<"Unable to set indices: unable to create buffer\n";
-		obj.index_loc=0;
-		return false;
-	}
+    D3D11_SUBRESOURCE_DATA index_buffer_data={0};
+    index_buffer_data.pSysMem=data;
+    index_buffer_data.SysMemPitch=0;
+    index_buffer_data.SysMemSlicePitch=0;
+    CD3D11_BUFFER_DESC index_buffer_desc(buffer_size,D3D11_BIND_INDEX_BUFFER);
+    if(nya_render::get_device()->CreateBuffer(&index_buffer_desc,&index_buffer_data,&obj.index_loc)<0)
+    {
+        get_log()<<"Unable to set indices: unable to create buffer\n";
+        obj.index_loc=0;
+        return false;
+    }
 
     obj.elements_usage=usage;
     obj.element_size=size;
@@ -827,22 +827,36 @@ bool vbo::get_vertex_data( nya_memory::tmp_buffer_ref &data ) const
         return false;
 
 #ifdef DIRECTX11
+    //ToDo
     return false;
 #else
     data.allocate(vbo_size);
     glBindBuffer(GL_ARRAY_BUFFER,vobj.vertex_loc);
+    current_verts=-1;
 
-#ifdef OPENGL_ES
+ #ifdef OPENGL_ES
+  #ifdef ANDROID
+    //ToDo
+    data.free();
+    return false;
+  #else
     const GLvoid *buf=glMapBufferOES(GL_ARRAY_BUFFER,GL_WRITE_ONLY_OES);
     if(!buf)
+    {
+        data.free();
         return false;
+    }
 
     memcpy(data.get_data(),buf,vbo_size);
-    return glUnmapBufferOES(GL_ARRAY_BUFFER);
-#else
+    if(!glUnmapBufferOES(GL_ARRAY_BUFFER))
+    {
+        data.free();
+        return false;
+    }
+  #endif
+ #else
     glGetBufferSubData(GL_ARRAY_BUFFER,0,vbo_size,data.get_data());
-#endif
-    current_verts=-1;
+ #endif
 #endif
 
     return true;
@@ -860,22 +874,36 @@ bool vbo::get_index_data( nya_memory::tmp_buffer_ref &data ) const
         return false;
 
 #ifdef DIRECTX11
+    //ToDo
     return false;
 #else
     data.allocate(ind_size);
     glBindBuffer(GL_ARRAY_BUFFER,obj.index_loc);
     current_inds=-1;
 
-  #ifdef OPENGL_ES
+ #ifdef OPENGL_ES
+  #ifdef ANDROID
+    //ToDo
+    data.free();
+    return false;
+  #else
     const GLvoid *buf=glMapBufferOES(GL_ARRAY_BUFFER,GL_WRITE_ONLY_OES);
     if(!buf)
+    {
+        data.free();
         return false;
+    }
 
     memcpy(data.get_data(),buf,ind_size);
-    return glUnmapBufferOES(GL_ARRAY_BUFFER);
-  #else
-    glGetBufferSubData(GL_ARRAY_BUFFER,0,ind_size,data.get_data());
+    if(!glUnmapBufferOES(GL_ARRAY_BUFFER))
+    {
+        data.free();
+        return false;
+    }
   #endif
+ #else
+    glGetBufferSubData(GL_ARRAY_BUFFER,0,ind_size,data.get_data());
+ #endif
 #endif
 
     return true;

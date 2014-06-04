@@ -37,6 +37,10 @@
     #endif
 
     #define NO_EXTENSIONS_INIT
+#elif ANDROID
+    #include <GLES2/gl2.h>
+    #include <GLES2/gl2ext.h>
+    #define OPENGL_ES
 #else
     #include <GL/glx.h>
     #include <GL/gl.h>
@@ -45,6 +49,7 @@
 
 #ifdef OPENGL_ES
     #define ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+    #define NO_EXTENSIONS_INIT
 #endif
 
 #ifdef DIRECTX11

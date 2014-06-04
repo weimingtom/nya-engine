@@ -34,35 +34,35 @@ ref class PhoneDirect3DApp sealed : public Windows::ApplicationModel::Core::IFra
 {
     friend ref class Direct3DApplicationSource;
 public:
-	//IFrameworkView.
-	virtual void Initialize(Windows::ApplicationModel::Core::CoreApplicationView^ applicationView)
+    //IFrameworkView.
+    virtual void Initialize(Windows::ApplicationModel::Core::CoreApplicationView^ applicationView)
     {
-	    applicationView->Activated +=
-		    ref new TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^>(this, &PhoneDirect3DApp::OnActivated);
+        applicationView->Activated +=
+            ref new TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^>(this, &PhoneDirect3DApp::OnActivated);
 
-	    CoreApplication::Suspending +=
-		    ref new EventHandler<SuspendingEventArgs^>(this, &PhoneDirect3DApp::OnSuspending);
+        CoreApplication::Suspending +=
+            ref new EventHandler<SuspendingEventArgs^>(this, &PhoneDirect3DApp::OnSuspending);
 
-	    CoreApplication::Resuming +=
-		    ref new EventHandler<Platform::Object^>(this, &PhoneDirect3DApp::OnResuming);
+        CoreApplication::Resuming +=
+            ref new EventHandler<Platform::Object^>(this, &PhoneDirect3DApp::OnResuming);
     }
 
-	virtual void SetWindow(Windows::UI::Core::CoreWindow^ window)
+    virtual void SetWindow(Windows::UI::Core::CoreWindow^ window)
     {
-	    window->VisibilityChanged +=
-		    ref new TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^>(this, &PhoneDirect3DApp::OnVisibilityChanged);
+        window->VisibilityChanged +=
+            ref new TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^>(this, &PhoneDirect3DApp::OnVisibilityChanged);
 
-	    window->Closed += 
-		    ref new TypedEventHandler<CoreWindow^, CoreWindowEventArgs^>(this, &PhoneDirect3DApp::OnWindowClosed);
+        window->Closed +=
+            ref new TypedEventHandler<CoreWindow^, CoreWindowEventArgs^>(this, &PhoneDirect3DApp::OnWindowClosed);
 
-	    window->PointerPressed +=
-		    ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &PhoneDirect3DApp::OnPointerPressed);
+        window->PointerPressed +=
+            ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &PhoneDirect3DApp::OnPointerPressed);
 
-	    window->PointerMoved +=
-		    ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &PhoneDirect3DApp::OnPointerMoved);
+        window->PointerMoved +=
+            ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &PhoneDirect3DApp::OnPointerMoved);
 
-	    window->PointerReleased +=
-		    ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &PhoneDirect3DApp::OnPointerReleased);
+        window->PointerReleased +=
+            ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &PhoneDirect3DApp::OnPointerReleased);
 
         m_window=window;
 
@@ -83,17 +83,17 @@ public:
     {
     }
 
-	virtual void Run()
+    virtual void Run()
     {
-	    while (!m_windowClosed)
-	    {
-		    if (m_windowVisible)
-		    {
+        while (!m_windowClosed)
+        {
+            if (m_windowVisible)
+            {
                 unsigned long time=nya_system::get_time();
                 unsigned int dt=(unsigned)(time-m_time);
                 m_time=time;
 
-			    CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
+                CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
 
                 m_app.on_frame(dt);
 
@@ -102,117 +102,117 @@ public:
                     //ToDo
                 }
             }
-		    else
-			    CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
-	    }
+            else
+                CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
+        }
     }
-	virtual void Uninitialize()
+    virtual void Uninitialize()
     {
     }
 
 protected:
-	void OnActivated(Windows::ApplicationModel::Core::CoreApplicationView^ applicationView, Windows::ApplicationModel::Activation::IActivatedEventArgs^ args)
+    void OnActivated(Windows::ApplicationModel::Core::CoreApplicationView^ applicationView, Windows::ApplicationModel::Activation::IActivatedEventArgs^ args)
     {
         CoreWindow::GetForCurrentThread()->Activate();
     }
 
-	void OnSuspending(Platform::Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ args)
+    void OnSuspending(Platform::Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ args)
     {
         SuspendingDeferral^ deferral = args->SuspendingOperation->GetDeferral();
-	    //release resources for suspending
+        //release resources for suspending
 
         /*
-	    create_task([this, deferral]()
-	    {
-		    deferral->Complete();
-	    });
+        create_task([this, deferral]()
+        {
+            deferral->Complete();
+        });
         */
     }
 
-	void OnResuming(Platform::Object^ sender, Platform::Object^ args)
+    void OnResuming(Platform::Object^ sender, Platform::Object^ args)
     {
     }
 
-	void OnWindowClosed(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::CoreWindowEventArgs^ args)
+    void OnWindowClosed(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::CoreWindowEventArgs^ args)
     {
-    	m_windowClosed=true;
+        m_windowClosed=true;
     }
 
-	void OnVisibilityChanged(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::VisibilityChangedEventArgs^ args)
+    void OnVisibilityChanged(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::VisibilityChangedEventArgs^ args)
     {
         m_windowVisible=args->Visible;
     }
 
-	float get_resolution_scale()
-	{
-		 //ToDo: DeviceExtendedProperties.GetValue("PhysicalScreenResolution");
-
-		const int rs = (int)Windows::Graphics::Display::DisplayProperties::ResolutionScale;
-		return (rs>0)?rs/100.0f:1.0f;
-	}
-
-	void OnPointerPressed(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args)
+    float get_resolution_scale()
     {
-		static float rs = get_resolution_scale();
+         //ToDo: DeviceExtendedProperties.GetValue("PhysicalScreenResolution");
+
+        const int rs = (int)Windows::Graphics::Display::DisplayProperties::ResolutionScale;
+        return (rs>0)?rs/100.0f:1.0f;
+    }
+
+    void OnPointerPressed(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args)
+    {
+        static float rs = get_resolution_scale();
         m_app.on_mouse_move(int(args->CurrentPoint->Position.X*rs),m_height-int(args->CurrentPoint->Position.Y*rs));
         m_app.on_mouse_button(nya_system::mouse_left,true);
     }
 
-	void OnPointerMoved(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args)
+    void OnPointerMoved(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args)
     {
-		static float rs = get_resolution_scale();
-		m_app.on_mouse_move(int(args->CurrentPoint->Position.X*rs),m_height-int(args->CurrentPoint->Position.Y*rs));
+        static float rs = get_resolution_scale();
+        m_app.on_mouse_move(int(args->CurrentPoint->Position.X*rs),m_height-int(args->CurrentPoint->Position.Y*rs));
     }
 
-	void OnPointerReleased(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args)
+    void OnPointerReleased(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args)
     {
         m_app.on_mouse_button(nya_system::mouse_left,false);
     }
 
     void CreateContext()
     {
-	    UINT creationFlags=D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+        UINT creationFlags=D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 
     #if defined(_DEBUG)
-	    creationFlags|=D3D11_CREATE_DEVICE_DEBUG;
+        creationFlags|=D3D11_CREATE_DEVICE_DEBUG;
     #endif
-	    D3D_FEATURE_LEVEL featureLevels[] = 
-	    {
-		    D3D_FEATURE_LEVEL_11_1,
-		    D3D_FEATURE_LEVEL_11_0,
-		    D3D_FEATURE_LEVEL_10_1,
-		    D3D_FEATURE_LEVEL_10_0,
-		    D3D_FEATURE_LEVEL_9_3
-	    };
+        D3D_FEATURE_LEVEL featureLevels[] =
+        {
+            D3D_FEATURE_LEVEL_11_1,
+            D3D_FEATURE_LEVEL_11_0,
+            D3D_FEATURE_LEVEL_10_1,
+            D3D_FEATURE_LEVEL_10_0,
+            D3D_FEATURE_LEVEL_9_3
+        };
 
 
-	    D3D11CreateDevice(nullptr,D3D_DRIVER_TYPE_HARDWARE,nullptr,creationFlags,featureLevels,
+        D3D11CreateDevice(nullptr,D3D_DRIVER_TYPE_HARDWARE,nullptr,creationFlags,featureLevels,
                           ARRAYSIZE(featureLevels),D3D11_SDK_VERSION,&m_device,&m_featureLevel,&m_context);
 
-	    nya_render::set_device(m_device);
-	    nya_render::set_context(m_context);
+        nya_render::set_device(m_device);
+        nya_render::set_context(m_context);
         nya_render::cull_face::disable();
     }
 
     void CreateTargets()
     {
-	    m_windowBounds = m_window->Bounds;
+        m_windowBounds = m_window->Bounds;
 
-	    m_renderTargetSize.Width = int(m_windowBounds.Width * get_resolution_scale());
-	    m_renderTargetSize.Height = int(m_windowBounds.Height * get_resolution_scale());
+        m_renderTargetSize.Width = int(m_windowBounds.Width * get_resolution_scale());
+        m_renderTargetSize.Height = int(m_windowBounds.Height * get_resolution_scale());
 
-	    DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {0};
-	    swapChainDesc.Width=static_cast<UINT>(m_renderTargetSize.Width);
-	    swapChainDesc.Height=static_cast<UINT>(m_renderTargetSize.Height);
-	    swapChainDesc.Format=DXGI_FORMAT_B8G8R8A8_UNORM;
-	    swapChainDesc.Stereo=false;
-	    swapChainDesc.SampleDesc.Count=1;
-	    swapChainDesc.SampleDesc.Quality=0;
-	    swapChainDesc.BufferUsage=DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	    swapChainDesc.BufferCount=1;
-	    swapChainDesc.Scaling=DXGI_SCALING_STRETCH;
-	    swapChainDesc.SwapEffect=DXGI_SWAP_EFFECT_DISCARD;
-	    swapChainDesc.Flags=0;
+        DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {0};
+        swapChainDesc.Width=static_cast<UINT>(m_renderTargetSize.Width);
+        swapChainDesc.Height=static_cast<UINT>(m_renderTargetSize.Height);
+        swapChainDesc.Format=DXGI_FORMAT_B8G8R8A8_UNORM;
+        swapChainDesc.Stereo=false;
+        swapChainDesc.SampleDesc.Count=1;
+        swapChainDesc.SampleDesc.Quality=0;
+        swapChainDesc.BufferUsage=DXGI_USAGE_RENDER_TARGET_OUTPUT;
+        swapChainDesc.BufferCount=1;
+        swapChainDesc.Scaling=DXGI_SCALING_STRETCH;
+        swapChainDesc.SwapEffect=DXGI_SWAP_EFFECT_DISCARD;
+        swapChainDesc.Flags=0;
 
         IDXGIDevice1 *device;
         if(m_device->QueryInterface(__uuidof(IDXGIDevice),(void **)&device)<0)
@@ -226,28 +226,28 @@ protected:
         if(adaptor->GetParent(__uuidof(IDXGIFactory2),(void **)&factory)<0)
             return;
 
-	    Windows::UI::Core::CoreWindow^ window = m_window.Get();
-	    if(factory->CreateSwapChainForCoreWindow(m_device,reinterpret_cast<IUnknown*>(window),&swapChainDesc,nullptr,&m_swap_chain)<0)
-            return;
-		
-	    if(device->SetMaximumFrameLatency(1)<0)
+        Windows::UI::Core::CoreWindow^ window = m_window.Get();
+        if(factory->CreateSwapChainForCoreWindow(m_device,reinterpret_cast<IUnknown*>(window),&swapChainDesc,nullptr,&m_swap_chain)<0)
             return;
 
-	    ID3D11Texture2D *back_buffer;
-	    if(m_swap_chain->GetBuffer(0,__uuidof(ID3D11Texture2D),(void **)&back_buffer)<0)
+        if(device->SetMaximumFrameLatency(1)<0)
             return;
 
-	    if(m_device->CreateRenderTargetView(back_buffer,nullptr,&m_renderTargetView)<0)
+        ID3D11Texture2D *back_buffer;
+        if(m_swap_chain->GetBuffer(0,__uuidof(ID3D11Texture2D),(void **)&back_buffer)<0)
             return;
 
-	    CD3D11_TEXTURE2D_DESC depthStencilDesc(DXGI_FORMAT_D24_UNORM_S8_UINT,static_cast<UINT>(m_renderTargetSize.Width),
-		                                       static_cast<UINT>(m_renderTargetSize.Height),1,1,D3D11_BIND_DEPTH_STENCIL);
-	    ID3D11Texture2D *depthStencil;
-	    if(m_device->CreateTexture2D(&depthStencilDesc,nullptr,&depthStencil)<0)
+        if(m_device->CreateRenderTargetView(back_buffer,nullptr,&m_renderTargetView)<0)
             return;
 
-	    CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc(D3D11_DSV_DIMENSION_TEXTURE2D);
-	    if(m_device->CreateDepthStencilView(depthStencil,&depthStencilViewDesc,&m_depthStencilView)<0)
+        CD3D11_TEXTURE2D_DESC depthStencilDesc(DXGI_FORMAT_D24_UNORM_S8_UINT,static_cast<UINT>(m_renderTargetSize.Width),
+                                               static_cast<UINT>(m_renderTargetSize.Height),1,1,D3D11_BIND_DEPTH_STENCIL);
+        ID3D11Texture2D *depthStencil;
+        if(m_device->CreateTexture2D(&depthStencilDesc,nullptr,&depthStencil)<0)
+            return;
+
+        CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc(D3D11_DSV_DIMENSION_TEXTURE2D);
+        if(m_device->CreateDepthStencilView(depthStencil,&depthStencilViewDesc,&m_depthStencilView)<0)
             return;
 
         m_context->OMSetRenderTargets(1,&m_renderTargetView,m_depthStencilView);
@@ -262,20 +262,20 @@ private:
     nya_system::app_responder &m_app;
 
 private:
-	bool m_windowClosed;
-	bool m_windowVisible;
+    bool m_windowClosed;
+    bool m_windowVisible;
     unsigned long m_time;
     int m_height;
 
 private:
-	ID3D11Device *m_device;
-	ID3D11DeviceContext *m_context;
+    ID3D11Device *m_device;
+    ID3D11DeviceContext *m_context;
     D3D_FEATURE_LEVEL m_featureLevel;
 
 private:
-	Windows::Foundation::Size m_renderTargetSize;
-	Windows::Foundation::Rect m_windowBounds;
-	Platform::Agile<Windows::UI::Core::CoreWindow> m_window;
+    Windows::Foundation::Size m_renderTargetSize;
+    Windows::Foundation::Rect m_windowBounds;
+    Platform::Agile<Windows::UI::Core::CoreWindow> m_window;
 
 private:
     ID3D11RenderTargetView *m_renderTargetView;
@@ -287,7 +287,7 @@ ref class Direct3DApplicationSource sealed : Windows::ApplicationModel::Core::IF
 {
     friend class shared_app;
 public:
-	virtual Windows::ApplicationModel::Core::IFrameworkView^ CreateView()
+    virtual Windows::ApplicationModel::Core::IFrameworkView^ CreateView()
     {
         return ref new PhoneDirect3DApp(m_app);
     }
@@ -304,8 +304,8 @@ class shared_app
 public:
     void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing,nya_system::app_responder &app)
     {
-    	auto direct3DApplicationSource = ref new Direct3DApplicationSource(app);
-	    CoreApplication::Run(direct3DApplicationSource);
+        auto direct3DApplicationSource = ref new Direct3DApplicationSource(app);
+        CoreApplication::Run(direct3DApplicationSource);
     }
 
     void start_fullscreen(unsigned int w,unsigned int h,nya_system::app_responder &app)
@@ -314,7 +314,7 @@ public:
 
         start_windowed(0,0,w,h,0,app);
     }
-    
+
     void finish(nya_system::app_responder &app)
     {
     }
@@ -343,7 +343,7 @@ public:
     #include "render/render.h"
 
   #ifndef DIRECTX11
-	#include <gl/wglext.h>
+    #include <gl/wglext.h>
   #endif
 
 namespace
@@ -387,7 +387,7 @@ public:
             return;
 
         ShowWindow(m_hwnd,SW_SHOW);
-		
+
   #ifdef DIRECTX11
         UINT create_device_flags=0;
     #ifdef _DEBUG
@@ -408,7 +408,7 @@ public:
             D3D_FEATURE_LEVEL_10_0,
         };
 
-	    D3D_FEATURE_LEVEL feature_level=D3D_FEATURE_LEVEL_11_0;
+        D3D_FEATURE_LEVEL feature_level=D3D_FEATURE_LEVEL_11_0;
 
         DXGI_SWAP_CHAIN_DESC sd;
         ZeroMemory(&sd,sizeof(sd));
@@ -592,7 +592,7 @@ public:
                 app.on_frame(dt);
 
   #ifdef DIRECTX11
-				m_swap_chain->Present(0,0);
+                m_swap_chain->Present(0,0);
   #else
                 SwapBuffers(m_hdc);
   #endif
@@ -617,38 +617,38 @@ public:
         app.on_free();
 
   #ifdef DIRECTX11
-		if(m_context)
-			m_context->ClearState();
+        if(m_context)
+            m_context->ClearState();
 
-		if(m_color_target)
-		{
-			m_color_target->Release();
-			m_color_target=0;
-		}
+        if(m_color_target)
+        {
+            m_color_target->Release();
+            m_color_target=0;
+        }
 
-		if( m_depth_target )
-		{
-			m_depth_target->Release();
-			m_depth_target=0;
-		}
+        if( m_depth_target )
+        {
+            m_depth_target->Release();
+            m_depth_target=0;
+        }
 
-		if(m_swap_chain)
-		{
-			m_swap_chain->Release();
-			m_swap_chain=0;
-		}
+        if(m_swap_chain)
+        {
+            m_swap_chain->Release();
+            m_swap_chain=0;
+        }
 
-		if(m_context)
-		{
-			m_context->Release();
-			m_context=0;
-		}
+        if(m_context)
+        {
+            m_context->Release();
+            m_context=0;
+        }
 
-		if(m_device)
-		{
-			m_device->Release();
-			m_device=0;
-		}
+        if(m_device)
+        {
+            m_device->Release();
+            m_device=0;
+        }
   #else
         wglMakeCurrent (m_hdc, 0);
         wglDeleteContext(m_hglrc);
@@ -692,10 +692,10 @@ private:
         if(FAILED(hr))
             return false;
 
-	    CD3D11_TEXTURE2D_DESC depthStencilDesc(DXGI_FORMAT_D24_UNORM_S8_UINT,w,h,1,1,D3D11_BIND_DEPTH_STENCIL);
+        CD3D11_TEXTURE2D_DESC depthStencilDesc(DXGI_FORMAT_D24_UNORM_S8_UINT,w,h,1,1,D3D11_BIND_DEPTH_STENCIL);
 
-	    ID3D11Texture2D *depthStencil;
-	    hr=m_device->CreateTexture2D(&depthStencilDesc,nullptr,&depthStencil);
+        ID3D11Texture2D *depthStencil;
+        hr=m_device->CreateTexture2D(&depthStencilDesc,nullptr,&depthStencil);
         if(FAILED(hr))
             return false;
 
@@ -704,7 +704,7 @@ private:
         depthStencil->Release();
 
         m_context->OMSetRenderTargets(1,&m_color_target,m_depth_target);
-        
+
         return true;
     }
   #endif
@@ -829,24 +829,24 @@ public:
     shared_app():
   #ifdef DIRECTX11
         m_device(0),
-		m_context(0),
-		m_swap_chain(0),
-		m_color_target(0),
-		m_depth_target(0),
+        m_context(0),
+        m_swap_chain(0),
+        m_color_target(0),
+        m_depth_target(0),
   #else
-		m_hdc(0),
+        m_hdc(0),
   #endif
-		m_title("Nya engine"),m_time(0) {}
+        m_title("Nya engine"),m_time(0) {}
 
 private:
     HINSTANCE m_instance;
     HWND m_hwnd;
   #ifdef DIRECTX11
-	ID3D11Device* m_device;
-	ID3D11DeviceContext* m_context;
-	IDXGISwapChain* m_swap_chain;
-	ID3D11RenderTargetView* m_color_target;
-	ID3D11DepthStencilView* m_depth_target;
+    ID3D11Device* m_device;
+    ID3D11DeviceContext* m_context;
+    IDXGISwapChain* m_swap_chain;
+    ID3D11RenderTargetView* m_color_target;
+    ID3D11DepthStencilView* m_depth_target;
   #else
     HDC m_hdc;
     HGLRC m_hglrc;
@@ -858,6 +858,8 @@ private:
 
 }
   #endif
+#elif ANDROID
+//ToDo
 #else
 
 //  fullscreen:
