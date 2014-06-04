@@ -3,6 +3,7 @@
 #include "tmp_buffer.h"
 #include "memory.h"
 #include <memory.h>
+#include <string.h>
 #include <vector>
 #include <list>
 
