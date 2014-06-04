@@ -19,13 +19,13 @@ private:
 private:
     class shared_resources_creator
     {
-        friend class shared_resources;
+        template<typename,int> friend class shared_resources;
         struct res_holder;
 
         class shared_resource_ref
         {
             template<typename,int> friend class shared_resources;
-            
+
         public:
             bool is_valid() const { return m_res!=0; }
             const t_res *const_get() const { return m_res; }
@@ -206,6 +206,9 @@ private:
             if(!ref.m_res_holder)
                 return 0;
 
+            if(ref.m_creator!=this)
+                return 0;
+
             if(ref.m_res_holder->map_it==m_res_map.end())
                 return 0;
 
@@ -215,6 +218,9 @@ private:
         void free(shared_resource_ref&ref)
         {
             if(!ref.m_res_holder)
+                return;
+
+            if(ref.m_creator!=this)
                 return;
 
             --ref.m_res_holder->ref_count;
@@ -254,7 +260,7 @@ private:
             }
         }
 
-        void res_ref_count_inc(shared_resource_ref&ref)
+        static void res_ref_count_inc(shared_resource_ref&ref)
         {
             if(!ref.m_res_holder)
                 return;
@@ -362,12 +368,45 @@ public:
     shared_resource_mutable_ref create() { return m_creator->create(); }
     shared_resources() { m_creator = new shared_resources_creator(this); }
 
+public:
     //void free_all() { m_creator->free_all(); }
     void free_unused() { m_creator->free_unused(); }
     void should_unload_unused(bool unload) { m_creator->should_unload_unused(unload); }
     bool reload_resource(const char *name) { return m_creator->reload_resource(name); }
     int reload_resources() { return m_creator->reload_resources(); }
 
+public:
+    shared_resource_ref get_first_resource()
+    {
+        if(m_creator->m_res_map.empty())
+            return shared_resource_ref();
+
+        class shared_resources_creator::res_holder *holder=m_creator->m_res_map.begin()->second;
+        if (!holder)
+            return shared_resource_ref();
+
+        ++holder->ref_count;
+        return shared_resource_ref(&(holder->res),holder,m_creator);
+    }
+
+    shared_resource_ref get_next_resource(shared_resource_ref &curr)
+    {
+        if(curr.m_creator!=m_creator || !curr.m_res_holder)
+            return shared_resource_ref();
+
+        typename shared_resources_creator::resources_map_iterator it=curr.m_res_holder->map_it;
+        if(++it==m_creator->m_res_map.end())
+            return shared_resource_ref();
+
+        class shared_resources_creator::res_holder *holder=it->second;
+        if (!holder)
+            return shared_resource_ref();
+
+        ++holder->ref_count;
+        return shared_resource_ref(&(holder->res),holder,m_creator);
+    }
+
+public:
     virtual ~shared_resources()
     {
         m_creator->base_released();

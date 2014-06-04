@@ -153,7 +153,8 @@ protected:
         }
     };
 
-    static shared_resources_manager &get_shared_resources()
+public:
+    static shared_resources &get_shared_resources()
     {
         static shared_resources_manager manager;
         return manager;
