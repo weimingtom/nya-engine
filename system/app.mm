@@ -775,6 +775,10 @@ private:
     };
 
     state m_state;
+
+    bool m_shift_pressed;
+    bool m_ctrl_pressed;
+    bool m_alt_pressed;
 }
 @end
 
@@ -890,6 +894,87 @@ private:
 - (void)scrollWheel:(NSEvent*)event
 {
     m_app->on_mouse_scroll(0,[event deltaY]);
+}
+
+-(unsigned int)cocoaKeyToX11Keycode:(unichar)key_char
+{
+    if(key_char>='A' && key_char<='Z')
+        return nya_system::key_a+key_char-'A';
+
+    if(key_char>='a' && key_char<='z')
+        return nya_system::key_a+key_char-'a';
+
+    if(key_char>='1' && key_char<='9')
+        return nya_system::key_1+key_char-'1';
+
+    if(key_char>=NSF1FunctionKey && key_char<=NSF35FunctionKey)
+        return nya_system::key_f1+key_char-NSF1FunctionKey;
+
+    switch(key_char)
+    {
+        case NSLeftArrowFunctionKey: return nya_system::key_left;
+        case NSRightArrowFunctionKey: return nya_system::key_right;
+        case NSUpArrowFunctionKey: return nya_system::key_up;
+        case NSDownArrowFunctionKey: return nya_system::key_down;
+
+        case ' ': return nya_system::key_space;
+        case '\r': return nya_system::key_return;
+        case '\t': return nya_system::key_tab;
+        case '0': return nya_system::key_0;
+
+        case 0x1f: return nya_system::key_escape;
+        case 0x7f: return nya_system::key_backspace;
+
+        case NSEndFunctionKey: return nya_system::key_end;
+        case NSHomeFunctionKey: return nya_system::key_home;
+        case NSInsertFunctionKey: return nya_system::key_insert;
+        case NSDeleteFunctionKey: return nya_system::key_delete;
+
+        default: break;
+    };
+
+    //printf("unknown key: \'%c\' %x\n",key_char,key_char);
+
+    return 0;
+}
+
+-(void)keyDown:(NSEvent *)event
+{
+    NSString *key=[event charactersIgnoringModifiers];
+    if([key length]!=1)
+        return;
+
+    const unsigned int x11key=[self cocoaKeyToX11Keycode:[key characterAtIndex:0]];
+    if(x11key)
+        return m_app->on_keyboard(x11key,true);
+}
+
+-(void)keyUp:(NSEvent *)event
+{
+    NSString *key=[event charactersIgnoringModifiers];
+    if([key length]!=1)
+        return;
+
+    const unsigned int x11key=[self cocoaKeyToX11Keycode:[key characterAtIndex:0]];
+    if(x11key)
+        return m_app->on_keyboard(x11key,false);
+}
+
+-(void)flagsChanged:(NSEvent *)event
+{
+    //ToDo: caps, left/right alt, ctrl, shift - 4ex: [event modifierFlags] == 131330
+
+    const bool shift_pressed = ([event modifierFlags] & NSShiftKeyMask) == NSShiftKeyMask;
+    if(shift_pressed!=m_shift_pressed)
+        m_app->on_keyboard(nya_system::key_shift,shift_pressed), m_shift_pressed=shift_pressed;
+
+    const bool ctrl_pressed = ([event modifierFlags] & NSControlKeyMask) == NSControlKeyMask;
+    if(ctrl_pressed!=m_ctrl_pressed)
+        m_app->on_keyboard(nya_system::key_control,ctrl_pressed), m_ctrl_pressed=ctrl_pressed;
+
+    const bool alt_pressed = ([event modifierFlags] & NSAlternateKeyMask) == NSAlternateKeyMask;
+    if(alt_pressed!=m_alt_pressed)
+        m_app->on_keyboard(nya_system::key_alt,alt_pressed), m_alt_pressed=alt_pressed;
 }
 
 -(void)dealloc
