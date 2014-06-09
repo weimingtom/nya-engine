@@ -405,7 +405,7 @@ public:
         if(++it==m_creator->m_res_map.end())
             return shared_resource_ref();
 
-        class shared_resources_creator::res_holder *holder=it->second;
+        struct shared_resources_creator::res_holder *holder=it->second;
         if (!holder)
             return shared_resource_ref();
 
