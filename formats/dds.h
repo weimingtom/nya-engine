@@ -41,6 +41,8 @@ struct dds
     size_t data_size;
     size_t mip0_data_size;
 
+    void flip_vertical(const void *from_data,void *to_data);
+
     dds(): width(0),height(0),data(0),mip0_data_size(0),data_size(0),mipmap_count(0), need_generate_mipmaps(false) {}
 
 public:

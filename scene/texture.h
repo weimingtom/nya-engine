@@ -63,11 +63,14 @@ public:
     static bool load_tga(shared_texture &res,resource_data &data,const char* name);
     static bool load_dds(shared_texture &res,resource_data &data,const char* name);
 
+    static void set_load_dds_flip(bool flip) { m_load_dds_flip=flip; }
+
 public:
     const texture_internal &internal() const { return m_internal; }
 
 private:
     texture_internal m_internal;
+    static bool m_load_dds_flip;
 };
 
 }

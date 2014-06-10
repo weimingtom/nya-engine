@@ -5,8 +5,6 @@
 #include "memory/tmp_buffer.h"
 #include "resources/resources.h"
 
-//ToDo: mipmaps, cubemaps
-
 namespace nya_formats
 {
 
@@ -20,6 +18,162 @@ struct dds_pixel_format
     uint bpp;
     uint bit_mask[4]; //rgba
 };
+
+static void flip_raw(int width,int height,int channels,const void *from_data,void *to_data)
+{
+    const int line_size=width*channels;
+    const int top=line_size*(height-1);
+
+    typedef unsigned char uchar;
+
+    uchar *to=(uchar*)to_data;
+
+    const int size=line_size*height;
+
+    const uchar *from=(const uchar*)from_data;
+    for(size_t offset=0;offset<size;offset+=line_size)
+    {
+        const uchar *ha=from+offset;
+        uchar *hb=to+top-offset;
+        memcpy(hb,ha,line_size);
+    }
+}
+
+static void flip_dxt1_block_full(unsigned char *data)
+{
+    std::swap(data[4],data[7]);
+    std::swap(data[5],data[6]);
+}
+
+static void flip_dxt3_block_full(unsigned char *data)
+{
+    std::swap(data[0],data[6]);
+    std::swap(data[1],data[7]);
+    std::swap(data[2],data[4]);
+    std::swap(data[3],data[5]);
+
+    flip_dxt1_block_full(data+8);
+}
+
+static void flip_dxt5_block_full(unsigned char *data)
+{
+    unsigned int line_0_1 = data[2] + 256 * (data[3] + 256 * data[4]);
+    unsigned int line_2_3 = data[5] + 256 * (data[6] + 256 * data[7]);
+    // swap lines 0 and 1 in line_0_1.
+    unsigned int line_1_0 = ((line_0_1 & 0x000fff) << 12) |
+    ((line_0_1 & 0xfff000) >> 12);
+    // swap lines 2 and 3 in line_2_3.
+    unsigned int line_3_2 = ((line_2_3 & 0x000fff) << 12) |
+    ((line_2_3 & 0xfff000) >> 12);
+    data[2] = line_3_2 & 0xff;
+    data[3] = (line_3_2 & 0xff00) >> 8;
+    data[4] = (line_3_2 & 0xff0000) >> 16;
+    data[5] = line_1_0 & 0xff;
+    data[6] = (line_1_0 & 0xff00) >> 8;
+    data[7] = (line_1_0 & 0xff0000) >> 16;
+
+    flip_dxt1_block_full(data+8);
+}
+
+static void flip_dxt(int width,int height,dds::pixel_format format,const void *from_data,void *to_data)
+{
+    if(from_data==to_data) //ToDo ?
+        return;
+
+    const unsigned int line_size=((width+3)/4)*(format==dds::dxt1?8:16);
+    const unsigned char *s=(unsigned char *)from_data;
+    unsigned char *d=(unsigned char *)to_data+((height+3)/4-1)*line_size;
+
+    if(height==1)
+    {
+        memcpy(d,s,line_size);
+        return;
+    }
+
+    for(int i=0;i<(height+3)/4;++i)
+    {
+        memcpy(d,s,line_size);
+
+        switch(format)
+        {
+            case dds::dxt1:
+                if(height==2)
+                {
+                    for(unsigned int k=0;k<line_size;k+=8)
+                        std::swap((d+k)[4],(d+k)[5]);
+                }
+                else
+                {
+                    for(unsigned int k=0;k<line_size;k+=8)
+                        flip_dxt1_block_full(d+k);
+                }
+                break;
+
+            case dds::dxt2:
+            case dds::dxt3:
+                for(unsigned int k=0;k<line_size;k+=16)
+                    flip_dxt3_block_full(d+k);
+                break;
+
+            case dds::dxt4:
+            case dds::dxt5:
+                for(unsigned int k=0;k<line_size;k+=16)
+                    flip_dxt5_block_full(d+k);
+                break;
+
+            default: return;
+        }
+
+        s+=line_size;
+        d-=line_size;
+    }
+}
+
+void dds::flip_vertical(const void *from_data,void *to_data)
+{
+    if(!from_data || !to_data)
+        return;
+
+    if(type==texture_cube) //ToDo
+        return;
+
+    size_t offset=0;
+    for(unsigned int i=0,w=width,h=height;i<mipmap_count;++i,w>1?w=w/2:w=1,h>1?h/=2:h=1)
+    {
+        const void *f=(const char *)from_data+offset;
+        void *t=(char *)to_data+offset;
+
+        switch(pf)
+        {
+            case bgr:
+            case bgra:
+            {
+                flip_raw(w,h,pf==bgr?3:4,f,t);
+                offset+=w*h*(pf==bgr?3:4);
+            }
+            break;
+
+            case dxt1:
+            {
+                unsigned int s=(w>4?w:4)/4 * (h>4?h:4)/4 * 8;
+                flip_dxt(w,h,pf,f,t);
+                offset+=s;
+            }
+            break;
+
+            case dxt2:
+            case dxt3:
+            case dxt4:
+            case dxt5:
+            {
+                unsigned int s=(w>4?w:4)/4 * (h>4?h:4)/4 * 16;
+                flip_dxt(w,h,pf,f,t);
+                offset+=s;
+            }
+            break;
+        }
+    }
+}
 
 size_t dds::decode_header(const void *data,size_t size)
 {
