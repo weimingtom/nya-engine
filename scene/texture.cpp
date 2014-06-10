@@ -23,6 +23,8 @@ void rgb_to_bgr(unsigned char *data,size_t data_size)
     }
 }
 
+bool texture::m_load_dds_flip=false;
+
 bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
 {
     if(!data.get_size())
@@ -59,7 +61,18 @@ bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
 
     switch(dds.type)
     {
-        case nya_formats::dds::texture_2d: res.tex.build_texture(dds.data,dds.width,dds.height,cf,mipmap_count); break;
+        case nya_formats::dds::texture_2d:
+        {
+            if(m_load_dds_flip)
+            {
+                nya_memory::tmp_buffer_scoped tmp_data(dds.data_size);
+                dds.flip_vertical(dds.data,tmp_data.get_data());
+                res.tex.build_texture(tmp_data.get_data(),dds.width,dds.height,cf,mipmap_count);
+            }
+            else
+                res.tex.build_texture(dds.data,dds.width,dds.height,cf,mipmap_count);
+        }
+        break;
 
         case nya_formats::dds::texture_cube: //ToDo: mipmap_count
         {
