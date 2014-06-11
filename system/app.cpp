@@ -784,6 +784,40 @@ private:
                 app->on_mouse_button(nya_system::mouse_right,false);
             }
             break;
+
+            case WM_KEYDOWN:
+            {
+                unsigned int key=LOWORD(wparam);
+                if(key>='A' && key<='Z')
+                    key-='A'-'a';
+
+                if(key>='a' && key<='z')
+                    app->on_keyboard(nya_system::key_a+key-'a',true);
+
+                if(key>='1' && key<='9')
+                    app->on_keyboard(nya_system::key_1+key-'1',true);
+
+                if(key=='0')
+                    app->on_keyboard(nya_system::key_0,true);
+            }
+            break;
+
+            case WM_KEYUP:
+            {
+                unsigned int key=LOWORD(wparam);
+                if(key>='A' && key<='Z')
+                    key-='A'-'a';
+
+                if(key>='a' && key<='z')
+                    app->on_keyboard(nya_system::key_a+key-'a',false);
+
+                if(key>='1' && key<='9')
+                    app->on_keyboard(nya_system::key_1+key-'1',false);
+
+                if(key=='0')
+                    app->on_keyboard(nya_system::key_0,false);
+            }
+            break;
         };
 
         return DefWindowProc(hwnd,message,wparam,lparam );
