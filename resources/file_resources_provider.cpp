@@ -333,11 +333,7 @@ bool file_resources_provider::set_folder(const char*name,bool recursive)
     }
 
     if(!S_ISDIR(sb.st_mode))
-    {
-        get_log()<<"unable to set folder: specified path is not a directory "<<name<<"\n";
-        m_path.erase();
-        return false;
-    }
+        get_log()<<"warning: specified path is not a directory "<<name<<"\n";
 
     m_path.push_back('/');
 
