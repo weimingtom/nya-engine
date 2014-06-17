@@ -84,6 +84,9 @@
     <ClCompile Include="..\..\render\vbo.cpp">
       <Filter>render</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\render\debug_draw.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\math\bezier.cpp">
       <Filter>math</Filter>
     </ClCompile>
@@ -216,6 +219,9 @@
       <Filter>render</Filter>
     </ClInclude>
     <ClInclude Include="..\..\render\vbo.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\render\debug_draw.h">
       <Filter>render</Filter>
     </ClInclude>
     <ClInclude Include="..\..\math\bezier.h">
