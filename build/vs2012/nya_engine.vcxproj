@@ -183,6 +183,7 @@
     <ClCompile Include="..\..\render\texture.cpp" />
     <ClCompile Include="..\..\render\transform.cpp" />
     <ClCompile Include="..\..\render\vbo.cpp" />
+    <ClCompile Include="..\..\render\debug_draw.cpp" />
     <ClCompile Include="..\..\resources\composite_resources_provider.cpp" />
     <ClCompile Include="..\..\resources\file_resources_provider.cpp" />
     <ClCompile Include="..\..\resources\resources.cpp" />
@@ -266,6 +267,7 @@
     <ClInclude Include="..\..\render\texture.h" />
     <ClInclude Include="..\..\render\transform.h" />
     <ClInclude Include="..\..\render\vbo.h" />
+    <ClInclude Include="..\..\render\debug_draw.h" />
     <ClInclude Include="..\..\resources\composite_resources_provider.h" />
     <ClInclude Include="..\..\resources\file_resources_provider.h" />
     <ClInclude Include="..\..\resources\resources.h" />
