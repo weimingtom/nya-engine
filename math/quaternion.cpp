@@ -116,12 +116,9 @@ quat::quat(const vec3 &axis,float angle)
 
 quat::quat(const vec3 &from,const vec3 &to)
 {
-    const float m=sqrtf(2.f + 2.f*from*to);
-    if(m>0.00001f)
-    {
-        v=(1.f/m) * vec3::cross(from,to);
-        w=0.5f*m;
-    }
+    float cos_theta = vec3::normalize(from)*vec3::normalize(to);
+    float angle = acos(cos_theta);
+    *this=quat(vec3::normalize(vec3::cross(from, to)),angle);
 }
 
 quat &quat::limit_pitch(float from,float to)

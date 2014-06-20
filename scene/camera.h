@@ -22,7 +22,7 @@ public:
     void set_pos(const nya_math::vec3 &pos);
     void set_rot(float yaw,float pitch,float roll);
     void set_rot(const nya_math::quat &rot);
-    void set_rot(const nya_math::vec3 &dir);
+    //void set_rot(const nya_math::vec3 &dir); //ToDo
 
 public:
     const nya_math::mat4 &get_proj_matrix() const { return m_proj; }
