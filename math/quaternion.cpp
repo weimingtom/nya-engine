@@ -106,12 +106,22 @@ quat::quat(float pitch,float yaw,float roll)
     w  =cos_x*cos_y*cos_z + sin_x*sin_y*sin_z;
 }
 
-quat::quat(vec3 axis,float angle)
+quat::quat(const vec3 &axis,float angle)
 {
     angle*=0.5f;
 
     v=axis*sinf(angle);
     w=cosf(angle);
+}
+
+quat::quat(const vec3 &from,const vec3 &to)
+{
+    const float m=sqrtf(2.f + 2.f*from*to);
+    if(m>0.00001f)
+    {
+        v=(1.f/m) * vec3::cross(from,to);
+        w=0.5f*m;
+    }
 }
 
 quat &quat::limit_pitch(float from,float to)

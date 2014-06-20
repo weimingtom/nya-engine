@@ -59,6 +59,13 @@ void camera::set_rot(const nya_math::quat &rot)
     m_recalc_frustum=true;
 }
 
+void camera::set_rot(const nya_math::vec3 &dir)
+{
+    m_rot=nya_math::quat(nya_math::vec3(0,0,1),dir);
+    m_recalc_view=true;
+    m_recalc_frustum=true;
+}
+
 void camera::set_rot(float yaw,float pitch,float roll)
 {
     const float a2r=nya_math::constants::pi/180.0f;

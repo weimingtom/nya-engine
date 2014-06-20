@@ -22,7 +22,9 @@ struct quat
 
     quat(float pitch,float yaw,float roll); //angles in radians
 
-    quat(vec3 axis,float angle); //angle in radians
+    quat(const vec3 &axis,float angle); //angle in radians
+
+    quat(const vec3 &from,const vec3 &to);
 
     quat(const float *q) { v.x=q[0]; v.y=q[1]; v.z=q[2]; w=q[3]; }
 
