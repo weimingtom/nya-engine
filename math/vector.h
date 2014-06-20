@@ -60,6 +60,7 @@ struct vec3
     vec3 operator + (const vec3 &v) const { return vec3(x+v.x,y+v.y,z+v.z); }
     vec3 operator - (const vec3 &v) const { return vec3(x-v.x,y-v.y,z-v.z); }
     float operator * (const vec3 &v) const { return x*v.x+y*v.y+z*v.z; }
+    vec3 operator * (const float a) const { return vec3(x*a,y*a,z*a); }
 
     vec3 operator - () const { return vec3(-x,-y,-z); }
 
@@ -73,15 +74,7 @@ struct vec3
 
     vec3 &abs() { x=fabsf(x); y=fabsf(y); z=fabsf(z); return *this; }
 
-    vec3 &normalize()
-    {
-        float len=length();
-        if(len<0.00001f)
-            return *this;
-
-        *this *=(1.0f/len);
-        return *this;
-    }
+    vec3 &normalize() { *this=normalize(*this); return *this; }
 
     static vec3 cross(const vec3 &a,const vec3 &b)
     {
@@ -89,10 +82,18 @@ struct vec3
                     a.z*b.x - a.x*b.z,
                     a.x*b.y - a.y*b.x);
     }
+
+    static vec3 normalize(const vec3 &v)
+    {
+        float len=v.length();
+        if(len<0.00001f)
+            return v;
+
+        return v*(1.0f/len);
+    }
 };
 
 inline vec3 operator * ( float a, const vec3& v ) { return vec3(v.x*a,v.y*a,v.z*a); }
-inline vec3 operator * ( const vec3& v, float a ) { return vec3(v.x*a,v.y*a,v.z*a); }
 inline vec3 operator / ( const vec3& v, float a ) { return vec3(v.x/a,v.y/a,v.z/a); }
 
 struct vec4
