@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3DE732E2195D9186008D6765 /* indexed_map.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DE732E0195D9186008D6765 /* indexed_map.h */; };
+		3DE732E3195D9186008D6765 /* indexed_map.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DE732E0195D9186008D6765 /* indexed_map.h */; };
+		3DE732E4195D9186008D6765 /* invalid_object.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DE732E1195D9186008D6765 /* invalid_object.h */; };
+		3DE732E5195D9186008D6765 /* invalid_object.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DE732E1195D9186008D6765 /* invalid_object.h */; };
 		F20E2D7E16999B7000395A1B /* material.h in Headers */ = {isa = PBXBuildFile; fileRef = F20E2D7616999B7000395A1B /* material.h */; };
 		F20E2D7F16999B7000395A1B /* material.h in Headers */ = {isa = PBXBuildFile; fileRef = F20E2D7616999B7000395A1B /* material.h */; };
 		F20E2D8016999B7000395A1B /* shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F20E2D7716999B7000395A1B /* shader.cpp */; };
@@ -198,6 +202,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3DE732E0195D9186008D6765 /* indexed_map.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = indexed_map.h; sourceTree = "<group>"; };
+		3DE732E1195D9186008D6765 /* invalid_object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = invalid_object.h; sourceTree = "<group>"; };
 		F20E2D7616999B7000395A1B /* material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = material.h; path = ../../scene/material.h; sourceTree = "<group>"; };
 		F20E2D7716999B7000395A1B /* shader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = shader.cpp; path = ../../scene/shader.cpp; sourceTree = "<group>"; };
 		F20E2D7816999B7000395A1B /* texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = texture.cpp; path = ../../scene/texture.cpp; sourceTree = "<group>"; };
@@ -460,6 +466,8 @@
 		F259322015D858140092C7D8 /* memory */ = {
 			isa = PBXGroup;
 			children = (
+				3DE732E0195D9186008D6765 /* indexed_map.h */,
+				3DE732E1195D9186008D6765 /* invalid_object.h */,
 				F259322115D858140092C7D8 /* memory.cpp */,
 				F259322215D858140092C7D8 /* memory.h */,
 				F22ADA301694C15100B01B4A /* memory_reader.h */,
@@ -542,6 +550,7 @@
 				F2F0A09A1695A758007245BC /* skeleton.h in Headers */,
 				F2F0A09E1695A758007245BC /* animation.h in Headers */,
 				F2F0A0A81695A794007245BC /* vector.h in Headers */,
+				3DE732E5195D9186008D6765 /* invalid_object.h in Headers */,
 				F2F0A0AA1695A794007245BC /* quaternion.h in Headers */,
 				F2F0A0AE1695A794007245BC /* bezier.h in Headers */,
 				F2F0A0B41695F809007245BC /* matrix.h in Headers */,
@@ -560,6 +569,7 @@
 				F2CA66FC172C700800965F9F /* render_objects.h in Headers */,
 				F2CA676A172D92CE00965F9F /* shaders_cache_provider.h in Headers */,
 				F5B3578F17FE8E2C001175FE /* optional.h in Headers */,
+				3DE732E3195D9186008D6765 /* indexed_map.h in Headers */,
 				F55C5722180623B100FF6163 /* debug_draw.h in Headers */,
 				F5AFDF421846C81400457928 /* shared_ptr.h in Headers */,
 			);
@@ -602,6 +612,7 @@
 				F2F0A0991695A758007245BC /* skeleton.h in Headers */,
 				F2F0A09D1695A758007245BC /* animation.h in Headers */,
 				F2F0A0A71695A794007245BC /* vector.h in Headers */,
+				3DE732E4195D9186008D6765 /* invalid_object.h in Headers */,
 				F2F0A0A91695A794007245BC /* quaternion.h in Headers */,
 				F2F0A0AD1695A794007245BC /* bezier.h in Headers */,
 				F2F0A0B31695F809007245BC /* matrix.h in Headers */,
@@ -620,6 +631,7 @@
 				F2CA66FB172C700800965F9F /* render_objects.h in Headers */,
 				F2CA6769172D92CE00965F9F /* shaders_cache_provider.h in Headers */,
 				F5B3578E17FE8E2C001175FE /* optional.h in Headers */,
+				3DE732E2195D9186008D6765 /* indexed_map.h in Headers */,
 				F55C5721180623B100FF6163 /* debug_draw.h in Headers */,
 				F5AFDF411846C81400457928 /* shared_ptr.h in Headers */,
 			);
