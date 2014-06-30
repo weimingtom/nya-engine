@@ -334,23 +334,38 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
 - (void)applicationWillResignActive:(NSNotification *)notification
 {
-    if ([self isViewLoaded] && self.view.window) {
+    if ([self isViewLoaded] && self.view.window)
+    {
+        nya_system::app_responder *responder=shared_app::get_app().get_responder();
+        if(responder)
+            responder->on_suspend();
+
         [self stopAnimation];
     }
 }
 
 - (void)applicationDidBecomeActive:(NSNotification *)notification
 {
-    if ([self isViewLoaded] && self.view.window) {
+    if ([self isViewLoaded] && self.view.window)
+    {
+        static bool ignore_first=true;
+        if(!ignore_first)
+        {
+            nya_system::app_responder *responder=shared_app::get_app().get_responder();
+            if(responder)
+                responder->on_restore();
+        }
+        else
+            ignore_first=false;
+
         [self startAnimation];
     }
 }
 
 - (void)applicationWillTerminate:(NSNotification *)notification
 {
-    if ([self isViewLoaded] && self.view.window) {
+    if ([self isViewLoaded] && self.view.window)
         [self stopAnimation];
-    }
 }
 
 - (void)dealloc
