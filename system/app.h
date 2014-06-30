@@ -24,6 +24,10 @@ public:
     virtual void on_free()=0;
 
 public:
+    virtual void on_suspend()=0;
+    virtual void on_restore()=0;
+
+public:
     virtual void on_mouse_move(int x,int y)=0;
     virtual void on_mouse_button(mouse_button button,bool pressed)=0;
     virtual void on_mouse_scroll(int dx,int dy)=0;
@@ -39,6 +43,10 @@ protected:
     virtual void on_splash(unsigned int dt) {}
     virtual void on_frame(unsigned int dt) {}
     virtual void on_free() {}
+
+public:
+    virtual void on_suspend() {}
+    virtual void on_restore() {}
 
 protected:
     virtual void on_mouse_move(int x,int y) {}

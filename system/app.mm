@@ -761,7 +761,7 @@ private:
 
 }
 
-@interface gl_view : NSOpenGLView 
+@interface gl_view : NSOpenGLView<NSWindowDelegate>
 {
     NSTimer *m_animation_timer;
     nya_system::app_responder *m_app;
@@ -795,6 +795,7 @@ private:
                                        selector:@selector(animate:) userInfo:nil repeats:YES];
 
     [[self window] setAcceptsMouseMovedEvents:YES];
+    [[self window] setDelegate: self];
 
     [[NSRunLoop currentRunLoop] addTimer:m_animation_timer forMode:NSDefaultRunLoopMode];
     [[NSRunLoop currentRunLoop] addTimer:m_animation_timer forMode:NSEventTrackingRunLoopMode];
@@ -958,6 +959,16 @@ private:
     const unsigned int x11key=[self cocoaKeyToX11Keycode:[key characterAtIndex:0]];
     if(x11key)
         return m_app->on_keyboard(x11key,false);
+}
+
+- (void)windowWillMiniaturize:(NSNotification *)notification
+{
+    m_app->on_suspend();
+}
+
+- (void)windowDidDeminiaturize:(NSNotification *)notification
+{
+    m_app->on_restore();
 }
 
 -(void)flagsChanged:(NSEvent *)event
