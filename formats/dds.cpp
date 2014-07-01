@@ -256,9 +256,9 @@ size_t dds::decode_header(const void *data,size_t size)
         else
             return 0;
 
-        this->mip0_data_size=width*height*(pf.bpp/4);
+        this->mip0_data_size=width*height*(pf.bpp/8);
         for(uint i=0,w=width,h=height;i<mipmap_count;++i,w>1?w=w/2:w=1,h>1?h/=2:h=1)
-            this->data_size+=w*h*(pf.bpp/4);
+            this->data_size+=w*h*(pf.bpp/8);
     }
     else
         return 0;
@@ -270,12 +270,19 @@ size_t dds::decode_header(const void *data,size_t size)
     if(caps2 & dds_cubemap)
     {
         type=texture_cube;
+        this->mip0_data_size*=6;
         this->data_size*=6;
     }
 
     reader.seek(128);
     if(!reader.check_remained(this->data_size))
-        return 0;
+    {
+        this->mipmap_count=-1;
+        this->data_size=this->mip0_data_size;
+        //probably broken, try load at least first mipmap
+        if(!reader.check_remained(this->data_size))
+            return 0;
+    }
 
     this->data=reader.get_data();
 
