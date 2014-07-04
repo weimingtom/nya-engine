@@ -509,7 +509,7 @@ void material::set_param_array(int idx, const param_array & a)
 
 void material::set_param_array(int idx, const param_array_proxy & p)
 {
-    if(idx>=(int)internal().m_params.size())
+    if(idx<0 || idx>=(int)internal().m_params.size())
     {
         nya_base_warning()<<"index out of range";
         return;

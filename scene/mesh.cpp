@@ -391,6 +391,9 @@ void mesh::draw(const char *pass_name) const
     if(!pass_name)
         return;
 
+    if(!internal().m_shared.is_valid())
+        return;
+
     for(int group_idx=0;group_idx<internal().m_shared->groups.size();++group_idx)
         draw_group(group_idx, pass_name);
 }
