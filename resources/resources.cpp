@@ -8,7 +8,7 @@ namespace
 {
     nya_resources::resources_provider *res_provider=0;
 
-    nya_log::log *resources_log=0;
+    nya_log::log_base *resources_log=0;
 }
 
 namespace nya_resources
@@ -31,17 +31,17 @@ resources_provider &get_resources_provider()
     return *res_provider;
 }
 
-void set_log(nya_log::log *l)
+void set_log(nya_log::log_base *l)
 {
     resources_log=l;
 }
 
-nya_log::log &get_log()
+nya_log::log_base &log()
 {
     static const char *resources_log_tag="resources";
     if(!resources_log)
     {
-        return nya_log::get_log(resources_log_tag);
+        return nya_log::log(resources_log_tag);
     }
 
     resources_log->set_tag(resources_log_tag);

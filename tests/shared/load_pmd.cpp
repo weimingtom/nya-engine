@@ -160,9 +160,11 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         nya_scene::material &m = res.materials[i];
         m.set_texture("diffuse",tex);
 
-        m.set_shader(sh);
-        m.set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
-        m.set_cull_face(true,nya_render::cull_face::cw);
+        nya_scene::material::pass &p=m.get_pass(m.add_pass(nya_scene::material::default_pass));
+
+        p.set_shader(sh);
+        p.get_state().set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
+        p.get_state().set_cull_face(true,nya_render::cull_face::cw);
 
         if(!edge_flag)
             continue;
@@ -174,9 +176,10 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         res.materials.resize(res.materials.size()+1);
         nya_scene::material &me = res.materials.back();
 
-        me.set_shader(she);
-        //me.set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
-        me.set_cull_face(true,nya_render::cull_face::ccw);
+        nya_scene::material::pass &pe=me.get_pass(me.add_pass(nya_scene::material::default_pass));
+        pe.set_shader(she);
+        //pe.get_state().set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
+        pe.get_state().set_cull_face(true,nya_render::cull_face::ccw);
     }
 
     const ushort bones_count=reader.read<ushort>();
@@ -197,7 +200,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
 
         if(res.skeleton.add_bone(name.c_str(),pos,parent,true)!=i)
         {
-            nya_log::get_log()<<"pmd load error: invalid bone\n";
+            nya_log::log()<<"pmd load error: invalid bone\n";
             return false;
         }
     }
@@ -221,7 +224,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
             const char *name=res.skeleton.get_bone_name(link);
             if(!name)
             {
-                nya_log::get_log()<<"pmd load warning: invalid ik link\n";
+                nya_log::log()<<"pmd load warning: invalid ik link\n";
                 continue;
             }
 

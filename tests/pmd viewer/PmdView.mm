@@ -100,14 +100,14 @@ bool load_texture(nya_scene::shared_texture &res,nya_scene::resource_data &textu
                                           length: texture_data.get_size() freeWhenDone:NO];
     if(data==nil)
     {
-        nya_log::get_log()<<"unable to load texture: NSData error\n";
+        nya_log::log()<<"unable to load texture: NSData error\n";
         return false;
     }
 
     NSBitmapImageRep *image=[NSBitmapImageRep imageRepWithData:data];
     if(image==nil)
     {
-        nya_log::get_log()<<"unable to load texture: invalid file\n";
+        nya_log::log()<<"unable to load texture: invalid file\n";
         return false;
     }
 
@@ -121,13 +121,13 @@ bool load_texture(nya_scene::shared_texture &res,nya_scene::resource_data &textu
         format=nya_render::texture::color_rgba;
     else
     {
-        nya_log::get_log()<<"unable to load texture: unsupported format\n";
+        nya_log::log()<<"unable to load texture: unsupported format\n";
         return false;
     }
 
     if([image bitsPerSample]!=8)
     {
-        nya_log::get_log()<<"unable to load texture: unsupported format\n";
+        nya_log::log()<<"unable to load texture: unsupported format\n";
         return false;
     }
 

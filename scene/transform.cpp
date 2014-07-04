@@ -3,6 +3,7 @@
 #include "transform.h"
 #include "render/render.h"
 #include "camera.h"
+#include "memory/invalid_object.h"
 
 namespace { const nya_scene::transform *active_transform=0; }
 
@@ -19,8 +20,7 @@ const transform &transform::get()
 {
     if(!active_transform)
     {
-        static transform invalid;
-        return invalid;
+        return nya_memory::get_invalid_object<transform>();
     }
 
     return *active_transform;

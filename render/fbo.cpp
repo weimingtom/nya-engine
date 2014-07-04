@@ -34,7 +34,7 @@ void init_default_target()
 dx_target get_default_target() { init_default_target(); return default_target; }
 dx_target get_target() { init_default_target(); return target; }
 
-void set_target(ID3D11RenderTargetView *color,ID3D11DepthStencilView *depth,bool default)
+void set_target(ID3D11RenderTargetView *color,ID3D11DepthStencilView *depth,bool is_default)
 {
     if(!get_context())
         return;
@@ -43,7 +43,7 @@ void set_target(ID3D11RenderTargetView *color,ID3D11DepthStencilView *depth,bool
 
     target.color=color;
     target.depth=depth;
-    if(default)
+    if(is_default)
         default_target=target;
 
     if(color)

@@ -323,10 +323,12 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         sh_.predefines[1].type=nya_scene::shared_shader::bones_rot;
         sh_.predefines[1].location=sh_.shdr.get_handler("bones_rot");
         sh.create(sh_);
-        
-        m.set_shader(sh);
-        m.set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
-        m.set_cull_face(!(flag & (1<<0)),nya_render::cull_face::cw);
+
+        nya_scene::material::pass &p=m.get_pass(m.add_pass(nya_scene::material::default_pass));
+
+        p.set_shader(sh);
+        p.get_state().set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
+        p.get_state().set_cull_face(!(flag & (1<<0)),nya_render::cull_face::cw);
 
         if(!(flag & (1<<4)))
             continue;
@@ -366,9 +368,10 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         she_.predefines[1].location=she_.shdr.get_handler("bones_rot");
         she.create(she_);
 
-        me.set_shader(she);
-        me.set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
-        me.set_cull_face(true,nya_render::cull_face::ccw);
+        nya_scene::material::pass &pe=me.get_pass(me.add_pass(nya_scene::material::default_pass));
+        pe.set_shader(she);
+        pe.get_state().set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
+        pe.get_state().set_cull_face(true,nya_render::cull_face::ccw);
     }
 
     typedef unsigned short ushort;
@@ -482,7 +485,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
 
         if(res.skeleton.add_bone(b.name.c_str(),b.pos,b.parent,true)!=i)
         {
-            nya_log::get_log()<<"pmx load error: invalid bone\n";
+            nya_log::log()<<"pmx load error: invalid bone\n";
             return false;
         }
 

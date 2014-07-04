@@ -44,7 +44,7 @@ public:
 void set_resources_provider(resources_provider *provider);
 resources_provider &get_resources_provider();
 
-void set_log(nya_log::log *l);
-nya_log::log &get_log();
+void set_log(nya_log::log_base *l);
+nya_log::log_base &log();
 
 }

@@ -45,14 +45,14 @@ bool shared_textures_manager::fill_resource(const char *name,nya_render::texture
 {
     if(!name)
     {
-        get_log()<<"unable to load texture: invalid name\n";
+        log()<<"unable to load texture: invalid name\n";
         return false;
     }
 
     nya_resources::resource_data *file_data = nya_resources::get_resources_provider().access(name);
     if(!file_data)
     {
-        get_log()<<"unable to load texture: unable to acess resource\n";
+        log()<<"unable to load texture: unable to acess resource\n";
         return false;
     }
 

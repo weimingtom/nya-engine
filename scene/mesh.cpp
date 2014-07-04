@@ -1,16 +1,32 @@
-    //https://code.google.com/p/nya-engine/
+//https://code.google.com/p/nya-engine/
 
-#include "mesh.h"
-#include "scene.h"
 #include "camera.h"
-#include "shader.h"
-#include "render/render.h"
-#include "memory/tmp_buffer.h"
-#include "memory/memory_reader.h"
 #include "math/constants.h"
+#include "memory/invalid_object.h"
+#include "memory/memory_reader.h"
+#include "memory/tmp_buffer.h"
+#include "formats/string_convert.h"
+#include "mesh.h"
+#include "render/render.h"
+#include "scene.h"
+#include "shader.h"
 
 namespace nya_scene
 {
+
+namespace
+{
+
+material::pass &material_default_pass(material &m)
+{
+    int idx=m.get_pass_idx(material::default_pass);
+    if(idx<0)
+        idx=m.add_pass(material::default_pass);
+
+    return m.get_pass(idx);
+}
+
+}
 
 static std::string read_string(nya_memory::memory_reader &reader)
 {
@@ -34,9 +50,9 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size,i
 
     nya_memory::memory_reader reader(data,size);
 
-    typedef unsigned int uint;
-    typedef unsigned short ushort;
-    typedef unsigned char uchar;
+    typedef uint32_t uint;
+    typedef uint16_t ushort;
+    typedef uint8_t uchar;
 
     const nya_math::vec3 aabb_min=reader.read<nya_math::vec3>();
     const nya_math::vec3 aabb_max=reader.read<nya_math::vec3>();
@@ -134,7 +150,7 @@ bool mesh::load_nms_skeleton_section(shared_mesh &res,const void *data,size_t si
 
     nya_memory::memory_reader reader(data,size);
 
-    const int bones_count=reader.read<int>();
+    const int32_t bones_count=reader.read<int32_t>();
     for(int i=0;i<bones_count;++i)
     {
         const std::string name=read_string(reader);
@@ -148,22 +164,6 @@ bool mesh::load_nms_skeleton_section(shared_mesh &res,const void *data,size_t si
     return true;
 }
 
-nya_render::blend::mode blend_mode_from_string(const std::string &s)
-{
-    if(s=="src_alpha") return nya_render::blend::src_alpha;
-    if(s=="inv_src_alpha") return nya_render::blend::inv_src_alpha;
-    if(s=="src_color") return nya_render::blend::src_color;
-    if(s=="inv_src_color") return nya_render::blend::inv_src_color;
-    if(s=="dst_color") return nya_render::blend::dst_color;
-    if(s=="inv_dst_color") return nya_render::blend::inv_dst_color;
-    if(s=="dst_alpha") return nya_render::blend::dst_alpha;
-    if(s=="inv_dst_alpha") return nya_render::blend::inv_dst_alpha;
-    if(s=="zero") return nya_render::blend::zero;
-    if(s=="one") return nya_render::blend::one;
-
-    return nya_render::blend::one;
-}
-
 bool mesh::load_nms_material_section(shared_mesh &res,const void *data,size_t size)
 {
     if(!data || !size)
@@ -171,78 +171,82 @@ bool mesh::load_nms_material_section(shared_mesh &res,const void *data,size_t si
 
     nya_memory::memory_reader reader(data,size);
 
-    typedef unsigned short ushort;
-
-    const ushort materials_count=reader.read<ushort>();
+    const uint16_t materials_count=reader.read<uint16_t>();
     res.materials.resize(materials_count);
-    for(ushort i=0;i<materials_count;++i)
+    for(uint16_t i=0;i<materials_count;++i)
     {
         material &m=res.materials[i];
+        load_nms_material(m, reader);
+    }
+
+    return true;
+}
+    
+bool mesh::load_nms_material(nya_scene::material &m, nya_memory::memory_reader &reader)
+{
+    std::string name=read_string(reader);
+    m.set_name(name.c_str());
+    const uint16_t textures_count=reader.read<uint16_t>();
+    for(uint16_t j=0;j<textures_count;++j)
+    {
+        std::string semantics=read_string(reader);
         std::string name=read_string(reader);
-        m.set_name(name.c_str());
 
-        const ushort textures_count=reader.read<ushort>();
-        for(ushort j=0;j<textures_count;++j)
+        texture tex;
+        tex.load(name.c_str());
+        m.set_texture(semantics.c_str(),tex);
+    }
+
+    const uint16_t strings_count=reader.read<uint16_t>();
+    for(uint16_t j=0;j<strings_count;++j)
+    {
+        std::string name=read_string(reader);
+        std::string value=read_string(reader);
+
+        if(name=="nya_material")
         {
-            std::string semantics=read_string(reader);
-            std::string name=read_string(reader);
-
-            texture tex;
-            tex.load(name.c_str());
-            m.set_texture(semantics.c_str(),tex);
+            m.load(value.c_str());
         }
-
-        const ushort strings_count=reader.read<ushort>();
-        for(ushort j=0;j<strings_count;++j)
+        else if(name=="nya_shader")
         {
-            std::string name=read_string(reader);
-            std::string value=read_string(reader);
-
-            if(name=="nya_shader")
-            {
-                shader sh;
-                sh.load(value.c_str());
-                m.set_shader(sh);
-            }
-            else if(name=="nya_blend")
-            {
-                size_t div=value.find(':');
-                if(div!=std::string::npos)
-                {
-                    std::string src=value;
-                    src.resize(div);
-                    std::string dst=value.substr(div+1);
-                    m.set_blend(true,blend_mode_from_string(src),blend_mode_from_string(dst));
-                }
-            }
-            else if(name=="nya_cull")
-            {
-                if(value=="ccw")
-                    m.set_cull_face(true,nya_render::cull_face::ccw);
-                else if(value=="cw")
-                    m.set_cull_face(true,nya_render::cull_face::cw);
-            }
-            else if(name=="nya_zwrite")
-                m.set_zwrite(value=="true"||value=="1");
+            shader sh;
+            sh.load(value.c_str());
+            material_default_pass(m).set_shader(sh);
         }
-
-        const ushort vec4_count=reader.read<ushort>();
-        for(ushort j=0;j<vec4_count;++j)
+        else if(name=="nya_blend")
         {
-            const std::string name=read_string(reader);
-            const float r=reader.read<float>();
-            const float g=reader.read<float>();
-            const float b=reader.read<float>();
-            const float a=reader.read<float>();
-            m.set_param( m.get_param_idx(name.c_str()),r,g,b,a);
+            nya_render::state &st=material_default_pass(m).get_state();
+            st.blend=nya_formats::blend_mode_from_string(value,st.blend_src,st.blend_dst);
         }
-
-        const ushort ints_count=reader.read<ushort>();
-        for(ushort j=0;j<ints_count;++j)
+        else if(name=="nya_cull")
         {
-            read_string(reader); //ToDo
-            reader.read<int>();
+            nya_render::state &st=material_default_pass(m).get_state();
+            st.cull_face=nya_formats::cull_face_from_string(value, st.cull_order);
         }
+        else if(name=="nya_zwrite")
+        {
+            material_default_pass(m).get_state().zwrite = nya_formats::bool_from_string(value);
+        }
+    }
+
+    const uint16_t vec4_count=reader.read<uint16_t>();
+    for(uint16_t j=0;j<vec4_count;++j)
+    {
+        const std::string name=read_string(reader);
+        const float r=reader.read<float>();
+        const float g=reader.read<float>();
+        const float b=reader.read<float>();
+        const float a=reader.read<float>();
+        int param_idx = m.get_param_idx(name.c_str());
+        if (param_idx >= 0)
+            m.set_param(param_idx, r,g,b,a);
+    }
+
+    const uint16_t ints_count=reader.read<uint16_t>();
+    for(uint16_t j=0;j<ints_count;++j)
+    {
+        read_string(reader); //ToDo
+        reader.read<int32_t>();
     }
 
     return true;
@@ -254,12 +258,12 @@ bool mesh::load_nms(shared_mesh &res,resource_data &data,const char* name)
     if(!reader.test("nya mesh",8))
         return false;
 
-    typedef unsigned int uint;
+    typedef uint32_t uint;
 
     uint version=reader.read<uint>();
     if(version!=1 && version!=2)
     {
-        nya_log::get_log()<<"nms load error: unsupported version: "<<version<<"\n";
+        nya_log::log()<<"nms load error: unsupported version: "<<version<<"\n";
         return false;
     }
 
@@ -278,7 +282,7 @@ bool mesh::load_nms(shared_mesh &res,resource_data &data,const char* name)
 
         if(!reader.check_remained(size))
         {
-            nya_log::get_log()<<"nms load error: chunk size is bigger than remained data size\n";
+            nya_log::log()<<"nms load error: chunk size is bigger than remained data size\n";
             return false;
         }
 
@@ -287,7 +291,7 @@ bool mesh::load_nms(shared_mesh &res,resource_data &data,const char* name)
             case mesh_data: load_nms_mesh_section(res,reader.get_data(),size,version); break;
             case skeleton: load_nms_skeleton_section(res,reader.get_data(),size); break;
             case materials: load_nms_material_section(res,reader.get_data(),size); break;
-            default: nya_log::get_log()<<"nms load warning: unknown chunk type\n";
+            //default: nya_log::log()<<"nms load warning: unknown chunk type\n";
         };
 
         reader.skip(size);
@@ -304,7 +308,7 @@ bool mesh_internal::init_form_shared()
         return false;
     
     for(size_t i=0;i<m_replaced_materials.size();++i)
-        m_replaced_materials[i].release();
+        m_replaced_materials[i].unload();
 
     m_replaced_materials.clear();
     m_replaced_materials_idx.clear();
@@ -341,7 +345,7 @@ void mesh::unload()
     m_internal.unload();
 
     for(size_t i=0;i<internal().m_replaced_materials.size();++i)
-        m_internal.m_replaced_materials[i].release();
+        m_internal.m_replaced_materials[i].unload();
 
     m_internal.m_replaced_materials.clear();
     m_internal.m_replaced_materials_idx.clear();
@@ -360,8 +364,11 @@ const material &mesh_internal::mat(int idx) const
     return m_shared->materials[idx];
 }
 
-void mesh_internal::draw_group(int idx) const
+void mesh_internal::draw_group(int idx, const char *pass_name) const
 {
+    if (idx<0 || idx>=m_shared->groups.size())
+        return;
+
     const shared_mesh::group &g=m_shared->groups[idx];
     if(g.material_idx>=m_shared->materials.size())
         return;
@@ -372,39 +379,41 @@ void mesh_internal::draw_group(int idx) const
     //        return;
 
     const material &m=mat(g.material_idx);
-    m.internal().set();
+    m.internal().set(pass_name);
+    m_shared->vbo.bind();
     m_shared->vbo.draw(g.offset,g.count,g.elem_type);
+    m_shared->vbo.unbind();
     m.internal().unset();
 }
 
-void mesh::draw(int idx) const
+void mesh::draw(const char *pass_name) const
 {
-    if(!internal().m_shared.is_valid() || idx>=int(internal().m_shared->groups.size()))
+    if(!pass_name)
         return;
 
-    if(internal().m_has_aabb)
-    {
-        if(get_camera().is_valid() && !get_camera()->get_frustum().test_intersect(get_aabb()))
-            return;
-    }
+    for(int group_idx=0;group_idx<internal().m_shared->groups.size();++group_idx)
+        draw_group(group_idx, pass_name);
+}
+
+void mesh::draw_group(int idx, const char *pass_name) const
+{
+    if(!internal().m_shared.is_valid() || idx<0 || idx>=(int)internal().m_shared->groups.size())
+        return;
+
+    const shared_mesh::group &g = internal().m_shared->groups[idx];
+    if(g.material_idx>=(int)internal().m_shared->materials.size())
+        return;
+
+    if(internal().m_shared->materials[g.material_idx].get_pass_idx(pass_name)<0)
+        return;
+
+    if(internal().m_has_aabb && get_camera().is_valid() && !get_camera()->get_frustum().test_intersect(get_aabb()))
+        return;
 
     transform::set(internal().m_transform);
     shader_internal::set_skeleton(&internal().m_skeleton);
 
-    internal().m_shared->vbo.bind();
-
-    if(idx>=0)
-    {
-        if(idx<int(internal().m_shared->groups.size()))
-            internal().draw_group(idx);
-    }
-    else
-    {
-        for(int i=0;i<int(internal().m_shared->groups.size());++i)
-            internal().draw_group(i);
-    }
-
-    internal().m_shared->vbo.unbind();
+    internal().draw_group(idx, pass_name);
 
     shader_internal::set_skeleton(0);
 }
@@ -450,10 +459,7 @@ int mesh::get_materials_count() const
 const material &mesh::get_material(int idx) const
 {
     if(!internal().m_shared.is_valid() || idx<0 || idx>=int(internal().m_shared->materials.size()))
-    {
-        const static material invalid;
-        return invalid;
-    }
+        return nya_memory::get_invalid_object<material>();
 
     return internal().mat(idx);
 }
@@ -461,11 +467,7 @@ const material &mesh::get_material(int idx) const
 material &mesh::modify_material(int idx)
 {
     if(!internal().m_shared.is_valid() || idx<0 || idx>=int(internal().m_shared->materials.size()))
-    {
-        static material invalid;
-        invalid=material();
-        return invalid;
-    }
+        return nya_memory::get_invalid_object<material>();
 
     if(internal().m_replaced_materials.empty())
         m_internal.m_replaced_materials_idx.resize(internal().m_shared->materials.size(),-1);
@@ -612,8 +614,7 @@ const animation_proxy & mesh::get_anim(int layer) const
             return internal().m_anims[i].anim;
     }
 
-    static const animation_proxy invalid;
-    return invalid;
+    return nya_memory::get_invalid_object<animation_proxy>();
 }
 
 void mesh::set_anim_time(unsigned int time,int layer)
@@ -782,10 +783,7 @@ void mesh_internal::update(unsigned int dt)
 const nya_math::aabb &mesh::get_aabb() const
 {
     if(!internal().m_shared.is_valid())
-    {
-        static nya_math::aabb invalid;
-        return invalid;
-    }
+        return nya_memory::get_invalid_object<nya_math::aabb>();
 
     if(internal().m_recalc_aabb)
     {

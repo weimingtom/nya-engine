@@ -5,7 +5,7 @@
 #include <string>
 #include <string.h>
 
-namespace { nya_log::log *ui_log=0; }
+namespace { nya_log::log_base *ui_log=0; }
 
 namespace nya_ui
 {
@@ -330,17 +330,17 @@ void layer::send_event(const event &e)
 }
 
 
-void set_log(nya_log::log *l)
+void set_log(nya_log::log_base *l)
 {
     ui_log = l;
 }
 
-nya_log::log &get_log()
+nya_log::log_base &log()
 {
     static const char *ui_log_tag="ui";
     if(!ui_log)
     {
-        return nya_log::get_log(ui_log_tag);
+        return nya_log::log(ui_log_tag);
     }
 
     ui_log->set_tag(ui_log_tag);

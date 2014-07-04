@@ -8,17 +8,17 @@
 namespace nya_log
 {
 
-class plain_file_log: public log
+class plain_file_log: public log_base
 {
 public:
     bool open(const char*file_name);
     void close();
 
 public:
-    log &operator << (long int a);
-    log &operator << (unsigned long int a);
-    log &operator << (float a);
-    log &operator << (const char *a);
+    ostream_base &operator << (long int a);
+    ostream_base &operator << (unsigned long int a);
+    ostream_base &operator << (float a);
+    ostream_base &operator << (const char *a);
 
 public:
     void scope_inc() { ++m_scope; }

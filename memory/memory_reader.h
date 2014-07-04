@@ -14,7 +14,7 @@ public:
     template <typename t> t read()
     {
         t a;
-        size_t size=sizeof(t);
+        const size_t size=sizeof(t);
         if(size>m_size-m_offset)
         {
             m_offset=m_size;
@@ -27,7 +27,7 @@ public:
 
         return a;
     }
-
+    
     bool test(const void*data,size_t size)
     {
         if(size>m_size-m_offset)
@@ -63,7 +63,7 @@ public:
     bool skip(size_t offset)
     {
         m_offset+=offset;
-        if(m_offset<offset) //overflow
+        if(m_offset<offset || m_offset > m_size) //overflow
             m_offset=m_size;
 
         return m_offset<m_size;

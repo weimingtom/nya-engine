@@ -115,14 +115,14 @@ protected:
         {
             if(!name)
             {
-                nya_resources::get_log()<<"unable to load scene resource: invalid name\n";
+                nya_resources::log()<<"unable to load scene resource: invalid name\n";
                 return false;
             }
 
             nya_resources::resource_data *file_data=nya_resources::get_resources_provider().access(name);
             if(!file_data)
             {
-                nya_resources::get_log()<<"unable to load scene resource: unable to access resource "<<name<<"\n";
+                nya_resources::log()<<"unable to load scene resource: unable to access resource "<<name<<"\n";
                 return false;
             }
 
@@ -142,7 +142,7 @@ protected:
 
             res_data.free();
 
-            nya_resources::get_log()<<"unable to load scene resource: unknown format in "<<name<<"\n";
+            nya_resources::log()<<"unable to load scene resource: unknown format in "<<name<<"\n";
 
             return false;
         }
@@ -153,8 +153,7 @@ protected:
         }
     };
 
-public:
-    static shared_resources &get_shared_resources()
+    static shared_resources_manager &get_shared_resources()
     {
         static shared_resources_manager manager;
         return manager;

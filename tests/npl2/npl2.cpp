@@ -27,21 +27,21 @@ class npl2: public nya_system::app
 private:
 	void on_init_splash()
 	{
-	    nya_log::get_log()<<"on_init_splash\n";
+	    nya_log::log()<<"on_init_splash\n";
 
 	    nya_render::set_clear_color(0,0.6,0.7,1);
 	}
 
 	void on_splash(unsigned int dt)
 	{
-	    nya_log::get_log()<<"on_splash\n";
+	    nya_log::log()<<"on_splash\n";
 
 	    nya_render::clear(true,false);
     }
 
 	void on_init()
 	{
-	    nya_log::get_log()<<"on_init\n";
+	    nya_log::log()<<"on_init\n";
 
         init_resource_system();
 
@@ -58,7 +58,7 @@ const unsigned long time_start=nya_system::get_time();
 
         get_scene().init();
 
-nya_log::get_log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n";
+nya_log::log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n";
 
 	    m_ui.init();
 	}
@@ -83,7 +83,7 @@ nya_log::get_log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n"
             sprintf(name,"npl2 %d fps",fps_counter);
             set_title(name);
 
-            //nya_log::get_log()<<name<<"\n";
+            //nya_log::log()<<name<<"\n";
 
             fps_update_timer%=1000;
             fps_counter=0;
@@ -92,7 +92,7 @@ nya_log::get_log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n"
 
     void on_mouse_move(int x,int y)
     {
-        //nya_log::get_log()<<"mmove "<<x<<" "<<y<<"\n";
+        //nya_log::log()<<"mmove "<<x<<" "<<y<<"\n";
 
         if(m_mouse_drag.left)
         {
@@ -129,7 +129,7 @@ nya_log::get_log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n"
 
     void on_resize(unsigned int w,unsigned int h)
     {
-        //nya_log::get_log()<<"on_resize "<<w<<" "<<h<<"\n";
+        //nya_log::log()<<"on_resize "<<w<<" "<<h<<"\n";
 
         if(!w || !h)
             return;
@@ -143,7 +143,7 @@ nya_log::get_log()<<"Scene init time: "<<nya_system::get_time()-time_start<<"\n"
 
 	void on_free() 
     {
-        nya_log::get_log()<<"on_free\n";
+        nya_log::log()<<"on_free\n";
         
         get_scene().release();
         m_ui.release();
@@ -193,7 +193,7 @@ private:
 
             unsigned long t0=nya_system::get_time();
 
-            //nya_log::get_log()<<arch_name.c_str()<<"\n";
+            //nya_log::log()<<arch_name.c_str()<<"\n";
             prov->open_archieve(arch_info->access());
 
             unsigned long t1=nya_system::get_time();
@@ -211,7 +211,7 @@ private:
 
             unsigned long t3=nya_system::get_time();
 
-            //nya_resources::get_log()<<arch_name.c_str()<<"\n";
+            //nya_resources::log()<<arch_name.c_str()<<"\n";
             arch_info=arch_info->get_next();
 
             arch_open_time+=t1-t0;
@@ -238,7 +238,7 @@ private:
             */
         }
 
-        nya_log::get_log()<<"Archieves ("<<arch_count<<")"<<"and attribs load time: "<<nya_system::get_time()-time_start<<"\n";
+        nya_log::log()<<"Archieves ("<<arch_count<<")"<<"and attribs load time: "<<nya_system::get_time()-time_start<<"\n";
 
         cprov.add_provider(&fprov);
 
@@ -249,10 +249,10 @@ private:
 
         nya_resources::set_resources_provider(&cprov);
 
-        nya_log::get_log()<<"Total res system init time: "<<nya_system::get_time()-time_start<<"\n";
-        nya_log::get_log()<<"Average open archieve time: "<<float(arch_open_time)/arch_count<<"\n";
-        nya_log::get_log()<<"Average add archieve time: "<<float(arch_add_time)/arch_count<<"\n";
-        nya_log::get_log()<<"Average attrib time: "<<float(attrib_time)/arch_count<<"\n";
+        nya_log::log()<<"Total res system init time: "<<nya_system::get_time()-time_start<<"\n";
+        nya_log::log()<<"Average open archieve time: "<<float(arch_open_time)/arch_count<<"\n";
+        nya_log::log()<<"Average add archieve time: "<<float(arch_add_time)/arch_count<<"\n";
+        nya_log::log()<<"Average attrib time: "<<float(attrib_time)/arch_count<<"\n";
     }
 
 private:
@@ -333,7 +333,7 @@ int main(int argc, char **argv)
 
     //nya_log::set_log(&log);
 
-    nya_log::get_log()<<"npl2 started from path "<<nya_system::get_app_path()<<"\n";
+    nya_log::log()<<"npl2 started from path "<<nya_system::get_app_path()<<"\n";
 
     const std::string config_path=std::string(nya_system::get_app_path())+"npl2.cfg";
     nya_resources::resource_data *cfg=
@@ -342,10 +342,10 @@ int main(int argc, char **argv)
     {
         get_config().load(cfg);
         cfg->release();
-        nya_log::get_log()<<"config loaded, starting\n";
+        nya_log::log()<<"config loaded, starting\n";
     }
     else
-        nya_log::get_log()<<"unable to load config\n";
+        nya_log::log()<<"unable to load config\n";
 
     npl2 app;
     app.set_title("Loading, please wait...");

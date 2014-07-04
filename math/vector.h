@@ -36,9 +36,13 @@ struct vec2
     {
         float len=length();
         if(len<0.00001f)
-            return *this;
+        {
+            x=1.0f;
+            y=0.0f;
+        }
+        else
+            *this *=(1.0f/len);
 
-        *this *=(1.0f/len);
         return *this;
     }
 };
@@ -87,7 +91,7 @@ struct vec3
     {
         float len=v.length();
         if(len<0.00001f)
-            return v;
+            return vec3(1.0f,0.0f,0.0f);
 
         return v*(1.0f/len);
     }
@@ -113,6 +117,7 @@ struct vec4
 
     vec4 operator - (const vec4 &v) const { return vec4(x-v.x,y-v.y,z-v.z,w-v.w); }
     float operator * (const vec4 &v) const { return x*v.x+y*v.y+z*v.z+w*v.w; }
+    vec4 operator * (const float a) const { return vec4(x*a,y*a,z*a,w*a); }
 
     vec4 operator - () const { return vec4(-x,-y,-z,-w); }
 
@@ -126,21 +131,21 @@ struct vec4
 
     vec4 &abs() { x=fabsf(x); y=fabsf(y); z=fabsf(z); w=fabsf(w); return *this; }
 
-    vec4 &normalize()
-    {
-        float len=length();
-        if(len<0.00001f)
-            return *this;
-
-        *this *=(1.0f/len);
-        return *this;
-    }
+    vec4 &normalize() { *this=normalize(*this); return *this; }
 
     vec3 xyz() const { return vec3(x,y,z); }
+
+    static vec4 normalize(const vec4 &v)
+    {
+        float len=v.length();
+        if(len<0.00001f)
+            return vec4(1.0f,0.0f,0.0f,0.0f);
+
+        return v*(1.0f/len);
+    }
 };
 
 inline vec4 operator * ( float a, const vec4& v ) { return vec4(v.x*a,v.y*a,v.z*a,v.w*a); }
-inline vec4 operator * ( const vec4& v, float a ) { return vec4(v.x*a,v.y*a,v.z*a,v.w*a); }
 inline vec4 operator / ( const vec4& v, float a ) { return vec4(v.x/a,v.y/a,v.z/a,v.w/a); }
 
 }

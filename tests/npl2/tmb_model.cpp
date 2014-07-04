@@ -27,7 +27,7 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
 
     if(!model_res)
     {
-        nya_log::get_log()<<"Unable to load model: invalid data\n";
+        nya_log::log()<<"Unable to load model: invalid data\n";
         return false;
     }
     
@@ -40,7 +40,7 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
     const char *magic=(const char*)model_data.get_data();
     if(strncmp(magic,"TMB0",4)!=0)
     {
-        nya_log::get_log()<<"Warning: invalid TMB0 magic\n";
+        nya_log::log()<<"Warning: invalid TMB0 magic\n";
         //return false;
     }
 
@@ -392,7 +392,7 @@ bool shared_models_manager::fill_resource(const char *name,tmb_model &res)
 {
     if(!name)
     {
-        nya_resources::get_log()<<"Unable to access model: invalid name\n";
+        nya_resources::log()<<"Unable to access model: invalid name\n";
         return false;
     }
 

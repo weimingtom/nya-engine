@@ -7,51 +7,41 @@
 namespace nya_memory
 {
 
-template<typename t_data,int block_count> class pool
+template<typename t_data,size_t block_size> class pool
 {
 public:
     t_data *allocate()
     {
-        long free_block;
-        long free_offset;
+        size_t free_block_idx, free_offset;
 
-        if(m_free_count<0)
+        if(m_free_node_idx==no_idx)
         {
             block *b=new block();
-            if (!b)
-                return 0;
 
-            const long prev_blocks_count = (long)m_blocks.size();
-            const long first_idx = block_count * prev_blocks_count;
-            long next_idx = first_idx+1;
+            m_free_node_idx=block_size*m_blocks.size();
+            size_t next_idx=m_free_node_idx+1;
 
-            for(long i=0;i<block_count;++i)
+            for(size_t i=0;i<block_size;++i)
             {
-                node &n = b->nodes[i];
-                n.block_idx = -1;
-                n.next_free = next_idx;
+                node &n=b->nodes[i];
+                n.block_idx=no_idx;
+                n.next_free=next_idx;
                 ++next_idx;
             }
 
-            b->nodes[block_count-1].next_free = m_free_count;
-            m_free_count = first_idx;
+            b->nodes[block_size-1].next_free=no_idx;
 
             m_blocks.push_back(b);
-
-            free_block = prev_blocks_count;
-            free_offset=0;
-        }
-        else
-        {
-            free_block = m_free_count / block_count;
-            free_offset = m_free_count % block_count;
         }
 
-        node &n = m_blocks[free_block]->nodes[free_offset];
-        m_free_count = n.next_free;
+        free_block_idx=m_free_node_idx / block_size;
+        free_offset=m_free_node_idx % block_size;
 
-        n.block_idx = free_block;
-        n.next_free = -1;
+        node &n=m_blocks[free_block_idx]->nodes[free_offset];
+        m_free_node_idx=n.next_free;
+
+        n.block_idx=free_block_idx;
+        n.next_free=no_idx;
 
         ++m_used_count;
 
@@ -61,28 +51,24 @@ public:
 
     bool free(t_data *data )
     {
-        if (!data)
+        if(!data)
             return false;
 
-        node t;
-        const int offset = (int)((char*)&t.data - (char*)&t.block_idx);
-        node &n = *((node *)(((char *)data) - offset));
+        node &n = *((node *)(((char *)data) - offsetof(node, data)));
 
-        if (n.block_idx<0 || n.block_idx>=(long)m_blocks.size())
+        if(n.block_idx>=m_blocks.size() || &n < &(m_blocks[n.block_idx]->nodes[0]))
             return false;
 
-        const long node_idx = n.block_idx*block_count +
-                    (int)(&n - &(m_blocks[n.block_idx]->nodes[0]));
-
-        if (node_idx<0 || node_idx>=(long)m_blocks.size()*block_count)
+        const size_t node_idx=n.block_idx*block_size + (size_t)(&n - &(m_blocks[n.block_idx]->nodes[0]));
+        if(node_idx>=m_blocks.size()*(n.block_idx+1))
             return false;
 
         data->~t_data();
 
-        n.block_idx = -1;
-        n.next_free = m_free_count;
+        n.block_idx=no_idx;
+        n.next_free=m_free_node_idx;
 
-        m_free_count = node_idx;
+        m_free_node_idx=node_idx;
 
         --m_used_count;
 
@@ -91,49 +77,41 @@ public:
 
     void clear()
     {
-        m_free_count = -1;
+        m_free_node_idx=m_blocks.empty()?no_idx:0;
 
-        long node_idx = 0;
+        size_t next_node_idx=1;
 
-        for (long i = 0;i<(long)m_blocks.size();++i)
+        for (size_t i=0;i<m_blocks.size();++i)
         {
-            for(int j = 0;j<block_count;++j)
+            for(size_t j=0;j<block_size;++j)
             {
-                node & n = m_blocks[i]->nodes[j];
+                node & n=m_blocks[i]->nodes[j];
 
-                n.block_idx = -1;
-                n.next_free = m_free_count;
+                if(n.block_idx!=no_idx)
+                    n.data->~t_data();
 
-                m_free_count = node_idx;
+                n.block_idx=no_idx;
+                n.next_free=next_node_idx;
 
-                ++node_idx;
+                ++next_node_idx;
             }
         }
+
+        if(!m_blocks.empty())
+            m_blocks.back()->nodes[block_size-1].next_free=no_idx;
 
         m_used_count = 0;
     }
 
 public:
-    long get_count() const
-    {
-        return m_used_count;
-    }
-
-    long get_mem_size() const
-    {
-        return long(m_blocks.size()*sizeof(t_data)*block_count);
-    }
+    size_t get_count() const { return m_used_count; }
+    size_t get_mem_size() const { return m_blocks.size()*sizeof(t_data)*block_size; }
 
 public:
-    pool():m_free_count(-1),m_used_count(0) {}
+    pool(): m_free_node_idx(no_idx),m_used_count(0) {}
+    ~pool() { for(size_t i=0;i<m_blocks.size();++i) delete m_blocks[i]; }
 
-    ~pool()
-    {
-        for (long i = 0; i<(long)m_blocks.size(); ++i)
-            delete m_blocks[i];
-    }
-
-    //non copiable
+    //non copyable
 private:
     pool(const pool &);
     void operator = (const pool &);
@@ -141,20 +119,19 @@ private:
 private:
     struct node
     {
-        long block_idx;
-        long next_free;
+        size_t block_idx;
+        size_t next_free;
         char data[sizeof(t_data)];
     };
 
-    struct block
-    {
-        node nodes[block_count];
-    };
+    struct block { node nodes[block_size]; };
 
-    long m_free_count;
-    long m_used_count;
+    size_t m_free_node_idx;
+    size_t m_used_count;
 
     std::vector<block*> m_blocks;
+
+    static const size_t no_idx=(size_t)-1;
 };
 
 }

@@ -179,7 +179,7 @@ resource_data *pl2_resources_provider::access(const char *resource_name)
 {
     if(!resource_name)
     {
-        get_log()<<"unable to access archieve entry: invalid name\n";
+        log()<<"unable to access archieve entry: invalid name\n";
         return 0;
     }
 
@@ -192,7 +192,7 @@ resource_data *pl2_resources_provider::access(const char *resource_name)
         entry=entry->next;
     }
 
-    get_log()<<"unable to access archieve entry: not found\n";
+    log()<<"unable to access archieve entry: not found\n";
 
     return 0;
 }
@@ -226,7 +226,7 @@ resource_data *pl2_entry_info::access()
 {
     if(!archieve_data || !packed_size || !size)
     {
-        get_log()<<"unable to access archieve entry: invalid size\n";
+        log()<<"unable to access archieve entry: invalid size\n";
         return 0;
     }
 
@@ -234,7 +234,7 @@ resource_data *pl2_entry_info::access()
 
     if(!archieve_data->read_chunk(packed.get_data(),packed_size,offset))
     {
-        get_log()<<"unable to access archieve entry: invalid data\n";
+        log()<<"unable to access archieve entry: invalid data\n";
         return 0;
     }
 
@@ -243,7 +243,7 @@ resource_data *pl2_entry_info::access()
     if(!data->decompress(packed.get_data(),packed_size,size))
     {
         pl2_resources.free(data);
-        get_log()<<"unable to access archieve entry: decompress failed\n";
+        log()<<"unable to access archieve entry: decompress failed\n";
         return 0;
     }
 

@@ -180,7 +180,7 @@ void mmd_mesh::draw()
     for(int i=0;i<int(sh.groups.size());++i)
     {
         const nya_scene::material &m=sh.materials[sh.groups[i].material_idx];
-        m.internal().set();
+        m.internal().set(nya_scene::material::default_pass);
         m_vbo.draw(sh.groups[i].offset,sh.groups[i].count);
         m.internal().unset();
     }

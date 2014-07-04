@@ -211,7 +211,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 {
     if(width==0 || height==0)
     {
-        get_log()<<"Unable to build texture: invalid width or height\n";
+        log()<<"Unable to build texture: invalid width or height\n";
 	    release();
         return false;
     }
@@ -342,7 +342,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 #else
     if(width>gl_get_max_tex_size() || height>gl_get_max_tex_size())
     {
-        get_log()<<"Unable to build texture: width or height is too high, maximum is "<<gl_get_max_tex_size()<<"\n";
+        log()<<"Unable to build texture: width or height is too high, maximum is "<<gl_get_max_tex_size()<<"\n";
 	    release();
         return false;
     }
@@ -373,7 +373,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     const unsigned int source_bpp=get_bpp(format);
     if(!source_format || !gl_format || !source_bpp)
     {
-        get_log()<<"Unable to build texture: unsuppored color format\n";
+        log()<<"Unable to build texture: unsuppored color format\n";
 	    release();
         return false;
     }
@@ -489,7 +489,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 {
     if(width==0 || height==0)
     {
-        get_log()<<"Unable to build cube texture: invalid width/height\n";
+        log()<<"Unable to build cube texture: invalid width/height\n";
 	    release();
         return false;
     }
@@ -609,7 +609,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 #else
     if(width>gl_get_max_tex_size() || height>gl_get_max_tex_size())
     {
-        get_log()<<"Unable to build cube texture: width or height is too high, maximum is "<<gl_get_max_tex_size()<<"\n";
+        log()<<"Unable to build cube texture: width or height is too high, maximum is "<<gl_get_max_tex_size()<<"\n";
 	    release();
         return false;
     }
@@ -634,7 +634,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 
     if(!source_format || !gl_format)
     {
-        get_log()<<"Unable to build cube texture: unsuppored color format\n";
+        log()<<"Unable to build cube texture: unsuppored color format\n";
 	    release();
         return false;
     }

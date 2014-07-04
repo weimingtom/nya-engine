@@ -105,6 +105,7 @@ public:
 
 public:
     int get_texture_slot(const char *semantic) const;
+    const char *get_texture_semantics(int slot) const;
     int get_texture_slots_count() const;
 
 public:

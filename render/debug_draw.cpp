@@ -91,7 +91,6 @@ void debug_draw::add_aabb(const nya_math::aabb &box,const nya_math::vec4 &color)
 
 void debug_draw::draw() const
 {
-#ifndef DIRECTX11
     if(!m_initialised)
     {
         m_vbo.set_colors(sizeof(float)*3,4);
@@ -106,9 +105,9 @@ void debug_draw::draw() const
 
     if(!m_point_verts.empty())
     {
-  #ifndef OPENGL_ES
+#ifndef OPENGL_ES
         glPointSize(m_point_size);
-  #endif
+#endif
         m_vbo.bind();
         m_vbo.set_element_type(vbo::points);
         m_vbo.set_vertex_data(&m_point_verts[0],sizeof(vert),int(m_point_verts.size()));
@@ -127,7 +126,6 @@ void debug_draw::draw() const
     }
 
     m_shader.unbind();
-#endif
 }
 
 void debug_draw::release()

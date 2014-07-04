@@ -3,26 +3,23 @@
 #include "log.h"
 #include "stdout_log.h"
 
-namespace
-{
-    nya_log::log *default_log=0;
-}
-
 namespace nya_log
 {
 
-log &no_log()
+namespace { log_base *default_log=0; }
+
+log_base &no_log()
 {
-    static log l;
+    static log_base l;
     return l;
 }
 
-void set_log(log *l)
+void set_log(log_base *l)
 {
     default_log=l;
 }
 
-log &get_log(const char *tag)
+log_base &log(const char *tag)
 {
     if(!tag)
         tag="general";
