@@ -88,7 +88,7 @@ public:
                 node & n=m_blocks[i]->nodes[j];
 
                 if(n.block_idx!=no_idx)
-                    n.data->~t_data();
+                    ((t_data*)n.data)->~t_data();
 
                 n.block_idx=no_idx;
                 n.next_free=next_node_idx;
