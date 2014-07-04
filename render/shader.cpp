@@ -379,7 +379,7 @@ bool shader::add_program(program_type type,const char*code)
 
     if(!code || !code[0])
     {
-        get_log()<<"Unable to add shader program: invalid code\n";
+        log()<<"Unable to add shader program: invalid code\n";
         return false;
     }
 
@@ -606,7 +606,7 @@ bool shader::add_program(program_type type,const char*code)
     if(!shdr.compiled[type].get_data())
     {
 #ifdef WINDOWS_PHONE8
-        get_log()<<"Can`t compile "<<type_str[type]<<" shader: Windows phone 8 not allowed to compile shaders, please, set compiled_shaders_provider and add compiled shaders cache\n";
+        log()<<"Can`t compile "<<type_str[type]<<" shader: Windows phone 8 not allowed to compile shaders, please, set compiled_shaders_provider and add compiled shaders cache\n";
         return false;
 #else
         ID3D10Blob *compiled=0;
@@ -618,9 +618,9 @@ bool shader::add_program(program_type type,const char*code)
 
         if(error)
         {
-            get_log()<<"Can`t compile "<<type_str[type]<<" shader: \n";
+            log()<<"Can`t compile "<<type_str[type]<<" shader: \n";
             std::string error_text((const char *)error->GetBufferPointer(),error->GetBufferSize());
-            get_log()<<error_text.c_str()<<"\n";
+            log()<<error_text.c_str()<<"\n";
 
             error->Release();
             return false;
@@ -640,7 +640,7 @@ bool shader::add_program(program_type type,const char*code)
         if(get_device()->CreateVertexShader(shdr.compiled[type].get_data(),
                                             shdr.compiled[type].get_size(),nullptr,&shdr.vertex_program)<0)
         {
-            get_log()<<"Can`t create "<<type_str[type]<<" shader\n";
+            log()<<"Can`t create "<<type_str[type]<<" shader\n";
             return false;
         }
     }
@@ -650,7 +650,7 @@ bool shader::add_program(program_type type,const char*code)
         if(get_device()->CreatePixelShader(shdr.compiled[type].get_data(),
                                            shdr.compiled[type].get_size(),nullptr,&shdr.pixel_program)<0)
         {
-            get_log()<<"Can`t create "<<type_str[type]<<" shader\n";
+            log()<<"Can`t create "<<type_str[type]<<" shader\n";
             return false;
         }
     }
@@ -669,7 +669,7 @@ bool shader::add_program(program_type type,const char*code)
 
     if(!shdr.program)
     {
-        get_log()<<"Unable to create shader program object\n";
+        log()<<"Unable to create shader program object\n";
         return false;
     }
 
@@ -829,7 +829,7 @@ bool shader::add_program(program_type type,const char*code)
 
     code=code_final.c_str();
 
-    //get_log()<<code<<"\n";
+    //log()<<code<<"\n";
 #endif
 
     GLenum gl_type=GL_VERTEX_SHADER_ARB;
@@ -845,13 +845,13 @@ bool shader::add_program(program_type type,const char*code)
     if(!compiled)
     {
         GLint log_len=0;
-        get_log()<<"Can`t compile "<<type_str[type]<<" shader: \n";
+        log()<<"Can`t compile "<<type_str[type]<<" shader: \n";
         glGetShaderParam(object,GL_OBJECT_INFO_LOG_LENGTH_ARB,&log_len);
         if(log_len>0)
         {
             GLchar *buf=new GLchar[log_len];
             glGetInfoLogARB(object,log_len,&log_len,buf);
-            get_log()<<buf<<"\n";
+            log()<<buf<<"\n";
             delete []buf;
         }
 
@@ -874,17 +874,17 @@ bool shader::add_program(program_type type,const char*code)
         if(!result)
         {
 #ifdef OPENGL_ES
-            get_log()<<"Can`t link shader\n";
+            log()<<"Can`t link shader\n";
 #else
-            get_log()<<"Can`t link "<<type_str[type]<<" shader\n";
+            log()<<"Can`t link "<<type_str[type]<<" shader\n";
 #endif
             GLint log_len=0;
             glGetObjectParam(shdr.program,GL_OBJECT_INFO_LOG_LENGTH_ARB,&log_len);
             if (log_len>0)
             {
-                std::string log(log_len,0);
-                glGetInfoLogARB(shdr.program,log_len,&log_len,&log[0]);
-                get_log()<<log.c_str()<<"\n";
+                std::string log_text(log_len,0);
+                glGetInfoLogARB(shdr.program,log_len,&log_len,&log_text[0]);
+                log()<<log_text.c_str()<<"\n";
             }
 
             shdr.program=0; //??
@@ -902,7 +902,7 @@ bool shader::add_program(program_type type,const char*code)
                 if(handler>=0)
                     glUniform1iARB(handler,s.layer);
                 else
-                    get_log()<<"Unable to set shader sampler \'"<<s.name.c_str()<<"\': probably not found\n";
+                    log()<<"Unable to set shader sampler \'"<<s.name.c_str()<<"\': probably not found\n";
             }
 
             set_shader(-1);
@@ -914,17 +914,17 @@ bool shader::add_program(program_type type,const char*code)
         if(!result)
         {
 #ifdef OPENGL_ES
-            get_log()<<"Can`t validate shader\n";
+            log()<<"Can`t validate shader\n";
 #else
-            get_log()<<"Can`t validate "<<type_str[type]<<" shader\n";
+            log()<<"Can`t validate "<<type_str[type]<<" shader\n";
 #endif
             GLint log_len=0;
             glGetObjectParam(shdr.program,GL_OBJECT_INFO_LOG_LENGTH_ARB,&log_len);
             if (log_len>0)
             {
-                std::string log(log_len,0);
-                glGetInfoLogARB(shdr.program,log_len,&log_len,&log[0]);
-                get_log()<<log.c_str()<<"\n";
+                std::string log_text(log_len,0);
+                glGetInfoLogARB(shdr.program,log_len,&log_len,&log_text[0]);
+                log()<<log_text.c_str()<<"\n";
             }
             shdr.program=0; //??
             return false;
@@ -1048,7 +1048,7 @@ void shader::set_sampler(const char*name,unsigned int layer)
 {
     if(!name || !name[0])
     {
-        get_log()<<"Unable to set shader sampler: invalid name\n";
+        log()<<"Unable to set shader sampler: invalid name\n";
         return;
     }
 
@@ -1068,14 +1068,14 @@ int shader::get_handler(const char *name) const
 {
     if(!name || !name[0])
     {
-        get_log()<<"Unable to set shader handler: invalid name\n";
+        log()<<"Unable to set shader handler: invalid name\n";
         return -1;
     }
 
-#ifdef DIRECTX11
     if(m_shdr<0)
         return -1;
-
+    
+#ifdef DIRECTX11
     shader_obj &shdr=shader_obj::get(m_shdr);
     for(int i=0;i<(int)shdr.uniforms.size();++i)
     {
@@ -1085,14 +1085,11 @@ int shader::get_handler(const char *name) const
 
     return -1;
 #else
-    if(m_shdr<0)
-        return -1;
-
     set_shader(m_shdr);
 
     if(!shader_obj::get(m_shdr).program)
     {
-        get_log()<<"Unable to get shader handler \'"<<name<<"\': invalid program\n";
+        log()<<"Unable to get shader handler \'"<<name<<"\': invalid program\n";
         return -1;
     }
 

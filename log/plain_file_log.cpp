@@ -6,7 +6,7 @@
 namespace nya_log
 {
 
-log & plain_file_log::operator << (long int a)
+ostream_base & plain_file_log::operator << (long int a)
 {
     if(FILE*f = fopen(m_file_name.c_str(),"a+"))
     {
@@ -19,7 +19,7 @@ log & plain_file_log::operator << (long int a)
     return *this;
 }
 
-log & plain_file_log::operator << (unsigned long int a)
+ostream_base & plain_file_log::operator << (unsigned long int a)
 {
     if(FILE*f = fopen(m_file_name.c_str(),"a+"))
     {
@@ -32,7 +32,7 @@ log & plain_file_log::operator << (unsigned long int a)
     return *this;
 }
 
-log & plain_file_log::operator << (float a)
+ostream_base & plain_file_log::operator << (float a)
 {
     if(FILE*f = fopen(m_file_name.c_str(),"a+"))
     {
@@ -45,14 +45,14 @@ log & plain_file_log::operator << (float a)
     return *this;
 }
 
-log & plain_file_log::operator << (const char * a)
+ostream_base & plain_file_log::operator << (const char * a)
 {
     if(FILE*f = fopen(m_file_name.c_str(),"a+"))
     {
         for(int i=0;i<m_scope;++i)
             fprintf(f,"%s",m_scope_tab.c_str());
 
-        fprintf(f,"%s",a);
+        fprintf(f,"%s",a? a:"NULL");
         fclose(f);
     }
     return *this;

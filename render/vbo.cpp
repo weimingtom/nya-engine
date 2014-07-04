@@ -552,14 +552,14 @@ bool vbo::set_vertex_data(const void*data,unsigned int vert_stride,unsigned int 
     if(size==0 || !data)
     {
         obj.verts_count=0;
-        get_log()<<"Unable to set vertices: invalid data\n";
+        log()<<"Unable to set vertices: invalid data\n";
         return false;
     }
 
 #ifdef DIRECTX11
 	if(!get_device())
 	{
-		get_log()<<"Unable to set vertices: invalid directx device, use nya_render::set_device()\n";
+		log()<<"Unable to set vertices: invalid directx device, use nya_render::set_device()\n";
 		return false;
 	}
 
@@ -576,7 +576,7 @@ bool vbo::set_vertex_data(const void*data,unsigned int vert_stride,unsigned int 
 
 	if(get_device()->CreateBuffer(&vertex_buffer_desc,&vertex_buffer_data,&obj.vertex_loc)<0)
 	{
-		get_log()<<"Unable to set vertices: unable to create buffer\n";
+		log()<<"Unable to set vertices: unable to create buffer\n";
 		obj.vertex_loc=0;
 		return false;
 	}
@@ -588,7 +588,7 @@ bool vbo::set_vertex_data(const void*data,unsigned int vert_stride,unsigned int 
     {
         if(!check_init_vbo())
         {
-            get_log()<<"Unable to gen vertex data: vbo unsupported\n";
+            log()<<"Unable to gen vertex data: vbo unsupported\n";
             return false;
         }
 
@@ -639,34 +639,34 @@ bool vbo::set_index_data(const void*data,index_size size,unsigned int indices_co
     const unsigned int buffer_size=indices_count*size;
     if(buffer_size==0 || !data)
     {
-        get_log()<<"Unable to set indices: invalid data\n";
+        log()<<"Unable to set indices: invalid data\n";
         obj.element_count=0;
         return false;
     }
 
 #ifdef DIRECTX11
-    if(!get_device())
-    {
-        get_log()<<"Unable to set indices: invalid directx device, use nya_render::set_device()\n";
-        return false;
-    }
+	if(!get_device())
+	{
+		log()<<"Unable to set indices: invalid directx device, use nya_render::set_device()\n";
+		return false;
+	}
 
-    if(obj.index_loc)
-    {
-        //ToDo: release or refill
-    }
+	if(obj.index_loc)
+	{
+		//ToDo: release or refill
+	}
 
-    D3D11_SUBRESOURCE_DATA index_buffer_data={0};
-    index_buffer_data.pSysMem=data;
-    index_buffer_data.SysMemPitch=0;
-    index_buffer_data.SysMemSlicePitch=0;
-    CD3D11_BUFFER_DESC index_buffer_desc(buffer_size,D3D11_BIND_INDEX_BUFFER);
-    if(nya_render::get_device()->CreateBuffer(&index_buffer_desc,&index_buffer_data,&obj.index_loc)<0)
-    {
-        get_log()<<"Unable to set indices: unable to create buffer\n";
-        obj.index_loc=0;
-        return false;
-    }
+	D3D11_SUBRESOURCE_DATA index_buffer_data={0};
+	index_buffer_data.pSysMem=data;
+	index_buffer_data.SysMemPitch=0;
+	index_buffer_data.SysMemSlicePitch=0;
+	CD3D11_BUFFER_DESC index_buffer_desc(buffer_size,D3D11_BIND_INDEX_BUFFER);
+	if(nya_render::get_device()->CreateBuffer(&index_buffer_desc,&index_buffer_data,&obj.index_loc)<0)
+	{
+		log()<<"Unable to set indices: unable to create buffer\n";
+		obj.index_loc=0;
+		return false;
+	}
 
     obj.elements_usage=usage;
     obj.element_size=size;
@@ -675,7 +675,7 @@ bool vbo::set_index_data(const void*data,index_size size,unsigned int indices_co
     {
         if(!check_init_vbo())
         {
-            get_log()<<"Unable to gen vertex data: vbo unsupported\n";
+            log()<<"Unable to gen vertex data: vbo unsupported\n";
             return false;
         }
 
@@ -834,7 +834,7 @@ bool vbo::get_vertex_data( nya_memory::tmp_buffer_ref &data ) const
     glBindBuffer(GL_ARRAY_BUFFER,vobj.vertex_loc);
     current_verts=-1;
 
- #ifdef OPENGL_ES
+#ifdef OPENGL_ES
   #ifdef ANDROID
     //ToDo
     data.free();
@@ -854,9 +854,9 @@ bool vbo::get_vertex_data( nya_memory::tmp_buffer_ref &data ) const
         return false;
     }
   #endif
- #else
+#else
     glGetBufferSubData(GL_ARRAY_BUFFER,0,vbo_size,data.get_data());
- #endif
+#endif
 #endif
 
     return true;
@@ -881,7 +881,7 @@ bool vbo::get_index_data( nya_memory::tmp_buffer_ref &data ) const
     glBindBuffer(GL_ARRAY_BUFFER,obj.index_loc);
     current_inds=-1;
 
- #ifdef OPENGL_ES
+  #ifdef OPENGL_ES
   #ifdef ANDROID
     //ToDo
     data.free();
@@ -901,9 +901,9 @@ bool vbo::get_index_data( nya_memory::tmp_buffer_ref &data ) const
         return false;
     }
   #endif
- #else
+  #else
     glGetBufferSubData(GL_ARRAY_BUFFER,0,ind_size,data.get_data());
- #endif
+  #endif
 #endif
 
     return true;

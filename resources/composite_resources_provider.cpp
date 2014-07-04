@@ -18,7 +18,7 @@ public:
     {
         if(!m_info)
         {
-            get_log()<<"unable to acess entry: invalid info\n";
+            log()<<"unable to acess entry: invalid info\n";
             return 0;
         }
 
@@ -29,7 +29,7 @@ public:
     {
         if(!m_info)
         {
-            get_log()<<"unable to get entry name: invalid info\n";
+            log()<<"unable to get entry name: invalid info\n";
             return 0;
         }
 
@@ -43,7 +43,7 @@ public:
     {
         if(!m_info)
         {
-            get_log()<<"unable to check entry extension: invalid info\n";
+            log()<<"unable to check entry extension: invalid info\n";
             return 0;
         }
 
@@ -90,7 +90,7 @@ void composite_resources_provider::add_provider(resources_provider *provider)
 {
     if(!provider)
     {
-        get_log()<<"unable to add provider: invalid provider\n";
+        log()<<"unable to add provider: invalid provider\n";
         return;
     }
 
@@ -123,7 +123,7 @@ void composite_resources_provider::cache_provider(resources_provider *provider)
         std::pair<res_info_iterator,bool> ir=m_resources_info.insert(std::make_pair(name_str,entry));
         if(!ir.second)
         {
-            //get_log()<<"unable to add composite provider entry "<<entry->get_name()
+            //log()<<"unable to add composite provider entry "<<entry->get_name()
             //        <<": already exist\n";
         }
         else
@@ -153,7 +153,7 @@ resource_data *composite_resources_provider::access(const char *resource_name)
 {
     if(!resource_name)
     {
-        get_log()<<"unable to access composite entry: invalid name\n";
+        log()<<"unable to access composite entry: invalid name\n";
         return 0;
     }
 
@@ -182,7 +182,7 @@ resource_data *composite_resources_provider::access(const char *resource_name)
 
     if(it==m_resources_info.end())
     {
-        get_log()<<"unable to access composite entry "<<resource_name
+        log()<<"unable to access composite entry "<<resource_name
                 <<": not found\n";
         return 0;
     }
@@ -190,7 +190,7 @@ resource_data *composite_resources_provider::access(const char *resource_name)
     resource_info *entry=it->second;
     if(!entry)
     {
-        get_log()<<"unable to access composite entry "<<resource_name
+        log()<<"unable to access composite entry "<<resource_name
                 <<": invalid entry\n";
         return 0;
     }

@@ -5,15 +5,12 @@
 #include "math/quaternion.h"
 #include "math/constants.h"
 #include "render/transform.h"
-
-namespace
-{
-    nya_scene::camera default_camera;
-    nya_scene::camera_proxy active_camera(default_camera);
-}
+#include <cmath>
 
 namespace nya_scene
 {
+
+namespace { camera_proxy active_camera=camera_proxy(camera()); }
 
 void camera::set_proj(float fov,float aspect,float near,float far)
 {
@@ -63,6 +60,18 @@ void camera::set_rot(float yaw,float pitch,float roll)
 {
     const float a2r=nya_math::constants::pi/180.0f;
     set_rot(nya_math::quat(pitch*a2r,yaw*a2r,roll*a2r));
+}
+
+void camera::set_rot(const nya_math::vec3 &dir)
+{
+    const float eps=1.0e-6f;
+    const nya_math::vec3 v=nya_math::vec3::normalize(dir);
+    const float xz_sqdist=v.x*v.x+v.z*v.z;
+
+    const float new_yaw=(xz_sqdist>eps*eps)? (-std::atan2(v.x,v.z)-nya_math::constants::pi) : m_rot.get_euler().y;
+    const float new_pitch=(fabsf(v.y)>eps)? (-std::atan2(v.y,sqrtf(xz_sqdist))) : 0.0f;
+
+    set_rot(nya_math::quat(new_pitch,new_yaw,0));
 }
 
 const nya_math::mat4 &camera::get_view_matrix() const

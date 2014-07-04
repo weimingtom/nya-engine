@@ -26,7 +26,7 @@ private:
         class shared_resource_ref
         {
             template<typename,int> friend class shared_resources;
-
+            
         public:
             bool is_valid() const { return m_res!=0; }
             const t_res *const_get() const { return m_res; }
@@ -241,7 +241,7 @@ private:
             if(m_ref_count>0)
                 --m_ref_count;
             else
-                nya_log::get_log()<<"resource system failure\n";
+                nya_log::log()<<"resource system failure\n";
 
             if(ref.m_res && m_base)
                 m_base->release_resource(*ref.m_res);
@@ -249,7 +249,7 @@ private:
             if(ref.m_res_holder->map_it!=m_res_map.end())
             {
                 if(!m_base)
-                    nya_log::get_log()<<"warning: unreleased resource "<<ref.m_res_holder->map_it->first.c_str()<<"\n";
+                    nya_log::log()<<"warning: unreleased resource "<<ref.m_res_holder->map_it->first.c_str()<<"\n";
 
                 m_res_map.erase(ref.m_res_holder->map_it);
             }
@@ -261,7 +261,7 @@ private:
                 if(!m_base)
                     delete this;
                 else
-                    nya_log::get_log()<<"resource system failure\n";
+                    nya_log::log()<<"resource system failure\n";
             }
         }
 
@@ -424,7 +424,7 @@ public:
 private:
     class shared_resources_creator *m_creator;
 
-    //non copiable
+    //non copyable
 private:
     shared_resources(const shared_resources &);
     void operator = (const shared_resources &);

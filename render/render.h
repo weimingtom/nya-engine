@@ -11,8 +11,8 @@ struct ID3D11DeviceContext;
 namespace nya_render
 {
 
-void set_log(nya_log::log *l);
-nya_log::log &get_log();
+void set_log(nya_log::log_base *l);
+nya_log::log_base &log();
 void log_gl_errors(const char *place=0);
 
 struct rect
@@ -114,9 +114,20 @@ struct state
     bool blend;
     blend::mode blend_src;
     blend::mode blend_dst;
+    void set_blend(bool blend, blend::mode src = blend::one, blend::mode dst = blend::zero)
+    {
+        this->blend = blend;
+        blend_src = src;
+        blend_dst = dst;
+    }
 
     bool cull_face;
     cull_face::order cull_order;
+    void set_cull_face(bool cull_face, cull_face::order order = cull_face::ccw)
+    {
+        this->cull_face = cull_face;
+        cull_order = order;
+    }
 
     bool depth_test;
     depth_test::comparsion depth_comparsion;

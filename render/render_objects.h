@@ -16,9 +16,12 @@ public:
 
     void remove(int idx)
     {
-        m_objects[idx].free=true;
-        m_objects[idx].data.release();
-        m_free.push_back(idx);
+        if (!m_objects[idx].free)
+        {
+            m_objects[idx].free=true;
+            m_objects[idx].data.release();
+            m_free.push_back(idx);
+        }
     }
 
     int add()

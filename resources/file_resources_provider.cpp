@@ -246,7 +246,7 @@ resource_data *file_resource_info::access()
     file_resource *file = file_resources.allocate();
     if(!file->open((path+name).c_str()))
     {
-        get_log()<<"unable to access file "<<name.c_str()
+        log()<<"unable to access file "<<name.c_str()
                     <<" at path "<<path.c_str()<<"\n";
         file_resources.free(file);
         return 0;
@@ -259,7 +259,7 @@ resource_data *file_resources_provider::access(const char *resource_name)
 {
     if(!resource_name)
     {
-        get_log()<<"unable to access file: invalid name\n";
+        log()<<"unable to access file: invalid name\n";
         return 0;
     }
 
@@ -274,7 +274,7 @@ resource_data *file_resources_provider::access(const char *resource_name)
 
     if(!file->open(file_name.c_str()))
     {
-        get_log()<<"unable to access file: "<<file_name.c_str()+m_path.size()
+        log()<<"unable to access file: "<<file_name.c_str()+m_path.size()
                         <<" at path "<<m_path.c_str()<<"\n";
         file_resources.free(file);
         return 0;
@@ -327,13 +327,13 @@ bool file_resources_provider::set_folder(const char*name,bool recursive)
     struct stat sb;
     if(stat(m_path.c_str(),&sb)==-1)
     {
-        get_log()<<"unable to set folder: invalid path "<<name<<"\n";
+        log()<<"unable to set folder: invalid path "<<name<<"\n";
         m_path.erase();
         return false;
     }
 
     if(!S_ISDIR(sb.st_mode))
-        get_log()<<"warning: specified path is not a directory "<<name<<"\n";
+        log()<<"warning: specified path is not a directory "<<name<<"\n";
 
     m_path.push_back('/');
 
@@ -382,7 +382,7 @@ void file_resources_provider::enumerate_folder(const char*folder_name,file_resou
     if(!dirp)
 #endif
     {
-        nya_log::get_log()<<"unable to enumerate folder "<<(m_path+folder_name_str).c_str()<<"\n";
+        nya_log::log()<<"unable to enumerate folder "<<(m_path+folder_name_str).c_str()<<"\n";
         return;
     }
 
@@ -405,7 +405,7 @@ void file_resources_provider::enumerate_folder(const char*folder_name,file_resou
         struct stat stat_buf;
         if(stat(full_path_str.c_str(),&stat_buf)<0)
         {
-            nya_log::get_log()<<"unable to read "<<full_path_str.c_str()<<"\n";
+            nya_log::log()<<"unable to read "<<full_path_str.c_str()<<"\n";
             continue;
         }
 
@@ -456,26 +456,26 @@ bool file_resource::read_all(void*data)
 {
     if(!data)
     {
-        get_log()<<"unable to read file data: invalid data pointer\n";
+        log()<<"unable to read file data: invalid data pointer\n";
         return false;
     }
 
     FILE *file=m_file.access();
     if(!file)
     {
-        get_log()<<"unable to read file data: no such file\n";
+        log()<<"unable to read file data: no such file\n";
         return false;
     }
 
     if(fseek(file,0,SEEK_SET)!=0)
     {
-        get_log()<<"unable to read file data: seek_set failed\n";
+        log()<<"unable to read file data: seek_set failed\n";
         return false;
     }
 
     if(fread(data,1,m_size,file)!=m_size)
     {
-        get_log()<<"unable to read file data: unexpected size of readen data\n";
+        log()<<"unable to read file data: unexpected size of readen data\n";
         return false;
     }
 
@@ -486,32 +486,32 @@ bool file_resource::read_chunk(void *data,size_t size,size_t offset)
 {
     if(!data)
     {
-        get_log()<<"unable to read file data chunk: invalid data pointer\n";
+        log()<<"unable to read file data chunk: invalid data pointer\n";
         return false;
     }
 
     FILE *file=m_file.access();
     if(!file)
     {
-        get_log()<<"unable to read file data: no such file\n";
+        log()<<"unable to read file data: no such file\n";
         return false;
     }
 
     if(offset+size>m_size||!size)
     {
-        get_log()<<"unable to read file data chunk: invalid size\n";
+        log()<<"unable to read file data chunk: invalid size\n";
         return false;
     }
 
     if(fseek(file,(long)offset,SEEK_SET)!=0)
     {
-        get_log()<<"unable to read file data chunk: seek_set failed\n";
+        log()<<"unable to read file data chunk: seek_set failed\n";
         return false;
     }
 
     if(fread(data,1,size,file)!=size)
     {
-        get_log()<<"unable to read file data chunk: unexpected size of readen data\n";
+        log()<<"unable to read file data chunk: unexpected size of readen data\n";
         return false;
     }
 

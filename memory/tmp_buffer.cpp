@@ -22,9 +22,9 @@ private:
     {
         if(size>m_data.size())
         {
-            get_log()<<"tmp buf resized from "<<m_data.size()<<" to "<<size<<", ";
+            log()<<"tmp buf resized from "<<m_data.size()<<" to "<<size<<", ";
             m_data.resize(size);
-            get_log()<<get_total_size()<<" in "<<m_buffers.size()<<" buffers total)\n";
+            log()<<get_total_size()<<" in "<<m_buffers.size()<<" buffers total)\n";
         }
 
         m_size = size;
@@ -94,12 +94,7 @@ public:
             if(buffer.is_used())
                 continue;
 
-            if(min_suit_buf)
-            {
-                if(buffer.get_actual_size()>=size && buffer.get_actual_size()< min_suit_buf->get_actual_size())
-                    min_suit_buf=&buffer;
-            }
-            else
+            if(buffer.get_actual_size()>=size && (!min_suit_buf  || buffer.get_actual_size()< min_suit_buf->get_actual_size()))
                 min_suit_buf=&buffer;
 
             if(max_buf)
@@ -126,7 +121,7 @@ public:
         m_buffers.push_back(tmp_buffer());
         m_buffers.back().allocate(size);
 
-        get_log()<<"new tmp buf allocated ("<<m_buffers.size()<<" total)\n";
+        log()<<"new tmp buf allocated ("<<m_buffers.size()<<" total)\n";
 
         return &m_buffers.back();
     }

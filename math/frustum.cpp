@@ -65,7 +65,7 @@ frustum::frustum(const mat4 &m)
 {
     for(int i=0;i<3;++i)
     {
-        const int idx=i+i;
+        const int idx=2*i;
         plane &p=m_planes[idx];
         p.n.x=m[0][3]-m[0][i];
         p.n.y=m[1][3]-m[1][i];

@@ -366,7 +366,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 {
     if ([self isViewLoaded] && self.view.window)
         [self stopAnimation];
-}
+    }
 
 - (void)dealloc
 {
@@ -390,11 +390,11 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
     [super didReceiveMemoryWarning];
     // Release any cached data, images, etc. that aren't in use.
 
-    nya_log::get_log()<<"app recieved memory warning, ";
+    nya_log::log()<<"app recieved memory warning, ";
 
     size_t tmp_buffers_size=nya_memory::tmp_buffers::get_total_size();
     nya_memory::tmp_buffers::force_free();
-    nya_log::get_log()<<"forced to free "<<tmp_buffers_size-
+    nya_log::log()<<"forced to free "<<tmp_buffers_size-
                     nya_memory::tmp_buffers::get_total_size()<<" bytes\n";
 }
 

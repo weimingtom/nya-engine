@@ -10,7 +10,7 @@ void applied_animation::apply_anim(const tmb_model &model,const tsb_anim &anim)
     m_frames_count=anim.get_frames_count();
     if(!m_frames_count)
     {
-        nya_log::get_log()<<"Unable to set empty animation\n";
+        nya_log::log()<<"Unable to set empty animation\n";
         clear();
         return;
     }
@@ -24,7 +24,7 @@ void applied_animation::apply_anim(const tmb_model &model,const tsb_anim &anim)
         bones_count=anim.get_bones_count();
 
     if(bones_count<m_bones_count)
-        nya_log::get_log()<<"bones_count<m_bones_count";
+        nya_log::log()<<"bones_count<m_bones_count";
 
     for(unsigned int i=0;i<m_frames_count;++i)
     {

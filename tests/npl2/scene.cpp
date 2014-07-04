@@ -107,7 +107,7 @@ void scene::init()
     {
         if(info->check_extension(".txt"))
         {
-            //nya_log::get_log()<<"script: "<<info->get_name()<<"\n";
+            //nya_log::log()<<"script: "<<info->get_name()<<"\n";
             nya_resources::resource_data *data=info->access();
             if(data)
             {
@@ -127,7 +127,7 @@ void scene::init()
                         break;
 
                     const std::string anim_name=script_str.substr(pos+5,pos2-(pos+5));
-                    //nya_log::get_log()<<"anim: "<<anim_name.c_str()<<"\n";
+                    //nya_log::log()<<"anim: "<<anim_name.c_str()<<"\n";
 
                     char num = script_str[pos+3];
                     if(num=='0')
@@ -137,7 +137,7 @@ void scene::init()
                             m_anim_list.push_back(anim_name.c_str());
                             anim_map[anim_name]=true;
 
-                            //nya_log::get_log()<<"anim0: "<<anim_name.c_str()<<"\n";
+                            //nya_log::log()<<"anim0: "<<anim_name.c_str()<<"\n";
 
                             size_t loc_pos=script_str.rfind("%mp0,",pos);
                             if(loc_pos!=std::string::npos)
@@ -147,7 +147,7 @@ void scene::init()
                                 {
                                     std::string pos=script_str.substr(loc_pos+5,loc_pos2-(loc_pos+5));
                                     m_anim_list.back().loc_idx[0]=atoi(&pos[pos.length()-2]);
-                                    //nya_log::get_log()<<"\tpos0: "<<pos.c_str()<<" "<<m_anim_list.back().loc_idx<<"\n";
+                                    //nya_log::log()<<"\tpos0: "<<pos.c_str()<<" "<<m_anim_list.back().loc_idx<<"\n";
                                 }
                             }
 
@@ -179,7 +179,7 @@ void scene::init()
                             size_t loc_pos2=script_str.find(";",loc_pos);
                             std::string pos=script_str.substr(loc_pos+5,loc_pos2-(loc_pos+5));
                             m_anim_list.back().loc_idx[num-'1'+1]=atoi(&pos[pos.length()-2]);
-                            //nya_log::get_log()<<"\tpos: "<<pos.c_str()<<" "<<m_anim_list.back().loc_idx[num-'1'+1]<<"\n";
+                            //nya_log::log()<<"\tpos: "<<pos.c_str()<<" "<<m_anim_list.back().loc_idx[num-'1'+1]<<"\n";
                         }
                     }
 
@@ -413,7 +413,7 @@ void scene::set_bkg(const char *name)
         if(!name || strcmp(name,"nil")==0)
             continue;
 
-        nya_log::get_log()<<"scenery anim: "<<name<<"\n";
+        nya_log::log()<<"scenery anim: "<<name<<"\n";
 
         scenery_res = nya_resources::get_resources_provider().access(name);
         if(scenery_res)
@@ -734,12 +734,12 @@ void scene::set_anim(unsigned int num)
 
     m_curr_anim=m_anim_list.begin()+num;
 
-    nya_log::get_log()<<"\nset_anim\n";
+    nya_log::log()<<"\nset_anim\n";
 
     for(int i=0;i<10;++i)
     {
         if(!m_curr_anim->name[i].empty())
-            nya_log::get_log()<<m_curr_anim->name[i].c_str()<<"\n";
+            nya_log::log()<<m_curr_anim->name[i].c_str()<<"\n";
     }
 
     apply_anim();

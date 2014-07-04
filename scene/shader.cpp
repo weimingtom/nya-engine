@@ -3,6 +3,7 @@
 #include "shader.h"
 #include "scene.h"
 #include "camera.h"
+#include "memory/invalid_object.h"
 #include "transform.h"
 #include "render/render.h"
 #include <string.h>
@@ -73,7 +74,7 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
                             nya_resources::resource_data *file_data=nya_resources::get_resources_provider().access(path.c_str());
                             if(!file_data)
                             {
-                                get_log()<<"unable to load shader include resource: unable to access resource "<<path.c_str()<<"\n";
+                                log()<<"unable to load shader include resource: unable to access resource "<<path.c_str()<<"\n";
                                 return false;
                             }
 
@@ -84,7 +85,7 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
 
                             if(!load_nya_shader_internal(res,desc,include_data,path.c_str(),true))
                             {
-                                get_log()<<"unable to load shader include: unknown format in "<<path.c_str()<<"\n";
+                                log()<<"unable to load shader include: unknown format in "<<path.c_str()<<"\n";
                                 include_data.free();
                                 return false;
                             }
@@ -270,7 +271,7 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
                 break;
 
             default:
-                get_log()<<"scene shader load warning: unsupported shader tag in "<<name<<"\n";
+                log()<<"scene shader load warning: unsupported shader tag in "<<name<<"\n";
             break;
         }
     }
@@ -283,18 +284,18 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
 
     if(res.vertex.empty())
     {
-        get_log()<<"scene shader load error: empty vertex shader in "<<name<<"\n";
+        log()<<"scene shader load error: empty vertex shader in "<<name<<"\n";
         return false;
     }
 
     if(res.pixel.empty())
     {
-        get_log()<<"scene shader load error: empty pixel shader in "<<name<<"\n";
+        log()<<"scene shader load error: empty pixel shader in "<<name<<"\n";
         return false;
     }
 
-    //get_log()<<"vertex <"<<res.vertex.c_str()<<">\n";
-    //get_log()<<"pixel <"<<res.pixel.c_str()<<">\n";
+    //log()<<"vertex <"<<res.vertex.c_str()<<">\n";
+    //log()<<"pixel <"<<res.pixel.c_str()<<">\n";
 
     for(shared_shader::samplers_map::iterator it=res.samplers.begin();
         it!=res.samplers.end();++it)
@@ -458,6 +459,18 @@ int shader_internal::get_texture_slot(const char *semantics) const
     return it->second;
 }
 
+const char *shader_internal::get_texture_semantics(int slot) const
+{
+    for(shared_shader::samplers_map::const_iterator it=m_shared->samplers.begin();
+        it!=m_shared->samplers.end();++it)
+    {
+        if(it->second==slot)
+            return it->first.c_str();
+    }
+
+    return 0;
+}
+
 int shader_internal::get_texture_slots_count() const
 {
     if(!m_shared.is_valid())
@@ -470,8 +483,7 @@ const shared_shader::uniform &shader_internal::get_uniform(int idx) const
 {
     if(!m_shared.is_valid() || idx<0 || idx >=(int)m_shared->uniforms.size())
     {
-        static shared_shader::uniform invalid;
-        return invalid;
+        return nya_memory::get_invalid_object<shared_shader::uniform>();
     }
 
     return m_shared->uniforms[idx];

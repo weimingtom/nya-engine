@@ -11,7 +11,7 @@ void character::set_attrib(const char *key,const char *value,int num)
 {
     if(!key || num>=part::max_models_per_part)
     {
-        nya_log::get_log()<<"Unable to set character attribute: invalid input params\n";
+        nya_log::log()<<"Unable to set character attribute: invalid input params\n";
         return;
     }
 
@@ -22,7 +22,7 @@ void character::set_attrib(const char *key,const char *value,int num)
         attribute *a=get_attribute_manager().get(key,value);
         if(!a)
         {
-            nya_log::get_log()<<"Invalid attribute "<<value<<" of type "<<key<<"\n";
+            nya_log::log()<<"Invalid attribute "<<value<<" of type "<<key<<"\n";
             return;
         }
 
@@ -46,7 +46,7 @@ void character::set_attrib(const char *key,const char *value,int num)
     part_id id=get_part_id(key);
     if(id==invalid_part)
     {
-        nya_log::get_log()<<"Unable to set character attribute: unknown key\n";
+        nya_log::log()<<"Unable to set character attribute: unknown key\n";
         return;
     }
 
@@ -97,7 +97,7 @@ void character::set_attrib(const char *key,const char *value,int num)
         a=get_attribute_manager().get(key,value);
         if(!a)
         {
-            //nya_log::get_log()<<"Invalid attribute "<<value<<" of type "<<key<<"\n";
+            //nya_log::log()<<"Invalid attribute "<<value<<" of type "<<key<<"\n";
             value="nil";
         }
         //else
@@ -123,7 +123,7 @@ void character::set_attrib(const char *key,const char *value,int num)
         int max_models=part::max_models_per_part;
         for(int i=0;i<max_models;++i)
         {
-            //nya_log::get_log()<<p.subparts[i].value.c_str()<<"->"<<value<<"\n";
+            //nya_log::log()<<p.subparts[i].value.c_str()<<"->"<<value<<"\n";
 
             if(p.subparts[i].value==value)
                 continue;
@@ -145,12 +145,12 @@ void character::set_attrib(const char *key,const char *value,int num)
             if(id==under && strstr(model_name,"HC."))
                 m_under_count=1;
  
-            //nya_log::get_log()<<"model "<<i<<" "<<model_name<<"\n";
+            //nya_log::log()<<"model "<<i<<" "<<model_name<<"\n";
 
             model_ref ref=get_shared_models().access(model_name);
             if(!ref.is_valid())
             {
-                nya_log::get_log()<<"Unable to set character attribute::Invalid model ref\n";
+                nya_log::log()<<"Unable to set character attribute::Invalid model ref\n";
                 p.subparts[i].value.assign("nil");
                 continue;
             }
@@ -160,7 +160,7 @@ void character::set_attrib(const char *key,const char *value,int num)
     }
     else if(p.subparts[num].value!=value)
     {
-        //nya_log::get_log()<<p.subparts[num].value.c_str()<<"=>"<<value<<"\n";
+        //nya_log::log()<<p.subparts[num].value.c_str()<<"=>"<<value<<"\n";
 
         char key[7]="FILE_";
         key[5]=num+'0';
@@ -180,7 +180,7 @@ void character::set_attrib(const char *key,const char *value,int num)
 
         ref=get_shared_models().access(model_name);
         if(!ref.is_valid())
-            nya_log::get_log()<<"Unable to set character attribute::Invalid model ref\n";
+            nya_log::log()<<"Unable to set character attribute::Invalid model ref\n";
     }
 
     if(id==body && p.subparts[0].model.is_valid())
@@ -265,12 +265,12 @@ void character::set_anim(const char *anim_name)
 
     m_anim_name.assign(anim_name);
 
-    //nya_log::get_log()<<"Set anim: "<<anim_name<<"\n";
+    //nya_log::log()<<"Set anim: "<<anim_name<<"\n";
 
     model_ref m=m_parts[body].subparts[0].model;
     if(!m.is_valid())
     {
-        nya_log::get_log()<<"Unable to set character anim: invalid base part model ref\n";
+        nya_log::log()<<"Unable to set character anim: invalid base part model ref\n";
         return;
     }
 
@@ -280,7 +280,7 @@ void character::set_anim(const char *anim_name)
     anim_ref a = get_shared_anims().access(name.c_str());
     if(!a.is_valid())
     {
-        nya_log::get_log()<<"Unable to set character anim: invalid animation\n";
+        nya_log::log()<<"Unable to set character anim: invalid animation\n";
         return;
     }
 
@@ -300,7 +300,7 @@ void character::set_part_opacity(const char *key,float value,int num)
     part_id id=get_part_id(key);
     if(id==invalid_part)
     {
-        nya_log::get_log()<<"Unable to set character attribute: unknown key\n";
+        nya_log::log()<<"Unable to set character attribute: unknown key\n";
         return;
     }
 
@@ -328,7 +328,7 @@ float character::get_part_opacity(const char *key,int num)
     part_id id=get_part_id(key);
     if(id==invalid_part)
     {
-        nya_log::get_log()<<"Unable to set character attribute: unknown key\n";
+        nya_log::log()<<"Unable to set character attribute: unknown key\n";
         return -1.0f;
     }
 

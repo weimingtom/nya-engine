@@ -13,7 +13,7 @@ namespace nya_render
 
 namespace
 {
-    nya_log::log *render_log=0;
+    nya_log::log_base *render_log=0;
 
     nya_render::state current_state;
     nya_render::state applied_state;
@@ -26,17 +26,17 @@ namespace
 #endif
 }
 
-void set_log(nya_log::log *l)
+void set_log(nya_log::log_base *l)
 {
     render_log = l;
 }
 
-nya_log::log &get_log()
+nya_log::log_base &log()
 {
     static const char *render_log_tag="render";
     if(!render_log)
     {
-        return nya_log::get_log(render_log_tag);
+        return nya_log::log(render_log_tag);
     }
 
     render_log->set_tag(render_log_tag);
@@ -49,26 +49,26 @@ void log_gl_errors(const char *place)
 #else
     for(int i=glGetError();i!=GL_NO_ERROR;i=glGetError())
     {
-        get_log()<<"gl error: ";
+        log()<<"gl error: ";
         switch(i)
         {
-            case GL_INVALID_ENUM: get_log()<<"invalid enum"; break;
-            case GL_INVALID_VALUE: get_log()<<"invalid value"; break;
-            case GL_INVALID_OPERATION: get_log()<<"invalid operation"; break;
+            case GL_INVALID_ENUM: log()<<"invalid enum"; break;
+            case GL_INVALID_VALUE: log()<<"invalid value"; break;
+            case GL_INVALID_OPERATION: log()<<"invalid operation"; break;
 #ifndef OPENGL_ES
-            case GL_STACK_OVERFLOW: get_log()<<"stack overflow"; break;
-            case GL_STACK_UNDERFLOW: get_log()<<"stack underflow"; break;
+            case GL_STACK_OVERFLOW: log()<<"stack overflow"; break;
+            case GL_STACK_UNDERFLOW: log()<<"stack underflow"; break;
 #endif
-            case GL_OUT_OF_MEMORY: get_log()<<"out of memory"; break;
+            case GL_OUT_OF_MEMORY: log()<<"out of memory"; break;
 
-            default: get_log()<<"unknown"; break;
+            default: log()<<"unknown"; break;
         }
 
-        get_log()<<" ("<<i<<")";
+        log()<<" ("<<i<<")";
         if(place)
-            get_log()<<" at "<<place<<"\n";
+            log()<<" at "<<place<<"\n";
         else
-            get_log()<<"\n";
+            log()<<"\n";
     }
 #endif
 }

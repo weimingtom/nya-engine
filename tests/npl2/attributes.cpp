@@ -9,14 +9,14 @@ bool attribute_parser::load(nya_resources::resource_data *data)
 
     if(!data)
     {
-        nya_log::get_log()<<"Unable to load attribute: invalid data\n";
+        nya_log::log()<<"Unable to load attribute: invalid data\n";
         return false;
     }
 
     size_t data_size=data->get_size();
     if(!data_size)
     {
-        nya_log::get_log()<<"Unable to load attribute: invalid data size\n";
+        nya_log::log()<<"Unable to load attribute: invalid data size\n";
         return false;
     }
 
@@ -56,7 +56,7 @@ bool attribute_parser::load(nya_resources::resource_data *data)
             std::pair<attrib_iterator,bool> ir=
             m_attributes.insert(std::make_pair(key,value));
             if(!ir.second)
-                nya_log::get_log()<<"Attribute parser warning: dublicate attribute"
+                nya_log::log()<<"Attribute parser warning: dublicate attribute"
                                   <<key.c_str()<<"\n";
 
             if(key=="TYPE" && value[0]=='A')
@@ -92,7 +92,7 @@ bool attribute_parser::load(nya_resources::resource_data *data)
         std::pair<attrib_iterator,bool> ir=
         m_attributes.insert(std::make_pair(key,value));
         if(!ir.second)
-            nya_log::get_log()<<"Attribute parser warning: dublicate attribute"
+            nya_log::log()<<"Attribute parser warning: dublicate attribute"
                               <<key.c_str()<<"\n";
     }
 
@@ -124,7 +124,7 @@ void attribute_parser::debug_print()
                 c='?';
         }
 
-        nya_log::get_log()<<"<"<<it->first.c_str()<<"> = <"<<safe_prnt.c_str()<<">\n";
+        nya_log::log()<<"<"<<it->first.c_str()<<"> = <"<<safe_prnt.c_str()<<">\n";
     }
 }
 
@@ -132,14 +132,14 @@ attribute *attribute_manager::get(const char *type,const char *name)
 {
     if(!type||!name)
     {
-        nya_log::get_log()<<"Unable to get attribute: invalid name or type\n";
+        nya_log::log()<<"Unable to get attribute: invalid name or type\n";
         return 0;
     }
 
     attribs_iterator it=m_attributes.find(type);
     if(it==m_attributes.end())
     {
-        nya_log::get_log()<<"Unable to get attribute "<<name<<": type not found\n";
+        nya_log::log()<<"Unable to get attribute "<<name<<": type not found\n";
         return 0;
     }
 
@@ -158,7 +158,7 @@ void attribute_manager::load(nya_resources::resource_data *data)
 {
     if(!data)
     {
-        nya_log::get_log()<<"Unable to load attribute: invalid data\n";
+        nya_log::log()<<"Unable to load attribute: invalid data\n";
         return;
     }
 
@@ -166,7 +166,7 @@ void attribute_manager::load(nya_resources::resource_data *data)
     const char *type=p.get_value("TYPE");
     if(!type)
     {
-        nya_log::get_log()<<"Unable to load attribute: invalid type\n";
+        nya_log::log()<<"Unable to load attribute: invalid type\n";
         return;
     }
 
@@ -177,7 +177,7 @@ void attribute_manager::load(nya_resources::resource_data *data)
     const char *name=p.get_value("NAME");
     if(!name)
     {
-        nya_log::get_log()<<"Unable to load attribute ("<<type<<"): invalid name\n";
+        nya_log::log()<<"Unable to load attribute ("<<type<<"): invalid name\n";
         return;
     }
 
@@ -190,7 +190,7 @@ void attribute_manager::load(nya_resources::resource_data *data)
     it.first->second.parsers_map.insert(std::make_pair(name,p));
     if(!it2.second)
     {
-        nya_log::get_log()<<"Doublicate attribute "<<name<<" of type "<<type<<"\n";
+        nya_log::log()<<"Doublicate attribute "<<name<<" of type "<<type<<"\n";
     }
 }
 
@@ -215,14 +215,14 @@ void attribute_manager::iterate_elements(const char *attrib_group)
 {
     if(!attrib_group)
     {
-        nya_log::get_log()<<"Unable to iterate attribute elements: invalid attribute group\n";
+        nya_log::log()<<"Unable to iterate attribute elements: invalid attribute group\n";
         return;
     }
 
     attribs_iterator it=m_attributes.find(attrib_group);
     if(it==m_attributes.end())
     {
-        nya_log::get_log()<<"Unable to iterate attribute elements "<<attrib_group<<": type not found\n";
+        nya_log::log()<<"Unable to iterate attribute elements "<<attrib_group<<": type not found\n";
         return;
     }
 

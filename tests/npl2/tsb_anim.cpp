@@ -8,7 +8,7 @@ bool tsb_anim::load(nya_resources::resource_data *anim_res)
 {
     if(!anim_res)
     {
-        nya_resources::get_log()<<"Unable to load animation: invalid data\n";
+        nya_resources::log()<<"Unable to load animation: invalid data\n";
         return false;
     }
 
@@ -36,7 +36,7 @@ bool tsb_anim::load(nya_resources::resource_data *anim_res)
     tsb_header *header=(tsb_header*)anim_data.get_data();
     if(strncmp(header->magic,"TSB0",4)!=0)
     {
-        nya_resources::get_log()<<"Invalid TSB0 magic in animation file\n";
+        nya_resources::log()<<"Invalid TSB0 magic in animation file\n";
         //return false;
     }
 
@@ -48,7 +48,7 @@ bool tsb_anim::load(nya_resources::resource_data *anim_res)
     m_data.resize(bones_size);
     if(!anim_data.copy_from(&m_data[0],bones_size*sizeof(nya_math::mat4),sizeof(tsb_header)))
     {
-        nya_resources::get_log()<<"Unable to load tsb animation file\n";
+        nya_resources::log()<<"Unable to load tsb animation file\n";
         return false;
     }
 
@@ -59,7 +59,7 @@ bool shared_anims_manager::fill_resource(const char *name,tsb_anim &res)
 {
     if(!name)
     {
-        nya_resources::get_log()<<"Unable to access model: invalid name\n";
+        nya_resources::log()<<"Unable to access model: invalid name\n";
         return false;
     }
 

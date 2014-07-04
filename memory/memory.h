@@ -7,7 +7,7 @@
 namespace nya_memory
 {
 
-void set_log(nya_log::log *l);
-nya_log::log &get_log();
+void set_log(nya_log::log_base *l);
+nya_log::log_base &log();
 
 }
