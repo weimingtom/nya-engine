@@ -2,7 +2,7 @@
 
 #include "material.h"
 #include "memory/invalid_object.h"
-#include "string_convert.h"
+#include "formats/string_convert.h"
 
 #include <list>
 
