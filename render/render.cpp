@@ -300,7 +300,6 @@ public:
             get_device()->CreateRasterizerState(&desc,&m_cull_enabled);
         }
 
-
         if(!m_cull_disabled)
         {
             D3D11_RASTERIZER_DESC desc;
