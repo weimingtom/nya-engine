@@ -41,7 +41,7 @@ private:
   #define nya_line_descriptor (nya_log::get_line_descriptor(__FILE__, __LINE__))
   #define nya_base_warning() nya_log::warning()<<"unexpected condition at "<<nya_line_descriptor<<": "
 #else
-  std::string get_line_descriptor(const char *filename, int line_number) {return "";}
+  inline std::string get_line_descriptor(const char *filename, int line_number) {return "";}
   #define nya_debug_line_descriptor ""
   #define nya_base_warning() nya_log::warning()
 #endif
