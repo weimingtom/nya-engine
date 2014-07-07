@@ -159,6 +159,9 @@
     <ClCompile Include="..\..\log\warning.cpp">
       <Filter>log</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\formats\nms.cpp">
+      <Filter>formats</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\log\log.h">
@@ -322,6 +325,9 @@
     </ClInclude>
     <ClInclude Include="..\..\log\warning.h">
       <Filter>log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\formats\nms.h">
+      <Filter>formats</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
