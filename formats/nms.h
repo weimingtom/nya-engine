@@ -5,6 +5,8 @@
 #include <vector>
 #include <string>
 #include <stddef.h>
+#include "math/vector.h"
+#include "math/quaternion.h"
 
 namespace nya_formats
 {
@@ -60,7 +62,7 @@ struct nms_material_chunk
     struct vector_param
     {
         std::string name;
-        float value[4];
+        nya_math::vec4 value;
     };
 
     struct int_param
@@ -86,6 +88,16 @@ public:
 
 struct nms_skeleton_chunk
 {
+    struct bone
+    {
+        std::string name;
+        nya_math::quat rot;
+        nya_math::vec3 pos;
+        int parent;
+    };
+
+    std::vector<bone> bones;
+
 public:
     bool read(const void *data,size_t size,int version);
 };

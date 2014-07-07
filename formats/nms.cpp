@@ -89,8 +89,10 @@ bool nms_material_chunk::read(const void *data,size_t size,int version)
         for(size_t j=0;j<m.vectors.size();++j)
         {
             m.vectors[j].name=read_string(reader);
-            for(int k=0;k<4;++k)
-                m.vectors[j].value[k]=reader.read<float>();
+            m.vectors[j].value.x=reader.read<float>();
+            m.vectors[j].value.y=reader.read<float>();
+            m.vectors[j].value.z=reader.read<float>();
+            m.vectors[j].value.w=reader.read<float>();
         }
 
         m.ints.resize(reader.read<uint16_t>());
@@ -99,6 +101,28 @@ bool nms_material_chunk::read(const void *data,size_t size,int version)
             m.ints[j].name=read_string(reader);
             m.ints[j].value=reader.read<int32_t>();
         }
+    }
+
+    return true;
+}
+
+bool nms_skeleton_chunk::read(const void *data,size_t size,int version)
+{
+    *this=nms_skeleton_chunk();
+
+    if(!data || !size)
+        return false;
+
+    nya_memory::memory_reader reader(data,size);
+
+    bones.resize(reader.read<int32_t>());
+    for(size_t i=0;i<bones.size();++i)
+    {
+        bone &b=bones[i];
+        b.name=read_string(reader);
+        b.rot=reader.read<nya_math::quat>();
+        b.pos=reader.read<nya_math::vec3>();
+        b.parent=reader.read<int32_t>();
     }
 
     return true;
