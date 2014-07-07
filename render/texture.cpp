@@ -24,7 +24,7 @@ namespace
     texture::filter default_mip_filter=texture::filter_linear;
 
 #ifndef DIRECTX11
-	const unsigned int cube_faces[]={GL_TEXTURE_CUBE_MAP_POSITIVE_X,GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+    const unsigned int cube_faces[]={GL_TEXTURE_CUBE_MAP_POSITIVE_X,GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
                                      GL_TEXTURE_CUBE_MAP_POSITIVE_Y,GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
                                      GL_TEXTURE_CUBE_MAP_POSITIVE_Z,GL_TEXTURE_CUBE_MAP_NEGATIVE_Z};
   #ifndef NO_EXTENSIONS_INIT
@@ -212,7 +212,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     if(width==0 || height==0)
     {
         log()<<"Unable to build texture: invalid width or height\n";
-	    release();
+        release();
         return false;
     }
 
@@ -316,8 +316,8 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     D3D11_SAMPLER_DESC sdesc;
     memset(&sdesc,0,sizeof(sdesc));
     sdesc.Filter=D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	sdesc.AddressU=D3D11_TEXTURE_ADDRESS_WRAP;
-	sdesc.AddressV=D3D11_TEXTURE_ADDRESS_WRAP;
+    sdesc.AddressU=D3D11_TEXTURE_ADDRESS_WRAP;
+    sdesc.AddressV=D3D11_TEXTURE_ADDRESS_WRAP;
     sdesc.AddressW=D3D11_TEXTURE_ADDRESS_WRAP;
     sdesc.ComparisonFunc=D3D11_COMPARISON_NEVER;
     sdesc.MaxAnisotropy=0;
@@ -343,7 +343,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     if(width>gl_get_max_tex_size() || height>gl_get_max_tex_size())
     {
         log()<<"Unable to build texture: width or height is too high, maximum is "<<gl_get_max_tex_size()<<"\n";
-	    release();
+        release();
         return false;
     }
 
@@ -352,7 +352,11 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     {
         case color_rgb: source_format=gl_format=GL_RGB; break; //in es stored internally as rgba
         case color_rgba: source_format=gl_format=GL_RGBA; break;
+#ifdef __ANDROID__
+        case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA_EXT; break;
+#else
         case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; break;
+#endif
         case greyscale: source_format=gl_format=GL_LUMINANCE; break;
 #ifdef OPENGL_ES
         case depth16: source_format=gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_SHORT; break;
@@ -374,11 +378,11 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     if(!source_format || !gl_format || !source_bpp)
     {
         log()<<"Unable to build texture: unsuppored color format\n";
-	    release();
+        release();
         return false;
     }
 
-	//bool create_new=(!m_tex_id || m_width!=width || m_height!=height || m_type!=texture_2d || m_format!=format);
+    //bool create_new=(!m_tex_id || m_width!=width || m_height!=height || m_type!=texture_2d || m_format!=format);
 
     if(m_tex<0)
         m_tex=texture_obj::add();
@@ -395,8 +399,8 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 
     m_width=width;
     m_height=height;
-	texture_obj::get(m_tex).gl_type=GL_TEXTURE_2D;
-	m_format=format;
+    texture_obj::get(m_tex).gl_type=GL_TEXTURE_2D;
+    m_format=format;
 
 #ifdef OPENGL_ES
     if(m_format==depth24)
@@ -454,7 +458,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         data_pointer+=size;
     }
 
-	//	glTexSubImage2D(GL_TEXTURE_2D,0,0,0,width,height,gl_format,precision,data);
+    //	glTexSubImage2D(GL_TEXTURE_2D,0,0,0,width,height,gl_format,precision,data);
   #ifndef GL_GENERATE_MIPMAP
     if(has_mipmap && mip_count<0) glGenerateMipmap(GL_TEXTURE_2D);
   #endif
@@ -490,7 +494,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     if(width==0 || height==0)
     {
         log()<<"Unable to build cube texture: invalid width/height\n";
-	    release();
+        release();
         return false;
     }
 
@@ -587,9 +591,9 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 
     D3D11_SAMPLER_DESC sdesc;
     memset(&sdesc,0,sizeof(sdesc));
-	sdesc.Filter=D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	sdesc.AddressU=D3D11_TEXTURE_ADDRESS_WRAP;
-	sdesc.AddressV=D3D11_TEXTURE_ADDRESS_WRAP;
+    sdesc.Filter=D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    sdesc.AddressU=D3D11_TEXTURE_ADDRESS_WRAP;
+    sdesc.AddressV=D3D11_TEXTURE_ADDRESS_WRAP;
     sdesc.AddressW=D3D11_TEXTURE_ADDRESS_WRAP;
     sdesc.ComparisonFunc=D3D11_COMPARISON_NEVER;
     sdesc.MaxAnisotropy=0;
@@ -610,7 +614,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     if(width>gl_get_max_tex_size() || height>gl_get_max_tex_size())
     {
         log()<<"Unable to build cube texture: width or height is too high, maximum is "<<gl_get_max_tex_size()<<"\n";
-	    release();
+        release();
         return false;
     }
 
@@ -621,7 +625,11 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     {
         case color_rgb: source_format=GL_RGB; gl_format=GL_RGB; break;
         case color_rgba: source_format=GL_RGBA; gl_format=GL_RGBA; break;
+#ifdef __ANDROID__
+        case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA_EXT; break;
+#else
         case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; break;
+#endif
         case greyscale: source_format=GL_LUMINANCE; gl_format=GL_LUMINANCE; break;
 
 #ifndef OPENGL_ES
@@ -635,7 +643,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     if(!source_format || !gl_format)
     {
         log()<<"Unable to build cube texture: unsuppored color format\n";
-	    release();
+        release();
         return false;
     }
 
@@ -647,8 +655,8 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
         m_format=color_rgba;
 #endif
 
-	if(m_format!=format)
-		release();
+    if(m_format!=format)
+        release();
 
     if(m_tex<0)
         m_tex=texture_obj::add();
@@ -665,8 +673,8 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 
     m_width=width;
     m_height=height;
-	texture_obj::get(m_tex).gl_type=GL_TEXTURE_CUBE_MAP;
-	m_format=format;
+    texture_obj::get(m_tex).gl_type=GL_TEXTURE_CUBE_MAP;
+    m_format=format;
 
     if(active_layers[active_layer]>=0)
     {
@@ -691,7 +699,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     if(!source_bpp)
         return false;
 
-	for(int i=0;i<int(sizeof(cube_faces)/sizeof(cube_faces[0]));++i)
+    for(int i=0;i<int(sizeof(cube_faces)/sizeof(cube_faces[0]));++i)
     {
         if(is_dxt)
             glCompressedTexImage2D(cube_faces[i],0,gl_format,width,height,0,width*height*source_bpp/8,data[i]);
@@ -788,13 +796,13 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
         return false;
 
 #ifdef DIRECTX11
-	if(!get_context() || !get_device())
-		return false;
+    if(!get_context() || !get_device())
+        return false;
 
     if(m_format>=dxt1)
         return false;
 
-	ID3D11Texture2D* copy_tex=0;
+    ID3D11Texture2D* copy_tex=0;
 
     D3D11_TEXTURE2D_DESC description;
     tex.tex->GetDesc( &description );
@@ -804,19 +812,19 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
 
     HRESULT hr=get_device()->CreateTexture2D(&description,0,&copy_tex);
     if(FAILED(hr) || !copy_tex)
-		return false;
- 
-	get_context()->CopyResource(copy_tex,tex.tex);
+        return false;
+
+    get_context()->CopyResource(copy_tex,tex.tex);
     D3D11_MAPPED_SUBRESOURCE resource;
     hr = get_context()->Map(copy_tex,0,D3D11_MAP_READ,0,&resource );
-	if(FAILED(hr))
-		return false;
+    if(FAILED(hr))
+        return false;
 
-	data.allocate(size);
-	data.copy_to(resource.pData,size);
+    data.allocate(size);
+    data.copy_to(resource.pData,size);
 
-	get_context()->Unmap(copy_tex,0);
-	copy_tex->Release();
+    get_context()->Unmap(copy_tex,0);
+    copy_tex->Release();
 
     return true;
 #else
@@ -825,7 +833,7 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
         return false;
 
     data.allocate(size);
-    
+
     gl_select_multitex_layer(0);
     glBindTexture(tex.gl_type,tex.tex_id);
     active_layers[0]=-1;
@@ -847,7 +855,11 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
     {
         case color_rgb: glReadPixels(0,0,m_width,m_height,GL_RGB,GL_UNSIGNED_BYTE,data.get_data()); break;
         case color_rgba: glReadPixels(0,0,m_width,m_height,GL_RGBA,GL_UNSIGNED_BYTE,data.get_data()); break;
+#ifdef __ANDROID__
+        case color_bgra: glReadPixels(0,0,m_width,m_height,GL_BGRA_EXT,GL_UNSIGNED_BYTE,data.get_data()); break;
+#else
         case color_bgra: glReadPixels(0,0,m_width,m_height,GL_BGRA,GL_UNSIGNED_BYTE,data.get_data()); break;
+#endif
         case greyscale: glReadPixels(0,0,m_width,m_height,GL_LUMINANCE,GL_UNSIGNED_BYTE,data.get_data()); break;
 
         default:
