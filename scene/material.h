@@ -58,8 +58,8 @@ private:
     public:
         void set_count(int count) { m_params.resize(count); }
         int get_count() const { return (int)m_params.size(); }
-        void set(int idx,const param &p) { if(idx>=0 && idx<m_params.size()) m_params[idx]=p; }
-        void set(int idx,float f0,float f1,float f2,float f3) { if(idx>=0 && idx<m_params.size()) m_params[idx].set(f0,f1,f2,f3); }
+        void set(int idx,const param &p) { if(idx>=0 && idx<(int)m_params.size()) m_params[idx]=p; }
+        void set(int idx,float f0,float f1,float f2,float f3) { if(idx>=0 && idx<(int)m_params.size()) m_params[idx].set(f0,f1,f2,f3); }
 
     private:
         friend class material_internal;

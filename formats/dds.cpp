@@ -21,14 +21,17 @@ struct dds_pixel_format
 
 static void flip_raw(int width,int height,int channels,const void *from_data,void *to_data)
 {
-    const int line_size=width*channels;
-    const int top=line_size*(height-1);
+    if(!height)
+        return;
+
+    const size_t line_size=width*channels;
+    const size_t top=line_size*(height-1);
 
     typedef unsigned char uchar;
 
     uchar *to=(uchar*)to_data;
 
-    const int size=line_size*height;
+    const size_t size=line_size*height;
 
     const uchar *from=(const uchar*)from_data;
     for(size_t offset=0;offset<size;offset+=line_size)
@@ -78,6 +81,9 @@ static void flip_dxt5_block_full(unsigned char *data)
 static void flip_dxt(int width,int height,dds::pixel_format format,const void *from_data,void *to_data)
 {
     if(from_data==to_data) //ToDo ?
+        return;
+
+    if(!height)
         return;
 
     const unsigned int line_size=((width+3)/4)*(format==dds::dxt1?8:16);
@@ -131,7 +137,7 @@ static void flip_dxt(int width,int height,dds::pixel_format format,const void *f
 
 void dds::flip_vertical(const void *from_data,void *to_data)
 {
-    if(!from_data || !to_data)
+    if(!from_data || !to_data || !height)
         return;
 
     if(type==texture_cube) //ToDo
