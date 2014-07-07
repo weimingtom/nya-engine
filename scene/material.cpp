@@ -520,6 +520,12 @@ void material::set_param_array(int idx, const param_array_proxy & p)
     m_internal.m_params[idx].a=p;
 }
 
+int material::get_params_count() const
+{
+    m_internal.update_passes_maps();
+    return (int)m_internal.m_params.size();
+}
+
 const material::param_proxy &material::get_param(int idx) const
 {
     if(idx<0 || idx>=(int)internal().m_params.size())

@@ -163,7 +163,7 @@ public:
     const texture_proxy &get_texture(const char *semantics) const;
 
     const char *get_param_name(int idx) const;
-    int get_params_count() const {return (int)m_internal.m_params.size();}
+    int get_params_count() const;
     int get_param_idx(const char *name) const {return m_internal.get_param_idx(name);}
     void set_param(int idx,float f0,float f1,float f2,float f3);
     void set_param(int idx,const param &p);
