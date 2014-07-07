@@ -892,8 +892,33 @@ private:
 
 }
   #endif
-#elif ANDROID
-//ToDo
+#elif ANDROID //unimplemented
+
+class shared_app
+{
+public:
+    void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing,nya_system::app_responder &app)
+    {
+         //ToDo
+    }
+
+    void start_fullscreen(unsigned int w,unsigned int h,nya_system::app_responder &app)
+    {
+        start_windowed(0,0,w,h,0,app);
+    }
+
+    void finish(nya_system::app_responder &app) {}
+    void set_title(const char *title) {}
+    void update_splash(nya_system::app_responder &app) {}
+
+public:
+    static shared_app &get_app()
+    {
+        static shared_app app;
+        return app;
+    }
+};
+
 #else
 
 //  fullscreen:
