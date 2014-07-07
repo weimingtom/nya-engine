@@ -30,9 +30,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\log\html_log.cpp">
-      <Filter>log</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\log\log.cpp">
       <Filter>log</Filter>
     </ClCompile>
@@ -153,11 +150,17 @@
     <ClCompile Include="..\..\formats\dds.cpp">
       <Filter>formats</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\formats\string_convert.cpp">
+      <Filter>formats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\formats\text_parser.cpp">
+      <Filter>formats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\log\warning.cpp">
+      <Filter>log</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\log\html_log.h">
-      <Filter>log</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\log\log.h">
       <Filter>log</Filter>
     </ClInclude>
@@ -310,6 +313,15 @@
     </ClInclude>
     <ClInclude Include="..\..\memory\shared_ptr.h">
       <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\formats\string_convert.h">
+      <Filter>formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\formats\text_parser.h">
+      <Filter>formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\log\warning.h">
+      <Filter>log</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

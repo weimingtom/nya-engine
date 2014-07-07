@@ -102,7 +102,7 @@ nya_math::vec4 text_parser::get_section_value_vector(int idx) const
 
 int text_parser::get_subsections_count(int section_idx) const
 {
-    if(section_idx<0 || section_idx>=m_sections.size())
+    if(section_idx<0 || section_idx>=(int)m_sections.size())
     {
         nya_base_warning();
         return -1;
@@ -148,8 +148,8 @@ const char *text_parser::get_subsection_type(int section_idx,int idx) const
 
 const char *text_parser::get_subsection_value(int section_idx,int idx) const
 {
-    if(section_idx<0 || section_idx>=m_sections.size() ||
-       idx<0 || idx>=m_sections[section_idx].subsections.size())
+    if(section_idx<0 || section_idx>=(int)m_sections.size() ||
+       idx<0 || idx>=(int)m_sections[section_idx].subsections.size())
     {
         nya_base_warning();
         return 0;
@@ -160,8 +160,8 @@ const char *text_parser::get_subsection_value(int section_idx,int idx) const
 
 bool text_parser::get_subsection_value_bool(int section_idx,int idx) const
 {
-    if(section_idx<0 || section_idx>=m_sections.size() ||
-       idx<0 || idx>=m_sections[section_idx].subsections.size())
+    if(section_idx<0 || section_idx>=(int)m_sections.size() ||
+       idx<0 || idx>=(int)m_sections[section_idx].subsections.size())
     {
         nya_base_warning();
         return 0;

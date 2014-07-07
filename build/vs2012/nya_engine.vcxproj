@@ -162,11 +162,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\formats\dds.cpp" />
+    <ClCompile Include="..\..\formats\string_convert.cpp" />
+    <ClCompile Include="..\..\formats\text_parser.cpp" />
     <ClCompile Include="..\..\formats\tga.cpp" />
-    <ClCompile Include="..\..\log\html_log.cpp" />
     <ClCompile Include="..\..\log\log.cpp" />
     <ClCompile Include="..\..\log\plain_file_log.cpp" />
     <ClCompile Include="..\..\log\stdout_log.cpp" />
+    <ClCompile Include="..\..\log\warning.cpp" />
     <ClCompile Include="..\..\math\bezier.cpp" />
     <ClCompile Include="..\..\math\constants.cpp" />
     <ClCompile Include="..\..\math\frustum.cpp" />
@@ -241,11 +243,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\formats\dds.h" />
+    <ClInclude Include="..\..\formats\string_convert.h" />
+    <ClInclude Include="..\..\formats\text_parser.h" />
     <ClInclude Include="..\..\formats\tga.h" />
-    <ClInclude Include="..\..\log\html_log.h" />
     <ClInclude Include="..\..\log\log.h" />
     <ClInclude Include="..\..\log\plain_file_log.h" />
     <ClInclude Include="..\..\log\stdout_log.h" />
+    <ClInclude Include="..\..\log\warning.h" />
     <ClInclude Include="..\..\math\bezier.h" />
     <ClInclude Include="..\..\math\constants.h" />
     <ClInclude Include="..\..\math\frustum.h" />
