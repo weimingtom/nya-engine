@@ -119,12 +119,12 @@ void material_internal::set(const char *pass_name) const
     const pass &p=m_passes[m_last_set_pass_idx];
 
     p.m_shader.internal().set();
-    for(int uniform_idx=0;uniform_idx<p.m_uniforms_idxs_map.size();++uniform_idx)
+    for(int uniform_idx=0;uniform_idx<(int)p.m_uniforms_idxs_map.size();++uniform_idx)
         m_params[p.m_uniforms_idxs_map[uniform_idx]].apply_to_shader(p.m_shader, uniform_idx);
 
     nya_render::set_state(p.m_render_state);
 
-    for(int slot_idx=0;slot_idx<p.m_textures_slots_map.size();++slot_idx)
+    for(int slot_idx=0;slot_idx<(int)p.m_textures_slots_map.size();++slot_idx)
     {
         int texture_idx = p.m_textures_slots_map[slot_idx];
         if(texture_idx >= 0)
@@ -156,10 +156,10 @@ void material_internal::unset() const
     if(!p.m_render_state.color_write)
         nya_render::color_write::enable();
 
-    for(int slot_idx=0;slot_idx<p.m_textures_slots_map.size();++slot_idx)
+    for(int slot_idx=0;slot_idx<(int)p.m_textures_slots_map.size();++slot_idx)
     {
         const int texture_idx=(int)p.m_textures_slots_map[slot_idx];
-        if (texture_idx>=0 && texture_idx<m_textures.size() && m_textures[texture_idx].proxy.is_valid())
+        if (texture_idx>=0 && texture_idx<(int)m_textures.size() && m_textures[texture_idx].proxy.is_valid())
             m_textures[texture_idx].proxy->internal().unset();
     }
 
@@ -172,7 +172,7 @@ int material_internal::get_param_idx(const char *name) const
         return -1;
 
     update_passes_maps();
-    for(int i=0;i<m_params.size();++i)
+    for(int i=0;i<(int)m_params.size();++i)
     {
         if(m_params[i].param_name==name)
             return i;
@@ -230,7 +230,7 @@ void material_internal::pass::update_maps(const material_internal &m) const
         const std::string &name=m_shader.internal().get_uniform(uniform_idx).name;
         // don't use m.get_param_idx(name.c_str()) as it calls rebuil_maps
         int param_idx=-1;
-        for(int i=0;i<m.m_params.size();++i)
+        for(int i=0;i<(int)m.m_params.size();++i)
         {
             if(m.m_params[i].param_name==name)
             {
@@ -329,7 +329,7 @@ void material_internal::update_passes_maps() const
     std::vector<bool> used_parameters(m_params.size());
     std::fill(used_parameters.begin(), used_parameters.end(), false);
     std::list<std::pair<std::string, nya_math::vec4> > parameters_to_add;
-    for (int pass_idx = 0; pass_idx < m_passes.size(); ++pass_idx)
+    for(int pass_idx=0;pass_idx<(int)m_passes.size();++pass_idx)
     {
         const nya_scene::shader &sh=m_passes[pass_idx].m_shader;
         for(int uniform_idx=0;uniform_idx<sh.internal().get_uniforms_count();++uniform_idx)
@@ -337,7 +337,7 @@ void material_internal::update_passes_maps() const
             const std::string name = sh.internal().get_uniform(uniform_idx).name;
             //don't use get_param_idx_for_name(name.c_str()) as it calls rebuild_passes_map
             int param_idx=-1;
-            for(int i=0;i<m_params.size();++i)
+            for(int i=0;i<(int)m_params.size();++i)
             {
                 if(m_params[i].param_name==name)
                 {

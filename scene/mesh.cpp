@@ -367,7 +367,7 @@ const material &mesh_internal::mat(int idx) const
 
 void mesh_internal::draw_group(int idx, const char *pass_name) const
 {
-    if (idx<0 || idx>=m_shared->groups.size())
+    if(idx<0 || idx>=(int)m_shared->groups.size())
         return;
 
     const shared_mesh::group &g=m_shared->groups[idx];
@@ -395,8 +395,8 @@ void mesh::draw(const char *pass_name) const
     if(!internal().m_shared.is_valid())
         return;
 
-    for(int group_idx=0;group_idx<internal().m_shared->groups.size();++group_idx)
-        draw_group(group_idx, pass_name);
+    for(int group_idx=0;group_idx<(int)internal().m_shared->groups.size();++group_idx)
+        draw_group(group_idx,pass_name);
 }
 
 void mesh::draw_group(int idx, const char *pass_name) const
@@ -417,7 +417,7 @@ void mesh::draw_group(int idx, const char *pass_name) const
     transform::set(internal().m_transform);
     shader_internal::set_skeleton(&internal().m_skeleton);
 
-    internal().draw_group(idx, pass_name);
+    internal().draw_group(idx,pass_name);
 
     shader_internal::set_skeleton(0);
 }
