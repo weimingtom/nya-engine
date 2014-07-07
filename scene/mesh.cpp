@@ -10,6 +10,7 @@
 #include "render/render.h"
 #include "scene.h"
 #include "shader.h"
+#include <stdint.h>
 
 namespace nya_scene
 {
