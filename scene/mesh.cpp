@@ -6,6 +6,7 @@
 #include "memory/memory_reader.h"
 #include "memory/tmp_buffer.h"
 #include "formats/string_convert.h"
+#include "formats/nms.h"
 #include "mesh.h"
 #include "render/render.h"
 #include "scene.h"
@@ -144,7 +145,7 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size,i
     return true;
 }
 
-bool mesh::load_nms_skeleton_section(shared_mesh &res,const void *data,size_t size)
+bool mesh::load_nms_skeleton_section(shared_mesh &res,const void *data,size_t size,int version)
 {
     if(!data || !size)
         return false;
@@ -165,89 +166,67 @@ bool mesh::load_nms_skeleton_section(shared_mesh &res,const void *data,size_t si
     return true;
 }
 
-bool mesh::load_nms_material_section(shared_mesh &res,const void *data,size_t size)
+bool mesh::load_nms_material_section(shared_mesh &res,const void *data,size_t size,int version)
 {
-    if(!data || !size)
+    nya_formats::nms_material_chunk c;
+    if(!c.read(data,size,version))
+    {
+        log()<<"nms load warning: invalid materials chunk\n";
         return false;
-
-    nya_memory::memory_reader reader(data,size);
-
-    const uint16_t materials_count=reader.read<uint16_t>();
-    res.materials.resize(materials_count);
-    for(uint16_t i=0;i<materials_count;++i)
-    {
-        material &m=res.materials[i];
-        load_nms_material(m, reader);
     }
 
-    return true;
-}
-    
-bool mesh::load_nms_material(nya_scene::material &m, nya_memory::memory_reader &reader)
-{
-    std::string name=read_string(reader);
-    m.set_name(name.c_str());
-    const uint16_t textures_count=reader.read<uint16_t>();
-    for(uint16_t j=0;j<textures_count;++j)
+    size_t mat_idx_off=res.materials.size();
+    res.materials.resize(mat_idx_off+c.materials.size());
+    for(size_t i=0;i<c.materials.size();++i)
     {
-        std::string semantics=read_string(reader);
-        std::string name=read_string(reader);
+        const nya_formats::nms_material_chunk::material_info &from=c.materials[i];
+        material &to=res.materials[i+mat_idx_off];
 
-        texture tex;
-        tex.load(name.c_str());
-        m.set_texture(semantics.c_str(),tex);
-    }
+        to.set_name(from.name.c_str());
+        for(size_t j=0;j<from.textures.size();++j)
+        {
+            texture tex;
+            tex.load(from.textures[j].filename.c_str());
+            to.set_texture(from.textures[j].semantics.c_str(),tex);
+        }
 
-    const uint16_t strings_count=reader.read<uint16_t>();
-    for(uint16_t j=0;j<strings_count;++j)
-    {
-        std::string name=read_string(reader);
-        std::string value=read_string(reader);
+        for(size_t j=0;j<from.strings.size();++j)
+        {
+            const std::string &name=from.strings[j].name;
+            const std::string &value=from.strings[j].value;
 
-        if(name=="nya_material")
-        {
-            m.load(value.c_str());
+            if(name=="nya_material")
+            {
+                to.load(value.c_str());
+            }
+            else if(name=="nya_shader")
+            {
+                shader sh;
+                sh.load(value.c_str());
+                material_default_pass(to).set_shader(sh);
+            }
+            else if(name=="nya_blend")
+            {
+                nya_render::state &st=material_default_pass(to).get_state();
+                st.blend=nya_formats::blend_mode_from_string(value,st.blend_src,st.blend_dst);
+            }
+            else if(name=="nya_cull")
+            {
+                nya_render::state &st=material_default_pass(to).get_state();
+                st.cull_face=nya_formats::cull_face_from_string(value,st.cull_order);
+            }
+            else if(name=="nya_zwrite")
+                material_default_pass(to).get_state().zwrite=nya_formats::bool_from_string(value);
         }
-        else if(name=="nya_shader")
-        {
-            shader sh;
-            sh.load(value.c_str());
-            material_default_pass(m).set_shader(sh);
-        }
-        else if(name=="nya_blend")
-        {
-            nya_render::state &st=material_default_pass(m).get_state();
-            st.blend=nya_formats::blend_mode_from_string(value,st.blend_src,st.blend_dst);
-        }
-        else if(name=="nya_cull")
-        {
-            nya_render::state &st=material_default_pass(m).get_state();
-            st.cull_face=nya_formats::cull_face_from_string(value, st.cull_order);
-        }
-        else if(name=="nya_zwrite")
-        {
-            material_default_pass(m).get_state().zwrite = nya_formats::bool_from_string(value);
-        }
-    }
 
-    const uint16_t vec4_count=reader.read<uint16_t>();
-    for(uint16_t j=0;j<vec4_count;++j)
-    {
-        const std::string name=read_string(reader);
-        const float r=reader.read<float>();
-        const float g=reader.read<float>();
-        const float b=reader.read<float>();
-        const float a=reader.read<float>();
-        int param_idx = m.get_param_idx(name.c_str());
-        if (param_idx >= 0)
-            m.set_param(param_idx, r,g,b,a);
-    }
+        for(size_t j=0;j<from.vectors.size();++j)
+        {
+            const int param_idx=to.get_param_idx(from.vectors[j].name.c_str());
+            if(param_idx<0)
+                continue;
 
-    const uint16_t ints_count=reader.read<uint16_t>();
-    for(uint16_t j=0;j<ints_count;++j)
-    {
-        read_string(reader); //ToDo
-        reader.read<int32_t>();
+            to.set_param(param_idx,nya_math::vec4(from.vectors[j].value));
+        }
     }
 
     return true;
@@ -255,47 +234,32 @@ bool mesh::load_nms_material(nya_scene::material &m, nya_memory::memory_reader &
 
 bool mesh::load_nms(shared_mesh &res,resource_data &data,const char* name)
 {
-    nya_memory::memory_reader reader(data.get_data(),data.get_size());
-    if(!reader.test("nya mesh",8))
+    if(!data.get_size() || data.get_size()<8 || memcmp(data.get_data(),"nya mesh ",8)!=0)
         return false;
 
-    typedef uint32_t uint;
-
-    uint version=reader.read<uint>();
-    if(version!=1 && version!=2)
+    nya_formats::nms m;
+    if(!m.read_chunks_info(data.get_data(),data.get_size()))
     {
-        nya_log::log()<<"nms load error: unsupported version: "<<version<<"\n";
+        log()<<"nms load error: invalid nms\n";
         return false;
     }
 
-    enum section_type
+    if(m.version!=1 && m.version!=2)
     {
-        mesh_data,
-        skeleton,
-        materials
-    };
+        log()<<"nms load error: unsupported version: "<<m.version<<"\n";
+        return false;
+    }
 
-    const uint num_sections=reader.read<uint>();
-    for(uint i=0;i<num_sections;++i)
+    for(size_t i=0;i<m.chunks.size();++i)
     {
-        const uint type=reader.read<uint>();
-        const uint size=reader.read<uint>();
-
-        if(!reader.check_remained(size))
+        const nya_formats::nms::chunk_info c=m.chunks[i];
+        switch(c.type)
         {
-            nya_log::log()<<"nms load error: chunk size is bigger than remained data size\n";
-            return false;
-        }
-
-        switch(type)
-        {
-            case mesh_data: load_nms_mesh_section(res,reader.get_data(),size,version); break;
-            case skeleton: load_nms_skeleton_section(res,reader.get_data(),size); break;
-            case materials: load_nms_material_section(res,reader.get_data(),size); break;
-            //default: nya_log::log()<<"nms load warning: unknown chunk type\n";
+            case nya_formats::nms::mesh_data: load_nms_mesh_section(res,c.data,c.size,m.version); break;
+            case nya_formats::nms::skeleton: load_nms_skeleton_section(res,c.data,c.size,m.version); break;
+            case nya_formats::nms::materials: load_nms_material_section(res,c.data,c.size,m.version); break;
+            //default: log()<<"nms load warning: unknown chunk type\n"; //not an error
         };
-
-        reader.skip(size);
     }
 
     data.free();

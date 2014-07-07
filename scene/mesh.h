@@ -197,9 +197,8 @@ public:
 public:
     static bool load_nms(shared_mesh &res,resource_data &data,const char* name);
     static bool load_nms_mesh_section(shared_mesh &res,const void *data,size_t size,int version);
-    static bool load_nms_skeleton_section(shared_mesh &res,const void *data,size_t size);
-    static bool load_nms_material_section(shared_mesh &res,const void *data,size_t size);
-    static bool load_nms_material(material &m, nya_memory::memory_reader &reader);
+    static bool load_nms_skeleton_section(shared_mesh &res,const void *data,size_t size,int version);
+    static bool load_nms_material_section(shared_mesh &res,const void *data,size_t size,int version);
 
     const mesh_internal &internal() const { return m_internal; }
 
