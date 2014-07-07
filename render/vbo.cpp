@@ -4,9 +4,7 @@
     ToDo:
           is_valid function
           log
-          gl functions in anonymous namespace
           advanced is_supported function (public)
-          cache states, static unbind
 */
 
 #include "vbo.h"
