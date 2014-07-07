@@ -23,7 +23,7 @@ void *get_extension(const char*ext_name)
 {
     if(!ext_name)
     {
-        get_log()<<nya_log::error_internal<<"invalid extension name\n";
+        log()<<"invalid extension name\n";
         return 0;
     }
 
@@ -41,7 +41,7 @@ void *get_extension(const char*ext_name)
     const std::string ext_name_ext = std::string(ext_name)+ext;
     extention = get_exact_extension(ext_name_ext.c_str());
     if(!extention)
-        get_log()<<nya_log::error<<"unable to initialise extension "<<ext_name<<"\n";
+        log()<<"unable to initialise extension "<<ext_name<<"\n";
 
     return extention;
 }
