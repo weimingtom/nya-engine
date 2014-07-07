@@ -147,20 +147,17 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size,i
 
 bool mesh::load_nms_skeleton_section(shared_mesh &res,const void *data,size_t size,int version)
 {
-    if(!data || !size)
-        return false;
-
-    nya_memory::memory_reader reader(data,size);
-
-    const int32_t bones_count=reader.read<int32_t>();
-    for(int i=0;i<bones_count;++i)
+    nya_formats::nms_skeleton_chunk c;
+    if(!c.read(data,size,version))
     {
-        const std::string name=read_string(reader);
-        const nya_math::quat rot=reader.read<nya_math::quat>(); //ToDo ?
-        const nya_math::vec3 pos=reader.read<nya_math::vec3>();
-        const int parent=reader.read<int>();
+        log()<<"nms load warning: invalid skeleton chunk\n";
+        return false;
+    }
 
-        res.skeleton.add_bone(name.c_str(),pos,parent);
+    for(size_t i=0;i<c.bones.size();++i)
+    {
+        nya_formats::nms_skeleton_chunk::bone &b=c.bones[i];
+        res.skeleton.add_bone(b.name.c_str(),b.pos,b.parent);
     }
 
     return true;
@@ -225,7 +222,7 @@ bool mesh::load_nms_material_section(shared_mesh &res,const void *data,size_t si
             if(param_idx<0)
                 continue;
 
-            to.set_param(param_idx,nya_math::vec4(from.vectors[j].value));
+            to.set_param(param_idx,from.vectors[j].value);
         }
     }
 
