@@ -15,14 +15,6 @@
 		3D8681271965B0C0008B8929 /* text_parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D8681201965B0C0008B8929 /* text_parser.cpp */; };
 		3D8681281965B0C0008B8929 /* text_parser.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D8681211965B0C0008B8929 /* text_parser.h */; };
 		3D8681291965B0C0008B8929 /* text_parser.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D8681211965B0C0008B8929 /* text_parser.h */; };
-		3D86812E1965B7D2008B8929 /* layer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D86812A1965B7D2008B8929 /* layer.cpp */; };
-		3D86812F1965B7D2008B8929 /* layer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D86812A1965B7D2008B8929 /* layer.cpp */; };
-		3D8681301965B7D2008B8929 /* layer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D86812B1965B7D2008B8929 /* layer.h */; };
-		3D8681311965B7D2008B8929 /* layer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D86812B1965B7D2008B8929 /* layer.h */; };
-		3D8681321965B7D2008B8929 /* meshes_layer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D86812C1965B7D2008B8929 /* meshes_layer.cpp */; };
-		3D8681331965B7D2008B8929 /* meshes_layer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D86812C1965B7D2008B8929 /* meshes_layer.cpp */; };
-		3D8681341965B7D2008B8929 /* meshes_layer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D86812D1965B7D2008B8929 /* meshes_layer.h */; };
-		3D8681351965B7D2008B8929 /* meshes_layer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D86812D1965B7D2008B8929 /* meshes_layer.h */; };
 		3D86813A1965B7F9008B8929 /* output_stream.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D8681361965B7F9008B8929 /* output_stream.h */; };
 		3D86813B1965B7F9008B8929 /* output_stream.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D8681361965B7F9008B8929 /* output_stream.h */; };
 		3D86813C1965B7F9008B8929 /* warning.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D8681371965B7F9008B8929 /* warning.h */; };
@@ -224,10 +216,6 @@
 		3D86811F1965B0C0008B8929 /* string_convert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = string_convert.h; path = ../../formats/string_convert.h; sourceTree = "<group>"; };
 		3D8681201965B0C0008B8929 /* text_parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = text_parser.cpp; path = ../../formats/text_parser.cpp; sourceTree = "<group>"; };
 		3D8681211965B0C0008B8929 /* text_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = text_parser.h; path = ../../formats/text_parser.h; sourceTree = "<group>"; };
-		3D86812A1965B7D2008B8929 /* layer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = layer.cpp; path = ../../scene/layer.cpp; sourceTree = "<group>"; };
-		3D86812B1965B7D2008B8929 /* layer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = layer.h; path = ../../scene/layer.h; sourceTree = "<group>"; };
-		3D86812C1965B7D2008B8929 /* meshes_layer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = meshes_layer.cpp; path = ../../scene/meshes_layer.cpp; sourceTree = "<group>"; };
-		3D86812D1965B7D2008B8929 /* meshes_layer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = meshes_layer.h; path = ../../scene/meshes_layer.h; sourceTree = "<group>"; };
 		3D8681361965B7F9008B8929 /* output_stream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = output_stream.h; sourceTree = "<group>"; };
 		3D8681371965B7F9008B8929 /* warning.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = warning.h; sourceTree = "<group>"; };
 		3D8681381965B7F9008B8929 /* warning.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = warning.cpp; sourceTree = "<group>"; };
@@ -354,14 +342,10 @@
 				F252169F16EC14F100A1B2A6 /* animation.h */,
 				F20E2D7A16999B7000395A1B /* camera.cpp */,
 				F20E2D7D16999B7000395A1B /* camera.h */,
-				3D86812A1965B7D2008B8929 /* layer.cpp */,
-				3D86812B1965B7D2008B8929 /* layer.h */,
 				F20E2D7916999B7000395A1B /* material.cpp */,
 				F20E2D7616999B7000395A1B /* material.h */,
 				F22AD9FA16946EC000B01B4A /* mesh.cpp */,
 				F22AD9FD16946EC000B01B4A /* mesh.h */,
-				3D86812C1965B7D2008B8929 /* meshes_layer.cpp */,
-				3D86812D1965B7D2008B8929 /* meshes_layer.h */,
 				F2D7D35B16AC1EF400C7DEE5 /* proxy.h */,
 				F22AD9FB16946EC000B01B4A /* scene.cpp */,
 				F22AD9FC16946EC000B01B4A /* scene.h */,
@@ -583,7 +567,6 @@
 				F22ADA0516946EC000B01B4A /* mesh.h in Headers */,
 				F22ADA321694C15100B01B4A /* memory_reader.h in Headers */,
 				3D86813D1965B7F9008B8929 /* warning.h in Headers */,
-				3D8681351965B7D2008B8929 /* meshes_layer.h in Headers */,
 				F2F0A09A1695A758007245BC /* skeleton.h in Headers */,
 				F2F0A09E1695A758007245BC /* animation.h in Headers */,
 				F2F0A0A81695A794007245BC /* vector.h in Headers */,
@@ -591,7 +574,6 @@
 				F2F0A0AA1695A794007245BC /* quaternion.h in Headers */,
 				F2F0A0AE1695A794007245BC /* bezier.h in Headers */,
 				F2F0A0B41695F809007245BC /* matrix.h in Headers */,
-				3D8681311965B7D2008B8929 /* layer.h in Headers */,
 				F23997931696406D00170768 /* transform.h in Headers */,
 				F20E2D7F16999B7000395A1B /* material.h in Headers */,
 				F20E2D8916999B7000395A1B /* texture.h in Headers */,
@@ -650,7 +632,6 @@
 				F22ADA0416946EC000B01B4A /* mesh.h in Headers */,
 				F22ADA311694C15100B01B4A /* memory_reader.h in Headers */,
 				3D86813C1965B7F9008B8929 /* warning.h in Headers */,
-				3D8681341965B7D2008B8929 /* meshes_layer.h in Headers */,
 				F2F0A0991695A758007245BC /* skeleton.h in Headers */,
 				F2F0A09D1695A758007245BC /* animation.h in Headers */,
 				F2F0A0A71695A794007245BC /* vector.h in Headers */,
@@ -658,7 +639,6 @@
 				F2F0A0A91695A794007245BC /* quaternion.h in Headers */,
 				F2F0A0AD1695A794007245BC /* bezier.h in Headers */,
 				F2F0A0B31695F809007245BC /* matrix.h in Headers */,
-				3D8681301965B7D2008B8929 /* layer.h in Headers */,
 				F23997921696406D00170768 /* transform.h in Headers */,
 				F20E2D7E16999B7000395A1B /* material.h in Headers */,
 				F20E2D8816999B7000395A1B /* texture.h in Headers */,
@@ -778,7 +758,6 @@
 				3D86813F1965B7F9008B8929 /* warning.cpp in Sources */,
 				F23997951696406D00170768 /* transform.cpp in Sources */,
 				F20E2D8116999B7000395A1B /* shader.cpp in Sources */,
-				3D8681331965B7D2008B8929 /* meshes_layer.cpp in Sources */,
 				F20E2D8316999B7000395A1B /* texture.cpp in Sources */,
 				F20E2D8516999B7000395A1B /* material.cpp in Sources */,
 				F20E2D8716999B7000395A1B /* camera.cpp in Sources */,
@@ -794,7 +773,6 @@
 				F25216A116EC14F400A1B2A6 /* animation.cpp in Sources */,
 				F29B460116F3821500C4CC36 /* frustum.cpp in Sources */,
 				F2CA6768172D92CE00965F9F /* shaders_cache_provider.cpp in Sources */,
-				3D86812F1965B7D2008B8929 /* layer.cpp in Sources */,
 				F55C5720180623B100FF6163 /* debug_draw.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -830,7 +808,6 @@
 				3D86813E1965B7F9008B8929 /* warning.cpp in Sources */,
 				F2F0A09F1695A758007245BC /* animation.cpp in Sources */,
 				F2F0A0AB1695A794007245BC /* quaternion.cpp in Sources */,
-				3D8681321965B7D2008B8929 /* meshes_layer.cpp in Sources */,
 				F2F0A0AF1695A794007245BC /* bezier.cpp in Sources */,
 				F2F0A0B51695F809007245BC /* matrix.cpp in Sources */,
 				F23997941696406D00170768 /* transform.cpp in Sources */,
@@ -846,7 +823,6 @@
 				F25216A016EC14F400A1B2A6 /* animation.cpp in Sources */,
 				F29B460016F3821500C4CC36 /* frustum.cpp in Sources */,
 				F2CA6767172D92CE00965F9F /* shaders_cache_provider.cpp in Sources */,
-				3D86812E1965B7D2008B8929 /* layer.cpp in Sources */,
 				F55C571F180623B100FF6163 /* debug_draw.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
