@@ -472,7 +472,7 @@ public:
             if(!nya_render::has_extension("GL_ARB_multisample"))
             {
                 //antialiasing=0;
-                nya_system::get_log()<<"GL_ARB_multisample not found\n";
+                nya_system::log()<<"GL_ARB_multisample not found\n";
             }
         }
 
@@ -484,7 +484,7 @@ public:
             if(!wglChoosePixelFormatARB)
             {
                 antialiasing=0;
-                nya_system::get_log()<<"wglChoosePixelFormatARB not found\n";
+                nya_system::log()<<"wglChoosePixelFormatARB not found\n";
             }
         }
 
@@ -505,11 +505,11 @@ public:
             WGL_SAMPLES_ARB,antialiasing,
             0,0};
 
-            nya_system::get_log()<<"antialiasing init\n";
+            nya_system::log()<<"antialiasing init\n";
 
             if(!wglChoosePixelFormatARB(m_hdc,iAttributes,0,1,&aa_pf,&num_aa_formats))
             {
-                nya_system::get_log()<<"wglChoosePixelFormatARB failed\n";
+                nya_system::log()<<"wglChoosePixelFormatARB failed\n";
                 antialiasing=0;
             }
         }
@@ -533,12 +533,12 @@ public:
 
             if(num_aa_formats>=1 && SetPixelFormat(m_hdc,aa_pf,&pfd))
             {
-                nya_system::get_log()<<"antialiasiing is set\n";
+                nya_system::log()<<"antialiasiing is set\n";
             }
             else
             {
                 antialiasing=0;
-                nya_system::get_log()<<"unable to set antialiasiing "<<aa_pf<<" "<<num_aa_formats<<"\n";
+                nya_system::log()<<"unable to set antialiasiing "<<aa_pf<<" "<<num_aa_formats<<"\n";
 
                 int pf=ChoosePixelFormat(m_hdc,&pfd);
                 if(!pf)
@@ -920,14 +920,14 @@ public:
         m_dpy=XOpenDisplay(NULL);
         if(!m_dpy)
         {
-            nya_system::get_log()<<"unable to open x display\n";
+            nya_system::log()<<"unable to open x display\n";
             return;
         }
 
         int dummy;
         if(!glXQueryExtension(m_dpy,&dummy,&dummy))
         {
-            nya_system::get_log()<<"unable to querry glx extension\n";
+            nya_system::log()<<"unable to querry glx extension\n";
             return;
         }
 
@@ -942,7 +942,7 @@ public:
             vi=glXChooseVisual(m_dpy,DefaultScreen(m_dpy),dbl_buf_aniso);
             if(!vi)
             {
-                nya_system::get_log()<<"unable to set antialising\n";
+                nya_system::log()<<"unable to set antialising\n";
                 antialiasing=0;
             }
         }
@@ -952,20 +952,20 @@ public:
 
         if(!vi)
         {
-            nya_system::get_log()<<"unable to choose glx visual\n";
+            nya_system::log()<<"unable to choose glx visual\n";
             return;
         }
 
         if(vi->c_class!=TrueColor)
         {
-            nya_system::get_log()<<"device does not support TrueColor\n";
+            nya_system::log()<<"device does not support TrueColor\n";
             return;
         }
 
         m_cx=glXCreateContext(m_dpy,vi,None,GL_TRUE);
         if(!m_cx)
         {
-            nya_system::get_log()<<"unable to ceate glx context\n";
+            nya_system::log()<<"unable to ceate glx context\n";
             return;
         }
 
@@ -1099,7 +1099,7 @@ public:
 
         if(!glXMakeCurrent(m_dpy,None,NULL))
         {
-            nya_system::get_log()<<"Could not release drawing context.\n";
+            nya_system::log()<<"Could not release drawing context.\n";
             return;
         }
 
