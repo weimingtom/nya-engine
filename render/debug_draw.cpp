@@ -91,6 +91,7 @@ void debug_draw::add_aabb(const nya_math::aabb &box,const nya_math::vec4 &color)
 
 void debug_draw::draw() const
 {
+#ifndef DIRECTX11
     if(!m_initialised)
     {
         m_vbo.set_colors(sizeof(float)*3,4);
@@ -126,6 +127,7 @@ void debug_draw::draw() const
     }
 
     m_shader.unbind();
+#endif
 }
 
 void debug_draw::release()
