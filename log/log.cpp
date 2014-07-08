@@ -10,14 +10,11 @@ namespace { log_base *default_log=0; }
 
 log_base &no_log()
 {
-    static log_base l;
-    return l;
+    static log_base *l=new log_base();
+    return *l;
 }
 
-void set_log(log_base *l)
-{
-    default_log=l;
-}
+void set_log(log_base *l) { default_log=l; }
 
 log_base &log(const char *tag)
 {
