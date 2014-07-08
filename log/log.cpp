@@ -23,9 +23,9 @@ log_base &log(const char *tag)
 
     if(!default_log)
     {
-        static stdout_log stdlog;
-        stdlog.set_tag(tag);
-        return stdlog;
+        static stdout_log *l=new stdout_log();
+        l->set_tag(tag);
+        return *l;
     }
 
     default_log->set_tag(tag);
