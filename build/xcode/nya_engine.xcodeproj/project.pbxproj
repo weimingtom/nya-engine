@@ -11,6 +11,8 @@
 		3D6D5F42196ABCB3008C1041 /* nms.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D6D5F3F196ABCB3008C1041 /* nms.h */; };
 		3D6D5F43196ABCB3008C1041 /* nms.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D6D5F40196ABCB3008C1041 /* nms.cpp */; };
 		3D6D5F44196ABCB3008C1041 /* nms.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D6D5F40196ABCB3008C1041 /* nms.cpp */; };
+		3D6D5F4E196C3347008C1041 /* memory_writer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D6D5F4D196C3347008C1041 /* memory_writer.h */; };
+		3D6D5F4F196C3347008C1041 /* memory_writer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D6D5F4D196C3347008C1041 /* memory_writer.h */; };
 		3D8681221965B0C0008B8929 /* string_convert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D86811E1965B0C0008B8929 /* string_convert.cpp */; };
 		3D8681231965B0C0008B8929 /* string_convert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D86811E1965B0C0008B8929 /* string_convert.cpp */; };
 		3D8681241965B0C0008B8929 /* string_convert.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D86811F1965B0C0008B8929 /* string_convert.h */; };
@@ -218,6 +220,7 @@
 /* Begin PBXFileReference section */
 		3D6D5F3F196ABCB3008C1041 /* nms.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nms.h; path = ../../formats/nms.h; sourceTree = "<group>"; };
 		3D6D5F40196ABCB3008C1041 /* nms.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = nms.cpp; path = ../../formats/nms.cpp; sourceTree = "<group>"; };
+		3D6D5F4D196C3347008C1041 /* memory_writer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = memory_writer.h; sourceTree = "<group>"; };
 		3D86811E1965B0C0008B8929 /* string_convert.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = string_convert.cpp; path = ../../formats/string_convert.cpp; sourceTree = "<group>"; };
 		3D86811F1965B0C0008B8929 /* string_convert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = string_convert.h; path = ../../formats/string_convert.h; sourceTree = "<group>"; };
 		3D8681201965B0C0008B8929 /* text_parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = text_parser.cpp; path = ../../formats/text_parser.cpp; sourceTree = "<group>"; };
@@ -493,6 +496,7 @@
 				F259322115D858140092C7D8 /* memory.cpp */,
 				F259322215D858140092C7D8 /* memory.h */,
 				F22ADA301694C15100B01B4A /* memory_reader.h */,
+				3D6D5F4D196C3347008C1041 /* memory_writer.h */,
 				F5B3578D17FE8E2C001175FE /* optional.h */,
 				F259322315D858140092C7D8 /* pool.h */,
 				F5AFDF401846C81400457928 /* shared_ptr.h */,
@@ -583,6 +587,7 @@
 				F2F0A0AE1695A794007245BC /* bezier.h in Headers */,
 				F2F0A0B41695F809007245BC /* matrix.h in Headers */,
 				F23997931696406D00170768 /* transform.h in Headers */,
+				3D6D5F4F196C3347008C1041 /* memory_writer.h in Headers */,
 				F20E2D7F16999B7000395A1B /* material.h in Headers */,
 				F20E2D8916999B7000395A1B /* texture.h in Headers */,
 				F20E2D8B16999B7000395A1B /* shader.h in Headers */,
@@ -649,6 +654,7 @@
 				F2F0A0AD1695A794007245BC /* bezier.h in Headers */,
 				F2F0A0B31695F809007245BC /* matrix.h in Headers */,
 				F23997921696406D00170768 /* transform.h in Headers */,
+				3D6D5F4E196C3347008C1041 /* memory_writer.h in Headers */,
 				F20E2D7E16999B7000395A1B /* material.h in Headers */,
 				F20E2D8816999B7000395A1B /* texture.h in Headers */,
 				F20E2D8A16999B7000395A1B /* shader.h in Headers */,

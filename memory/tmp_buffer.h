@@ -45,6 +45,7 @@ public:
 
 public:
     void *get_data(size_t offset=0) const;
+    size_t get_size() const;
 
 public:
     tmp_buffer_scoped(size_t size);

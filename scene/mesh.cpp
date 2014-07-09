@@ -154,6 +154,7 @@ bool mesh::load_nms_skeleton_section(shared_mesh &res,const void *data,size_t si
         return false;
     }
 
+    //ToDo: rotations
     for(size_t i=0;i<c.bones.size();++i)
     {
         nya_formats::nms_skeleton_chunk::bone &b=c.bones[i];
