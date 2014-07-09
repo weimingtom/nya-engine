@@ -157,7 +157,7 @@ size_t nms_mesh_chunk::read_header(const void *data, size_t size, int version)
     *this=nms_mesh_chunk();
 
     if(!data || !size)
-        return false;
+        return 0;
 
     typedef uint32_t uint;
     typedef uint16_t ushort;
@@ -195,14 +195,14 @@ size_t nms_mesh_chunk::read_header(const void *data, size_t size, int version)
     if(!vertex_stride)
     {
         *this=nms_mesh_chunk();
-        return false;
+        return 0;
     }
 
     verts_count=reader.read<uint>();
     if(!reader.check_remained(verts_count*vertex_stride))
     {
         *this=nms_mesh_chunk();
-        return false;
+        return 0;
     }
 
     vertices_data=reader.get_data();
@@ -210,7 +210,7 @@ size_t nms_mesh_chunk::read_header(const void *data, size_t size, int version)
     if(!reader.skip(verts_count*vertex_stride))
     {
         *this=nms_mesh_chunk();
-        return false;
+        return 0;
     }
 
     index_size=reader.read<uchar>();
@@ -218,12 +218,12 @@ size_t nms_mesh_chunk::read_header(const void *data, size_t size, int version)
     {
         indices_count=reader.read<uint>();
         if(!reader.check_remained(indices_count*index_size))
-            return false;
+            return 0;
 
         indices_data=reader.get_data();
 
         if(!reader.skip(index_size*indices_count))
-            return false;
+            return 0;
     }
 
     lods.resize(reader.read<ushort>());
@@ -246,7 +246,7 @@ size_t nms_mesh_chunk::read_header(const void *data, size_t size, int version)
         }
     }
 
-    return 0;
+    return reader.get_offset();
 }
 
 bool nms_material_chunk::read(const void *data,size_t size,int version)
