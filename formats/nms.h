@@ -120,16 +120,19 @@ struct nms_mesh_chunk
     nya_math::vec3 aabb_max;
 
     std::vector<element> elements;
-    unsigned int vcount;
-    unsigned int stride;
-    std::vector<char> vbuf;
+    unsigned int verts_count;
+    unsigned int vertex_stride;
+    const void *vertices_data;
 
     unsigned int index_size;
-    unsigned int icount;
-    std::vector<char> ibuf;
+    unsigned int indices_count;
+    const void *indices_data;
 
     std::vector<lod> lods;
 
+public:
+    nms_mesh_chunk(): verts_count(0),vertex_stride(0),vertices_data(0),
+                      index_size(0),indices_count(0),indices_data(0) {}
 public:
     size_t read_header(const void *data,size_t size,int version); //0 if invalid
 
