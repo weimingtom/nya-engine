@@ -12,11 +12,16 @@ class memory_writer
 {
 public:
     template<typename t> bool write(const t&v) { return write(&v,sizeof(t)); }
+    bool write_int(int v) { return write(&v,sizeof(v)); }
     bool write_uint(unsigned int v) { return write(&v,sizeof(v)); }
     bool write_ushort(unsigned short v) { return write(&v,sizeof(v)); }
     bool write_ubyte(unsigned char v) { return write(&v,sizeof(v)); }
     bool write_float(float v) { return write(&v,sizeof(v)); }
-    bool write_string(const std::string &s) { return write_ushort(s.length()) && write(s.c_str(),s.length()); }
+    template<typename t=unsigned short> bool write_string(const std::string &s)
+    {
+        t len=(t)s.length();
+        return write(&len,sizeof(t)) && write(s.c_str(),len);
+    }
 
     bool write(const void *data,size_t size)
     {
