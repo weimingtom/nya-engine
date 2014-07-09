@@ -218,12 +218,17 @@ size_t nms_mesh_chunk::read_header(const void *data, size_t size, int version)
     {
         indices_count=reader.read<uint>();
         if(!reader.check_remained(indices_count*index_size))
+        {
+            *this=nms_mesh_chunk();
             return 0;
-
+        }
         indices_data=reader.get_data();
 
         if(!reader.skip(index_size*indices_count))
+        {
+            *this=nms_mesh_chunk();
             return 0;
+        }
     }
 
     lods.resize(reader.read<ushort>());
