@@ -159,9 +159,92 @@ size_t nms_mesh_chunk::read_header(const void *data, size_t size, int version)
     if(!data || !size)
         return false;
 
+    typedef uint32_t uint;
+    typedef uint16_t ushort;
+    typedef uint8_t uchar;
+
     nya_memory::memory_reader reader(data,size);
 
-    //ToDo
+    aabb_min=reader.read<nya_math::vec3>();
+    aabb_max=reader.read<nya_math::vec3>();
+
+    elements.resize(reader.read<uchar>());
+    for(size_t i=0;i<elements.size();++i)
+    {
+        element &e=elements[i];
+
+        e.type=reader.read<uchar>();
+        e.dimension=reader.read<uchar>();
+        uchar data_type=float32;
+        if(version>1)
+        {
+            data_type=reader.read<uchar>();
+            if(data_type!=float16 && data_type!=float32)
+            {
+                *this=nms_mesh_chunk();
+                return 0;
+            }
+        }
+
+        e.data_type=(vertex_atrib_type)data_type;
+        read_string(reader); //semantics
+
+        vertex_stride+=e.dimension*sizeof(float);
+    }
+
+    if(!vertex_stride)
+    {
+        *this=nms_mesh_chunk();
+        return false;
+    }
+
+    verts_count=reader.read<uint>();
+    if(!reader.check_remained(verts_count*vertex_stride))
+    {
+        *this=nms_mesh_chunk();
+        return false;
+    }
+
+    vertices_data=reader.get_data();
+
+    if(!reader.skip(verts_count*vertex_stride))
+    {
+        *this=nms_mesh_chunk();
+        return false;
+    }
+
+    index_size=reader.read<uchar>();
+    if(index_size)
+    {
+        indices_count=reader.read<uint>();
+        if(!reader.check_remained(indices_count*index_size))
+            return false;
+
+        indices_data=reader.get_data();
+
+        if(!reader.skip(index_size*indices_count))
+            return false;
+    }
+
+    lods.resize(reader.read<ushort>());
+    for(size_t i=0;i<lods.size();++i)
+    {
+        lod &l=lods[i];
+        l.groups.resize(reader.read<ushort>());
+        for(size_t j=0;j<l.groups.size();++j)
+        {
+            group &g=l.groups[j];
+            g.name=read_string(reader);
+
+            g.aabb_min=reader.read<nya_math::vec3>();
+            g.aabb_max=reader.read<nya_math::vec3>();
+
+            g.material_idx=reader.read<ushort>();
+            g.offset=reader.read<uint>();
+            g.count=reader.read<uint>();
+            g.element_type=version>1?draw_element_type(reader.read<uchar>()):triangles;
+        }
+    }
 
     return 0;
 }
