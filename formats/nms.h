@@ -52,6 +52,12 @@ public:
     size_t write_to_buf(void *to_data,size_t to_size); //to_size=get_nms_size()
 
 public:
+    static size_t write_header_to_buf(unsigned int chunks_count,void *to_data,size_t to_size=nms_header_size)
+    {
+        header h; h.version=latest_version,h.chunks_count=chunks_count;
+        return write_header_to_buf(h,to_data,to_size);
+    }
+
     static size_t write_header_to_buf(const header &h,void *to_data,size_t to_size=nms_header_size);
 
     static size_t get_chunk_write_size(size_t chunk_data_size);
@@ -59,6 +65,7 @@ public:
 
 public:
     const static size_t nms_header_size=16;
+    const static unsigned int latest_version=2;
 };
 
 struct nms_mesh_chunk

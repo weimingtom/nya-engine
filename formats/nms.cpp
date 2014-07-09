@@ -218,7 +218,46 @@ bool nms_material_chunk::read(const void *data,size_t size,int version)
 
 size_t nms_material_chunk::write_to_buf(void *to_data,size_t to_size)
 {
-    return 0;
+    nya_memory::memory_writer writer(to_data,to_size);
+    writer.write_ushort((unsigned short)materials.size());
+    for(size_t i=0;i<materials.size();++i)
+    {
+        material_info &m=materials[i];
+        writer.write_string(m.name);
+
+        writer.write_ushort((unsigned short)m.textures.size());
+        for(size_t j=0;j<m.textures.size();++j)
+        {
+            writer.write_string(m.textures[j].semantics);
+            writer.write_string(m.textures[j].filename);
+        }
+
+        writer.write_ushort((unsigned short)m.strings.size());
+        for(size_t j=0;j<m.strings.size();++j)
+        {
+            writer.write_string(m.strings[j].name);
+            writer.write_string(m.strings[j].value);
+        }
+
+        writer.write_ushort((unsigned short)m.vectors.size());
+        for(size_t j=0;j<m.vectors.size();++j)
+        {
+            writer.write_string(m.vectors[j].name);
+            writer.write_float(m.vectors[j].value.x);
+            writer.write_float(m.vectors[j].value.y);
+            writer.write_float(m.vectors[j].value.z);
+            writer.write_float(m.vectors[j].value.w);
+        }
+
+        writer.write_ushort((unsigned short)m.ints.size());
+        for(size_t j=0;j<m.ints.size();++j)
+        {
+            writer.write_string(m.ints[j].name);
+            writer.write_int(m.ints[j].value);
+        }
+    }
+
+    return writer.get_offset();
 }
 
 bool nms_skeleton_chunk::read(const void *data,size_t size,int version)
