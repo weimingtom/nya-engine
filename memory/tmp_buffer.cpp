@@ -228,6 +228,11 @@ void *tmp_buffer_scoped::get_data(size_t offset) const
     return m_buf->get_data(offset);
 }
 
+size_t tmp_buffer_scoped::get_size() const
+{
+    return m_buf->get_size();
+}
+
 bool tmp_buffer_scoped::copy_from(void*data,size_t size,size_t offset) const
 {
     return m_buf->copy_from(data,size,offset);
