@@ -17,7 +17,9 @@ public:
     bool write_ushort(unsigned short v) { return write(&v,sizeof(v)); }
     bool write_ubyte(unsigned char v) { return write(&v,sizeof(v)); }
     bool write_float(float v) { return write(&v,sizeof(v)); }
-    template<typename t=unsigned short> bool write_string(const std::string &s)
+
+    bool write_string(const std::string &s) { return write_string<unsigned short>(s); }
+    template<typename t> bool write_string(const std::string &s)
     {
         t len=(t)s.length();
         return write(&len,sizeof(t)) && write(s.c_str(),len);
