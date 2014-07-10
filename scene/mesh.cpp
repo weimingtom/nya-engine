@@ -47,96 +47,54 @@ static std::string read_string(nya_memory::memory_reader &reader)
 
 bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size,int version)
 {
-    if(!data || !size)
+    nya_formats::nms_mesh_chunk c;
+    if(!c.read_header(data,size,version))
         return false;
 
-    nya_memory::memory_reader reader(data,size);
+    res.aabb.delta=(c.aabb_max-c.aabb_min)*0.5f;
+    res.aabb.origin=c.aabb_min+res.aabb.delta;
 
-    typedef uint32_t uint;
-    typedef uint16_t ushort;
-    typedef uint8_t uchar;
-
-    const nya_math::vec3 aabb_min=reader.read<nya_math::vec3>();
-    const nya_math::vec3 aabb_max=reader.read<nya_math::vec3>();
-    res.aabb.delta=(aabb_max-aabb_min)*0.5f;
-    res.aabb.origin=aabb_min+res.aabb.delta;
-
-    uint vertex_stride=0;
-    const uchar el_count=reader.read<uchar>();
-    for(uchar i=0;i<el_count;++i)
+    for(size_t i=0;i<c.elements.size();++i)
     {
-        enum el_type
+        const nya_formats::nms_mesh_chunk::element &e=c.elements[i];
+        switch(e.type) //ToDo: data_type for all types
         {
-            pos,
-            normal,
-            color,
-            tc0=100
+            case nya_formats::nms_mesh_chunk::pos: res.vbo.set_vertices(e.offset,e.dimension); break;
+            case nya_formats::nms_mesh_chunk::normal: res.vbo.set_normals(e.offset,nya_render::vbo::vertex_atrib_type(e.data_type)); break;
+            case nya_formats::nms_mesh_chunk::color: res.vbo.set_colors(e.offset,e.dimension); break;
+            default:
+                res.vbo.set_tc(e.type-nya_formats::nms_mesh_chunk::tc0,e.offset,e.dimension); break;
         };
-
-        const uchar type=reader.read<uchar>();
-        const uchar dimension=reader.read<uchar>();
-        const uchar data_type=version>1?reader.read<uchar>():nya_render::vbo::float32;
-
-        read_string(reader); //semantics
-
-        switch(type) //ToDo: data_type for all types
-        {
-            case pos: res.vbo.set_vertices(vertex_stride,dimension); break;
-            case normal: res.vbo.set_normals(vertex_stride,nya_render::vbo::vertex_atrib_type(data_type)); break;
-            case color: res.vbo.set_colors(vertex_stride,dimension); break;
-            default: res.vbo.set_tc(type-tc0,vertex_stride,dimension); break;
-        };
-
-        vertex_stride+=dimension*sizeof(float);
     }
 
-    if(!vertex_stride)
-        return false;
+    res.vbo.set_vertex_data(c.vertices_data,c.vertex_stride,c.verts_count);
 
-    const uint verts_count=reader.read<uint>();
-    if(!reader.check_remained(verts_count*vertex_stride))
-        return false;
-
-    res.vbo.set_vertex_data(reader.get_data(),vertex_stride,verts_count);
-    if(!reader.skip(verts_count*vertex_stride))
-        return false;
-
-    const uchar index_size=reader.read<uchar>();
-    if(index_size)
+    switch(c.index_size)
     {
-        uint inds_count=reader.read<uint>();
-        if(!reader.check_remained(inds_count*index_size))
-            return false;
-
-        switch(index_size)
-        {
-            case 2: res.vbo.set_index_data(reader.get_data(),nya_render::vbo::index2b,inds_count); break;
-            case 4: res.vbo.set_index_data(reader.get_data(),nya_render::vbo::index4b,inds_count); break;
-            default: return false;
-        }
-
-        reader.skip(index_size*inds_count);
+        case 0: break; //to indices
+        case 2: res.vbo.set_index_data(c.indices_data,nya_render::vbo::index2b,c.indices_count); break;
+        case 4: res.vbo.set_index_data(c.indices_data,nya_render::vbo::index4b,c.indices_count); break;
+        default: return false;
     }
 
-    const ushort lods_count=reader.read<ushort>();
-    for(ushort i=0;i<lods_count;++i)
+    for(size_t i=0;i<c.lods.size();++i)
     {
-        const ushort groups_count=reader.read<ushort>();
-        res.groups.resize(groups_count);
-        for(ushort j=0;j<groups_count;++j)
+        res.groups.resize(c.lods[i].groups.size());
+        for(size_t j=0;j<res.groups.size();++j)
         {
-            shared_mesh::group &g=res.groups[j];
-            g.name=read_string(reader);
+            const nya_formats::nms_mesh_chunk::group &from=c.lods[i].groups[j];
+            shared_mesh::group &to=res.groups[j];
 
-            const nya_math::vec3 aabb_min=reader.read<nya_math::vec3>();
-            const nya_math::vec3 aabb_max=reader.read<nya_math::vec3>();
-            g.aabb.delta=(aabb_max-aabb_min)*0.5f;
-            g.aabb.origin=aabb_min+g.aabb.delta;
+            to.name=from.name;
 
-            g.material_idx=reader.read<ushort>();
-            g.offset=reader.read<uint>();
-            g.count=reader.read<uint>();
-            g.elem_type=version>1?nya_render::vbo::element_type(reader.read<uchar>()):nya_render::vbo::triangles;
+            to.aabb.delta=(from.aabb_max-from.aabb_min)*0.5f;
+            to.aabb.origin=from.aabb_min+to.aabb.delta;
+
+            to.material_idx=from.material_idx;
+            to.offset=from.offset;
+            to.count=from.count;
+
+            to.elem_type=nya_render::vbo::element_type(from.element_type);
         }
 
         break; //ToDo: load all lods
