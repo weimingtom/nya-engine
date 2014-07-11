@@ -275,14 +275,39 @@ void mesh::unload()
     m_internal.m_aabb=nya_math::aabb();
 }
 
+int mesh_internal::get_materials_count() const
+{
+    if(!m_shared.is_valid())
+        return 0;
+
+    return int(m_shared->materials.size()+m_replaced_materials.size());
+}
+
 const material &mesh_internal::mat(int idx) const
 {
-    const int rep_idx=(m_replaced_materials_idx.empty()?
-                       -1:m_replaced_materials_idx[idx]);
-    if(rep_idx>=0)
-        return m_replaced_materials[rep_idx];
+    const int shared_mat_count=(int)m_shared->materials.size();
+    if(idx<shared_mat_count)
+        return m_shared->materials[idx];
 
-    return m_shared->materials[idx];
+    return m_replaced_materials[idx-shared_mat_count];
+}
+
+int mesh_internal::get_mat_idx(int group_idx) const
+{
+    if(!m_shared.is_valid())
+        return -1;
+
+    if(group_idx<0)
+        return -1;
+
+    if(group_idx<(int)m_replaced_materials_idx.size())
+        return m_replaced_materials_idx[group_idx];
+
+    const shared_mesh::group &g=m_shared->groups[group_idx];
+    if(g.material_idx>=m_shared->materials.size())
+        return -1;
+
+    return (int)g.material_idx;
 }
 
 void mesh_internal::draw_group(int idx, const char *pass_name) const
@@ -290,16 +315,18 @@ void mesh_internal::draw_group(int idx, const char *pass_name) const
     if(idx<0 || idx>=(int)m_shared->groups.size())
         return;
 
-    const shared_mesh::group &g=m_shared->groups[idx];
-    if(g.material_idx>=m_shared->materials.size())
+    int mat_idx=get_mat_idx(idx);
+    if(mat_idx<0)
         return;
+
+    const shared_mesh::group &g=m_shared->groups[idx];
 
     //ToDo: check aabb for groups
     //if(g.aabb.delta*g.aabb.delta>0.0001)
     //    if(get_camera().is_valid() && !get_camera()->get_frustum().test_intersect(g.aabb))
     //        return;
 
-    const material &m=mat(g.material_idx);
+    const material &m=mat(mat_idx);
     m.internal().set(pass_name);
     m_shared->vbo.bind();
     m_shared->vbo.draw(g.offset,g.count,g.elem_type);
@@ -312,23 +339,17 @@ void mesh::draw(const char *pass_name) const
     if(!pass_name)
         return;
 
-    if(!internal().m_shared.is_valid())
-        return;
-
-    for(int group_idx=0;group_idx<(int)internal().m_shared->groups.size();++group_idx)
-        draw_group(group_idx,pass_name);
+    for(int i=0;i<get_groups_count();++i)
+        draw_group(i,pass_name);
 }
 
-void mesh::draw_group(int idx, const char *pass_name) const
+void mesh::draw_group(int idx,const char *pass_name) const
 {
-    if(!internal().m_shared.is_valid() || idx<0 || idx>=(int)internal().m_shared->groups.size())
+    int mat_idx=internal().get_mat_idx(idx);
+    if(mat_idx<0)
         return;
 
-    const shared_mesh::group &g = internal().m_shared->groups[idx];
-    if(g.material_idx>=(int)internal().m_shared->materials.size())
-        return;
-
-    if(internal().m_shared->materials[g.material_idx].get_pass_idx(pass_name)<0)
+    if(internal().mat(mat_idx).get_pass_idx(pass_name)<0)
         return;
 
     if(internal().m_has_aabb && get_camera().is_valid() && !get_camera()->get_frustum().test_intersect(get_aabb()))
@@ -352,83 +373,62 @@ int mesh::get_groups_count() const
 
 const char *mesh::get_group_name(int group_idx) const
 {
-    if(!internal().m_shared.is_valid())
-        return 0;
-
-    if(group_idx<0 || group_idx>=int(internal().m_shared->groups.size()))
+    if(group_idx<0 || group_idx>=get_groups_count())
         return 0;
 
     return internal().m_shared->groups[group_idx].name.c_str();
 }
 
-int mesh::get_material_idx(int group_idx) const
+const material &mesh::get_material(int group_idx) const
 {
-    if(!internal().m_shared.is_valid())
-        return 0;
-
-    if(group_idx<0 || group_idx>=int(internal().m_shared->groups.size()))
-        return 0;
-
-    return internal().m_shared->groups[group_idx].material_idx;
-}
-
-int mesh::get_materials_count() const
-{
-    if(!internal().m_shared.is_valid())
-        return 0;
-
-    return int(internal().m_shared->materials.size());
-}
-
-const material &mesh::get_material(int idx) const
-{
-    if(!internal().m_shared.is_valid() || idx<0 || idx>=int(internal().m_shared->materials.size()))
+    int mat_idx=internal().get_mat_idx(group_idx);
+    if(mat_idx<0)
         return nya_memory::get_invalid_object<material>();
 
-    return internal().mat(idx);
+    return internal().mat(mat_idx);
 }
 
 material &mesh::modify_material(int idx)
 {
-    if(!internal().m_shared.is_valid() || idx<0 || idx>=int(internal().m_shared->materials.size()))
+    if(!internal().m_shared.is_valid())
         return nya_memory::get_invalid_object<material>();
 
-    if(internal().m_replaced_materials.empty())
-        m_internal.m_replaced_materials_idx.resize(internal().m_shared->materials.size(),-1);
+    if(idx<0 || idx>=(int)internal().m_shared->groups.size())
+        return nya_memory::get_invalid_object<material>();
 
-    int &replace_idx=m_internal.m_replaced_materials_idx[idx];
-    if(replace_idx<0)
-    {
-        replace_idx=int(internal().m_replaced_materials.size());
-        m_internal.m_replaced_materials.resize(internal().m_replaced_materials.size()+1);
-        m_internal.m_replaced_materials.back()=internal().m_shared->materials[idx];
-    }
-
-    return m_internal.m_replaced_materials[replace_idx];
-}
-
-void mesh::set_material(int idx,const material &mat)
-{
-    if(!internal().m_shared.is_valid() || idx<0 || idx>=int(internal().m_shared->materials.size()))
-        return;
+    int shared_mat_count=(int)internal().m_shared->materials.size();
 
     if(internal().m_replaced_materials_idx.empty())
-        m_internal.m_replaced_materials_idx.resize(internal().m_shared->materials.size(),-1);
-
-    if(internal().m_replaced_materials_idx[idx]>=0)
     {
-        m_internal.m_replaced_materials[internal().m_replaced_materials_idx[idx]]=mat;
-        return;
+        m_internal.m_replaced_materials_idx.resize(internal().m_shared->groups.size());
+        for(size_t i=0;i<(int)internal().m_shared->groups.size();++i)
+            m_internal.m_replaced_materials_idx[i]=internal().m_shared->groups[i].material_idx;
+
+        //preallocate because modify_material shouldn't ruin get_material
+        m_internal.m_replaced_materials.resize(m_internal.m_replaced_materials_idx.size());
+    }
+    else
+    {
+        int replaced_idx=internal().m_replaced_materials_idx[idx];
+        if(replaced_idx>=shared_mat_count)
+            return m_internal.m_replaced_materials[replaced_idx-shared_mat_count];
     }
 
-    m_internal.m_replaced_materials_idx[idx]=int(internal().m_replaced_materials.size());
-    m_internal.m_replaced_materials.resize(internal().m_replaced_materials.size()+1);
-    m_internal.m_replaced_materials.back()=mat;
+    m_internal.m_replaced_materials_idx[idx]=shared_mat_count+idx;
+    if(internal().m_shared->groups[idx].material_idx>=shared_mat_count)
+        return m_internal.m_replaced_materials[idx];
+
+    m_internal.m_replaced_materials[idx]=internal().m_shared->materials[internal().m_shared->groups[idx].material_idx];
+    return m_internal.m_replaced_materials[idx];
 }
 
-const nya_render::skeleton &mesh::get_skeleton() const
+bool mesh::set_material(int idx,const material &mat)
 {
-    return internal().m_skeleton;
+    if(idx<0 || idx>=internal().get_materials_count())
+        return false;
+
+    modify_material(idx)=mat;
+    return true;
 }
 
 void mesh::set_anim(const animation_proxy & anim,int layer)
@@ -700,7 +700,8 @@ void mesh_internal::update(unsigned int dt)
 
     m_skeleton.update();
 
-    for(int i=0;i<int(m_shared->materials.size());++i)
+    const int mat_count=get_materials_count();
+    for(int i=0;i<mat_count;++i)
         mat(i).internal().skeleton_changed(&m_skeleton);
 }
 
