@@ -77,7 +77,10 @@ private:
 
     void draw_group(int idx, const char *pass_name) const;
     bool init_from_shared();
-    const material &mat(int idx) const;
+
+    int get_materials_count() const;
+    const material &mat(int idx) const; //idx must be valid
+    int get_mat_idx(int group_idx) const;
 
     struct applied_anim
     {
@@ -87,7 +90,7 @@ private:
         animation_proxy anim;
         unsigned int version;
         bool full_weight;
-        
+
         applied_anim(): layer(0),time(0),version(0) {}
     };
 
@@ -104,6 +107,7 @@ private:
         bone_additive,
         bone_override
     };
+
     struct bone_control
     {
         nya_math::vec3 pos;
@@ -113,17 +117,17 @@ private:
         
         bone_control(): pos_ctrl(bone_free),rot_ctrl(bone_free) {}
     };
-    
+
     transform m_transform;
-    
+
     nya_render::skeleton m_skeleton;
     std::vector<applied_anim> m_anims;
     typedef std::map<int,bone_control> bone_control_map;
     bone_control_map m_bone_controls;
-    
+
     std::vector<int> m_replaced_materials_idx;
     std::vector<material> m_replaced_materials;
-    
+
     mutable bool m_recalc_aabb;
     mutable nya_math::aabb m_aabb;
     bool m_has_aabb;
@@ -143,6 +147,8 @@ public:
     void draw(const char *pass_name=material::default_pass) const;
     void draw_group(int group_idx,const char *pass_name=material::default_pass) const;
 
+    const nya_math::aabb &get_aabb() const;
+
     // transform
     const nya_math::vec3 &get_pos() const { return internal().m_transform.get_pos(); }
     const nya_math::quat &get_rot() const { return internal().m_transform.get_rot(); }
@@ -158,16 +164,12 @@ public:
     // groups
     int get_groups_count() const;
     const char *get_group_name(int group_idx) const;
-    int get_material_idx(int group_idx) const;
-
-    // materials
-    int get_materials_count() const;
-    const material &get_material(int material_idx) const;
-    material &modify_material(int material_idx);
-    void set_material(int material_idx,const material &mat);
+    const material &get_material(int group_idx) const;
+    material &modify_material(int group_idx);
+    bool set_material(int group_idx,const material &mat);
 
     // skeleton
-    const nya_render::skeleton &get_skeleton() const;
+    const nya_render::skeleton &get_skeleton() const { return internal().m_skeleton; }
     int get_bone_idx(const char *name) { return internal().m_skeleton.get_bone_idx(name); }
     nya_math::vec3 get_bone_pos(int bone_idx,bool local=false,bool ignore_animations=false);
     nya_math::quat get_bone_rot(int bone_idx,bool local=false);
@@ -184,8 +186,6 @@ public:
     unsigned int get_anim_time(int layer=0) const;
     bool is_anim_finished(int layer=0) const;
     void set_anim_time(unsigned int time,int layer=0);
-
-    const nya_math::aabb &get_aabb() const;
 
 public:
     mesh() { internal().default_load_function(load_nms); }
