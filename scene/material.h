@@ -138,6 +138,9 @@ public:
     typedef material_internal::param_array_proxy param_array_proxy;
     typedef material_internal::pass pass;
 
+    static void set_resources_prefix(const char *prefix);
+    static const char *get_resources_prefix();
+
     bool load(const char *filename);
     void unload();
 
@@ -166,6 +169,7 @@ public:
     int get_params_count() const;
     int get_param_idx(const char *name) const {return m_internal.get_param_idx(name);}
     void set_param(int idx,float f0,float f1,float f2,float f3);
+    void set_param(int idx,const nya_math::vec4 &v);
     void set_param(int idx,const param &p);
     void set_param(int idx,const param_proxy &p);
     void set_param(int idx,const param_proxy &p,const param &m); //set as p*m
@@ -180,6 +184,7 @@ public:
     const material_internal &internal() const { return m_internal; }
 
 private:
+    static std::string resources_prefix;
     material_internal m_internal;
 };
 
