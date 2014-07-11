@@ -205,6 +205,21 @@ unsigned int gl_get_max_tex_size()
     return max_tex_size;
 }
 #endif
+
+void bgra_to_rgba(const unsigned char *from,unsigned char *to,size_t data_size)
+{
+    if(!from || !to || from==to)
+        return;
+
+    for(size_t i=0;i<data_size;i+=4)
+    {
+        to[i]=from[i+2];
+        to[i+1]=from[i+1];
+        to[i+2]=from[i+0];
+        to[i+3]=from[i+3];
+    }
+}
+
 }
 
 bool texture::build_texture(const void *data,unsigned int width,unsigned int height,color_format format,int mip_count)
@@ -353,7 +368,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         case color_rgb: source_format=gl_format=GL_RGB; break; //in es stored internally as rgba
         case color_rgba: source_format=gl_format=GL_RGBA; break;
 #ifdef __ANDROID__
-        case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA_EXT; break;
+        case color_bgra: source_format=GL_RGBA; gl_format=GL_RGBA; break;
 #else
         case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; break;
 #endif
@@ -408,6 +423,20 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 
     if(m_format==color_rgb)
         m_format=color_rgba;
+
+  #ifdef __ANDROID__
+    nya_memory::tmp_buffer_ref temp_buf;
+    if(m_format==color_bgra)
+    {
+        m_format=color_rgba;
+        if(data)
+        {
+            temp_buf.allocate(width*height*4);
+            bgra_to_rgba((const unsigned char *)data,(unsigned char *)temp_buf.get_data(),temp_buf.get_size());
+            data=temp_buf.get_data();
+        }
+    }
+  #endif
 #endif
 
     if(active_layers[active_layer]>=0)
@@ -463,6 +492,9 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     if(has_mipmap && mip_count<0) glGenerateMipmap(GL_TEXTURE_2D);
   #endif
 
+  #ifdef __ANDROID__
+    temp_buf.free();
+  #endif
     glBindTexture(GL_TEXTURE_2D,0);
 #endif
 
@@ -626,7 +658,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
         case color_rgb: source_format=GL_RGB; gl_format=GL_RGB; break;
         case color_rgba: source_format=GL_RGBA; gl_format=GL_RGBA; break;
 #ifdef __ANDROID__
-        case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA_EXT; break;
+        case color_bgra: source_format=GL_RGBA; gl_format=GL_RGBA; break;
 #else
         case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; break;
 #endif
@@ -648,11 +680,18 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     }
 
 #ifdef OPENGL_ES
-    if(m_format==depth24)
-        m_format=depth32;
+    if(format==depth24)
+        format=depth32;
 
-    if(m_format==color_rgb)
-        m_format=color_rgba;
+    if(format==color_rgb)
+        format=color_rgba;
+
+  #ifdef __ANDROID__
+    const bool swap_rb=(format==color_bgra);
+    if(swap_rb)
+        format=color_rgba;
+  #endif
+
 #endif
 
     if(m_format!=format)
@@ -704,7 +743,21 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
         if(is_dxt)
             glCompressedTexImage2D(cube_faces[i],0,gl_format,width,height,0,width*height*source_bpp/8,data[i]);
         else
+        {
+  #ifdef __ANDROID__
+            nya_memory::tmp_buffer_ref temp_buf;
+            if(swap_rb &&data && data[i])
+            {
+                temp_buf.allocate(width*height*4);
+                bgra_to_rgba((const unsigned char *)data[i],(unsigned char *)temp_buf.get_data(),temp_buf.get_size());
+                data[i]=temp_buf.get_data();
+            }
+  #endif
             glTexImage2D(cube_faces[i],0,source_format,width,height,0,gl_format,GL_UNSIGNED_BYTE,data?data[i]:0);
+  #ifdef __ANDROID__
+            temp_buf.free();
+  #endif
+        }
     }
 
   #ifndef GL_GENERATE_MIPMAP
@@ -855,9 +908,7 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
     {
         case color_rgb: glReadPixels(0,0,m_width,m_height,GL_RGB,GL_UNSIGNED_BYTE,data.get_data()); break;
         case color_rgba: glReadPixels(0,0,m_width,m_height,GL_RGBA,GL_UNSIGNED_BYTE,data.get_data()); break;
-#ifdef __ANDROID__
-        case color_bgra: glReadPixels(0,0,m_width,m_height,GL_BGRA_EXT,GL_UNSIGNED_BYTE,data.get_data()); break;
-#else
+#ifndef __ANDROID__
         case color_bgra: glReadPixels(0,0,m_width,m_height,GL_BGRA,GL_UNSIGNED_BYTE,data.get_data()); break;
 #endif
         case greyscale: glReadPixels(0,0,m_width,m_height,GL_LUMINANCE,GL_UNSIGNED_BYTE,data.get_data()); break;
