@@ -255,6 +255,55 @@ size_t nms_mesh_chunk::read_header(const void *data, size_t size, int version)
     return reader.get_offset();
 }
 
+size_t nms_mesh_chunk::write_to_buf(void *to_data,size_t to_size)
+{
+    nya_memory::memory_writer writer(to_data,to_size);
+
+    writer.write(aabb_min);
+    writer.write(aabb_max);
+
+    writer.write_ubyte(elements.size());
+    for(size_t i=0;i<elements.size();++i)
+    {
+        element &e=elements[i];
+        writer.write_ubyte(e.type);
+        writer.write_ubyte(e.dimension);
+        writer.write_ubyte(e.data_type);
+        writer.write_string(e.semantics);
+    }
+
+    writer.write_uint(verts_count);
+    writer.write(vertices_data,verts_count*vertex_stride);
+    writer.write_ubyte(index_size);
+    if(index_size)
+    {
+        writer.write_uint(indices_count);
+        writer.write(indices_data,indices_count*index_size);
+    }
+
+    writer.write_ushort(lods.size());
+    for(size_t i=0;i<lods.size();++i)
+    {
+        lod &l=lods[i];
+        writer.write_ushort(l.groups.size());
+        for(size_t j=0;j<l.groups.size();++j)
+        {
+            group &g=l.groups[j];
+            writer.write_string(g.name);
+
+            writer.write(g.aabb_min);
+            writer.write(g.aabb_max);
+
+            writer.write_ushort(g.material_idx);
+            writer.write_uint(g.offset);
+            writer.write_uint(g.count);
+            writer.write_ubyte(g.element_type);
+        }
+    }
+
+    return writer.get_offset();
+}
+
 bool nms_material_chunk::read(const void *data,size_t size,int version)
 {
     *this=nms_material_chunk();
