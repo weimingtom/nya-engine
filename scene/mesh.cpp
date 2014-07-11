@@ -280,34 +280,34 @@ int mesh_internal::get_materials_count() const
     if(!m_shared.is_valid())
         return 0;
 
-    //ToDo: replacement by group
-    return (int)m_shared->materials.size();
+    return int(m_shared->materials.size()+m_replaced_materials.size());
 }
 
 const material &mesh_internal::mat(int idx) const
 {
-    //ToDo: replacement by group
+    const int shared_mat_count=(int)m_shared->materials.size();
+    if(idx<shared_mat_count)
+        return m_shared->materials[idx];
 
-    const int rep_idx=(m_replaced_materials_idx.empty()?
-                       -1:m_replaced_materials_idx[idx]);
-    if(rep_idx>=0)
-        return m_replaced_materials[rep_idx];
-
-    return m_shared->materials[idx];
+    return m_replaced_materials[idx-shared_mat_count];
 }
 
 int mesh_internal::get_mat_idx(int group_idx) const
 {
-    //ToDo: replacement by group
-
     if(!m_shared.is_valid())
         return -1;
+
+    if(group_idx<0)
+        return -1;
+
+    if(group_idx<(int)m_replaced_materials_idx.size())
+        return m_replaced_materials_idx[group_idx];
 
     const shared_mesh::group &g=m_shared->groups[group_idx];
     if(g.material_idx>=m_shared->materials.size())
         return -1;
 
-    return g.material_idx;
+    return (int)g.material_idx;
 }
 
 void mesh_internal::draw_group(int idx, const char *pass_name) const
@@ -379,68 +379,56 @@ const char *mesh::get_group_name(int group_idx) const
     return internal().m_shared->groups[group_idx].name.c_str();
 }
 
-const material &mesh::get_material(int idx) const
+const material &mesh::get_material(int group_idx) const
 {
-    if(idx<0 || idx>=internal().get_materials_count())
+    int mat_idx=internal().get_mat_idx(group_idx);
+    if(mat_idx<0)
         return nya_memory::get_invalid_object<material>();
 
-    return internal().mat(idx);
+    return internal().mat(mat_idx);
 }
 
 material &mesh::modify_material(int idx)
 {
-    //ToDo: replacement by group
-
-    if(idx<0 || idx>=internal().get_materials_count())
+    if(!internal().m_shared.is_valid())
         return nya_memory::get_invalid_object<material>();
 
-    if(internal().m_replaced_materials.empty())
-        m_internal.m_replaced_materials_idx.resize(internal().m_shared->materials.size(),-1);
+    if(idx<0 || idx>=(int)internal().m_shared->groups.size())
+        return nya_memory::get_invalid_object<material>();
 
-    int &replace_idx=m_internal.m_replaced_materials_idx[idx];
-    if(replace_idx<0)
+    int shared_mat_count=(int)internal().m_shared->materials.size();
+
+    if(internal().m_replaced_materials_idx.empty())
     {
-        replace_idx=int(internal().m_replaced_materials.size());
-        m_internal.m_replaced_materials.resize(internal().m_replaced_materials.size()+1);
-        m_internal.m_replaced_materials.back()=internal().m_shared->materials[idx];
+        m_internal.m_replaced_materials_idx.resize(internal().m_shared->groups.size());
+        for(size_t i=0;i<(int)internal().m_shared->groups.size();++i)
+            m_internal.m_replaced_materials_idx[i]=internal().m_shared->groups[i].material_idx;
+
+        //preallocate because modify_material shouldn't ruin get_material
+        m_internal.m_replaced_materials.resize(m_internal.m_replaced_materials_idx.size());
+    }
+    else
+    {
+        int replaced_idx=internal().m_replaced_materials_idx[idx];
+        if(replaced_idx>=shared_mat_count)
+            return m_internal.m_replaced_materials[replaced_idx-shared_mat_count];
     }
 
-    return m_internal.m_replaced_materials[replace_idx];
+    m_internal.m_replaced_materials_idx[idx]=shared_mat_count+idx;
+    if(internal().m_shared->groups[idx].material_idx>=shared_mat_count)
+        return m_internal.m_replaced_materials[idx];
+
+    m_internal.m_replaced_materials[idx]=internal().m_shared->materials[internal().m_shared->groups[idx].material_idx];
+    return m_internal.m_replaced_materials[idx];
 }
 
 bool mesh::set_material(int idx,const material &mat)
 {
-    //ToDo: replacement by group
-
     if(idx<0 || idx>=internal().get_materials_count())
         return false;
 
-    if(internal().m_replaced_materials_idx.empty())
-        m_internal.m_replaced_materials_idx.resize(internal().m_shared->materials.size(),-1);
-
-    if(internal().m_replaced_materials_idx[idx]>=0)
-    {
-        m_internal.m_replaced_materials[internal().m_replaced_materials_idx[idx]]=mat;
-        return false;
-    }
-
-    m_internal.m_replaced_materials_idx[idx]=int(internal().m_replaced_materials.size());
-    m_internal.m_replaced_materials.resize(internal().m_replaced_materials.size()+1);
-    m_internal.m_replaced_materials.back()=mat;
-
+    modify_material(idx)=mat;
     return true;
-}
-
-bool mesh::set_group_material(int group_idx,const material &mat)
-{
-    //ToDo: replacement by group
-
-    return false;
-}
-
-const nya_render::skeleton &mesh::get_skeleton() const
-{
-    return internal().m_skeleton;
 }
 
 void mesh::set_anim(const animation_proxy & anim,int layer)
