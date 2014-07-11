@@ -223,7 +223,7 @@ bool mesh::load_nms(shared_mesh &res,resource_data &data,const char* name)
     return true;
 }
 
-bool mesh_internal::init_form_shared()
+bool mesh_internal::init_from_shared()
 {
     if(!m_shared.is_valid())
         return false;
@@ -252,13 +252,13 @@ bool mesh::load(const char *name)
     if(!m_internal.load(name))
         return false;
 
-    return m_internal.init_form_shared();
+    return m_internal.init_from_shared();
 }
 
 void mesh::create(const shared_mesh &res)
 {
     m_internal.create(res);
-    m_internal.init_form_shared();
+    m_internal.init_from_shared();
 }
 
 void mesh::unload()
