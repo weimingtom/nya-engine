@@ -10,6 +10,22 @@ namespace nya_scene
 {
 
 const char *material::default_pass="default_pass";
+std::string material::resources_prefix = "";
+
+void material::set_resources_prefix(const char *prefix)
+{
+    if (prefix)
+        resources_prefix.assign(prefix);
+    else
+        resources_prefix.clear();
+}
+
+const char *material::get_resources_prefix()
+{
+    return resources_prefix.c_str();
+}
+
+
 
 void material_internal::param_holder::apply_to_shader(const nya_scene::shader &shader,int uniform_idx) const
 {
@@ -35,10 +51,10 @@ void material_internal::skeleton_changed(const nya_render::skeleton *skeleton) c
         m_passes[i].m_shader.internal().skeleton_changed(skeleton);
 }
 
-bool material_internal::load(const char *code,size_t text_size)
+bool material_internal::load(const char *data,size_t text_size)
 {
     nya_formats::text_parser parser;
-    parser.load_from_data(code,text_size);
+    parser.load_from_data(data,text_size);
     for(int section_idx=0;section_idx<parser.get_sections_count();++section_idx)
     {
         const char *section_type=parser.get_section_type(section_idx);
@@ -384,10 +400,11 @@ void material_internal::update_passes_maps() const
 
 bool material::load(const char *filename)
 {
-    nya_resources::resource_data* res=nya_resources::get_resources_provider().access(filename);
+    std::string fullFilename = resources_prefix + filename;
+    nya_resources::resource_data* res=nya_resources::get_resources_provider().access(fullFilename.c_str());
     if(!res)
     {
-        nya_log::log()<<"material load error: unable to access resource '"<<filename<<"'";
+        nya_log::log()<<"material load error: unable to access resource '"<<fullFilename<<"'";
         return false;
     }
 
@@ -464,6 +481,11 @@ const char *material::get_param_name(int idx) const
 void material::set_param(int idx,float f0,float f1,float f2,float f3)
 {
     set_param(idx,param(f0,f1,f2,f3));
+}
+
+void material::set_param(int idx,const nya_math::vec4 &v)
+{
+    set_param(idx,v.x,v.y,v.z,v.w);
 }
 
 void material::set_param(int idx,const param &p)

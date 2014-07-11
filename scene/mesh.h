@@ -76,7 +76,7 @@ private:
     mesh_internal(): m_recalc_aabb(true), m_has_aabb(false) {}
 
     void draw_group(int idx, const char *pass_name) const;
-    bool init_form_shared();
+    bool init_from_shared();
     const material &mat(int idx) const;
 
     struct applied_anim
