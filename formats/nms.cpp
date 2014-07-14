@@ -207,7 +207,6 @@ size_t nms_mesh_chunk::read_header(const void *data, size_t size, int version)
     }
 
     vertices_data=reader.get_data();
-
     if(!reader.skip(verts_count*vertex_stride))
     {
         *this=nms_mesh_chunk();
@@ -217,7 +216,7 @@ size_t nms_mesh_chunk::read_header(const void *data, size_t size, int version)
     const uint index_size=reader.read<uchar>();
     switch(index_size)
     {
-        case no_idices: break;
+        case no_indices: break;
 
         case index2b:
         case index4b:
