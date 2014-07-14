@@ -214,23 +214,32 @@ size_t nms_mesh_chunk::read_header(const void *data, size_t size, int version)
         return 0;
     }
 
-    index_size=reader.read<uchar>();
-    if(index_size)
+    const uint index_size=reader.read<uchar>();
+    switch(index_size)
     {
-        indices_count=reader.read<uint>();
-        if(!reader.check_remained(indices_count*index_size))
-        {
-            *this=nms_mesh_chunk();
-            return 0;
-        }
-        indices_data=reader.get_data();
+        case no_idices: break;
 
-        if(!reader.skip(index_size*indices_count))
-        {
-            *this=nms_mesh_chunk();
-            return 0;
-        }
+        case index2b:
+        case index4b:
+            indices_count=reader.read<uint>();
+            if(!reader.check_remained(indices_count*index_size))
+            {
+                *this=nms_mesh_chunk();
+                return 0;
+            }
+
+            indices_data=reader.get_data();
+            if(!reader.skip(index_size*indices_count))
+            {
+                *this=nms_mesh_chunk();
+                return 0;
+            }
+        break;
+
+        default: return 0;
     }
+
+    this->index_size=(ind_size)index_size;
 
     lods.resize(reader.read<ushort>());
     for(size_t i=0;i<lods.size();++i)

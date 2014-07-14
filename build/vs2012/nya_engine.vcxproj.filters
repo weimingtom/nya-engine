@@ -176,9 +176,6 @@
     <ClInclude Include="..\..\memory\memory.h">
       <Filter>memory</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\memory\memory_mapper.h">
-      <Filter>memory</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\memory\memory_reader.h">
       <Filter>memory</Filter>
     </ClInclude>
@@ -328,6 +325,18 @@
     </ClInclude>
     <ClInclude Include="..\..\formats\nms.h">
       <Filter>formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\memory\indexed_map.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\memory\invalid_object.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\memory\memory_writer.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\memory\optional.h">
+      <Filter>memory</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
