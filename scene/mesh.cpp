@@ -415,7 +415,7 @@ material &mesh::modify_material(int idx)
     }
 
     m_internal.m_replaced_materials_idx[idx]=shared_mat_count+idx;
-    if(internal().m_shared->groups[idx].material_idx>=shared_mat_count)
+    if((int)internal().m_shared->groups[idx].material_idx>=shared_mat_count)
         return m_internal.m_replaced_materials[idx];
 
     m_internal.m_replaced_materials[idx]=internal().m_shared->materials[internal().m_shared->groups[idx].material_idx];
