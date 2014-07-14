@@ -58,9 +58,11 @@ bool material_internal::load(const char *data,size_t text_size)
     for(int section_idx=0;section_idx<parser.get_sections_count();++section_idx)
     {
         const char *section_type=parser.get_section_type(section_idx);
+        const char *section_name=parser.get_section_name(section_idx);
+        const char *section_value=parser.get_section_value(section_idx);
         if(strcmp(section_type,"@pass")==0)
         {
-            int pass_idx = add_pass(parser.get_section_name(section_idx));
+            int pass_idx = add_pass(section_name);
             pass &p = get_pass(pass_idx);
 
             for (int subsection_idx = 0; subsection_idx < parser.get_subsections_count(section_idx); ++subsection_idx)
@@ -82,14 +84,14 @@ bool material_internal::load(const char *data,size_t text_size)
         }
         else if(strcmp(section_type,"@texture")==0)
         {
-            texture_proxy text;
-            if(text->load(parser.get_section_value(section_idx)))
+            texture_proxy text( (nya_scene::texture()) );
+            if(text->load(section_value))
             {
-                const int texture_idx=get_texture_idx(parser.get_section_name(section_idx));
+                const int texture_idx=get_texture_idx(section_name);
                 if(texture_idx<0)
                 {
                     material_internal::material_texture mat;
-                    mat.semantics=parser.get_section_name(section_idx);
+                    mat.semantics.assign(section_name);
                     mat.proxy=text;
                     m_textures.push_back(mat);
                 }
@@ -102,10 +104,10 @@ bool material_internal::load(const char *data,size_t text_size)
         else if(strcmp(section_type,"@param")==0)
         {
             material_internal::param_holder ph;
-            ph.param_name=parser.get_section_name(section_idx);
+            ph.param_name.assign(section_name);
             ph.p=param_proxy(material_internal::param(parser.get_section_value_vector(section_idx)));
 
-            const int param_idx=get_param_idx(parser.get_section_name(section_idx));
+            const int param_idx=get_param_idx(section_name);
             if(param_idx>=0)
                 m_params[param_idx]=ph;
             else
@@ -342,8 +344,7 @@ void material_internal::update_passes_maps() const
 
     // step 1: build params array
     // substep 1: build boolean map indicating used parameters and map of names of parameters to be added
-    std::vector<bool> used_parameters(m_params.size());
-    std::fill(used_parameters.begin(), used_parameters.end(), false);
+    std::vector<bool> used_parameters(m_params.size(), false);
     std::list<std::pair<std::string, nya_math::vec4> > parameters_to_add;
     for(int pass_idx=0;pass_idx<(int)m_passes.size();++pass_idx)
     {
@@ -390,17 +391,16 @@ void material_internal::update_passes_maps() const
     }
 
     for(std::vector<pass>::const_iterator iter=m_passes.begin();iter!=m_passes.end();++iter)
+    {
         iter->update_maps(*this);
-
-    for(std::vector<pass>::const_iterator it=m_passes.begin();it!=m_passes.end();++it)
-        it->m_shader_changed=false;
-
+        iter->m_shader_changed=false;
+    }
     m_should_rebuild_passes_maps = false;
 }
 
 bool material::load(const char *filename)
 {
-    std::string fullFilename = resources_prefix + filename;
+    std::string fullFilename=resources_prefix+filename;
     nya_resources::resource_data* res=nya_resources::get_resources_provider().access(fullFilename.c_str());
     if(!res)
     {
