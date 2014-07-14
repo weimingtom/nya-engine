@@ -34,6 +34,8 @@ struct nms
 
     std::vector<chunk_info> chunks;
 
+    nms(): version(0) {}
+
 public:
     bool read_chunks_info(const void *data,size_t size);
 
