@@ -54,14 +54,15 @@ private:
 
     struct section
     {
-        section() { names.resize(1); }
         std::string type;
         std::vector<std::string> names;
         std::string option;
         std::string value;
         // value -> subsections conversion is done on first subsection access for this section
-        bool subsection_parsed;
+        mutable bool subsection_parsed;
         mutable std::vector<subsection> subsections;
+
+        section(): subsection_parsed(false) { names.resize(1); }
     };
 
     struct line

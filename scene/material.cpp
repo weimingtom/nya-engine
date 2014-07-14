@@ -9,11 +9,11 @@
 namespace nya_scene
 {
 
-const char *material::default_pass="default_pass";
+const char *material::default_pass="default";
 
 void material_internal::param_holder::apply_to_shader(const nya_scene::shader &shader,int uniform_idx) const
 {
-    if (p.is_valid())
+    if(p.is_valid())
     {
         if(m.is_valid())
             shader.internal().set_uniform_value(uniform_idx,p->f[0]*m->f[0],p->f[1]*m->f[1],p->f[2]*m->f[2],p->f[3]*m->f[3]);
@@ -47,38 +47,39 @@ bool material_internal::load(const char *code,size_t text_size)
             int pass_idx = add_pass(parser.get_section_name(section_idx));
             pass &p = get_pass(pass_idx);
 
-            for (int subsection_idx = 0; subsection_idx < parser.get_subsections_count(section_idx); ++subsection_idx)
+            for(int subsection_idx=0;subsection_idx<parser.get_subsections_count(section_idx);++subsection_idx)
             {
-                const char *subsection_type = parser.get_subsection_type(section_idx, subsection_idx);
-                const char *subsection_value = parser.get_subsection_value(section_idx, subsection_idx);
-                if (strcmp(subsection_type, "shader") == 0)
+                const char *subsection_type = parser.get_subsection_type(section_idx,subsection_idx);
+                const char *subsection_value = parser.get_subsection_value(section_idx,subsection_idx);
+                if(strcmp(subsection_type, "shader") == 0)
                 {
-                    if (!p.m_shader.load(subsection_value))
+                    if(!p.m_shader.load(subsection_value))
                         nya_log::log()<<"can't load shader when loding material '"<<m_name<<"'";
                 }
-                else if (strcmp(subsection_type, "blend") == 0)
-                    p.get_state().blend = nya_formats::blend_mode_from_string(subsection_value, p.get_state().blend_src, p.get_state().blend_dst);
-                else if (strcmp(subsection_type, "zwrite") == 0)
-                    p.get_state().zwrite = nya_formats::bool_from_string(subsection_value);
-                else if (strcmp(subsection_type, "cull") == 0)
-                    p.get_state().cull_face = nya_formats::cull_face_from_string(subsection_value, p.get_state().cull_order);
+                else if(strcmp(subsection_type, "blend")==0)
+                    p.get_state().blend=nya_formats::blend_mode_from_string(subsection_value,p.get_state().blend_src,p.get_state().blend_dst);
+                else if(strcmp(subsection_type, "zwrite")==0)
+                    p.get_state().zwrite=nya_formats::bool_from_string(subsection_value);
+                else if(strcmp(subsection_type, "cull")==0)
+                    p.get_state().cull_face=nya_formats::cull_face_from_string(subsection_value,p.get_state().cull_order);
             }
         }
         else if(strcmp(section_type,"@texture")==0)
         {
-            texture_proxy text;
-            if(text->load(parser.get_section_value(section_idx)))
+            texture_proxy tex;
+            tex.create();
+            if(tex->load(parser.get_section_value(section_idx)))
             {
                 const int texture_idx=get_texture_idx(parser.get_section_name(section_idx));
                 if(texture_idx<0)
                 {
                     material_internal::material_texture mat;
                     mat.semantics=parser.get_section_name(section_idx);
-                    mat.proxy=text;
+                    mat.proxy=tex;
                     m_textures.push_back(mat);
                 }
                 else
-                    m_textures[texture_idx].proxy=text;
+                    m_textures[texture_idx].proxy=tex;
             }
             else
                 nya_log::log()<<"can't load texture when loading material "<<m_name<<"'";
@@ -126,8 +127,8 @@ void material_internal::set(const char *pass_name) const
 
     for(int slot_idx=0;slot_idx<(int)p.m_textures_slots_map.size();++slot_idx)
     {
-        int texture_idx = p.m_textures_slots_map[slot_idx];
-        if(texture_idx >= 0)
+        int texture_idx=p.m_textures_slots_map[slot_idx];
+        if(texture_idx>=0)
         {
             if(m_textures[texture_idx].proxy.is_valid())
                 m_textures[texture_idx].proxy->internal().set(slot_idx);
@@ -141,7 +142,7 @@ void material_internal::set(const char *pass_name) const
 
 void material_internal::unset() const
 {
-    if (m_last_set_pass_idx < 0)
+    if(m_last_set_pass_idx<0)
         return;
 
     const pass &p=m_passes[m_last_set_pass_idx];
@@ -159,7 +160,7 @@ void material_internal::unset() const
     for(int slot_idx=0;slot_idx<(int)p.m_textures_slots_map.size();++slot_idx)
     {
         const int texture_idx=(int)p.m_textures_slots_map[slot_idx];
-        if (texture_idx>=0 && texture_idx<(int)m_textures.size() && m_textures[texture_idx].proxy.is_valid())
+        if(texture_idx>=0 && texture_idx<(int)m_textures.size() && m_textures[texture_idx].proxy.is_valid())
             m_textures[texture_idx].proxy->internal().unset();
     }
 
@@ -249,7 +250,7 @@ void material_internal::pass::update_maps(const material_internal &m) const
     {
         const std::string semantics=m_shader.internal().get_texture_semantics(slot_idx);
         int texture_idx=m.get_texture_idx(semantics.c_str());
-        if (texture_idx>=0)
+        if(texture_idx>=0)
             m_textures_slots_map[slot_idx]=texture_idx;
     }
 }
@@ -279,7 +280,7 @@ int material_internal::get_pass_idx(const char *pass_name) const
         return -1;
 
     for(int i=0;i<(int)m_passes.size();++i)
-        if (m_passes[i].m_name == pass_name)
+        if(m_passes[i].m_name == pass_name)
             return i;
 
     return -1;
@@ -321,7 +322,7 @@ void material_internal::update_passes_maps() const
         }
     }
 
-    if (!m_should_rebuild_passes_maps)
+    if(!m_should_rebuild_passes_maps)
         return;
 
     // step 1: build params array
@@ -357,7 +358,7 @@ void material_internal::update_passes_maps() const
     int param_idx = 0;
     for(std::vector<bool>::iterator iter=used_parameters.begin();iter!=used_parameters.end();++iter)
     {
-        if (!*iter)
+        if(!*iter)
             m_params.erase(m_params.begin()+param_idx);
         else
             ++param_idx;

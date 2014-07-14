@@ -129,6 +129,8 @@ int text_parser::get_subsections_count(int section_idx) const
                 }
             }
         }
+
+        s.subsection_parsed=true;
     }
 
     return (int)s.subsections.size();
