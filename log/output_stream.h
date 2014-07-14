@@ -20,6 +20,7 @@ public:
     virtual ostream_base &operator << (unsigned int a) { return operator<<((unsigned long int)a); }
     virtual ostream_base &operator << (short int a) { return operator<<((long int)a); }
     virtual ostream_base &operator << (unsigned short int a) { return operator<<((unsigned long int)a); }
+    virtual ostream_base &operator << (unsigned long long int a) { return operator<<((unsigned long int)a); } //ToDo
     virtual ostream_base &operator << (const std::string &a) { return operator<<(a.c_str()); }
 
     virtual ~ostream_base() {}
