@@ -84,6 +84,13 @@ struct nms_mesh_chunk
         float32
     };
 
+    enum ind_size
+    {
+        no_idices=0,
+        index2b=2,
+        index4b=4
+    };
+
     struct element
     {
         unsigned int type;
@@ -124,7 +131,7 @@ struct nms_mesh_chunk
     unsigned int vertex_stride;
     const void *vertices_data;
 
-    unsigned int index_size;
+    ind_size index_size;
     unsigned int indices_count;
     const void *indices_data;
 
@@ -132,7 +139,7 @@ struct nms_mesh_chunk
 
 public:
     nms_mesh_chunk(): verts_count(0),vertex_stride(0),vertices_data(0),
-                      index_size(0),indices_count(0),indices_data(0) {}
+                      index_size(no_idices),indices_count(0),indices_data(0) {}
 public:
     size_t read_header(const void *data,size_t size,int version); //0 if invalid
 
