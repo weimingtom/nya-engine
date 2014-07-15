@@ -129,6 +129,8 @@ int text_parser::get_subsections_count(int section_idx) const
                 }
             }
         }
+
+        s.subsection_parsed=true;
     }
 
     return (int)s.subsections.size();
@@ -253,7 +255,7 @@ bool text_parser::load_from_data(const char *text,size_t text_size)
             }
             else if(!l.empty)
             {
-                nya_log::warning()<<typeid(text_parser).name()<<": subsection found before any section declaration at line "<< l.line_number;
+                nya_log::log()<<typeid(text_parser).name()<<": subsection found before any section declaration at line "<< l.line_number;
             }
         }
     }
@@ -269,7 +271,7 @@ bool text_parser::load_from_file(const char *filename)
     nya_resources::resource_data* res=nya_resources::get_resources_provider().access(filename);
     if(!res)
     {
-        nya_log::warning()<<"file load error: unable to access resource '"<<filename<<"'";
+        nya_log::log()<<"file load error: unable to access resource '"<<filename<<"'";
         return false;
     }
 
@@ -322,7 +324,7 @@ void text_parser::fill_section(section &s,const line &l)
         }
         else
         {
-            nya_log::warning()<<typeid(text_parser).name()<<": unexpected token at line "<<l.line_number;
+            nya_log::log()<<typeid(text_parser).name()<<": unexpected token at line "<<l.line_number;
             break;
         }
 
