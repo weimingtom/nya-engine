@@ -135,7 +135,7 @@ public:
     const char *get_name() const { return m_internal.get_name(); }
 
 public:
-    shader() { m_internal.default_load_function(load_nya_shader); }
+    shader() { shader_internal::default_load_function(load_nya_shader); }
 
 public:
     static bool load_nya_shader(shared_shader &res,resource_data &data,const char* name);

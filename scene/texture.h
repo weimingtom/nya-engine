@@ -57,7 +57,7 @@ public:
     void build(const void *data,unsigned int width,unsigned int height,color_format format);
 
 public:
-    texture() { internal().default_load_function(load_tga); internal().default_load_function(load_dds); }
+    texture() { texture_internal::default_load_function(load_tga); texture_internal::default_load_function(load_dds); }
 
 public:
     static bool load_tga(shared_texture &res,resource_data &data,const char* name);
