@@ -35,17 +35,17 @@ void material_internal::skeleton_changed(const nya_render::skeleton *skeleton) c
         m_passes[i].m_shader.internal().skeleton_changed(skeleton);
 }
 
-bool material_internal::load(const char *code,size_t text_size)
+bool material::load_text(shared_material &res,resource_data &data,const char* name)
 {
     nya_formats::text_parser parser;
-    parser.load_from_data(code,text_size);
+    parser.load_from_data((const char *)data.get_data(),data.get_size());
     for(int section_idx=0;section_idx<parser.get_sections_count();++section_idx)
     {
         const char *section_type=parser.get_section_type(section_idx);
         if(strcmp(section_type,"@pass")==0)
         {
-            int pass_idx = add_pass(parser.get_section_name(section_idx));
-            pass &p = get_pass(pass_idx);
+            int pass_idx = res.add_pass(parser.get_section_name(section_idx));
+            pass &p = res.get_pass(pass_idx);
 
             for(int subsection_idx=0;subsection_idx<parser.get_subsections_count(section_idx);++subsection_idx)
             {
@@ -54,7 +54,7 @@ bool material_internal::load(const char *code,size_t text_size)
                 if(strcmp(subsection_type, "shader") == 0)
                 {
                     if(!p.m_shader.load(subsection_value))
-                        nya_log::log()<<"can't load shader when loding material '"<<m_name<<"'";
+                        nya_log::log()<<"can't load shader when loding material '"<<name<<"'";
                 }
                 else if(strcmp(subsection_type, "blend")==0)
                     p.get_state().blend=nya_formats::blend_mode_from_string(subsection_value,p.get_state().blend_src,p.get_state().blend_dst);
@@ -70,19 +70,19 @@ bool material_internal::load(const char *code,size_t text_size)
             tex.create();
             if(tex->load(parser.get_section_value(section_idx)))
             {
-                const int texture_idx=get_texture_idx(parser.get_section_name(section_idx));
+                const int texture_idx=res.get_texture_idx(parser.get_section_name(section_idx));
                 if(texture_idx<0)
                 {
                     material_internal::material_texture mat;
                     mat.semantics=parser.get_section_name(section_idx);
                     mat.proxy=tex;
-                    m_textures.push_back(mat);
+                    res.m_textures.push_back(mat);
                 }
                 else
-                    m_textures[texture_idx].proxy=tex;
+                    res.m_textures[texture_idx].proxy=tex;
             }
             else
-                nya_log::log()<<"can't load texture when loading material "<<m_name<<"'";
+                nya_log::log()<<"can't load texture when loading material "<<name<<"'";
         }
         else if(strcmp(section_type,"@param")==0)
         {
@@ -90,17 +90,17 @@ bool material_internal::load(const char *code,size_t text_size)
             ph.param_name=parser.get_section_name(section_idx);
             ph.p=param_proxy(material_internal::param(parser.get_section_value_vector(section_idx)));
 
-            const int param_idx=get_param_idx(parser.get_section_name(section_idx));
+            const int param_idx=res.get_param_idx(parser.get_section_name(section_idx));
             if(param_idx>=0)
-                m_params[param_idx]=ph;
+                res.m_params[param_idx]=ph;
             else
-                m_params.push_back(ph);
+                res.m_params.push_back(ph);
         }
         else
-            nya_log::log()<<"unknown section when loading material '"<<m_name<<"'";
+            nya_log::log()<<"unknown section when loading material '"<<name<<"'";
     }
 
-    m_should_rebuild_passes_maps=true;
+    res.m_should_rebuild_passes_maps=true;
     return true;
 }
 
@@ -383,20 +383,35 @@ void material_internal::update_passes_maps() const
     m_should_rebuild_passes_maps = false;
 }
 
-bool material::load(const char *filename)
+bool material_internal::release()
 {
-    nya_resources::resource_data* res=nya_resources::get_resources_provider().access(filename);
-    if(!res)
-    {
-        nya_log::log()<<"material load error: unable to access resource '"<<filename<<"'";
-        return false;
-    }
+    m_passes.clear();
+    m_textures.clear();
+    m_params.clear();
+    m_name.clear();
+    m_should_rebuild_passes_maps = false;
+    m_last_set_pass_idx = -1;
 
-    const size_t data_size=res->get_size();
-    nya_memory::tmp_buffer_scoped buf(data_size);
-    res->read_all(buf.get_data());
-    res->release();
-    return m_internal.load((const char*)buf.get_data(), data_size);
+    return true;
+}
+
+bool material::load(const char *name)
+{
+    if(!m_internal.load(name))
+        return false;
+
+    if(!internal().m_shared.is_valid())
+        return false;
+
+    m_internal.m_last_set_pass_idx=-1;
+    m_internal.m_should_rebuild_passes_maps=true;
+
+    m_internal.m_name=m_internal.m_shared->m_name;
+    m_internal.m_passes=m_internal.m_shared->m_passes;
+    m_internal.m_params=m_internal.m_shared->m_params;
+    m_internal.m_textures=m_internal.m_shared->m_textures;
+
+    return true;
 }
 
 void material::set_texture(const char *semantics,const texture &tex)
@@ -558,19 +573,6 @@ const material::param_array_proxy &material::get_param_array(int idx) const
     }
 
     return internal().m_params[idx].a;
-}
-
-void material::unload()
-{
-    for(int i=0;i<(int)m_internal.m_passes.size();++i)
-        m_internal.m_passes[i].m_shader.unload();
-
-    m_internal.m_passes.clear();
-    m_internal.m_textures.clear();
-    m_internal.m_params.clear();
-    m_internal.m_name.clear();
-    m_internal.m_should_rebuild_passes_maps = false;
-    m_internal.m_last_set_pass_idx = -1;
 }
 
 }
