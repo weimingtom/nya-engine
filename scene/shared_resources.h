@@ -135,7 +135,7 @@ protected:
             {
                 if(scene_shared::get_load_functions().f[i](res,res_data,name))
                 {
-                    res_data.free(); //just for shure, load function should do this
+                    res_data.free();
                     return true;
                 }
             }

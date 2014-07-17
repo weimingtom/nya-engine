@@ -171,7 +171,6 @@ bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
 
     res.tex.build_texture(color_data,tga.width,tga.height,color_format);
     tmp_data.free();
-    data.free();
 
     return true;
 }

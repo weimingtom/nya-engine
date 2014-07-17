@@ -112,11 +112,10 @@ bool mesh::load_nms_skeleton_section(shared_mesh &res,const void *data,size_t si
         return false;
     }
 
-    //ToDo: rotations
     for(size_t i=0;i<c.bones.size();++i)
     {
         nya_formats::nms_skeleton_chunk::bone &b=c.bones[i];
-        res.skeleton.add_bone(b.name.c_str(),b.pos,b.parent);
+        res.skeleton.add_bone(b.name.c_str(),b.pos,b.rot,b.parent);
     }
 
     return true;
@@ -218,8 +217,6 @@ bool mesh::load_nms(shared_mesh &res,resource_data &data,const char* name)
             //default: log()<<"nms load warning: unknown chunk type\n"; //not an error
         };
     }
-
-    data.free();
 
     return true;
 }
