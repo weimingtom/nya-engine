@@ -5,7 +5,7 @@
 namespace nya_render
 {
 
-int skeleton::add_bone(const char *name,const nya_math::vec3 &pos,int parent,bool allow_doublicate)
+int skeleton::add_bone(const char *name,const nya_math::vec3 &pos,const nya_math::quat &rot,int parent,bool allow_doublicate)
 {
     if(!name)
         return -1;
@@ -24,22 +24,61 @@ int skeleton::add_bone(const char *name,const nya_math::vec3 &pos,int parent,boo
     m_pos_tr.resize(bone_idx+1);
     m_rot_tr.resize(bone_idx+1);
 
+    if(!m_rot_org.empty() || rot.v.length()>0.001f)
+        m_rot_org.resize(m_bones.size());
+
     bone &b=m_bones[bone_idx];
-    b.pos_org=pos;
     b.parent=parent;
     b.name.assign(name);
 
+    b.pos_org=pos;
     if(parent>=0)
     {
-        const bone &p=m_bones[b.parent];
-        b.offset=b.pos_org-p.pos_org;
+        const bone &p=m_bones[parent];
+        b.offset=pos-p.pos_org;
     }
     else
         b.offset=pos;
 
+    if(!m_rot_org.empty())
+    {
+        m_rot_org[bone_idx].rot_org=rot;
+        if(parent>=0)
+        {
+            nya_math::quat pq=m_rot_org[parent].rot_org;
+            pq.v=-pq.v;
+            m_rot_org[bone_idx].offset=pq*m_rot_org[bone_idx].rot_org;
+            b.offset=pq.rotate(b.offset);
+        }
+        else
+            m_rot_org[bone_idx].offset=m_rot_org[bone_idx].rot_org;
+    }
+
     update_bone(bone_idx);
 
     return bone_idx;
+}
+
+void skeleton::update_bone(int idx,const nya_math::vec3 &pos,const nya_math::quat &rot)
+{
+    const bone &b=m_bones[idx];
+    if(b.parent<0)
+    {
+        m_pos_tr[idx]=pos+b.offset;
+        if(m_rot_org.empty())
+            m_rot_tr[idx]=rot;
+        else
+            m_rot_tr[idx]=m_rot_org[idx].offset*rot;
+
+        return;
+    }
+
+    m_pos_tr[idx]=m_pos_tr[b.parent] + m_rot_tr[b.parent].rotate(pos+b.offset);
+
+    if(m_rot_org.empty())
+        m_rot_tr[idx]=m_rot_tr[b.parent]*rot;
+    else
+        m_rot_tr[idx]=m_rot_tr[b.parent]*(m_rot_org[idx].offset*rot);
 }
 
 int skeleton::get_bone_idx(const char *name) const
@@ -92,6 +131,14 @@ nya_math::vec3 skeleton::get_bone_original_pos(int idx) const
         return nya_math::vec3();
 
     return m_bones[idx].pos_org;
+}
+
+nya_math::quat skeleton::get_bone_original_rot(int idx) const
+{
+    if(idx<0 || idx>=(int)m_rot_org.size())
+        return nya_math::quat();
+
+    return m_rot_org[idx].rot_org;
 }
 
 int skeleton::add_ik(int target_bone_idx,int effect_bone_idx,int count,float fact,bool allow_invalid)
@@ -177,20 +224,6 @@ void skeleton::set_bone_transform(int bone_idx,const nya_math::vec3 &pos,const n
     bone &b=m_bones[bone_idx];
     b.pos=pos;
     b.rot=rot;
-}
-
-void skeleton::update_bone(int idx,const nya_math::vec3 &pos,const nya_math::quat &rot)
-{
-    const bone &b=m_bones[idx];
-    if(b.parent<0)
-    {
-        m_pos_tr[idx]=pos+b.offset;
-        m_rot_tr[idx]=rot;
-        return;
-    }
-
-    m_pos_tr[idx]=m_pos_tr[b.parent] + m_rot_tr[b.parent].rotate(pos+b.offset);
-    m_rot_tr[idx]=m_rot_tr[b.parent]*rot;
 }
 
 void skeleton::update_bone_childs(int idx) //ToDo: better realisation
