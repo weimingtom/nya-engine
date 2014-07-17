@@ -24,7 +24,7 @@ int skeleton::add_bone(const char *name,const nya_math::vec3 &pos,const nya_math
     m_pos_tr.resize(bone_idx+1);
     m_rot_tr.resize(bone_idx+1);
 
-    if(!m_rot_org.empty() || rot.v.length()>0.001f)
+    if(!m_rot_org.empty() || rot.v*rot.v>0.001f)
         m_rot_org.resize(m_bones.size());
 
     bone &b=m_bones[bone_idx];
