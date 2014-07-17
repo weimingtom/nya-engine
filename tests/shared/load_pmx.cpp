@@ -483,7 +483,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         if(b.bound.has_pos || b.bound.has_rot)
             res.skeleton.add_bound(old_bones[b.bound.src_idx],i,b.bound.k,b.bound.has_pos,b.bound.has_rot,true);
 
-        if(res.skeleton.add_bone(b.name.c_str(),b.pos,b.parent,true)!=i)
+        if(res.skeleton.add_bone(b.name.c_str(),b.pos,nya_math::quat(),b.parent,true)!=i)
         {
             nya_log::log()<<"pmx load error: invalid bone\n";
             return false;
