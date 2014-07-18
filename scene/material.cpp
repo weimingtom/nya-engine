@@ -1,9 +1,9 @@
 //https://code.google.com/p/nya-engine/
 
 #include "material.h"
-#include "memory/invalid_object.h"
+#include "formats/text_parser.h"
 #include "formats/string_convert.h"
-
+#include "memory/invalid_object.h"
 #include <list>
 
 namespace nya_scene
