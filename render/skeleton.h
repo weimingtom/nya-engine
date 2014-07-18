@@ -24,6 +24,7 @@ public:
     nya_math::vec3 get_bone_pos(int idx) const;
     nya_math::quat get_bone_rot(int idx) const;
     nya_math::vec3 get_bone_original_pos(int idx) const;
+    nya_math::quat get_bone_original_rot(int idx) const;
 
     void set_bone_transform(int bone_idx,const nya_math::vec3 &pos,
                                                 const nya_math::quat &rot);
@@ -34,7 +35,8 @@ public:
     const float *get_rot_buffer() const;
 
 public:
-    int add_bone(const char *name,const nya_math::vec3 &pos,int parent_bone_idx=-1,bool allow_doublicate=false);
+    int add_bone(const char *name,const nya_math::vec3 &pos,
+                 const nya_math::quat &rot=nya_math::quat(),int parent_bone_idx=-1,bool allow_doublicate=false);
 
 public:
     int add_ik(int target_bone_idx,int effect_bone_idx,int count,float fact,bool allow_invalid=false);
@@ -68,6 +70,14 @@ private:
 
     index_map m_bones_map;
     std::vector<bone> m_bones;
+
+    struct bone_r
+    {
+        nya_math::quat rot_org;
+        nya_math::quat offset;
+    };
+
+    std::vector<bone_r> m_rot_org;
 
     std::vector<nya_math::vec3> m_pos_tr;
     std::vector<nya_math::quat> m_rot_tr;

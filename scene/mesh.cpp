@@ -112,11 +112,10 @@ bool mesh::load_nms_skeleton_section(shared_mesh &res,const void *data,size_t si
         return false;
     }
 
-    //ToDo: rotations
     for(size_t i=0;i<c.bones.size();++i)
     {
         nya_formats::nms_skeleton_chunk::bone &b=c.bones[i];
-        res.skeleton.add_bone(b.name.c_str(),b.pos,b.parent);
+        res.skeleton.add_bone(b.name.c_str(),b.pos,b.rot,b.parent);
     }
 
     return true;
@@ -139,12 +138,6 @@ bool mesh::load_nms_material_section(shared_mesh &res,const void *data,size_t si
         material &to=res.materials[i+mat_idx_off];
 
         to.set_name(from.name.c_str());
-        for(size_t j=0;j<from.textures.size();++j)
-        {
-            texture tex;
-            tex.load(from.textures[j].filename.c_str());
-            to.set_texture(from.textures[j].semantics.c_str(),tex);
-        }
 
         for(size_t j=0;j<from.strings.size();++j)
         {
@@ -173,6 +166,13 @@ bool mesh::load_nms_material_section(shared_mesh &res,const void *data,size_t si
             }
             else if(name=="nya_zwrite")
                 material_default_pass(to).get_state().zwrite=nya_formats::bool_from_string(value);
+        }
+
+        for(size_t j=0;j<from.textures.size();++j)
+        {
+            texture tex;
+            tex.load(from.textures[j].filename.c_str());
+            to.set_texture(from.textures[j].semantics.c_str(),tex);
         }
 
         for(size_t j=0;j<from.vectors.size();++j)
@@ -218,8 +218,6 @@ bool mesh::load_nms(shared_mesh &res,resource_data &data,const char* name)
         };
     }
 
-    data.free();
-
     return true;
 }
 
@@ -227,14 +225,11 @@ bool mesh_internal::init_from_shared()
 {
     if(!m_shared.is_valid())
         return false;
-    
-    for(size_t i=0;i<m_replaced_materials.size();++i)
-        m_replaced_materials[i].unload();
 
     m_replaced_materials.clear();
     m_replaced_materials_idx.clear();
     m_anims.clear();
-    
+
     m_skeleton=m_shared->skeleton;
     m_bone_controls.clear();
 
