@@ -10,26 +10,10 @@ namespace nya_scene
 {
 
 const char *material::default_pass="default";
-std::string material::resources_prefix = "";
-
-void material::set_resources_prefix(const char *prefix)
-{
-    if (prefix)
-        resources_prefix.assign(prefix);
-    else
-        resources_prefix.clear();
-}
-
-const char *material::get_resources_prefix()
-{
-    return resources_prefix.c_str();
-}
-
-
 
 void material_internal::param_holder::apply_to_shader(const nya_scene::shader &shader,int uniform_idx) const
 {
-    if (p.is_valid())
+    if(p.is_valid())
     {
         if(m.is_valid())
             shader.internal().set_uniform_value(uniform_idx,p->f[0]*m->f[0],p->f[1]*m->f[1],p->f[2]*m->f[2],p->f[3]*m->f[3]);
@@ -51,74 +35,72 @@ void material_internal::skeleton_changed(const nya_render::skeleton *skeleton) c
         m_passes[i].m_shader.internal().skeleton_changed(skeleton);
 }
 
-bool material_internal::load(const char *data,size_t text_size)
+bool material::load_text(shared_material &res,resource_data &data,const char* name)
 {
     nya_formats::text_parser parser;
-    parser.load_from_data(data,text_size);
+    parser.load_from_data((const char *)data.get_data(),data.get_size());
     for(int section_idx=0;section_idx<parser.get_sections_count();++section_idx)
     {
         const char *section_type=parser.get_section_type(section_idx);
-        const char *section_name=parser.get_section_name(section_idx);
-        const char *section_value=parser.get_section_value(section_idx);
         if(strcmp(section_type,"@pass")==0)
         {
-            int pass_idx = add_pass(section_name);
-            pass &p = get_pass(pass_idx);
+            int pass_idx = res.add_pass(parser.get_section_name(section_idx));
+            pass &p = res.get_pass(pass_idx);
 
-            for (int subsection_idx = 0; subsection_idx < parser.get_subsections_count(section_idx); ++subsection_idx)
+            for(int subsection_idx=0;subsection_idx<parser.get_subsections_count(section_idx);++subsection_idx)
             {
-                const char *subsection_type = parser.get_subsection_type(section_idx, subsection_idx);
-                const char *subsection_value = parser.get_subsection_value(section_idx, subsection_idx);
-                if (strcmp(subsection_type, "shader") == 0)
+                const char *subsection_type = parser.get_subsection_type(section_idx,subsection_idx);
+                const char *subsection_value = parser.get_subsection_value(section_idx,subsection_idx);
+                if(strcmp(subsection_type, "shader") == 0)
                 {
-                    if (!p.m_shader.load(subsection_value))
-                        nya_log::log()<<"can't load shader when loding material '"<<m_name<<"'";
+                    if(!p.m_shader.load(subsection_value))
+                        nya_log::log()<<"can't load shader when loding material '"<<name<<"'";
                 }
-                else if (strcmp(subsection_type, "blend") == 0)
-                    p.get_state().blend = nya_formats::blend_mode_from_string(subsection_value, p.get_state().blend_src, p.get_state().blend_dst);
-                else if (strcmp(subsection_type, "zwrite") == 0)
-                    p.get_state().zwrite = nya_formats::bool_from_string(subsection_value);
-                else if (strcmp(subsection_type, "cull") == 0)
-                    p.get_state().cull_face = nya_formats::cull_face_from_string(subsection_value, p.get_state().cull_order);
+                else if(strcmp(subsection_type, "blend")==0)
+                    p.get_state().blend=nya_formats::blend_mode_from_string(subsection_value,p.get_state().blend_src,p.get_state().blend_dst);
+                else if(strcmp(subsection_type, "zwrite")==0)
+                    p.get_state().zwrite=nya_formats::bool_from_string(subsection_value);
+                else if(strcmp(subsection_type, "cull")==0)
+                    p.get_state().cull_face=nya_formats::cull_face_from_string(subsection_value,p.get_state().cull_order);
             }
         }
         else if(strcmp(section_type,"@texture")==0)
         {
             texture_proxy tex;
             tex.create();
-            if(tex->load(section_value))
+            if(tex->load(parser.get_section_value(section_idx)))
             {
-                const int texture_idx=get_texture_idx(section_name);
+                const int texture_idx=res.get_texture_idx(parser.get_section_name(section_idx));
                 if(texture_idx<0)
                 {
                     material_internal::material_texture mat;
-                    mat.semantics.assign(section_name);
+                    mat.semantics=parser.get_section_name(section_idx);
                     mat.proxy=tex;
-                    m_textures.push_back(mat);
+                    res.m_textures.push_back(mat);
                 }
                 else
-                    m_textures[texture_idx].proxy=tex;
+                    res.m_textures[texture_idx].proxy=tex;
             }
             else
-                nya_log::log()<<"can't load texture when loading material "<<m_name<<"'";
+                nya_log::log()<<"can't load texture when loading material "<<name<<"'";
         }
         else if(strcmp(section_type,"@param")==0)
         {
             material_internal::param_holder ph;
-            ph.param_name.assign(section_name);
+            ph.param_name=parser.get_section_name(section_idx);
             ph.p=param_proxy(material_internal::param(parser.get_section_value_vector(section_idx)));
 
-            const int param_idx=get_param_idx(section_name);
+            const int param_idx=res.get_param_idx(parser.get_section_name(section_idx));
             if(param_idx>=0)
-                m_params[param_idx]=ph;
+                res.m_params[param_idx]=ph;
             else
-                m_params.push_back(ph);
+                res.m_params.push_back(ph);
         }
         else
-            nya_log::log()<<"unknown section when loading material '"<<m_name<<"'";
+            nya_log::log()<<"unknown section when loading material '"<<name<<"'";
     }
 
-    m_should_rebuild_passes_maps=true;
+    res.m_should_rebuild_passes_maps=true;
     return true;
 }
 
@@ -145,8 +127,8 @@ void material_internal::set(const char *pass_name) const
 
     for(int slot_idx=0;slot_idx<(int)p.m_textures_slots_map.size();++slot_idx)
     {
-        int texture_idx = p.m_textures_slots_map[slot_idx];
-        if(texture_idx >= 0)
+        int texture_idx=p.m_textures_slots_map[slot_idx];
+        if(texture_idx>=0)
         {
             if(m_textures[texture_idx].proxy.is_valid())
                 m_textures[texture_idx].proxy->internal().set(slot_idx);
@@ -160,7 +142,7 @@ void material_internal::set(const char *pass_name) const
 
 void material_internal::unset() const
 {
-    if (m_last_set_pass_idx < 0)
+    if(m_last_set_pass_idx<0)
         return;
 
     const pass &p=m_passes[m_last_set_pass_idx];
@@ -178,7 +160,7 @@ void material_internal::unset() const
     for(int slot_idx=0;slot_idx<(int)p.m_textures_slots_map.size();++slot_idx)
     {
         const int texture_idx=(int)p.m_textures_slots_map[slot_idx];
-        if (texture_idx>=0 && texture_idx<(int)m_textures.size() && m_textures[texture_idx].proxy.is_valid())
+        if(texture_idx>=0 && texture_idx<(int)m_textures.size() && m_textures[texture_idx].proxy.is_valid())
             m_textures[texture_idx].proxy->internal().unset();
     }
 
@@ -268,7 +250,7 @@ void material_internal::pass::update_maps(const material_internal &m) const
     {
         const std::string semantics=m_shader.internal().get_texture_semantics(slot_idx);
         int texture_idx=m.get_texture_idx(semantics.c_str());
-        if (texture_idx>=0)
+        if(texture_idx>=0)
             m_textures_slots_map[slot_idx]=texture_idx;
     }
 }
@@ -298,7 +280,7 @@ int material_internal::get_pass_idx(const char *pass_name) const
         return -1;
 
     for(int i=0;i<(int)m_passes.size();++i)
-        if (m_passes[i].m_name == pass_name)
+        if(m_passes[i].m_name == pass_name)
             return i;
 
     return -1;
@@ -340,12 +322,13 @@ void material_internal::update_passes_maps() const
         }
     }
 
-    if (!m_should_rebuild_passes_maps)
+    if(!m_should_rebuild_passes_maps)
         return;
 
     // step 1: build params array
     // substep 1: build boolean map indicating used parameters and map of names of parameters to be added
-    std::vector<bool> used_parameters(m_params.size(), false);
+    std::vector<bool> used_parameters(m_params.size());
+    std::fill(used_parameters.begin(), used_parameters.end(), false);
     std::list<std::pair<std::string, nya_math::vec4> > parameters_to_add;
     for(int pass_idx=0;pass_idx<(int)m_passes.size();++pass_idx)
     {
@@ -375,7 +358,7 @@ void material_internal::update_passes_maps() const
     int param_idx = 0;
     for(std::vector<bool>::iterator iter=used_parameters.begin();iter!=used_parameters.end();++iter)
     {
-        if (!*iter)
+        if(!*iter)
             m_params.erase(m_params.begin()+param_idx);
         else
             ++param_idx;
@@ -392,28 +375,43 @@ void material_internal::update_passes_maps() const
     }
 
     for(std::vector<pass>::const_iterator iter=m_passes.begin();iter!=m_passes.end();++iter)
-    {
         iter->update_maps(*this);
-        iter->m_shader_changed=false;
-    }
+
+    for(std::vector<pass>::const_iterator it=m_passes.begin();it!=m_passes.end();++it)
+        it->m_shader_changed=false;
+
     m_should_rebuild_passes_maps = false;
 }
 
-bool material::load(const char *filename)
+bool material_internal::release()
 {
-    std::string fullFilename=resources_prefix+filename;
-    nya_resources::resource_data* res=nya_resources::get_resources_provider().access(fullFilename.c_str());
-    if(!res)
-    {
-        nya_log::log()<<"material load error: unable to access resource '"<<fullFilename<<"'";
-        return false;
-    }
+    m_passes.clear();
+    m_textures.clear();
+    m_params.clear();
+    m_name.clear();
+    m_should_rebuild_passes_maps = false;
+    m_last_set_pass_idx = -1;
 
-    const size_t data_size=res->get_size();
-    nya_memory::tmp_buffer_scoped buf(data_size);
-    res->read_all(buf.get_data());
-    res->release();
-    return m_internal.load((const char*)buf.get_data(), data_size);
+    return true;
+}
+
+bool material::load(const char *name)
+{
+    if(!m_internal.load(name))
+        return false;
+
+    if(!internal().m_shared.is_valid())
+        return false;
+
+    m_internal.m_last_set_pass_idx=-1;
+    m_internal.m_should_rebuild_passes_maps=true;
+
+    m_internal.m_name=m_internal.m_shared->m_name;
+    m_internal.m_passes=m_internal.m_shared->m_passes;
+    m_internal.m_params=m_internal.m_shared->m_params;
+    m_internal.m_textures=m_internal.m_shared->m_textures;
+
+    return true;
 }
 
 void material::set_texture(const char *semantics,const texture &tex)
@@ -482,11 +480,6 @@ const char *material::get_param_name(int idx) const
 void material::set_param(int idx,float f0,float f1,float f2,float f3)
 {
     set_param(idx,param(f0,f1,f2,f3));
-}
-
-void material::set_param(int idx,const nya_math::vec4 &v)
-{
-    set_param(idx,v.x,v.y,v.z,v.w);
 }
 
 void material::set_param(int idx,const param &p)
@@ -580,19 +573,6 @@ const material::param_array_proxy &material::get_param_array(int idx) const
     }
 
     return internal().m_params[idx].a;
-}
-
-void material::unload()
-{
-    for(int i=0;i<(int)m_internal.m_passes.size();++i)
-        m_internal.m_passes[i].m_shader.unload();
-
-    m_internal.m_passes.clear();
-    m_internal.m_textures.clear();
-    m_internal.m_params.clear();
-    m_internal.m_name.clear();
-    m_internal.m_should_rebuild_passes_maps = false;
-    m_internal.m_last_set_pass_idx = -1;
 }
 
 }

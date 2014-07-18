@@ -277,10 +277,7 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
     }
 
     if(include)
-    {
-        data.free();
         return true;
-    }
 
     if(res.vertex.empty())
     {
@@ -321,8 +318,6 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
 
     for(int i=0;i<(int)res.uniforms.size();++i)
         res.uniforms[i].location=res.shdr.get_handler(desc.uniforms[res.uniforms[i].name].c_str());
-
-    data.free();
 
     return true;
 }

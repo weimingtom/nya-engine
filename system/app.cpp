@@ -256,10 +256,10 @@ protected:
     }
 
 private:
-    PhoneDirect3DApp(nya_system::app_responder &app): m_app(app),m_windowClosed(false),m_windowVisible(false),m_time(0),m_height(0) {}
+    PhoneDirect3DApp(nya_system::app &app): m_app(app),m_windowClosed(false),m_windowVisible(false),m_time(0),m_height(0) {}
 
 private:
-    nya_system::app_responder &m_app;
+    nya_system::app &m_app;
 
 private:
     bool m_windowClosed;
@@ -293,29 +293,29 @@ public:
     }
 
 private:
-    Direct3DApplicationSource(nya_system::app_responder &app): m_app(app) {}
+    Direct3DApplicationSource(nya_system::app &app): m_app(app) {}
 
 private:
-    nya_system::app_responder &m_app;
+    nya_system::app &m_app;
 };
 
 class shared_app
 {
 public:
-    void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing,nya_system::app_responder &app)
+    void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing,nya_system::app &app)
     {
         auto direct3DApplicationSource = ref new Direct3DApplicationSource(app);
         CoreApplication::Run(direct3DApplicationSource);
     }
 
-    void start_fullscreen(unsigned int w,unsigned int h,nya_system::app_responder &app)
+    void start_fullscreen(unsigned int w,unsigned int h,nya_system::app &app)
     {
         //ToDo
 
         start_windowed(0,0,w,h,0,app);
     }
 
-    void finish(nya_system::app_responder &app)
+    void finish(nya_system::app &app)
     {
     }
 
@@ -323,7 +323,7 @@ public:
     {
     }
 
-    void update_splash(nya_system::app_responder &app)
+    void update_splash(nya_system::app &app)
     {
     }
 
@@ -352,7 +352,7 @@ namespace
 class shared_app
 {
 public:
-    void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing,nya_system::app_responder &app)
+    void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing,nya_system::app &app)
     {
         m_instance=GetModuleHandle(NULL);
         if(!m_instance)
@@ -602,14 +602,14 @@ public:
         finish(app);
     }
 
-    void start_fullscreen(unsigned int w,unsigned int h,nya_system::app_responder &app)
+    void start_fullscreen(unsigned int w,unsigned int h,nya_system::app &app)
     {
         //ToDo
 
         start_windowed(0,0,w,h,0,app);
     }
 
-    void finish(nya_system::app_responder &app)
+    void finish(nya_system::app &app)
     {
         if(!m_hwnd)
             return;
@@ -712,7 +712,7 @@ private:
 private:
     static LRESULT CALLBACK wnd_proc(HWND hwnd,UINT message,WPARAM wparam,LPARAM lparam)
     {
-        nya_system::app_responder *app=(nya_system::app_responder*)GetWindowLongPtr(hwnd,GWL_USERDATA);
+        nya_system::app *app=(nya_system::app*)GetWindowLongPtr(hwnd,GWL_USERDATA);
         if(!app)
             return DefWindowProc(hwnd,message,wparam,lparam );
 
@@ -838,7 +838,7 @@ public:
             SetWindowTextA(m_hwnd,title);
     }
 
-    void update_splash(nya_system::app_responder &app)
+    void update_splash(nya_system::app &app)
     {
         unsigned long time=nya_system::get_time();
         unsigned int dt=(unsigned)(time-m_time);
@@ -897,19 +897,19 @@ private:
 class shared_app
 {
 public:
-    void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing,nya_system::app_responder &app)
+    void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing,nya_system::app &app)
     {
          //ToDo
     }
 
-    void start_fullscreen(unsigned int w,unsigned int h,nya_system::app_responder &app)
+    void start_fullscreen(unsigned int w,unsigned int h,nya_system::app &app)
     {
         start_windowed(0,0,w,h,0,app);
     }
 
-    void finish(nya_system::app_responder &app) {}
+    void finish(nya_system::app &app) {}
     void set_title(const char *title) {}
-    void update_splash(nya_system::app_responder &app) {}
+    void update_splash(nya_system::app &app) {}
 
 public:
     static shared_app &get_app()
@@ -937,7 +937,7 @@ namespace
 class shared_app
 {
 public:
-    void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing,nya_system::app_responder &app)
+    void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing,nya_system::app &app)
     {
         if(m_dpy)
             return;
@@ -1110,12 +1110,12 @@ public:
         finish(app);
     }
 
-    void start_fullscreen(unsigned int w,unsigned int h,nya_system::app_responder &app)
+    void start_fullscreen(unsigned int w,unsigned int h,nya_system::app &app)
     {
         //ToDo
     }
 
-    void finish(nya_system::app_responder &app)
+    void finish(nya_system::app &app)
     {
         if(!m_dpy || !m_cx)
             return;
@@ -1149,7 +1149,7 @@ public:
         XSetStandardProperties(m_dpy,m_win,title,title,None,0,0,NULL);
     }
 
-    void update_splash(nya_system::app_responder &app)
+    void update_splash(nya_system::app &app)
     {
         unsigned long time=nya_system::get_time();
         unsigned int dt=(unsigned)(time-m_time);

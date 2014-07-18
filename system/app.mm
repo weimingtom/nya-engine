@@ -75,12 +75,12 @@ namespace
     class shared_app
     {
     public:
-        void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing,nya_system::app_responder &app)
+        void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing,nya_system::app &app)
         {
             start_fullscreen(w,h,app);
         }
 
-        void start_fullscreen(unsigned int w,unsigned int h,nya_system::app_responder &app)
+        void start_fullscreen(unsigned int w,unsigned int h,nya_system::app &app)
         {
             if(m_responder)
                 return;
@@ -93,7 +93,7 @@ namespace
             }
         }
 
-        void finish(nya_system::app_responder &app)
+        void finish(nya_system::app &app)
         {
         }
 
@@ -119,7 +119,7 @@ namespace
             return app;
         }
 
-        nya_system::app_responder *get_responder()
+        nya_system::app *get_responder()
         {
             return m_responder;
         }
@@ -128,7 +128,7 @@ namespace
         shared_app():m_responder(0),m_title("Nya engine") {}
 
     private:
-        nya_system::app_responder *m_responder;
+        nya_system::app *m_responder;
         std::string m_title;
     };
 }
@@ -155,9 +155,35 @@ namespace
     return YES;
 }
 
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
+{
+    nya_system::app *responder=shared_app::get_app().get_responder();
+    if(responder)
+    {
+        NSString *s=[url absoluteString];
+        if(responder->on_open_url(s.UTF8String))
+            return true;
+    }
+
+    return false;
+}
+
+- (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url
+{
+    nya_system::app *responder=shared_app::get_app().get_responder();
+    if(responder)
+    {
+        NSString *s=[url absoluteString];
+        if(responder->on_open_url(s.UTF8String))
+            return true;
+    }
+
+    return false;
+}
+
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    nya_system::app_responder *responder=shared_app::get_app().get_responder();
+    nya_system::app *responder=shared_app::get_app().get_responder();
     if(!responder)
         return;
 
@@ -170,7 +196,7 @@ namespace
 
 -(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    nya_system::app_responder *responder=shared_app::get_app().get_responder();
+    nya_system::app *responder=shared_app::get_app().get_responder();
     if(!responder)
         return;
 
@@ -185,7 +211,7 @@ namespace
 
 -(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    nya_system::app_responder *responder=shared_app::get_app().get_responder();
+    nya_system::app *responder=shared_app::get_app().get_responder();
     if(!responder)
         return;
 
@@ -317,7 +343,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
     [(EAGLView *)self.view setContext:context];
     [(EAGLView *)self.view setFramebuffer];
 
-    nya_system::app_responder *responder=shared_app::get_app().get_responder();
+    nya_system::app *responder=shared_app::get_app().get_responder();
     if(responder)
     {
         responder->on_init_splash();
@@ -336,7 +362,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 {
     if ([self isViewLoaded] && self.view.window)
     {
-        nya_system::app_responder *responder=shared_app::get_app().get_responder();
+        nya_system::app *responder=shared_app::get_app().get_responder();
         if(responder)
             responder->on_suspend();
 
@@ -351,7 +377,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
         static bool ignore_first=true;
         if(!ignore_first)
         {
-            nya_system::app_responder *responder=shared_app::get_app().get_responder();
+            nya_system::app *responder=shared_app::get_app().get_responder();
             if(responder)
                 responder->on_restore();
         }
@@ -375,7 +401,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
     // Tear down context.
     if ([EAGLContext currentContext] == context)
     {
-        nya_system::app_responder *responder=shared_app::get_app().get_responder();
+        nya_system::app *responder=shared_app::get_app().get_responder();
         if(responder)
             responder->on_free();
 
@@ -474,7 +500,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
     unsigned int dt=(unsigned int)(time-m_time);
     m_time=time;
 
-    nya_system::app_responder *responder=shared_app::get_app().get_responder();
+    nya_system::app *responder=shared_app::get_app().get_responder();
     if(responder)
         responder->on_frame(dt);
 
@@ -627,7 +653,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
         if (!defaultFramebuffer)
         {
             [self createFramebuffer];
-            nya_system::app_responder *responder=shared_app::get_app().get_responder();
+            nya_system::app *responder=shared_app::get_app().get_responder();
             if(responder)
                 responder->on_resize(framebufferWidth,framebufferHeight);
         }
@@ -664,11 +690,11 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
 @interface shared_app_delegate : NSObject <NSApplicationDelegate>
 {
-    nya_system::app_responder *m_app;
+    nya_system::app *m_app;
     int m_antialiasing;
 }
 
--(id)init_with_responder:(nya_system::app_responder*)responder antialiasing:(int)aa;
+-(id)init_with_responder:(nya_system::app*)responder antialiasing:(int)aa;
 
 @end
 
@@ -678,7 +704,7 @@ namespace
 class shared_app
 {
 public:
-    void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing,nya_system::app_responder &app)
+    void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing,nya_system::app &app)
     {
         [NSApplication sharedApplication];
 
@@ -704,14 +730,14 @@ public:
         [controller release];
     }
 
-    void start_fullscreen(unsigned int w,unsigned int h,nya_system::app_responder &app)
+    void start_fullscreen(unsigned int w,unsigned int h,nya_system::app &app)
     {
         //ToDo
 
         start_windowed(0,0,w,h,0,app);
     }
 
-    void finish(nya_system::app_responder &app)
+    void finish(nya_system::app &app)
     {
     }
 
@@ -779,7 +805,7 @@ private:
 @interface gl_view : NSOpenGLView<NSWindowDelegate>
 {
     NSTimer *m_animation_timer;
-    nya_system::app_responder *m_app;
+    nya_system::app *m_app;
     unsigned long m_time;
 
     enum state
@@ -799,7 +825,7 @@ private:
 
 @implementation gl_view
 
--(void)set_responder:(nya_system::app_responder*)responder
+-(void)set_responder:(nya_system::app*)responder
 {
     m_app=responder;
 }
@@ -1014,7 +1040,7 @@ private:
 
 @implementation shared_app_delegate
 
--(id)init_with_responder:(nya_system::app_responder*)responder  antialiasing:(int)aa
+-(id)init_with_responder:(nya_system::app*)responder  antialiasing:(int)aa
 {
     self=[super init];
     if (self)

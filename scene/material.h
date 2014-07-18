@@ -17,16 +17,18 @@ namespace nya_scene
 
 typedef proxy<texture> texture_proxy;
 
-class material_internal
+class material_internal;
+typedef material_internal shared_material;
+
+class material_internal: public scene_shared<shared_material>
 {
 public:
-    bool load(const char *data,size_t text_size=nya_formats::text_parser::no_size);
-
     void set(const char *pass_name) const;
     void unset() const;
     void skeleton_changed(const nya_render::skeleton *skeleton) const;
     int get_param_idx(const char *name) const;
     int get_texture_idx(const char *semantics) const;
+    bool release();
 
     material_internal(): m_last_set_pass_idx(-1),m_should_rebuild_passes_maps(false) {}
 
@@ -138,11 +140,8 @@ public:
     typedef material_internal::param_array_proxy param_array_proxy;
     typedef material_internal::pass pass;
 
-    static void set_resources_prefix(const char *prefix);
-    static const char *get_resources_prefix();
-
-    bool load(const char *filename);
-    void unload();
+    bool load(const char *name);
+    void unload() { m_internal.release(); }
 
     const char *get_name() const { return internal().m_name.c_str(); }
     void set_name(const char*name) { m_internal.m_name.assign(name?name:""); }
@@ -169,7 +168,6 @@ public:
     int get_params_count() const;
     int get_param_idx(const char *name) const {return m_internal.get_param_idx(name);}
     void set_param(int idx,float f0,float f1,float f2,float f3);
-    void set_param(int idx,const nya_math::vec4 &v);
     void set_param(int idx,const param &p);
     void set_param(int idx,const param_proxy &p);
     void set_param(int idx,const param_proxy &p,const param &m); //set as p*m
@@ -181,10 +179,19 @@ public:
     const param_proxy &get_param_multiplier(int idx) const;
     const param_array_proxy &get_param_array(int idx) const;
 
+public:
+    material() { material_internal::default_load_function(load_text); }
+
+public:
+    static void set_resources_prefix(const char *prefix) { material_internal::set_resources_prefix(prefix); }
+    static void register_load_function(material_internal::load_function function,bool clear_default=true) { material_internal::register_load_function(function,clear_default); }
+
+public:
+    static bool load_text(shared_material &res,resource_data &data,const char* name);
+
     const material_internal &internal() const { return m_internal; }
 
 private:
-    static std::string resources_prefix;
     material_internal m_internal;
 };
 

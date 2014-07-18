@@ -14,30 +14,9 @@ enum mouse_button
     mouse_right
 };
 
-class app_responder
+class app
 {
 public:
-    virtual void on_init_splash()=0;
-    virtual void on_splash(unsigned int dt)=0;
-    virtual void on_init()=0;
-    virtual void on_frame(unsigned int dt)=0;
-    virtual void on_free()=0;
-
-public:
-    virtual void on_suspend()=0;
-    virtual void on_restore()=0;
-
-public:
-    virtual void on_mouse_move(int x,int y)=0;
-    virtual void on_mouse_button(mouse_button button,bool pressed)=0;
-    virtual void on_mouse_scroll(int dx,int dy)=0;
-    virtual void on_keyboard(unsigned int key,bool pressed)=0;
-    virtual void on_resize(unsigned int w,unsigned int h)=0;
-};
-
-class app: public app_responder
-{
-protected:
     virtual void on_init_splash() {}
     virtual void on_init() {}
     virtual void on_splash(unsigned int dt) {}
@@ -48,12 +27,15 @@ public:
     virtual void on_suspend() {}
     virtual void on_restore() {}
 
-protected:
+public:
     virtual void on_mouse_move(int x,int y) {}
     virtual void on_mouse_button(mouse_button button,bool pressed) {}
     virtual void on_mouse_scroll(int dx,int dy) {}
     virtual void on_keyboard(unsigned int key,bool pressed) {}
     virtual void on_resize(unsigned int w,unsigned int h) {}
+
+public:
+    virtual bool on_open_url(const char *url) { return false; }
 
 public:
     void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing);
@@ -62,7 +44,7 @@ public:
 public:
     void set_title(const char *title);
 
-protected:
+public:
     void limit_framerate(unsigned int fps);
     void set_mouse_pos(int x,int y);
     void update_splash();
