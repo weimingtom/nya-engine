@@ -342,25 +342,19 @@ void shader_internal::set() const
         {
             case shared_shader::camera_pos:
             {
-                if(!get_camera().is_valid())
-                {
-                    m_shared->shdr.set_uniform(p.location,0.0f,0.0f,0.0f);
-                    break;
-                }
-
                 if(p.transform==shared_shader::local)
                 {
-                    const nya_math::vec3 v=transform::get().inverse_transform(get_camera()->get_pos());
+                    const nya_math::vec3 v=transform::get().inverse_transform(get_camera().get_pos());
                     m_shared->shdr.set_uniform(p.location,v.x,v.y,v.z);
                 }
                 else if(p.transform==shared_shader::local_rot)
                 {
-                    const nya_math::vec3 v=transform::get().inverse_rot(get_camera()->get_pos());
+                    const nya_math::vec3 v=transform::get().inverse_rot(get_camera().get_pos());
                     m_shared->shdr.set_uniform(p.location,v.x,v.y,v.z);
                 }
                 else
                 {
-                    const nya_math::vec3 v=get_camera()->get_pos();
+                    const nya_math::vec3 v=get_camera().get_pos();
                     m_shared->shdr.set_uniform(p.location,v.x,v.y,v.z);
                 }
             }
@@ -368,15 +362,9 @@ void shader_internal::set() const
 
             case shared_shader::camera_rot:
             {
-                if(!get_camera().is_valid())
-                {
-                    m_shared->shdr.set_uniform(p.location,0.0f,0.0f,0.0f);
-                    break;
-                }
-
                 //if(p.transform==shared_shader::none) //ToDo
                 {
-                    const nya_math::quat v=get_camera()->get_rot();
+                    const nya_math::quat v=get_camera().get_rot();
                     m_shared->shdr.set_uniform(p.location,v.v.x,v.v.y,v.v.z,v.w);
                 }
             }
