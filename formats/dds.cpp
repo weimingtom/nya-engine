@@ -4,13 +4,14 @@
 #include "memory/memory_reader.h"
 #include "memory/tmp_buffer.h"
 #include "resources/resources.h"
+#include <stdint.h>
 
 namespace nya_formats
 {
 
 struct dds_pixel_format
 {
-    typedef unsigned int uint;
+    typedef uint32_t uint;
 
     uint size;
     uint flags;
@@ -188,7 +189,7 @@ size_t dds::decode_header(const void *data,size_t size)
     if(!data || size<128)
         return 0;
 
-    typedef unsigned int uint;
+    typedef uint32_t uint;
 
     nya_memory::memory_reader reader(data,size);
     if(!reader.test("DDS ",4))
@@ -269,8 +270,8 @@ size_t dds::decode_header(const void *data,size_t size)
     else
         return 0;
 
-    unsigned int caps1=reader.read<unsigned int>();
-    unsigned int caps2=reader.read<unsigned int>();
+    reader.read<uint>(); //caps
+    const uint caps2=reader.read<uint>();
 
     type=texture_2d;
     if(caps2 & dds_cubemap)
