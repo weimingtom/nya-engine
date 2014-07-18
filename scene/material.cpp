@@ -9,7 +9,7 @@
 namespace nya_scene
 {
 
-const char *material::default_pass="default_pass";
+const char *material::default_pass="default";
 std::string material::resources_prefix = "";
 
 void material::set_resources_prefix(const char *prefix)
@@ -84,19 +84,20 @@ bool material_internal::load(const char *data,size_t text_size)
         }
         else if(strcmp(section_type,"@texture")==0)
         {
-            texture_proxy text( (nya_scene::texture()) );
-            if(text->load(section_value))
+            texture_proxy tex;
+            tex.create();
+            if(tex->load(section_value))
             {
                 const int texture_idx=get_texture_idx(section_name);
                 if(texture_idx<0)
                 {
                     material_internal::material_texture mat;
                     mat.semantics.assign(section_name);
-                    mat.proxy=text;
+                    mat.proxy=tex;
                     m_textures.push_back(mat);
                 }
                 else
-                    m_textures[texture_idx].proxy=text;
+                    m_textures[texture_idx].proxy=tex;
             }
             else
                 nya_log::log()<<"can't load texture when loading material "<<m_name<<"'";
