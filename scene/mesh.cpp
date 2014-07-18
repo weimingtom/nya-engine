@@ -347,7 +347,7 @@ void mesh::draw_group(int idx,const char *pass_name) const
     if(internal().mat(mat_idx).get_pass_idx(pass_name)<0)
         return;
 
-    if(internal().m_has_aabb && get_camera().is_valid() && !get_camera()->get_frustum().test_intersect(get_aabb()))
+    if(internal().m_has_aabb && !get_camera().get_frustum().test_intersect(get_aabb()))
         return;
 
     transform::set(internal().m_transform);
