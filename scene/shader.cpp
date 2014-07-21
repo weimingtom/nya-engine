@@ -29,6 +29,9 @@ struct shader_description
     typedef std::map<std::string,std::string> strings_map;
     strings_map samplers;
     strings_map uniforms;
+
+    std::string vertex;
+    std::string pixel;
 };
 
 shared_shader::transform_type transform_from_string(const char *str)
@@ -101,8 +104,8 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
             const char *text=parser.get_section_value(section_idx);
             if(text)
             {
-                res.vertex.append(text);
-                res.pixel.append(text);
+                desc.vertex.append(text);
+                desc.pixel.append(text);
             }
         }
         else if(strcmp(section_type,"@sampler")==0)
@@ -123,13 +126,13 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
         {
             const char *text=parser.get_section_value(section_idx);
             if(text)
-                res.vertex.append(text);
+                desc.vertex.append(text);
         }
         else if(strcmp(section_type,"@fragment")==0)
         {
             const char *text=parser.get_section_value(section_idx);
             if(text)
-                res.pixel.append(text);
+                desc.pixel.append(text);
         }
         else if(strcmp(section_type,"@predefined")==0)
         {
@@ -181,13 +184,13 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
     if(include)
         return true;
 
-    if(res.vertex.empty())
+    if(desc.vertex.empty())
     {
         log()<<"scene shader load error: empty vertex shader in "<<name<<"\n";
         return false;
     }
 
-    if(res.pixel.empty())
+    if(desc.pixel.empty())
     {
         log()<<"scene shader load error: empty pixel shader in "<<name<<"\n";
         return false;
@@ -200,10 +203,10 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
         it!=res.samplers.end();++it)
         res.shdr.set_sampler(desc.samplers[it->first].c_str(),it->second);
 
-    if(!res.shdr.add_program(nya_render::shader::vertex,res.vertex.c_str()))
+    if(!res.shdr.add_program(nya_render::shader::vertex,desc.vertex.c_str()))
         return false;
 
-    if(!res.shdr.add_program(nya_render::shader::pixel,res.pixel.c_str()))
+    if(!res.shdr.add_program(nya_render::shader::pixel,desc.pixel.c_str()))
         return false;
 
     for(int i=0;i<shared_shader::predefines_count;++i)
