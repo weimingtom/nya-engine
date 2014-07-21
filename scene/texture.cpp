@@ -175,16 +175,18 @@ bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
     return true;
 }
 
-void texture_internal::set(int slot) const
+bool texture_internal::set(int slot) const
 {
     if(!m_shared.is_valid())
     {
         nya_render::texture::unbind(slot);
-        return;
+        return false;
     }
 
     m_last_slot=slot;
     m_shared->tex.bind(slot);
+
+    return true;
 }
 
 void texture_internal::unset() const

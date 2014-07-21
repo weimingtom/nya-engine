@@ -4,12 +4,44 @@
 #include "formats/text_parser.h"
 #include "formats/string_convert.h"
 #include "memory/invalid_object.h"
+#include "system/system.h"
 #include <list>
 
 namespace nya_scene
 {
 
 const char *material::default_pass="default";
+
+namespace
+{
+    nya_scene::texture missing_texture()
+    {
+        static nya_scene::texture missing_red;
+        static nya_scene::texture missing_white;
+
+        static bool initialised=false;
+        if(!initialised)
+        {
+            const unsigned char red_data[4]={255,0,0,255};
+            const unsigned char white_data[4]={255,255,255,255};
+
+            nya_scene::shared_texture red_res;
+            red_res.tex.build_texture(red_data,1,1,nya_render::texture::color_rgba);
+            missing_red.create(red_res);
+
+            nya_scene::shared_texture white_res;
+            white_res.tex.build_texture(white_data,1,1,nya_render::texture::color_rgba);
+            missing_white.create(white_res);
+
+            initialised=true;
+        }
+
+        if((nya_system::get_time()/200)%2>0)
+            return missing_white;
+
+        return missing_red;
+    }
+}
 
 void material_internal::param_holder::apply_to_shader(const nya_scene::shader &shader,int uniform_idx) const
 {
@@ -131,12 +163,27 @@ void material_internal::set(const char *pass_name) const
         if(texture_idx>=0)
         {
             if(m_textures[texture_idx].proxy.is_valid())
-                m_textures[texture_idx].proxy->internal().set(slot_idx);
+            {
+                if(!m_textures[texture_idx].proxy->internal().set(slot_idx))
+                {
+                    nya_log::warning()<<"invalid texture for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' for pass '"<<pass_name<<"' in material '"<<m_name<<"\n";
+
+                    missing_texture().internal().set(slot_idx);
+                }
+            }
             else
-                nya_render::texture::unbind(slot_idx);
+            {
+                nya_log::warning()<<"invalid texture proxy for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' for pass '"<<pass_name<<"' in material '"<<m_name<<"\n";
+
+                missing_texture().internal().set(slot_idx);
+            }
         }
         else
-            nya_log::warning()<<"texture not set for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' for pass '"<<pass_name<<"' in material '"<<m_name<<"\n";
+        {
+            nya_log::warning()<<"missing texture for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' for pass '"<<pass_name<<"' in material '"<<m_name<<"\n";
+
+            missing_texture().internal().set(slot_idx);
+        }
     }
 }
 
@@ -449,7 +496,7 @@ const char *material::get_texture_semantics(int idx) const
 
     return internal().m_textures[idx].semantics.c_str();
 }
-    
+
 const texture_proxy &material::get_texture(int idx) const
 {
     if(idx < 0 || idx>=(int)internal().m_textures.size() )
@@ -460,7 +507,7 @@ const texture_proxy &material::get_texture(int idx) const
     
     return internal().m_textures[idx].proxy;
 }
-    
+
 const texture_proxy &material::get_texture(const char *semantics) const
 {
     return get_texture(get_texture_idx(semantics));
