@@ -30,21 +30,6 @@ material::pass &material_default_pass(material &m)
 
 }
 
-static std::string read_string(nya_memory::memory_reader &reader)
-{
-    unsigned short size=reader.read<unsigned short>();
-    const char *str=(const char *)reader.get_data();
-    if(!size || !str || !reader.check_remained(size))
-    {
-        reader.skip(size);
-        return "";
-    }
-
-    reader.skip(size);
-
-    return std::string(str,size);
-}
-
 bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size,int version)
 {
     nya_formats::nms_mesh_chunk c;
