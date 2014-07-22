@@ -24,7 +24,7 @@ class texture_internal: public scene_shared<shared_texture>
     friend class texture;
 
 public:
-    void set(int slot=0) const;
+    bool set(int slot=0) const;
     void unset() const;
 
 public:

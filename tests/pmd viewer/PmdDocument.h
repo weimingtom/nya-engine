@@ -9,6 +9,7 @@
 @public
     std::string m_model_name;
     std::string m_animation_name;
+    std::string m_export_obj_name;
 
     mmd_mesh *m_mesh;
     PmdView *m_view;
@@ -18,6 +19,7 @@
 }
 
 -(IBAction)loadAnimation:(id)sender;
+-(IBAction)exportToObj:(id)sender;
 -(BOOL)validateUserInterfaceItem:(id <NSValidatedUserInterfaceItem>)anItem;
 
 @end

@@ -13,6 +13,8 @@ public:
     bool load(const char *name);
     void unload();
 
+    const char *get_name() const { return m_mesh.get_name(); }
+
     void set_anim(const nya_scene::animation &anim,int layer=0);
     const nya_scene::animation_proxy & get_anim(int layer=0) const { return m_mesh.get_anim(layer); }
     unsigned int get_anim_time(int layer=0) const { return m_mesh.get_anim_time(layer); }
@@ -37,7 +39,8 @@ public:
     void set_rot(const nya_math::quat &rot) { m_mesh.set_rot(rot); }
     void set_scale(float scale) { m_mesh.set_scale(scale); }
 
-    const char *get_name() const { return m_mesh.get_name(); }
+    const nya_render::skeleton &get_skeleton() const { return internal().get_skeleton(); }
+
     int get_morphs_count() const { return (int)m_morphs.size(); }
     const char *get_morph_name(int idx) const
     {
@@ -55,8 +58,10 @@ public:
         return m_morph_data->morphs[idx].type;
     }
 
-
     mmd_mesh(): m_morph_data(0), m_pos_count(0) {}
+
+public:
+    const nya_scene::mesh_internal &internal() const { return m_mesh.internal(); }
 
 private:
     nya_scene::mesh m_mesh;

@@ -13,8 +13,6 @@ namespace nya_scene
 struct shared_shader
 {
     nya_render::shader shdr;
-    std::string vertex;
-    std::string pixel;
 
     typedef std::map<std::string,int> samplers_map;
     samplers_map samplers;
@@ -68,8 +66,6 @@ struct shared_shader
 
     bool release()
     {
-        vertex.clear();
-        pixel.clear();
         shdr.release();
         predefines.clear();
         uniforms.clear();

@@ -64,14 +64,12 @@
     if(!m_mesh)
         return;
 
+    NSArray *fileTypes = [NSArray arrayWithObjects:@"vmd",nil];
     NSOpenPanel* openDlg = [NSOpenPanel openPanel];
-
-     NSArray *fileTypes = [NSArray arrayWithObjects:@"vmd",nil];
     [openDlg setAllowedFileTypes:fileTypes];
     [openDlg setAllowsMultipleSelection:NO];
     [openDlg setCanChooseFiles:YES];
     [openDlg setCanChooseDirectories:NO];
-
     if ( [openDlg runModal] == NSOKButton )
     {
         NSArray* URLs = [openDlg URLs];
@@ -81,6 +79,15 @@
         NSURL* fileName = [URLs objectAtIndex:0];
         m_animation_name.assign(fileName.path.UTF8String);
     }
+}
+
+-(IBAction)exportToObj:(id)sender
+{
+    NSSavePanel* saveDlg = [NSSavePanel savePanel];
+    NSArray *fileTypes = [NSArray arrayWithObjects:@"obj",nil];
+    [saveDlg setAllowedFileTypes:fileTypes];
+    if ( [saveDlg runModal] == NSOKButton )
+        m_export_obj_name.assign([saveDlg URL].path.UTF8String);
 }
 
 -(IBAction)morphWindow:(id)sender

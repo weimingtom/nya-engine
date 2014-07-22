@@ -53,6 +53,7 @@ private:
 typedef proxy<camera> camera_proxy;
 
 void set_camera(const camera_proxy &cam);
-const camera_proxy &get_camera();
+camera &get_camera();
+camera_proxy &get_camera_proxy();
 
 }

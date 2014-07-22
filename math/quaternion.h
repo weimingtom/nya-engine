@@ -26,7 +26,7 @@ struct quat
 
     quat(const vec3 &from,const vec3 &to);
 
-    quat(const float *q) { v.x=q[0]; v.y=q[1]; v.z=q[2]; w=q[3]; }
+    explicit quat(const float *q) { v.x=q[0]; v.y=q[1]; v.z=q[2]; w=q[3]; }
 
     quat operator - () const { return quat(-v.x,-v.y,-v.z,-w); }
 

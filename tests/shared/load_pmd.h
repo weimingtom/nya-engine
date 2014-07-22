@@ -76,8 +76,9 @@ struct pmd_phys_data
     std::vector<joint> joints;
 };
 
-class pmd_loader
+struct pmd_loader
 {
+public:
     struct pmd_material_params
     {
         float diffuse[4];
@@ -86,12 +87,11 @@ class pmd_loader
         float ambient[3];
     };
 
-    struct pmd_vertex
+    struct vert
     {
-        nya_math::vec3 pos;
-        nya_math::vec3 pos2;
-        float normal[3];
-        float tc[2];
+        nya_math::vec3 pos[2];
+        nya_math::vec3 normal;
+        nya_math::vec2 tc;
         float bone_idx[2];
         float bone_weight;
     };

@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "formats/text_parser.h"
 #include "proxy.h"
 #include "render/render.h"
 #include "scene.h"
