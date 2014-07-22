@@ -71,6 +71,7 @@ class mesh_internal: public scene_shared<shared_mesh>
 
 public:
     const transform &get_transform() const { return m_transform; }
+    const nya_render::skeleton &get_skeleton() const { return m_skeleton; }
 
 private:
     mesh_internal(): m_recalc_aabb(true), m_has_aabb(false) {}

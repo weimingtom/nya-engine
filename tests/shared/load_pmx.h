@@ -7,8 +7,9 @@
 namespace nya_memory { class memory_reader; class tmp_buffer_ref; }
 namespace nya_scene { class mesh; class shared_mesh; typedef nya_memory::tmp_buffer_ref resource_data; }
 
-class pmx_loader
+struct pmx_loader
 {
+public:
     struct pmx_header
     {
         char text_encoding;

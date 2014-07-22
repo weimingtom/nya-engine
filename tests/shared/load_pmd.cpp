@@ -35,7 +35,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     if(!reader.check_remained(pmd_vert_size*vert_count))
         return false;
 
-    std::vector<pmd_vertex> vertices(vert_count);
+    std::vector<vert> vertices(vert_count);
     for(size_t i=0;i<vertices.size();++i)
     {
         vertices[i].pos.x=reader.read<float>();
