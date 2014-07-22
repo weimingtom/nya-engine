@@ -183,6 +183,7 @@ public:
     // animation
     void set_anim(const animation & anim,int layer=0) { set_anim(animation_proxy(anim),layer); }
     void set_anim(const animation_proxy & anim,int layer=0);
+    void remove_anim(int layer=0) { set_anim(animation_proxy(),layer); }
     const animation_proxy & get_anim(int layer=0) const;
     unsigned int get_anim_time(int layer=0) const;
     bool is_anim_finished(int layer=0) const;

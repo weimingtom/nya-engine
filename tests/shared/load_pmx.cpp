@@ -68,12 +68,12 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         v.pos[0].y=reader.read<float>();
         v.pos[0].z=-reader.read<float>();
 
-        v.normal[0]=reader.read<float>();
-        v.normal[1]=reader.read<float>();
-        v.normal[2]=-reader.read<float>();
+        v.normal.x=reader.read<float>();
+        v.normal.y=reader.read<float>();
+        v.normal.z=-reader.read<float>();
         
-        v.tc[0]=reader.read<float>();
-        v.tc[1]=1.0f-reader.read<float>();
+        v.tc.x=reader.read<float>();
+        v.tc.y=1.0f-reader.read<float>();
         reader.skip(header.extended_uv*sizeof(float)*4);
 
         switch(reader.read<char>())

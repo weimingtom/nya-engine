@@ -38,16 +38,16 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     std::vector<vert> vertices(vert_count);
     for(size_t i=0;i<vertices.size();++i)
     {
-        vertices[i].pos.x=reader.read<float>();
-        vertices[i].pos.y=reader.read<float>();
-        vertices[i].pos.z=-reader.read<float>();
+        vertices[i].pos[0].x=reader.read<float>();
+        vertices[i].pos[0].y=reader.read<float>();
+        vertices[i].pos[0].z=-reader.read<float>();
 
-        vertices[i].normal[0]=reader.read<float>();
-        vertices[i].normal[1]=reader.read<float>();
-        vertices[i].normal[2]=reader.read<float>();
+        vertices[i].normal.x=reader.read<float>();
+        vertices[i].normal.y=reader.read<float>();
+        vertices[i].normal.z=-reader.read<float>();
 
-        vertices[i].tc[0]=reader.read<float>();
-        vertices[i].tc[1]=1.0f-reader.read<float>();
+        vertices[i].tc.x=reader.read<float>();
+        vertices[i].tc.y=1.0f-reader.read<float>();
 
         vertices[i].bone_idx[0]=reader.read<ushort>();
         vertices[i].bone_idx[1]=reader.read<ushort>();
@@ -280,8 +280,8 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
 */
     for(size_t i=0;i<vertices.size();++i)
     {
-        vertices[i].pos2=vertices[i].pos-res.skeleton.get_bone_pos(int(vertices[i].bone_idx[1]));
-        vertices[i].pos-=res.skeleton.get_bone_pos(int(vertices[i].bone_idx[0]));
+        vertices[i].pos[1]=vertices[i].pos[0]-res.skeleton.get_bone_pos(int(vertices[i].bone_idx[1]));
+        vertices[i].pos[0]-=res.skeleton.get_bone_pos(int(vertices[i].bone_idx[0]));
     }
 
     res.vbo.set_vertex_data(&vertices[0],sizeof(vertices[0]),vert_count);

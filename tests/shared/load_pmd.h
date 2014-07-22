@@ -89,10 +89,9 @@ public:
 
     struct vert
     {
-        nya_math::vec3 pos;
-        nya_math::vec3 pos2;
-        float normal[3];
-        float tc[2];
+        nya_math::vec3 pos[2];
+        nya_math::vec3 normal;
+        nya_math::vec2 tc;
         float bone_idx[2];
         float bone_weight;
     };
