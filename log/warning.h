@@ -14,13 +14,20 @@ public:
     // returns index of inserted warning; preserves indices of previously added warnings
     int add_warning(const char *msg);
     void clear() { m_warnings.clear(); }
+    void ignore_warnings(bool ignore) { m_ignore_warnings=ignore; }
+
+public:
     int get_unique_warnings_count() { return (int)m_warnings.size(); }
     int get_count_for_warning_with_idx(int idx);
     const char *get_warning_message_with_idx(int idx);
 
+public:
+    warnings_counter(): m_ignore_warnings(false) {}
+
 private:
     typedef std::vector<std::pair<std::string,int> > warnings_counts_map;
     warnings_counts_map m_warnings;
+    bool m_ignore_warnings;
 };
 
 class warning_ostream: public memory_ostream

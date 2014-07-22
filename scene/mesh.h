@@ -189,7 +189,7 @@ public:
     void set_anim_time(unsigned int time,int layer=0);
 
 public:
-    mesh() { internal().default_load_function(load_nms); }
+    mesh() { mesh_internal::default_load_function(load_nms); }
 
 public:
     static void set_resources_prefix(const char *prefix) { mesh_internal::set_resources_prefix(prefix); }

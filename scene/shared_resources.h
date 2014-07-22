@@ -34,6 +34,10 @@ public:
 
         m_shared=get_shared_resources().access(final_name.c_str());
 
+#if DEBUG
+        m_debug_name=final_name;
+#endif
+
         return m_shared.is_valid();
     }
 
@@ -135,7 +139,7 @@ protected:
             {
                 if(scene_shared::get_load_functions().f[i](res,res_data,name))
                 {
-                    res_data.free(); //just for shure, load function should do this
+                    res_data.free();
                     return true;
                 }
             }
@@ -199,6 +203,10 @@ private:
 
 protected:
     shared_resource_ref m_shared;
+
+#if DEBUG
+private: std::string m_debug_name;
+#endif
 };
 
 }

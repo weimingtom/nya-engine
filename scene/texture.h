@@ -24,7 +24,7 @@ class texture_internal: public scene_shared<shared_texture>
     friend class texture;
 
 public:
-    void set(int slot=0) const;
+    bool set(int slot=0) const;
     void unset() const;
 
 public:
@@ -57,7 +57,7 @@ public:
     void build(const void *data,unsigned int width,unsigned int height,color_format format);
 
 public:
-    texture() { internal().default_load_function(load_tga); internal().default_load_function(load_dds); }
+    texture() { texture_internal::default_load_function(load_tga); texture_internal::default_load_function(load_dds); }
 
 public:
     static bool load_tga(shared_texture &res,resource_data &data,const char* name);

@@ -30,21 +30,6 @@ material::pass &material_default_pass(material &m)
 
 }
 
-static std::string read_string(nya_memory::memory_reader &reader)
-{
-    unsigned short size=reader.read<unsigned short>();
-    const char *str=(const char *)reader.get_data();
-    if(!size || !str || !reader.check_remained(size))
-    {
-        reader.skip(size);
-        return "";
-    }
-
-    reader.skip(size);
-
-    return std::string(str,size);
-}
-
 bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size,int version)
 {
     nya_formats::nms_mesh_chunk c;
@@ -112,11 +97,10 @@ bool mesh::load_nms_skeleton_section(shared_mesh &res,const void *data,size_t si
         return false;
     }
 
-    //ToDo: rotations
     for(size_t i=0;i<c.bones.size();++i)
     {
         nya_formats::nms_skeleton_chunk::bone &b=c.bones[i];
-        res.skeleton.add_bone(b.name.c_str(),b.pos,b.parent);
+        res.skeleton.add_bone(b.name.c_str(),b.pos,b.rot,b.parent);
     }
 
     return true;
@@ -139,12 +123,6 @@ bool mesh::load_nms_material_section(shared_mesh &res,const void *data,size_t si
         material &to=res.materials[i+mat_idx_off];
 
         to.set_name(from.name.c_str());
-        for(size_t j=0;j<from.textures.size();++j)
-        {
-            texture tex;
-            tex.load(from.textures[j].filename.c_str());
-            to.set_texture(from.textures[j].semantics.c_str(),tex);
-        }
 
         for(size_t j=0;j<from.strings.size();++j)
         {
@@ -173,6 +151,13 @@ bool mesh::load_nms_material_section(shared_mesh &res,const void *data,size_t si
             }
             else if(name=="nya_zwrite")
                 material_default_pass(to).get_state().zwrite=nya_formats::bool_from_string(value);
+        }
+
+        for(size_t j=0;j<from.textures.size();++j)
+        {
+            texture tex;
+            tex.load(from.textures[j].filename.c_str());
+            to.set_texture(from.textures[j].semantics.c_str(),tex);
         }
 
         for(size_t j=0;j<from.vectors.size();++j)
@@ -218,8 +203,6 @@ bool mesh::load_nms(shared_mesh &res,resource_data &data,const char* name)
         };
     }
 
-    data.free();
-
     return true;
 }
 
@@ -227,14 +210,11 @@ bool mesh_internal::init_from_shared()
 {
     if(!m_shared.is_valid())
         return false;
-    
-    for(size_t i=0;i<m_replaced_materials.size();++i)
-        m_replaced_materials[i].unload();
 
     m_replaced_materials.clear();
     m_replaced_materials_idx.clear();
     m_anims.clear();
-    
+
     m_skeleton=m_shared->skeleton;
     m_bone_controls.clear();
 
@@ -352,7 +332,7 @@ void mesh::draw_group(int idx,const char *pass_name) const
     if(internal().mat(mat_idx).get_pass_idx(pass_name)<0)
         return;
 
-    if(internal().m_has_aabb && get_camera().is_valid() && !get_camera()->get_frustum().test_intersect(get_aabb()))
+    if(internal().m_has_aabb && !get_camera().get_frustum().test_intersect(get_aabb()))
         return;
 
     transform::set(internal().m_transform);
@@ -415,7 +395,7 @@ material &mesh::modify_material(int idx)
     }
 
     m_internal.m_replaced_materials_idx[idx]=shared_mat_count+idx;
-    if(internal().m_shared->groups[idx].material_idx>=shared_mat_count)
+    if((int)internal().m_shared->groups[idx].material_idx>=shared_mat_count)
         return m_internal.m_replaced_materials[idx];
 
     m_internal.m_replaced_materials[idx]=internal().m_shared->materials[internal().m_shared->groups[idx].material_idx];
