@@ -311,6 +311,63 @@ private:
     m_last_time=nya_system::get_time();
 }
 
+-(void)saveObj:(const std::string &)name
+{
+    const char *mesh_name=m_mesh.get_name();
+    if(!mesh_name || !mesh_name[0])
+        return;
+
+    const nya_scene::shared_mesh *sh=m_mesh.internal().get_shared_data().operator->();
+    if(!sh)
+        return;
+
+    const nya_render::vbo &vbo=sh->vbo;
+    nya_memory::tmp_buffer_ref vert_buf;
+    if(!vbo.get_vertex_data(vert_buf))
+        return;
+
+    nya_memory::tmp_buffer_ref inds_buf;
+    if(!vbo.get_index_data(inds_buf))
+        return;
+
+    const int vcount=vbo.get_verts_count();
+    const int icount=vbo.get_indices_count();
+
+    const unsigned short *inds=(const unsigned short *)inds_buf.get_data();
+
+    const nya_render::skeleton &sk=m_mesh.get_skeleton();
+
+    const bool is_pmx=mesh_name[strlen(mesh_name)-1]=='x';
+    if(is_pmx)
+    {
+        //ToDo
+    }
+    else
+    {
+        /*
+         nya_math::vec3 pos;
+         nya_math::vec3 pos2;
+         float normal[3];
+         float tc[2];
+         float bone_idx[2];
+         float bone_weight;
+        */
+
+        const pmd_loader::vert *verts=(const pmd_loader::vert *)vert_buf.get_data();
+        for(int i=0;i<vcount;++i)
+        {
+        }
+    }
+
+    vert_buf.free();
+    inds_buf.free();
+
+
+    //ToDo
+
+    printf("saveObj: %s %s\n",name.c_str(),mesh_name);
+}
+
 - (void)animate:(id)sender
 {
     PmdDocument *doc=[[[self window] windowController] document];
@@ -318,6 +375,12 @@ private:
     {
         [m_animation_timer invalidate];
         return;
+    }
+
+    if(!doc->m_export_obj_name.empty())
+    {
+        [self saveObj: doc->m_export_obj_name];
+        doc->m_export_obj_name.clear();
     }
 
     if(!doc->m_animation_name.empty())
