@@ -95,7 +95,7 @@ public:
         nya_scene::animation anim;
         anim.load("anims/walk.vmd");
 
-        m_char.add_anim(anim);
+        m_char.set_anim(anim);
         //m_char.update(130);
         
         m_time=0;
@@ -148,21 +148,21 @@ class character_demo: public nya_system::app
 private:
 	void on_init_splash()
 	{
-	    nya_log::get_log()<<"on_init_splash\n";
+	    nya_log::log()<<"on_init_splash\n";
 
 	    glClearColor(0,0.6,0.7,1);
 	}
 
 	void on_splash(unsigned int dt)
 	{
-	    nya_log::get_log()<<"on_splash\n";
+	    nya_log::log()<<"on_splash\n";
 
 	    glClear(GL_COLOR_BUFFER_BIT);
     }
 
 	void on_init()
 	{
-	    nya_log::get_log()<<"on_init\n";
+	    nya_log::log()<<"on_init\n";
 
 	    glClearColor(0.2,0.4,0.5,0);
         glEnable(GL_DEPTH_TEST);
@@ -227,7 +227,7 @@ private:
 
     void on_resize(unsigned int w,unsigned int h)
     {
-        nya_log::get_log()<<"on_resize "<<w<<" "<<h<<"\n";
+        nya_log::log()<<"on_resize "<<w<<" "<<h<<"\n";
 
         if(!w || !h)
             return;
@@ -235,7 +235,7 @@ private:
         m_camera.set_aspect(float(w)/h);
     }
 
-	void on_free() { nya_log::get_log()<<"on_free\n"; }
+	void on_free() { nya_log::log()<<"on_free\n"; }
 
 private:
     scene m_scene;
@@ -263,7 +263,7 @@ int main(int argc, char **argv)
     nya_log::set_log(&log);
     */
 
-    nya_log::get_log()<<"character_demo started from path "<<nya_system::get_app_path()<<"\n";
+    nya_log::log()<<"character_demo started from path "<<nya_system::get_app_path()<<"\n";
 
     nya_resources::file_resources_provider fprov;
     fprov.set_folder(nya_system::get_app_path());

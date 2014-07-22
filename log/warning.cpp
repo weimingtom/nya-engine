@@ -7,7 +7,7 @@ namespace nya_log
 
 int warnings_counter::add_warning(const char *msg)
 {
-    if(!msg)
+    if(!msg || m_ignore_warnings)
         return 0;
 
     warnings_counts_map::iterator iter=m_warnings.begin();

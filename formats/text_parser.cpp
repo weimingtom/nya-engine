@@ -129,6 +129,8 @@ int text_parser::get_subsections_count(int section_idx) const
                 }
             }
         }
+
+        s.subsection_parsed=true;
     }
 
     return (int)s.subsections.size();
@@ -216,14 +218,19 @@ bool text_parser::line::next()
 
     return true;
 }
-    
+
 bool text_parser::load_from_data(const char *text,size_t text_size)
 {
-    text_size = get_real_text_size(text, text_size);
+    if(!text)
+        return false;
 
-    size_t global_count = 0;
-    line l = line::first(text, text_size);
-    while (l.next()) if (l.global) ++global_count;
+    text_size=get_real_text_size(text,text_size);
+    if(!text_size)
+        return false;
+
+    size_t global_count=0;
+    line l=line::first(text,text_size);
+    while(l.next()) if(l.global) ++global_count;
     m_sections.resize(global_count);
 
     size_t subsection_start_idx=0,subsection_end_idx=0,sections_count=0;
@@ -248,12 +255,12 @@ bool text_parser::load_from_data(const char *text,size_t text_size)
             if(sections_count>0)
             {
                 subsection_end_idx=l.offset+l.size;
-                if (!l.empty)
+                if(!l.empty)
                     subsection_empty=false;
             }
             else if(!l.empty)
             {
-                nya_log::warning()<<typeid(text_parser).name()<<": subsection found before any section declaration at line "<< l.line_number;
+                nya_log::log()<<typeid(text_parser).name()<<": subsection found before any section declaration at line "<< l.line_number;
             }
         }
     }
@@ -269,7 +276,7 @@ bool text_parser::load_from_file(const char *filename)
     nya_resources::resource_data* res=nya_resources::get_resources_provider().access(filename);
     if(!res)
     {
-        nya_log::warning()<<"file load error: unable to access resource '"<<filename<<"'";
+        nya_log::log()<<"file load error: unable to access resource '"<<filename<<"'";
         return false;
     }
 
@@ -282,11 +289,11 @@ bool text_parser::load_from_file(const char *filename)
 
 void text_parser::fill_section(section &s,const line &l)
 {
-   std::list<std::string> tokens = tokenize_line(l);
+   std::list<std::string> tokens=tokenize_line(l);
     // assert(tokens.size() > 0);
     // assert(tokens.front().size > 0);
     // assert(tokens.front().at(0) == global_marker);
-    std::list<std::string>::iterator iter = tokens.begin();
+    std::list<std::string>::iterator iter=tokens.begin();
     s.type.swap(*(iter++));
     bool need_option=false;
     bool need_value=false;
@@ -322,7 +329,7 @@ void text_parser::fill_section(section &s,const line &l)
         }
         else
         {
-            nya_log::warning()<<typeid(text_parser).name()<<": unexpected token at line "<<l.line_number;
+            nya_log::log()<<typeid(text_parser).name()<<": unexpected token at line "<<l.line_number;
             break;
         }
 
@@ -436,7 +443,7 @@ void text_parser::debug_print(nya_log::ostream_base &os) const
         for(size_t j=0;j<s.names.size();++j)
             os<<"  name "<<j<<" '"<<s.names[j]<<"'\n";
 
-        if (!s.option.empty())
+        if(!s.option.empty())
             os<<"  option '"<<s.option<<"'\n";
         os<<"  value '"<<s.value<<"'\n\n\n";
     }
