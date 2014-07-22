@@ -38,11 +38,12 @@ public:
     virtual ostream_base &operator << (float a) { m_sstream<<a; return *this; }
     virtual ostream_base &operator << (const char *a) { m_sstream<<(a?a:"NULL"); return *this; }
 
-    const char *get_text() const { return m_sstream.str().c_str(); }
+    const char *get_text() const { m_text_str=m_sstream.str(); return m_text_str.c_str(); }
     void clear() { m_sstream.str(""); }
 
 private:
     std::ostringstream m_sstream;
+    mutable std::string m_text_str;
 };
 
 }
