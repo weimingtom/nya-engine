@@ -68,12 +68,12 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         v.pos[0].y=reader.read<float>();
         v.pos[0].z=-reader.read<float>();
 
-        v.normal[0]=reader.read<float>();
-        v.normal[1]=reader.read<float>();
-        v.normal[2]=-reader.read<float>();
+        v.normal.x=reader.read<float>();
+        v.normal.y=reader.read<float>();
+        v.normal.z=-reader.read<float>();
         
-        v.tc[0]=reader.read<float>();
-        v.tc[1]=1.0f-reader.read<float>();
+        v.tc.x=reader.read<float>();
+        v.tc.y=1.0f-reader.read<float>();
         reader.skip(header.extended_uv*sizeof(float)*4);
 
         switch(reader.read<char>())
@@ -272,7 +272,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         //    printf("sp %d %d\n",sph_mode,sph_tex_idx);
 
         nya_scene::shader sh;
-        sh_.vertex=sh_defines+"uniform vec3 bones_pos[256]; uniform vec4 bones_rot[256];"
+        std::string vertex_code=sh_defines+"uniform vec3 bones_pos[256]; uniform vec4 bones_rot[256];"
         "vec3 tr(vec3 pos,int idx) { vec4 q=bones_rot[idx];"
         "return bones_pos[idx]+pos+cross(q.xyz,cross(q.xyz,pos)+pos*q.w)*2.0; }"
         "vec3 trn(vec3 normal,int idx) { vec4 q=bones_rot[idx];"
@@ -299,7 +299,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         "r.z-=1.0; tc.zw = 0.5*r.xy/length(r) + 0.5;"
         "gl_Position=gl_ModelViewProjectionMatrix*vec4(pos,gl_Vertex.w); }";
 
-        sh_.pixel=sh_defines+"varying vec4 tc; varying vec3 normal;\n"
+        std::string pixel_code=sh_defines+"varying vec4 tc; varying vec3 normal;\n"
         "uniform sampler2D base;\n"
         "uniform sampler2D env;\n"
         "void main() {\n"
@@ -315,8 +315,8 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         "   gl_FragColor=tm; }\n"
         "#endif\n";
         
-        sh_.shdr.add_program(nya_render::shader::vertex,sh_.vertex.c_str());
-        sh_.shdr.add_program(nya_render::shader::pixel,sh_.pixel.c_str());
+        sh_.shdr.add_program(nya_render::shader::vertex,vertex_code.c_str());
+        sh_.shdr.add_program(nya_render::shader::pixel,pixel_code.c_str());
         sh_.predefines.resize(2);
         sh_.predefines[0].type=nya_scene::shared_shader::bones_pos;
         sh_.predefines[0].location=sh_.shdr.get_handler("bones_pos");
@@ -344,7 +344,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         nya_scene::shader she;
 
         sprintf(buf,"%f",edge.width*0.02f);
-        she_.vertex="uniform vec3 bones_pos[256]; uniform vec4 bones_rot[256];"
+        vertex_code="uniform vec3 bones_pos[256]; uniform vec4 bones_rot[256];"
         "vec3 tr(vec3 pos,int idx) { vec4 q=bones_rot[idx];"
         "return bones_pos[idx]+pos+cross(q.xyz,cross(q.xyz,pos)+pos*q.w)*2.0; }"
         "void main() {"
@@ -357,10 +357,10 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
 
         "gl_Position=gl_ModelViewProjectionMatrix*vec4(pos,gl_Vertex.w); }";
         sprintf(buf,"%f,%f,%f,%f",edge.color[0],edge.color[1],edge.color[2],edge.color[3]);
-        she_.pixel="void main() { gl_FragColor=vec4("+std::string(buf)+"); }\n";
+        pixel_code="void main() { gl_FragColor=vec4("+std::string(buf)+"); }\n";
 
-        she_.shdr.add_program(nya_render::shader::vertex,she_.vertex.c_str());
-        she_.shdr.add_program(nya_render::shader::pixel,she_.pixel.c_str());
+        she_.shdr.add_program(nya_render::shader::vertex,vertex_code.c_str());
+        she_.shdr.add_program(nya_render::shader::pixel,pixel_code.c_str());
         she_.predefines.resize(2);
         she_.predefines[0].type=nya_scene::shared_shader::bones_pos;
         she_.predefines[0].location=she_.shdr.get_handler("bones_pos");

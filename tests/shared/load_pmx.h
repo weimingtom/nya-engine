@@ -7,8 +7,9 @@
 namespace nya_memory { class memory_reader; class tmp_buffer_ref; }
 namespace nya_scene { class mesh; class shared_mesh; typedef nya_memory::tmp_buffer_ref resource_data; }
 
-class pmx_loader
+struct pmx_loader
 {
+public:
     struct pmx_header
     {
         char text_encoding;
@@ -24,8 +25,8 @@ class pmx_loader
     struct vert
     {
         nya_math::vec3 pos[4];
-        float normal[3];
-        float tc[2];
+        nya_math::vec3 normal;
+        nya_math::vec2 tc;
         float bone_idx[4];
         float bone_weight[4];
     };

@@ -5,6 +5,7 @@
 #include "math/quaternion.h"
 #include "math/constants.h"
 #include "render/transform.h"
+#include "memory/invalid_object.h"
 #include <cmath>
 
 namespace nya_scene
@@ -113,6 +114,14 @@ void set_camera(const camera_proxy &cam)
         nya_render::set_projection_matrix(cam->get_proj_matrix());
 }
 
-const camera_proxy &get_camera() { return active_camera; }
+camera_proxy &get_camera_proxy() { return active_camera; }
+
+camera &get_camera()
+{
+    if(!active_camera.is_valid())
+        return nya_memory::get_invalid_object<nya_scene::camera>();
+
+    return *active_camera.operator->();
+}
 
 }

@@ -46,25 +46,18 @@ void viewer_camera::add_pos(float dx,float dy,float dz)
 
 void viewer_camera::set_aspect(float aspect)
 {
-    nya_scene::camera_proxy cam=nya_scene::get_camera();
-    if(cam.is_valid())
-        cam->set_proj(55.0,aspect,1.0,2000.0);
-
+    nya_scene::get_camera().set_proj(55.0,aspect,1.0,2000.0);
     update();
 }
 
 void viewer_camera::update()
 {
-    nya_scene::camera_proxy cam=nya_scene::get_camera();
-    if(!cam.is_valid())
-        return;
-
-    cam->set_rot(m_rot_x,m_rot_y,0.0);
+    nya_scene::get_camera().set_rot(m_rot_x,m_rot_y,0.0);
 
     nya_math::quat rot(-m_rot_y*3.14f/180.0f,-m_rot_x*3.14f/180.0f,0.0f);
     nya_math::vec3 pos=rot.rotate(m_pos);
 
-    cam->set_pos(pos.x,pos.y+10.0f,pos.z);
+    nya_scene::get_camera().set_pos(pos.x,pos.y+10.0f,pos.z);
 }
 
 void flip_vertical(unsigned char *data,int width,int height,int bpp)
@@ -311,6 +304,134 @@ private:
     m_last_time=nya_system::get_time();
 }
 
+-(void)saveObj:(const std::string &)name
+{
+    const char *mesh_name=m_mesh.get_name();
+    if(!mesh_name || !mesh_name[0])
+        return;
+
+    const nya_scene::shared_mesh *sh=m_mesh.internal().get_shared_data().operator->();
+    if(!sh)
+        return;
+
+    const nya_render::vbo &vbo=sh->vbo;
+    nya_memory::tmp_buffer_ref vert_buf;
+    if(!vbo.get_vertex_data(vert_buf))
+        return;
+
+    nya_memory::tmp_buffer_ref inds_buf;
+    if(!vbo.get_index_data(inds_buf))
+        return;
+
+    const int vcount=vbo.get_verts_count();
+
+    const nya_render::skeleton &sk=m_mesh.get_skeleton();
+
+    class obj_mesh
+    {
+    public:
+        void add_vec(const char *id,const nya_math::vec3 &v)
+        {
+            char buf[512];
+            sprintf(buf,"%s %f %f %f\n",id,v.x,v.y,v.z);
+            m_data.append(buf);
+        }
+
+        void add_vec(const char *id,const nya_math::vec2 &v)
+        {
+            char buf[512];
+            sprintf(buf,"%s %f %f\n",id,v.x,v.y);
+            m_data.append(buf);
+        }
+
+        void add_face(int idx1,int idx2,int idx3)
+        {
+            ++idx1,++idx2,++idx3;
+            char buf[512];
+            sprintf(buf,"f %d/%d/%d %d/%d/%d %d/%d/%d\n",idx1,idx1,idx1,
+                                                         idx2,idx2,idx2,
+                                                         idx3,idx3,idx3);
+            m_data.append(buf);
+        }
+
+        void add_group(const char *group_name)
+        {
+            char buf[512];
+            sprintf(buf,"g %s\n",group_name);
+            m_data.append(buf);
+        }
+
+        void add_group(const char *group_name,const char *mat_name)
+        {
+            char buf[512];
+            sprintf(buf,"g %s\nusemtl %s",group_name,mat_name);
+            m_data.append(buf);
+        }
+
+        bool write_file(const char *filename)
+        {
+            FILE *o=fopen(filename,"wb");
+            if(!o)
+                return false;
+
+            if(!m_data.empty())
+                fwrite(&m_data[0],1,m_data.length(),o);
+
+            fclose(o);
+            return true;
+        }
+
+    private:
+        std::string m_data;
+    } obj;
+
+    std::string obj_file_text;
+
+    const bool is_pmx=mesh_name[strlen(mesh_name)-1]=='x';
+    if(is_pmx)
+    {
+        const pmx_loader::vert *verts=(const pmx_loader::vert *)vert_buf.get_data();
+        for(int i=0;i<vcount;++i)
+        {
+            nya_math::vec3 pos;
+            for(int j=0;j<4;++j)
+                pos+=(sk.get_bone_pos(verts[i].bone_idx[j])+verts[i].pos[j])*verts[i].bone_weight[j];
+
+            obj.add_vec("v",pos);
+            obj.add_vec("vn",verts[i].normal);
+            obj.add_vec("vt",verts[i].tc);
+        }
+    }
+    else
+    {
+        const pmd_loader::vert *verts=(const pmd_loader::vert *)vert_buf.get_data();
+        for(int i=0;i<vcount;++i)
+        {
+            nya_math::vec3 pos;
+            for(int j=0;j<2;++j)
+                pos+=(sk.get_bone_pos(verts[i].bone_idx[0])+verts[i].pos[0])*
+                     (j==0?verts[i].bone_weight:(1.0f-verts[i].bone_weight));
+
+            obj.add_vec("v",pos);
+            obj.add_vec("vn",verts[i].normal);
+            obj.add_vec("vt",verts[i].tc);
+        }
+    }
+
+    vert_buf.free();
+
+    //sh->groups.size(); //ToDo
+
+    obj.add_group("mesh");
+    const unsigned short *inds=(const unsigned short *)inds_buf.get_data();
+    for(int i=0;i<vbo.get_indices_count();i+=3)
+        obj.add_face(inds[i],inds[i+1],inds[i+2]);
+
+    inds_buf.free();
+
+    obj.write_file(name.c_str());
+}
+
 - (void)animate:(id)sender
 {
     PmdDocument *doc=[[[self window] windowController] document];
@@ -318,6 +439,12 @@ private:
     {
         [m_animation_timer invalidate];
         return;
+    }
+
+    if(!doc->m_export_obj_name.empty())
+    {
+        [self saveObj: doc->m_export_obj_name];
+        doc->m_export_obj_name.clear();
     }
 
     if(!doc->m_animation_name.empty())

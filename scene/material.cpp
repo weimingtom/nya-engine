@@ -1,15 +1,47 @@
 //https://code.google.com/p/nya-engine/
 
 #include "material.h"
-#include "memory/invalid_object.h"
+#include "formats/text_parser.h"
 #include "formats/string_convert.h"
-
+#include "memory/invalid_object.h"
+#include "system/system.h"
 #include <list>
 
 namespace nya_scene
 {
 
 const char *material::default_pass="default";
+
+namespace
+{
+    nya_scene::texture missing_texture()
+    {
+        static nya_scene::texture missing_red;
+        static nya_scene::texture missing_white;
+
+        static bool initialised=false;
+        if(!initialised)
+        {
+            const unsigned char red_data[4]={255,0,0,255};
+            const unsigned char white_data[4]={255,255,255,255};
+
+            nya_scene::shared_texture red_res;
+            red_res.tex.build_texture(red_data,1,1,nya_render::texture::color_rgba);
+            missing_red.create(red_res);
+
+            nya_scene::shared_texture white_res;
+            white_res.tex.build_texture(white_data,1,1,nya_render::texture::color_rgba);
+            missing_white.create(white_res);
+
+            initialised=true;
+        }
+
+        if((nya_system::get_time()/200)%2>0)
+            return missing_white;
+
+        return missing_red;
+    }
+}
 
 void material_internal::param_holder::apply_to_shader(const nya_scene::shader &shader,int uniform_idx) const
 {
@@ -51,16 +83,16 @@ bool material::load_text(shared_material &res,resource_data &data,const char* na
             {
                 const char *subsection_type = parser.get_subsection_type(section_idx,subsection_idx);
                 const char *subsection_value = parser.get_subsection_value(section_idx,subsection_idx);
-                if(strcmp(subsection_type, "shader") == 0)
+                if(strcmp(subsection_type,"shader") == 0)
                 {
                     if(!p.m_shader.load(subsection_value))
                         nya_log::log()<<"can't load shader when loding material '"<<name<<"'";
                 }
-                else if(strcmp(subsection_type, "blend")==0)
+                else if(strcmp(subsection_type,"blend")==0)
                     p.get_state().blend=nya_formats::blend_mode_from_string(subsection_value,p.get_state().blend_src,p.get_state().blend_dst);
-                else if(strcmp(subsection_type, "zwrite")==0)
+                else if(strcmp(subsection_type,"zwrite")==0)
                     p.get_state().zwrite=nya_formats::bool_from_string(subsection_value);
-                else if(strcmp(subsection_type, "cull")==0)
+                else if(strcmp(subsection_type,"cull")==0)
                     p.get_state().cull_face=nya_formats::cull_face_from_string(subsection_value,p.get_state().cull_order);
             }
         }
@@ -121,7 +153,7 @@ void material_internal::set(const char *pass_name) const
 
     p.m_shader.internal().set();
     for(int uniform_idx=0;uniform_idx<(int)p.m_uniforms_idxs_map.size();++uniform_idx)
-        m_params[p.m_uniforms_idxs_map[uniform_idx]].apply_to_shader(p.m_shader, uniform_idx);
+        m_params[p.m_uniforms_idxs_map[uniform_idx]].apply_to_shader(p.m_shader,uniform_idx);
 
     nya_render::set_state(p.m_render_state);
 
@@ -131,12 +163,27 @@ void material_internal::set(const char *pass_name) const
         if(texture_idx>=0)
         {
             if(m_textures[texture_idx].proxy.is_valid())
-                m_textures[texture_idx].proxy->internal().set(slot_idx);
+            {
+                if(!m_textures[texture_idx].proxy->internal().set(slot_idx))
+                {
+                    nya_log::warning()<<"invalid texture for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"\n";
+
+                    missing_texture().internal().set(slot_idx);
+                }
+            }
             else
-                nya_render::texture::unbind(slot_idx);
+            {
+                nya_log::warning()<<"invalid texture proxy for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"\n";
+
+                missing_texture().internal().set(slot_idx);
+            }
         }
         else
-            nya_log::warning()<<"texture not set for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' for pass '"<<pass_name<<"' in material '"<<m_name<<"\n";
+        {
+            nya_log::warning()<<"missing texture for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"\n";
+
+            missing_texture().internal().set(slot_idx);
+        }
     }
 }
 
@@ -225,7 +272,7 @@ void material_internal::pass::set_shader(const nya_scene::shader &shader)
 void material_internal::pass::update_maps(const material_internal &m) const
 {
     m_uniforms_idxs_map.resize(m_shader.internal().get_uniforms_count());
-    std::fill(m_uniforms_idxs_map.begin(), m_uniforms_idxs_map.end(), 0); // params should exists if idxs_map was rebuild properly
+    std::fill(m_uniforms_idxs_map.begin(),m_uniforms_idxs_map.end(),0); // params should exists if idxs_map was rebuild properly
     for(int uniform_idx=0;uniform_idx<m_shader.internal().get_uniforms_count();++uniform_idx)
     {
         const std::string &name=m_shader.internal().get_uniform(uniform_idx).name;
@@ -328,8 +375,8 @@ void material_internal::update_passes_maps() const
     // step 1: build params array
     // substep 1: build boolean map indicating used parameters and map of names of parameters to be added
     std::vector<bool> used_parameters(m_params.size());
-    std::fill(used_parameters.begin(), used_parameters.end(), false);
-    std::list<std::pair<std::string, nya_math::vec4> > parameters_to_add;
+    std::fill(used_parameters.begin(),used_parameters.end(),false);
+    std::list<std::pair<std::string,nya_math::vec4> > parameters_to_add;
     for(int pass_idx=0;pass_idx<(int)m_passes.size();++pass_idx)
     {
         const nya_scene::shader &sh=m_passes[pass_idx].m_shader;
@@ -365,13 +412,13 @@ void material_internal::update_passes_maps() const
     }
 
     // add missing parameters
-    for(std::list<std::pair<std::string, nya_math::vec4> >::iterator iter=parameters_to_add.begin();iter!=parameters_to_add.end();++iter)
+    for(std::list<std::pair<std::string,nya_math::vec4> >::iterator iter=parameters_to_add.begin();iter!=parameters_to_add.end();++iter)
     {
         m_params.push_back(param_holder());
         m_params.back().param_name=iter->first;
         nya_math::vec4 &v=iter->second;
         m_params.back().p=param_proxy(param());
-        m_params.back().p->set(v.x, v.y, v.z, v.w);
+        m_params.back().p->set(v.x,v.y,v.z,v.w);
     }
 
     for(std::vector<pass>::const_iterator iter=m_passes.begin();iter!=m_passes.end();++iter)
@@ -449,7 +496,7 @@ const char *material::get_texture_semantics(int idx) const
 
     return internal().m_textures[idx].semantics.c_str();
 }
-    
+
 const texture_proxy &material::get_texture(int idx) const
 {
     if(idx < 0 || idx>=(int)internal().m_textures.size() )
@@ -457,10 +504,10 @@ const texture_proxy &material::get_texture(int idx) const
         nya_base_warning()<<"index out of range";
         return nya_memory::get_invalid_object<texture_proxy>();
     }
-    
+
     return internal().m_textures[idx].proxy;
 }
-    
+
 const texture_proxy &material::get_texture(const char *semantics) const
 {
     return get_texture(get_texture_idx(semantics));
@@ -518,12 +565,12 @@ void material::set_param(int idx,const param_proxy &p,const param_proxy &m)
     m_internal.m_params[idx].a.free();
 }
 
-void material::set_param_array(int idx, const param_array & a)
+void material::set_param_array(int idx,const param_array &a)
 {
     set_param_array(idx,param_array_proxy(a));
 }
 
-void material::set_param_array(int idx, const param_array_proxy & p)
+void material::set_param_array(int idx,const param_array_proxy &p)
 {
     if(idx<0 || idx>=(int)internal().m_params.size())
     {

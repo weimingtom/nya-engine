@@ -35,19 +35,19 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     if(!reader.check_remained(pmd_vert_size*vert_count))
         return false;
 
-    std::vector<pmd_vertex> vertices(vert_count);
+    std::vector<vert> vertices(vert_count);
     for(size_t i=0;i<vertices.size();++i)
     {
-        vertices[i].pos.x=reader.read<float>();
-        vertices[i].pos.y=reader.read<float>();
-        vertices[i].pos.z=-reader.read<float>();
+        vertices[i].pos[0].x=reader.read<float>();
+        vertices[i].pos[0].y=reader.read<float>();
+        vertices[i].pos[0].z=-reader.read<float>();
 
-        vertices[i].normal[0]=reader.read<float>();
-        vertices[i].normal[1]=reader.read<float>();
-        vertices[i].normal[2]=reader.read<float>();
+        vertices[i].normal.x=reader.read<float>();
+        vertices[i].normal.y=reader.read<float>();
+        vertices[i].normal.z=-reader.read<float>();
 
-        vertices[i].tc[0]=reader.read<float>();
-        vertices[i].tc[1]=1.0f-reader.read<float>();
+        vertices[i].tc.x=reader.read<float>();
+        vertices[i].tc.y=1.0f-reader.read<float>();
 
         vertices[i].bone_idx[0]=reader.read<ushort>();
         vertices[i].bone_idx[1]=reader.read<ushort>();
@@ -77,7 +77,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     sh_.samplers_count=1;
     sh_.samplers["diffuse"]=0;
 
-    sh_.vertex="uniform vec3 bones_pos[255]; uniform vec4 bones_rot[255];"
+    const char *vertex_code="uniform vec3 bones_pos[255]; uniform vec4 bones_rot[255];"
     "vec3 tr(vec3 pos,int idx) { vec4 q=bones_rot[idx];"
     "return bones_pos[idx]+pos+cross(q.xyz,cross(q.xyz,pos)+pos*q.w)*2.0; }"
     "varying vec2 tc;"
@@ -86,12 +86,12 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     "vec3 pos=mix(tr(gl_MultiTexCoord2.xyz,bone1),tr(gl_Vertex.xyz,bone0),gl_MultiTexCoord1.z);"
     "tc=gl_MultiTexCoord0.xy; gl_Position=gl_ModelViewProjectionMatrix*vec4(pos,1.0); }";
 
-    sh_.pixel="varying vec2 tc; uniform sampler2D base; void main() { vec4 tm=texture2D(base,tc.xy);"
+    const char *pixel_code="varying vec2 tc; uniform sampler2D base; void main() { vec4 tm=texture2D(base,tc.xy);"
               "if(tm.a<0.001) discard;\n"
               " gl_FragColor=tm; }";
 
-    sh_.shdr.add_program(nya_render::shader::vertex,sh_.vertex.c_str());
-    sh_.shdr.add_program(nya_render::shader::pixel,sh_.pixel.c_str());
+    sh_.shdr.add_program(nya_render::shader::vertex,vertex_code);
+    sh_.shdr.add_program(nya_render::shader::pixel,pixel_code);
     sh_.predefines.resize(2);
     sh_.predefines[0].type=nya_scene::shared_shader::bones_pos;
     sh_.predefines[0].location=sh_.shdr.get_handler("bones_pos");
@@ -102,7 +102,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     nya_scene::shared_shader she_;
     nya_scene::shader she;
     
-    she_.vertex="uniform vec3 bones_pos[255]; uniform vec4 bones_rot[255];"
+    const char *vertex_code2="uniform vec3 bones_pos[255]; uniform vec4 bones_rot[255];"
     "vec3 tr(vec3 pos,int idx) { vec4 q=bones_rot[idx];"
     "return bones_pos[idx]+pos+cross(q.xyz,cross(q.xyz,pos)+pos*q.w)*2.0; }"
     "void main()"
@@ -110,10 +110,10 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     "vec3 pos=mix(tr(gl_MultiTexCoord2.xyz,bone1),tr(gl_Vertex.xyz,bone0),gl_MultiTexCoord1.z);"
     "pos.xyz+=gl_Normal*0.01;"
     "gl_Position=gl_ModelViewProjectionMatrix*vec4(pos,1.0); }";
-    she_.pixel="void main() { gl_FragColor=vec4(0.0,0.0,0.0,1.0); }\n";
+    const char *pixel_code2="void main() { gl_FragColor=vec4(0.0,0.0,0.0,1.0); }\n";
     
-    she_.shdr.add_program(nya_render::shader::vertex,she_.vertex.c_str());
-    she_.shdr.add_program(nya_render::shader::pixel,she_.pixel.c_str());
+    she_.shdr.add_program(nya_render::shader::vertex,vertex_code2);
+    she_.shdr.add_program(nya_render::shader::pixel,pixel_code2);
     she_.predefines.resize(2);
     she_.predefines[0].type=nya_scene::shared_shader::bones_pos;
     she_.predefines[0].location=she_.shdr.get_handler("bones_pos");
@@ -280,8 +280,8 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
 */
     for(size_t i=0;i<vertices.size();++i)
     {
-        vertices[i].pos2=vertices[i].pos-res.skeleton.get_bone_pos(int(vertices[i].bone_idx[1]));
-        vertices[i].pos-=res.skeleton.get_bone_pos(int(vertices[i].bone_idx[0]));
+        vertices[i].pos[1]=vertices[i].pos[0]-res.skeleton.get_bone_pos(int(vertices[i].bone_idx[1]));
+        vertices[i].pos[0]-=res.skeleton.get_bone_pos(int(vertices[i].bone_idx[0]));
     }
 
     res.vbo.set_vertex_data(&vertices[0],sizeof(vertices[0]),vert_count);
