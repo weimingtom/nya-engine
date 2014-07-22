@@ -67,8 +67,8 @@ bool animation::load_vmd(shared_animation &res,resource_data &data,const char* n
             std::string name;
             uint frame;
 
-            float pos[3];
-            float rot[4];
+            nya_math::vec3 pos;
+            nya_math::quat rot;
 
             char bezier_x[16];
             char bezier_y[16];
@@ -81,14 +81,14 @@ bool animation::load_vmd(shared_animation &res,resource_data &data,const char* n
         bone_frame.name.resize(strlen(bone_frame.name.c_str()));
         reader.skip(15);
         bone_frame.frame=reader.read<uint>();
-        bone_frame.pos[0]=reader.read<float>();
-        bone_frame.pos[1]=reader.read<float>();
-        bone_frame.pos[2]=-reader.read<float>();
+        bone_frame.pos.x=reader.read<float>();
+        bone_frame.pos.y=reader.read<float>();
+        bone_frame.pos.z=-reader.read<float>();
 
-        bone_frame.rot[0]=-reader.read<float>();
-        bone_frame.rot[1]=-reader.read<float>();
-        bone_frame.rot[2]=reader.read<float>();
-        bone_frame.rot[3]=reader.read<float>();
+        bone_frame.rot.v.x=-reader.read<float>();
+        bone_frame.rot.v.y=-reader.read<float>();
+        bone_frame.rot.v.z=reader.read<float>();
+        bone_frame.rot.w=reader.read<float>();
 
         memcpy(bone_frame.bezier_x,reader.get_data(),sizeof(bone_frame.bezier_x));
         reader.skip(sizeof(bone_frame.bezier_x));
