@@ -283,6 +283,9 @@ int mesh_internal::get_mat_idx(int group_idx) const
     if(group_idx<(int)m_replaced_materials_idx.size())
         return m_replaced_materials_idx[group_idx];
 
+    if(group_idx>=(int)m_shared->groups.size())
+        return -1;
+
     const shared_mesh::group &g=m_shared->groups[group_idx];
     if(g.material_idx>=m_shared->materials.size())
         return -1;

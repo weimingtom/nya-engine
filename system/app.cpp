@@ -710,6 +710,32 @@ private:
   #endif
 
 private:
+	static unsigned int get_x11_key(unsigned int key)
+	{
+		switch(key)
+		{
+		case VK_SHIFT: return nya_system::key_shift;
+		case VK_CONTROL: return nya_system::key_control;
+		case VK_MENU: return nya_system::key_alt;
+
+		case VK_CAPITAL: return nya_system::key_capital;
+		case VK_ESCAPE: return nya_system::key_escape;
+		case VK_RETURN: return nya_system::key_return;
+
+		case VK_END: return nya_system::key_end;
+		case VK_HOME: return nya_system::key_home;
+		case VK_INSERT: return nya_system::key_insert;
+		case VK_DELETE: return nya_system::key_delete;
+
+		case VK_UP: return nya_system::key_up;
+		case VK_DOWN: return nya_system::key_down;
+		case VK_LEFT: return nya_system::key_left;
+		case VK_RIGHT: return nya_system::key_right;
+		}
+
+		return 0;
+	}
+
     static LRESULT CALLBACK wnd_proc(HWND hwnd,UINT message,WPARAM wparam,LPARAM lparam)
     {
         nya_system::app *app=(nya_system::app*)GetWindowLongPtr(hwnd,GWL_USERDATA);
@@ -734,11 +760,7 @@ private:
             }
             break;
 
-            case WM_CLOSE:
-            {
-                get_app().finish(*app);
-            }
-            break;
+            case WM_CLOSE: get_app().finish(*app); break;
 
             case WM_MOUSEWHEEL:
             {
@@ -761,29 +783,10 @@ private:
             }
             break;
 
-            case WM_LBUTTONDOWN:
-            {
-                app->on_mouse_button(nya_system::mouse_left,true);
-            }
-            break;
-
-            case WM_LBUTTONUP:
-            {
-                app->on_mouse_button(nya_system::mouse_left,false);
-            }
-            break;
-
-            case WM_RBUTTONDOWN:
-            {
-                app->on_mouse_button(nya_system::mouse_right,true);
-            }
-            break;
-
-            case WM_RBUTTONUP:
-            {
-                app->on_mouse_button(nya_system::mouse_right,false);
-            }
-            break;
+            case WM_LBUTTONDOWN: app->on_mouse_button(nya_system::mouse_left,true); break;
+            case WM_LBUTTONUP: app->on_mouse_button(nya_system::mouse_left,false); break;
+            case WM_RBUTTONDOWN: app->on_mouse_button(nya_system::mouse_right,true); break;
+            case WM_RBUTTONUP: app->on_mouse_button(nya_system::mouse_right,false); break;
 
             case WM_KEYDOWN:
             {
@@ -799,6 +802,10 @@ private:
 
                 if(key=='0')
                     app->on_keyboard(nya_system::key_0,true);
+
+				const unsigned int x11key=get_x11_key(key);
+				if(x11key)
+					app->on_keyboard(x11key,true);
             }
             break;
 
@@ -816,6 +823,10 @@ private:
 
                 if(key=='0')
                     app->on_keyboard(nya_system::key_0,false);
+
+				const unsigned int x11key=get_x11_key(key);
+				if(x11key)
+					app->on_keyboard(x11key,true);
             }
             break;
         };
