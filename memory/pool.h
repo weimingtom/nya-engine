@@ -65,10 +65,9 @@ public:
 
         data->~t_data();
 
+        m_free_node_idx=n.block_idx*block_elements_count + idx;
         n.block_idx=no_idx;
         n.next_free=m_free_node_idx;
-
-        m_free_node_idx=n.block_idx*block_elements_count + idx;
 
         --m_used_count;
 
