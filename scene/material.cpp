@@ -138,15 +138,15 @@ bool material::load_text(shared_material &res,resource_data &data,const char* na
 
 void material_internal::set(const char *pass_name) const
 {
+    if(!pass_name)
+        return;
+
     if(m_last_set_pass_idx>=0)
         unset();
 
     m_last_set_pass_idx=get_pass_idx(pass_name);
     if(m_last_set_pass_idx<0)
-    {
-        nya_log::warning()<<"Setting non existing pass named '"<<pass_name<<"' in material '"<<m_name.c_str()<<"\n";
-        return ;
-    }
+        return;
 
     update_passes_maps();
     const pass &p=m_passes[m_last_set_pass_idx];

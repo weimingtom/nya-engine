@@ -295,12 +295,18 @@ int mesh_internal::get_mat_idx(int group_idx) const
 
 void mesh_internal::draw_group(int idx, const char *pass_name) const
 {
+    if(!m_shared.is_valid())
+        return;
+
     if(idx<0 || idx>=(int)m_shared->groups.size())
         return;
 
     int mat_idx=get_mat_idx(idx);
     if(mat_idx<0)
+    {
+        nya_log::warning()<<"invalid material for group'"<<idx<<"in mesh"<<get_name()<<"\n";
         return;
+    }
 
     const shared_mesh::group &g=m_shared->groups[idx];
 
@@ -328,6 +334,9 @@ void mesh::draw(const char *pass_name) const
 
 void mesh::draw_group(int idx,const char *pass_name) const
 {
+    if(!pass_name)
+        return;
+
     int mat_idx=internal().get_mat_idx(idx);
     if(mat_idx<0)
         return;
