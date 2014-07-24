@@ -188,9 +188,12 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         for(int j=0;j<2;++j)
         {
             const int name_len=reader.read<int>();
-            std::string name((const char*)reader.get_data(),name_len);
+            if(j==1)
+            {
+                std::string name((const char*)reader.get_data(),name_len);
+                m.set_name(name.c_str());
+            }
             reader.skip(name_len);
-            m.set_name(name.c_str());
         }
 
         std::string sh_defines;
@@ -229,6 +232,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         const int comment_len=reader.read<int>();
         reader.skip(comment_len);
 
+        g.name="mesh";
         g.offset=offset;
         g.count=reader.read<int>();
         g.material_idx=i;
@@ -314,7 +318,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         "#else\n"
         "   gl_FragColor=tm; }\n"
         "#endif\n";
-        
+
         sh_.shdr.add_program(nya_render::shader::vertex,vertex_code.c_str());
         sh_.shdr.add_program(nya_render::shader::pixel,pixel_code.c_str());
         sh_.predefines.resize(2);
@@ -336,6 +340,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         res.groups.resize(res.groups.size()+1);
         nya_scene::shared_mesh::group &ge=res.groups.back();
         ge=res.groups[i];
+        ge.name="edge";
         ge.material_idx=int(res.materials.size());
         res.materials.resize(res.materials.size()+1);
         nya_scene::material &me = res.materials.back();

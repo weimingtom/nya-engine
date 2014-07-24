@@ -357,15 +357,34 @@ private:
         void add_group(const char *group_name)
         {
             char buf[512];
-            sprintf(buf,"g %s\n",group_name);
+            sprintf(buf,"\ng %s\n",group_name);
             m_data.append(buf);
         }
 
         void add_group(const char *group_name,const char *mat_name)
         {
             char buf[512];
-            sprintf(buf,"g %s\nusemtl %s",group_name,mat_name);
+            sprintf(buf,"\ng %s\nusemtl %s\n",group_name,mat_name);
             m_data.append(buf);
+        }
+
+        void add_material(const char *mat_name,const char *tex_name)
+        {
+            m_materials_data.append("\nnewmtl ");
+            m_materials_data.append(mat_name);
+            m_materials_data.append("\nillum 2\n"
+                          "Kd 0.800000 0.800000 0.800000\n"
+                          "Ka 0.200000 0.200000 0.200000\n"
+                          "Ks 0.000000 0.000000 0.000000\n"
+                          "Ke 0.000000 0.000000 0.000000\n"
+                          "Ns 0.000000\n");
+
+            if(tex_name)
+            {
+                m_materials_data.append("map_Kd ");
+                m_materials_data.append(tex_name);
+                m_materials_data.append("\n");
+            }
         }
 
         bool write_file(const char *filename)
@@ -373,6 +392,35 @@ private:
             FILE *o=fopen(filename,"wb");
             if(!o)
                 return false;
+
+            if(!m_materials_data.empty())
+            {
+                std::string name(filename);
+                std::string path;
+                size_t sep=name.find_last_of("\\/");
+                if(sep!=std::string::npos)
+                {
+                    path=name.substr(0,sep+1);
+                    name=name.substr(sep+1,name.size()-sep-1);
+                }
+                size_t dot=name.find_last_of(".");
+                if(dot!=std::string::npos)
+                    name=name.substr(0,dot);
+                
+                name+=".mtl";
+
+                FILE *om=fopen((path+name).c_str(),"wb");
+                if(!om)
+                    return false;
+
+                fwrite(&m_materials_data[0],1,m_materials_data.length(),om);
+                fclose(om);
+
+                char buf[512];
+                sprintf(buf,"mtllib %s\n\n",name.c_str());
+
+                fwrite(buf,1,strlen(buf),o);
+            }
 
             if(!m_data.empty())
                 fwrite(&m_data[0],1,m_data.length(),o);
@@ -383,6 +431,7 @@ private:
 
     private:
         std::string m_data;
+        std::string m_materials_data;
     } obj;
 
     std::string obj_file_text;
@@ -420,12 +469,31 @@ private:
 
     vert_buf.free();
 
-    //sh->groups.size(); //ToDo
+    std::string tex_cut_path(mesh_name);
+    size_t sep=tex_cut_path.find_last_of("\\/");
+    if(sep!=std::string::npos)
+        tex_cut_path=tex_cut_path.substr(0,sep+1);
 
-    obj.add_group("mesh");
     const unsigned short *inds=(const unsigned short *)inds_buf.get_data();
-    for(int i=0;i<vbo.get_indices_count();i+=3)
-        obj.add_face(inds[i],inds[i+1],inds[i+2]);
+    for(int i=0;i<(int)sh->groups.size();++i)
+    {
+        const nya_scene::shared_mesh::group &g=sh->groups[i];
+        if(g.name=="edge")
+            continue;
+
+        char group_name[255];
+        sprintf(group_name,"mesh%0d",i);
+
+        char mat_name[255];
+        sprintf(mat_name,"Material%0d",i);
+
+        nya_scene::texture_proxy t=sh->materials[g.material_idx].get_texture("diffuse");
+        obj.add_material(mat_name,t.is_valid()?t->get_name()+tex_cut_path.length():0);
+
+        obj.add_group(group_name,mat_name);
+        for(int j=g.offset;j<g.offset+g.count;j+=3)
+            obj.add_face(inds[j],inds[j+2],inds[j+1]);
+    }
 
     inds_buf.free();
 
