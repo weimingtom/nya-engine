@@ -14,7 +14,7 @@ int warnings_counter::add_warning(const char *msg)
     while(iter!=m_warnings.end() && iter->first!=msg)
         ++iter;
 
-    if (iter==m_warnings.end())
+    if(iter==m_warnings.end())
         iter=m_warnings.insert(iter,std::make_pair(std::string(msg),0));
 
     ++(iter->second);
