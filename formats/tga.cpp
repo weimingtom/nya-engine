@@ -227,8 +227,8 @@ size_t tga::encode_rle(void *to_data,size_t to_size)
             }
 
             // check if the exit condition was the start of a repeating color
-            if (memcmp(raw_it,check,channels)!=0)
-                rle -= 2;
+            if(memcmp(raw_it,check,channels)!=0)
+                rle-=2;
 
             break;
         }

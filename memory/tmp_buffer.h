@@ -51,6 +51,11 @@ public:
     tmp_buffer_scoped(size_t size);
     ~tmp_buffer_scoped();
 
+    // non copyable
+private:
+    tmp_buffer_scoped(const tmp_buffer_scoped &);
+    tmp_buffer_scoped &operator=(const tmp_buffer_scoped &);
+
 private:
     tmp_buffer *m_buf;
 };

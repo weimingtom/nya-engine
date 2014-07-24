@@ -147,7 +147,7 @@ private:
             else
             {
                 res_holder *holder=ir.first->second;
-                if (holder)
+                if(holder)
                 {
                     ++holder->ref_count;
 
@@ -389,7 +389,7 @@ public:
             return shared_resource_ref();
 
         struct shared_resources_creator::res_holder *holder=m_creator->m_res_map.begin()->second;
-        if (!holder)
+        if(!holder)
             return shared_resource_ref();
 
         ++holder->ref_count;
@@ -406,7 +406,7 @@ public:
             return shared_resource_ref();
 
         struct shared_resources_creator::res_holder *holder=it->second;
-        if (!holder)
+        if(!holder)
             return shared_resource_ref();
 
         ++holder->ref_count;

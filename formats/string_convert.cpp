@@ -12,7 +12,7 @@ inline std::string fix_string(const std::string &s,const std::string whitespaces
     std::string ss=s;
     std::transform(ss.begin(),ss.end(),ss.begin(),::tolower);
     const size_t start_idx=ss.find_first_not_of(whitespaces);
-    if (start_idx==std::string::npos)
+    if(start_idx==std::string::npos)
         return std::string("");
 
     const size_t end_idx=ss.find_last_not_of(whitespaces)+1;
@@ -25,6 +25,8 @@ bool bool_from_string(const std::string &s)
     return ss=="yes" || ss=="1" || ss=="true";
 }
 
+std::string string_from_bool(bool value) { return value? "true" : "false"; }
+
 nya_math::vec4 vec4_from_string(const std::string &s)
 {
     nya_math::vec4 v;
@@ -36,6 +38,21 @@ nya_math::vec4 vec4_from_string(const std::string &s)
             if(iss>>v.z)
                 iss>>v.w;
     return v;
+}
+
+std::string string_from_vec4(const nya_math::vec4 &v,int precision)
+{
+    std::ostringstream oss;
+    if(precision>=0)
+    {
+        oss.precision(precision);
+        oss.setf(std::ios::fixed,std::ios::floatfield);
+        oss<<v.x<<','<<v.y<<','<<v.z<<','<<v.w;
+    }
+    else
+        oss<<v.x<<','<<v.y<<','<<v.z<<','<<v.w;
+
+    return oss.str();
 }
 
 nya_render::blend::mode blend_mode_from_string(const std::string &s)
@@ -55,6 +72,24 @@ nya_render::blend::mode blend_mode_from_string(const std::string &s)
     return nya_render::blend::one;
 }
 
+std::string string_from_blend_mode(nya_render::blend::mode value)
+{
+    switch (value)
+    {
+        case nya_render::blend::zero: return "zero";
+        case nya_render::blend::one: return "one";
+        case nya_render::blend::src_color: return "src_color";
+        case nya_render::blend::inv_src_color: return "inv_src_color";
+        case nya_render::blend::src_alpha: return "src_alpha";
+        case nya_render::blend::inv_src_alpha: return "inv_src_alpha";
+        case nya_render::blend::dst_color: return "dst_color";
+        case nya_render::blend::inv_dst_color: return "inv_dst_color";
+        case nya_render::blend::dst_alpha: return "dst_alpha";
+        case nya_render::blend::inv_dst_alpha: return "inv_dst_alpha";
+        default: return "zero";
+    }
+}
+
 bool blend_mode_from_string(const std::string &s,nya_render::blend::mode &src_out,nya_render::blend::mode &dst_out)
 {
     const size_t div_idx=s.find(':');
@@ -70,6 +105,14 @@ bool blend_mode_from_string(const std::string &s,nya_render::blend::mode &src_ou
     src_out=blend_mode_from_string(src_str);
     dst_out=blend_mode_from_string(s.substr(div_idx+1));
     return true;
+}
+
+std::string string_from_blend_mode(bool blend,nya_render::blend::mode src,nya_render::blend::mode dst)
+{
+    if(!blend)
+        return string_from_bool(false);
+
+    return string_from_blend_mode(src)+":"+string_from_blend_mode(dst);
 }
 
 bool cull_face_from_string(const std::string &s,nya_render::cull_face::order &order_out)
@@ -89,6 +132,14 @@ bool cull_face_from_string(const std::string &s,nya_render::cull_face::order &or
 
     order_out=nya_render::cull_face::ccw;
     return false;
+}
+
+std::string string_from_cull_face(bool cull,nya_render::cull_face::order order)
+{
+    if(!cull)
+        return string_from_bool(false);
+
+    return order==nya_render::cull_face::ccw?"ccw":"cw";
 }
 
 }

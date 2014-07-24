@@ -159,7 +159,7 @@ private:
 
 private:
     typedef std::list<tmp_buffer> buffers_list;
-    static std::list<tmp_buffer> m_buffers;
+    static buffers_list m_buffers;
 };
 
 tmp_buffer::buffers_list tmp_buffer::m_buffers;

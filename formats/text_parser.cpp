@@ -148,7 +148,7 @@ text_parser::line text_parser::line::first(const char *text,size_t text_size)
     l.text_size=text_size;
     l.offset=l.size=0;
     l.global=l.empty=false;
-    l.line_number=l.next_line_number=0;
+    l.line_number=l.next_line_number=1;
     return l;
 }
 
@@ -227,7 +227,7 @@ bool text_parser::load_from_data(const char *text,size_t text_size)
             }
             else if(!l.empty)
             {
-                nya_log::log()<<typeid(text_parser).name()<<": subsection found before any section declaration at line "<< l.line_number;
+                nya_log::log()<<"Text parser: subsection found before any section declaration at lines "<< l.line_number<<"-"<<l.next_line_number<<"\n";
             }
         }
     }
@@ -243,7 +243,7 @@ bool text_parser::load_from_file(const char *filename)
     nya_resources::resource_data* res=nya_resources::get_resources_provider().access(filename);
     if(!res)
     {
-        nya_log::log()<<"file load error: unable to access resource '"<<filename<<"'";
+        nya_log::log()<<"file load error: unable to access resource '"<<filename<<"'\n";
         return false;
     }
 
@@ -296,7 +296,7 @@ void text_parser::fill_section(section &s,const line &l)
         }
         else
         {
-            nya_log::log()<<typeid(text_parser).name()<<": unexpected token at line "<<l.line_number;
+            nya_log::log()<<"Text parser: unexpected token at lines "<<l.line_number<<"-"<<l.next_line_number<<"\n";
             break;
         }
 
