@@ -23,10 +23,7 @@ namespace nya_formats
 const char *text_parser::get_section_type(int idx) const
 {
     if(idx<0 || idx>=(int)m_sections.size())
-    {
-        nya_base_warning();
         return 0;
-    }
 
     return m_sections[idx].type.c_str();
 }
@@ -34,10 +31,7 @@ const char *text_parser::get_section_type(int idx) const
 int text_parser::get_section_names_count(int idx) const
 {
     if(idx < 0 || idx >= (int)m_sections.size())
-    {
-        nya_base_warning();
         return 0;
-    }
 
     return (int)m_sections[idx].names.size();
 }
@@ -45,16 +39,10 @@ int text_parser::get_section_names_count(int idx) const
 const char *text_parser::get_section_name(int idx,int name_idx) const
 {
     if(idx<0 || idx>=(int)m_sections.size())
-    {
-        nya_base_warning();
         return 0;
-    }
 
     if(name_idx<0 || name_idx>=(int)m_sections[idx].names.size())
-    {
-        nya_base_warning();
         return 0;
-    }
 
     return m_sections[idx].names[name_idx].c_str();
 }
@@ -62,10 +50,7 @@ const char *text_parser::get_section_name(int idx,int name_idx) const
 const char *text_parser::get_section_option(int idx) const
 {
     if(idx<0 || idx>=(int)m_sections.size())
-    {
-        nya_base_warning();
         return 0;
-    }
 
     return m_sections[idx].option.c_str();
 }
@@ -73,10 +58,7 @@ const char *text_parser::get_section_option(int idx) const
 const char *text_parser::get_section_value(int idx) const
 {
     if(idx<0 || idx>=(int)m_sections.size())
-    {
-        nya_base_warning();
         return 0;
-    }
 
     return m_sections[idx].value.c_str();
 }
@@ -84,10 +66,7 @@ const char *text_parser::get_section_value(int idx) const
 nya_math::vec4 text_parser::get_section_value_vector(int idx) const
 {
     if(idx<0 || idx>=(int)m_sections.size())
-    {
-        nya_base_warning();
         return nya_memory::get_invalid_object<nya_math::vec4>();
-    }
 
     nya_math::vec4 v;
     std::string s=m_sections[idx].value;
@@ -103,10 +82,7 @@ nya_math::vec4 text_parser::get_section_value_vector(int idx) const
 int text_parser::get_subsections_count(int section_idx) const
 {
     if(section_idx<0 || section_idx>=(int)m_sections.size())
-    {
-        nya_base_warning();
         return -1;
-    }
 
     const section &s=m_sections[section_idx];
     if(!s.subsection_parsed)
@@ -140,10 +116,7 @@ const char *text_parser::get_subsection_type(int section_idx,int idx) const
 {
     if(section_idx<0 || section_idx>=(int)m_sections.size() ||
        idx<0 || idx>=(int)m_sections[section_idx].subsections.size())
-    {
-        nya_base_warning();
         return 0;
-    }
 
     return m_sections[section_idx].subsections[idx].type.c_str();
 }
@@ -152,10 +125,7 @@ const char *text_parser::get_subsection_value(int section_idx,int idx) const
 {
     if(section_idx<0 || section_idx>=(int)m_sections.size() ||
        idx<0 || idx>=(int)m_sections[section_idx].subsections.size())
-    {
-        nya_base_warning();
         return 0;
-    }
 
     return m_sections[section_idx].subsections[idx].value.c_str();
 }
@@ -164,10 +134,7 @@ bool text_parser::get_subsection_value_bool(int section_idx,int idx) const
 {
     if(section_idx<0 || section_idx>=(int)m_sections.size() ||
        idx<0 || idx>=(int)m_sections[section_idx].subsections.size())
-    {
-        nya_base_warning();
         return 0;
-    }
 
     std::string s=m_sections[section_idx].subsections[idx].value;
     std::transform(s.begin(),s.end(),s.begin(),::tolower);
