@@ -41,6 +41,7 @@ struct shared_mesh
         aabb=nya_math::aabb();
         vbo.release();
         groups.clear();
+        materials.clear();
         skeleton=nya_render::skeleton();
 
         if(add_data)
