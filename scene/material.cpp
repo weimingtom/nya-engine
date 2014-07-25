@@ -442,6 +442,37 @@ bool material_internal::release()
     return true;
 }
 
+material_internal::material_internal(const material_internal &m):
+    m_last_set_pass_idx(-1),
+    m_should_rebuild_passes_maps(true),
+    m_name(m.m_name),
+    m_passes(m.m_passes),
+    m_params(m.m_params),
+    m_textures(m.m_textures)
+{
+    for (int texIdx=0;texIdx<(int)m_textures.size();++texIdx)
+    {
+        if (m_textures[texIdx].proxy.is_valid())
+            m_textures[texIdx].proxy.create(*(m_textures[texIdx].proxy.operator->()));
+    }
+}
+
+material_internal &material_internal::operator=(const material_internal &m)
+{
+    m_name=m.m_name;
+    m_passes=m.m_passes;
+    m_last_set_pass_idx=-1;
+    m_should_rebuild_passes_maps=true;
+    m_params=m.m_params;
+    m_textures=m.m_textures;
+    for (int texIdx=0;texIdx<(int)m_textures.size();++texIdx)
+    {
+        if (m_textures[texIdx].proxy.is_valid())
+            m_textures[texIdx].proxy.create(*(m_textures[texIdx].proxy.operator->()));
+    }
+    return *this;
+}
+
 bool material::load(const char *name)
 {
     if(!m_internal.load(name))
