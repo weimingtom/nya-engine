@@ -17,6 +17,7 @@ namespace
     nya_scene::texture missing_texture()
     {
         static nya_scene::texture missing_red;
+        /*
         static nya_scene::texture missing_white;
 
         static bool initialised=false;
@@ -38,7 +39,7 @@ namespace
 
         if((nya_system::get_time()/200)%2>0)
             return missing_white;
-
+        */
         return missing_red;
     }
 }
