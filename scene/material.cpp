@@ -582,7 +582,7 @@ const material::param_array_proxy &material::get_param_array(int idx) const
 
     return internal().m_params[idx].a;
 }
-
+/*
 material_internal &material_internal::operator=(const material_internal &m)
 {
     m_name=m.m_name;
@@ -618,5 +618,5 @@ material_internal::param_holder &material_internal::param_holder::operator=(cons
 
     return *this;
 }
-
+*/
 }
