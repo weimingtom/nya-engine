@@ -583,4 +583,40 @@ const material::param_array_proxy &material::get_param_array(int idx) const
     return internal().m_params[idx].a;
 }
 
+material_internal &material_internal::operator=(const material_internal &m)
+{
+    m_name=m.m_name;
+    m_passes=m.m_passes;
+    m_last_set_pass_idx=-1;
+    m_should_rebuild_passes_maps=true;
+    m_params=m.m_params;
+    m_textures=m.m_textures;
+    for (int texIdx=0;texIdx<(int)m_textures.size();++texIdx)
+    {
+        if (m_textures[texIdx].proxy.is_valid())
+            m_textures[texIdx].proxy.create(*(m_textures[texIdx].proxy.operator->()));
+    }
+    return *this;
+}
+
+material_internal::param_holder &material_internal::param_holder::operator=(const material_internal::param_holder &ph)
+{
+    if(ph.p.is_valid())
+        p.create(*(ph.p.operator->()));
+    else
+        p.free();
+
+    if(ph.m.is_valid())
+        m.create(*(ph.m.operator->()));
+    else
+        m.free();
+
+    if(ph.a.is_valid())
+        a.create(*(ph.a.operator->()));
+    else
+        a.free();
+
+    return *this;
+}
+
 }
