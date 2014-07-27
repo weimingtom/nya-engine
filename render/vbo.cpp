@@ -50,7 +50,7 @@ namespace
             unsigned int offset;
             vbo::vertex_atrib_type type;
 
-            attribute(): has(false), type(vbo::float32) {}
+            attribute(): has(false),dimension(0),offset(0),type(vbo::float32) {}
         };
 
         attribute vertices;
