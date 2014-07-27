@@ -39,7 +39,7 @@ bool mmd_mesh::load(const char *name)
     m_vbo.set_vertex_data(&m_vertex_data[0],vbo.get_vert_stride(),vbo.get_verts_count());
     m_vbo.set_vertices(vbo.get_vert_offset(),vbo.get_vert_dimension());
     m_vbo.set_normals(vbo.get_normals_offset());
-    for(int i=0;i<16;++i)
+    for(int i=0;i<nya_render::vbo::max_tex_coord;++i)
     {
         if(vbo.get_tc_dimension(i)>0)
             m_vbo.set_tc(i,vbo.get_tc_offset(i),vbo.get_tc_dimension(i));
