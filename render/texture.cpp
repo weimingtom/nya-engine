@@ -499,6 +499,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 #endif
 
     texture_obj::get(m_tex).size=get_tex_memory_size(m_width,m_height,m_format,mip_count);
+    texture_obj::get(m_tex).is_cubemap=false;
     texture_obj::get(m_tex).has_mipmaps=has_mipmap;
 
     return true;
@@ -765,10 +766,11 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
   #endif
 
     glBindTexture(GL_TEXTURE_CUBE_MAP,0);
-    texture_obj::get(m_tex).has_mipmaps=has_mipmap;
 #endif
-
     texture_obj::get(m_tex).size=get_tex_memory_size(m_width,m_height,m_format,-1)*6;
+    texture_obj::get(m_tex).is_cubemap=true;
+    texture_obj::get(m_tex).has_mipmaps=has_mipmap;
+
     return true;
 }
 
@@ -1030,6 +1032,15 @@ void texture::set_default_filter(filter minification,filter magnification,filter
     default_mag_filter=magnification;
     default_mip_filter=mipmap;
 }
+
+bool texture::is_cubemap() const
+{
+    if(m_tex<0)
+        return false;
+
+    return texture_obj::get(m_tex).is_cubemap;
+}
+
 
 namespace
 {
