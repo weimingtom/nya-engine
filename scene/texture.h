@@ -51,6 +51,7 @@ public:
     const char *get_name() const { return internal().get_name(); }
     unsigned int get_width() const;
     unsigned int get_height() const;
+    bool is_cubemap() const;
 
 public:
     typedef nya_render::texture::color_format color_format;

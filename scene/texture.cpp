@@ -213,6 +213,14 @@ unsigned int texture::get_height() const
     return internal().get_shared_data()->tex.get_height();
 }
 
+bool texture::is_cubemap() const
+{
+    if(!internal().get_shared_data().is_valid())
+        return false;
+
+    return internal().get_shared_data()->tex.is_cubemap();
+}
+
 void texture::build(const void *data,unsigned int width,unsigned int height,color_format format)
 {
     if(!data)
