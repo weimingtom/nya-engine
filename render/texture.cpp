@@ -247,6 +247,8 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     else if(!pot)
         mip_count=1;
 
+    const bool has_mipmap=(data && pot && mip_count!=1 && mip_count!=0);
+
 #ifdef DIRECTX11
     if(!get_device())
         return false;
@@ -300,7 +302,6 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     else
         desc.BindFlags=D3D11_BIND_SHADER_RESOURCE|D3D11_BIND_RENDER_TARGET;
 
-    const bool has_mipmap=(data && pot && mip_count!=1 && mip_count!=0);
     if(has_mipmap && mip_count<0)
         desc.MiscFlags=D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
@@ -448,8 +449,6 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     glBindTexture(GL_TEXTURE_2D,texture_obj::get(m_tex).tex_id);
     active_layers[active_layer]=-1;
 
-    const bool has_mipmap=(data && pot && mip_count!=1 && mip_count!=0);
-
     if(!pot) gl_setup_pack_alignment();
     gl_setup_texture(GL_TEXTURE_2D,!pot,has_mipmap);
 
@@ -540,6 +539,9 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
         if(!is_dxt_supported())
             return false;
     }
+
+    const bool pot=((width&(width-1))==0 && (height&(height-1))==0);
+    const bool has_mipmap=(data && pot);
 
 #ifdef DIRECTX11
     if(!get_device())
@@ -724,9 +726,6 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 
     glBindTexture(GL_TEXTURE_CUBE_MAP,texture_obj::get(m_tex).tex_id);
     active_layers[active_layer]=-1;
-
-    const bool pot=((width&(width-1))==0 && (height&(height-1))==0);
-    const bool has_mipmap=(data && pot);
 
     if(!pot) gl_setup_pack_alignment();
     gl_setup_texture(GL_TEXTURE_CUBE_MAP,true,has_mipmap);
