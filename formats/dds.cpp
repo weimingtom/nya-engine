@@ -231,11 +231,11 @@ size_t dds::decode_header(const void *data,size_t size)
     {
         switch(pf.four_cc)
         {
-            case '1TXD': this->pf=dxt1; break;
-            case '2TXD': this->pf=dxt2; break;
-            case '3TXD': this->pf=dxt3; break;
-            case '4TXD':this->pf=dxt4; break;
-            case '5TXD': this->pf=dxt5; break;
+            case 0x31545844 /*'1TXD'*/ :this->pf=dxt1; break;
+            case 0x32545844 /*'2TXD'*/ :this->pf=dxt2; break;
+            case 0x33545844 /*'3TXD'*/ :this->pf=dxt3; break;
+            case 0x34545844 /*'4TXD'*/ :this->pf=dxt4; break;
+            case 0x35545844 /*'5TXD'*/ :this->pf=dxt5; break;
             default: return 0;
         };
 

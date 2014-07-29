@@ -34,7 +34,7 @@ nya_math::vec4 vec4_from_string(const std::string &s)
 {
     nya_math::vec4 v;
     std::string ss=s;
-    std::replace(ss.begin(),ss.end(),',',' ');
+    std::replace(ss.begin(),ss.end(),vector_string_delimeter,' ');
     std::istringstream iss(ss);
     if(iss>>v.x)
         if(iss>>v.y)
@@ -50,11 +50,11 @@ std::string string_from_vec4(const nya_math::vec4 &v,int precision)
     {
         oss.precision(precision);
         oss.setf(std::ios::fixed,std::ios::floatfield);
-        oss<<v.x<<','<<v.y<<','<<v.z<<','<<v.w;
+        oss<<v.x<<vector_string_delimeter<<v.y<<vector_string_delimeter<<v.z<<vector_string_delimeter<<v.w;
     }
     else
     {
-        oss<<v.x<<','<<v.y<<','<<v.z<<','<<v.w;
+        oss<<v.x<<vector_string_delimeter<<v.y<<vector_string_delimeter<<v.z<<vector_string_delimeter<<v.w;
     }
     return oss.str();
 }
@@ -96,7 +96,7 @@ std::string string_from_blend_mode(nya_render::blend::mode value)
 
 bool blend_mode_from_string(const std::string &s,nya_render::blend::mode &src_out,nya_render::blend::mode &dst_out)
 {
-    const size_t div_idx=s.find(':');
+    const size_t div_idx=s.find(blend_string_delimeter);
     if(div_idx==std::string::npos)
     {
         src_out=nya_render::blend::one;
@@ -114,7 +114,7 @@ bool blend_mode_from_string(const std::string &s,nya_render::blend::mode &src_ou
 std::string string_from_blend_mode(bool blend,nya_render::blend::mode src,nya_render::blend::mode dst)
 {
     if (blend)
-        return string_from_blend_mode(src) + ":" + string_from_blend_mode(dst);
+        return string_from_blend_mode(src) + blend_string_delimeter + string_from_blend_mode(dst);
     else
         return string_from_bool(false);
 }
