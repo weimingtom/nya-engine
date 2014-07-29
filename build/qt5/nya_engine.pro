@@ -1,10 +1,9 @@
 # WARNING: do not forget to configure qt creator kit (under projects tab) to build in appropiate directory
-# this .pro file is tested under clang64 and mingw (x86) specs
+# this .pro file is tested under clang64 and mingw32 specs
 
 QT -= core gui
 
 NYA_ENGINE_PATH = ../..
-win32: NYA_ENGINE_PATH = ../..
 
 TARGET = nya_engine
 TEMPLATE = lib
