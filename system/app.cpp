@@ -376,8 +376,8 @@ public:
         RECT rect = {x,y,x+w,y+h};
         AdjustWindowRect(&rect,WS_OVERLAPPEDWINDOW,false);
 
-        m_hwnd = CreateWindow(TEXT("nya_engine"),
-                          TEXT(m_title.c_str()),
+        m_hwnd = CreateWindowA("nya_engine",
+                          m_title.c_str(),
                           WS_OVERLAPPEDWINDOW,
                           rect.left,rect.top,
                           rect.right-rect.left,rect.bottom-rect.top,
@@ -521,8 +521,8 @@ public:
             ReleaseDC(m_hwnd,m_hdc);
             DestroyWindow (m_hwnd);
 
-            m_hwnd = CreateWindow(TEXT("nya_engine"),
-                          TEXT(m_title.c_str()),
+            m_hwnd = CreateWindowA("nya_engine",
+                          m_title.c_str(),
                           WS_OVERLAPPEDWINDOW,
                           rect.left,rect.top,
                           rect.right-rect.left,rect.bottom-rect.top,

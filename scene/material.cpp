@@ -6,6 +6,7 @@
 #include "memory/invalid_object.h"
 #include "system/system.h"
 #include <list>
+#include <cstring>
 
 namespace nya_scene
 {
