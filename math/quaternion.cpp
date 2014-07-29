@@ -15,7 +15,7 @@ quat quat::slerp(const quat &q1,const quat &q2,float t)
     const float cosom=q1.v*q2.v+q1.w*q2.w;
     if(cosom<0.0f)
     {
-        if (1.0f+cosom>eps)
+        if(1.0f+cosom>eps)
         {
             const float omega=acosf(-cosom);
             const float sinom_inv=1.0f/sinf(omega);
@@ -30,7 +30,7 @@ quat quat::slerp(const quat &q1,const quat &q2,float t)
     }
     else
     {
-        if (1.0f-cosom>eps)
+        if(1.0f-cosom>eps)
         {
             const float omega=acosf(cosom);
             const float sinom_inv=1.0f/sinf(omega);

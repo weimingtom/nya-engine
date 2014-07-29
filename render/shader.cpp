@@ -880,7 +880,7 @@ bool shader::add_program(program_type type,const char*code)
 #endif
             GLint log_len=0;
             glGetObjectParam(shdr.program,GL_OBJECT_INFO_LOG_LENGTH_ARB,&log_len);
-            if (log_len>0)
+            if(log_len>0)
             {
                 std::string log_text(log_len,0);
                 glGetInfoLogARB(shdr.program,log_len,&log_len,&log_text[0]);
@@ -920,7 +920,7 @@ bool shader::add_program(program_type type,const char*code)
 #endif
             GLint log_len=0;
             glGetObjectParam(shdr.program,GL_OBJECT_INFO_LOG_LENGTH_ARB,&log_len);
-            if (log_len>0)
+            if(log_len>0)
             {
                 std::string log_text(log_len,0);
                 glGetInfoLogARB(shdr.program,log_len,&log_len,&log_text[0]);

@@ -16,7 +16,7 @@ public:
 
     void remove(int idx)
     {
-        if (!m_objects[idx].free)
+        if(!m_objects[idx].free)
         {
             m_objects[idx].free=true;
             m_objects[idx].data.release();

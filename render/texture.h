@@ -69,6 +69,7 @@ public:
     unsigned int get_width() const { return m_width; }
     unsigned int get_height() const { return m_height; }
     color_format get_color_format() const { return m_format; }
+    bool is_cubemap() const;
 
 public:
     void release();

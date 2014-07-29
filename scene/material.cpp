@@ -17,6 +17,7 @@ namespace
     nya_scene::texture missing_texture()
     {
         static nya_scene::texture missing_red;
+        /*
         static nya_scene::texture missing_white;
 
         static bool initialised=false;
@@ -38,7 +39,7 @@ namespace
 
         if((nya_system::get_time()/200)%2>0)
             return missing_white;
-
+        */
         return missing_red;
     }
 }
@@ -138,15 +139,15 @@ bool material::load_text(shared_material &res,resource_data &data,const char* na
 
 void material_internal::set(const char *pass_name) const
 {
+    if(!pass_name)
+        return;
+
     if(m_last_set_pass_idx>=0)
         unset();
 
     m_last_set_pass_idx=get_pass_idx(pass_name);
     if(m_last_set_pass_idx<0)
-    {
-        nya_log::warning()<<"Setting non existing pass named '"<<pass_name<<"' in material '"<<m_name.c_str()<<"'";
-        return ;
-    }
+        return;
 
     update_passes_maps();
     const pass &p=m_passes[m_last_set_pass_idx];
@@ -166,21 +167,21 @@ void material_internal::set(const char *pass_name) const
             {
                 if(!m_textures[texture_idx].proxy->internal().set(slot_idx))
                 {
-                    nya_log::warning()<<"invalid texture for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"'";
+                    nya_log::warning()<<"invalid texture for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"\n";
 
                     missing_texture().internal().set(slot_idx);
                 }
             }
             else
             {
-                nya_log::warning()<<"invalid texture proxy for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"'";
+                nya_log::warning()<<"invalid texture proxy for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"\n";
 
                 missing_texture().internal().set(slot_idx);
             }
         }
         else
         {
-            nya_log::warning()<<"missing texture for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"'";
+            nya_log::warning()<<"missing texture for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"\n";
 
             missing_texture().internal().set(slot_idx);
         }
@@ -243,13 +244,6 @@ int material_internal::get_texture_idx(const char *semantics) const
     return -1;
 }
 
-material_internal::pass::pass(const pass &p):
-    m_name(p.m_name),
-    m_render_state(p.m_render_state),
-    m_shader(p.m_shader),
-    m_shader_changed(true)
-{}
-
 material_internal::pass &material_internal::pass::operator=(const pass &p)
 {
     m_name=p.m_name;
@@ -305,10 +299,7 @@ void material_internal::pass::update_maps(const material_internal &m) const
 int material_internal::add_pass(const char *pass_name)
 {
     if(!pass_name)
-    {
-        nya_base_warning()<<"pass name is null";
         return -1;
-    }
 
     for(std::vector<pass>::iterator iter=m_passes.begin();iter!=m_passes.end();++iter)
     {
@@ -336,10 +327,7 @@ int material_internal::get_pass_idx(const char *pass_name) const
 material_internal::pass &material_internal::get_pass(int idx)
 {
     if(idx<0 || idx>=(int)m_passes.size())
-    {
-        nya_base_warning()<<"index out of range";
         return nya_memory::get_invalid_object<pass>();
-    }
 
     return m_passes[idx];
 }
@@ -347,10 +335,7 @@ material_internal::pass &material_internal::get_pass(int idx)
 const material_internal::pass &material_internal::get_pass(int idx) const
 {
     if(idx<0 || idx>=(int)m_passes.size())
-    {
-        nya_base_warning()<<"index out of range";
         return nya_memory::get_invalid_object<pass>();
-    }
 
     return m_passes[idx];
 }
@@ -442,37 +427,6 @@ bool material_internal::release()
     return true;
 }
 
-material_internal::material_internal(const material_internal &m):
-    m_last_set_pass_idx(-1),
-    m_should_rebuild_passes_maps(true),
-    m_name(m.m_name),
-    m_passes(m.m_passes),
-    m_params(m.m_params),
-    m_textures(m.m_textures)
-{
-    for (int texIdx=0;texIdx<(int)m_textures.size();++texIdx)
-    {
-        if (m_textures[texIdx].proxy.is_valid())
-            m_textures[texIdx].proxy.create(*(m_textures[texIdx].proxy.operator->()));
-    }
-}
-
-material_internal &material_internal::operator=(const material_internal &m)
-{
-    m_name=m.m_name;
-    m_passes=m.m_passes;
-    m_last_set_pass_idx=-1;
-    m_should_rebuild_passes_maps=true;
-    m_params=m.m_params;
-    m_textures=m.m_textures;
-    for (int texIdx=0;texIdx<(int)m_textures.size();++texIdx)
-    {
-        if (m_textures[texIdx].proxy.is_valid())
-            m_textures[texIdx].proxy.create(*(m_textures[texIdx].proxy.operator->()));
-    }
-    return *this;
-}
-
 bool material::load(const char *name)
 {
     if(!m_internal.load(name))
@@ -500,10 +454,7 @@ void material::set_texture(const char *semantics,const texture &tex)
 void material::set_texture(const char *semantics,const texture_proxy &proxy)
 {
     if(!semantics || !semantics[0])
-    {
-        nya_base_warning()<<"texture semantics is empty";
         return;
-    }
 
     int texture_idx=m_internal.get_texture_idx(semantics);
     if(texture_idx<0)
@@ -520,10 +471,7 @@ void material::set_texture(const char *semantics,const texture_proxy &proxy)
 const char *material::get_texture_semantics(int idx) const
 {
     if(idx < 0 || idx>=(int)internal().m_textures.size())
-    {
-        nya_base_warning()<<"index out of range";
         return 0;
-    }
 
     return internal().m_textures[idx].semantics.c_str();
 }
@@ -531,10 +479,7 @@ const char *material::get_texture_semantics(int idx) const
 const texture_proxy &material::get_texture(int idx) const
 {
     if(idx < 0 || idx>=(int)internal().m_textures.size() )
-    {
-        nya_base_warning()<<"index out of range";
         return nya_memory::get_invalid_object<texture_proxy>();
-    }
 
     return internal().m_textures[idx].proxy;
 }
@@ -547,10 +492,7 @@ const texture_proxy &material::get_texture(const char *semantics) const
 const char *material::get_param_name(int idx) const
 {
     if(idx<0 || idx>=(int)internal().m_params.size())
-    {
-        nya_base_warning()<<"index out of range";
         return 0;
-    }
 
     return m_internal.m_params[idx].param_name.c_str();
 }
@@ -568,10 +510,7 @@ void material::set_param(int idx,const param &p)
 void material::set_param(int idx,const param_proxy &p)
 {
     if(idx<0 || idx>=(int)internal().m_params.size())
-    {
-        nya_base_warning()<<"index out of range";
         return;
-    }
 
     m_internal.m_params[idx].p=p;
     m_internal.m_params[idx].m.free();
@@ -586,10 +525,7 @@ void material::set_param(int idx,const param_proxy &p,const param &m)
 void material::set_param(int idx,const param_proxy &p,const param_proxy &m)
 {
     if(idx<0 || idx>=(int)internal().m_params.size())
-    {
-        nya_base_warning()<<"index out of range";
         return;
-    }
 
     m_internal.m_params[idx].p=p;
     m_internal.m_params[idx].m=m;
@@ -604,10 +540,7 @@ void material::set_param_array(int idx,const param_array &a)
 void material::set_param_array(int idx,const param_array_proxy &p)
 {
     if(idx<0 || idx>=(int)internal().m_params.size())
-    {
-        nya_base_warning()<<"index out of range";
         return;
-    }
 
     m_internal.m_params[idx].p.free();
     m_internal.m_params[idx].m.free();
@@ -623,10 +556,7 @@ int material::get_params_count() const
 const material::param_proxy &material::get_param(int idx) const
 {
     if(idx<0 || idx>=(int)internal().m_params.size())
-    {
-        nya_base_warning()<<"index out of range";
         return nya_memory::get_invalid_object<param_proxy>();
-    }
 
     return m_internal.m_params[idx].p;
 }
@@ -634,10 +564,7 @@ const material::param_proxy &material::get_param(int idx) const
 const material::param_proxy &material::get_param_multiplier(int idx) const
 {
     if(idx<0 || idx>=(int)internal().m_params.size())
-    {
-        nya_base_warning()<<"index out of range";
         return nya_memory::get_invalid_object<param_proxy>();
-    }
 
     return internal().m_params[idx].m;
 }
@@ -645,10 +572,7 @@ const material::param_proxy &material::get_param_multiplier(int idx) const
 const material::param_array_proxy &material::get_param_array(int idx) const
 {
     if(idx<0 || idx>=(int)internal().m_params.size())
-    {
-        nya_base_warning()<<"index out of range";
         return nya_memory::get_invalid_object<param_array_proxy>();
-    }
 
     return internal().m_params[idx].a;
 }
