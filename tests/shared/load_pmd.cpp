@@ -140,6 +140,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         reader.read<char>();//toon idx
         const char edge_flag=reader.read<char>();//edge flag
 
+        g.name="mesh";
         g.offset=ind_offset;
         g.count=reader.read<uint>();
         g.material_idx=i;
@@ -172,6 +173,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         res.groups.resize(res.groups.size()+1);
         nya_scene::shared_mesh::group &ge=res.groups.back();
         ge=res.groups[i];
+        ge.name="edge";
         ge.material_idx=int(res.materials.size());
         res.materials.resize(res.materials.size()+1);
         nya_scene::material &me = res.materials.back();
@@ -256,8 +258,6 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         if(type)
             ++i;
 
-        //printf("name %s %d\n",name.c_str(),type);
-
         m.name=name;
         m.verts.resize(size);
         for(uint j=0;j<size;++j)
@@ -271,13 +271,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
             v.pos.z=-reader.read<float>();
         }
     }
-/*
-    for(int i=0;i<int(base_morph.verts.size());++i)
-    {
-        const pmd_morph_data::morph_vertex &b=base_morph.verts[i];
-        vertices[b.idx].pos=b.pos;
-    }
-*/
+
     for(size_t i=0;i<vertices.size();++i)
     {
         vertices[i].pos[1]=vertices[i].pos[0]-res.skeleton.get_bone_pos(int(vertices[i].bone_idx[1]));

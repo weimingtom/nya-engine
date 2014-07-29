@@ -81,6 +81,7 @@ namespace nya_render
     struct texture_obj
     {
         unsigned int size;
+        bool is_cubemap;
 
 #ifdef DIRECTX11
         ID3D11Texture2D *tex;
@@ -91,7 +92,7 @@ namespace nya_render
         DXGI_FORMAT dx_format;
         bool has_mipmaps;
 
-        texture_obj(): tex(0),srv(0),sampler_state(0),size(0),depth_target(0),has_mipmaps(false)
+        texture_obj(): tex(0),srv(0),sampler_state(0),size(0),is_cubemap(false),depth_target(0),has_mipmaps(false)
         {
             for(int i=0;i<6;++i)
                 color_targets[i]=0;
@@ -101,7 +102,7 @@ namespace nya_render
         unsigned int gl_type;
         bool has_mipmaps;
 
-        texture_obj(): tex_id(0),gl_type(0),size(0),has_mipmaps(false) {}
+        texture_obj(): tex_id(0),gl_type(0),size(0),is_cubemap(false),has_mipmaps(false) {}
 #endif
     public:
         static int add() { return get_texture_objs().add(); }

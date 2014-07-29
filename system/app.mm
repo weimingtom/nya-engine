@@ -318,12 +318,12 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 {
     [super viewDidLoad];
 
-    if (!self.context)
+    if(!self.context)
     {
         EAGLContext *aContext = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
-        if (!aContext)
+        if(!aContext)
             NSLog(@"Failed to create ES2 context");
-        else if (![EAGLContext setCurrentContext:aContext])
+        else if(![EAGLContext setCurrentContext:aContext])
             NSLog(@"Failed to set ES context current");
 
         self.context=aContext;
@@ -360,7 +360,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
 - (void)applicationWillResignActive:(NSNotification *)notification
 {
-    if ([self isViewLoaded] && self.view.window)
+    if([self isViewLoaded] && self.view.window)
     {
         nya_system::app *responder=shared_app::get_app().get_responder();
         if(responder)
@@ -372,7 +372,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
 - (void)applicationDidBecomeActive:(NSNotification *)notification
 {
-    if ([self isViewLoaded] && self.view.window)
+    if([self isViewLoaded] && self.view.window)
     {
         static bool ignore_first=true;
         if(!ignore_first)
@@ -390,16 +390,16 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
 - (void)applicationWillTerminate:(NSNotification *)notification
 {
-    if ([self isViewLoaded] && self.view.window)
+    if([self isViewLoaded] && self.view.window)
         [self stopAnimation];
-    }
+}
 
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 
     // Tear down context.
-    if ([EAGLContext currentContext] == context)
+    if([EAGLContext currentContext] == context)
     {
         nya_system::app *responder=shared_app::get_app().get_responder();
         if(responder)
@@ -443,7 +443,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 	[super viewDidUnload];
 
     // Tear down context.
-    if ([EAGLContext currentContext] == context)
+    if([EAGLContext currentContext]==context)
         [EAGLContext setCurrentContext:nil];
 	self.context = nil;	
 }
@@ -459,10 +459,11 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 	 Frame interval defines how many display frames must pass between each time the display link fires.
 	 The display link will only fire 30 times a second when the frame internal is two on a display that refreshes 60 times a second. The default frame interval setting of one will fire 60 times a second when the display refreshes at 60 times a second. A frame interval setting of less than one results in undefined behavior.
 	 */
-    if (frameInterval >= 1) {
+    if(frameInterval>=1)
+    {
         animationFrameInterval = frameInterval;
-
-        if (animating) {
+        if(animating)
+        {
             [self stopAnimation];
             [self startAnimation];
         }
@@ -471,7 +472,8 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
 - (void)startAnimation
 {
-    if (!animating) {
+    if(!animating)
+    {
         CADisplayLink *aDisplayLink = [[UIScreen mainScreen] displayLinkWithTarget:self selector:@selector(drawFrame)];
         [aDisplayLink setFrameInterval:animationFrameInterval];
         [aDisplayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
@@ -485,7 +487,8 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
 - (void)stopAnimation
 {
-    if (animating) {
+    if(animating)
+    {
         [self.displayLink invalidate];
         self.displayLink = nil;
         animating = NO;
@@ -533,13 +536,13 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
 - (id)initWithFrame:(CGRect)frame 
 {
-    if ((self = [super initWithFrame:frame])) 
+    if((self=[super initWithFrame:frame]))
     {   
         m_scale=1.0f;
         SEL scaleSelector = NSSelectorFromString(@"scale");
         SEL setContentScaleSelector = NSSelectorFromString(@"setContentScaleFactor:");
         SEL getContentScaleSelector = NSSelectorFromString(@"contentScaleFactor");
-        if ([self respondsToSelector: getContentScaleSelector] && [self respondsToSelector: setContentScaleSelector])
+        if([self respondsToSelector: getContentScaleSelector] && [self respondsToSelector: setContentScaleSelector])
         {
             NSMethodSignature *scaleSignature = [UIScreen instanceMethodSignatureForSelector: scaleSelector];
             NSInvocation *scaleInvocation = [NSInvocation invocationWithMethodSignature: scaleSignature];
@@ -547,8 +550,8 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
             [scaleInvocation setSelector: scaleSelector];
             [scaleInvocation invoke];
 
-            NSInteger returnLength = [[scaleInvocation methodSignature] methodReturnLength];
-            if (returnLength == sizeof(float))
+            NSInteger returnLength=[[scaleInvocation methodSignature] methodReturnLength];
+            if(returnLength==sizeof(float))
                 [scaleInvocation getReturnValue: &m_scale];
 
             typedef void (*CC_CONTENT_SCALE)(id, SEL, float);
@@ -575,24 +578,19 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
 - (void)setContext:(EAGLContext *)newContext
 {
-    if (context != newContext) 
+    if(context!=newContext)
     {
         [self deleteFramebuffer];
-
-        context = newContext;
-
+        context=newContext;
         [EAGLContext setCurrentContext:nil];
     }
 }
 
-- (float)getScale
-{
-    return m_scale;
-}
+- (float)getScale { return m_scale; }
 
 - (void)createFramebuffer
 {
-    if (context && !defaultFramebuffer) 
+    if(context && !defaultFramebuffer)
     {
         [EAGLContext setCurrentContext:context];
 
@@ -619,25 +617,25 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
         //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
 
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             NSLog(@"Failed to make complete framebuffer object %x", glCheckFramebufferStatus(GL_FRAMEBUFFER));
     }
 }
 
 - (void)deleteFramebuffer
 {
-    if (!context)
+    if(!context)
         return;
 
     [EAGLContext setCurrentContext:context];
 
-    if (defaultFramebuffer)
+    if(defaultFramebuffer)
     {
         glDeleteFramebuffers(1,&defaultFramebuffer);
         defaultFramebuffer=0;
     }
 
-    if (colorRenderbuffer)
+    if(colorRenderbuffer)
     {
         glDeleteRenderbuffers(1,&colorRenderbuffer);
         colorRenderbuffer=0;
@@ -646,11 +644,11 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
 - (void)setFramebuffer
 {
-    if (context) 
+    if(context)
     {
         [EAGLContext setCurrentContext:context];
 
-        if (!defaultFramebuffer)
+        if(!defaultFramebuffer)
         {
             [self createFramebuffer];
             nya_system::app *responder=shared_app::get_app().get_responder();
@@ -1043,7 +1041,7 @@ private:
 -(id)init_with_responder:(nya_system::app*)responder  antialiasing:(int)aa
 {
     self=[super init];
-    if (self)
+    if(self)
     {
         m_app=responder;
         m_antialiasing=aa;

@@ -30,8 +30,7 @@ public:
     bool release();
 
     material_internal(): m_last_set_pass_idx(-1),m_should_rebuild_passes_maps(false) {}
-    material_internal(const material_internal &m);
-    material_internal &operator=(const material_internal &m);
+
 private:
     friend class material;
 
@@ -78,34 +77,6 @@ private:
         param_array_proxy a;
 
         void apply_to_shader(const nya_scene::shader &shader, int uniform_idx) const;
-        param_holder() {}
-        param_holder(const param_holder &ph)
-        {
-            if(ph.p.is_valid())
-                p.create(*(ph.p.operator->()));
-            if(ph.m.is_valid())
-                m.create(*(ph.m.operator->()));
-            if(ph.a.is_valid())
-                a.create(*(ph.a.operator->()));
-        }
-        param_holder &operator=(const param_holder &ph)
-        {
-            if(ph.p.is_valid())
-                p.create(*(ph.p.operator->()));
-            else
-                p.free();
-
-            if(ph.m.is_valid())
-                m.create(*(ph.m.operator->()));
-            else
-                m.free();
-            
-            if(ph.a.is_valid())
-                a.create(*(ph.a.operator->()));
-            else
-                a.free();
-            return *this;
-        }
     };
 
     struct material_texture
@@ -125,7 +96,7 @@ private:
 
     public:
         pass(): m_shader_changed(false) { }
-        pass(const pass &p);
+        pass(const pass &p) { *this=p; }
         pass &operator=(const pass &p);
 
     private:

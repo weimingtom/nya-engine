@@ -41,8 +41,8 @@ public:
 
     int get_idx_for_key(const key_t &k) const
     {
-        typename keys_map::const_iterator key_iter = m_keys.find(k);
-        if (key_iter == m_keys.end())
+        typename keys_map::const_iterator key_iter=m_keys.find(k);
+        if(key_iter==m_keys.end())
             return -1;
 
         return (int)get_idx_for_iter(key_iter->second);
@@ -51,7 +51,7 @@ public:
     // returns invalid key on bad idx
     key_t get_key_for_idx(size_t idx) const
     {
-        if(idx >= m_objects.size())
+        if(idx>=m_objects.size())
             return get_invalid_object<key_t>();
 
         typename objects_list::const_iterator object_iter=m_indices[idx];
@@ -104,7 +104,7 @@ public:
 
     bool erase_by_idx(size_t idx)
     {
-        if (idx >= m_objects.size())
+        if(idx>=m_objects.size())
             return false;
 
         key_t k=get_key_for_idx(idx);
@@ -117,7 +117,7 @@ public:
     bool erase_by_key(const key_t &k)
     {
         typename keys_map::iterator key_iter=m_keys.find(k);
-        if (key_iter==m_keys.end())
+        if(key_iter==m_keys.end())
             return false;
 
         size_t idx=get_idx_for_iter(key_iter->second);
@@ -162,7 +162,7 @@ private:
     size_t get_idx_for_iter(typename objects_list::const_iterator object_iter) const
     {
         size_t result=0;
-        while (m_indices[result]!=object_iter)
+        while(m_indices[result]!=object_iter)
             ++result;
 
         return result;
@@ -173,7 +173,7 @@ private:
     {
         typename objects_list::iterator result=m_objects.begin();
         typename objects_list::const_iterator another_finder=another_objects.begin();
-        while (another_finder!=another_iter)
+        while(another_finder!=another_iter)
         {
             ++another_finder;
             ++result;
