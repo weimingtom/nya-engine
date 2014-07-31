@@ -15,8 +15,8 @@ QMAKE_CXXFLAGS_WARN_ON = -Wall -Wno-unused-parameter -Wno-reorder
 QMAKE_OBJECTIVE_CFLAGS_WARN_ON = -Wall -Wno-unused-parameter -Wno-reorder
 QMAKE_OBJECTIVE_CXXFLAGS_WARN_ON = -Wall -Wno-unused-parameter -Wno-reorder
 
-DESTDIR = ../../bin/qt_release
-debug: DESTDIR = ../../bin/qt_debug
+DESTDIR = ../../bin/qt
+#debug: DESTDIR = ../../bin/qt_debug
 
 SOURCES += \
     $${NYA_ENGINE_PATH}/formats/dds.cpp \
