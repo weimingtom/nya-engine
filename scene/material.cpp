@@ -406,6 +406,34 @@ void material_internal::update_passes_maps() const
         m_params.back().p->set(v.x,v.y,v.z,v.w);
     }
 
+    std::map<std::string,bool> tex_semantics;
+
+    for(std::vector<pass>::const_iterator iter=m_passes.begin();iter!=m_passes.end();++iter)
+    {
+        const nya_scene::shader_internal &s=iter->get_shader().internal();
+        for(int i=0;i<s.get_texture_slots_count();++i)
+            tex_semantics[s.get_texture_semantics(i)]=true;
+    }
+
+    for(std::map<std::string,bool>::const_iterator iter=tex_semantics.begin();iter!=tex_semantics.end();++iter)
+    {
+        if(get_texture_idx(iter->first.c_str())<0)
+        {
+            m_textures.push_back(material_texture());
+            m_textures.back().semantics.assign(iter->first.c_str());
+        }
+    }
+
+    int tex_count=(int)m_textures.size();
+    for(int i=0;i<tex_count;++i)
+    {
+        if(tex_semantics.find(m_textures[i].semantics)!=tex_semantics.end())
+            continue;
+
+        m_textures.erase(m_textures.begin()+i);
+        --i; --tex_count;
+    }
+
     for(std::vector<pass>::const_iterator iter=m_passes.begin();iter!=m_passes.end();++iter)
         iter->update_maps(*this);
 

@@ -124,7 +124,7 @@ private:
     mutable int m_last_set_pass_idx;
     mutable bool m_should_rebuild_passes_maps;
     mutable std::vector<param_holder> m_params;
-    std::vector<material_texture> m_textures;
+    mutable std::vector<material_texture> m_textures;
 };
 
 class material
