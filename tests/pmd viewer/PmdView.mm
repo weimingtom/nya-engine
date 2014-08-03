@@ -60,9 +60,18 @@ void viewer_camera::update()
     nya_scene::get_camera().set_pos(pos.x,pos.y+10.0f,pos.z);
 }
 
-void flip_vertical(unsigned char *data,int width,int height,int bpp)
+void bpp64to32(void *data,int width,int height,int channels)
 {
-    const int line_size=width*bpp;
+    const unsigned short *from=(unsigned short *)data;
+    unsigned char *to=(unsigned char *)data;
+
+    for(int i=0;i<width*height*channels;++i)
+        to[i]=from[i];
+}
+
+void flip_vertical(unsigned char *data,int width,int height,int channels)
+{
+    const int line_size=width*channels;
     const int top=line_size*(height-1);
     const int half=line_size*height/2;
 
@@ -73,13 +82,13 @@ void flip_vertical(unsigned char *data,int width,int height,int bpp)
         unsigned char *ha=data+offset;
         unsigned char *hb=data+top-offset;
 
-        for(int w=0;w<line_size;w+=bpp)
+        for(int w=0;w<line_size;w+=channels)
         {
             unsigned char *a=ha+w;
             unsigned char *b=hb+w;
-            memcpy(tmp,a,bpp);
-            memcpy(a,b,bpp);
-            memcpy(b,tmp,bpp);
+            memcpy(tmp,a,channels);
+            memcpy(a,b,channels);
+            memcpy(b,tmp,channels);
         }
     }
 }
@@ -104,31 +113,33 @@ bool load_texture(nya_scene::shared_texture &res,nya_scene::resource_data &textu
         return false;
     }
 
-    unsigned int bpp=(unsigned int)[image bitsPerPixel];
-
-    nya_render::texture::color_format format;
-
-    if(bpp==24)
-        format=nya_render::texture::color_rgb;
-    else if(bpp==32)
-        format=nya_render::texture::color_rgba;
-    else
+    const unsigned int bpp=(unsigned int)[image bitsPerPixel];
+    const unsigned int bps=(unsigned int)[image bitsPerSample];
+    if(!bpp || !bps)
     {
         nya_log::log()<<"unable to load texture: unsupported format\n";
         return false;
     }
 
-    if([image bitsPerSample]!=8)
+    const unsigned int channels=bpp/bps;
+
+    nya_render::texture::color_format format;
+    switch (channels)
     {
-        nya_log::log()<<"unable to load texture: unsupported format\n";
-        return false;
+        case 3: format=nya_render::texture::color_rgb; break;
+        case 4: format=nya_render::texture::color_rgba; break;
+
+        default: nya_log::log()<<"unable to load texture: unsupported format\n"; return false;
     }
 
     unsigned int width=(unsigned int)[image pixelsWide];
     unsigned int height=(unsigned int)[image pixelsHigh];
     unsigned char *image_data=[image bitmapData];
 
-    flip_vertical(image_data,width,height,bpp/8);
+    if(bpp==64)
+        bpp64to32(image_data,width,height,channels);
+
+    flip_vertical(image_data,width,height,channels);
 
     res.tex.build_texture(image_data,width,height,format);
 
@@ -544,6 +555,7 @@ private:
         
         nya_scene::texture::register_load_function(load_texture);
         nya_scene::texture::register_load_function(nya_scene::texture::load_dds);
+        nya_scene::texture::set_load_dds_flip(true);
         m_mesh.load(doc->m_model_name.c_str());
         nya_render::apply_state(true);
 
