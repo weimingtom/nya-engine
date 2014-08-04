@@ -73,9 +73,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
 
     nya_scene::shader sh;
     nya_scene::shared_shader sh_;
-    sh_.shdr.set_sampler("base",0);
-    sh_.samplers_count=1;
-    sh_.samplers["diffuse"]=0;
+    sh_.shdr.set_sampler("base",sh_.samplers["diffuse"]=0);
 
     const char *vertex_code="uniform vec3 bones_pos[255]; uniform vec4 bones_rot[255];"
     "vec3 tr(vec3 pos,int idx) { vec4 q=bones_rot[idx];"

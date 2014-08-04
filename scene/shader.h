@@ -16,7 +16,6 @@ struct shared_shader
 
     typedef std::map<std::string,int> samplers_map;
     samplers_map samplers;
-    int samplers_count;
 
     enum predefined_values
     {
@@ -62,7 +61,7 @@ struct shared_shader
 
     std::vector<uniform> uniforms;
 
-	shared_shader():samplers_count(0),last_skeleton_pos(0),last_skeleton_rot(0){}
+	shared_shader():last_skeleton_pos(0),last_skeleton_rot(0){}
 
     bool release()
     {
@@ -70,7 +69,6 @@ struct shared_shader
         predefines.clear();
         uniforms.clear();
         samplers.clear();
-        samplers_count=0;
         return true;
     }
 
