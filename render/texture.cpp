@@ -53,6 +53,15 @@ int get_bpp(texture::color_format format)
     return 0;
 }
 
+unsigned int get_tex_mips_count(unsigned int width,unsigned int height)
+{
+	int count=0;
+	for(unsigned int w=width,h=height;w>=1 && h>=1;w/=2,h/=2)
+		++count;
+
+	return count;
+}
+
 unsigned int get_tex_memory_size(unsigned int width,unsigned int height,texture::color_format format,int mip_count)
 {
     unsigned int size=width*height*(get_bpp(format)/8);
@@ -238,6 +247,9 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 
         if(!is_dxt_supported())
             return false;
+
+		if(mip_count<0)
+			mip_count=1;
     }
 
     const bool pot=((width&(width-1))==0 && (height&(height-1))==0);
@@ -259,15 +271,41 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     D3D11_TEXTURE2D_DESC desc;
     memset(&desc,0,sizeof(desc));
 
+	const bool need_generate_mips=(has_mipmap && mip_count<0);
+
     desc.Width=width;
     desc.Height=height;
-    desc.MipLevels=1;
+    desc.MipLevels=mip_count?mip_count:1;
+	if(need_generate_mips)
+		desc.MipLevels=get_tex_mips_count(width,height);
     desc.ArraySize=1;
 
-    D3D11_SUBRESOURCE_DATA srdata;
-    srdata.pSysMem=data;
-    srdata.SysMemPitch=width*4;
-    srdata.SysMemSlicePitch=0;
+	std::vector<D3D11_SUBRESOURCE_DATA> srdata(desc.MipLevels);
+	for(auto &l:srdata)
+	{
+		l.pSysMem=data;
+		l.SysMemPitch=width*4;
+		l.SysMemSlicePitch=0;
+	}
+
+	if(!need_generate_mips && mip_count>1)
+	{
+		const char *mem_data=(const char *)data;
+		for(int i=0,w=width,h=height;i<(mip_count<=0?1:mip_count);++i,w=w>1?w/2:1,h=h>1?h/2:1)
+		{
+			srdata[i].pSysMem=mem_data;
+			if(format==dxt1 || format==dxt3 || format==dxt5)
+			{
+				srdata[i].SysMemPitch=(h>4?h:4)/4 * get_bpp(format)*2;
+				mem_data+=(w>4?w:4)/4 * srdata[i].SysMemPitch;
+			}
+			else
+			{
+				srdata[i].SysMemPitch=h*4;
+				mem_data+=w * srdata[i].SysMemPitch;
+			}
+		}
+	}
 
     m_format=format;
 
@@ -302,7 +340,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     else
         desc.BindFlags=D3D11_BIND_SHADER_RESOURCE|D3D11_BIND_RENDER_TARGET;
 
-    if(has_mipmap && mip_count<0)
+    if(need_generate_mips)
         desc.MiscFlags=D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
     //desc.MiscFlags=D3D11_RESOURCE_MISC_GDI_COMPATIBLE;
@@ -310,13 +348,13 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     ID3D11Texture2D *tex=0;
     if((format==color_rgb || format==greyscale) && data)
     {
-        nya_memory::tmp_buffer_scoped buf(srdata.SysMemPitch*height);
-        srdata.pSysMem=buf.get_data();
+        nya_memory::tmp_buffer_scoped buf(srdata[0].SysMemPitch*height);
+        srdata[0].pSysMem=buf.get_data();
         dx_convert_to_format((unsigned char *)data,(unsigned char *)buf.get_data(),height*width,format);
-        get_device()->CreateTexture2D(&desc,&srdata,&tex);
+        get_device()->CreateTexture2D(&desc,&srdata[0],&tex);
     }
     else
-        get_device()->CreateTexture2D(&desc,data?(&srdata):0,&tex);
+        get_device()->CreateTexture2D(&desc,data?(&srdata[0]):0,&tex);
 
     if(!tex)
         return false;
@@ -327,11 +365,14 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         get_device()->CreateShaderResourceView(tex,0,&srv);
         if(!srv)
             return false;
+
+		if(need_generate_mips)
+			get_context()->GenerateMips(srv);
     }
 
     D3D11_SAMPLER_DESC sdesc;
     memset(&sdesc,0,sizeof(sdesc));
-    sdesc.Filter=D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    sdesc.Filter=D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
     sdesc.AddressU=D3D11_TEXTURE_ADDRESS_WRAP;
     sdesc.AddressV=D3D11_TEXTURE_ADDRESS_WRAP;
     sdesc.AddressW=D3D11_TEXTURE_ADDRESS_WRAP;
@@ -626,7 +667,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 
     D3D11_SAMPLER_DESC sdesc;
     memset(&sdesc,0,sizeof(sdesc));
-    sdesc.Filter=D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    sdesc.Filter=D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
     sdesc.AddressU=D3D11_TEXTURE_ADDRESS_WRAP;
     sdesc.AddressV=D3D11_TEXTURE_ADDRESS_WRAP;
     sdesc.AddressW=D3D11_TEXTURE_ADDRESS_WRAP;
