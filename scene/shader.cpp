@@ -119,8 +119,8 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
             }
 
             desc.samplers[semantics]=name;
-            res.samplers[semantics]=res.samplers_count;
-            ++res.samplers_count;
+            int tex_idx=(int)res.samplers.size();
+            res.samplers[semantics]=tex_idx;
         }
         else if(strcmp(section_type,"@vertex")==0)
         {
@@ -364,7 +364,7 @@ int shader_internal::get_texture_slots_count() const
     if(!m_shared.is_valid())
         return 0;
 
-    return m_shared->samplers_count;
+    return (int)m_shared->samplers.size();
 }
 
 const shared_shader::uniform &shader_internal::get_uniform(int idx) const

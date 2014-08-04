@@ -40,11 +40,17 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
 
     reader.skip(1);
     if(reader.read<float>()!=2.0f)
+    {
+        nya_log::log()<<"pmx load error: invalid version\n";
         return false;
-    
+    }
+
     const char header_size=reader.read<char>();
     if(header_size!=sizeof(pmx_header))
+    {
+        nya_log::log()<<"pmx load error: invalid header\n";
         return false;
+    }
     
     const pmx_header header=reader.read<pmx_header>();
     
@@ -56,7 +62,10 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     
     const int vert_count=reader.read<int>();
     if(!vert_count)
+    {
+        nya_log::log()<<"pmx load error: no verts found\n";
         return false;
+    }
 
     std::vector<vert> verts(vert_count);
 
@@ -117,7 +126,9 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
                 reader.skip(sizeof(float)*3*3);
                 break;
 
-            default: return false;
+            default:
+                nya_log::log()<<"pmx load error: invalid skining\n";
+                return false;
         }
 
         reader.read<float>(); //edge
@@ -129,7 +140,10 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     else if(header.index_size==4)
         res.vbo.set_index_data(reader.get_data(),nya_render::vbo::index4b,indices_count);
     else
+    {
+        nya_log::log()<<"pmx load error: invalid index size\n";
         return false;
+    }
 
     reader.skip(indices_count*header.index_size);
 
@@ -180,6 +194,9 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
 
     //nya_resources::file_resources_provider frp; frp.set_folder(path.c_str()); for(nya_resources::resource_info *fri=frp.first_res_info();fri;fri=fri->get_next()) printf("%s\n",fri->get_name());
 
+    const nya_math::vec3 mmd_light_dir=-nya_math::vec3(-0.5,-1.0,-0.5).normalize();
+    const nya_math::vec3 mmd_light_color=nya_math::vec3(154,154,154)/255.0;
+
     for(int i=0,offset=0;i<mat_count;++i)
     {
         nya_scene::shared_mesh::group &g=res.groups[i];
@@ -227,7 +244,16 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         else if(toon_flag==1)
             toon_tex_idx=reader.read<char>();
         else
+        {
+            nya_log::log()<<"pmx load error: invalid toon flag\n";
             return false;
+        }
+
+        if(toon_tex_idx>=(int)tex_names.size())
+        {
+            nya_log::log()<<"pmx load error: invalid toon tex\n";
+            return false;
+        }
 
         const int comment_len=reader.read<int>();
         reader.skip(comment_len);
@@ -239,9 +265,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         offset+=g.count;
 
         nya_scene::shared_shader sh_;
-        sh_.shdr.set_sampler("base",0);
-        sh_.samplers_count=1;
-        sh_.samplers["diffuse"]=0;
+        sh_.shdr.set_sampler("base",sh_.samplers["diffuse"]=(int)sh_.samplers.size());
 
         if(tex_idx>=0 && tex_idx<(int)tex_names.size())
         {
@@ -256,10 +280,8 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
             const std::string &name=tex_names[sph_tex_idx];
             if(sph_mode>0 && !name.empty())
             {
-                sh_.shdr.set_sampler("env",1);
-                sh_.samplers["env"]=1;
-                ++sh_.samplers_count;
-                
+                sh_.shdr.set_sampler("env",sh_.samplers["env"]=(int)sh_.samplers.size());
+
                 nya_scene::texture tex;
                 tex.load((path+name).c_str());
                 m.set_texture("env",tex);
@@ -306,17 +328,21 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         std::string pixel_code=sh_defines+"varying vec4 tc; varying vec3 normal;\n"
         "uniform sampler2D base;\n"
         "uniform sampler2D env;\n"
+        "uniform sampler2D toon;\n"
+        "uniform vec4 light_dir;\n"
         "void main() {\n"
         "vec4 tm=texture2D(base,tc.xy);\n"
-        "if(tm.a<0.001) discard;\n"
+        "if(tm.a<0.01) discard;\n"
+        "vec3 diff=k_d.rgb*clamp(dot(light_dir.xyz,normal),0.0,1.0);\n"
+
         "#ifdef spa\n"
         "   vec4 em=texture2D(env,tc.zw);\n"
-        "   gl_FragColor=vec4(tm.rgb+em.rgb,tm.a); }\n"
+        "   gl_FragColor=vec4(tm.rgb*(k_a+diff)+em.rgb,tm.a); }\n"
         "#elif defined sph\n"
         "   vec4 em=texture2D(env,tc.zw);\n"
-        "   gl_FragColor=vec4(tm.xyz*(k_a+k_d.rgb*em.rgb),tm.a); }\n"
+        "   gl_FragColor=vec4(tm.rgb*(k_a+diff*em.rgb),tm.a); }\n"
         "#else\n"
-        "   gl_FragColor=tm; }\n"
+        "   gl_FragColor=vec4(tm.rgb*min((k_a+diff),vec3(1.0)),tm.a); }\n"
         "#endif\n";
 
         sh_.shdr.add_program(nya_render::shader::vertex,vertex_code.c_str());
@@ -326,6 +352,10 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         sh_.predefines[0].location=sh_.shdr.get_handler("bones_pos");
         sh_.predefines[1].type=nya_scene::shared_shader::bones_rot;
         sh_.predefines[1].location=sh_.shdr.get_handler("bones_rot");
+        sh_.uniforms.resize(1);
+        sh_.uniforms[0].name="light dir";
+        sh_.uniforms[0].location=sh_.shdr.get_handler("light_dir");
+        sh_.uniforms[0].transform=nya_scene::shared_shader::local_rot;
         sh.create(sh_);
 
         nya_scene::material::pass &p=m.get_pass(m.add_pass(nya_scene::material::default_pass));
@@ -333,6 +363,8 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         p.set_shader(sh);
         p.get_state().set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
         p.get_state().set_cull_face(!(flag & (1<<0)),nya_render::cull_face::cw);
+
+        m.set_param(m.get_param_idx(sh_.uniforms[0].name.c_str()),mmd_light_dir);
 
         if(!(flag & (1<<4)))
             continue;
@@ -605,7 +637,9 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
             }
             break;
 
-            default: return false;
+            default:
+                nya_log::log()<<"pmx load error: invalid morph type\n";
+                return false;
         }
     }
 
