@@ -497,12 +497,25 @@ void material::set_texture(const char *semantics,const texture_proxy &proxy)
         m_internal.m_textures[texture_idx].proxy=proxy;
 }
 
+int material::get_textures_count() const
+{
+    m_internal.update_passes_maps();
+    return (int)internal().m_textures.size();
+}
+
 const char *material::get_texture_semantics(int idx) const
 {
+    m_internal.update_passes_maps();
     if(idx < 0 || idx>=(int)internal().m_textures.size())
         return 0;
 
     return internal().m_textures[idx].semantics.c_str();
+}
+
+int material::get_texture_idx(const char *semantics) const
+{
+    m_internal.update_passes_maps();
+    return m_internal.get_texture_idx(semantics);
 }
 
 const texture_proxy &material::get_texture(int idx) const
