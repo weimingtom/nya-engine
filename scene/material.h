@@ -157,9 +157,9 @@ public:
     void set_texture(const char *semantics,const texture &tex);
     void set_texture(const char *semantics,const texture_proxy &proxy);
 
-    int get_textures_count() const { return (int)internal().m_textures.size(); }
+    int get_textures_count() const;
     const char *get_texture_semantics(int idx) const;
-    int get_texture_idx(const char *semantics) const {return m_internal.get_texture_idx(semantics);}
+    int get_texture_idx(const char *semantics) const;
     const texture_proxy &get_texture(int idx) const;
     const texture_proxy &get_texture(const char *semantics) const;
 
