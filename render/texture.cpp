@@ -6,7 +6,7 @@
 
 #include "memory/tmp_buffer.h"
 
-//ToDo: mipmaps and dxt support for cubemaps, mipmaps support in dx11
+//ToDo: mipmaps and dxt support for cubemaps
 
 namespace nya_render
 {
