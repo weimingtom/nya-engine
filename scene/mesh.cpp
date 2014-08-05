@@ -122,8 +122,6 @@ bool mesh::load_nms_material_section(shared_mesh &res,const void *data,size_t si
         const nya_formats::nms_material_chunk::material_info &from=c.materials[i];
         material &to=res.materials[i+mat_idx_off];
 
-        to.set_name(from.name.c_str());
-
         for(size_t j=0;j<from.strings.size();++j)
         {
             const std::string &name=from.strings[j].name;
@@ -168,6 +166,8 @@ bool mesh::load_nms_material_section(shared_mesh &res,const void *data,size_t si
 
             to.set_param(param_idx,from.vectors[j].value);
         }
+
+        to.set_name(from.name.c_str());
     }
 
     return true;
