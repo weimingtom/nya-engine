@@ -83,6 +83,29 @@ unsigned int get_tex_memory_size(unsigned int width,unsigned int height,texture:
     return full_size;
 }
 
+void downsample(const void *from,void *to,unsigned int width,unsigned int height,unsigned int channels)
+{
+    const unsigned char *f=(unsigned char *)from;
+    unsigned char *t=(unsigned char *)to;
+
+    const unsigned int new_width = width / 2;
+    const unsigned int new_height = height / 2;
+
+    for( int h = 0; h < new_height*channels; h+=channels )
+    {
+        for( int w = 0; w < new_width*channels; w+=channels )
+        {
+            for(int c = 0; c < channels; ++c)
+            {
+                t[h*new_width+w+c] = ( f[(h*width+w)*2 + c] +
+                                         f[((h*2+channels)*width+w*2) + c] +
+                                         f[(h*2*width+(w*2+channels)) + c] +
+                                         f[((h*2+channels)*width+(w*2+channels)) + c] ) / 4;
+            }
+        }
+    }
+}
+
 #ifdef DIRECTX11
 void dx_convert_to_format(const unsigned char *from,unsigned char *to,size_t size,texture::color_format format)
 {
