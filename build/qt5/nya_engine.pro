@@ -3,133 +3,138 @@
 
 QT -= core gui
 
-NYA_ENGINE_PATH = ../..
+NYA_ENGINE_DIR = ../..
+include($${NYA_ENGINE_DIR}/build/qt5/nya_engine.pri)
 
 TARGET = nya_engine
 TEMPLATE = lib
 CONFIG += staticlib
-INCLUDEPATH += $$NYA_ENGINE_PATH
+DESTDIR = $$NYA_ENGINE_LIB_DIR
+
+INCLUDEPATH += $$NYA_ENGINE_DIR
 # to compile '.o' files (like scene/shader.cpp and render/shader.cpp) in different subdirs
 CONFIG += object_parallel_to_source
 QMAKE_CXXFLAGS_WARN_ON = -Wall -Wno-unused-parameter -Wno-reorder
 QMAKE_OBJECTIVE_CFLAGS_WARN_ON = -Wall -Wno-unused-parameter -Wno-reorder
 QMAKE_OBJECTIVE_CXXFLAGS_WARN_ON = -Wall -Wno-unused-parameter -Wno-reorder
 
-DESTDIR = ../../bin/qt
-#debug: DESTDIR = ../../bin/qt_debug
-
 SOURCES += \
-    $${NYA_ENGINE_PATH}/formats/dds.cpp \
-    $${NYA_ENGINE_PATH}/formats/nms.cpp \
-    $${NYA_ENGINE_PATH}/formats/string_convert.cpp \
-    $${NYA_ENGINE_PATH}/formats/text_parser.cpp \
-    $${NYA_ENGINE_PATH}/formats/tga.cpp \
-    $${NYA_ENGINE_PATH}/log/log.cpp \
-    $${NYA_ENGINE_PATH}/log/plain_file_log.cpp \
-    $${NYA_ENGINE_PATH}/log/stdout_log.cpp \
-    $${NYA_ENGINE_PATH}/log/warning.cpp \
-    $${NYA_ENGINE_PATH}/math/bezier.cpp \
-    $${NYA_ENGINE_PATH}/math/constants.cpp \
-    $${NYA_ENGINE_PATH}/math/frustum.cpp \
-    $${NYA_ENGINE_PATH}/math/matrix.cpp \
-    $${NYA_ENGINE_PATH}/math/quaternion.cpp \
-    $${NYA_ENGINE_PATH}/memory/memory.cpp \
-    $${NYA_ENGINE_PATH}/memory/tmp_buffer.cpp \
-    $${NYA_ENGINE_PATH}/render/animation.cpp \
-    $${NYA_ENGINE_PATH}/render/debug_draw.cpp \
-    $${NYA_ENGINE_PATH}/render/fbo.cpp \
-    $${NYA_ENGINE_PATH}/render/platform_specific_gl.cpp \
-    $${NYA_ENGINE_PATH}/render/render.cpp \
-    $${NYA_ENGINE_PATH}/render/shader.cpp \
-    $${NYA_ENGINE_PATH}/render/skeleton.cpp \
-    $${NYA_ENGINE_PATH}/render/texture.cpp \
-    $${NYA_ENGINE_PATH}/render/transform.cpp \
-    $${NYA_ENGINE_PATH}/render/vbo.cpp \
-    $${NYA_ENGINE_PATH}/resources/composite_resources_provider.cpp \
-    $${NYA_ENGINE_PATH}/resources/file_resources_provider.cpp \
-    $${NYA_ENGINE_PATH}/resources/resources.cpp \
-    $${NYA_ENGINE_PATH}/scene/animation.cpp \
-    $${NYA_ENGINE_PATH}/scene/camera.cpp \
-    $${NYA_ENGINE_PATH}/scene/material.cpp \
-    $${NYA_ENGINE_PATH}/scene/mesh.cpp \
-    $${NYA_ENGINE_PATH}/scene/scene.cpp \
-    $${NYA_ENGINE_PATH}/scene/shader.cpp \
-    $${NYA_ENGINE_PATH}/scene/texture.cpp \
-    $${NYA_ENGINE_PATH}/scene/transform.cpp \
-    $${NYA_ENGINE_PATH}/system/shaders_cache_provider.cpp \
-    $${NYA_ENGINE_PATH}/system/system.cpp \
-    $${NYA_ENGINE_PATH}/ui/list.cpp \
-    $${NYA_ENGINE_PATH}/ui/panel.cpp \
-    $${NYA_ENGINE_PATH}/ui/slider.cpp \
-    $${NYA_ENGINE_PATH}/ui/ui.cpp
+    $${NYA_ENGINE_DIR}/formats/dds.cpp \
+    $${NYA_ENGINE_DIR}/formats/nms.cpp \
+    $${NYA_ENGINE_DIR}/formats/string_convert.cpp \
+    $${NYA_ENGINE_DIR}/formats/text_parser.cpp \
+    $${NYA_ENGINE_DIR}/formats/tga.cpp \
+    $${NYA_ENGINE_DIR}/log/log.cpp \
+    $${NYA_ENGINE_DIR}/log/plain_file_log.cpp \
+    $${NYA_ENGINE_DIR}/log/stdout_log.cpp \
+    $${NYA_ENGINE_DIR}/log/warning.cpp \
+    $${NYA_ENGINE_DIR}/math/bezier.cpp \
+    $${NYA_ENGINE_DIR}/math/constants.cpp \
+    $${NYA_ENGINE_DIR}/math/frustum.cpp \
+    $${NYA_ENGINE_DIR}/math/matrix.cpp \
+    $${NYA_ENGINE_DIR}/math/quaternion.cpp \
+    $${NYA_ENGINE_DIR}/memory/memory.cpp \
+    $${NYA_ENGINE_DIR}/memory/tmp_buffer.cpp \
+    $${NYA_ENGINE_DIR}/render/animation.cpp \
+    $${NYA_ENGINE_DIR}/render/debug_draw.cpp \
+    $${NYA_ENGINE_DIR}/render/fbo.cpp \
+    $${NYA_ENGINE_DIR}/render/platform_specific_gl.cpp \
+    $${NYA_ENGINE_DIR}/render/render.cpp \
+    $${NYA_ENGINE_DIR}/render/shader.cpp \
+    $${NYA_ENGINE_DIR}/render/skeleton.cpp \
+    $${NYA_ENGINE_DIR}/render/texture.cpp \
+    $${NYA_ENGINE_DIR}/render/transform.cpp \
+    $${NYA_ENGINE_DIR}/render/vbo.cpp \
+    $${NYA_ENGINE_DIR}/resources/composite_resources_provider.cpp \
+    $${NYA_ENGINE_DIR}/resources/file_resources_provider.cpp \
+    $${NYA_ENGINE_DIR}/resources/resources.cpp \
+    $${NYA_ENGINE_DIR}/scene/animation.cpp \
+    $${NYA_ENGINE_DIR}/scene/camera.cpp \
+    $${NYA_ENGINE_DIR}/scene/material.cpp \
+    $${NYA_ENGINE_DIR}/scene/mesh.cpp \
+    $${NYA_ENGINE_DIR}/scene/scene.cpp \
+    $${NYA_ENGINE_DIR}/scene/shader.cpp \
+    $${NYA_ENGINE_DIR}/scene/texture.cpp \
+    $${NYA_ENGINE_DIR}/scene/transform.cpp \
+    $${NYA_ENGINE_DIR}/system/shaders_cache_provider.cpp \
+    $${NYA_ENGINE_DIR}/system/system.cpp \
+    $${NYA_ENGINE_DIR}/ui/list.cpp \
+    $${NYA_ENGINE_DIR}/ui/panel.cpp \
+    $${NYA_ENGINE_DIR}/ui/slider.cpp \
+    $${NYA_ENGINE_DIR}/ui/ui.cpp
 
-!macx: SOURCES += $${NYA_ENGINE_PATH}/system/app.cpp
-macx: OBJECTIVE_SOURCES += $${NYA_ENGINE_PATH}/system/app.mm
-
-# clang gives 'file: XXX has no symbols' error for empty source files
-# remove this line if anything changes
-macx: SOURCES -= $${NYA_ENGINE_PATH}/render/platform_specific_gl.cpp
+macx {
+    # clang gives 'file: XXX has no symbols' error for empty source files
+    # remove this line if anything changes
+    macx: SOURCES -= $${NYA_ENGINE_DIR}/render/platform_specific_gl.cpp
+    macx: OBJECTIVE_SOURCES += $${NYA_ENGINE_DIR}/system/app.mm
+} else {
+    SOURCES += $${NYA_ENGINE_DIR}/system/app.cpp
+}
 
 HEADERS += \
-    $${NYA_ENGINE_PATH}/formats/dds.h \
-    $${NYA_ENGINE_PATH}/formats/nms.h \
-    $${NYA_ENGINE_PATH}/formats/string_convert.h \
-    $${NYA_ENGINE_PATH}/formats/text_parser.h \
-    $${NYA_ENGINE_PATH}/formats/tga.h \
-    $${NYA_ENGINE_PATH}/gl/glext.h \
-    $${NYA_ENGINE_PATH}/gl/wglext.h \
-    $${NYA_ENGINE_PATH}/log/log.h \
-    $${NYA_ENGINE_PATH}/log/output_stream.h \
-    $${NYA_ENGINE_PATH}/log/plain_file_log.h \
-    $${NYA_ENGINE_PATH}/log/stdout_log.h \
-    $${NYA_ENGINE_PATH}/log/warning.h \
-    $${NYA_ENGINE_PATH}/math/bezier.h \
-    $${NYA_ENGINE_PATH}/math/constants.h \
-    $${NYA_ENGINE_PATH}/math/frustum.h \
-    $${NYA_ENGINE_PATH}/math/matrix.h \
-    $${NYA_ENGINE_PATH}/math/quaternion.h \
-    $${NYA_ENGINE_PATH}/math/vector.h \
-    $${NYA_ENGINE_PATH}/memory/indexed_map.h \
-    $${NYA_ENGINE_PATH}/memory/invalid_object.h \
-    $${NYA_ENGINE_PATH}/memory/memory.h \
-    $${NYA_ENGINE_PATH}/memory/memory_reader.h \
-    $${NYA_ENGINE_PATH}/memory/memory_writer.h \
-    $${NYA_ENGINE_PATH}/memory/optional.h \
-    $${NYA_ENGINE_PATH}/memory/pool.h \
-    $${NYA_ENGINE_PATH}/memory/shared_ptr.h \
-    $${NYA_ENGINE_PATH}/memory/tmp_buffer.h \
-    $${NYA_ENGINE_PATH}/render/animation.h \
-    $${NYA_ENGINE_PATH}/render/debug_draw.h \
-    $${NYA_ENGINE_PATH}/render/fbo.h \
-    $${NYA_ENGINE_PATH}/render/platform_specific_gl.h \
-    $${NYA_ENGINE_PATH}/render/render.h \
-    $${NYA_ENGINE_PATH}/render/render_objects.h \
-    $${NYA_ENGINE_PATH}/render/shader.h \
-    $${NYA_ENGINE_PATH}/render/skeleton.h \
-    $${NYA_ENGINE_PATH}/render/texture.h \
-    $${NYA_ENGINE_PATH}/render/transform.h \
-    $${NYA_ENGINE_PATH}/render/vbo.h \
-    $${NYA_ENGINE_PATH}/resources/composite_resources_provider.h \
-    $${NYA_ENGINE_PATH}/resources/file_resources_provider.h \
-    $${NYA_ENGINE_PATH}/resources/resources.h \
-    $${NYA_ENGINE_PATH}/resources/shared_resources.h \
-    $${NYA_ENGINE_PATH}/scene/animation.h \
-    $${NYA_ENGINE_PATH}/scene/camera.h \
-    $${NYA_ENGINE_PATH}/scene/material.h \
-    $${NYA_ENGINE_PATH}/scene/mesh.h \
-    $${NYA_ENGINE_PATH}/scene/proxy.h \
-    $${NYA_ENGINE_PATH}/scene/scene.h \
-    $${NYA_ENGINE_PATH}/scene/shader.h \
-    $${NYA_ENGINE_PATH}/scene/shared_resources.h \
-    $${NYA_ENGINE_PATH}/scene/texture.h \
-    $${NYA_ENGINE_PATH}/scene/transform.h \
-    $${NYA_ENGINE_PATH}/system/app.h \
-    $${NYA_ENGINE_PATH}/system/button_codes.h \
-    $${NYA_ENGINE_PATH}/system/shaders_cache_provider.h \
-    $${NYA_ENGINE_PATH}/system/system.h \
-    $${NYA_ENGINE_PATH}/ui/button.h \
-    $${NYA_ENGINE_PATH}/ui/label.h \
-    $${NYA_ENGINE_PATH}/ui/list.h \
-    $${NYA_ENGINE_PATH}/ui/panel.h \
-    $${NYA_ENGINE_PATH}/ui/slider.h \
-    $${NYA_ENGINE_PATH}/ui/ui.h
+    $${NYA_ENGINE_DIR}/formats/dds.h \
+    $${NYA_ENGINE_DIR}/formats/nms.h \
+    $${NYA_ENGINE_DIR}/formats/string_convert.h \
+    $${NYA_ENGINE_DIR}/formats/text_parser.h \
+    $${NYA_ENGINE_DIR}/formats/tga.h \
+    $${NYA_ENGINE_DIR}/gl/glext.h \
+    $${NYA_ENGINE_DIR}/gl/wglext.h \
+    $${NYA_ENGINE_DIR}/log/log.h \
+    $${NYA_ENGINE_DIR}/log/output_stream.h \
+    $${NYA_ENGINE_DIR}/log/plain_file_log.h \
+    $${NYA_ENGINE_DIR}/log/stdout_log.h \
+    $${NYA_ENGINE_DIR}/log/warning.h \
+    $${NYA_ENGINE_DIR}/math/bezier.h \
+    $${NYA_ENGINE_DIR}/math/constants.h \
+    $${NYA_ENGINE_DIR}/math/frustum.h \
+    $${NYA_ENGINE_DIR}/math/matrix.h \
+    $${NYA_ENGINE_DIR}/math/quaternion.h \
+    $${NYA_ENGINE_DIR}/math/vector.h \
+    $${NYA_ENGINE_DIR}/memory/indexed_map.h \
+    $${NYA_ENGINE_DIR}/memory/invalid_object.h \
+    $${NYA_ENGINE_DIR}/memory/memory.h \
+    $${NYA_ENGINE_DIR}/memory/memory_reader.h \
+    $${NYA_ENGINE_DIR}/memory/memory_writer.h \
+    $${NYA_ENGINE_DIR}/memory/optional.h \
+    $${NYA_ENGINE_DIR}/memory/pool.h \
+    $${NYA_ENGINE_DIR}/memory/shared_ptr.h \
+    $${NYA_ENGINE_DIR}/memory/tmp_buffer.h \
+    $${NYA_ENGINE_DIR}/render/animation.h \
+    $${NYA_ENGINE_DIR}/render/debug_draw.h \
+    $${NYA_ENGINE_DIR}/render/fbo.h \
+    $${NYA_ENGINE_DIR}/render/platform_specific_gl.h \
+    $${NYA_ENGINE_DIR}/render/render.h \
+    $${NYA_ENGINE_DIR}/render/render_objects.h \
+    $${NYA_ENGINE_DIR}/render/shader.h \
+    $${NYA_ENGINE_DIR}/render/skeleton.h \
+    $${NYA_ENGINE_DIR}/render/texture.h \
+    $${NYA_ENGINE_DIR}/render/transform.h \
+    $${NYA_ENGINE_DIR}/render/vbo.h \
+    $${NYA_ENGINE_DIR}/resources/composite_resources_provider.h \
+    $${NYA_ENGINE_DIR}/resources/file_resources_provider.h \
+    $${NYA_ENGINE_DIR}/resources/resources.h \
+    $${NYA_ENGINE_DIR}/resources/shared_resources.h \
+    $${NYA_ENGINE_DIR}/scene/animation.h \
+    $${NYA_ENGINE_DIR}/scene/camera.h \
+    $${NYA_ENGINE_DIR}/scene/material.h \
+    $${NYA_ENGINE_DIR}/scene/mesh.h \
+    $${NYA_ENGINE_DIR}/scene/proxy.h \
+    $${NYA_ENGINE_DIR}/scene/scene.h \
+    $${NYA_ENGINE_DIR}/scene/shader.h \
+    $${NYA_ENGINE_DIR}/scene/shared_resources.h \
+    $${NYA_ENGINE_DIR}/scene/texture.h \
+    $${NYA_ENGINE_DIR}/scene/transform.h \
+    $${NYA_ENGINE_DIR}/system/app.h \
+    $${NYA_ENGINE_DIR}/system/button_codes.h \
+    $${NYA_ENGINE_DIR}/system/shaders_cache_provider.h \
+    $${NYA_ENGINE_DIR}/system/system.h \
+    $${NYA_ENGINE_DIR}/ui/button.h \
+    $${NYA_ENGINE_DIR}/ui/label.h \
+    $${NYA_ENGINE_DIR}/ui/list.h \
+    $${NYA_ENGINE_DIR}/ui/panel.h \
+    $${NYA_ENGINE_DIR}/ui/slider.h \
+    $${NYA_ENGINE_DIR}/ui/ui.h
+
+OTHER_FILES += \
+    nya_engine.pri

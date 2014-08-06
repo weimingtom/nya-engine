@@ -1,0 +1,7 @@
+Config shadow build path before building nya engine lib to avoid building in nya-engine/build directory.
+
+Include 'nya_engine.pri' file in custom qt project using nya-engine. This pri file puts path to the nya engine library directory in NYA_ENGINE_LIB_DIR variable. Set NYA_ENGINE_DIR qmake variable before including it.
+Example:
+    NYA_ENGINE_DIR = /ext/sdk/nya-engine
+    include($${NYA_ENGINE_DIR}/build/qt5/nya_engine.pri)
+    LIBS += -L$${NYA_ENGINE_LIB_DIR} -lnya_engine
