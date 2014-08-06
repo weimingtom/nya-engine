@@ -55,7 +55,7 @@ int get_bpp(texture::color_format format)
 
 unsigned int get_tex_mips_count(unsigned int width,unsigned int height)
 {
-	int count=0;
+	int count=width && height;
 	for(unsigned int w=width,h=height;!(w==1 && h==1);w>1?w=w/2:w=1,h>1?h/=2:h=1)
 		++count;
 
@@ -73,6 +73,7 @@ unsigned int get_tex_memory_size(unsigned int width,unsigned int height,texture:
     }
     else if(mip_count<0)
     {
+		//inaccurate
         for(unsigned int w=width,h=height;w==1 && h==1;w>1?w=w/2:w=1,h>1?h/=2:h=1,size/=4)
             full_size+=size;
     }
