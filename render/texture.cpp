@@ -55,11 +55,11 @@ int get_bpp(texture::color_format format)
 
 unsigned int get_tex_mips_count(unsigned int width,unsigned int height)
 {
-	int count=width && height;
-	for(unsigned int w=width,h=height;!(w==1 && h==1);w>1?w=w/2:w=1,h>1?h/=2:h=1)
-		++count;
+    int count=width && height;
+    for(unsigned int w=width,h=height;!(w==1 && h==1);w>1?w=w/2:w=1,h>1?h/=2:h=1)
+        ++count;
 
-	return count;
+    return count;
 }
 
 unsigned int get_tex_memory_size(unsigned int width,unsigned int height,texture::color_format format,int mip_count)
@@ -73,7 +73,7 @@ unsigned int get_tex_memory_size(unsigned int width,unsigned int height,texture:
     }
     else if(mip_count<0)
     {
-		//inaccurate
+        //inaccurate
         for(unsigned int w=width,h=height;w && h;w/=2,h/=2,size/=4)
             full_size+=size;
     }
@@ -88,19 +88,19 @@ void downsample(const void *from,void *to,unsigned int width,unsigned int height
     const unsigned char *f=(unsigned char *)from;
     unsigned char *t=(unsigned char *)to;
 
-    const unsigned int new_width = width / 2;
-    const unsigned int new_height = height / 2;
+    const unsigned int new_width=width/2;
+    const unsigned int new_height=height/2;
 
-    for( int h = 0; h < new_height*channels; h+=channels )
+    for(unsigned int h=0;h<new_height*channels;h+=channels)
     {
-        for( int w = 0; w < new_width*channels; w+=channels )
+        for(unsigned int w=0;w<new_width*channels;w+=channels)
         {
-            for(int c = 0; c < channels; ++c)
+            for(unsigned int c=0;c<channels;++c)
             {
-                t[h*new_width+w+c] = ( f[(h*width+w)*2 + c] +
-                                         f[((h*2+channels)*width+w*2) + c] +
-                                         f[(h*2*width+(w*2+channels)) + c] +
-                                         f[((h*2+channels)*width+(w*2+channels)) + c] ) / 4;
+                t[h*new_width+w+c]=(f[(h*width+w)*2+c]+
+                                    f[((h*2+channels)*width+w*2)+c]+
+                                    f[(h*2*width+(w*2+channels))+c]+
+                                    f[((h*2+channels)*width+(w*2+channels))+c])/4;
             }
         }
     }
@@ -272,8 +272,8 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         if(!is_dxt_supported())
             return false;
 
-		if(mip_count<0)
-			mip_count=1;
+        if(mip_count<0)
+            mip_count=1;
     }
 
     const bool pot=((width&(width-1))==0 && (height&(height-1))==0);
@@ -295,41 +295,41 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     D3D11_TEXTURE2D_DESC desc;
     memset(&desc,0,sizeof(desc));
 
-	const bool need_generate_mips=(has_mipmap && mip_count<0);
+    const bool need_generate_mips=(has_mipmap && mip_count<0);
 
     desc.Width=width;
     desc.Height=height;
     desc.MipLevels=mip_count?mip_count:1;
-	if(need_generate_mips)
-		desc.MipLevels=get_tex_mips_count(width,height);
+    if(need_generate_mips)
+        desc.MipLevels=get_tex_mips_count(width,height);
     desc.ArraySize=1;
 
-	std::vector<D3D11_SUBRESOURCE_DATA> srdata(desc.MipLevels);
-	for(auto &l:srdata)
-	{
-		l.pSysMem=data;
-		l.SysMemPitch=width*4;
-		l.SysMemSlicePitch=0;
-	}
+    std::vector<D3D11_SUBRESOURCE_DATA> srdata(desc.MipLevels);
+    for(auto &l:srdata)
+    {
+        l.pSysMem=data;
+        l.SysMemPitch=width*4;
+        l.SysMemSlicePitch=0;
+    }
 
-	if(!need_generate_mips && mip_count>1)
-	{
-		const char *mem_data=(const char *)data;
-		for(int i=0,w=width,h=height;i<(mip_count<=0?1:mip_count);++i,w=w>1?w/2:1,h=h>1?h/2:1)
-		{
-			srdata[i].pSysMem=mem_data;
-			if(format==dxt1 || format==dxt3 || format==dxt5)
-			{
-				srdata[i].SysMemPitch=(w>4?w:4)/4 * get_bpp(format)*2;
-				mem_data+=(h>4?h:4)/4 * srdata[i].SysMemPitch;
-			}
-			else
-			{
-				srdata[i].SysMemPitch=w*4;
-				mem_data+=srdata[i].SysMemPitch*h;
-			}
-		}
-	}
+    if(!need_generate_mips && mip_count>1)
+    {
+        const char *mem_data=(const char *)data;
+        for(int i=0,w=width,h=height;i<(mip_count<=0?1:mip_count);++i,w=w>1?w/2:1,h=h>1?h/2:1)
+        {
+            srdata[i].pSysMem=mem_data;
+            if(format==dxt1 || format==dxt3 || format==dxt5)
+            {
+                srdata[i].SysMemPitch=(w>4?w:4)/4 * get_bpp(format)*2;
+                mem_data+=(h>4?h:4)/4 * srdata[i].SysMemPitch;
+            }
+            else
+            {
+                srdata[i].SysMemPitch=w*4;
+                mem_data+=srdata[i].SysMemPitch*h;
+            }
+        }
+    }
 
     m_format=format;
 
@@ -411,8 +411,8 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         if(!srv)
             return false;
 
-		if(need_generate_mips && width==height)
-			get_context()->GenerateMips(srv);
+        if(need_generate_mips && width==height)
+            get_context()->GenerateMips(srv);
     }
 
     D3D11_SAMPLER_DESC sdesc;
@@ -572,7 +572,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         data_pointer+=size;
     }
 
-    //	glTexSubImage2D(GL_TEXTURE_2D,0,0,0,width,height,gl_format,precision,data);
+    //    glTexSubImage2D(GL_TEXTURE_2D,0,0,0,width,height,gl_format,precision,data);
   #ifndef GL_GENERATE_MIPMAP
     if(has_mipmap && mip_count<0) glGenerateMipmap(GL_TEXTURE_2D);
   #endif
