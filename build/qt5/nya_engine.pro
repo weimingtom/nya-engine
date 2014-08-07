@@ -1,13 +1,13 @@
 # WARNING: do not forget to configure qt creator kit (under projects tab) to build in appropiate directory
 # this .pro file is tested under clang64 and mingw32 specs
 
-QT -= core gui
-
 NYA_ENGINE_PATH = ../..
 
 TARGET = nya_engine
 TEMPLATE = lib
 CONFIG += staticlib
+CONFIG -= qt
+QT =
 INCLUDEPATH += $$NYA_ENGINE_PATH
 # to compile '.o' files (like scene/shader.cpp and render/shader.cpp) in different subdirs
 CONFIG += object_parallel_to_source
@@ -15,8 +15,22 @@ QMAKE_CXXFLAGS_WARN_ON = -Wall -Wno-unused-parameter -Wno-reorder
 QMAKE_OBJECTIVE_CFLAGS_WARN_ON = -Wall -Wno-unused-parameter -Wno-reorder
 QMAKE_OBJECTIVE_CXXFLAGS_WARN_ON = -Wall -Wno-unused-parameter -Wno-reorder
 
-DESTDIR = ../../bin/qt
-#debug: DESTDIR = ../../bin/qt_debug
+
+CONFIG(debug, debug|release) {
+    CONF = debug
+} else:CONFIG(release, debug|release) {
+    CONF = release
+}
+PLATFORM = $$first(QMAKE_PLATFORM)
+android {
+    PLATFORM = $$PLATFORM"_"$$ANDROID_TARGET_ARCH
+} else:mingw {
+    PLATFORM = mingw
+}
+BIN_DIR_NAME = "qtc_"$$PLATFORM"_"$$CONF
+
+DESTDIR = $$NYA_ENGINE_PATH/bin/$$BIN_DIR_NAME
+
 
 SOURCES += \
     $${NYA_ENGINE_PATH}/formats/dds.cpp \

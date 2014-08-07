@@ -33,7 +33,7 @@ aabb::aabb(const aabb &b,const vec3 &p,const quat &q,const vec3 &s)
     origin.x*=s.x;
     origin.y*=s.y;
     origin.z*=s.z;
-    origin=q.rotate(b.origin)+p;
+    origin=q.rotate(origin)+p;
 }
 
 bool frustum::test_intersect(const aabb &box) const
