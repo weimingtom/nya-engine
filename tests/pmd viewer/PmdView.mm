@@ -7,6 +7,7 @@
 
 #include "scene/camera.h"
 #include "system/system.h"
+#include "render/platform_specific_gl.h"
 
 void viewer_camera::add_rot(float dx,float dy)
 {
@@ -549,6 +550,8 @@ private:
     PmdDocument *doc=[[[self window] windowController] document];
     if(!doc->m_model_name.empty())
     {
+        nya_render::set_ignore_platform_restrictions(true);
+
         //nya_render::set_clear_color(0.2f,0.4f,0.5f,0.0f);
         nya_render::set_clear_color(1.0f,1.0f,1.0f,0.0f);
         nya_render::depth_test::enable(nya_render::depth_test::less);
