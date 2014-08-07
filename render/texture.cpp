@@ -320,13 +320,13 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 			srdata[i].pSysMem=mem_data;
 			if(format==dxt1 || format==dxt3 || format==dxt5)
 			{
-				srdata[i].SysMemPitch=(h>4?h:4)/4 * get_bpp(format)*2;
-				mem_data+=(w>4?w:4)/4 * srdata[i].SysMemPitch;
+				srdata[i].SysMemPitch=(w>4?w:4)/4 * get_bpp(format)*2;
+				mem_data+=(h>4?h:4)/4 * srdata[i].SysMemPitch;
 			}
 			else
 			{
-				srdata[i].SysMemPitch=h*4;
-				mem_data+=w * srdata[i].SysMemPitch;
+				srdata[i].SysMemPitch=w*4;
+				mem_data+=srdata[i].SysMemPitch*h;
 			}
 		}
 	}
@@ -369,16 +369,37 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 
     //desc.MiscFlags=D3D11_RESOURCE_MISC_GDI_COMPATIBLE;
 
+    nya_memory::tmp_buffer_ref buf_rgb;
+    nya_memory::tmp_buffer_ref buf_mip;
+
     ID3D11Texture2D *tex=0;
     if((format==color_rgb || format==greyscale) && data)
     {
-        nya_memory::tmp_buffer_scoped buf(srdata[0].SysMemPitch*height);
-        srdata[0].pSysMem=buf.get_data();
-        dx_convert_to_format((unsigned char *)data,(unsigned char *)buf.get_data(),height*width,format);
-        get_device()->CreateTexture2D(&desc,&srdata[0],&tex);
+        buf_rgb.allocate(srdata[0].SysMemPitch*height);
+        srdata[0].pSysMem=buf_rgb.get_data();
+        dx_convert_to_format((unsigned char *)data,(unsigned char *)buf_rgb.get_data(),height*width,format);
     }
-    else
-        get_device()->CreateTexture2D(&desc,data?(&srdata[0]):0,&tex);
+
+    if(need_generate_mips && width!=height)
+    {
+        buf_mip.allocate(srdata[0].SysMemPitch*height/2);
+
+        const void *prev_data=srdata[0].pSysMem;
+        char *mem_data=(char *)buf_mip.get_data();
+        for(int i=0,w=width,h=height;i<(int)srdata.size()-1;++i)
+        {
+            downsample(prev_data,mem_data,w,h,4);
+            prev_data=srdata[i+1].pSysMem=mem_data;
+            w=w>1?w/2:1,h=h>1?h/2:1;
+            srdata[i+1].SysMemPitch=w*4;
+            mem_data+=srdata[i+1].SysMemPitch*h;
+        }
+    }
+
+    get_device()->CreateTexture2D(&desc,data?(&srdata[0]):0,&tex);
+
+    buf_rgb.free();
+    buf_mip.free();
 
     if(!tex)
         return false;
@@ -390,7 +411,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         if(!srv)
             return false;
 
-		if(need_generate_mips)
+		if(need_generate_mips && width==height)
 			get_context()->GenerateMips(srv);
     }
 
