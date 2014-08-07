@@ -61,3 +61,10 @@ bool has_extension(const char *name)
 }
 
 #endif
+
+namespace nya_render
+{
+namespace { bool ignore_platform_restrictions; }
+void set_ignore_platform_restrictions(bool ignore) { ignore_platform_restrictions=ignore; }
+bool is_platform_restrictions_ignored() { return ignore_platform_restrictions; }
+}
