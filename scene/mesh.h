@@ -138,8 +138,8 @@ private:
 class mesh
 {
 public:
-    virtual bool load(const char *name);
-    virtual void unload();
+    bool load(const char *name);
+    void unload();
 
     void create(const shared_mesh &res);
 
