@@ -155,6 +155,18 @@ void set_state(const state &s);
 const state &get_state();
 const state &get_applied_state();
 
+struct state_override: public state
+{
+    bool override_blend;
+
+    //ToDo
+
+    state_override(): override_blend(false) {}
+};
+
+void set_state_override(const state_override &s);
+const state_override &get_state_override();
+
 void apply_state(bool ignore_cache=false);
 
 //dx-specific
