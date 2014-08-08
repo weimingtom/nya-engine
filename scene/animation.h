@@ -25,8 +25,8 @@ class animation: public scene_shared<shared_animation>
     friend class mesh_internal;
 
 public:
-    virtual bool load(const char *name);
-    virtual void unload();
+    bool load(const char *name);
+    void unload();
 
 public:
     void create(const shared_animation &res);
