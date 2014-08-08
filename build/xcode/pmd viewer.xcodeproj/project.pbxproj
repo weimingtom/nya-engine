@@ -21,6 +21,7 @@
 		F28DADA815D9AF830030D67B /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F28DADA315D9AF830030D67B /* InfoPlist.strings */; };
 		F28DADAF15D9AFB50030D67B /* libnya_engine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F28DADAE15D9AFA70030D67B /* libnya_engine.a */; };
 		F53786FE18D2EEE600A93F17 /* mmd_mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53786FC18D2EEE600A93F17 /* mmd_mesh.cpp */; };
+		F5556F6C199439BE008422B3 /* toon in Resources */ = {isa = PBXBuildFile; fileRef = F5556F6A199439BE008422B3 /* toon */; };
 		F5D869B41809A303000C8791 /* string_encoding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5D869B11809A303000C8791 /* string_encoding.cpp */; };
 		F5D869B91809A551000C8791 /* load_vmd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5D869B71809A551000C8791 /* load_vmd.cpp */; };
 		F5EA4D3C18E62C930015B54D /* MorphsConfig.xib in Resources */ = {isa = PBXBuildFile; fileRef = F5EA4D3A18E62C930015B54D /* MorphsConfig.xib */; };
@@ -68,6 +69,7 @@
 		F28DADA915D9AFA70030D67B /* nya_engine.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = nya_engine.xcodeproj; sourceTree = "<group>"; };
 		F53786FC18D2EEE600A93F17 /* mmd_mesh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mmd_mesh.cpp; path = ../../tests/shared/mmd_mesh.cpp; sourceTree = "<group>"; };
 		F53786FD18D2EEE600A93F17 /* mmd_mesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mmd_mesh.h; path = ../../tests/shared/mmd_mesh.h; sourceTree = "<group>"; };
+		F5556F6B199439BE008422B3 /* en */ = {isa = PBXFileReference; lastKnownFileType = folder; name = en; path = "../../tests/pmd viewer/en.lproj/toon"; sourceTree = "<group>"; };
 		F5D869B11809A303000C8791 /* string_encoding.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = string_encoding.cpp; path = ../../tests/shared/string_encoding.cpp; sourceTree = "<group>"; };
 		F5D869B21809A303000C8791 /* string_encoding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = string_encoding.h; path = ../../tests/shared/string_encoding.h; sourceTree = "<group>"; };
 		F5D869B31809A303000C8791 /* moonspeak.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = moonspeak.h; path = ../../tests/shared/moonspeak.h; sourceTree = "<group>"; };
@@ -158,6 +160,7 @@
 		F28DAD9D15D9AF6B0030D67B /* Supporting files */ = {
 			isa = PBXGroup;
 			children = (
+				F5556F6A199439BE008422B3 /* toon */,
 				F28DAD9E15D9AF830030D67B /* pmd viewer-Info.plist */,
 				F28DAD9F15D9AF830030D67B /* AppIcon.icns */,
 				F28DADA115D9AF830030D67B /* Credits.rtf */,
@@ -249,6 +252,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F5EA4D3C18E62C930015B54D /* MorphsConfig.xib in Resources */,
+				F5556F6C199439BE008422B3 /* toon in Resources */,
 				F28DAD9A15D9AF4E0030D67B /* PmdDocument.xib in Resources */,
 				F28DAD9B15D9AF4E0030D67B /* MainMenu.xib in Resources */,
 				F28DADA615D9AF830030D67B /* AppIcon.icns in Resources */,
@@ -316,6 +320,14 @@
 				F28DADA415D9AF830030D67B /* en */,
 			);
 			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		F5556F6A199439BE008422B3 /* toon */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F5556F6B199439BE008422B3 /* en */,
+			);
+			name = toon;
 			sourceTree = "<group>";
 		};
 		F5EA4D3A18E62C930015B54D /* MorphsConfig.xib */ = {
