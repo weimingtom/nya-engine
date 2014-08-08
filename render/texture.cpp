@@ -380,7 +380,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         dx_convert_to_format((unsigned char *)data,(unsigned char *)buf_rgb.get_data(),height*width,format);
     }
 
-    if(need_generate_mips && width!=height)
+    if(need_generate_mips && width!=height && !is_platform_restrictions_ignored())
     {
         buf_mip.allocate(srdata[0].SysMemPitch*height/2);
 
@@ -536,7 +536,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     active_layers[active_layer]=-1;
 
     if(!pot) gl_setup_pack_alignment();
-    gl_setup_texture(GL_TEXTURE_2D,!pot,has_mipmap);
+    gl_setup_texture(GL_TEXTURE_2D,!pot && !is_platform_restrictions_ignored(),has_mipmap);
 
   #ifdef GL_GENERATE_MIPMAP
     if(has_mipmap && mip_count<0) glTexParameteri(GL_TEXTURE_2D,GL_GENERATE_MIPMAP,GL_TRUE);

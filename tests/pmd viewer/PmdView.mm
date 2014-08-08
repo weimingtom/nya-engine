@@ -7,6 +7,9 @@
 
 #include "scene/camera.h"
 #include "system/system.h"
+#include "render/platform_specific_gl.h"
+#include "resources/file_resources_provider.h"
+#include "resources/composite_resources_provider.h"
 
 void viewer_camera::add_rot(float dx,float dy)
 {
@@ -549,13 +552,33 @@ private:
     PmdDocument *doc=[[[self window] windowController] document];
     if(!doc->m_model_name.empty())
     {
-        //nya_render::set_clear_color(0.2f,0.4f,0.5f,0.0f);
+        static bool once=false;
+        if(!once)
+        {
+            once=true;
+
+            std::string res_path([[NSBundle mainBundle] resourcePath].UTF8String);
+
+            nya_resources::file_resources_provider *toon_res=new nya_resources::file_resources_provider();
+            toon_res->set_folder((res_path+"/en.lproj/toon/").c_str());
+            nya_resources::composite_resources_provider *comp_res=new nya_resources::composite_resources_provider();
+            comp_res->add_provider(toon_res);
+            comp_res->add_provider(new nya_resources::file_resources_provider());
+
+            nya_resources::set_resources_provider(comp_res);
+
+            nya_render::set_ignore_platform_restrictions(true);
+
+            //nya_render::set_clear_color(0.2f,0.4f,0.5f,0.0f);
+
+            nya_scene::texture::register_load_function(load_texture);
+            nya_scene::texture::register_load_function(nya_scene::texture::load_dds);
+            nya_scene::texture::set_load_dds_flip(true);
+        }
+
         nya_render::set_clear_color(1.0f,1.0f,1.0f,0.0f);
         nya_render::depth_test::enable(nya_render::depth_test::less);
-        
-        nya_scene::texture::register_load_function(load_texture);
-        nya_scene::texture::register_load_function(nya_scene::texture::load_dds);
-        nya_scene::texture::set_load_dds_flip(true);
+
         m_mesh.load(doc->m_model_name.c_str());
         nya_render::apply_state(true);
 

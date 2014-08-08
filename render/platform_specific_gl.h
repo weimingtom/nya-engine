@@ -78,6 +78,9 @@ namespace nya_render
     void *get_extension(const char*ext_name);
 #endif
 
+    void set_ignore_platform_restrictions(bool ignore);
+    bool is_platform_restrictions_ignored();
+
     struct texture_obj
     {
         unsigned int size;
