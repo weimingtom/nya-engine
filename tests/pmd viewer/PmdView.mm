@@ -570,13 +570,14 @@ private:
             nya_render::set_ignore_platform_restrictions(true);
 
             //nya_render::set_clear_color(0.2f,0.4f,0.5f,0.0f);
-            nya_render::set_clear_color(1.0f,1.0f,1.0f,0.0f);
-            nya_render::depth_test::enable(nya_render::depth_test::less);
-            
+
             nya_scene::texture::register_load_function(load_texture);
             nya_scene::texture::register_load_function(nya_scene::texture::load_dds);
             nya_scene::texture::set_load_dds_flip(true);
         }
+
+        nya_render::set_clear_color(1.0f,1.0f,1.0f,0.0f);
+        nya_render::depth_test::enable(nya_render::depth_test::less);
 
         m_mesh.load(doc->m_model_name.c_str());
         nya_render::apply_state(true);
