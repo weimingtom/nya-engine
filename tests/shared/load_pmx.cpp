@@ -5,7 +5,7 @@
 #include "memory/memory_reader.h"
 #include "string_encoding.h"
 
-//#include "resources/file_resources_provider.h"
+#include "resources/resources.h"
 
 namespace
 {
@@ -240,7 +240,14 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         
         int toon_tex_idx=-1;
         if(toon_flag==0)
+        {
             toon_tex_idx=read_idx(reader,header.texture_idx_size);
+            if(toon_tex_idx>=(int)tex_names.size())
+            {
+                nya_log::log()<<"pmx load error: invalid toon tex idx\n";
+                return false;
+            }
+        }
         else if(toon_flag==1)
             toon_tex_idx=reader.read<char>();
         else
@@ -249,9 +256,15 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
             return false;
         }
 
-        if(toon_tex_idx>=(int)tex_names.size())
+        if(tex_idx>=(int)tex_names.size())
         {
-            nya_log::log()<<"pmx load error: invalid toon tex\n";
+            nya_log::log()<<"pmx load error: invalid tex idx\n";
+            return false;
+        }
+
+        if(sph_tex_idx>=(int)tex_names.size())
+        {
+            nya_log::log()<<"pmx load error: invalid sph tex idx\n";
             return false;
         }
 
@@ -265,33 +278,61 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         offset+=g.count;
 
         nya_scene::shared_shader sh_;
-        sh_.shdr.set_sampler("base",sh_.samplers["diffuse"]=(int)sh_.samplers.size());
 
-        if(tex_idx>=0 && tex_idx<(int)tex_names.size())
+        if(tex_idx>=0)
         {
             nya_scene::texture tex;
-            tex.load((path+tex_names[tex_idx]).c_str());
-            m.set_texture("diffuse",tex);
-            //printf("tex %d %s ",tex_idx,tex_names[tex_idx].c_str());
+            if(tex.load((path+tex_names[tex_idx]).c_str()))
+            {
+                sh_.shdr.set_sampler("base",sh_.samplers["diffuse"]=(int)sh_.samplers.size());
+                m.set_texture("diffuse",tex);
+                //printf("tex %d %s ",tex_idx,tex_names[tex_idx].c_str());
+
+                sh_defines+="#define use_base\n";
+            }
         }
 
-        if(sph_tex_idx>=0 && sph_tex_idx<(int)tex_names.size())
+        {
+            bool loaded=false;
+            nya_scene::texture tex;
+            if(toon_flag>0)
+            {
+                char buf[255];
+                sprintf(buf,"toon%02d.bmp",toon_tex_idx+1);
+                if(nya_resources::get_resources_provider().has((path+buf).c_str()))
+                    loaded=tex.load((path+buf).c_str());
+                else
+                    loaded=tex.load(buf);
+            }
+            else if(toon_tex_idx>=0)
+            {
+                loaded=tex.load((path+tex_names[toon_tex_idx]).c_str());
+                //printf("tex %d %s ",toon_tex_idx,tex_names[toon_tex_idx].c_str());
+            }
+
+            if(!loaded)
+                tex.build("\xff\xff\xff\xff",1,1,nya_render::texture::color_bgra);
+
+            sh_.shdr.set_sampler("toon",sh_.samplers["toon"]=(int)sh_.samplers.size());
+            m.set_texture("toon",tex);
+        }
+
+        if(sph_tex_idx>=0)
         {
             const std::string &name=tex_names[sph_tex_idx];
             if(sph_mode>0 && !name.empty())
             {
-                sh_.shdr.set_sampler("env",sh_.samplers["env"]=(int)sh_.samplers.size());
-
                 nya_scene::texture tex;
-                tex.load((path+name).c_str());
-                m.set_texture("env",tex);
-                //printf("sp %d %d %s\n",sph_mode,sph_tex_idx,tex_names[sph_tex_idx].c_str());
-                
-                char last=name[name.length()-1];
-                if(last=='h' || last=='H')
-                    sh_defines+="#define sph\n";
-                else
-                    sh_defines+="#define spa\n";
+                if(tex.load((path+name).c_str()))
+                {
+                    sh_.shdr.set_sampler("env",sh_.samplers["env"]=(int)sh_.samplers.size());
+                    m.set_texture("env",tex);
+                    //char last=name[name.length()-1]; last=='h' || last=='H'
+                    if(sph_mode==2)
+                        sh_defines+="#define use_spa\n";
+                    else
+                        sh_defines+="#define use_sph\n";
+                }
             }
         }
         //else
@@ -325,25 +366,52 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         "r.z-=1.0; tc.zw = 0.5*r.xy/length(r) + 0.5;"
         "gl_Position=gl_ModelViewProjectionMatrix*vec4(pos,gl_Vertex.w); }";
 
-        std::string pixel_code=sh_defines+"varying vec4 tc; varying vec3 normal;\n"
-        "uniform sampler2D base;\n"
-        "uniform sampler2D env;\n"
-        "uniform sampler2D toon;\n"
-        "uniform vec4 light_dir;\n"
-        "void main() {\n"
-        "vec4 tm=texture2D(base,tc.xy);\n"
-        "if(tm.a<0.01) discard;\n"
-        "vec3 diff=k_d.rgb*clamp(dot(light_dir.xyz,normal),0.0,1.0);\n"
+        std::string pixel_code=sh_defines+"varying vec4 tc; varying vec3 normal;"
+        "uniform sampler2D base;"
+        "uniform sampler2D env;"
+        "uniform sampler2D toon;"
 
-        "#ifdef spa\n"
+        "uniform vec4 light_dir;"
+
+        "void main() {"
+        "\n#ifdef use_base\n"
+        "    vec4 c=texture2D(base,tc.xy);"
+        "    if(c.a<0.01) discard;"
+        "\n#else\n"
+        "    vec4 c=k_d;"
+        "\n#endif\n"
+
+        "    float s=0.0;"
+        "    float l=0.5+0.5*dot(light_dir.xyz,normal);"
+        "    l=clamp(l,0.05,0.95);" //ToDo: clamp to edge instead
+        "    vec3 t=texture2D(toon,vec2(s,l)).rgb;"
+        "\n#ifdef use_spa\n"
+        "    c.rgb+=texture2D(env,tc.zw).rgb;"
+        "\n#elif defined use_sph\n"
+        "    c.rgb*=texture2D(env,tc.zw).rgb;"
+        "\n#endif\n"
+
+        "    gl_FragColor=vec4(c.rgb*t,c.a); }\n";
+
+/*
+        "#ifdef use_toon\n"
+        "    vec3 diff=k_d.rgb*texture2D(toon,vec2(0.0,clamp(0.5+dot(light_dir.xyz,normal),0.01,0.99))).rgb*(154.0/255.0);\n"
+        "#else\n"
+        "    vec3 diff=k_d.rgb*clamp(dot(light_dir.xyz,normal),0.0,1.0);\n"
+        "#endif\n"
+
+        "#ifdef use_spa\n"
         "   vec4 em=texture2D(env,tc.zw);\n"
         "   gl_FragColor=vec4(tm.rgb*(k_a+diff)+em.rgb,tm.a); }\n"
-        "#elif defined sph\n"
+        "#elif defined use_sph\n"
         "   vec4 em=texture2D(env,tc.zw);\n"
         "   gl_FragColor=vec4(tm.rgb*(k_a+diff*em.rgb),tm.a); }\n"
         "#else\n"
-        "   gl_FragColor=vec4(tm.rgb*min((k_a+diff),vec3(1.0)),tm.a); }\n"
+        //"   gl_FragColor=vec4(tm.rgb*(k_a+diff),tm.a); }\n" //*(154.0/255.0)
+        "   gl_FragColor=vec4(tm.rgb*(k_a+diff),tm.a); }\n" //
         "#endif\n";
+ 
+ */
 
         sh_.shdr.add_program(nya_render::shader::vertex,vertex_code.c_str());
         sh_.shdr.add_program(nya_render::shader::pixel,pixel_code.c_str());
