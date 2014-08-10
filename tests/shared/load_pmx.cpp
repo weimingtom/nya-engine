@@ -213,22 +213,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
             reader.skip(name_len);
         }
 
-        std::string sh_defines;
-        
         pmx_material_params params=reader.read<pmx_material_params>();
-        
-        char buf[255];
-        sprintf(buf,"#define k_d vec4(%f,%f,%f,%f)\n",params.diffuse[0],params.diffuse[1],
-                params.diffuse[2],params.diffuse[3]);
-        sh_defines.append(buf);
-        
-        sprintf(buf,"#define k_s vec4(%f,%f,%f,%f)\n",params.specular[0],params.specular[1],
-                params.specular[2],params.shininess);
-        sh_defines.append(buf);
-        
-        sprintf(buf,"#define k_a vec3(%f,%f,%f)\n",params.ambient[0],params.ambient[1],
-                params.ambient[2]);
-        sh_defines.append(buf);
 
         const char unsigned flag=reader.read<unsigned char>();
         pmx_edge_params edge=reader.read<pmx_edge_params>();
@@ -277,19 +262,15 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         g.material_idx=i;
         offset+=g.count;
 
-        nya_scene::shared_shader sh_;
-
-        if(tex_idx>=0)
         {
             nya_scene::texture tex;
-            if(tex.load((path+tex_names[tex_idx]).c_str()))
+            if(tex_idx<0 || !tex.load((path+tex_names[tex_idx]).c_str()))
             {
-                sh_.shdr.set_sampler("base",sh_.samplers["diffuse"]=(int)sh_.samplers.size());
-                m.set_texture("diffuse",tex);
-                //printf("tex %d %s ",tex_idx,tex_names[tex_idx].c_str());
-
-                sh_defines+="#define use_base\n";
+                unsigned char data[4]={params.diffuse[2]*255,params.diffuse[1]*255,params.diffuse[0]*255,params.diffuse[3]*255};
+                tex.build(&data,1,1,nya_render::texture::color_bgra);
             }
+
+            m.set_texture("diffuse",tex);
         }
 
         {
@@ -313,126 +294,48 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
             if(!loaded)
                 tex.build("\xff\xff\xff\xff",1,1,nya_render::texture::color_bgra);
 
-            sh_.shdr.set_sampler("toon",sh_.samplers["toon"]=(int)sh_.samplers.size());
             m.set_texture("toon",tex);
         }
 
-        if(sph_tex_idx>=0)
         {
-            const std::string &name=tex_names[sph_tex_idx];
-            if(sph_mode>0 && !name.empty())
+            bool add=false,mult=false;
+            nya_scene::texture tex;
+            if(sph_tex_idx>=0 && tex.load((path+tex_names[sph_tex_idx]).c_str()))
+            {
+                if(sph_mode==2)
+                    m.set_texture("env add",tex),add=true;
+                else if(sph_mode==1)
+                    m.set_texture("env mult",tex),mult=true;
+            }
+
+            if(!add)
             {
                 nya_scene::texture tex;
-                if(tex.load((path+name).c_str()))
-                {
-                    sh_.shdr.set_sampler("env",sh_.samplers["env"]=(int)sh_.samplers.size());
-                    m.set_texture("env",tex);
-                    //char last=name[name.length()-1]; last=='h' || last=='H'
-                    if(sph_mode==2)
-                        sh_defines+="#define use_spa\n";
-                    else
-                        sh_defines+="#define use_sph\n";
-                }
+                tex.build("\x00\x00\x00\x00",1,1,nya_render::texture::color_bgra);
+                m.set_texture("env add",tex);
+            }
+
+            if(!mult)
+            {
+                nya_scene::texture tex;
+                tex.build("\xff\xff\xff\xff",1,1,nya_render::texture::color_bgra);
+                m.set_texture("env mult",tex);
             }
         }
         //else
         //    printf("sp %d %d\n",sph_mode,sph_tex_idx);
 
-        nya_scene::shader sh;
-        std::string vertex_code=sh_defines+"uniform vec3 bones_pos[256]; uniform vec4 bones_rot[256];"
-        "vec3 tr(vec3 pos,int idx) { vec4 q=bones_rot[idx];"
-        "return bones_pos[idx]+pos+cross(q.xyz,cross(q.xyz,pos)+pos*q.w)*2.0; }"
-        "vec3 trn(vec3 normal,int idx) { vec4 q=bones_rot[idx];"
-        "return normal+cross(q.xyz,cross(q.xyz,normal)+normal*q.w)*2.0; }"
-        "varying vec4 tc; varying vec3 normal;"
-        "void main() { tc.xy=gl_MultiTexCoord0.xy;"
-
-        "vec3 pos=tr(gl_Vertex.xyz,int(gl_MultiTexCoord1.x))*gl_MultiTexCoord2.x;"
-        "normal=trn(gl_Normal.xyz,int(gl_MultiTexCoord1.x))*gl_MultiTexCoord2.x;"
-
-        "if(gl_MultiTexCoord2.y>0.0) {"
-        "pos+=tr(gl_MultiTexCoord3.xyz,int(gl_MultiTexCoord1.y))*gl_MultiTexCoord2.y;"
-        "normal+=trn(gl_Normal.xyz,int(gl_MultiTexCoord1.y))*gl_MultiTexCoord2.y; }"
-
-        "if(gl_MultiTexCoord2.z>0.0) {"
-        "pos+=tr(gl_MultiTexCoord4.xyz,int(gl_MultiTexCoord1.z))*gl_MultiTexCoord2.z;"
-        "normal+=trn(gl_Normal.xyz,int(gl_MultiTexCoord1.z))*gl_MultiTexCoord2.z; }"
-
-        "if(gl_MultiTexCoord2.w>0.0) {"
-        "pos+=tr(gl_MultiTexCoord5.xyz,int(gl_MultiTexCoord1.w))*gl_MultiTexCoord2.w;"
-        "normal+=trn(gl_Normal.xyz,int(gl_MultiTexCoord1.w))*gl_MultiTexCoord2.w; }"
-
-        "vec3 r = normalize((gl_ModelViewProjectionMatrix * vec4(normal,0.0)).xyz);"
-        "r.z-=1.0; tc.zw = 0.5*r.xy/length(r) + 0.5;"
-        "gl_Position=gl_ModelViewProjectionMatrix*vec4(pos,gl_Vertex.w); }";
-
-        std::string pixel_code=sh_defines+"varying vec4 tc; varying vec3 normal;"
-        "uniform sampler2D base;"
-        "uniform sampler2D env;"
-        "uniform sampler2D toon;"
-
-        "uniform vec4 light_dir;"
-
-        "void main() {"
-        "\n#ifdef use_base\n"
-        "    vec4 c=texture2D(base,tc.xy);"
-        "    if(c.a<0.01) discard;"
-        "\n#else\n"
-        "    vec4 c=k_d;"
-        "\n#endif\n"
-
-        "    float s=0.0;"
-        "    float l=0.5+0.5*dot(light_dir.xyz,normal);"
-        "    l=clamp(l,0.05,0.95);" //ToDo: clamp to edge instead
-        "    vec3 t=texture2D(toon,vec2(s,l)).rgb;"
-        "\n#ifdef use_spa\n"
-        "    c.rgb+=texture2D(env,tc.zw).rgb;"
-        "\n#elif defined use_sph\n"
-        "    c.rgb*=texture2D(env,tc.zw).rgb;"
-        "\n#endif\n"
-
-        "    gl_FragColor=vec4(c.rgb*t,c.a); }\n";
-
-/*
-        "#ifdef use_toon\n"
-        "    vec3 diff=k_d.rgb*texture2D(toon,vec2(0.0,clamp(0.5+dot(light_dir.xyz,normal),0.01,0.99))).rgb*(154.0/255.0);\n"
-        "#else\n"
-        "    vec3 diff=k_d.rgb*clamp(dot(light_dir.xyz,normal),0.0,1.0);\n"
-        "#endif\n"
-
-        "#ifdef use_spa\n"
-        "   vec4 em=texture2D(env,tc.zw);\n"
-        "   gl_FragColor=vec4(tm.rgb*(k_a+diff)+em.rgb,tm.a); }\n"
-        "#elif defined use_sph\n"
-        "   vec4 em=texture2D(env,tc.zw);\n"
-        "   gl_FragColor=vec4(tm.rgb*(k_a+diff*em.rgb),tm.a); }\n"
-        "#else\n"
-        //"   gl_FragColor=vec4(tm.rgb*(k_a+diff),tm.a); }\n" //*(154.0/255.0)
-        "   gl_FragColor=vec4(tm.rgb*(k_a+diff),tm.a); }\n" //
-        "#endif\n";
- 
- */
-
-        sh_.shdr.add_program(nya_render::shader::vertex,vertex_code.c_str());
-        sh_.shdr.add_program(nya_render::shader::pixel,pixel_code.c_str());
-        sh_.predefines.resize(2);
-        sh_.predefines[0].type=nya_scene::shared_shader::bones_pos;
-        sh_.predefines[0].location=sh_.shdr.get_handler("bones_pos");
-        sh_.predefines[1].type=nya_scene::shared_shader::bones_rot;
-        sh_.predefines[1].location=sh_.shdr.get_handler("bones_rot");
-        sh_.uniforms.resize(1);
-        sh_.uniforms[0].name="light dir";
-        sh_.uniforms[0].location=sh_.shdr.get_handler("light_dir");
-        sh_.uniforms[0].transform=nya_scene::shared_shader::local_rot;
-        sh.create(sh_);
-
         nya_scene::material::pass &p=m.get_pass(m.add_pass(nya_scene::material::default_pass));
-
+        nya_scene::shader sh;
+        sh.load("pmx.nsh");
         p.set_shader(sh);
         p.get_state().set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
         p.get_state().set_cull_face(!(flag & (1<<0)),nya_render::cull_face::cw);
 
-        m.set_param(m.get_param_idx(sh_.uniforms[0].name.c_str()),mmd_light_dir);
+        m.set_param(m.get_param_idx("light dir"),mmd_light_dir);
+        m.set_param(m.get_param_idx("amb k"),params.ambient[0],params.ambient[1],params.ambient[2],1.0f);
+        m.set_param(m.get_param_idx("diff k"),params.diffuse[0],params.diffuse[1],params.diffuse[2],params.diffuse[3]);
+        m.set_param(m.get_param_idx("spec k"),params.specular[0],params.specular[1],params.specular[2],params.shininess);
 
         if(!(flag & (1<<4)))
             continue;
@@ -445,38 +348,14 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         res.materials.resize(res.materials.size()+1);
         nya_scene::material &me = res.materials.back();
 
-        nya_scene::shared_shader she_;
-        nya_scene::shader she;
-
-        sprintf(buf,"%f",edge.width*0.02f);
-        vertex_code="uniform vec3 bones_pos[256]; uniform vec4 bones_rot[256];"
-        "vec3 tr(vec3 pos,int idx) { vec4 q=bones_rot[idx];"
-        "return bones_pos[idx]+pos+cross(q.xyz,cross(q.xyz,pos)+pos*q.w)*2.0; }"
-        "void main() {"
-        "vec3 offset=gl_Normal.xyz*"+std::string(buf)+";"
-
-        "vec3 pos=tr(gl_Vertex.xyz+offset,int(gl_MultiTexCoord1.x))*gl_MultiTexCoord2.x;"
-        "if(gl_MultiTexCoord2.y>0.0) pos+=tr(gl_MultiTexCoord3.xyz+offset,int(gl_MultiTexCoord1.y))*gl_MultiTexCoord2.y;"
-        "if(gl_MultiTexCoord2.z>0.0) pos+=tr(gl_MultiTexCoord4.xyz+offset,int(gl_MultiTexCoord1.z))*gl_MultiTexCoord2.z;"
-        "if(gl_MultiTexCoord2.w>0.0) pos+=tr(gl_MultiTexCoord5.xyz+offset,int(gl_MultiTexCoord1.w))*gl_MultiTexCoord2.w;"
-
-        "gl_Position=gl_ModelViewProjectionMatrix*vec4(pos,gl_Vertex.w); }";
-        sprintf(buf,"%f,%f,%f,%f",edge.color[0],edge.color[1],edge.color[2],edge.color[3]);
-        pixel_code="void main() { gl_FragColor=vec4("+std::string(buf)+"); }\n";
-
-        she_.shdr.add_program(nya_render::shader::vertex,vertex_code.c_str());
-        she_.shdr.add_program(nya_render::shader::pixel,pixel_code.c_str());
-        she_.predefines.resize(2);
-        she_.predefines[0].type=nya_scene::shared_shader::bones_pos;
-        she_.predefines[0].location=she_.shdr.get_handler("bones_pos");
-        she_.predefines[1].type=nya_scene::shared_shader::bones_rot;
-        she_.predefines[1].location=she_.shdr.get_handler("bones_rot");
-        she.create(she_);
-
         nya_scene::material::pass &pe=me.get_pass(me.add_pass(nya_scene::material::default_pass));
+        nya_scene::shader she;
+        she.load("pmx_edge.nsh");
         pe.set_shader(she);
         pe.get_state().set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
         pe.get_state().set_cull_face(true,nya_render::cull_face::ccw);
+        me.set_param(me.get_param_idx("edge offset"),edge.width*0.02f,edge.width*0.02f,edge.width*0.02f,0.0f);
+        me.set_param(me.get_param_idx("edge color"),edge.color[0],edge.color[1],edge.color[2],edge.color[3]);
     }
 
     typedef unsigned short ushort;
