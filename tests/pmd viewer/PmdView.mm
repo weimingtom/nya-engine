@@ -559,11 +559,14 @@ private:
 
             std::string res_path([[NSBundle mainBundle] resourcePath].UTF8String);
 
+            nya_resources::composite_resources_provider *comp_res=new nya_resources::composite_resources_provider();
+            comp_res->add_provider(new nya_resources::file_resources_provider());
             nya_resources::file_resources_provider *toon_res=new nya_resources::file_resources_provider();
             toon_res->set_folder((res_path+"/en.lproj/toon/").c_str());
-            nya_resources::composite_resources_provider *comp_res=new nya_resources::composite_resources_provider();
             comp_res->add_provider(toon_res);
-            comp_res->add_provider(new nya_resources::file_resources_provider());
+            nya_resources::file_resources_provider *sh_res=new nya_resources::file_resources_provider();
+            sh_res->set_folder((res_path+"/en.lproj/shaders/").c_str());
+            comp_res->add_provider(sh_res);
 
             nya_resources::set_resources_provider(comp_res);
 

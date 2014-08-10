@@ -71,54 +71,6 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     res.groups.resize(mat_count);
     res.materials.resize(mat_count);
 
-    nya_scene::shader sh;
-    nya_scene::shared_shader sh_;
-    sh_.shdr.set_sampler("base",sh_.samplers["diffuse"]=0);
-
-    const char *vertex_code="uniform vec3 bones_pos[255]; uniform vec4 bones_rot[255];"
-    "vec3 tr(vec3 pos,int idx) { vec4 q=bones_rot[idx];"
-    "return bones_pos[idx]+pos+cross(q.xyz,cross(q.xyz,pos)+pos*q.w)*2.0; }"
-    "varying vec2 tc;"
-    "void main()"
-    "{  int bone0=int(gl_MultiTexCoord1.x); int bone1=int(gl_MultiTexCoord1.y);"
-    "vec3 pos=mix(tr(gl_MultiTexCoord2.xyz,bone1),tr(gl_Vertex.xyz,bone0),gl_MultiTexCoord1.z);"
-    "tc=gl_MultiTexCoord0.xy; gl_Position=gl_ModelViewProjectionMatrix*vec4(pos,1.0); }";
-
-    const char *pixel_code="varying vec2 tc; uniform sampler2D base; void main() { vec4 tm=texture2D(base,tc.xy);"
-              "if(tm.a<0.001) discard;\n"
-              " gl_FragColor=tm; }";
-
-    sh_.shdr.add_program(nya_render::shader::vertex,vertex_code);
-    sh_.shdr.add_program(nya_render::shader::pixel,pixel_code);
-    sh_.predefines.resize(2);
-    sh_.predefines[0].type=nya_scene::shared_shader::bones_pos;
-    sh_.predefines[0].location=sh_.shdr.get_handler("bones_pos");
-    sh_.predefines[1].type=nya_scene::shared_shader::bones_rot;
-    sh_.predefines[1].location=sh_.shdr.get_handler("bones_rot");
-    sh.create(sh_);
-    
-    nya_scene::shared_shader she_;
-    nya_scene::shader she;
-    
-    const char *vertex_code2="uniform vec3 bones_pos[255]; uniform vec4 bones_rot[255];"
-    "vec3 tr(vec3 pos,int idx) { vec4 q=bones_rot[idx];"
-    "return bones_pos[idx]+pos+cross(q.xyz,cross(q.xyz,pos)+pos*q.w)*2.0; }"
-    "void main()"
-    "{  int bone0=int(gl_MultiTexCoord1.x); int bone1=int(gl_MultiTexCoord1.y);"
-    "vec3 pos=mix(tr(gl_MultiTexCoord2.xyz,bone1),tr(gl_Vertex.xyz,bone0),gl_MultiTexCoord1.z);"
-    "pos.xyz+=gl_Normal*0.01;"
-    "gl_Position=gl_ModelViewProjectionMatrix*vec4(pos,1.0); }";
-    const char *pixel_code2="void main() { gl_FragColor=vec4(0.0,0.0,0.0,1.0); }\n";
-    
-    she_.shdr.add_program(nya_render::shader::vertex,vertex_code2);
-    she_.shdr.add_program(nya_render::shader::pixel,pixel_code2);
-    she_.predefines.resize(2);
-    she_.predefines[0].type=nya_scene::shared_shader::bones_pos;
-    she_.predefines[0].location=she_.shdr.get_handler("bones_pos");
-    she_.predefines[1].type=nya_scene::shared_shader::bones_rot;
-    she_.predefines[1].location=she_.shdr.get_handler("bones_rot");
-    she.create(she_);
-    
     std::string path(name);
     size_t p=path.rfind("/");
     if(p==std::string::npos)
@@ -128,15 +80,18 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     else
         path.resize(p+1);
 
+    const nya_math::vec3 mmd_light_dir=-nya_math::vec3(-0.5,-1.0,-0.5).normalize();
+
+    std::vector<char> toon_idxs(mat_count);
+
     for(uint i=0,ind_offset=0;i<mat_count;++i)
     {
         nya_scene::shared_mesh::group &g=res.groups[i];
 
-        //const mmd_material_params params=
-        reader.read<pmd_material_params>();
+        const pmd_material_params params=reader.read<pmd_material_params>();
 
-        reader.read<char>();//toon idx
-        const char edge_flag=reader.read<char>();//edge flag
+        toon_idxs[i]=reader.read<char>();
+        const char edge_flag=reader.read<char>();
 
         g.name="mesh";
         g.offset=ind_offset;
@@ -144,7 +99,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         g.material_idx=i;
         ind_offset+=g.count;
 
-        const std::string tex_name((const char*)data.get_data(reader.get_offset()),20);
+        const std::string tex_name((const char*)data.get_data(reader.get_offset()));
         reader.skip(20);
 
         std::string base_tex=tex_name;
@@ -152,18 +107,78 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         if(pos!=std::string::npos)
             base_tex.resize(pos);
 
-        nya_scene::texture tex;
-        if(!base_tex.empty() && base_tex[0])
-            tex.load((path+base_tex).c_str());
-
         nya_scene::material &m = res.materials[i];
-        m.set_texture("diffuse",tex);
+
+        enum
+        {
+            no_env=0,
+            env_mult=1,
+            env_add=2
+        } sph_mode=no_env;
+
+        if(base_tex.size()>2)
+        {
+            const char check_p=base_tex[base_tex.length()-2];
+            if(check_p=='p' || check_p=='P')
+            {
+                const char last=base_tex[base_tex.length()-1];
+                if(last=='a' || last=='A')
+                    sph_mode=env_add;
+                else if(last=='h' || last=='H')
+                    sph_mode=env_mult;
+            }
+        }
+
+        {
+            nya_scene::texture tex;
+            if(sph_mode!=no_env || base_tex.empty() || !base_tex[0] || !tex.load((path+base_tex).c_str()))
+            {
+                unsigned char data[4]={params.diffuse[2]*255,params.diffuse[1]*255,params.diffuse[0]*255,params.diffuse[3]*255};
+                tex.build(&data,1,1,nya_render::texture::color_bgra);
+            }
+
+            m.set_texture("diffuse",tex);
+        }
+
+        {
+            bool add=false,mult=false;
+            nya_scene::texture tex;
+
+            if(sph_mode!=no_env && !base_tex.empty() && base_tex[0] && tex.load((path+base_tex).c_str()))
+            {
+                if(sph_mode==env_add)
+                    m.set_texture("env add",tex),add=true;
+                else if(sph_mode==env_mult)
+                    m.set_texture("env mult",tex),mult=true;
+            }
+
+            if(!add)
+            {
+                nya_scene::texture tex;
+                tex.build("\x00\x00\x00\x00",1,1,nya_render::texture::color_bgra);
+                m.set_texture("env add",tex);
+            }
+
+            if(!mult)
+            {
+                nya_scene::texture tex;
+                tex.build("\xff\xff\xff\xff",1,1,nya_render::texture::color_bgra);
+                m.set_texture("env mult",tex);
+            }
+        }
 
         nya_scene::material::pass &p=m.get_pass(m.add_pass(nya_scene::material::default_pass));
 
+        nya_scene::shader sh;
+        sh.load("pmd.nsh");
         p.set_shader(sh);
         p.get_state().set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
         p.get_state().set_cull_face(true,nya_render::cull_face::cw);
+
+        m.set_param(m.get_param_idx("light dir"),mmd_light_dir);
+        m.set_param(m.get_param_idx("amb k"),params.ambient[0],params.ambient[1],params.ambient[2],1.0f);
+        m.set_param(m.get_param_idx("diff k"),params.diffuse[0],params.diffuse[1],params.diffuse[2],params.diffuse[3]);
+        m.set_param(m.get_param_idx("spec k"),params.specular[0],params.specular[1],params.specular[2],params.shininess);
 
         if(!edge_flag)
             continue;
@@ -177,8 +192,9 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         nya_scene::material &me = res.materials.back();
 
         nya_scene::material::pass &pe=me.get_pass(me.add_pass(nya_scene::material::default_pass));
+        nya_scene::shader she;
+        she.load("pmd_edge.nsh");
         pe.set_shader(she);
-        //pe.get_state().set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
         pe.get_state().set_cull_face(true,nya_render::cull_face::ccw);
     }
 
@@ -234,8 +250,6 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
                 res.skeleton.add_ik_link(ik,link);
         }
     }
-
-
 
     add_data *ad=new add_data;
     res.add_data=ad;
@@ -306,7 +320,35 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         reader.skip(bone_groups_count*50);
     }
 
-    reader.skip(10*100);//toon
+    char toon_names[10][100];
+    for(int i=0;i<10;++i)
+    {
+        memcpy(toon_names[i],reader.get_data(),100);
+        reader.skip(100);
+    }
+
+    for(int i=0;i<mat_count;++i)
+    {
+        nya_scene::material &m=res.materials[i];
+
+        bool loaded=false;
+        nya_scene::texture tex;
+
+        const char idx=toon_idxs[i];
+        if(idx>=0 && idx<10)
+        {
+            const char *name=toon_names[idx];
+            if(nya_resources::get_resources_provider().has((path+name).c_str()))
+                loaded=tex.load((path+name).c_str());
+            else
+                loaded=tex.load(name);
+        }
+
+        if(!loaded)
+            tex.build("\xff\xff\xff\xff",1,1,nya_render::texture::color_bgra);
+
+        m.set_texture("toon",tex);
+    }
 
     const uint rigid_bodies_count=reader.read<uint>();
     ad->rigid_bodies.resize(rigid_bodies_count);
