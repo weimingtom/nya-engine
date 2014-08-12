@@ -35,6 +35,20 @@ public:
         }
     }
 
+    object_t &add(const key_t &k)
+    {
+        typename keys_map::iterator key_iter=m_keys.find(k);
+        if(key_iter==m_keys.end())
+        {
+            typename objects_list::iterator object_iter = m_objects.insert(m_objects.end(),object_t());
+            m_keys.insert(std::make_pair(k,object_iter));
+            m_indices.push_back(object_iter);
+            return *object_iter;
+        }
+        else
+            return *(key_iter->second);
+    }
+
     bool has_key(const key_t &k) const { return m_keys.find(k)!=m_keys.end(); }
     bool is_empty() const { return m_objects.empty(); }
     int get_size() const { return (int)m_objects.size(); }
