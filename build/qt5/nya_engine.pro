@@ -9,8 +9,12 @@ QT =
 
 
 CONFIG(debug, debug|release) {
+    CONFIG += CDEBUG
+    DEFINES += DEBUG _DEBUG
     CONF = debug
 } else:CONFIG(release, debug|release) {
+    CONFIG += CRELEASE
+    DEFINES += NDEBUG RELEASE
     CONF = release
 }
 PLATFORM = $$first(QMAKE_PLATFORM)
