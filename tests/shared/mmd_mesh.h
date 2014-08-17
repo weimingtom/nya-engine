@@ -67,6 +67,7 @@ private:
     nya_scene::mesh m_mesh;
     nya_render::vbo m_vbo;
     std::vector<float> m_vertex_data;
+    std::vector<float> m_original_vertex_data;
     const pmd_morph_data *m_morph_data;
 
     struct morph

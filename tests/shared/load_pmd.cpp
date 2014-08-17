@@ -202,6 +202,18 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     if(!reader.check_remained(bones_count*(20+sizeof(short)+5+sizeof(nya_math::vec3))))
         return false;
 
+    if(bones_count>gpu_skining_bones_limit)
+    {
+        for(int i=0;i<int(res.groups.size());++i)
+        {
+            nya_scene::material &me=res.materials[res.groups[i].material_idx];
+            nya_scene::material::pass &pe=me.get_pass(me.add_pass(nya_scene::material::default_pass));
+            nya_scene::shader sh;
+            sh.load(res.groups[i].name=="edge"?"pm_edge.nsh":"pm.nsh");
+            pe.set_shader(sh);
+        }
+    }
+
     for(ushort i=0;i<bones_count;++i)
     {
         std::string name=utf8_from_shiftjis(data.get_data(reader.get_offset()),20);

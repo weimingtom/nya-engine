@@ -472,7 +472,7 @@ private:
         {
             nya_math::vec3 pos;
             for(int j=0;j<2;++j)
-                pos+=(sk.get_bone_pos(verts[i].bone_idx[0])+verts[i].pos[0])*
+                pos+=(sk.get_bone_pos(verts[i].bone_idx[j])+verts[i].pos[j])*
                      (j==0?verts[i].bone_weight:(1.0f-verts[i].bone_weight));
 
             obj.add_vec("v",pos);

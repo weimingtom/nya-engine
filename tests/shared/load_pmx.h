@@ -38,7 +38,7 @@ public:
         float shininess;
         float ambient[3];
     };
-    
+
     struct pmx_edge_params
     {
         float color[4];
