@@ -195,7 +195,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     //nya_resources::file_resources_provider frp; frp.set_folder(path.c_str()); for(nya_resources::resource_info *fri=frp.first_res_info();fri;fri=fri->get_next()) printf("%s\n",fri->get_name());
 
     const nya_math::vec3 mmd_light_dir=-nya_math::vec3(-0.5,-1.0,-0.5).normalize();
-    const nya_math::vec3 mmd_light_color=nya_math::vec3(154,154,154)/255.0;
+    //const nya_math::vec3 mmd_light_color=nya_math::vec3(154,154,154)/255.0;
 
     for(int i=0,offset=0;i<mat_count;++i)
     {
@@ -346,7 +346,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         ge.name="edge";
         ge.material_idx=int(res.materials.size());
         res.materials.resize(res.materials.size()+1);
-        nya_scene::material &me = res.materials.back();
+        nya_scene::material &me=res.materials.back();
 
         nya_scene::material::pass &pe=me.get_pass(me.add_pass(nya_scene::material::default_pass));
         nya_scene::shader she;
@@ -361,6 +361,18 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     typedef unsigned short ushort;
 
     const int bones_count=reader.read<int>();
+    if(bones_count>pmd_loader::gpu_skining_bones_limit)
+    {
+        for(int i=0;i<int(res.groups.size());++i)
+        {
+            nya_scene::material &me=res.materials[res.groups[i].material_idx];
+            nya_scene::material::pass &pe=me.get_pass(me.add_pass(nya_scene::material::default_pass));
+            nya_scene::shader sh;
+            sh.load(res.groups[i].name=="edge"?"pm_edge.nsh":"pm.nsh");
+            pe.set_shader(sh);
+        }
+    }
+
     std::vector<pmx_bone> bones(bones_count);
     for(int i=0;i<bones_count;++i)
     {

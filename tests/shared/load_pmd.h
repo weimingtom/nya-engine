@@ -97,6 +97,9 @@ public:
     };
 
 public:
+    static const int gpu_skining_bones_limit=256;
+
+public:
     static bool load(nya_scene::shared_mesh &res,nya_scene::resource_data &data,const char* name);
 
 public:
