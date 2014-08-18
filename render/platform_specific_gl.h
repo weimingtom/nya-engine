@@ -148,6 +148,7 @@ namespace nya_render
 #endif
     void reset_vbo_state();
 
+    inline void release_textures() { texture_obj::release_all(); }
     void release_vbos();
     void release_shaders();
     void release_fbos();
@@ -155,7 +156,7 @@ namespace nya_render
 
     inline void release_resources()
     {
-        texture_obj::release_all();
+        release_textures();
         release_shaders();
         release_vbos();
         release_fbos();
