@@ -13,7 +13,7 @@ struct pmd_morph_data
 {
     struct morph_vertex
     {
-        unsigned short idx;
+        unsigned int idx;
         nya_math::vec3 pos;
     };
 
@@ -46,8 +46,8 @@ struct pmd_phys_data
         unsigned short collision_mask;
         unsigned char type;
         nya_math::vec3 size;
-        nya_math::vec3 location;
-        nya_math::vec3 rotation;
+        nya_math::vec3 pos;
+        nya_math::vec3 rot;
         float mass;
         float vel_attenuation;
         float rot_attenuation;
@@ -63,14 +63,16 @@ struct pmd_phys_data
         std::string name;
         unsigned int rigid_src;
         unsigned int rigid_dst;
-        nya_math::vec3 location;
-        nya_math::vec3 rotation;
-        nya_math::vec3 location_max;
-        nya_math::vec3 location_min;
-        nya_math::vec3 rotation_max;
-        nya_math::vec3 rotation_min;
-        nya_math::vec3 location_spring;
-        nya_math::vec3 rotation_spring;
+
+        nya_math::vec3 pos;
+        nya_math::vec3 pos_max;
+        nya_math::vec3 pos_min;
+        nya_math::vec3 pos_spring;
+
+        nya_math::vec3 rot;
+        nya_math::vec3 rot_max;
+        nya_math::vec3 rot_min;
+        nya_math::vec3 rot_spring;
     };
 
     std::vector<joint> joints;
