@@ -111,9 +111,15 @@ bool load_texture(nya_scene::shared_texture &res,nya_scene::resource_data &textu
             reader.seek(10);
             const unsigned int data_offset=reader.read<unsigned int>();
             reader.skip(4);
-            const unsigned int width=reader.read<unsigned int>();
-            const unsigned int height=reader.read<unsigned int>();
+            int width=reader.read<int>();
+            int height=reader.read<int>();
             reader.seek(data_offset);
+            if(height<0)
+            {
+                height=-height;
+                flip_vertical((unsigned char*)reader.get_data(),width,height,4);
+            }
+
             res.tex.build_texture(reader.get_data(),width,height,nya_render::texture::color_bgra);
             return true;
         }

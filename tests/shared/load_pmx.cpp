@@ -15,9 +15,7 @@ struct add_data: public pmx_loader::additional_data, nya_scene::shared_mesh::add
     const char *type() { return "pmx"; }
 };
 
-}
-
-int pmx_loader::read_idx(nya_memory::memory_reader &reader,int size)
+int read_idx(nya_memory::memory_reader &reader,int size)
 {
     switch(size)
     {
@@ -27,6 +25,20 @@ int pmx_loader::read_idx(nya_memory::memory_reader &reader,int size)
     }
 
     return 0;
+}
+
+template<typename t> void load_vertex_morph(nya_memory::memory_reader &reader,pmd_morph_data::morph &m)
+{
+    for(size_t j=0;j<m.verts.size();++j)
+    {
+        pmd_morph_data::morph_vertex &v=m.verts[j];
+        v.idx=reader.read<t>();
+        v.pos.x=reader.read<float>();
+        v.pos.y=reader.read<float>();
+        v.pos.z=-reader.read<float>();
+    }
+}
+
 }
 
 bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data,const char* name)
@@ -539,13 +551,12 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
             {
                 const int size=reader.read<int>();
                 m.verts.resize(size);
-                for(int j=0;j<size;++j)
+
+                switch(header.index_size)
                 {
-                    pmd_morph_data::morph_vertex &v=m.verts[j];
-                    v.idx=read_idx(reader,header.index_size);
-                    v.pos.x=reader.read<float>();
-                    v.pos.y=reader.read<float>();
-                    v.pos.z=-reader.read<float>();
+                    case 1: load_vertex_morph<unsigned char>(reader,m); break;
+                    case 2: load_vertex_morph<unsigned short>(reader,m); break;
+                    case 4: load_vertex_morph<unsigned int>(reader,m); break;
                 }
             }
             break;

@@ -90,8 +90,6 @@ public:
         }
     };
 
-    static int read_idx(nya_memory::memory_reader &reader,int size);
-
     template<typename t> class flag
     {
     private:
