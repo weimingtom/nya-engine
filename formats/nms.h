@@ -100,6 +100,8 @@ struct nms_mesh_chunk
         unsigned int offset;
         vertex_atrib_type data_type;
         std::string semantics;
+
+        element(): type(0),dimension(0),offset(0),data_type(float32) {}
     };
 
     enum draw_element_type
@@ -121,6 +123,8 @@ struct nms_mesh_chunk
         unsigned int offset;
         unsigned int count;
         draw_element_type element_type;
+
+        group(): material_idx(0),offset(0),count(0),element_type(triangles) {}
     };
 
     struct lod { std::vector<group> groups; };
@@ -174,6 +178,8 @@ struct nms_material_chunk
     {
         std::string name;
         int value;
+
+        int_param(): value(0) {}
     };
 
     struct material_info
@@ -203,6 +209,8 @@ struct nms_skeleton_chunk
         nya_math::quat rot;
         nya_math::vec3 pos;
         int parent;
+
+        bone(): parent(-1) {}
     };
 
     std::vector<bone> bones;
