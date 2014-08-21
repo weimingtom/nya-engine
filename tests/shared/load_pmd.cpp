@@ -374,8 +374,8 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         rb.collision_mask=reader.read<ushort>();
         rb.type=reader.read<uchar>();
         rb.size=reader.read<nya_math::vec3>();
-        rb.location=reader.read<nya_math::vec3>();
-        rb.rotation=reader.read<nya_math::vec3>();
+        rb.pos=reader.read<nya_math::vec3>();
+        rb.rot=reader.read<nya_math::vec3>();
         rb.mass=reader.read<float>();
         rb.vel_attenuation=reader.read<float>();
         rb.rot_attenuation=reader.read<float>();
@@ -393,14 +393,14 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         reader.skip(20);
         j.rigid_src=reader.read<uint>();
         j.rigid_dst=reader.read<uint>();
-        j.location=reader.read<nya_math::vec3>();
-        j.rotation=reader.read<nya_math::vec3>();
-        j.location_max=reader.read<nya_math::vec3>();
-        j.location_min=reader.read<nya_math::vec3>();
-        j.rotation_max=reader.read<nya_math::vec3>();
-        j.rotation_min=reader.read<nya_math::vec3>();
-        j.location_spring=reader.read<nya_math::vec3>();
-        j.rotation_spring=reader.read<nya_math::vec3>();
+        j.pos=reader.read<nya_math::vec3>();
+        j.rot=reader.read<nya_math::vec3>();
+        j.pos_max=reader.read<nya_math::vec3>();
+        j.pos_min=reader.read<nya_math::vec3>();
+        j.rot_max=reader.read<nya_math::vec3>();
+        j.rot_min=reader.read<nya_math::vec3>();
+        j.pos_spring=reader.read<nya_math::vec3>();
+        j.rot_spring=reader.read<nya_math::vec3>();
     }
 
     return true;

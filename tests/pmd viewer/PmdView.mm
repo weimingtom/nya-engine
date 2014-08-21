@@ -101,6 +101,24 @@ bool load_texture(nya_scene::shared_texture &res,nya_scene::resource_data &textu
     if(!texture_data.get_size())
         return false;
 
+    //NSImage lose alpha of 32bit bmp textures
+    if(texture_data.get_size()>3 && memcmp(texture_data.get_data(),"BM6",3)==0)
+    {
+        nya_memory::memory_reader reader(texture_data.get_data(),texture_data.get_size());
+        reader.seek(28);
+        if(reader.read<unsigned int>()==32)
+        {
+            reader.seek(10);
+            const unsigned int data_offset=reader.read<unsigned int>();
+            reader.skip(4);
+            const unsigned int width=reader.read<unsigned int>();
+            const unsigned int height=reader.read<unsigned int>();
+            reader.seek(data_offset);
+            res.tex.build_texture(reader.get_data(),width,height,nya_render::texture::color_bgra);
+            return true;
+        }
+    }
+
     NSData *data=[NSData dataWithBytesNoCopy:texture_data.get_data() 
                                           length: texture_data.get_size() freeWhenDone:NO];
     if(data==nil)
@@ -137,6 +155,7 @@ bool load_texture(nya_scene::shared_texture &res,nya_scene::resource_data &textu
 
     unsigned int width=(unsigned int)[image pixelsWide];
     unsigned int height=(unsigned int)[image pixelsHigh];
+
     unsigned char *image_data=[image bitmapData];
 
     if(bpp==64)
@@ -692,17 +711,23 @@ private:
     if([[column identifier] isEqualToString:@"override"])
         m_morphs[row].override=[value boolValue];
 
-    m_mesh->set_morph(int(row),m_morphs[row].value/100.0f,m_morphs[row].override);
+    const NSUInteger flags = [[NSApp currentEvent] modifierFlags];
+    const float mult=flags & NSShiftKeyMask?10.0f:1.0f;
+
+    m_mesh->set_morph(int(row),mult*m_morphs[row].value/100.0f,m_morphs[row].override);
     m_mesh->update(0);
     [m_view setNeedsDisplay: YES];
 }
 
 -(IBAction)resetAll:(id)sender
 {
+    const NSUInteger flags = [[NSApp currentEvent] modifierFlags];
+    const float value=flags & NSShiftKeyMask?1.0f:0.0f;
+
     for(int i=0;i<int(m_morphs.size());++i)
     {
         m_morphs[i]=morph();
-        m_mesh->set_morph(i,0.0f,false);
+        m_mesh->set_morph(i,value,false);
     }
 
     m_mesh->update(0);

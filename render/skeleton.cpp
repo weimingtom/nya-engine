@@ -317,7 +317,7 @@ void skeleton::update()
         if(b.rot)
             tmp.apply_weight(b.k);
 
-        update_bone(b.target,t.pos,b.rot?(t.rot*tmp):t.rot);
+        update_bone(b.target,b.pos?t.pos+f.pos*b.k:t.pos,b.rot?(t.rot*tmp).normalize():t.rot);
         update_bone_childs(b.target);
     }
 }
