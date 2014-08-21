@@ -214,19 +214,55 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         }
     }
 
-    for(ushort i=0;i<bones_count;++i)
+    std::vector<pmd_bone> bones(bones_count);
+    for(int i=0;i<bones_count;++i)
     {
-        std::string name=utf8_from_shiftjis(data.get_data(reader.get_offset()),20);
+        pmd_bone &b=bones[i];
+        b.idx=i;
+        b.name=utf8_from_shiftjis(data.get_data(reader.get_offset()),20);
         reader.skip(20);
-        const short parent=reader.read<short>();
+        b.parent=reader.read<short>();
         reader.skip(5); //child,kind,ik target
 
-        nya_math::vec3 pos;
-        pos.x=reader.read<float>();
-        pos.y=reader.read<float>();
-        pos.z=-reader.read<float>();
+        b.pos.x=reader.read<float>();
+        b.pos.y=reader.read<float>();
+        b.pos.z=-reader.read<float>();
+    }
 
-        if(res.skeleton.add_bone(name.c_str(),pos,nya_math::quat(),parent,true)!=i)
+    for(int i=0;i<int(bones.size());++i)
+        if(bones[i].parent>=0)
+            bones[i].parent_name=bones[bones[i].parent].name;
+
+    //dumb sort
+    for(int i=0;i<int(bones.size());++i) //ToDo: less dumb
+    {
+        bool had_sorted=false;
+        for(int j=0;j<int(bones.size());++j)
+        {
+            const int p=bones[j].parent;
+            if(p>j)
+            {
+                had_sorted=true;
+                std::swap(bones[j], bones[p]);
+                for(int k=0;k<bones.size();++k)
+                    if(bones[k].parent==j || bones[k].parent==p)
+                        bones[k].parent=pmd_bone::parent_idx_by_name(bones[k].parent_name,bones);
+            }
+        }
+
+        if(!had_sorted)
+            break;
+    }
+
+    std::vector<int> old_bones(bones_count);
+    for(int i=0;i<bones_count;++i)
+        old_bones[bones[i].idx]=i;
+
+    for(int i=0;i<bones_count;++i)
+    {
+        const pmd_bone &b=bones[i];
+
+        if(res.skeleton.add_bone(b.name.c_str(),b.pos,nya_math::quat(),b.parent,true)!=i)
         {
             nya_log::log()<<"pmd load error: invalid bone\n";
             return false;
@@ -245,7 +281,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         const ushort count=reader.read<ushort>();
         const float k=reader.read<float>();
 
-        const int ik=res.skeleton.add_ik(target,eff,count,k*nya_math::constants::pi);
+        const int ik=res.skeleton.add_ik(old_bones[target],old_bones[eff],count,k*nya_math::constants::pi);
         for(int j=0;j<link_count;++j)
         {
             const ushort link=reader.read<ushort>();
@@ -257,9 +293,9 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
             }
 
             if(strcmp(name,"\xe5\xb7\xa6\xe3\x81\xb2\xe3\x81\x96")==0 || strcmp(name,"\xe5\x8f\xb3\xe3\x81\xb2\xe3\x81\x96")==0)
-                res.skeleton.add_ik_link(ik,link,0.001f,nya_math::constants::pi);
+                res.skeleton.add_ik_link(ik,old_bones[link],0.001f,nya_math::constants::pi);
             else
-                res.skeleton.add_ik_link(ik,link);
+                res.skeleton.add_ik_link(ik,old_bones[link]);
         }
     }
 

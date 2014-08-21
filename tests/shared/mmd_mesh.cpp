@@ -187,7 +187,7 @@ void mmd_mesh::update(unsigned int dt)
             const pmd_morph_data::morph &m=m_morph_data->morphs[i];
             for(int j=0;j<int(m.verts.size());++j)
             {
-                const int base=m.verts[j].idx*stride;
+                const unsigned int base=m.verts[j].idx*stride;
                 for(int k=0;k<m_pos_count*3;k+=3)
                 {
                     m_vertex_data[base+k]+=m.verts[j].pos.x*delta;

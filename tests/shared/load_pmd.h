@@ -98,6 +98,24 @@ public:
         float bone_weight;
     };
 
+    struct pmd_bone
+    {
+        std::string name;
+        int idx;
+        int parent;
+        std::string parent_name;
+        nya_math::vec3 pos;
+
+        template<typename t> static int parent_idx_by_name(const std::string &name,t bones)
+        {
+            for(int i=0;i<int(bones.size());++i)
+                if(bones[i].name==name)
+                    return i;
+
+            return -1;
+        }
+    };
+
 public:
     static const int gpu_skining_bones_limit=256;
 
