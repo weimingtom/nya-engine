@@ -186,6 +186,7 @@ public:
                 NSOpenGLPFAAccelerated,
                 NSOpenGLPFADoubleBuffer,
                 NSOpenGLPFADepthSize, 32,
+                NSOpenGLPFAStencilSize, 8,
                 NSOpenGLPFASampleBuffers,1,NSOpenGLPFASamples,2,
                 //NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
                 0
@@ -258,15 +259,37 @@ private:
     return self;
 }
 
-- (NSDragOperation)draggingEntered:(id < NSDraggingInfo >)sender { return NSDragOperationGeneric; }
+- (NSDragOperation)draggingEntered:(id<NSDraggingInfo>)sender { return NSDragOperationGeneric; }
 
-- (BOOL)performDragOperation:(id < NSDraggingInfo >)sender
+- (BOOL)performDragOperation:(id<NSDraggingInfo>)sender
 {
-    NSArray *draggedFilenames = [[sender draggingPasteboard] propertyListForType:NSFilenamesPboardType];
-    if ([[[draggedFilenames objectAtIndex:0] pathExtension] caseInsensitiveCompare:@"vmd"]==NSOrderedSame)
+    NSArray *draggedFilenames=[[sender draggingPasteboard] propertyListForType:NSFilenamesPboardType];
+    NSString *extension=[[[draggedFilenames objectAtIndex:0] pathExtension] lowercaseString];
+    NSURL *url=[NSURL fileURLWithPath:[draggedFilenames objectAtIndex:0]];
+
+    if([extension compare:@"vmd"]==NSOrderedSame)
     {
-        NSURL *url = [NSURL fileURLWithPath:[draggedFilenames objectAtIndex:0]];
-        [self loadAnim: [url path].UTF8String];
+        [self loadAnim:[url path].UTF8String];
+        return YES;
+    }
+
+    NSArray *texFileTypes = [NSArray arrayWithObjects:@"spa",@"sph",@"tga",@"bmp",@"png",@"jpg",@"jpeg",@"dds",nil];
+    if([texFileTypes indexOfObject:extension]!=NSNotFound)
+    {
+        NSPoint pt = [self convertPoint:[sender draggingLocation] fromView:nil];
+        m_mouse_old=[self convertPoint: pt fromView: nil];
+
+        m_assigntexture_name.assign([url path].UTF8String);
+
+        if([extension compare:@"spa"]==NSOrderedSame)
+            m_pick_mode=pick_assignspa;
+        else if([extension compare:@"sph"]==NSOrderedSame)
+            m_pick_mode=pick_assignsph;
+        else
+            m_pick_mode=pick_assigntexture;
+
+        [self setNeedsDisplay: YES];
+
         return YES;
     }
 
@@ -278,6 +301,13 @@ private:
     NSPoint pt=[theEvent locationInWindow];
 
     m_mouse_old=[self convertPoint: pt fromView: nil];
+
+    const NSUInteger flags = [[NSApp currentEvent] modifierFlags];
+    if(flags & NSCommandKeyMask && flags & NSAlternateKeyMask)
+    {
+        m_pick_mode=pick_showhide;
+        [self setNeedsDisplay: YES];
+    }
 }
 
 - (void) rightMouseDown: (NSEvent *) theEvent
@@ -285,8 +315,21 @@ private:
     NSPoint pt=[theEvent locationInWindow];
 
     m_mouse_old=[self convertPoint: pt fromView: nil];
-}
 
+    const NSUInteger flags = [[NSApp currentEvent] modifierFlags];
+    if(flags & NSCommandKeyMask && flags & NSAlternateKeyMask)
+    {
+        m_show_groups.clear();
+        [self setNeedsDisplay: YES];
+    }
+}
+/*
+- (void) mouseMoved:(NSEvent *)theEvent
+{
+    NSPoint pt=[theEvent locationInWindow];
+    m_mouse_old=[self convertPoint: pt fromView: nil];
+}
+*/
 - (void) mouseDragged: (NSEvent *) theEvent
 {
     NSPoint pt=[theEvent locationInWindow];
@@ -597,14 +640,14 @@ private:
 
             nya_render::set_ignore_platform_restrictions(true);
 
-            //nya_render::set_clear_color(0.2f,0.4f,0.5f,0.0f);
-
             nya_scene::texture::register_load_function(load_texture);
             nya_scene::texture::register_load_function(nya_scene::texture::load_dds);
             nya_scene::texture::set_load_dds_flip(true);
         }
 
         nya_render::set_clear_color(1.0f,1.0f,1.0f,0.0f);
+        //nya_render::set_clear_color(0.2f,0.4f,0.5f,0.0f);
+
         nya_render::depth_test::enable(nya_render::depth_test::less);
 
         m_mesh.load(doc->m_model_name.c_str());
@@ -615,9 +658,80 @@ private:
         doc->m_view=self;
     }
 
+    if(m_pick_mode!=pick_none)
+    {
+        glClearStencil(0);
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
+        glEnable(GL_STENCIL_TEST);
+        glStencilOp(GL_KEEP,GL_KEEP,GL_REPLACE);
+
+        for(int i=0;i<m_mesh.get_groups_count();++i)
+        {
+            glStencilFunc(GL_ALWAYS,i+1,-1);
+            m_mesh.draw_group(i);
+        }
+
+        unsigned int g;
+        glReadPixels(m_mouse_old.x,m_mouse_old.y, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &g);
+        glDisable(GL_STENCIL_TEST);
+
+        printf("group %d\n",g);
+
+        if(g>0 && strcmp(m_mesh.get_group_name(g-1),"edge")!=0)
+        {
+            --g;
+            if(m_pick_mode==pick_showhide)
+            {
+                m_show_groups.resize(m_mesh.get_groups_count(),true);
+                m_show_groups[g]=!m_show_groups[g];
+
+                const nya_scene::shared_mesh *sh=m_mesh.internal().get_shared_data().operator->();
+                if(sh)
+                {
+                    for(int i=g+1;i<int(sh->groups.size());++i)
+                    {
+                        if(sh->groups[i].offset==sh->groups[g].offset &&
+                           sh->groups[i].count==sh->groups[g].count)
+                            m_show_groups[i]=m_show_groups[g];
+                    }
+                }
+            }
+            else if(!m_assigntexture_name.empty())
+            {
+                auto &m=m_mesh.modify_material(g);
+                nya_scene::texture t;
+                if(t.load(m_assigntexture_name.c_str()))
+                {
+                    printf("tex was %s\n",m.get_texture("diffuse")->get_name());
+
+                    if(m_pick_mode==pick_assigntexture)
+                        m.set_texture("diffuse",t);
+                    else if(m_pick_mode==pick_assignspa)
+                        m.set_texture("env add",t);
+                    else if(m_pick_mode==pick_assignsph)
+                        m.set_texture("end mult",t);
+
+                    printf("tex loaded %s\n",t.get_name());
+                    printf("tex now %s\n",m.get_texture("diffuse")->get_name());
+                }
+
+                m_assigntexture_name.clear();
+            }
+        }
+
+        m_pick_mode=pick_none;
+    }
+
     nya_render::clear(true,true);
 
-    m_mesh.draw();
+    if(!m_show_groups.empty())
+    {
+        for(int i=0;i<int(m_show_groups.size());++i)
+            if(m_show_groups[i])
+                m_mesh.draw_group(i);
+    }
+    else
+        m_mesh.draw();
 
     //nya_render::clear(false,true);
     //static nya_render::debug_draw dd; dd.clear(); dd.set_point_size(3.0f);

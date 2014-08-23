@@ -38,22 +38,36 @@ struct pmd_morph_data
 
 struct pmd_phys_data
 {
+    enum shape_type
+    {
+        shape_sphere=0,
+        shape_box=1,
+        shape_capsule=2
+    };
+
+    enum object_type
+    {
+        object_static=0,
+        object_dynamic=1,
+        object_aligned=2
+    };
+
     struct rigid_body
     {
         std::string name;
         short bone;
         unsigned char collision_group;
         unsigned short collision_mask;
-        unsigned char type;
+        shape_type type;
         nya_math::vec3 size;
         nya_math::vec3 pos;
         nya_math::vec3 rot;
         float mass;
         float vel_attenuation;
         float rot_attenuation;
-        float bounce;
+        float restriction;
         float friction;
-        unsigned char mode;
+        object_type mode;
     };
 
     std::vector<rigid_body> rigid_bodies;
