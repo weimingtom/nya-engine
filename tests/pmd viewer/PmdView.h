@@ -34,6 +34,19 @@ private:
 
     NSTimer *m_animation_timer;
     unsigned long m_last_time;
+
+    enum pick_mode
+    {
+        pick_none,
+        pick_showhide,
+        pick_assigntexture,
+        pick_assignspa,
+        pick_assignsph
+
+    } m_pick_mode;
+
+    std::string m_assigntexture_name;
+    std::vector<bool> m_show_groups;
 }
 
 @end

@@ -408,16 +408,16 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         rb.bone=reader.read<short>();
         rb.collision_group=reader.read<uchar>();
         rb.collision_mask=reader.read<ushort>();
-        rb.type=reader.read<uchar>();
+        rb.type=(pmd_phys_data::shape_type)reader.read<uchar>();
         rb.size=reader.read<nya_math::vec3>();
         rb.pos=reader.read<nya_math::vec3>();
         rb.rot=reader.read<nya_math::vec3>();
         rb.mass=reader.read<float>();
         rb.vel_attenuation=reader.read<float>();
         rb.rot_attenuation=reader.read<float>();
-        rb.bounce=reader.read<float>();
+        rb.restriction=reader.read<float>();
         rb.friction=reader.read<float>();
-        rb.mode=reader.read<uchar>();
+        rb.mode=(pmd_phys_data::object_type)reader.read<uchar>();
     }
 
     const uint joints_count=reader.read<uint>();
