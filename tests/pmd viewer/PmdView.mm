@@ -675,7 +675,7 @@ private:
         glReadPixels(m_mouse_old.x,m_mouse_old.y, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &g);
         glDisable(GL_STENCIL_TEST);
 
-        printf("group %d\n",g);
+        //printf("group %d\n",g);
 
         if(g>0 && strcmp(m_mesh.get_group_name(g-1),"edge")!=0)
         {
@@ -702,17 +702,12 @@ private:
                 nya_scene::texture t;
                 if(t.load(m_assigntexture_name.c_str()))
                 {
-                    printf("tex was %s\n",m.get_texture("diffuse")->get_name());
-
                     if(m_pick_mode==pick_assigntexture)
                         m.set_texture("diffuse",t);
                     else if(m_pick_mode==pick_assignspa)
                         m.set_texture("env add",t);
                     else if(m_pick_mode==pick_assignsph)
                         m.set_texture("end mult",t);
-
-                    printf("tex loaded %s\n",t.get_name());
-                    printf("tex now %s\n",m.get_texture("diffuse")->get_name());
                 }
 
                 m_assigntexture_name.clear();
