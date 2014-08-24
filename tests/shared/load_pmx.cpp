@@ -173,7 +173,10 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
              encoding:NSUTF16LittleEndianStringEncoding];
              tex_names[i].assign(str.UTF8String);
              */
+
+            tex_names[i]=utf8_from_utf16le(reader.get_data(),str_len);
             
+            /*
             const char *data=(const char*)reader.get_data();
             //for(int j=0;j<str_len;++j) printf("%c",data[j]); printf("\n");
 
@@ -182,6 +185,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
                 if(data[j]!=0)
                     tex_names[i].push_back(data[j]);
             }
+*/
         }
         else
             tex_names[i]=std::string((const char*)reader.get_data(),str_len);
@@ -488,8 +492,11 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     {
         const pmx_bone &b=bones[i];
 
-        if(b.bound.has_pos || b.bound.has_rot)
+        if((b.bound.has_pos || b.bound.has_rot) && b.bound.src_idx>=0 && b.bound.src_idx<bones_count)
+            {
             res.skeleton.add_bound(old_bones[b.bound.src_idx],i,b.bound.k,b.bound.has_pos,b.bound.has_rot,true);
+printf("%d %d\n",b.bound.src_idx,old_bones[b.bound.src_idx]);
+            }
 
         if(res.skeleton.add_bone(b.name.c_str(),b.pos,nya_math::quat(),b.parent,true)!=i)
         {
