@@ -493,10 +493,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         const pmx_bone &b=bones[i];
 
         if((b.bound.has_pos || b.bound.has_rot) && b.bound.src_idx>=0 && b.bound.src_idx<bones_count)
-            {
             res.skeleton.add_bound(old_bones[b.bound.src_idx],i,b.bound.k,b.bound.has_pos,b.bound.has_rot,true);
-printf("%d %d\n",b.bound.src_idx,old_bones[b.bound.src_idx]);
-            }
 
         if(res.skeleton.add_bone(b.name.c_str(),b.pos,nya_math::quat(),b.parent,true)!=i)
         {
