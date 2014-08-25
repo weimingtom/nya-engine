@@ -133,7 +133,9 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
             nya_scene::texture tex;
             if(sph_mode!=no_env || base_tex.empty() || !base_tex[0] || !tex.load((path+base_tex).c_str()))
             {
-                unsigned char data[4]={params.diffuse[2]*255,params.diffuse[1]*255,params.diffuse[0]*255,params.diffuse[3]*255};
+                typedef unsigned char uchar;
+                unsigned char data[4]={uchar(params.diffuse[2]*255),uchar(params.diffuse[1]*255),
+                                       uchar(params.diffuse[0]*255),uchar(params.diffuse[3]*255)};
                 tex.build(&data,1,1,nya_render::texture::color_bgra);
             }
 
