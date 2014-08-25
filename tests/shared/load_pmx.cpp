@@ -278,7 +278,9 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
             nya_scene::texture tex;
             if(tex_idx<0 || !tex.load((path+tex_names[tex_idx]).c_str()))
             {
-                unsigned char data[4]={params.diffuse[2]*255,params.diffuse[1]*255,params.diffuse[0]*255,params.diffuse[3]*255};
+                typedef unsigned char uchar;
+                unsigned char data[4]={uchar(params.diffuse[2]*255),uchar(params.diffuse[1]*255),
+                                       uchar(params.diffuse[0]*255),uchar(params.diffuse[3]*255)};
                 tex.build(&data,1,1,nya_render::texture::color_bgra);
             }
 
