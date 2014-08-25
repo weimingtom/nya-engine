@@ -205,31 +205,39 @@ void mmd_mesh::update(unsigned int dt)
         m_vbo.set_vertex_data(&m_vertex_data[0],m_vbo.get_vert_stride(),m_vbo.get_verts_count());
 }
 
-void mmd_mesh::draw()
+void mmd_mesh::draw_group(int group_idx,const char *pass_name) const
 {
     if(!m_mesh.internal().get_shared_data().is_valid())
         return;
+
+    if(group_idx<0 || group_idx>=m_mesh.get_groups_count())
+        return;
+
     /*
-    if(m_mesh.internal().m_has_aabb) //ToDo
-    {
-        if(get_camera().is_valid() && !get_camera()->get_frustum().test_intersect(get_aabb()))
-            return;
-    }
-    */
+     if(m_mesh.internal().m_has_aabb) //ToDo
+     {
+     if(get_camera().is_valid() && !get_camera()->get_frustum().test_intersect(get_aabb()))
+     return;
+     }
+     */
     nya_scene::transform::set(m_mesh.internal().get_transform());
     nya_scene::shader_internal::set_skeleton(&m_mesh.get_skeleton());
 
     const nya_scene::shared_mesh &sh=*m_mesh.internal().get_shared_data().operator ->();
     sh.vbo.bind_indices();
     m_vbo.bind_verts();
-    for(int i=0;i<int(sh.groups.size());++i)
-    {
-        const nya_scene::material &m=sh.materials[sh.groups[i].material_idx];
-        m.internal().set(nya_scene::material::default_pass);
-        m_vbo.draw(sh.groups[i].offset,sh.groups[i].count);
-        m.internal().unset();
-    }
+
+    const nya_scene::material &m=m_mesh.get_material(group_idx);
+    m.internal().set(pass_name);
+    m_vbo.draw(sh.groups[group_idx].offset,sh.groups[group_idx].count);
+    m.internal().unset();
     m_vbo.unbind();
     sh.vbo.unbind();
     nya_scene::shader_internal::set_skeleton(0);
+}
+
+void mmd_mesh::draw(const char *pass_name)
+{
+    for(int i=0;i<m_mesh.get_groups_count();++i)
+        draw_group(i);
 }

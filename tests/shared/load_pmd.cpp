@@ -13,6 +13,16 @@ struct add_data: public pmd_loader::additional_data, nya_scene::shared_mesh::add
     const char *type() { return "pmd"; }
 };
 
+inline void read_vector(nya_math::vec3 &out,nya_memory::memory_reader &reader)
+{
+    out.x=reader.read<float>(),out.y=reader.read<float>(),out.z=-reader.read<float>();
+}
+
+inline void read_angle(nya_math::vec3 &out,nya_memory::memory_reader &reader)
+{
+    out.x=-reader.read<float>(),out.y=-reader.read<float>(),out.z=reader.read<float>();
+}
+
 }
 
 bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data,const char* name)
@@ -38,13 +48,8 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     std::vector<vert> vertices(vert_count);
     for(size_t i=0;i<vertices.size();++i)
     {
-        vertices[i].pos[0].x=reader.read<float>();
-        vertices[i].pos[0].y=reader.read<float>();
-        vertices[i].pos[0].z=-reader.read<float>();
-
-        vertices[i].normal.x=reader.read<float>();
-        vertices[i].normal.y=reader.read<float>();
-        vertices[i].normal.z=-reader.read<float>();
+        read_vector(vertices[i].pos[0],reader);
+        read_vector(vertices[i].normal,reader);
 
         vertices[i].tc.x=reader.read<float>();
         vertices[i].tc.y=1.0f-reader.read<float>();
@@ -226,9 +231,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         b.parent=reader.read<short>();
         reader.skip(5); //child,kind,ik target
 
-        b.pos.x=reader.read<float>();
-        b.pos.y=reader.read<float>();
-        b.pos.z=-reader.read<float>();
+        read_vector(b.pos,reader);
     }
 
     for(int i=0;i<int(bones.size());++i)
@@ -328,9 +331,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
 
             const uint idx=reader.read<uint>();
             v.idx=type?base_morph.verts[idx].idx:idx;
-            v.pos.x=reader.read<float>();
-            v.pos.y=reader.read<float>();
-            v.pos.z=-reader.read<float>();
+            read_vector(v.pos,reader);
         }
     }
 
@@ -410,16 +411,16 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         rb.bone=reader.read<short>();
         rb.collision_group=reader.read<uchar>();
         rb.collision_mask=reader.read<ushort>();
-        rb.type=reader.read<uchar>();
+        rb.type=(pmd_phys_data::shape_type)reader.read<uchar>();
         rb.size=reader.read<nya_math::vec3>();
-        rb.pos=reader.read<nya_math::vec3>();
-        rb.rot=reader.read<nya_math::vec3>();
+        read_vector(rb.pos,reader);
+        read_angle(rb.rot,reader);
         rb.mass=reader.read<float>();
         rb.vel_attenuation=reader.read<float>();
         rb.rot_attenuation=reader.read<float>();
-        rb.bounce=reader.read<float>();
+        rb.restriction=reader.read<float>();
         rb.friction=reader.read<float>();
-        rb.mode=reader.read<uchar>();
+        rb.mode=(pmd_phys_data::object_type)reader.read<uchar>();
     }
 
     const uint joints_count=reader.read<uint>();
@@ -431,12 +432,17 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         reader.skip(20);
         j.rigid_src=reader.read<uint>();
         j.rigid_dst=reader.read<uint>();
-        j.pos=reader.read<nya_math::vec3>();
-        j.rot=reader.read<nya_math::vec3>();
-        j.pos_max=reader.read<nya_math::vec3>();
-        j.pos_min=reader.read<nya_math::vec3>();
-        j.rot_max=reader.read<nya_math::vec3>();
-        j.rot_min=reader.read<nya_math::vec3>();
+        read_vector(j.pos,reader);
+        read_angle(j.rot,reader);
+        read_vector(j.pos_max,reader);
+        read_vector(j.pos_min,reader);
+        read_angle(j.rot_max,reader);
+        read_angle(j.rot_min,reader);
+
+        //std::swap(j.pos_max.z,j.pos_min.z); //caused by z axis inversion
+        //std::swap(j.rot_max.x,j.rot_min.x);
+        //std::swap(j.rot_max.y,j.rot_min.y);
+
         j.pos_spring=reader.read<nya_math::vec3>();
         j.rot_spring=reader.read<nya_math::vec3>();
     }
