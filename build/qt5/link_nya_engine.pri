@@ -12,6 +12,6 @@ android {
 }
 BIN_DIR_NAME = "qtc_"$$PLATFORM"_"$$CONF
 
-NYA_ENGINE_PATH = $$PWD/../..
+NYA_ENGINE_PATH = $$shell_path($$PWD/../..)
 INCLUDEPATH += $$NYA_ENGINE_PATH
 LIBS += -L$$NYA_ENGINE_PATH/bin/$$BIN_DIR_NAME -lnya_engine
