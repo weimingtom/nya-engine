@@ -460,29 +460,23 @@ bool shader::add_program(program_type type,const char*code)
                 u.ps_offset=(int)buf.buffer.size();
 
             char dim=(type_name.length()==6)?type_name[5]:'\0';
-
-            int dimension=1;
+            int dimension;
             switch(dim)
             {
-            case '2':
-                dimension=2;
-                buf.buffer.resize(buf.buffer.size()+4*count,0.0f);
-                break;
-
             case '3':
                 dimension=3;
+                u.type=uniform_vec3;
                 buf.buffer.resize(buf.buffer.size()+4*count,0.0f);
                 break;
 
             case '4':
                 dimension=4;
+                u.type=uniform_vec4;
                 buf.buffer.resize(buf.buffer.size()+4*count,0.0f);
                 break;
 
-            default:
-                dimension=1;
-                buf.buffer.resize(buf.buffer.size()+4,0.0f);
-                break;
+            default:  //ToDo: log error
+                return false;
             };
 
             if(u.vs_offset>=0 && u.ps_offset>=0) //ToDo: log error
