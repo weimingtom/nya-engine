@@ -85,10 +85,40 @@ namespace
             int ps_offset;
             int dimension;
             int array_size;
+            shader::uniform_type type;
 
             uniform(): vs_offset(-1), ps_offset(-1) {}
         };
+#else
+    public:
+        shader_obj(): program(0)
+        {
+            for(int i = 0;i<shader::program_types_count;++i)
+                objects[i]=0;
 
+#ifdef SUPPORT_OLD_SHADERS
+            mat_mvp=mat_mv=mat_p=-1;
+#endif
+        }
+
+    public:
+        GLhandleARB program;
+        GLhandleARB objects[shader::program_types_count];
+
+        struct uniform
+        {
+            std::string name;
+            int array_size;
+            shader::uniform_type type;
+
+            uniform(): array_size(1) {}
+        };
+
+#ifdef SUPPORT_OLD_SHADERS
+        int mat_mvp,mat_mv,mat_p;
+#endif
+#endif
+    public:
         std::vector<uniform> uniforms;
 
         uniform &add_uniform(const std::string &name)
@@ -107,26 +137,7 @@ namespace
             uniforms.back().name=name;
             return uniforms.back();
         }
-#else
-    public:
-        shader_obj(): program(0)
-        {
-            for(int i = 0;i<shader::program_types_count;++i)
-                objects[i]=0;
 
-#ifdef SUPPORT_OLD_SHADERS
-            mat_mvp=mat_mv=mat_p=-1;
-#endif
-        }
-
-    public:
-        GLhandleARB program;
-        GLhandleARB objects[shader::program_types_count];
-
-#ifdef SUPPORT_OLD_SHADERS
-        int mat_mvp,mat_mv,mat_p;
-#endif
-#endif
     public:
         static int add() { return get_shader_objs().add(); }
         static shader_obj &get(int idx) { return get_shader_objs().get(idx); }
@@ -194,6 +205,7 @@ namespace
     PFNGLGETOBJECTPARAMETERIVARBPROC glGetObjectParameterivARB = NULL;
     PFNGLGETINFOLOGARBPROC glGetInfoLogARB = NULL;
     PFNGLGETUNIFORMLOCATIONARBPROC glGetUniformLocationARB = NULL;
+    PFNGLGETACTIVEUNIFORMARBPROC glGetActiveUniformARB = NULL;
 #endif
 
   #ifdef OPENGL_ES
@@ -237,6 +249,7 @@ namespace
   #else
     #define glGetObjectParam glGetObjectParameterivARB
     #define glGetShaderParam glGetObjectParameterivARB
+    #define glGetActiveUniform glGetActiveUniformARB
   #endif
 
 bool check_init_shaders()
@@ -268,6 +281,7 @@ bool check_init_shaders()
     if(!(glGetObjectParameterivARB =(PFNGLGETOBJECTPARAMETERIVARBPROC) get_extension("glGetObjectParameteriv"))) return false;
     if(!(glGetInfoLogARB           =(PFNGLGETINFOLOGARBPROC)           get_extension("glGetInfoLog"))) return false;
     if(!(glGetUniformLocationARB   =(PFNGLGETUNIFORMLOCATIONARBPROC)   get_extension("glGetUniformLocation"))) return false;
+    if(!(glGetActiveUniformARB     =(PFNGLGETACTIVEUNIFORMARBPROC)     get_extension("glGetActiveUniform"))) return false;
   #endif
     failed=false;
     initialised=true;
@@ -942,6 +956,35 @@ bool shader::add_program(program_type type,const char*code)
     }
 
     shdr.objects[type]=object;
+
+    GLint uniforms_count=0;
+#ifdef OPENGL_ES
+    glGetObjectParam(shdr.program,GL_ACTIVE_UNIFORMS,&uniforms_count);
+#else
+    glGetShaderParam(shdr.program,GL_ACTIVE_UNIFORMS,&uniforms_count);
+#endif
+    for(int i=0;i<uniforms_count;++i)
+    {
+        char name[128]; GLsizei name_len; GLint size; GLenum type;
+        glGetActiveUniform(shdr.program,i,GLsizei(sizeof(name)/sizeof(name[0])),&name_len,&size,&type,name);
+
+        if(!name_len)
+            continue;
+
+        shader_obj::uniform &u=shdr.add_uniform(name);
+        u.array_size=size;
+        switch(type)
+        {
+            case GL_FLOAT: u.type=uniform_float; break;
+            case GL_FLOAT_VEC3: u.type=uniform_vec3; break;
+            case GL_FLOAT_VEC4: u.type=uniform_vec4; break;
+            case GL_FLOAT_MAT4: u.type=uniform_mat4; break;
+            case GL_SAMPLER_2D: u.type=uniform_sampler2d; break;
+            case GL_SAMPLER_CUBE: u.type=uniform_sampler_cube; break;
+            default: u.type=uniform_not_found;
+        }
+    }
+
 #endif
 
     return true;
@@ -1290,6 +1333,38 @@ void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int coun
 
     glUniformMatrix4fvARB(i,count,transpose,f);
 #endif
+}
+
+int shader::get_uniforms_count() const
+{
+    if(m_shdr<0)
+        return 0;
+
+    return (int)shader_obj::get(m_shdr).uniforms.size();
+}
+
+const char *shader::get_uniform_name(int idx) const
+{
+    if(idx<0 || idx>=get_uniforms_count())
+        return 0;
+
+    return shader_obj::get(m_shdr).uniforms[idx].name.c_str();
+}
+
+shader::uniform_type shader::get_uniform_type(int idx) const
+{
+    if(idx<0 || idx>=get_uniforms_count())
+        return uniform_not_found;
+
+    return shader_obj::get(m_shdr).uniforms[idx].type;
+}
+
+unsigned int shader::get_uniform_array_size(int idx) const
+{
+    if(idx<0 || idx>=get_uniforms_count())
+        return uniform_not_found;
+
+    return shader_obj::get(m_shdr).uniforms[idx].type;
 }
 
 void shader::release()
