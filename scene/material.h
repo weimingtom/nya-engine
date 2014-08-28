@@ -186,6 +186,9 @@ public:
     static void register_load_function(material_internal::load_function function,bool clear_default=true) { material_internal::register_load_function(function,clear_default); }
 
 public:
+    static void highlight_missing_textures(bool enable);
+
+public:
     static bool load_text(shared_material &res,resource_data &data,const char* name);
 
     const material_internal &internal() const { return m_internal; }

@@ -15,10 +15,17 @@ const char *material::default_pass="default";
 
 namespace
 {
+    bool enable_highlight_missing_texture=true;
+
     nya_scene::texture missing_texture()
     {
+        if(!enable_highlight_missing_texture)
+        {
+            static nya_scene::texture invalid;
+            return invalid;
+        }
+
         static nya_scene::texture missing_red;
-        /*
         static nya_scene::texture missing_white;
 
         static bool initialised=false;
@@ -40,7 +47,7 @@ namespace
 
         if((nya_system::get_time()/200)%2>0)
             return missing_white;
-        */
+
         return missing_red;
     }
 }
@@ -618,5 +625,7 @@ const material::param_array_proxy &material::get_param_array(int idx) const
 
     return internal().m_params[idx].a;
 }
+
+void material::highlight_missing_textures(bool enable) { enable_highlight_missing_texture=enable; }
 
 }
