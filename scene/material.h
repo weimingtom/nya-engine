@@ -180,6 +180,7 @@ public:
 
 public:
     material() { material_internal::default_load_function(load_text); }
+    material(const char *name) { *this=material(); load(name); }
 
 public:
     static void set_resources_prefix(const char *prefix) { material_internal::set_resources_prefix(prefix); }

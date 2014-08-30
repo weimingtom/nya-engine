@@ -130,6 +130,7 @@ public:
 
 public:
     shader() { shader_internal::default_load_function(load_nya_shader); }
+    shader(const char *name) { *this=shader(); load(name); }
 
 public:
     static bool load_nya_shader(shared_shader &res,resource_data &data,const char* name);

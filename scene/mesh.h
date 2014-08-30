@@ -192,6 +192,7 @@ public:
 
 public:
     mesh() { mesh_internal::default_load_function(load_nms); }
+    mesh(const char *name) { *this=mesh(); load(name); }
 
 public:
     static void set_resources_prefix(const char *prefix) { mesh_internal::set_resources_prefix(prefix); }
