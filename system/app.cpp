@@ -10,7 +10,7 @@
 
 #include "render/platform_specific_gl.h"
 
-  #ifdef WINDOWS_PHONE8
+  #ifdef WINDOWS_RT
     #include "render/render.h"
 
     #include <wrl/client.h>
