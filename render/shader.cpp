@@ -17,7 +17,7 @@
 #ifdef DIRECTX11
     #include <map>
 
-  #ifndef WINDOWS_PHONE8
+  #ifndef WINDOWS_METRO
     #include <D3Dcompiler.h>
   #endif
 #endif
@@ -613,8 +613,9 @@ bool shader::add_program(program_type type,const char*code)
 
     if(!shdr.compiled[type].get_data())
     {
-#ifdef WINDOWS_PHONE8
-        log()<<"Can`t compile "<<type_str[type]<<" shader: Windows phone 8 not allowed to compile shaders, please, set compiled_shaders_provider and add compiled shaders cache\n";
+#ifdef WINDOWS_METRO
+        log()<<"Can`t compile "<<type_str[type]<<" shader: Windows metro apps are not allowed to compile shaders, please,"
+                                                 "set compiled_shaders_provider and add compiled shaders cache\n";
         return false;
 #else
         ID3D10Blob *compiled=0;
@@ -689,17 +690,14 @@ bool shader::add_program(program_type type,const char*code)
     }
 
 #ifdef SUPPORT_OLD_SHADERS
-    std::string code_str(code);
-    std::string code_final;
+    std::string code_str(code),code_final;
 
     if(type==vertex)
     {
         const char *attribute_names[]={"nyaVertex","nyaNormal","nyaColor","nyaMultiTexCoord"};
 
         bool used_attribs[max_attributes]={false};
-        shdr.mat_mvp=-1;
-        shdr.mat_mv=-1;
-        shdr.mat_p=-1;
+        shdr.mat_mvp=shdr.mat_mv=shdr.mat_p=-1;
 
         for(size_t gl=code_str.find("gl_");gl!=std::string::npos;gl=code_str.find("gl_",gl+8))
         {
@@ -710,29 +708,9 @@ bool shader::add_program(program_type type,const char*code)
 
             switch(code_str[gl+3])
             {
-                case 'V':
-                    if(code_str.compare(gl+3,6,"Vertex")==0)
-                    {
-                        used_attribs[vertex_attribute]=true;
-                        replace=true;
-                    }
-                    break;
-
-                case 'N':
-                    if(code_str.compare(gl+3,6,"Normal")==0)
-                    {
-                        used_attribs[normal_attribute]=true;
-                        replace=true;
-                    }
-                    break;
-
-                case 'C':
-                    if(code_str.compare(gl+3,5,"Color")==0)
-                    {
-                        used_attribs[color_attribute]=true;
-                        replace=true;
-                    }
-                    break;
+                case 'V': if(code_str.compare(gl+3,6,"Vertex")==0) replace=used_attribs[vertex_attribute]=true; break;
+                case 'N': if(code_str.compare(gl+3,6,"Normal")==0) replace=used_attribs[normal_attribute]=true; break;
+                case 'C': if(code_str.compare(gl+3,5,"Color")==0) replace=used_attribs[color_attribute]=true; break;
 
                 case 'M':
                     if(code_str.compare(gl+3,13,"MultiTexCoord")==0)
@@ -753,57 +731,35 @@ bool shader::add_program(program_type type,const char*code)
                         if(tc0_attribute+idx>=max_attributes)
                             break;
 
-                        used_attribs[tc0_attribute+idx]=true;
-                        replace=true;
+                        replace=used_attribs[tc0_attribute+idx]=true;
                     }
                     else if(code_str.size()>gl+15 && code_str.compare(gl+3,15,"ModelViewMatrix")==0)
-                    {
-                        shdr.mat_mv=1;
-                        replace=true;
-                    }
+                        shdr.mat_mv=1,replace=true;
                     else if(code_str.size()>gl+25 && code_str.compare(gl+3,25,"ModelViewProjectionMatrix")==0)
-                    {
-                        shdr.mat_mvp=1;
-                        replace=true;
-                    }
+                        shdr.mat_mvp=1,replace=true;
                     break;
 
                 case 'P':
                     if(code_str.size()>gl+16 && code_str.compare(gl+3,16,"ProjectionMatrix")==0)
-                    {
-                        shdr.mat_p=1;
-                        replace=true;
-                    }
+                        shdr.mat_p=1,replace=true;
                     break;
 
-                //case 'T':     //ToDo: gl_TexCoord[] variables
-                //break;
+                //case 'T':     //ToDo: gl_TexCoord[] variables //break;
             }
 
-            if(replace)
-            {
-                code_str[gl]='n';
-                code_str[gl+1]='y';
-                code_str[gl+2]='a';
-            }
+            if(replace) code_str[gl]='n',code_str[gl+1]='y',code_str[gl+2]='a';
         }
 
-        if(shdr.mat_mvp>0)
-            code_final.append("uniform mat4 nyaModelViewProjectionMatrix;");
-        if(shdr.mat_mv>0)
-            code_final.append("uniform mat4 nyaModelViewMatrix;");
-        if(shdr.mat_p>0)
-            code_final.append("uniform mat4 nyaProjectionMatrix;");
+        if(shdr.mat_mvp>0) code_final.append("uniform mat4 nyaModelViewProjectionMatrix;");
+        if(shdr.mat_mv>0) code_final.append("uniform mat4 nyaModelViewMatrix;");
+        if(shdr.mat_p>0) code_final.append("uniform mat4 nyaProjectionMatrix;");
 
         for(int i=0;i<tc0_attribute;++i)
         {
             if(!used_attribs[i])
                 continue;
 
-            code_final.append("attribute vec4 ");
-            code_final.append(attribute_names[i]);
-            code_final.append(";\n");
-
+            code_final.append("attribute vec4 "),code_final.append(attribute_names[i]),code_final.append(";\n");
             glBindAttribLocation(shdr.program,i,attribute_names[i]);
         }
 
@@ -820,12 +776,9 @@ bool shader::add_program(program_type type,const char*code)
                 attrib_name+=char('0'+h);
                 idx-=h*10;
             }
+
             attrib_name+=char('0'+idx);
-
-            code_final.append("attribute vec4 ");
-            code_final.append(attrib_name);
-            code_final.append(";\n");
-
+            code_final.append("attribute vec4 "),code_final.append(attrib_name),code_final.append(";\n");
             glBindAttribLocation(shdr.program,i,attrib_name.c_str());
         }
     }
@@ -834,7 +787,6 @@ bool shader::add_program(program_type type,const char*code)
     code_final.append("precision mediump float;\n");
 #endif
     code_final.append(code_str);
-
     code=code_final.c_str();
 
     //log()<<code<<"\n";
@@ -939,13 +891,9 @@ bool shader::add_program(program_type type,const char*code)
         }
 
 #ifdef SUPPORT_OLD_SHADERS
-
-        if(shdr.mat_mvp>=0)
-            shdr.mat_mvp=get_handler("nyaModelViewProjectionMatrix");
-        if(shdr.mat_mv>=0)
-            shdr.mat_mv=get_handler("nyaModelViewMatrix");
-        if(shdr.mat_p>=0)
-            shdr.mat_p=get_handler("nyaProjectionMatrix");
+        if(shdr.mat_mvp>=0) shdr.mat_mvp=get_handler("nyaModelViewProjectionMatrix");
+        if(shdr.mat_mv>=0) shdr.mat_mv=get_handler("nyaModelViewMatrix");
+        if(shdr.mat_p>=0) shdr.mat_p=get_handler("nyaProjectionMatrix");
 #endif
     }
 
@@ -978,7 +926,6 @@ bool shader::add_program(program_type type,const char*code)
             default: u.type=uniform_not_found;
         }
     }
-
 #endif
 
     return true;
