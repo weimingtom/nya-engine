@@ -11,16 +11,16 @@
             #include "winapifamily.h"
             #if defined(WINAPI_PARTITION_PHONE) && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_PHONE)
                 #define WINDOWS_PHONE8
-                #define WINDOWS_RT
+                #define WINDOWS_METRO
             #elif defined(WINAPI_PARTITION_APP) && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
-                #define WINDOWS_RT
+                #define WINDOWS_METRO
             #endif
         #endif
     #endif
 
     //#define NYA_DIRECTX11
 
-    #if defined WINDOWS_RT || defined NYA_DIRECTX11
+    #if defined WINDOWS_METRO || defined NYA_DIRECTX11
         #define DIRECTX11
     #endif
 

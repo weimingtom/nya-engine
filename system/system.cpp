@@ -64,7 +64,7 @@ const char *get_app_path()
         else
             path[0]='\0';
 #elif defined _WIN32
-	#ifdef WINDOWS_RT
+	#ifdef WINDOWS_METRO
         auto current=Windows::ApplicationModel::Package::Current;
         if(!current)
             return 0;
@@ -121,7 +121,7 @@ const char *get_app_path()
 }
 
 #ifdef _WIN32
-  #ifdef WINDOWS_RT
+  #ifdef WINDOWS_METRO
     unsigned long get_time()
     {
         static LARGE_INTEGER freq;
