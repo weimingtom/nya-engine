@@ -10,7 +10,7 @@
 
 #include "render/platform_specific_gl.h"
 
-  #ifdef WINDOWS_RT
+  #ifdef WINDOWS_METRO
     #include "render/render.h"
 
     #include <wrl/client.h>
