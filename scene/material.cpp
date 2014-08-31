@@ -365,6 +365,9 @@ void material_internal::update_passes_maps() const
     if(!m_should_rebuild_passes_maps)
         return;
 
+    if(m_passes.empty())
+        return;
+
     // step 1: build params array
     // substep 1: build boolean map indicating used parameters and map of names of parameters to be added
     std::vector<bool> used_parameters(m_params.size());
