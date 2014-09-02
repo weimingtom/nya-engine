@@ -43,19 +43,64 @@ nya_math::vec4 vec4_from_string(const std::string &s)
     return v;
 }
 
-std::string string_from_vec4(const nya_math::vec4 &v,int precision)
+std::string string_from_vec4(const nya_math::vec4 &v, int precision)
 {
     std::ostringstream oss;
     if (precision>=0)
     {
         oss.precision(precision);
         oss.setf(std::ios::fixed,std::ios::floatfield);
-        oss<<v.x<<vector_string_delimeter<<v.y<<vector_string_delimeter<<v.z<<vector_string_delimeter<<v.w;
     }
-    else
+    oss<<v.x<<vector_string_delimeter<<v.y<<vector_string_delimeter<<v.z<<vector_string_delimeter<<v.w;
+    return oss.str();
+}
+
+nya_math::vec3 vec3_from_string(const std::string &s)
+{
+    nya_math::vec3 v;
+    std::string ss=s;
+    std::replace(ss.begin(),ss.end(),vector_string_delimeter,' ');
+    std::istringstream iss(ss);
+    if(iss>>v.x)
+        if(iss>>v.y)
+            iss>>v.z;
+    return v;
+}
+
+std::string string_from_vec3(const nya_math::vec3 &v,int precision)
+{
+    std::ostringstream oss;
+    if (precision>=0)
     {
-        oss<<v.x<<vector_string_delimeter<<v.y<<vector_string_delimeter<<v.z<<vector_string_delimeter<<v.w;
+        oss.precision(precision);
+        oss.setf(std::ios::fixed,std::ios::floatfield);
     }
+    oss<<v.x<<vector_string_delimeter<<v.y<<vector_string_delimeter<<v.z;
+    return oss.str();
+}
+
+nya_math::quat quat_from_string(const std::string &s)
+{
+    nya_math::quat q;
+    std::string ss=s;
+    std::replace(ss.begin(),ss.end(),vector_string_delimeter,' ');
+    std::istringstream iss(ss);
+    if(iss>>q.v.x)
+        if(iss>>q.v.y)
+            if(iss>>q.v.z)
+                iss>>q.w;
+    return q;
+}
+
+std::string string_from_quat(const nya_math::quat &q,int precision)
+{
+    std::ostringstream oss;
+    if (precision>=0)
+    {
+        oss.precision(precision);
+        oss.setf(std::ios::fixed,std::ios::floatfield);
+    }
+    oss<<q.v.x<<vector_string_delimeter<<q.v.y<<vector_string_delimeter<<q.v.z<<vector_string_delimeter<<q.w;
     return oss.str();
 }
 
