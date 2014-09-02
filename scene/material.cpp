@@ -168,21 +168,21 @@ void material_internal::set(const char *pass_name) const
             {
                 if(!m_textures[texture_idx].proxy->internal().set(slot_idx))
                 {
-                    nya_log::warning()<<"invalid texture for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"\n";
+                    nya_log::warning()<<"invalid texture for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"'";
 
                     missing_texture().internal().set(slot_idx);
                 }
             }
             else
             {
-                nya_log::warning()<<"invalid texture proxy for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"\n";
+                nya_log::warning()<<"invalid texture proxy for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"'";
 
                 missing_texture().internal().set(slot_idx);
             }
         }
         else
         {
-            nya_log::warning()<<"missing texture for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"\n";
+            nya_log::warning()<<"missing texture for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"'";
 
             missing_texture().internal().set(slot_idx);
         }
