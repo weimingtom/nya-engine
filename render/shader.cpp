@@ -1048,6 +1048,20 @@ void shader::set_sampler(const char*name,unsigned int layer)
     m_samplers.push_back(sampler(name,layer));
 }
 
+int shader::get_sampler_layer(const char *name) const
+{
+    if(!name)
+        return -1;
+
+    for(size_t i=0;i<m_samplers.size();++i)
+    {
+        if(m_samplers[i].name==name)
+            return m_samplers[i].layer;
+    }
+
+    return -1;
+}
+
 int shader::get_handler(const char *name) const
 {
     if(!name || !name[0])

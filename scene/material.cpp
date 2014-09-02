@@ -17,7 +17,25 @@ namespace
 {
     bool enable_highlight_missing_texture=true;
 
-    nya_scene::texture missing_texture()
+    bool is_shader_sampler_cube(const nya_scene::shader &sh,unsigned int layer)
+    {
+        if(!sh.internal().get_shared_data().is_valid())
+            return false;
+
+        const nya_render::shader &rsh=sh.internal().get_shared_data()->shdr;
+        for(int i=0;i<rsh.get_uniforms_count();++i)
+        {
+            if(rsh.get_uniform_type(i)!=nya_render::shader::uniform_sampler_cube)
+                continue;
+
+            if(rsh.get_sampler_layer(rsh.get_uniform_name(i))==layer)
+                return true;
+        }
+
+        return false;
+    }
+
+    nya_scene::texture missing_texture(bool cube)
     {
         if(!enable_highlight_missing_texture)
         {
@@ -27,6 +45,9 @@ namespace
 
         static nya_scene::texture missing_red;
         static nya_scene::texture missing_white;
+
+        static nya_scene::texture missing_cube_red;
+        static nya_scene::texture missing_cube_white;
 
         static bool initialised=false;
         if(!initialised)
@@ -42,13 +63,24 @@ namespace
             white_res.tex.build_texture(white_data,1,1,nya_render::texture::color_rgba);
             missing_white.create(white_res);
 
+            const void *cube_red_data[6]={red_data,red_data,red_data,red_data,red_data,red_data};
+            const void *cube_white_data[6]={white_data,white_data,white_data,white_data,white_data,white_data};
+
+            nya_scene::shared_texture cube_red_res;
+            cube_red_res.tex.build_cubemap(cube_red_data,1,1,nya_render::texture::color_rgba);
+            missing_cube_red.create(cube_red_res);
+
+            nya_scene::shared_texture cube_white_res;
+            cube_white_res.tex.build_cubemap(cube_white_data,1,1,nya_render::texture::color_rgba);
+            missing_cube_white.create(cube_white_res);
+
             initialised=true;
         }
 
         if((nya_system::get_time()/200)%2>0)
-            return missing_white;
+            return cube?missing_cube_white:missing_white;
 
-        return missing_red;
+        return cube?missing_cube_red:missing_red;
     }
 }
 
@@ -177,21 +209,21 @@ void material_internal::set(const char *pass_name) const
                 {
                     nya_log::warning()<<"invalid texture for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"\n";
 
-                    missing_texture().internal().set(slot_idx);
+                    missing_texture(is_shader_sampler_cube(p.m_shader,slot_idx)).internal().set(slot_idx);
                 }
             }
             else
             {
                 nya_log::warning()<<"invalid texture proxy for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"\n";
 
-                missing_texture().internal().set(slot_idx);
+                missing_texture(is_shader_sampler_cube(p.m_shader,slot_idx)).internal().set(slot_idx);
             }
         }
         else
         {
             nya_log::warning()<<"missing texture for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"\n";
 
-            missing_texture().internal().set(slot_idx);
+            missing_texture(is_shader_sampler_cube(p.m_shader,slot_idx)).internal().set(slot_idx);
         }
     }
 }

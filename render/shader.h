@@ -30,6 +30,7 @@ public:
 
 public:
     void set_sampler(const char*name,unsigned int layer);
+    int get_sampler_layer(const char *name) const;
 
 public:
     int get_handler(const char*name) const;
