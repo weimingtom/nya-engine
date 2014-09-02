@@ -24,7 +24,7 @@
     EAGLContext *context;
 
     BOOL animating;
-    unsigned long m_time;
+    CFTimeInterval m_time;
     float m_scale;
 
     NSInteger animationFrameInterval;
@@ -293,7 +293,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
         animating=NO;
         animationFrameInterval=1;
-        m_time=0;
+        m_time=0.0;
         self.displayLink = nil;
 
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillResignActive:) name:UIApplicationWillResignActiveNotification object:nil];
@@ -440,7 +440,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
         [aDisplayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
         self.displayLink = aDisplayLink;
 
-        m_time=(unsigned long)(self.displayLink.timestamp*1000.0);
+        m_time=self.displayLink.timestamp*1000.0;
 
         animating = YES;
     }
@@ -460,8 +460,8 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 {
     [(EAGLView *)self.view setFramebuffer];
 
-    unsigned long time=(unsigned long)(self.displayLink.timestamp*1000.0);
-    unsigned int dt=(unsigned int)(time-m_time);
+    CFTimeInterval time=self.displayLink.timestamp;
+    unsigned int dt=(unsigned int)((time-m_time)*1000.0);
     m_time=time;
 
     nya_system::app *responder=shared_app::get_app().get_responder();

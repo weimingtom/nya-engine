@@ -155,7 +155,8 @@ unsigned long get_time()
 {
     timeval tim;
     gettimeofday(&tim, 0);
-    return (tim.tv_sec*1000+(tim.tv_usec/1000));
+    unsigned long sec=(unsigned long)tim.tv_sec;
+    return (sec*1000+(tim.tv_usec/1000));
 }
 
 #endif
