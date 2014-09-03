@@ -9,6 +9,7 @@ template<typename t>
 class shared_ptr
 {
     template<typename tt,typename tf> friend shared_ptr<tt> shared_ptr_cast(shared_ptr<tf>& f);
+    template<typename tt,typename tf> friend const shared_ptr<tt> shared_ptr_cast(const shared_ptr<tf>& f);
 
 public:
     bool is_valid() const { return m_ref!=0; }
@@ -73,12 +74,15 @@ template<typename to,typename from> shared_ptr<to> shared_ptr_cast(shared_ptr<fr
 {
     shared_ptr<to> t;
     t.m_ref=static_cast<to*>(f.m_ref);
-    if(f.m_ref)
-    {
-        t.m_ref_count=f.m_ref_count;
-        ++(*t.m_ref_count);
-    }
+    if(f.m_ref) t.m_ref_count=f.m_ref_count, ++(*t.m_ref_count);
+    return t;
+}
 
+template<typename to,typename from> const shared_ptr<to> shared_ptr_cast(const shared_ptr<from>& f)
+{
+    shared_ptr<to> t;
+    t.m_ref=static_cast<to*>(f.m_ref);
+    if(f.m_ref) t.m_ref_count=f.m_ref_count, ++(*t.m_ref_count);
     return t;
 }
 
