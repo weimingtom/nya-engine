@@ -38,7 +38,7 @@ public:
         stream_draw
     };
 
-    const static unsigned int max_tex_coord=16;
+    const static unsigned int max_tex_coord=13;
 
 public:
     bool set_vertex_data(const void*data,unsigned int vert_stride,unsigned int vert_count,usage_hint usage=static_draw);
