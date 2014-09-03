@@ -369,11 +369,11 @@ bool tga_file::load(const char *file_name)
     return true;
 }
 
-bool tga_file::create(int width,int height,tga::color_mode channels)
+bool tga_file::create(int width,int height,tga::color_mode channels,const void *data)
 {
     release();
 
-    if(width<0 || height<0)
+    if(width<=0 || height<=0)
         return false;
 
     m_header.width=width;
@@ -381,6 +381,8 @@ bool tga_file::create(int width,int height,tga::color_mode channels)
     m_header.channels=channels;
 
     m_data.resize(width*height*channels,0);
+    if(data)
+        memcpy(&m_data[0],data,m_data.size());
 
     return true;
 }

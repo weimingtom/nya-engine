@@ -38,7 +38,7 @@ public:
         float shininess;
         float ambient[3];
     };
-    
+
     struct pmx_edge_params
     {
         float color[4];
@@ -89,8 +89,6 @@ public:
             return -1;
         }
     };
-
-    static int read_idx(nya_memory::memory_reader &reader,int size);
 
     template<typename t> class flag
     {

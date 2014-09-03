@@ -7,6 +7,9 @@
 
 #include "scene/camera.h"
 #include "system/system.h"
+#include "render/platform_specific_gl.h"
+#include "resources/file_resources_provider.h"
+#include "resources/composite_resources_provider.h"
 
 void viewer_camera::add_rot(float dx,float dy)
 {
@@ -60,9 +63,18 @@ void viewer_camera::update()
     nya_scene::get_camera().set_pos(pos.x,pos.y+10.0f,pos.z);
 }
 
-void flip_vertical(unsigned char *data,int width,int height,int bpp)
+void bpp64to32(void *data,int width,int height,int channels)
 {
-    const int line_size=width*bpp;
+    const unsigned short *from=(unsigned short *)data;
+    unsigned char *to=(unsigned char *)data;
+
+    for(int i=0;i<width*height*channels;++i)
+        to[i]=from[i];
+}
+
+void flip_vertical(unsigned char *data,int width,int height,int channels)
+{
+    const int line_size=width*channels;
     const int top=line_size*(height-1);
     const int half=line_size*height/2;
 
@@ -73,13 +85,13 @@ void flip_vertical(unsigned char *data,int width,int height,int bpp)
         unsigned char *ha=data+offset;
         unsigned char *hb=data+top-offset;
 
-        for(int w=0;w<line_size;w+=bpp)
+        for(int w=0;w<line_size;w+=channels)
         {
             unsigned char *a=ha+w;
             unsigned char *b=hb+w;
-            memcpy(tmp,a,bpp);
-            memcpy(a,b,bpp);
-            memcpy(b,tmp,bpp);
+            memcpy(tmp,a,channels);
+            memcpy(a,b,channels);
+            memcpy(b,tmp,channels);
         }
     }
 }
@@ -88,6 +100,30 @@ bool load_texture(nya_scene::shared_texture &res,nya_scene::resource_data &textu
 {
     if(!texture_data.get_size())
         return false;
+
+    //NSImage lose alpha of 32bit bmp textures
+    if(texture_data.get_size()>3 && memcmp(texture_data.get_data(),"BM6",3)==0)
+    {
+        nya_memory::memory_reader reader(texture_data.get_data(),texture_data.get_size());
+        reader.seek(28);
+        if(reader.read<unsigned int>()==32)
+        {
+            reader.seek(10);
+            const unsigned int data_offset=reader.read<unsigned int>();
+            reader.skip(4);
+            int width=reader.read<int>();
+            int height=reader.read<int>();
+            reader.seek(data_offset);
+            if(height<0)
+            {
+                height=-height;
+                flip_vertical((unsigned char*)reader.get_data(),width,height,4);
+            }
+
+            res.tex.build_texture(reader.get_data(),width,height,nya_render::texture::color_bgra);
+            return true;
+        }
+    }
 
     NSData *data=[NSData dataWithBytesNoCopy:texture_data.get_data() 
                                           length: texture_data.get_size() freeWhenDone:NO];
@@ -104,31 +140,34 @@ bool load_texture(nya_scene::shared_texture &res,nya_scene::resource_data &textu
         return false;
     }
 
-    unsigned int bpp=(unsigned int)[image bitsPerPixel];
-
-    nya_render::texture::color_format format;
-
-    if(bpp==24)
-        format=nya_render::texture::color_rgb;
-    else if(bpp==32)
-        format=nya_render::texture::color_rgba;
-    else
+    const unsigned int bpp=(unsigned int)[image bitsPerPixel];
+    const unsigned int bps=(unsigned int)[image bitsPerSample];
+    if(!bpp || !bps)
     {
         nya_log::log()<<"unable to load texture: unsupported format\n";
         return false;
     }
 
-    if([image bitsPerSample]!=8)
+    const unsigned int channels=bpp/bps;
+
+    nya_render::texture::color_format format;
+    switch (channels)
     {
-        nya_log::log()<<"unable to load texture: unsupported format\n";
-        return false;
+        case 3: format=nya_render::texture::color_rgb; break;
+        case 4: format=nya_render::texture::color_rgba; break;
+
+        default: nya_log::log()<<"unable to load texture: unsupported format\n"; return false;
     }
 
     unsigned int width=(unsigned int)[image pixelsWide];
     unsigned int height=(unsigned int)[image pixelsHigh];
+
     unsigned char *image_data=[image bitmapData];
 
-    flip_vertical(image_data,width,height,bpp/8);
+    if(bpp==64)
+        bpp64to32(image_data,width,height,channels);
+
+    flip_vertical(image_data,width,height,channels);
 
     res.tex.build_texture(image_data,width,height,format);
 
@@ -147,6 +186,7 @@ public:
                 NSOpenGLPFAAccelerated,
                 NSOpenGLPFADoubleBuffer,
                 NSOpenGLPFADepthSize, 32,
+                NSOpenGLPFAStencilSize, 8,
                 NSOpenGLPFASampleBuffers,1,NSOpenGLPFASamples,2,
                 //NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
                 0
@@ -219,15 +259,37 @@ private:
     return self;
 }
 
-- (NSDragOperation)draggingEntered:(id < NSDraggingInfo >)sender { return NSDragOperationGeneric; }
+- (NSDragOperation)draggingEntered:(id<NSDraggingInfo>)sender { return NSDragOperationGeneric; }
 
-- (BOOL)performDragOperation:(id < NSDraggingInfo >)sender
+- (BOOL)performDragOperation:(id<NSDraggingInfo>)sender
 {
-    NSArray *draggedFilenames = [[sender draggingPasteboard] propertyListForType:NSFilenamesPboardType];
-    if ([[[draggedFilenames objectAtIndex:0] pathExtension] caseInsensitiveCompare:@"vmd"]==NSOrderedSame)
+    NSArray *draggedFilenames=[[sender draggingPasteboard] propertyListForType:NSFilenamesPboardType];
+    NSString *extension=[[[draggedFilenames objectAtIndex:0] pathExtension] lowercaseString];
+    NSURL *url=[NSURL fileURLWithPath:[draggedFilenames objectAtIndex:0]];
+
+    if([extension compare:@"vmd"]==NSOrderedSame)
     {
-        NSURL *url = [NSURL fileURLWithPath:[draggedFilenames objectAtIndex:0]];
-        [self loadAnim: [url path].UTF8String];
+        [self loadAnim:[url path].UTF8String];
+        return YES;
+    }
+
+    NSArray *texFileTypes = [NSArray arrayWithObjects:@"spa",@"sph",@"tga",@"bmp",@"png",@"jpg",@"jpeg",@"dds",nil];
+    if([texFileTypes indexOfObject:extension]!=NSNotFound)
+    {
+        NSPoint pt = [self convertPoint:[sender draggingLocation] fromView:nil];
+        m_mouse_old=[self convertPoint: pt fromView: nil];
+
+        m_assigntexture_name.assign([url path].UTF8String);
+
+        if([extension compare:@"spa"]==NSOrderedSame)
+            m_pick_mode=pick_assignspa;
+        else if([extension compare:@"sph"]==NSOrderedSame)
+            m_pick_mode=pick_assignsph;
+        else
+            m_pick_mode=pick_assigntexture;
+
+        [self setNeedsDisplay: YES];
+
         return YES;
     }
 
@@ -239,6 +301,13 @@ private:
     NSPoint pt=[theEvent locationInWindow];
 
     m_mouse_old=[self convertPoint: pt fromView: nil];
+
+    const NSUInteger flags = [[NSApp currentEvent] modifierFlags];
+    if(flags & NSCommandKeyMask && flags & NSAlternateKeyMask)
+    {
+        m_pick_mode=pick_showhide;
+        [self setNeedsDisplay: YES];
+    }
 }
 
 - (void) rightMouseDown: (NSEvent *) theEvent
@@ -246,8 +315,21 @@ private:
     NSPoint pt=[theEvent locationInWindow];
 
     m_mouse_old=[self convertPoint: pt fromView: nil];
-}
 
+    const NSUInteger flags = [[NSApp currentEvent] modifierFlags];
+    if(flags & NSCommandKeyMask && flags & NSAlternateKeyMask)
+    {
+        m_show_groups.clear();
+        [self setNeedsDisplay: YES];
+    }
+}
+/*
+- (void) mouseMoved:(NSEvent *)theEvent
+{
+    NSPoint pt=[theEvent locationInWindow];
+    m_mouse_old=[self convertPoint: pt fromView: nil];
+}
+*/
 - (void) mouseDragged: (NSEvent *) theEvent
 {
     NSPoint pt=[theEvent locationInWindow];
@@ -458,7 +540,7 @@ private:
         {
             nya_math::vec3 pos;
             for(int j=0;j<2;++j)
-                pos+=(sk.get_bone_pos(verts[i].bone_idx[0])+verts[i].pos[0])*
+                pos+=(sk.get_bone_pos(verts[i].bone_idx[j])+verts[i].pos[j])*
                      (j==0?verts[i].bone_weight:(1.0f-verts[i].bone_weight));
 
             obj.add_vec("v",pos);
@@ -538,12 +620,36 @@ private:
     PmdDocument *doc=[[[self window] windowController] document];
     if(!doc->m_model_name.empty())
     {
-        //nya_render::set_clear_color(0.2f,0.4f,0.5f,0.0f);
+        static bool once=false;
+        if(!once)
+        {
+            once=true;
+
+            std::string res_path([[NSBundle mainBundle] resourcePath].UTF8String);
+
+            nya_resources::composite_resources_provider *comp_res=new nya_resources::composite_resources_provider();
+            comp_res->add_provider(new nya_resources::file_resources_provider());
+            nya_resources::file_resources_provider *toon_res=new nya_resources::file_resources_provider();
+            toon_res->set_folder((res_path+"/en.lproj/toon/").c_str());
+            comp_res->add_provider(toon_res);
+            nya_resources::file_resources_provider *sh_res=new nya_resources::file_resources_provider();
+            sh_res->set_folder((res_path+"/en.lproj/shaders/").c_str());
+            comp_res->add_provider(sh_res);
+
+            nya_resources::set_resources_provider(comp_res);
+
+            nya_render::set_ignore_platform_restrictions(true);
+
+            nya_scene::texture::register_load_function(load_texture);
+            nya_scene::texture::register_load_function(nya_scene::texture::load_dds);
+            nya_scene::texture::set_load_dds_flip(true);
+        }
+
         nya_render::set_clear_color(1.0f,1.0f,1.0f,0.0f);
+        //nya_render::set_clear_color(0.2f,0.4f,0.5f,0.0f);
+
         nya_render::depth_test::enable(nya_render::depth_test::less);
-        
-        nya_scene::texture::register_load_function(load_texture);
-        nya_scene::texture::register_load_function(nya_scene::texture::load_dds);
+
         m_mesh.load(doc->m_model_name.c_str());
         nya_render::apply_state(true);
 
@@ -552,9 +658,75 @@ private:
         doc->m_view=self;
     }
 
+    if(m_pick_mode!=pick_none)
+    {
+        glClearStencil(0);
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
+        glEnable(GL_STENCIL_TEST);
+        glStencilOp(GL_KEEP,GL_KEEP,GL_REPLACE);
+
+        for(int i=0;i<m_mesh.get_groups_count();++i)
+        {
+            glStencilFunc(GL_ALWAYS,i+1,-1);
+            m_mesh.draw_group(i);
+        }
+
+        unsigned int g;
+        glReadPixels(m_mouse_old.x,m_mouse_old.y, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &g);
+        glDisable(GL_STENCIL_TEST);
+
+        //printf("group %d\n",g);
+
+        if(g>0 && strcmp(m_mesh.get_group_name(g-1),"edge")!=0)
+        {
+            --g;
+            if(m_pick_mode==pick_showhide)
+            {
+                m_show_groups.resize(m_mesh.get_groups_count(),true);
+                m_show_groups[g]=!m_show_groups[g];
+
+                const nya_scene::shared_mesh *sh=m_mesh.internal().get_shared_data().operator->();
+                if(sh)
+                {
+                    for(int i=g+1;i<int(sh->groups.size());++i)
+                    {
+                        if(sh->groups[i].offset==sh->groups[g].offset &&
+                           sh->groups[i].count==sh->groups[g].count)
+                            m_show_groups[i]=m_show_groups[g];
+                    }
+                }
+            }
+            else if(!m_assigntexture_name.empty())
+            {
+                auto &m=m_mesh.modify_material(g);
+                nya_scene::texture t;
+                if(t.load(m_assigntexture_name.c_str()))
+                {
+                    if(m_pick_mode==pick_assigntexture)
+                        m.set_texture("diffuse",t);
+                    else if(m_pick_mode==pick_assignspa)
+                        m.set_texture("env add",t);
+                    else if(m_pick_mode==pick_assignsph)
+                        m.set_texture("end mult",t);
+                }
+
+                m_assigntexture_name.clear();
+            }
+        }
+
+        m_pick_mode=pick_none;
+    }
+
     nya_render::clear(true,true);
 
-    m_mesh.draw();
+    if(!m_show_groups.empty())
+    {
+        for(int i=0;i<int(m_show_groups.size());++i)
+            if(m_show_groups[i])
+                m_mesh.draw_group(i);
+    }
+    else
+        m_mesh.draw();
 
     //nya_render::clear(false,true);
     //static nya_render::debug_draw dd; dd.clear(); dd.set_point_size(3.0f);
@@ -654,17 +826,23 @@ private:
     if([[column identifier] isEqualToString:@"override"])
         m_morphs[row].override=[value boolValue];
 
-    m_mesh->set_morph(int(row),m_morphs[row].value/100.0f,m_morphs[row].override);
+    const NSUInteger flags = [[NSApp currentEvent] modifierFlags];
+    const float mult=flags & NSShiftKeyMask?10.0f:1.0f;
+
+    m_mesh->set_morph(int(row),mult*m_morphs[row].value/100.0f,m_morphs[row].override);
     m_mesh->update(0);
     [m_view setNeedsDisplay: YES];
 }
 
 -(IBAction)resetAll:(id)sender
 {
+    const NSUInteger flags = [[NSApp currentEvent] modifierFlags];
+    const float value=flags & NSShiftKeyMask?1.0f:0.0f;
+
     for(int i=0;i<int(m_morphs.size());++i)
     {
         m_morphs[i]=morph();
-        m_mesh->set_morph(i,0.0f,false);
+        m_mesh->set_morph(i,value,false);
     }
 
     m_mesh->update(0);

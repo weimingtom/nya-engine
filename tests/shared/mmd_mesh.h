@@ -32,7 +32,14 @@ public:
     }
 
     void update(unsigned int dt);
-    void draw();
+    void draw(const char *pass_name=nya_scene::material::default_pass);
+    void draw_group(int group_idx,const char *pass_name=nya_scene::material::default_pass) const;
+
+    int get_groups_count() const { return m_mesh.get_groups_count(); }
+    const char *get_group_name(int group_idx) const { return m_mesh.get_group_name(group_idx); }
+    const nya_scene::material &get_material(int group_idx) const { return m_mesh.get_material(group_idx); }
+    nya_scene::material &modify_material(int group_idx) { return m_mesh.modify_material(group_idx); }
+    bool set_material(int group_idx,const nya_scene::material &mat) { return m_mesh.set_material(group_idx,mat); }
 
     void set_pos(const nya_math::vec3 &pos) { m_mesh.set_pos(pos); }
     void set_rot(float yaw,float pitch,float roll) { m_mesh.set_rot(yaw,pitch,roll); }
@@ -67,6 +74,7 @@ private:
     nya_scene::mesh m_mesh;
     nya_render::vbo m_vbo;
     std::vector<float> m_vertex_data;
+    std::vector<float> m_original_vertex_data;
     const pmd_morph_data *m_morph_data;
 
     struct morph

@@ -25,8 +25,8 @@ class animation: public scene_shared<shared_animation>
     friend class mesh_internal;
 
 public:
-    virtual bool load(const char *name);
-    virtual void unload();
+    bool load(const char *name);
+    void unload();
 
 public:
     void create(const shared_animation &res);
@@ -51,6 +51,7 @@ private:
 public:
     animation(): m_looped(true),m_range_from(0),m_range_to(0),m_speed(1.0f),
                  m_weight(1.0f),m_version(0) { default_load_function(load_vmd); }
+    animation(const char *name) { *this=animation(); load(name); }
 
 public:
     static bool load_vmd(shared_animation &res,resource_data &data,const char* name);

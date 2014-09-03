@@ -24,7 +24,7 @@
     EAGLContext *context;
 
     BOOL animating;
-    unsigned long m_time;
+    CFTimeInterval m_time;
     float m_scale;
 
     NSInteger animationFrameInterval;
@@ -222,45 +222,6 @@ namespace
     responder->on_mouse_button(nya_system::mouse_left,false);
 };
 
-- (void)applicationWillResignActive:(UIApplication *)application
-{
-    /*
-     Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-     Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
-     */
-}
-
-- (void)applicationDidEnterBackground:(UIApplication *)application
-{
-    /*
-     Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later. 
-     If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-     */
-}
-
-- (void)applicationWillEnterForeground:(UIApplication *)application
-{
-    /*
-     Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
-     */
-}
-
-- (void)applicationDidBecomeActive:(UIApplication *)application
-{
-    /*
-     Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-     */
-}
-
-- (void)applicationWillTerminate:(UIApplication *)application
-{
-    /*
-     Called when the application is about to terminate.
-     Save data if appropriate.
-     See also applicationDidEnterBackground:.
-     */
-}
-
 @end
 
 
@@ -332,7 +293,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
         animating=NO;
         animationFrameInterval=1;
-        m_time=0;
+        m_time=0.0;
         self.displayLink = nil;
 
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillResignActive:) name:UIApplicationWillResignActiveNotification object:nil];
@@ -479,7 +440,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
         [aDisplayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
         self.displayLink = aDisplayLink;
 
-        m_time=(unsigned long)(self.displayLink.timestamp*1000.0);
+        m_time=self.displayLink.timestamp*1000.0;
 
         animating = YES;
     }
@@ -499,8 +460,8 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 {
     [(EAGLView *)self.view setFramebuffer];
 
-    unsigned long time=(unsigned long)(self.displayLink.timestamp*1000.0);
-    unsigned int dt=(unsigned int)(time-m_time);
+    CFTimeInterval time=self.displayLink.timestamp;
+    unsigned int dt=(unsigned int)((time-m_time)*1000.0);
     m_time=time;
 
     nya_system::app *responder=shared_app::get_app().get_responder();

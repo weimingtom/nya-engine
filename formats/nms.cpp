@@ -270,7 +270,7 @@ size_t nms_mesh_chunk::write_to_buf(void *to_data,size_t to_size)
     writer.write(aabb_min);
     writer.write(aabb_max);
 
-    writer.write_ubyte(elements.size());
+    writer.write_ubyte((unsigned char)elements.size());
     for(size_t i=0;i<elements.size();++i)
     {
         element &e=elements[i];
@@ -289,11 +289,11 @@ size_t nms_mesh_chunk::write_to_buf(void *to_data,size_t to_size)
         writer.write(indices_data,indices_count*index_size);
     }
 
-    writer.write_ushort(lods.size());
+    writer.write_ushort((unsigned short)lods.size());
     for(size_t i=0;i<lods.size();++i)
     {
         lod &l=lods[i];
-        writer.write_ushort(l.groups.size());
+        writer.write_ushort((unsigned short)l.groups.size());
         for(size_t j=0;j<l.groups.size();++j)
         {
             group &g=l.groups[j];

@@ -18,6 +18,9 @@ namespace
     nya_render::state current_state;
     nya_render::state applied_state;
 
+    nya_render::state_override override_state;
+    bool has_state_override=false;
+
     nya_render::rect viewport_rect;
 
 #ifdef DIRECTX11
@@ -261,19 +264,30 @@ void scissor::disable()
 #endif
 }
 
-void set_state(const state &s)
+void set_state(const state &s) { current_state=s; }
+const state &get_state() { return current_state; }
+const state &get_aplied_state() { return applied_state; }
+
+void set_state_override(const state_override &s)
 {
-    current_state=s;
+    override_state=s;
+    has_state_override=s.override_blend;
 }
 
-const state &get_state()
-{
-    return current_state;
-}
+const state_override &get_state_override() { return override_state; }
 
-const state &get_aplied_state()
+state get_overriden_state(const state &s)
 {
-    return applied_state;
+    state r=s;
+
+    if(override_state.override_blend)
+    {
+        r.blend=override_state.blend;
+        r.blend_src=override_state.blend_src;
+        r.blend_dst=override_state.blend_dst;
+    }
+
+    return r;
 }
 
 #ifdef DIRECTX11
@@ -532,7 +546,7 @@ void apply_state(bool ignore_cache)
 {
     DIRECTX11_ONLY(if(!get_context() || !get_device()) return);
 
-    const state &c=current_state;
+    const state &c=has_state_override?get_overriden_state(current_state):current_state;
     state &a=applied_state;
 
     static bool first_time=true;

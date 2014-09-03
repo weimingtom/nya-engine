@@ -1,6 +1,7 @@
 //https://code.google.com/p/nya-engine/
 
 #include "system.h"
+#include "render/platform_specific_gl.h"
 
 #ifdef __APPLE__
     #include <mach-o/dyld.h>
@@ -63,7 +64,7 @@ const char *get_app_path()
         else
             path[0]='\0';
 #elif defined _WIN32
-	#ifdef _M_ARM
+	#ifdef WINDOWS_METRO
         auto current=Windows::ApplicationModel::Package::Current;
         if(!current)
             return 0;
@@ -120,7 +121,7 @@ const char *get_app_path()
 }
 
 #ifdef _WIN32
-  #ifdef _M_ARM
+  #ifdef WINDOWS_METRO
     unsigned long get_time()
     {
         static LARGE_INTEGER freq;
@@ -154,7 +155,8 @@ unsigned long get_time()
 {
     timeval tim;
     gettimeofday(&tim, 0);
-    return (tim.tv_sec*1000+(tim.tv_usec/1000));
+    unsigned long sec=(unsigned long)tim.tv_sec;
+    return (sec*1000+(tim.tv_usec/1000));
 }
 
 #endif

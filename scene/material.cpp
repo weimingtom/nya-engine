@@ -15,11 +15,39 @@ const char *material::default_pass="default";
 
 namespace
 {
-    nya_scene::texture missing_texture()
+    bool enable_highlight_missing_texture=true;
+
+    bool is_shader_sampler_cube(const nya_scene::shader &sh,unsigned int layer)
     {
+        if(!sh.internal().get_shared_data().is_valid())
+            return false;
+
+        const nya_render::shader &rsh=sh.internal().get_shared_data()->shdr;
+        for(int i=0;i<rsh.get_uniforms_count();++i)
+        {
+            if(rsh.get_uniform_type(i)!=nya_render::shader::uniform_sampler_cube)
+                continue;
+
+            if(rsh.get_sampler_layer(rsh.get_uniform_name(i))==layer)
+                return true;
+        }
+
+        return false;
+    }
+
+    nya_scene::texture missing_texture(bool cube)
+    {
+        if(!enable_highlight_missing_texture)
+        {
+            static nya_scene::texture invalid;
+            return invalid;
+        }
+
         static nya_scene::texture missing_red;
-        /*
         static nya_scene::texture missing_white;
+
+        static nya_scene::texture missing_cube_red;
+        static nya_scene::texture missing_cube_white;
 
         static bool initialised=false;
         if(!initialised)
@@ -35,13 +63,24 @@ namespace
             white_res.tex.build_texture(white_data,1,1,nya_render::texture::color_rgba);
             missing_white.create(white_res);
 
+            const void *cube_red_data[6]={red_data,red_data,red_data,red_data,red_data,red_data};
+            const void *cube_white_data[6]={white_data,white_data,white_data,white_data,white_data,white_data};
+
+            nya_scene::shared_texture cube_red_res;
+            cube_red_res.tex.build_cubemap(cube_red_data,1,1,nya_render::texture::color_rgba);
+            missing_cube_red.create(cube_red_res);
+
+            nya_scene::shared_texture cube_white_res;
+            cube_white_res.tex.build_cubemap(cube_white_data,1,1,nya_render::texture::color_rgba);
+            missing_cube_white.create(cube_white_res);
+
             initialised=true;
         }
 
         if((nya_system::get_time()/200)%2>0)
-            return missing_white;
-        */
-        return missing_red;
+            return cube?missing_cube_white:missing_white;
+
+        return cube?missing_cube_red:missing_red;
     }
 }
 
@@ -170,21 +209,21 @@ void material_internal::set(const char *pass_name) const
                 {
                     nya_log::warning()<<"invalid texture for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"'";
 
-                    missing_texture().internal().set(slot_idx);
+                    missing_texture(is_shader_sampler_cube(p.m_shader,slot_idx)).internal().set(slot_idx);
                 }
             }
             else
             {
                 nya_log::warning()<<"invalid texture proxy for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"'";
 
-                missing_texture().internal().set(slot_idx);
+                missing_texture(is_shader_sampler_cube(p.m_shader,slot_idx)).internal().set(slot_idx);
             }
         }
         else
         {
             nya_log::warning()<<"missing texture for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"'";
 
-            missing_texture().internal().set(slot_idx);
+            missing_texture(is_shader_sampler_cube(p.m_shader,slot_idx)).internal().set(slot_idx);
         }
     }
 }
@@ -358,6 +397,9 @@ void material_internal::update_passes_maps() const
     if(!m_should_rebuild_passes_maps)
         return;
 
+    if(m_passes.empty())
+        return;
+
     // step 1: build params array
     // substep 1: build boolean map indicating used parameters and map of names of parameters to be added
     std::vector<bool> used_parameters(m_params.size());
@@ -405,6 +447,34 @@ void material_internal::update_passes_maps() const
         nya_math::vec4 &v=iter->second;
         m_params.back().p=param_proxy(param());
         m_params.back().p->set(v.x,v.y,v.z,v.w);
+    }
+
+    std::map<std::string,bool> tex_semantics;
+
+    for(std::vector<pass>::const_iterator iter=m_passes.begin();iter!=m_passes.end();++iter)
+    {
+        const nya_scene::shader_internal &s=iter->get_shader().internal();
+        for(int i=0;i<s.get_texture_slots_count();++i)
+            tex_semantics[s.get_texture_semantics(i)]=true;
+    }
+
+    for(std::map<std::string,bool>::const_iterator iter=tex_semantics.begin();iter!=tex_semantics.end();++iter)
+    {
+        if(get_texture_idx(iter->first.c_str())<0)
+        {
+            m_textures.push_back(material_texture());
+            m_textures.back().semantics.assign(iter->first.c_str());
+        }
+    }
+
+    int tex_count=(int)m_textures.size();
+    for(int i=0;i<tex_count;++i)
+    {
+        if(tex_semantics.find(m_textures[i].semantics)!=tex_semantics.end())
+            continue;
+
+        m_textures.erase(m_textures.begin()+i);
+        --i; --tex_count;
     }
 
     for(std::vector<pass>::const_iterator iter=m_passes.begin();iter!=m_passes.end();++iter)
@@ -469,12 +539,25 @@ void material::set_texture(const char *semantics,const texture_proxy &proxy)
         m_internal.m_textures[texture_idx].proxy=proxy;
 }
 
+int material::get_textures_count() const
+{
+    m_internal.update_passes_maps();
+    return (int)internal().m_textures.size();
+}
+
 const char *material::get_texture_semantics(int idx) const
 {
+    m_internal.update_passes_maps();
     if(idx < 0 || idx>=(int)internal().m_textures.size())
         return 0;
 
     return internal().m_textures[idx].semantics.c_str();
+}
+
+int material::get_texture_idx(const char *semantics) const
+{
+    m_internal.update_passes_maps();
+    return m_internal.get_texture_idx(semantics);
 }
 
 const texture_proxy &material::get_texture(int idx) const
@@ -577,5 +660,7 @@ const material::param_array_proxy &material::get_param_array(int idx) const
 
     return internal().m_params[idx].a;
 }
+
+void material::highlight_missing_textures(bool enable) { enable_highlight_missing_texture=enable; }
 
 }

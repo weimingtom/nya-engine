@@ -124,7 +124,7 @@ private:
     mutable int m_last_set_pass_idx;
     mutable bool m_should_rebuild_passes_maps;
     mutable std::vector<param_holder> m_params;
-    std::vector<material_texture> m_textures;
+    mutable std::vector<material_texture> m_textures;
 };
 
 class material
@@ -157,9 +157,9 @@ public:
     void set_texture(const char *semantics,const texture &tex);
     void set_texture(const char *semantics,const texture_proxy &proxy);
 
-    int get_textures_count() const { return (int)internal().m_textures.size(); }
+    int get_textures_count() const;
     const char *get_texture_semantics(int idx) const;
-    int get_texture_idx(const char *semantics) const {return m_internal.get_texture_idx(semantics);}
+    int get_texture_idx(const char *semantics) const;
     const texture_proxy &get_texture(int idx) const;
     const texture_proxy &get_texture(const char *semantics) const;
 
@@ -180,10 +180,14 @@ public:
 
 public:
     material() { material_internal::default_load_function(load_text); }
+    material(const char *name) { *this=material(); load(name); }
 
 public:
     static void set_resources_prefix(const char *prefix) { material_internal::set_resources_prefix(prefix); }
     static void register_load_function(material_internal::load_function function,bool clear_default=true) { material_internal::register_load_function(function,clear_default); }
+
+public:
+    static void highlight_missing_textures(bool enable);
 
 public:
     static bool load_text(shared_material &res,resource_data &data,const char* name);

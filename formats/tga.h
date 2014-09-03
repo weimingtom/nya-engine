@@ -49,7 +49,7 @@ class tga_file
 {
 public:
     bool load(const char *file_name);
-    bool create(int width,int height,tga::color_mode channels);
+    bool create(int width,int height,tga::color_mode channels,const void *data);
     bool decode_rle();
     bool encode_rle(size_t max_compressed_size);
     bool save(const char *file_name);

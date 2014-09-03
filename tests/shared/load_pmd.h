@@ -13,7 +13,7 @@ struct pmd_morph_data
 {
     struct morph_vertex
     {
-        unsigned short idx;
+        unsigned int idx;
         nya_math::vec3 pos;
     };
 
@@ -38,22 +38,36 @@ struct pmd_morph_data
 
 struct pmd_phys_data
 {
+    enum shape_type
+    {
+        shape_sphere=0,
+        shape_box=1,
+        shape_capsule=2
+    };
+
+    enum object_type
+    {
+        object_static=0,
+        object_dynamic=1,
+        object_aligned=2
+    };
+
     struct rigid_body
     {
         std::string name;
         short bone;
         unsigned char collision_group;
         unsigned short collision_mask;
-        unsigned char type;
+        shape_type type;
         nya_math::vec3 size;
-        nya_math::vec3 location;
-        nya_math::vec3 rotation;
+        nya_math::vec3 pos;
+        nya_math::vec3 rot;
         float mass;
         float vel_attenuation;
         float rot_attenuation;
-        float bounce;
+        float restriction;
         float friction;
-        unsigned char mode;
+        object_type mode;
     };
 
     std::vector<rigid_body> rigid_bodies;
@@ -63,14 +77,16 @@ struct pmd_phys_data
         std::string name;
         unsigned int rigid_src;
         unsigned int rigid_dst;
-        nya_math::vec3 location;
-        nya_math::vec3 rotation;
-        nya_math::vec3 location_max;
-        nya_math::vec3 location_min;
-        nya_math::vec3 rotation_max;
-        nya_math::vec3 rotation_min;
-        nya_math::vec3 location_spring;
-        nya_math::vec3 rotation_spring;
+
+        nya_math::vec3 pos;
+        nya_math::vec3 pos_max;
+        nya_math::vec3 pos_min;
+        nya_math::vec3 pos_spring;
+
+        nya_math::vec3 rot;
+        nya_math::vec3 rot_max;
+        nya_math::vec3 rot_min;
+        nya_math::vec3 rot_spring;
     };
 
     std::vector<joint> joints;
@@ -95,6 +111,27 @@ public:
         float bone_idx[2];
         float bone_weight;
     };
+
+    struct pmd_bone
+    {
+        std::string name;
+        int idx;
+        int parent;
+        std::string parent_name;
+        nya_math::vec3 pos;
+
+        template<typename t> static int parent_idx_by_name(const std::string &name,t bones)
+        {
+            for(int i=0;i<int(bones.size());++i)
+                if(bones[i].name==name)
+                    return i;
+
+            return -1;
+        }
+    };
+
+public:
+    static const int gpu_skining_bones_limit=256;
 
 public:
     static bool load(nya_scene::shared_mesh &res,nya_scene::resource_data &data,const char* name);

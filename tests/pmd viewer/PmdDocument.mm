@@ -7,8 +7,8 @@
 
 - (id)init
 {
-    self = [super init];
-    if (self) 
+    self=[super init];
+    if(self)
     {
     }
     return self;
@@ -106,11 +106,11 @@
     [m_morphs_window displayWindow:m_mesh view:m_view];
 }
 
-- (BOOL)validateUserInterfaceItem:(id <NSValidatedUserInterfaceItem>)anItem
+- (BOOL)validateUserInterfaceItem:(id<NSValidatedUserInterfaceItem>)anItem
 {
     SEL theAction = [anItem action];
 
-    if (theAction == @selector(loadAnimation:))
+    if(theAction == @selector(loadAnimation:))
         return YES;
     else
         return [super validateUserInterfaceItem:anItem];

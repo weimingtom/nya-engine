@@ -59,6 +59,7 @@ public:
 
 public:
     texture() { texture_internal::default_load_function(load_tga); texture_internal::default_load_function(load_dds); }
+    texture(const char *name) { *this=texture(); load(name); }
 
 public:
     static bool load_tga(shared_texture &res,resource_data &data,const char* name);

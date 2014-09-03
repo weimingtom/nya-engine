@@ -17,7 +17,7 @@
 #ifdef DIRECTX11
     #include <map>
 
-  #ifndef WINDOWS_PHONE8
+  #ifndef WINDOWS_METRO
     #include <D3Dcompiler.h>
   #endif
 #endif
@@ -85,10 +85,40 @@ namespace
             int ps_offset;
             int dimension;
             int array_size;
+            shader::uniform_type type;
 
             uniform(): vs_offset(-1), ps_offset(-1) {}
         };
+#else
+    public:
+        shader_obj(): program(0)
+        {
+            for(int i = 0;i<shader::program_types_count;++i)
+                objects[i]=0;
 
+#ifdef SUPPORT_OLD_SHADERS
+            mat_mvp=mat_mv=mat_p=-1;
+#endif
+        }
+
+    public:
+        GLhandleARB program;
+        GLhandleARB objects[shader::program_types_count];
+
+        struct uniform
+        {
+            std::string name;
+            int array_size;
+            shader::uniform_type type;
+
+            uniform(): array_size(1) {}
+        };
+
+#ifdef SUPPORT_OLD_SHADERS
+        int mat_mvp,mat_mv,mat_p;
+#endif
+#endif
+    public:
         std::vector<uniform> uniforms;
 
         uniform &add_uniform(const std::string &name)
@@ -107,26 +137,7 @@ namespace
             uniforms.back().name=name;
             return uniforms.back();
         }
-#else
-    public:
-        shader_obj(): program(0)
-        {
-            for(int i = 0;i<shader::program_types_count;++i)
-                objects[i]=0;
 
-#ifdef SUPPORT_OLD_SHADERS
-            mat_mvp=mat_mv=mat_p=-1;
-#endif
-        }
-
-    public:
-        GLhandleARB program;
-        GLhandleARB objects[shader::program_types_count];
-
-#ifdef SUPPORT_OLD_SHADERS
-        int mat_mvp,mat_mv,mat_p;
-#endif
-#endif
     public:
         static int add() { return get_shader_objs().add(); }
         static shader_obj &get(int idx) { return get_shader_objs().get(idx); }
@@ -194,6 +205,7 @@ namespace
     PFNGLGETOBJECTPARAMETERIVARBPROC glGetObjectParameterivARB = NULL;
     PFNGLGETINFOLOGARBPROC glGetInfoLogARB = NULL;
     PFNGLGETUNIFORMLOCATIONARBPROC glGetUniformLocationARB = NULL;
+    PFNGLGETACTIVEUNIFORMARBPROC glGetActiveUniformARB = NULL;
 #endif
 
   #ifdef OPENGL_ES
@@ -237,6 +249,7 @@ namespace
   #else
     #define glGetObjectParam glGetObjectParameterivARB
     #define glGetShaderParam glGetObjectParameterivARB
+    #define glGetActiveUniform glGetActiveUniformARB
   #endif
 
 bool check_init_shaders()
@@ -268,6 +281,7 @@ bool check_init_shaders()
     if(!(glGetObjectParameterivARB =(PFNGLGETOBJECTPARAMETERIVARBPROC) get_extension("glGetObjectParameteriv"))) return false;
     if(!(glGetInfoLogARB           =(PFNGLGETINFOLOGARBPROC)           get_extension("glGetInfoLog"))) return false;
     if(!(glGetUniformLocationARB   =(PFNGLGETUNIFORMLOCATIONARBPROC)   get_extension("glGetUniformLocation"))) return false;
+    if(!(glGetActiveUniformARB     =(PFNGLGETACTIVEUNIFORMARBPROC)     get_extension("glGetActiveUniform"))) return false;
   #endif
     failed=false;
     initialised=true;
@@ -446,29 +460,23 @@ bool shader::add_program(program_type type,const char*code)
                 u.ps_offset=(int)buf.buffer.size();
 
             char dim=(type_name.length()==6)?type_name[5]:'\0';
-
-            int dimension=1;
+            int dimension;
             switch(dim)
             {
-            case '2':
-                dimension=2;
-                buf.buffer.resize(buf.buffer.size()+4*count,0.0f);
-                break;
-
             case '3':
                 dimension=3;
+                u.type=uniform_vec3;
                 buf.buffer.resize(buf.buffer.size()+4*count,0.0f);
                 break;
 
             case '4':
                 dimension=4;
+                u.type=uniform_vec4;
                 buf.buffer.resize(buf.buffer.size()+4*count,0.0f);
                 break;
 
-            default:
-                dimension=1;
-                buf.buffer.resize(buf.buffer.size()+4,0.0f);
-                break;
+            default:  //ToDo: log error
+                return false;
             };
 
             if(u.vs_offset>=0 && u.ps_offset>=0) //ToDo: log error
@@ -605,8 +613,9 @@ bool shader::add_program(program_type type,const char*code)
 
     if(!shdr.compiled[type].get_data())
     {
-#ifdef WINDOWS_PHONE8
-        log()<<"Can`t compile "<<type_str[type]<<" shader: Windows phone 8 not allowed to compile shaders, please, set compiled_shaders_provider and add compiled shaders cache\n";
+#ifdef WINDOWS_METRO
+        log()<<"Can`t compile "<<type_str[type]<<" shader: Windows metro apps are not allowed to compile shaders, please,"
+                                                 "set compiled_shaders_provider and add compiled shaders cache\n";
         return false;
 #else
         ID3D10Blob *compiled=0;
@@ -681,17 +690,14 @@ bool shader::add_program(program_type type,const char*code)
     }
 
 #ifdef SUPPORT_OLD_SHADERS
-    std::string code_str(code);
-    std::string code_final;
+    std::string code_str(code),code_final;
 
     if(type==vertex)
     {
         const char *attribute_names[]={"nyaVertex","nyaNormal","nyaColor","nyaMultiTexCoord"};
 
         bool used_attribs[max_attributes]={false};
-        shdr.mat_mvp=-1;
-        shdr.mat_mv=-1;
-        shdr.mat_p=-1;
+        shdr.mat_mvp=shdr.mat_mv=shdr.mat_p=-1;
 
         for(size_t gl=code_str.find("gl_");gl!=std::string::npos;gl=code_str.find("gl_",gl+8))
         {
@@ -702,29 +708,9 @@ bool shader::add_program(program_type type,const char*code)
 
             switch(code_str[gl+3])
             {
-                case 'V':
-                    if(code_str.compare(gl+3,6,"Vertex")==0)
-                    {
-                        used_attribs[vertex_attribute]=true;
-                        replace=true;
-                    }
-                    break;
-
-                case 'N':
-                    if(code_str.compare(gl+3,6,"Normal")==0)
-                    {
-                        used_attribs[normal_attribute]=true;
-                        replace=true;
-                    }
-                    break;
-
-                case 'C':
-                    if(code_str.compare(gl+3,5,"Color")==0)
-                    {
-                        used_attribs[color_attribute]=true;
-                        replace=true;
-                    }
-                    break;
+                case 'V': if(code_str.compare(gl+3,6,"Vertex")==0) replace=used_attribs[vertex_attribute]=true; break;
+                case 'N': if(code_str.compare(gl+3,6,"Normal")==0) replace=used_attribs[normal_attribute]=true; break;
+                case 'C': if(code_str.compare(gl+3,5,"Color")==0) replace=used_attribs[color_attribute]=true; break;
 
                 case 'M':
                     if(code_str.compare(gl+3,13,"MultiTexCoord")==0)
@@ -745,57 +731,35 @@ bool shader::add_program(program_type type,const char*code)
                         if(tc0_attribute+idx>=max_attributes)
                             break;
 
-                        used_attribs[tc0_attribute+idx]=true;
-                        replace=true;
+                        replace=used_attribs[tc0_attribute+idx]=true;
                     }
                     else if(code_str.size()>gl+15 && code_str.compare(gl+3,15,"ModelViewMatrix")==0)
-                    {
-                        shdr.mat_mv=1;
-                        replace=true;
-                    }
+                        shdr.mat_mv=1,replace=true;
                     else if(code_str.size()>gl+25 && code_str.compare(gl+3,25,"ModelViewProjectionMatrix")==0)
-                    {
-                        shdr.mat_mvp=1;
-                        replace=true;
-                    }
+                        shdr.mat_mvp=1,replace=true;
                     break;
 
                 case 'P':
                     if(code_str.size()>gl+16 && code_str.compare(gl+3,16,"ProjectionMatrix")==0)
-                    {
-                        shdr.mat_p=1;
-                        replace=true;
-                    }
+                        shdr.mat_p=1,replace=true;
                     break;
 
-                //case 'T':     //ToDo: gl_TexCoord[] variables
-                //break;
+                //case 'T':     //ToDo: gl_TexCoord[] variables //break;
             }
 
-            if(replace)
-            {
-                code_str[gl]='n';
-                code_str[gl+1]='y';
-                code_str[gl+2]='a';
-            }
+            if(replace) code_str[gl]='n',code_str[gl+1]='y',code_str[gl+2]='a';
         }
 
-        if(shdr.mat_mvp>0)
-            code_final.append("uniform mat4 nyaModelViewProjectionMatrix;");
-        if(shdr.mat_mv>0)
-            code_final.append("uniform mat4 nyaModelViewMatrix;");
-        if(shdr.mat_p>0)
-            code_final.append("uniform mat4 nyaProjectionMatrix;");
+        if(shdr.mat_mvp>0) code_final.append("uniform mat4 nyaModelViewProjectionMatrix;");
+        if(shdr.mat_mv>0) code_final.append("uniform mat4 nyaModelViewMatrix;");
+        if(shdr.mat_p>0) code_final.append("uniform mat4 nyaProjectionMatrix;");
 
         for(int i=0;i<tc0_attribute;++i)
         {
             if(!used_attribs[i])
                 continue;
 
-            code_final.append("attribute vec4 ");
-            code_final.append(attribute_names[i]);
-            code_final.append(";\n");
-
+            code_final.append("attribute vec4 "),code_final.append(attribute_names[i]),code_final.append(";\n");
             glBindAttribLocation(shdr.program,i,attribute_names[i]);
         }
 
@@ -812,12 +776,9 @@ bool shader::add_program(program_type type,const char*code)
                 attrib_name+=char('0'+h);
                 idx-=h*10;
             }
+
             attrib_name+=char('0'+idx);
-
-            code_final.append("attribute vec4 ");
-            code_final.append(attrib_name);
-            code_final.append(";\n");
-
+            code_final.append("attribute vec4 "),code_final.append(attrib_name),code_final.append(";\n");
             glBindAttribLocation(shdr.program,i,attrib_name.c_str());
         }
     }
@@ -826,7 +787,6 @@ bool shader::add_program(program_type type,const char*code)
     code_final.append("precision mediump float;\n");
 #endif
     code_final.append(code_str);
-
     code=code_final.c_str();
 
     //log()<<code<<"\n";
@@ -931,17 +891,41 @@ bool shader::add_program(program_type type,const char*code)
         }
 
 #ifdef SUPPORT_OLD_SHADERS
-
-        if(shdr.mat_mvp>=0)
-            shdr.mat_mvp=get_handler("nyaModelViewProjectionMatrix");
-        if(shdr.mat_mv>=0)
-            shdr.mat_mv=get_handler("nyaModelViewMatrix");
-        if(shdr.mat_p>=0)
-            shdr.mat_p=get_handler("nyaProjectionMatrix");
+        if(shdr.mat_mvp>=0) shdr.mat_mvp=get_handler("nyaModelViewProjectionMatrix");
+        if(shdr.mat_mv>=0) shdr.mat_mv=get_handler("nyaModelViewMatrix");
+        if(shdr.mat_p>=0) shdr.mat_p=get_handler("nyaProjectionMatrix");
 #endif
     }
 
     shdr.objects[type]=object;
+
+    GLint uniforms_count=0;
+#ifdef OPENGL_ES
+    glGetObjectParam(shdr.program,GL_ACTIVE_UNIFORMS,&uniforms_count);
+#else
+    glGetShaderParam(shdr.program,GL_ACTIVE_UNIFORMS,&uniforms_count);
+#endif
+    for(int i=0;i<uniforms_count;++i)
+    {
+        char name[128]; GLsizei name_len; GLint size; GLenum type;
+        glGetActiveUniform(shdr.program,i,GLsizei(sizeof(name)/sizeof(name[0])),&name_len,&size,&type,name);
+
+        if(!name_len)
+            continue;
+
+        shader_obj::uniform &u=shdr.add_uniform(name);
+        u.array_size=size;
+        switch(type)
+        {
+            case GL_FLOAT: u.type=uniform_float; break;
+            case GL_FLOAT_VEC3: u.type=uniform_vec3; break;
+            case GL_FLOAT_VEC4: u.type=uniform_vec4; break;
+            case GL_FLOAT_MAT4: u.type=uniform_mat4; break;
+            case GL_SAMPLER_2D: u.type=uniform_sampler2d; break;
+            case GL_SAMPLER_CUBE: u.type=uniform_sampler_cube; break;
+            default: u.type=uniform_not_found;
+        }
+    }
 #endif
 
     return true;
@@ -1062,6 +1046,20 @@ void shader::set_sampler(const char*name,unsigned int layer)
     }
 
     m_samplers.push_back(sampler(name,layer));
+}
+
+int shader::get_sampler_layer(const char *name) const
+{
+    if(!name)
+        return -1;
+
+    for(size_t i=0;i<m_samplers.size();++i)
+    {
+        if(m_samplers[i].name==name)
+            return m_samplers[i].layer;
+    }
+
+    return -1;
 }
 
 int shader::get_handler(const char *name) const
@@ -1290,6 +1288,38 @@ void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int coun
 
     glUniformMatrix4fvARB(i,count,transpose,f);
 #endif
+}
+
+int shader::get_uniforms_count() const
+{
+    if(m_shdr<0)
+        return 0;
+
+    return (int)shader_obj::get(m_shdr).uniforms.size();
+}
+
+const char *shader::get_uniform_name(int idx) const
+{
+    if(idx<0 || idx>=get_uniforms_count())
+        return 0;
+
+    return shader_obj::get(m_shdr).uniforms[idx].name.c_str();
+}
+
+shader::uniform_type shader::get_uniform_type(int idx) const
+{
+    if(idx<0 || idx>=get_uniforms_count())
+        return uniform_not_found;
+
+    return shader_obj::get(m_shdr).uniforms[idx].type;
+}
+
+unsigned int shader::get_uniform_array_size(int idx) const
+{
+    if(idx<0 || idx>=get_uniforms_count())
+        return uniform_not_found;
+
+    return shader_obj::get(m_shdr).uniforms[idx].type;
 }
 
 void shader::release()

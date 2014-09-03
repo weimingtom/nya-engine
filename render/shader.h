@@ -30,13 +30,31 @@ public:
 
 public:
     void set_sampler(const char*name,unsigned int layer);
+    int get_sampler_layer(const char *name) const;
 
 public:
     int get_handler(const char*name) const;
-    void set_uniform(unsigned int i,float f0,float f1=0.0f,float f2=0.0f,float f3=0.0f) const;
-    void set_uniform3_array(unsigned int i,const float *f,unsigned int count) const;
-    void set_uniform4_array(unsigned int i,const float *f,unsigned int count) const;
-    void set_uniform16_array(unsigned int i,const float *f,unsigned int count,bool transpose=false) const;
+    void set_uniform(unsigned int handler,float f0,float f1=0.0f,float f2=0.0f,float f3=0.0f) const;
+    void set_uniform3_array(unsigned int handler,const float *f,unsigned int count) const;
+    void set_uniform4_array(unsigned int handler,const float *f,unsigned int count) const;
+    void set_uniform16_array(unsigned int handler,const float *f,unsigned int count,bool transpose=false) const;
+
+public:
+    enum uniform_type
+    {
+        uniform_not_found,
+        uniform_float,
+        uniform_vec3,
+        uniform_vec4,
+        uniform_mat4,
+        uniform_sampler2d,
+        uniform_sampler_cube
+    };
+
+    int get_uniforms_count() const;
+    const char *get_uniform_name(int idx) const;        //idx!=handler
+    uniform_type get_uniform_type(int idx) const;
+    unsigned int get_uniform_array_size(int idx) const;
 
 public:
     void release();
