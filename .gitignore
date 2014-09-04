@@ -13,3 +13,4 @@ xcschememanagement.plist
 *.vcproj.*.user
 *.vcxproj.user
 *.pro.user
+*.pyc
