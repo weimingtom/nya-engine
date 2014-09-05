@@ -109,10 +109,10 @@ class nms_mesh:
 
         atr_count = len(self.vert_attr)
         buf.add_uchar(atr_count)
-        for i in range(atr_count):
-            buf.add_uchar(self.vert_attr[i].type)
-            buf.add_uchar(self.vert_attr[i].dimension)
-            buf.add_string(self.vert_attr[i].semantics)
+        for a in self.vert_attr:
+            buf.add_uchar(a.type)
+            buf.add_uchar(a.dimension)
+            buf.add_string(a.semantics)
 
         buf.add_uint(self.vcount)
         buf.add_floats(self.verts_data)
@@ -132,13 +132,13 @@ class nms_mesh:
         groups_count = len(self.groups)
         buf.add_ushort(1) #lods count
         buf.add_ushort(groups_count)
-        for i in range(groups_count):
-            buf.add_string(self.groups[i].name)
+        for g in self.groups:
+            buf.add_string(g.name)
             for j in range(6):
                 buf.add_float(0)
-            buf.add_ushort(self.groups[i].mat_idx)
-            buf.add_uint(self.groups[i].offset)
-            buf.add_uint(self.groups[i].count)
+            buf.add_ushort(g.mat_idx)
+            buf.add_uint(g.offset)
+            buf.add_uint(g.count)
 
         out.add_uint(0) #mesh
         out.add_uint(len(buf.data))
@@ -149,20 +149,20 @@ class nms_mesh:
         if mat_count > 0:
             buf = bin_data()
             buf.add_ushort(mat_count)
-            for i in range(mat_count):
-                buf.add_string(self.materials[i].name)
-                buf.add_ushort(len(self.materials[i].textures))
-                for tex in self.materials[i].textures:
-                    buf.add_string( tex.name )
-                    buf.add_string( tex.value )
+            for m in self.materials:
+                buf.add_string(m.name)
+                buf.add_ushort(len(m.textures))
+                for tex in m.textures:
+                    buf.add_string(tex.name)
+                    buf.add_string(tex.value)
 
-                params=self.materials[i].params
+                params=m.params
                 buf.add_ushort(len(params))
                 for p in params:
                     buf.add_string(p.name)
                     buf.add_string(p.value)
 
-                vec_params=self.materials[i].vec_params
+                vec_params=m.vec_params
                 buf.add_ushort(len(vec_params))
                 for p in vec_params:
                     buf.add_string(p.name)
