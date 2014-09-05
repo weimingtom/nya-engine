@@ -178,7 +178,7 @@ class nms_mesh:
             out.data += buf.data
 
         #-------------- skeleton data ---------------
-            
+
         if jcount > 0:
             buf = bin_data()
             buf.add_uint(jcount)
