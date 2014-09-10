@@ -57,11 +57,11 @@ public:
     enum filter
     {
         filter_nearest,
-        filter_linear,
-        //filter_aniso
+        filter_linear
     };
 
     void set_filter(filter minification,filter magnification,filter mipmap);
+    void set_aniso(unsigned int level);
     static void set_default_filter(filter minification,filter magnification,filter mipmap);
 
 public:

@@ -1097,6 +1097,20 @@ void texture::set_wrap(bool repeat_s,bool repeat_t)
 #endif
 }
 
+void texture::set_aniso(unsigned int level)
+{
+    if(m_tex<0)
+        return;
+
+    const texture_obj &tex=texture_obj::get(m_tex);
+
+#ifndef DIRECTX11
+    glBindTexture(tex.gl_type,tex.tex_id);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, float(level));
+    active_layers[0]=-1;
+#endif
+}
+
 void texture::set_filter(filter minification,filter magnification,filter mipmap)
 {
     if(m_tex<0)
