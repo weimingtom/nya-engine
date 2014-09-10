@@ -63,6 +63,7 @@ public:
     void set_filter(filter minification,filter magnification,filter mipmap);
     void set_aniso(unsigned int level);
     static void set_default_filter(filter minification,filter magnification,filter mipmap);
+    static void set_default_aniso(unsigned int level);
 
 public:
     bool get_data( nya_memory::tmp_buffer_ref &data ) const;
