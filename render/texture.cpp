@@ -22,6 +22,7 @@ namespace
     texture::filter default_min_filter=texture::filter_linear;
     texture::filter default_mag_filter=texture::filter_linear;
     texture::filter default_mip_filter=texture::filter_linear;
+    unsigned int default_aniso=0;
 
 #ifndef DIRECTX11
     const unsigned int cube_faces[]={GL_TEXTURE_CUBE_MAP_POSITIVE_X,GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
@@ -191,6 +192,9 @@ void gl_setup_filtration(int target,bool has_mips,texture::filter minif,texture:
         filter=GL_LINEAR;
 
     glTexParameteri(target,GL_TEXTURE_MIN_FILTER,filter);
+
+    if(default_aniso>0)
+        glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MAX_ANISOTROPY_EXT,float(default_aniso));
 }
 
 void gl_setup_texture(int target,bool clamp,bool has_mips)
@@ -1106,7 +1110,7 @@ void texture::set_aniso(unsigned int level)
 
 #ifndef DIRECTX11
     glBindTexture(tex.gl_type,tex.tex_id);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, float(level));
+    glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MAX_ANISOTROPY_EXT,float(level));
     active_layers[0]=-1;
 #endif
 }
@@ -1131,6 +1135,8 @@ void texture::set_default_filter(filter minification,filter magnification,filter
     default_mag_filter=magnification;
     default_mip_filter=mipmap;
 }
+
+void texture::set_default_aniso(unsigned int level) { default_aniso=level; }
 
 bool texture::is_cubemap() const
 {
