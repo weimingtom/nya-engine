@@ -22,6 +22,7 @@ namespace
     texture::filter default_min_filter=texture::filter_linear;
     texture::filter default_mag_filter=texture::filter_linear;
     texture::filter default_mip_filter=texture::filter_linear;
+    unsigned int default_aniso=0;
 
 #ifndef DIRECTX11
     const unsigned int cube_faces[]={GL_TEXTURE_CUBE_MAP_POSITIVE_X,GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
@@ -132,6 +133,23 @@ void dx_convert_to_format(const unsigned char *from,unsigned char *to,size_t siz
         }
     }
 }
+
+D3D11_SAMPLER_DESC dx_setup_filtration()
+{
+    D3D11_SAMPLER_DESC sdesc;
+    memset(&sdesc,0,sizeof(sdesc));
+    sdesc.Filter=D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+    sdesc.AddressU=D3D11_TEXTURE_ADDRESS_WRAP;
+    sdesc.AddressV=D3D11_TEXTURE_ADDRESS_WRAP;
+    sdesc.AddressW=D3D11_TEXTURE_ADDRESS_WRAP;
+    sdesc.ComparisonFunc=D3D11_COMPARISON_NEVER;
+    sdesc.MaxAnisotropy=0;
+    sdesc.MinLOD=0;
+    sdesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+    return sdesc;
+}
+
 #else
 void gl_select_multitex_layer(int idx)
 {
@@ -212,6 +230,8 @@ void gl_setup_texture(int target,bool clamp,bool has_mips)
     }
 
     gl_setup_filtration(target,has_mips,default_min_filter,default_mag_filter,default_mip_filter);
+    if(default_aniso>0)
+        glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MAX_ANISOTROPY_EXT,float(default_aniso));
 }
 
 void gl_setup_pack_alignment()
@@ -415,26 +435,24 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
             get_context()->GenerateMips(srv);
     }
 
-    D3D11_SAMPLER_DESC sdesc;
-    memset(&sdesc,0,sizeof(sdesc));
-    sdesc.Filter=D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
-    sdesc.AddressU=D3D11_TEXTURE_ADDRESS_WRAP;
-    sdesc.AddressV=D3D11_TEXTURE_ADDRESS_WRAP;
-    sdesc.AddressW=D3D11_TEXTURE_ADDRESS_WRAP;
-    sdesc.ComparisonFunc=D3D11_COMPARISON_NEVER;
-    sdesc.MaxAnisotropy=0;
-    sdesc.MinLOD=0;
+    m_tex=texture_obj::add();
+    texture_obj::get(m_tex).tex=tex;
+    texture_obj::get(m_tex).dx_format=desc.Format;
+    texture_obj::get(m_tex).srv=srv;
+
+    auto sdesc=dx_setup_filtration();
+
+    if(default_aniso>0)
+    {
+        sdesc.Filter=D3D11_FILTER_ANISOTROPIC;
+        sdesc.MaxAnisotropy=default_aniso;
+    }
 
 #ifdef WINDOWS_PHONE8
     sdesc.MaxLOD=D3D11_FLOAT32_MAX;
 #else
     sdesc.MaxLOD=mip_count>=1?mip_count:has_mipmap?D3D11_FLOAT32_MAX:1;
 #endif
-
-    m_tex=texture_obj::add();
-    texture_obj::get(m_tex).tex=tex;
-    texture_obj::get(m_tex).dx_format=desc.Format;
-    texture_obj::get(m_tex).srv=srv;
 
     get_device()->CreateSamplerState(&sdesc,&texture_obj::get(m_tex).sampler_state);
 
@@ -709,23 +727,13 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     get_device()->CreateShaderResourceView(tex,0,&srv);
     if(!srv)
         return false;
-
-    D3D11_SAMPLER_DESC sdesc;
-    memset(&sdesc,0,sizeof(sdesc));
-    sdesc.Filter=D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
-    sdesc.AddressU=D3D11_TEXTURE_ADDRESS_WRAP;
-    sdesc.AddressV=D3D11_TEXTURE_ADDRESS_WRAP;
-    sdesc.AddressW=D3D11_TEXTURE_ADDRESS_WRAP;
-    sdesc.ComparisonFunc=D3D11_COMPARISON_NEVER;
-    sdesc.MaxAnisotropy=0;
-    sdesc.MinLOD=0;
-    sdesc.MaxLOD = D3D11_FLOAT32_MAX;
-
+    
     m_tex=texture_obj::add();
     texture_obj::get(m_tex).tex=tex;
     texture_obj::get(m_tex).dx_format=desc.Format;
     texture_obj::get(m_tex).srv=srv;
 
+    auto sdesc=dx_setup_filtration();
     get_device()->CreateSamplerState(&sdesc,&texture_obj::get(m_tex).sampler_state);
 
     m_width=width;
@@ -1097,6 +1105,29 @@ void texture::set_wrap(bool repeat_s,bool repeat_t)
 #endif
 }
 
+void texture::set_aniso(unsigned int level)
+{
+    if(m_tex<0)
+        return;
+
+    texture_obj &tex=texture_obj::get(m_tex);
+
+#ifdef DIRECTX11
+    auto sdesc=dx_setup_filtration();
+    if(level>0)
+    {
+        sdesc.Filter=D3D11_FILTER_ANISOTROPIC;
+        sdesc.MaxAnisotropy=level;
+    }
+
+    get_device()->CreateSamplerState(&sdesc,&tex.sampler_state);
+#else
+    glBindTexture(tex.gl_type,tex.tex_id);
+    glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MAX_ANISOTROPY_EXT,float(level));
+    active_layers[0]=-1;
+#endif
+}
+
 void texture::set_filter(filter minification,filter magnification,filter mipmap)
 {
     if(m_tex<0)
@@ -1117,6 +1148,8 @@ void texture::set_default_filter(filter minification,filter magnification,filter
     default_mag_filter=magnification;
     default_mip_filter=mipmap;
 }
+
+void texture::set_default_aniso(unsigned int level) { default_aniso=level; }
 
 bool texture::is_cubemap() const
 {

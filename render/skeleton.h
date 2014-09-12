@@ -18,7 +18,7 @@ public:
     int get_bone_idx(const char *name) const; //< 0 if invalid
     const char *get_bone_name(int idx) const;
     int get_bone_parent_idx(int idx) const;
-    nya_math::vec3 transform(int bone_idx,nya_math::vec3 point) const;
+    nya_math::vec3 transform(int bone_idx,const nya_math::vec3 &point) const;
     int get_bones_count() const { return (int)m_bones.size(); }
 
     nya_math::vec3 get_bone_pos(int idx) const;

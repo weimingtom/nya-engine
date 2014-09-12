@@ -322,12 +322,12 @@ void skeleton::update()
     }
 }
 
-nya_math::vec3 skeleton::transform(int bone_idx,nya_math::vec3 point) const
+nya_math::vec3 skeleton::transform(int bone_idx,const nya_math::vec3 &point) const
 {
     if(bone_idx<0 || bone_idx>=(int)m_bones.size())
-        return nya_math::vec3();
+        return point;
 
-    return m_pos_tr[bone_idx]+m_rot_tr[bone_idx].rotate(point-m_bones[bone_idx].pos_org);
+    return m_pos_tr[bone_idx]+m_rot_tr[bone_idx].rotate(point);
 }
 
 const float *skeleton::get_pos_buffer() const
