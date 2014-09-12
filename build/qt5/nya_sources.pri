@@ -57,8 +57,7 @@ SOURCES += \
 macx: OBJECTIVE_SOURCES += $${NYA_ENGINE_PATH}/system/app.mm
 
 # clang gives 'file: XXX has no symbols' error for empty source files
-# remove this line if anything changes
-macx: SOURCES -= $${NYA_ENGINE_PATH}/render/platform_specific_gl.cpp
+# macx: SOURCES -= $${NYA_ENGINE_PATH}/render/platform_specific_gl.cpp
 
 HEADERS += \
     $${NYA_ENGINE_PATH}/formats/dds.h \
