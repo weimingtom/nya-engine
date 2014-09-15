@@ -124,6 +124,9 @@ bool material::load_text(shared_material &res,resource_data &data,const char* na
             {
                 const char *subsection_type = parser.get_subsection_type(section_idx,subsection_idx);
                 const char *subsection_value = parser.get_subsection_value(section_idx,subsection_idx);
+                if(!subsection_type || !subsection_value)
+                    continue;
+
                 if(strcmp(subsection_type,"shader") == 0)
                 {
                     if(!p.m_shader.load(subsection_value))
@@ -135,6 +138,8 @@ bool material::load_text(shared_material &res,resource_data &data,const char* na
                     p.get_state().zwrite=nya_formats::bool_from_string(subsection_value);
                 else if(strcmp(subsection_type,"cull")==0)
                     p.get_state().cull_face=nya_formats::cull_face_from_string(subsection_value,p.get_state().cull_order);
+                else
+                    p.set_pass_param(subsection_type,param(nya_formats::vec4_from_string(subsection_value)));
             }
         }
         else if(strcmp(section_type,"@texture")==0)
@@ -160,7 +165,7 @@ bool material::load_text(shared_material &res,resource_data &data,const char* na
         else if(strcmp(section_type,"@param")==0)
         {
             material_internal::param_holder ph;
-            ph.param_name=parser.get_section_name(section_idx);
+            ph.name=parser.get_section_name(section_idx);
             ph.p=param_proxy(material_internal::param(parser.get_section_value_vector(section_idx)));
 
             const int param_idx=res.get_param_idx(parser.get_section_name(section_idx));
@@ -195,6 +200,12 @@ void material_internal::set(const char *pass_name) const
     p.m_shader.internal().set();
     for(int uniform_idx=0;uniform_idx<(int)p.m_uniforms_idxs_map.size();++uniform_idx)
         m_params[p.m_uniforms_idxs_map[uniform_idx]].apply_to_shader(p.m_shader,uniform_idx);
+
+    for(int i=0;i<(int)p.m_pass_params.size();++i)
+    {
+        const pass::pass_param &pp=p.m_pass_params[i];
+        p.m_shader.internal().set_uniform_value(pp.uniform_idx,pp.p.f[0],pp.p.f[1],pp.p.f[2],pp.p.f[3]);
+    }
 
     nya_render::set_state(p.m_render_state);
 
@@ -263,7 +274,7 @@ int material_internal::get_param_idx(const char *name) const
     update_passes_maps();
     for(int i=0;i<(int)m_params.size();++i)
     {
-        if(m_params[i].param_name==name)
+        if(m_params[i].name==name)
             return i;
     }
 
@@ -289,6 +300,7 @@ material_internal::pass &material_internal::pass::operator=(const pass &p)
     m_name=p.m_name;
     m_render_state=p.m_render_state;
     m_shader=p.m_shader;
+    m_pass_params=p.m_pass_params;
     m_shader_changed=true;
     m_uniforms_idxs_map.clear();
     m_textures_slots_map.clear();
@@ -301,6 +313,48 @@ void material_internal::pass::set_shader(const nya_scene::shader &shader)
     m_shader_changed=true;
     m_uniforms_idxs_map.clear();
     m_textures_slots_map.clear();
+    update_pass_params();
+}
+
+void material_internal::pass::set_pass_param(const char *name,const param &value)
+{
+    if(!name)
+        return;
+
+    for(int i=0;i<(int)m_pass_params.size();++i)
+    {
+        if(m_pass_params[i].name==name)
+        {
+            m_pass_params[i].p=value;
+            update_pass_params();
+            return;
+        }
+    }
+
+    m_pass_params.resize(m_pass_params.size()+1);
+    m_pass_params.back().name=name;
+    m_pass_params.back().p=value;
+
+    update_pass_params();
+}
+
+void material_internal::pass::update_pass_params()
+{
+    for(int i=0;i<(int)m_pass_params.size();++i)
+    {
+        pass_param &pp=m_pass_params[i];
+        pp.uniform_idx=-1;
+
+        for(int uniform_idx=0;uniform_idx<m_shader.internal().get_uniforms_count();++uniform_idx)
+        {
+            const std::string &name=m_shader.internal().get_uniform(uniform_idx).name;
+            if(pp.name==name)
+            {
+                pp.uniform_idx=uniform_idx;
+                break;
+            }
+        }
+    }
 }
 
 void material_internal::pass::update_maps(const material_internal &m) const
@@ -314,7 +368,7 @@ void material_internal::pass::update_maps(const material_internal &m) const
         int param_idx=-1;
         for(int i=0;i<(int)m.m_params.size();++i)
         {
-            if(m.m_params[i].param_name==name)
+            if(m.m_params[i].name==name)
             {
                 param_idx=i;
                 break;
@@ -323,6 +377,7 @@ void material_internal::pass::update_maps(const material_internal &m) const
 
         if(param_idx>=0)
             m_uniforms_idxs_map[uniform_idx]=param_idx;
+
     }
 
     m_textures_slots_map.resize(m_shader.internal().get_texture_slots_count());
@@ -415,7 +470,7 @@ void material_internal::update_passes_maps() const
             int param_idx=-1;
             for(int i=0;i<(int)m_params.size();++i)
             {
-                if(m_params[i].param_name==name)
+                if(m_params[i].name==name)
                 {
                     param_idx=i;
                     break;
@@ -443,7 +498,7 @@ void material_internal::update_passes_maps() const
     for(std::list<std::pair<std::string,nya_math::vec4> >::iterator iter=parameters_to_add.begin();iter!=parameters_to_add.end();++iter)
     {
         m_params.push_back(param_holder());
-        m_params.back().param_name=iter->first;
+        m_params.back().name=iter->first;
         nya_math::vec4 &v=iter->second;
         m_params.back().p=param_proxy(param());
         m_params.back().p->set(v.x,v.y,v.z,v.w);
@@ -578,7 +633,7 @@ const char *material::get_param_name(int idx) const
     if(idx<0 || idx>=(int)internal().m_params.size())
         return 0;
 
-    return m_internal.m_params[idx].param_name.c_str();
+    return m_internal.m_params[idx].name.c_str();
 }
 
 void material::set_param(int idx,float f0,float f1,float f2,float f3)

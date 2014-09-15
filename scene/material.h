@@ -71,7 +71,7 @@ private:
 
     struct param_holder
     {
-        std::string param_name;
+        std::string name;
         param_proxy p;
         param_proxy m;
         param_array_proxy a;
@@ -93,6 +93,7 @@ private:
         const nya_render::state &get_state() const {return m_render_state;}
         const nya_scene::shader &get_shader() const {return m_shader;}
         void set_shader(const nya_scene::shader &shader);
+        void set_pass_param(const char *name,const param &value); //material param override
 
     public:
         pass(): m_shader_changed(false) { }
@@ -103,6 +104,7 @@ private:
         friend class material_internal;
         friend class material;
         void update_maps(const material_internal &m) const;
+        void update_pass_params();
 
         std::string m_name;
         nya_render::state m_render_state;
@@ -110,6 +112,17 @@ private:
         mutable bool m_shader_changed;
         mutable std::vector<int> m_uniforms_idxs_map;
         mutable std::vector<int> m_textures_slots_map;
+
+        struct pass_param
+        {
+            std::string name;
+            param p;
+            int uniform_idx;
+
+            pass_param(): uniform_idx(-1) {}
+        };
+
+        std::vector<pass_param> m_pass_params;
     };
 
     int add_pass(const char *pass_name);
