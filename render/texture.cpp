@@ -556,6 +556,11 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     if(!pot) gl_setup_pack_alignment();
     gl_setup_texture(GL_TEXTURE_2D,!pot && !is_platform_restrictions_ignored(),has_mipmap);
 
+#ifndef OPENGL_ES
+    if(mip_count>1) //is_platform_restrictions_ignored() &&
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAX_LEVEL,mip_count-1);
+#endif
+
   #ifdef GL_GENERATE_MIPMAP
     if(has_mipmap && mip_count<0) glTexParameteri(GL_TEXTURE_2D,GL_GENERATE_MIPMAP,GL_TRUE);
   #endif
