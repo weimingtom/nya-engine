@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3D4FEDB619C711A400A01168 /* shaders in Resources */ = {isa = PBXBuildFile; fileRef = 3D4FEDB419C711A400A01168 /* shaders */; };
+		3D4FEDB719C711A400A01168 /* toon in Resources */ = {isa = PBXBuildFile; fileRef = 3D4FEDB519C711A400A01168 /* toon */; };
+		3D4FEDB919C7230700A01168 /* materials in Resources */ = {isa = PBXBuildFile; fileRef = 3D4FEDB819C7230700A01168 /* materials */; };
 		F20FADB7177CBF6500330FA5 /* load_pmd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F20FADB6177CBF6400330FA5 /* load_pmd.cpp */; };
 		F20FADBA177CC06F00330FA5 /* load_pmx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F20FADB8177CC06F00330FA5 /* load_pmx.cpp */; };
 		F261EA56151E698D00C195DA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F261EA55151E698D00C195DA /* Cocoa.framework */; };
@@ -21,8 +24,8 @@
 		F28DADA815D9AF830030D67B /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F28DADA315D9AF830030D67B /* InfoPlist.strings */; };
 		F28DADAF15D9AFB50030D67B /* libnya_engine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F28DADAE15D9AFA70030D67B /* libnya_engine.a */; };
 		F53786FE18D2EEE600A93F17 /* mmd_mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53786FC18D2EEE600A93F17 /* mmd_mesh.cpp */; };
-		F5556F6C199439BE008422B3 /* toon in Resources */ = {isa = PBXBuildFile; fileRef = F5556F6A199439BE008422B3 /* toon */; };
-		F5CEE3D41997C8310029D9EF /* shaders in Resources */ = {isa = PBXBuildFile; fileRef = F5CEE3D21997C8310029D9EF /* shaders */; };
+		F55A74D419C639D9009825B7 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = F55A74D219C639D9009825B7 /* AppIcon.icns */; };
+		F59FB9F019C6388A00EBD7A0 /* load_xps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59FB9EF19C6388A00EBD7A0 /* load_xps.cpp */; };
 		F5D869B41809A303000C8791 /* string_encoding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5D869B11809A303000C8791 /* string_encoding.cpp */; };
 		F5D869B91809A551000C8791 /* load_vmd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5D869B71809A551000C8791 /* load_vmd.cpp */; };
 		F5EA4D3C18E62C930015B54D /* MorphsConfig.xib in Resources */ = {isa = PBXBuildFile; fileRef = F5EA4D3A18E62C930015B54D /* MorphsConfig.xib */; };
@@ -46,6 +49,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3D4FEDB419C711A400A01168 /* shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; name = shaders; path = "../../tests/pmd viewer/shaders"; sourceTree = "<group>"; };
+		3D4FEDB519C711A400A01168 /* toon */ = {isa = PBXFileReference; lastKnownFileType = folder; name = toon; path = "../../tests/pmd viewer/toon"; sourceTree = "<group>"; };
+		3D4FEDB819C7230700A01168 /* materials */ = {isa = PBXFileReference; lastKnownFileType = folder; name = materials; path = "../../tests/pmd viewer/materials"; sourceTree = "<group>"; };
 		F20FADB5177CBF6400330FA5 /* load_pmd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = load_pmd.h; path = ../../tests/shared/load_pmd.h; sourceTree = "<group>"; };
 		F20FADB6177CBF6400330FA5 /* load_pmd.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = load_pmd.cpp; path = ../../tests/shared/load_pmd.cpp; sourceTree = "<group>"; };
 		F20FADB8177CC06F00330FA5 /* load_pmx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = load_pmx.cpp; path = ../../tests/shared/load_pmx.cpp; sourceTree = "<group>"; };
@@ -70,8 +76,9 @@
 		F28DADA915D9AFA70030D67B /* nya_engine.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = nya_engine.xcodeproj; sourceTree = "<group>"; };
 		F53786FC18D2EEE600A93F17 /* mmd_mesh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mmd_mesh.cpp; path = ../../tests/shared/mmd_mesh.cpp; sourceTree = "<group>"; };
 		F53786FD18D2EEE600A93F17 /* mmd_mesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mmd_mesh.h; path = ../../tests/shared/mmd_mesh.h; sourceTree = "<group>"; };
-		F5556F6B199439BE008422B3 /* en */ = {isa = PBXFileReference; lastKnownFileType = folder; name = en; path = "../../tests/pmd viewer/en.lproj/toon"; sourceTree = "<group>"; };
-		F5CEE3D31997C8310029D9EF /* en */ = {isa = PBXFileReference; lastKnownFileType = folder; name = en; path = "../../tests/pmd viewer/en.lproj/shaders"; sourceTree = "<group>"; };
+		F55A74D319C639D9009825B7 /* en */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = en; path = "../../tests/pmd viewer/en.lproj/AppIcon.icns"; sourceTree = "<group>"; };
+		F59FB9EE19C6388A00EBD7A0 /* load_xps.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = load_xps.h; path = ../../tests/shared/load_xps.h; sourceTree = "<group>"; };
+		F59FB9EF19C6388A00EBD7A0 /* load_xps.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = load_xps.cpp; path = ../../tests/shared/load_xps.cpp; sourceTree = "<group>"; };
 		F5D869B11809A303000C8791 /* string_encoding.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = string_encoding.cpp; path = ../../tests/shared/string_encoding.cpp; sourceTree = "<group>"; };
 		F5D869B21809A303000C8791 /* string_encoding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = string_encoding.h; path = ../../tests/shared/string_encoding.h; sourceTree = "<group>"; };
 		F5D869B31809A303000C8791 /* moonspeak.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = moonspeak.h; path = ../../tests/shared/moonspeak.h; sourceTree = "<group>"; };
@@ -97,6 +104,7 @@
 		F261EA46151E698D00C195DA = {
 			isa = PBXGroup;
 			children = (
+				F55A74D219C639D9009825B7 /* AppIcon.icns */,
 				F28DADA915D9AFA70030D67B /* nya_engine.xcodeproj */,
 				F28DAD8D15D9AF330030D67B /* pmd viewer */,
 				F261EA54151E698D00C195DA /* Frameworks */,
@@ -143,6 +151,8 @@
 				F20FADB9177CC06F00330FA5 /* load_pmx.h */,
 				F5D869B71809A551000C8791 /* load_vmd.cpp */,
 				F5D869B81809A551000C8791 /* load_vmd.h */,
+				F59FB9EF19C6388A00EBD7A0 /* load_xps.cpp */,
+				F59FB9EE19C6388A00EBD7A0 /* load_xps.h */,
 				F28DAD9715D9AF4E0030D67B /* main.m */,
 				F28DAD9515D9AF4E0030D67B /* MainMenu.xib */,
 				F5D869B31809A303000C8791 /* moonspeak.h */,
@@ -162,8 +172,9 @@
 		F28DAD9D15D9AF6B0030D67B /* Supporting files */ = {
 			isa = PBXGroup;
 			children = (
-				F5CEE3D21997C8310029D9EF /* shaders */,
-				F5556F6A199439BE008422B3 /* toon */,
+				3D4FEDB819C7230700A01168 /* materials */,
+				3D4FEDB419C711A400A01168 /* shaders */,
+				3D4FEDB519C711A400A01168 /* toon */,
 				F28DAD9E15D9AF830030D67B /* pmd viewer-Info.plist */,
 				F28DAD9F15D9AF830030D67B /* AppIcon.icns */,
 				F28DADA115D9AF830030D67B /* Credits.rtf */,
@@ -255,11 +266,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				F5EA4D3C18E62C930015B54D /* MorphsConfig.xib in Resources */,
-				F5CEE3D41997C8310029D9EF /* shaders in Resources */,
-				F5556F6C199439BE008422B3 /* toon in Resources */,
+				3D4FEDB919C7230700A01168 /* materials in Resources */,
+				3D4FEDB619C711A400A01168 /* shaders in Resources */,
+				F55A74D419C639D9009825B7 /* AppIcon.icns in Resources */,
 				F28DAD9A15D9AF4E0030D67B /* PmdDocument.xib in Resources */,
 				F28DAD9B15D9AF4E0030D67B /* MainMenu.xib in Resources */,
 				F28DADA615D9AF830030D67B /* AppIcon.icns in Resources */,
+				3D4FEDB719C711A400A01168 /* toon in Resources */,
 				F28DADA715D9AF830030D67B /* Credits.rtf in Resources */,
 				F28DADA815D9AF830030D67B /* InfoPlist.strings in Resources */,
 			);
@@ -274,6 +287,7 @@
 			files = (
 				F28DAD9815D9AF4E0030D67B /* PmdView.mm in Sources */,
 				F28DAD9915D9AF4E0030D67B /* PmdDocument.mm in Sources */,
+				F59FB9F019C6388A00EBD7A0 /* load_xps.cpp in Sources */,
 				F28DAD9C15D9AF4E0030D67B /* main.m in Sources */,
 				F20FADB7177CBF6500330FA5 /* load_pmd.cpp in Sources */,
 				F53786FE18D2EEE600A93F17 /* mmd_mesh.cpp in Sources */,
@@ -326,20 +340,12 @@
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
-		F5556F6A199439BE008422B3 /* toon */ = {
+		F55A74D219C639D9009825B7 /* AppIcon.icns */ = {
 			isa = PBXVariantGroup;
 			children = (
-				F5556F6B199439BE008422B3 /* en */,
+				F55A74D319C639D9009825B7 /* en */,
 			);
-			name = toon;
-			sourceTree = "<group>";
-		};
-		F5CEE3D21997C8310029D9EF /* shaders */ = {
-			isa = PBXVariantGroup;
-			children = (
-				F5CEE3D31997C8310029D9EF /* en */,
-			);
-			name = shaders;
+			name = AppIcon.icns;
 			sourceTree = "<group>";
 		};
 		F5EA4D3A18E62C930015B54D /* MorphsConfig.xib */ = {

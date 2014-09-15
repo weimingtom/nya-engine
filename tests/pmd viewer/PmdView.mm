@@ -4,6 +4,7 @@
 #import "PmdDocument.h"
 
 #include "load_vmd.h"
+#include "load_xps.h"
 
 #include "scene/camera.h"
 #include "system/system.h"
@@ -340,7 +341,7 @@ private:
 
     m_mouse_old=pt;
 
-    if(!m_mesh.get_anim().is_valid())
+    if(!m_mmd_mesh.get_anim().is_valid())
         [self setNeedsDisplay: YES];
 }
 
@@ -354,7 +355,7 @@ private:
 
     m_mouse_old=pt;
 
-    if(!m_mesh.get_anim().is_valid())
+    if(!m_mmd_mesh.get_anim().is_valid())
         [self setNeedsDisplay: YES];
 }
 
@@ -362,7 +363,7 @@ private:
 {
     m_camera.add_pos(0.0f,0.0f,[event deltaY]);
 
-    if(!m_mesh.get_anim().is_valid())
+    if(!m_mmd_mesh.get_anim().is_valid())
         [self setNeedsDisplay: YES];
 }
 
@@ -381,18 +382,18 @@ private:
     nya_scene::animation anim;
     nya_scene::animation::register_load_function(vmd_loader::load,true);
     anim.load(name.c_str());
-    m_mesh.set_anim(anim);
+    m_mmd_mesh.set_anim(anim);
 
     m_last_time=nya_system::get_time();
 }
 
 -(void)saveObj:(const std::string &)name
 {
-    const char *mesh_name=m_mesh.get_name();
+    const char *mesh_name=m_mmd_mesh.get_name();
     if(!mesh_name || !mesh_name[0])
         return;
 
-    const nya_scene::shared_mesh *sh=m_mesh.internal().get_shared_data().operator->();
+    const nya_scene::shared_mesh *sh=m_mmd_mesh.internal().get_shared_data().operator->();
     if(!sh)
         return;
 
@@ -407,7 +408,7 @@ private:
 
     const int vcount=vbo.get_verts_count();
 
-    const nya_render::skeleton &sk=m_mesh.get_skeleton();
+    const nya_render::skeleton &sk=m_mmd_mesh.get_skeleton();
 
     class obj_mesh
     {
@@ -603,10 +604,10 @@ private:
         doc->m_animation_name.clear();
     }
 
-    if(m_mesh.get_anim().is_valid())
+    if(m_mmd_mesh.get_anim().is_valid())
     {
         unsigned long time=nya_system::get_time();
-        m_mesh.update(int(time-m_last_time));
+        m_mmd_mesh.update(int(time-m_last_time));
         m_last_time=time;
 
         [self setNeedsDisplay:YES];
@@ -630,19 +631,26 @@ private:
             nya_resources::composite_resources_provider *comp_res=new nya_resources::composite_resources_provider();
             comp_res->add_provider(new nya_resources::file_resources_provider());
             nya_resources::file_resources_provider *toon_res=new nya_resources::file_resources_provider();
-            toon_res->set_folder((res_path+"/en.lproj/toon/").c_str());
+            toon_res->set_folder((res_path+"/toon/").c_str());
             comp_res->add_provider(toon_res);
             nya_resources::file_resources_provider *sh_res=new nya_resources::file_resources_provider();
-            sh_res->set_folder((res_path+"/en.lproj/shaders/").c_str());
+            sh_res->set_folder((res_path+"/shaders/").c_str());
             comp_res->add_provider(sh_res);
+            nya_resources::file_resources_provider *mat_res=new nya_resources::file_resources_provider();
+            mat_res->set_folder((res_path+"/materials/").c_str());
+            comp_res->add_provider(mat_res);
 
             nya_resources::set_resources_provider(comp_res);
 
             nya_render::set_ignore_platform_restrictions(true);
 
-            nya_scene::texture::register_load_function(load_texture);
             nya_scene::texture::register_load_function(nya_scene::texture::load_dds);
+            nya_scene::texture::register_load_function(load_texture);
             nya_scene::texture::set_load_dds_flip(true);
+
+            nya_scene::mesh::register_load_function(xps_loader::load_xps);
+            nya_scene::mesh::register_load_function(xps_loader::load_mesh);
+            nya_scene::mesh::register_load_function(xps_loader::load_mesh_ascii);
         }
 
         nya_render::set_clear_color(1.0f,1.0f,1.0f,0.0f);
@@ -650,11 +658,19 @@ private:
 
         nya_render::depth_test::enable(nya_render::depth_test::less);
 
-        m_mesh.load(doc->m_model_name.c_str());
+        const bool is_mmd=doc->m_model_name[doc->m_model_name.length()-2]=='m';
+        if(is_mmd)
+            m_mmd_mesh.load(doc->m_model_name.c_str());
+        else
+        {
+            m_mesh.load(doc->m_model_name.c_str());
+            m_mesh.set_scale(10.0);
+        }
+
         nya_render::apply_state(true);
 
         doc->m_model_name.clear();
-        doc->m_mesh=&m_mesh;
+        doc->m_mesh=&m_mmd_mesh;
         doc->m_view=self;
     }
 
@@ -665,10 +681,10 @@ private:
         glEnable(GL_STENCIL_TEST);
         glStencilOp(GL_KEEP,GL_KEEP,GL_REPLACE);
 
-        for(int i=0;i<m_mesh.get_groups_count();++i)
+        for(int i=0;i<m_mmd_mesh.get_groups_count();++i)
         {
             glStencilFunc(GL_ALWAYS,i+1,-1);
-            m_mesh.draw_group(i);
+            m_mmd_mesh.draw_group(i);
         }
 
         unsigned int g;
@@ -677,15 +693,15 @@ private:
 
         //printf("group %d\n",g);
 
-        if(g>0 && strcmp(m_mesh.get_group_name(g-1),"edge")!=0)
+        if(g>0 && strcmp(m_mmd_mesh.get_group_name(g-1),"edge")!=0)
         {
             --g;
             if(m_pick_mode==pick_showhide)
             {
-                m_show_groups.resize(m_mesh.get_groups_count(),true);
+                m_show_groups.resize(m_mmd_mesh.get_groups_count(),true);
                 m_show_groups[g]=!m_show_groups[g];
 
-                const nya_scene::shared_mesh *sh=m_mesh.internal().get_shared_data().operator->();
+                const nya_scene::shared_mesh *sh=m_mmd_mesh.internal().get_shared_data().operator->();
                 if(sh)
                 {
                     for(int i=g+1;i<int(sh->groups.size());++i)
@@ -698,7 +714,7 @@ private:
             }
             else if(!m_assigntexture_name.empty())
             {
-                auto &m=m_mesh.modify_material(g);
+                auto &m=m_mmd_mesh.modify_material(g);
                 nya_scene::texture t;
                 if(t.load(m_assigntexture_name.c_str()))
                 {
@@ -723,14 +739,19 @@ private:
     {
         for(int i=0;i<int(m_show_groups.size());++i)
             if(m_show_groups[i])
-                m_mesh.draw_group(i);
+                m_mmd_mesh.draw_group(i);
     }
     else
-        m_mesh.draw();
+    {
+        m_mesh.draw("opaque");
+        m_mesh.draw("transparent_clip");
+        m_mesh.draw("transparent_blend");
+        m_mmd_mesh.draw();
+    }
 
     //nya_render::clear(false,true);
     //static nya_render::debug_draw dd; dd.clear(); dd.set_point_size(3.0f);
-    //dd.add_skeleton(m_mesh.get_skeleton(),nya_math::vec4(0.0,0.0,1.0,1.0));
+    //dd.add_skeleton(m_mmd_mesh.get_skeleton(),nya_math::vec4(0.0,0.0,1.0,1.0));
     //dd.draw();
 }
 
@@ -746,6 +767,7 @@ private:
 -(void) dealloc
 {
     m_mesh.unload();
+    m_mmd_mesh.unload();
 
     shared_context::get().free();
 

@@ -29,7 +29,8 @@ private:
 {
     NSPoint m_mouse_old;
 
-    mmd_mesh m_mesh;
+    mmd_mesh m_mmd_mesh;
+    nya_scene::mesh m_mesh;
     viewer_camera m_camera;
 
     NSTimer *m_animation_timer;
