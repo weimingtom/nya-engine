@@ -645,12 +645,15 @@ private:
             nya_render::set_ignore_platform_restrictions(true);
 
             nya_scene::texture::register_load_function(nya_scene::texture::load_dds);
+            nya_scene::texture::register_load_function(nya_scene::texture::load_tga);
             nya_scene::texture::register_load_function(load_texture);
             nya_scene::texture::set_load_dds_flip(true);
             nya_render::texture::set_default_aniso(4);
 
-            nya_scene::mesh::register_load_function(xps_loader::load_mesh);
-            nya_scene::mesh::register_load_function(xps_loader::load_mesh_ascii);
+            nya_scene::mesh::register_load_function(pmx_loader::load,false);
+            nya_scene::mesh::register_load_function(pmd_loader::load,false);
+            nya_scene::mesh::register_load_function(xps_loader::load_mesh,false);
+            nya_scene::mesh::register_load_function(xps_loader::load_mesh_ascii,false);
         }
 
         nya_render::set_clear_color(1.0f,1.0f,1.0f,0.0f);
@@ -665,6 +668,7 @@ private:
         {
             m_mesh.load(doc->m_model_name.c_str());
             m_mesh.set_scale(10.0);
+            m_mesh.draw();
         }
 
         nya_render::apply_state(true);

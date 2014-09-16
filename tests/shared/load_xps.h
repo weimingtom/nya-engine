@@ -13,9 +13,14 @@ public:
     struct vert
     {
         nya_math::vec3 pos;
+
         nya_math::vec3 normal;
+        nya_math::vec3 tangent;
+        nya_math::vec3 bitangent;
+
         nya_math::vec2 tc;
         nya_math::vec2 tc2;
+
         //float bone_idx[4];
         //float bone_weight[4];
     };

@@ -104,17 +104,56 @@ struct render_group_props
 
     shading_mode shading;
     bool alpha;
+    float spec_k;
+    spec_mode spec;
+
+    const char *semantics(unsigned int idx) const
+    {
+        if(idx>=(unsigned int)maps.size())
+            return 0;
+
+        return maps[idx].c_str();
+    }
+
+private:
+    std::vector<std::string> maps;
 
 public:
-    render_group_props(): shading(shading_no),alpha(false) {}
-    render_group_props(const std::string &s) { *this=get(s); }
+    render_group_props(): shading(shading_no),alpha(false),spec_k(0.0f) {}
     render_group_props(shading_mode shading,bool alpha,spec_mode spec_hl,bool bump_rep1,
-                       bool bump_rep2,const char *tex,const char *tex2=0,const char *tex3=0,
-                       const char *tex4=0,const char *tex5=0,const char *tex6=0,const char *tex7=0)
+                       bool bump_rep2,const char *tex,const char *tex2="",const char *tex3="",
+                       const char *tex4="",const char *tex5="",const char *tex6="",const char *tex7="")
     {
         this->shading=shading;
         this->alpha=alpha;
+        this->spec_k=0.0f;
+        this->spec=spec_hl;
+
         //ToDo
+
+        maps.push_back(tex);
+        maps.push_back(tex2);
+        maps.push_back(tex3);
+        maps.push_back(tex4);
+        maps.push_back(tex5);
+        maps.push_back(tex6);
+        maps.push_back(tex7);
+    }
+
+    render_group_props(const std::string &s)
+    {
+        *this=get(s);
+
+        if(this->spec!=spec_no)
+        {
+            size_t p=s.find("_");
+            if(p!=std::string::npos)
+            {
+                p=s.find("_",p+1);
+                if(p!=std::string::npos)
+                    spec_k=atof(&s[p+1]);
+            }
+        }
     }
 
 public:
@@ -180,8 +219,37 @@ public:
 
         return xnl_props[ridx];
     }
-
 };
+
+template<typename vert_t,typename ind_t> void calculate_tangents(vert_t *verts,ind_t *inds,unsigned int icount)
+{
+    for(unsigned int i=0;i<icount;i+=3)
+    {
+        vert_t &v0=verts[inds[i]],&v1=verts[inds[i+1]],&v2=verts[inds[i+2]];
+
+        const nya_math::vec3 &p0=v0.pos,&p1=v1.pos,&p2=v2.pos;
+        const nya_math::vec2 &tc0=v0.tc,&tc1=v1.tc,&tc2=v2.tc;
+
+        const nya_math::vec3 n=nya_math::vec3::cross(p1-p0,p2-p0);
+
+        const float eps=0.001f;
+
+        nya_math::vec3 dp=p1-p0;
+        nya_math::vec2 dtc;
+        if(dp*dp<eps)
+            dp=p2-p0,dtc=tc2-tc0;
+        else
+            dtc=tc1-tc0;
+
+        nya_math::vec3 t;
+        if(fabsf(dtc.x)>eps)
+            t=dp/dtc.x;
+
+        t=nya_math::vec3::normalize(t-(n*t)*n);
+        v0.tangent=v1.tangent=v2.tangent=t;
+        v0.bitangent=v1.bitangent=v2.bitangent=nya_math::vec3::normalize(nya_math::vec3::cross(t,n));
+    }
+}
 
 template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &reader,const char* name,unsigned short version=1)
 {
@@ -303,8 +371,35 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
         else
             m.load("xps.txt");
 
-        if(!tex_names.empty())
-            m.set_texture("diffuse", nya_scene::texture(tex_names[0].c_str()));
+        if(rgp.shading==rgp.shading_no)
+            m.set_param(m.get_param_idx("light k"), nya_scene::material::param(1.0,0.0,0.0,0.0));
+        else
+            m.set_param(m.get_param_idx("light k"), nya_scene::material::param(0.6,0.4,rgp.spec_k,0.0));
+
+        std::map<std::string,bool> has_semantics;
+        for(int i=0;i<(int)tex_names.size();++i)
+        {
+            const char *semantics=rgp.semantics(i);
+            if(!semantics)
+                continue;
+
+            m.set_texture(semantics, nya_scene::texture(tex_names[i].c_str()));
+            has_semantics[semantics]=true;
+        }
+
+        const char *semantics[]={"diffuse","lightmap","bump","mask","bump1","bump2","spec","env","emission"};
+        const char *white="\xff\xff\xff\xff",*black="\x00\x00\x00\x00",*normal="\x7f\x7f\xff\xff";
+        const char *default_textures[]={white,white,normal,white,normal,normal,white,black,black};
+
+        for(int i=0;i<sizeof(semantics)/sizeof(semantics[0]);++i)
+        {
+            if(has_semantics.find(semantics[i])!=has_semantics.end())
+                continue;
+
+            nya_scene::texture tex;
+            tex.build(default_textures[i],1,1,nya_render::texture::color_rgba);
+            m.set_texture(semantics[i],tex);
+        }
     }
 
     if(res.groups.empty())
@@ -313,12 +408,19 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
     if(!vertices.size())
         return false;
 
-    res.vbo.set_vertex_data(&vertices[0],(uint)sizeof(vertices[0]),(uint)vertices.size());
-    res.vbo.set_normals(3*4);
-    res.vbo.set_tc(0,6*4,2);
-
     if(!indices.size())
         return false;
+
+    calculate_tangents(&vertices[0],&indices[0],(uint)indices.size());
+
+    res.vbo.set_vertex_data(&vertices[0],(uint)sizeof(vertices[0]),(uint)vertices.size());
+
+    #define off(st, m) uint((size_t)(&((st *)0)->m))
+    res.vbo.set_normals(off(xps_loader::vert,normal));
+    res.vbo.set_tc(5,off(xps_loader::vert,tangent),3);
+    res.vbo.set_tc(6,off(xps_loader::vert,bitangent),3);
+    res.vbo.set_tc(0,off(xps_loader::vert,tc),2);
+    res.vbo.set_tc(1,off(xps_loader::vert,tc2),2);
 
     if(vertices.size()<65535)
     {
