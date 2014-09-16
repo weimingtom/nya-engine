@@ -15,12 +15,12 @@ public:
         nya_math::vec3 pos;
         nya_math::vec3 normal;
         nya_math::vec2 tc;
+        nya_math::vec2 tc2;
         //float bone_idx[4];
         //float bone_weight[4];
     };
 
 public:
-    static bool load_xps(nya_scene::shared_mesh &res,nya_scene::resource_data &data,const char* name) { return false; } //ToDo
     static bool load_mesh(nya_scene::shared_mesh &res,nya_scene::resource_data &data,const char* name);
     static bool load_mesh_ascii(nya_scene::shared_mesh &res,nya_scene::resource_data &data,const char* name);
 };

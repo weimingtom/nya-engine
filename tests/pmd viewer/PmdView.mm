@@ -647,8 +647,8 @@ private:
             nya_scene::texture::register_load_function(nya_scene::texture::load_dds);
             nya_scene::texture::register_load_function(load_texture);
             nya_scene::texture::set_load_dds_flip(true);
+            nya_render::texture::set_default_aniso(4);
 
-            nya_scene::mesh::register_load_function(xps_loader::load_xps);
             nya_scene::mesh::register_load_function(xps_loader::load_mesh);
             nya_scene::mesh::register_load_function(xps_loader::load_mesh_ascii);
         }
@@ -677,15 +677,16 @@ private:
     if(m_pick_mode!=pick_none)
     {
         glClearStencil(0);
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
+        nya_render::clear(true,true);
+        glClear(GL_STENCIL_BUFFER_BIT);
         glEnable(GL_STENCIL_TEST);
         glStencilOp(GL_KEEP,GL_KEEP,GL_REPLACE);
 
         for(int i=0;i<m_mmd_mesh.get_groups_count();++i)
-        {
-            glStencilFunc(GL_ALWAYS,i+1,-1);
-            m_mmd_mesh.draw_group(i);
-        }
+            glStencilFunc(GL_ALWAYS,i+1,-1), m_mmd_mesh.draw_group(i);
+
+        for(int i=0;i<m_mesh.get_groups_count();++i)
+            glStencilFunc(GL_ALWAYS,i+1,-1), m_mesh.draw_group(i);
 
         unsigned int g;
         glReadPixels(m_mouse_old.x,m_mouse_old.y, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &g);
@@ -693,12 +694,13 @@ private:
 
         //printf("group %d\n",g);
 
-        if(g>0 && strcmp(m_mmd_mesh.get_group_name(g-1),"edge")!=0)
+        const char *group_name=m_mmd_mesh.get_group_name(g-1);
+        if(g>0 && (!group_name || strcmp(group_name,"edge")!=0))
         {
             --g;
             if(m_pick_mode==pick_showhide)
             {
-                m_show_groups.resize(m_mmd_mesh.get_groups_count(),true);
+                m_show_groups.resize(m_mmd_mesh.get_groups_count()+m_mesh.get_groups_count(),true);
                 m_show_groups[g]=!m_show_groups[g];
 
                 const nya_scene::shared_mesh *sh=m_mmd_mesh.internal().get_shared_data().operator->();
@@ -732,14 +734,15 @@ private:
 
         m_pick_mode=pick_none;
     }
-
     nya_render::clear(true,true);
 
     if(!m_show_groups.empty())
     {
-        for(int i=0;i<int(m_show_groups.size());++i)
-            if(m_show_groups[i])
-                m_mmd_mesh.draw_group(i);
+        for(int i=0;i<int(m_show_groups.size());++i) if(m_show_groups[i]) m_mmd_mesh.draw_group(i);
+
+        for(int i=0;i<int(m_show_groups.size());++i) if(m_show_groups[i]) m_mesh.draw_group(i,"opaque");
+        for(int i=0;i<int(m_show_groups.size());++i) if(m_show_groups[i]) m_mesh.draw_group(i,"transparent_clip");
+        for(int i=0;i<int(m_show_groups.size());++i) if(m_show_groups[i]) m_mesh.draw_group(i,"transparent_blend");
     }
     else
     {

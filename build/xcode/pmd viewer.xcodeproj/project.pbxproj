@@ -19,7 +19,6 @@
 		F28DAD9A15D9AF4E0030D67B /* PmdDocument.xib in Resources */ = {isa = PBXBuildFile; fileRef = F28DAD9315D9AF4E0030D67B /* PmdDocument.xib */; };
 		F28DAD9B15D9AF4E0030D67B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = F28DAD9515D9AF4E0030D67B /* MainMenu.xib */; };
 		F28DAD9C15D9AF4E0030D67B /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F28DAD9715D9AF4E0030D67B /* main.m */; };
-		F28DADA615D9AF830030D67B /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = F28DAD9F15D9AF830030D67B /* AppIcon.icns */; };
 		F28DADA715D9AF830030D67B /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = F28DADA115D9AF830030D67B /* Credits.rtf */; };
 		F28DADA815D9AF830030D67B /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F28DADA315D9AF830030D67B /* InfoPlist.strings */; };
 		F28DADAF15D9AFB50030D67B /* libnya_engine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F28DADAE15D9AFA70030D67B /* libnya_engine.a */; };
@@ -70,7 +69,6 @@
 		F28DAD9615D9AF4E0030D67B /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = "../../tests/pmd viewer/en.lproj/MainMenu.xib"; sourceTree = "<group>"; };
 		F28DAD9715D9AF4E0030D67B /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = "../../tests/pmd viewer/main.m"; sourceTree = "<group>"; };
 		F28DAD9E15D9AF830030D67B /* pmd viewer-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "pmd viewer-Info.plist"; path = "../../tests/pmd viewer/pmd viewer-Info.plist"; sourceTree = "<group>"; };
-		F28DADA015D9AF830030D67B /* en */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = en; path = "../../tests/pmd viewer/en.lproj/AppIcon.icns"; sourceTree = "<group>"; };
 		F28DADA215D9AF830030D67B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = "../../tests/pmd viewer/en.lproj/Credits.rtf"; sourceTree = "<group>"; };
 		F28DADA415D9AF830030D67B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = "../../tests/pmd viewer/en.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		F28DADA915D9AFA70030D67B /* nya_engine.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = nya_engine.xcodeproj; sourceTree = "<group>"; };
@@ -104,7 +102,6 @@
 		F261EA46151E698D00C195DA = {
 			isa = PBXGroup;
 			children = (
-				F55A74D219C639D9009825B7 /* AppIcon.icns */,
 				F28DADA915D9AFA70030D67B /* nya_engine.xcodeproj */,
 				F28DAD8D15D9AF330030D67B /* pmd viewer */,
 				F261EA54151E698D00C195DA /* Frameworks */,
@@ -172,11 +169,11 @@
 		F28DAD9D15D9AF6B0030D67B /* Supporting files */ = {
 			isa = PBXGroup;
 			children = (
+				F55A74D219C639D9009825B7 /* AppIcon.icns */,
 				3D4FEDB819C7230700A01168 /* materials */,
 				3D4FEDB419C711A400A01168 /* shaders */,
 				3D4FEDB519C711A400A01168 /* toon */,
 				F28DAD9E15D9AF830030D67B /* pmd viewer-Info.plist */,
-				F28DAD9F15D9AF830030D67B /* AppIcon.icns */,
 				F28DADA115D9AF830030D67B /* Credits.rtf */,
 				F28DADA315D9AF830030D67B /* InfoPlist.strings */,
 			);
@@ -271,7 +268,6 @@
 				F55A74D419C639D9009825B7 /* AppIcon.icns in Resources */,
 				F28DAD9A15D9AF4E0030D67B /* PmdDocument.xib in Resources */,
 				F28DAD9B15D9AF4E0030D67B /* MainMenu.xib in Resources */,
-				F28DADA615D9AF830030D67B /* AppIcon.icns in Resources */,
 				3D4FEDB719C711A400A01168 /* toon in Resources */,
 				F28DADA715D9AF830030D67B /* Credits.rtf in Resources */,
 				F28DADA815D9AF830030D67B /* InfoPlist.strings in Resources */,
@@ -314,14 +310,6 @@
 				F28DAD9615D9AF4E0030D67B /* en */,
 			);
 			name = MainMenu.xib;
-			sourceTree = "<group>";
-		};
-		F28DAD9F15D9AF830030D67B /* AppIcon.icns */ = {
-			isa = PBXVariantGroup;
-			children = (
-				F28DADA015D9AF830030D67B /* en */,
-			);
-			name = AppIcon.icns;
 			sourceTree = "<group>";
 		};
 		F28DADA115D9AF830030D67B /* Credits.rtf */ = {

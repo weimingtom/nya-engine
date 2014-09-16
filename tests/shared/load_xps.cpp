@@ -47,7 +47,7 @@ public:
     }
 
     void skip_color() { read_string(); } //ToDo: remove
-    void skip_skining() { read_string(); read_string(); } //ToDo: remove
+    void skip_skining(unsigned short) { read_string(); read_string(); } //ToDo: remove
     void skip(size_t) {}
 
 public:
@@ -80,7 +80,7 @@ public:
     }
 
     void skip_color() { skip(4); } //ToDo: remove
-    void skip_skining() { skip(4*4*2+2*4); } //ToDo: remove
+    void skip_skining(unsigned short version) { if(version==1) skip(4*4*2+2*4); else skip(6*4) ; } //ToDo: remove
 
     binary_reader(const void *data,size_t size): memory_reader(data,size) {}
 };
@@ -183,21 +183,11 @@ public:
 
 };
 
-template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,nya_scene::resource_data &data,const char* name)
+template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &reader,const char* name,unsigned short version=1)
 {
-    if(!data.get_size())
+    if(version>2)
         return false;
 
-    std::string path(name);
-    size_t p=path.rfind("/");
-    if(p==std::string::npos)
-        p=path.rfind("\\");
-    if(p==std::string::npos)
-        path.clear();
-    else
-        path.resize(p+1);
-
-    reader_t reader((const char *)data.get_data(),data.get_size());
     typedef unsigned int uint;
     uint bones_count=reader.template read<uint>();
     if(bones_count>1024)
@@ -219,6 +209,15 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,nya_scene:
     typedef unsigned short ushort;
     std::vector<uint> indices;
 
+    std::string path(name);
+    size_t p=path.rfind("/");
+    if(p==std::string::npos)
+        p=path.rfind("\\");
+    if(p==std::string::npos)
+        path.clear();
+    else
+        path.resize(p+1);
+
     uint groups_count=reader.template read<uint>();
     res.groups.resize(groups_count);
     res.materials.resize(groups_count);
@@ -226,6 +225,11 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,nya_scene:
     {
         const std::string name=reader.read_string();
         const uint uvlayers=reader.template read<uint>();
+        if(uvlayers!=1 && uvlayers!=2) //ToDo
+        {
+            printf("uvlayers %d\n",uvlayers);
+            return false;
+        }
         const uint tex_count=reader.template read<uint>();
 
         std::vector<std::string> tex_names(tex_count);
@@ -263,7 +267,14 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,nya_scene:
             v.tc.x=reader.template read<float>("\n\r ");
             v.tc.y=1.0f-reader.template read<float>();
 
-            reader.skip_skining(); //skip bones 1-4 ints, bone weights 1-4 floats
+            if(uvlayers>1)
+            {
+                v.tc2.x=reader.template read<float>("\n\r ");
+                v.tc2.y=1.0f-reader.template read<float>();
+                reader.skip(4*4);
+            }
+
+            reader.skip_skining(version); //skip bones 1-4 ints, bone weights 1-4 floats
         }
 
         const uint ioffset=(uint)indices.size();
@@ -324,10 +335,24 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,nya_scene:
 
 bool xps_loader::load_mesh(nya_scene::shared_mesh &res,nya_scene::resource_data &data,const char* name)
 {
-    return ::load_mesh<binary_reader>(res,data,name);
+    binary_reader r(data.get_data(),data.get_size());
+    if(r.read<unsigned int>()==323232)
+    {
+        unsigned short version=r.read<unsigned short>();
+        r.seek(512);
+        while(r.read<char>()==0) {}
+        r.seek(r.get_offset()-1);
+
+        return ::load_mesh(res,r,name,version);
+    }
+
+    r.seek(0);
+
+    return ::load_mesh(res,r,name);
 }
 
 bool xps_loader::load_mesh_ascii(nya_scene::shared_mesh &res,nya_scene::resource_data &data,const char* name)
 {
-    return ::load_mesh<text_reader>(res,data,name);
+    text_reader r((const char *)data.get_data(),data.get_size());
+    return ::load_mesh(res,r,name);
 }
