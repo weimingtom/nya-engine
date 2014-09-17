@@ -102,6 +102,8 @@ private:
 
     void update(unsigned int dt);
 
+    void update_aabb_transform() const;
+
 private:
     enum bone_control_mode
     {
@@ -133,6 +135,16 @@ private:
     mutable bool m_recalc_aabb;
     mutable nya_math::aabb m_aabb;
     bool m_has_aabb;
+
+    struct group
+    {
+        mutable nya_math::aabb aabb;
+        bool has_aabb;
+
+        group(): has_aabb(false) {}
+    };
+
+    std::vector<group> m_groups;
 };
 
 class mesh

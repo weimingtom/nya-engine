@@ -224,6 +224,10 @@ bool mesh_internal::init_from_shared()
     m_recalc_aabb=true;
     m_has_aabb=m_shared->aabb.delta*m_shared->aabb.delta>0.0001;
 
+    m_groups.resize(m_shared->groups.size());
+    for(int i=0;i<(int)m_groups.size();++i)
+        m_groups[i].has_aabb=m_shared->groups[i].aabb.delta*m_shared->groups[i].aabb.delta>0.0001;
+
     return true;
 }
 
@@ -253,6 +257,7 @@ void mesh::unload()
     m_internal.m_anims.clear();
     m_internal.m_skeleton=nya_render::skeleton();
     m_internal.m_aabb=nya_math::aabb();
+    m_internal.m_groups.clear();
 }
 
 int mesh_internal::get_materials_count() const
@@ -328,6 +333,9 @@ void mesh::draw(const char *pass_name) const
     if(!pass_name)
         return;
 
+    if(internal().m_has_aabb && !get_camera().get_frustum().test_intersect(get_aabb()))
+        return;
+
     for(int i=0;i<get_groups_count();++i)
         draw_group(i,pass_name);
 }
@@ -344,7 +352,13 @@ void mesh::draw_group(int idx,const char *pass_name) const
     if(internal().mat(mat_idx).get_pass_idx(pass_name)<0)
         return;
 
-    if(internal().m_has_aabb && !get_camera().get_frustum().test_intersect(get_aabb()))
+    internal().update_aabb_transform();
+    if(internal().m_groups[idx].has_aabb)
+    {
+        if(!get_camera().get_frustum().test_intersect(internal().m_groups[idx].aabb))
+            return;
+    }
+    else if(internal().m_has_aabb && !get_camera().get_frustum().test_intersect(get_aabb()))
         return;
 
     transform::set(internal().m_transform);
@@ -519,6 +533,25 @@ void mesh_internal::anim_update_mapping(applied_anim &a)
     {
         for(int j=0;j<int(m_skeleton.get_bones_count());++j)
             a.bones_map[j]=ra.get_bone_idx(m_skeleton.get_bone_name(j));
+    }
+}
+
+void mesh_internal::update_aabb_transform() const
+{
+    if(!m_shared.is_valid())
+        return;
+
+    if(!m_recalc_aabb)
+        return;
+
+    m_recalc_aabb=false;
+    m_aabb=m_transform.transform_aabb(m_shared->aabb);
+    for(int i=0;i<(int)m_groups.size();++i)
+    {
+        if(!m_groups[i].has_aabb)
+            continue;
+
+        m_groups[i].aabb=m_transform.transform_aabb(m_shared->groups[i].aabb);
     }
 }
 
@@ -699,15 +732,7 @@ void mesh_internal::update(unsigned int dt)
 
 const nya_math::aabb &mesh::get_aabb() const
 {
-    if(!internal().m_shared.is_valid())
-        return nya_memory::get_invalid_object<nya_math::aabb>();
-
-    if(internal().m_recalc_aabb)
-    {
-        m_internal.m_recalc_aabb=false;
-        m_internal.m_aabb=internal().m_transform.transform_aabb(internal().m_shared->aabb);
-    }
-
+    internal().update_aabb_transform();
     return internal().m_aabb;
 }
 
