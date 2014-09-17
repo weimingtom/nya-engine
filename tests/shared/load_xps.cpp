@@ -221,7 +221,7 @@ public:
     }
 };
 
-template<typename vert_t,typename ind_t> void calculate_tangents(vert_t *verts,ind_t *inds,unsigned int icount)
+template<typename vert_t,typename ind_t> void calculate_tangents(vert_t *verts,unsigned int vcount,ind_t *inds,unsigned int icount)
 {
     for(unsigned int i=0;i<icount;i+=3)
     {
@@ -229,25 +229,24 @@ template<typename vert_t,typename ind_t> void calculate_tangents(vert_t *verts,i
 
         const nya_math::vec3 &p0=v0.pos,&p1=v1.pos,&p2=v2.pos;
         const nya_math::vec2 &tc0=v0.tc,&tc1=v1.tc,&tc2=v2.tc;
+        const nya_math::vec3 p10=p1-p0,p20=p2-p0;
+        const nya_math::vec2 tc10=tc1-tc0,tc20=tc2-tc0;
 
-        const nya_math::vec3 n=nya_math::vec3::cross(p1-p0,p2-p0);
+        const nya_math::vec3 t=nya_math::vec3::normalize(tc20.y*p10 - tc10.y*p20);
+        const nya_math::vec3 bt=nya_math::vec3::normalize(tc20.x*p10 - tc10.x*p20);
 
-        const float eps=0.001f;
+        v0.tangent+=t,v1.tangent+=t,v2.tangent+=t;
+        v0.bitangent+=bt,v1.bitangent+=bt,v2.bitangent+=bt;
+    }
 
-        nya_math::vec3 dp=p1-p0;
-        nya_math::vec2 dtc;
-        if(dp*dp<eps)
-            dp=p2-p0,dtc=tc2-tc0;
-        else
-            dtc=tc1-tc0;
+    for(unsigned int i=0;i<vcount;++i)
+    {
+        vert_t &v=verts[i];
+        v.tangent.normalize();
+        v.bitangent.normalize();
 
-        nya_math::vec3 t;
-        if(fabsf(dtc.x)>eps)
-            t=dp/dtc.x;
-
-        t=nya_math::vec3::normalize(t-(n*t)*n);
-        v0.tangent=v1.tangent=v2.tangent=t;
-        v0.bitangent=v1.bitangent=v2.bitangent=nya_math::vec3::normalize(nya_math::vec3::cross(t,n));
+        v.tangent=(v.tangent-v.normal*(v.normal*v.tangent)).normalize();
+        v.bitangent=(v.bitangent-v.normal*(v.normal*v.bitangent)).normalize();
     }
 }
 
@@ -383,7 +382,11 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
             if(!semantics)
                 continue;
 
-            m.set_texture(semantics, nya_scene::texture(tex_names[i].c_str()));
+            nya_scene::texture tex;
+            if(!tex.load(tex_names[i].c_str()))
+                continue;
+
+            m.set_texture(semantics,tex);
             has_semantics[semantics]=true;
         }
 
@@ -411,7 +414,7 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
     if(!indices.size())
         return false;
 
-    calculate_tangents(&vertices[0],&indices[0],(uint)indices.size());
+    calculate_tangents(&vertices[0],(uint)vertices.size(),&indices[0],(uint)indices.size());
 
     res.vbo.set_vertex_data(&vertices[0],(uint)sizeof(vertices[0]),(uint)vertices.size());
 
