@@ -271,7 +271,7 @@ const state &get_aplied_state() { return applied_state; }
 void set_state_override(const state_override &s)
 {
     override_state=s;
-    has_state_override=s.override_blend;
+    has_state_override=s.override_blend || s.override_cull_face;
 }
 
 const state_override &get_state_override() { return override_state; }
@@ -285,6 +285,12 @@ state get_overriden_state(const state &s)
         r.blend=override_state.blend;
         r.blend_src=override_state.blend_src;
         r.blend_dst=override_state.blend_dst;
+    }
+
+    if(override_state.override_cull_face)
+    {
+        r.cull_face=override_state.cull_face;
+        r.cull_order=override_state.cull_order;
     }
 
     return r;

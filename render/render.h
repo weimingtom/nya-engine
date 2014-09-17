@@ -158,10 +158,11 @@ const state &get_applied_state();
 struct state_override: public state
 {
     bool override_blend;
+    bool override_cull_face;
 
     //ToDo
 
-    state_override(): override_blend(false) {}
+    state_override(): override_blend(false),override_cull_face(false) {}
 };
 
 void set_state_override(const state_override &s);

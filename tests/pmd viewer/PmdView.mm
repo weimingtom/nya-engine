@@ -604,6 +604,12 @@ private:
         doc->m_animation_name.clear();
     }
 
+    if(backface_cull!=doc->backface_cull)
+    {
+        backface_cull=doc->backface_cull;
+        [self setNeedsDisplay:YES];
+    }
+
     if(m_mmd_mesh.get_anim().is_valid())
     {
         unsigned long time=nya_system::get_time();

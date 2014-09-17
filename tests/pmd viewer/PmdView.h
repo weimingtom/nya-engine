@@ -28,6 +28,7 @@ private:
 @interface PmdView : NSOpenGLView
 {
     NSPoint m_mouse_old;
+    bool backface_cull;
 
     mmd_mesh m_mmd_mesh;
     nya_scene::mesh m_mesh;
