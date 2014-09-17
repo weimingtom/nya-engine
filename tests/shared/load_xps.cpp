@@ -443,8 +443,18 @@ bool xps_loader::load_mesh(nya_scene::shared_mesh &res,nya_scene::resource_data 
     binary_reader r(data.get_data(),data.get_size());
     if(r.read<unsigned int>()==323232)
     {
-        unsigned short version=r.read<unsigned short>();
-        r.seek(512);
+        const unsigned short version=r.read<unsigned short>();
+        r.read<unsigned short>();
+        r.read_string();
+        const unsigned int skip_count=r.read<unsigned int>();
+        r.read_string();
+        r.read_string();
+        const int string_len=r.read<unsigned char>();
+        r.read<unsigned char>();
+        r.skip(string_len);
+        r.skip(skip_count*4);
+
+        //still missing sometimes
         while(r.read<char>()==0) {}
         r.seek(r.get_offset()-1);
 
