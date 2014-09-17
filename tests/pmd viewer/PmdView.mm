@@ -39,8 +39,8 @@ void viewer_camera::add_pos(float dx,float dy,float dz)
     m_pos.x-=dx;
     m_pos.y-=dy;
     m_pos.z-=dz;
-    if(m_pos.z<5.0f)
-        m_pos.z=5.0f;
+    if(m_pos.z<2.0f)
+        m_pos.z=2.0f;
 
     if(m_pos.z>200.0f)
         m_pos.z=200.0f;
