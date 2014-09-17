@@ -12,6 +12,7 @@
 #include "texture.h"
 #include "shader.h"
 #include "platform_specific_gl.h"
+#include "statistics.h"
 
 #include "memory/tmp_buffer.h"
 
@@ -522,6 +523,18 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type) //To
         glDrawArrays(gl_elem,offset,count);
     }
 #endif
+
+    if(statistics::enabled())
+    {
+        ++statistics::get().draw_count;
+        statistics::get().verts_count+=count;
+
+        const unsigned int tri_count=el_type==vbo::triangles?count/3:el_type==vbo::triangle_strip?count-2:0;
+        if(get_state().blend)
+            statistics::get().transparent_poly_count+=tri_count;
+        else
+            statistics::get().opaque_poly_count+=tri_count;
+    }
 }
 
 void vbo::release()
