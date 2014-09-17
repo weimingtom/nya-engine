@@ -162,6 +162,9 @@
     <ClCompile Include="..\..\formats\nms.cpp">
       <Filter>formats</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\render\statistics.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\log\log.h">
@@ -337,6 +340,9 @@
     </ClInclude>
     <ClInclude Include="..\..\memory\optional.h">
       <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\render\statistics.h">
+      <Filter>render</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -183,6 +183,7 @@
     <ClCompile Include="..\..\render\render.cpp" />
     <ClCompile Include="..\..\render\shader.cpp" />
     <ClCompile Include="..\..\render\skeleton.cpp" />
+    <ClCompile Include="..\..\render\statistics.cpp" />
     <ClCompile Include="..\..\render\texture.cpp" />
     <ClCompile Include="..\..\render\transform.cpp" />
     <ClCompile Include="..\..\render\vbo.cpp" />
@@ -273,6 +274,7 @@
     <ClInclude Include="..\..\render\render.h" />
     <ClInclude Include="..\..\render\shader.h" />
     <ClInclude Include="..\..\render\skeleton.h" />
+    <ClInclude Include="..\..\render\statistics.h" />
     <ClInclude Include="..\..\render\texture.h" />
     <ClInclude Include="..\..\render\transform.h" />
     <ClInclude Include="..\..\render\vbo.h" />
