@@ -32,6 +32,7 @@ SOURCES += \
     $${NYA_ENGINE_PATH}/render/render.cpp \
     $${NYA_ENGINE_PATH}/render/shader.cpp \
     $${NYA_ENGINE_PATH}/render/skeleton.cpp \
+    $${NYA_ENGINE_PATH}/render/statistics.cpp \
     $${NYA_ENGINE_PATH}/render/texture.cpp \
     $${NYA_ENGINE_PATH}/render/transform.cpp \
     $${NYA_ENGINE_PATH}/render/vbo.cpp \
@@ -95,7 +96,8 @@ HEADERS += \
     $${NYA_ENGINE_PATH}/render/render.h \
     $${NYA_ENGINE_PATH}/render/render_objects.h \
     $${NYA_ENGINE_PATH}/render/shader.h \
-    $${NYA_ENGINE_PATH}/render/skeleton.h \
+    $${NYA_ENGINE_PATH}/render/skeleton.h \    
+	$${NYA_ENGINE_PATH}/render/statistics.h \
     $${NYA_ENGINE_PATH}/render/texture.h \
     $${NYA_ENGINE_PATH}/render/transform.h \
     $${NYA_ENGINE_PATH}/render/vbo.h \
