@@ -83,6 +83,9 @@ public:
     void release();
 
 public:
+    static unsigned int get_used_vmem_size();
+
+public:
     vbo(): m_verts(-1),m_indices(-1) {}
 
 private:
