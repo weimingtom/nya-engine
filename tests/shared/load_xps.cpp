@@ -7,25 +7,60 @@
 
 #include "resources/resources.h"
 
+namespace
+{
+    struct color { unsigned char r,g,b,a; };
+    struct face { unsigned int i0,i1,i2; };
+    struct skining { unsigned short inds[4]; float weights[4]; };
+}
+
 class text_reader
 {
 public:
-    template<typename t> t read(const char *str="\n\r")
+    template<typename t> t read()
     {
-        const std::string s=read_string(str);
+        const std::string s=read_string();
         std::istringstream iss(s);
         t out;
         iss>>out;
         return out;
     }
 
-    std::string read_string(const char *str="\n\r")
+    nya_math::vec2 read_tc()
+    {
+        const std::string s=read_string();
+        std::istringstream iss(s);
+        nya_math::vec2 v;
+        if(iss>>v.x) iss>>v.y;
+        v.y=1.0f-v.y;
+        return v;
+    }
+
+    nya_math::vec3 read_vec3()
+    {
+        const std::string s=read_string();
+        std::istringstream iss(s);
+        nya_math::vec3 v;
+        if(iss>>v.x) if(iss>>v.y) iss>>v.z;
+        return v;
+    }
+
+    face read_face()
+    {
+        const std::string s=read_string();
+        std::istringstream iss(s);
+        face f; memset(&f,0,sizeof(f));
+        if(iss>>f.i0) if(iss>>f.i1) iss>>f.i2;
+        return f;
+    }
+
+    std::string read_string()
     {
         size_t i=m_offset;
         for(;i<m_size;++i)
         {
             const char c=*(m_text+i);
-            if(!c || strchr(str,c))
+            if(!c || strchr("\n\r",c))
                 break;
         }
 
@@ -39,16 +74,35 @@ public:
         for(;m_offset<m_size;++m_offset)
         {
             const char c=*(m_text+m_offset);
-            if(c && !strchr(str,c))
+            if(c && !strchr("\n\r",c))
                 break;
         }
 
         return std::string(text,len);
     }
 
+    skining read_skining(unsigned short version)
+    {
+        const std::string str=read_string();
+        const std::string str2=read_string();
+        std::istringstream iss(str);
+        std::istringstream iss2(str2);
+        skining s; memset(&s,0,sizeof(s));
+        if(iss>>s.inds[0]) if(iss>>s.inds[1]) if(iss>>s.inds[2]) iss>>s.inds[3];
+        if(iss2>>s.weights[0]) if(iss>>s.weights[1]) if(iss>>s.weights[2]) iss>>s.weights[3];
+        return s;
+    }
+
     void skip_color() { read_string(); } //ToDo: remove
-    void skip_skining(unsigned short) { read_string(); read_string(); } //ToDo: remove
     void skip(size_t) {}
+
+    size_t get_remained() const
+    {
+        if(m_offset>=m_size)
+            return 0;
+
+        return m_size-m_offset;
+    }
 
 public:
     text_reader(const char *text,size_t size): m_text(size?text:0),m_size(text?size:0),m_offset(0)
@@ -62,8 +116,7 @@ public:
 
 private:
     const char *m_text;
-    size_t m_size;
-    size_t m_offset;
+    size_t m_size,m_offset;
 };
 
 class binary_reader: public nya_memory::memory_reader
@@ -73,14 +126,48 @@ public:
 
     std::string read_string(const char *str=0)
     {
-        unsigned char len=read<unsigned char>();
+        unsigned int len=0;
+        for(unsigned int i=0;get_remained();++i)
+        {
+            unsigned char len_byte=read<unsigned char>();
+            len+=(len_byte & 0x7F) << (7*i);
+            if(!(len_byte & 0x80))
+                break;
+        }
+
+        if(len>get_remained())
+            return "";
+
         std::string ret((const char *)get_data(),len);
         skip(len);
         return ret;
     }
 
+    nya_math::vec2 read_tc() { nya_math::vec2 v; v.x=read<float>(); v.y=1.0f-read<float>(); return v; }
+    nya_math::vec3 read_vec3() { return read<nya_math::vec3>(); }
+
+    face read_face() { return read<face>(); }
+
+    skining read_skining(unsigned short version)
+    {
+        skining s;
+
+        if(version==1) //ToDo
+        {
+            skip(10*4);
+            return s;
+        }
+
+        for(int i=0;i<4;++i)
+            s.inds[i]=read<unsigned short>();
+
+        for(int i=0;i<4;++i)
+            s.weights[i]=read<float>();
+
+        return s;
+    }
+
     void skip_color() { skip(4); } //ToDo: remove
-    void skip_skining(unsigned short version) { if(version==1) skip(4*4*2+2*4); else skip(6*4) ; } //ToDo: remove
 
     binary_reader(const void *data,size_t size): memory_reader(data,size) {}
 };
@@ -257,18 +344,14 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
 
     typedef unsigned int uint;
     uint bones_count=reader.template read<uint>();
-    if(bones_count>1024)
+    if(bones_count>4096)
         return false;
 
     for(uint i=0;i<bones_count;++i)
     {
         const std::string name=reader.read_string();
         const short parent=reader.template read<short>();
-        nya_math::vec3 pos;
-        pos.x=reader.template read<float>("\n\r ");
-        pos.y=reader.template read<float>("\n\r ");
-        pos.z=reader.template read<float>();
-
+        const nya_math::vec3 pos=reader.read_vec3();
         res.skeleton.add_bone(name.c_str(),pos,nya_math::quat(),parent,true);
     }
 
@@ -286,18 +369,16 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
         path.resize(p+1);
 
     uint groups_count=reader.template read<uint>();
-    res.groups.resize(groups_count);
-    res.materials.resize(groups_count);
     for(uint i=0;i<groups_count;++i)
     {
+        if(!reader.get_remained())
+            return false;
+
         const std::string name=reader.read_string();
         const uint uvlayers=reader.template read<uint>();
-        if(uvlayers!=1 && uvlayers!=2) //ToDo
-        {
-            printf("uvlayers %d\n",uvlayers);
-            return false;
-        }
         const uint tex_count=reader.template read<uint>();
+        if(tex_count>32)
+            return false;
 
         std::vector<std::string> tex_names(tex_count);
         std::vector<uint> tex_uvlayers(tex_count);
@@ -316,45 +397,49 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
 
         const uint voffset=(uint)vertices.size();
         const uint vcount=reader.template read<uint>();
+        if(vcount>reader.get_remained()) //rough check
+            return false;
+
         vertices.resize(voffset+vcount);
         for(uint j=voffset;j<voffset+vcount;++j)
         {
             xps_loader::vert &v=vertices[j];
 
-            v.pos.x=reader.template read<float>("\n\r ");
-            v.pos.y=reader.template read<float>("\n\r ");
-            v.pos.z=reader.template read<float>();
-
-            v.normal.x=reader.template read<float>("\n\r ");
-            v.normal.y=reader.template read<float>("\n\r ");
-            v.normal.z=reader.template read<float>();
+            v.pos=reader.read_vec3();
+            v.normal=reader.read_vec3();
 
             reader.skip_color(); //skip colors, 4 bytes
 
-            v.tc.x=reader.template read<float>("\n\r ");
-            v.tc.y=1.0f-reader.template read<float>();
+            v.tc=reader.read_tc();
 
-            if(uvlayers>1)
+            for(int j=1;j<uvlayers;++j)
             {
-                v.tc2.x=reader.template read<float>("\n\r ");
-                v.tc2.y=1.0f-reader.template read<float>();
-                reader.skip(4*4);
+                reader.read_tc();
+
+                if(version==1) reader.skip(4*4); //I dunno
             }
 
-            reader.skip_skining(version); //skip bones 1-4 ints, bone weights 1-4 floats
+            if(bones_count)
+                reader.read_skining(version);
         }
 
         const uint ioffset=(uint)indices.size();
         const uint fcount=reader.template read<uint>();
+        if(fcount>reader.get_remained()) //rough check
+            return false;
+
         indices.resize(ioffset+fcount*3);
         for(uint j=0;j<fcount;++j)
         {
             uint *f=&indices[ioffset+j*3];
-            f[0]=voffset+reader.template read<uint>("\n\r ");
-            f[2]=voffset+reader.template read<uint>("\n\r ");
-            f[1]=voffset+reader.template read<uint>();
+
+            const face ff=reader.read_face();
+            f[0]=ff.i0+voffset;
+            f[1]=ff.i2+voffset;
+            f[2]=ff.i1+voffset;
         }
 
+        res.groups.resize(i+1);
         nya_scene::shared_mesh::group &g=res.groups[i];
         g.name=name;
         g.offset=ioffset;
@@ -362,6 +447,7 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
         g.material_idx=i;
         g.elem_type=nya_render::vbo::triangles;
 
+        res.materials.resize(i+1);
         nya_scene::material &m=res.materials[i];
 
         const render_group_props rgp(name);
@@ -449,14 +535,8 @@ bool xps_loader::load_mesh(nya_scene::shared_mesh &res,nya_scene::resource_data 
         const unsigned int skip_count=r.read<unsigned int>();
         r.read_string();
         r.read_string();
-        const int string_len=r.read<unsigned char>();
-        r.read<unsigned char>();
-        r.skip(string_len);
+        r.read_string();
         r.skip(skip_count*4);
-
-        //still missing sometimes
-        while(r.read<char>()==0) {}
-        r.seek(r.get_offset()-1);
 
         return ::load_mesh(res,r,name,version);
     }
