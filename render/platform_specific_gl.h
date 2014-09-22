@@ -127,7 +127,7 @@ namespace nya_render
     public:
         void release();
 
-    private:
+    public:
         typedef render_objects<texture_obj> texture_objs;
         static texture_objs &get_texture_objs()
         {

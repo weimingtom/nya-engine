@@ -1164,7 +1164,6 @@ bool texture::is_cubemap() const
     return texture_obj::get(m_tex).is_cubemap;
 }
 
-
 namespace
 {
 
@@ -1178,17 +1177,12 @@ struct size_counter
 
 };
 
-unsigned int texture_obj::get_used_vmem_size()
-{
-    size_counter counter;
-    get_texture_objs().apply_to_all(counter);
-
-    return counter.size;
-}
-
 unsigned int texture::get_used_vmem_size()
 {
-    return texture_obj::get_used_vmem_size();
+    size_counter counter;
+    texture_obj::get_texture_objs().apply_to_all(counter);
+
+    return counter.size;
 }
 
 void texture_obj::release()

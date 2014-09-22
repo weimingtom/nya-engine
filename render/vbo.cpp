@@ -83,7 +83,7 @@ namespace
     public:
         void release();
 
-    private:
+    public:
         typedef render_objects<vbo_obj> vbo_objs;
         static vbo_objs &get_vbo_objs()
         {
@@ -1039,6 +1039,30 @@ unsigned int vbo::get_indices_count() const
         return 0;
 
     return vbo_obj::get(m_indices).element_count;
+}
+
+namespace
+{
+
+struct size_counter
+{
+    unsigned int size;
+    void apply(const vbo_obj &obj)
+    {
+        size+=obj.vertex_stride*obj.verts_count;
+        size+=obj.element_size*obj.element_count;
+    }
+    size_counter(): size(0) {}
+};
+
+};
+
+unsigned int vbo::get_used_vmem_size()
+{
+    size_counter counter;
+    vbo_obj::get_vbo_objs().apply_to_all(counter);
+
+    return counter.size;
 }
 
 }

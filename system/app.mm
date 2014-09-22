@@ -679,7 +679,7 @@ public:
 
         shared_app_delegate *delegate=[[shared_app_delegate alloc] init_with_responder:&app antialiasing:antialiasing];
 
-        [NSApp setDelegate:delegate];
+        [[NSApplication sharedApplication] setDelegate:delegate];
 
         setup_menu();
 
