@@ -95,8 +95,17 @@ namespace
     vbo_obj_atributes active_attributes;
 
 #ifdef DIRECTX11
-DXGI_FORMAT get_dx_format(int dimension)
+DXGI_FORMAT get_dx_format(int dimension,vbo::vertex_atrib_type type)
 {
+    if(type==vbo::float16)
+    {
+        switch(dimension)
+        {
+            case 1: case 2: return DXGI_FORMAT_R16G16_FLOAT;
+            case 3: case 4: return DXGI_FORMAT_R16G16B16A16_FLOAT;
+        }
+    }
+
     switch(dimension)
     {
         case 1: return DXGI_FORMAT_R32_FLOAT;
@@ -310,7 +319,7 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type) //To
             D3D11_INPUT_ELEMENT_DESC d;
             d.SemanticName="POSITION";
             d.SemanticIndex=0;
-            d.Format=get_dx_format(vobj.vertices.dimension);
+            d.Format=get_dx_format(vobj.vertices.dimension,vobj.vertices.type);
             d.InputSlot=0;
             d.AlignedByteOffset=vobj.vertices.offset;
             d.InputSlotClass=D3D11_INPUT_PER_VERTEX_DATA;
@@ -323,7 +332,7 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type) //To
             D3D11_INPUT_ELEMENT_DESC d;
             d.SemanticName="NORMAL";
             d.SemanticIndex=0;
-            d.Format=get_dx_format(3);
+            d.Format=get_dx_format(3,vobj.normals.type);
             d.InputSlot=0;
             d.AlignedByteOffset=vobj.normals.offset;
             d.InputSlotClass=D3D11_INPUT_PER_VERTEX_DATA;
@@ -336,7 +345,7 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type) //To
             D3D11_INPUT_ELEMENT_DESC d;
             d.SemanticName="COLOR";
             d.SemanticIndex=0;
-            d.Format=get_dx_format(vobj.colors.dimension);
+            d.Format=get_dx_format(vobj.colors.dimension,vobj.colors.type);
             d.InputSlot=0;
             d.AlignedByteOffset=vobj.colors.offset;
             d.InputSlotClass=D3D11_INPUT_PER_VERTEX_DATA;
@@ -353,7 +362,7 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type) //To
             D3D11_INPUT_ELEMENT_DESC d;
             d.SemanticName="TEXCOORD";
             d.SemanticIndex=i;
-            d.Format=get_dx_format(tc.dimension);
+            d.Format=get_dx_format(tc.dimension,tc.type);
             d.InputSlot=0;
             d.AlignedByteOffset=tc.offset;
             d.InputSlotClass=D3D11_INPUT_PER_VERTEX_DATA;
