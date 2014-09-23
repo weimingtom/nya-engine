@@ -2,6 +2,7 @@
 @sampler bump "bump"
 @sampler lightmap "lightmap"
 @sampler spec "spec"
+@sampler env "env"
 
 @uniform alpha_test "alpha test"
 @predefined cam_pos "nya camera position":local
@@ -10,10 +11,8 @@
 
 @all
 
-varying vec2 tc;
-varying vec3 normal;
 varying vec3 pos;
-
+varying vec2 tc;
 varying mat3 tbn;
 
 @vertex
@@ -37,6 +36,7 @@ uniform sampler2D base;
 uniform sampler2D bump;
 uniform sampler2D lightmap;
 uniform sampler2D spec;
+uniform sampler2D env;
 
 uniform vec4 alpha_test;
 uniform vec4 cam_pos;
@@ -59,6 +59,10 @@ void main()
     c.rgb+=pow(max(0.0,dot(v,lrn)),10.0)*light_k.z*texture2D(spec,tc).rgb;
     
     c.rgb*=texture2D(lightmap,tc).rgb;
+
+    vec3 r=normalize(reflect(v,normal));
+	vec2 rtc = 0.5*r.xy/length(r)+0.5;
+    c.rgb+=texture2D(env,rtc).rgb*0.3;
 
     gl_FragColor=c;
 }
