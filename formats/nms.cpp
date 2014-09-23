@@ -176,21 +176,16 @@ size_t nms_mesh_chunk::read_header(const void *data, size_t size, int version)
         e.offset=vertex_stride;
         e.type=reader.read<uchar>();
         e.dimension=reader.read<uchar>();
-        uchar data_type=float32;
-        if(version>1)
+        e.data_type=version>1?(vertex_atrib_type)reader.read<uchar>():float32;
+        switch(e.data_type)
         {
-            data_type=reader.read<uchar>();
-            if(data_type!=float16 && data_type!=float32)
-            {
+            case float16: vertex_stride+=e.dimension*2; break;
+            case float32: vertex_stride+=e.dimension*4; break;
+            default:
                 *this=nms_mesh_chunk();
                 return 0;
-            }
-        }
-
-        e.data_type=(vertex_atrib_type)data_type;
+        };
         e.semantics=read_string(reader);
-
-        vertex_stride+=e.dimension*sizeof(float);
     }
 
     if(!vertex_stride)

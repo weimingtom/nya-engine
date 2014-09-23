@@ -42,13 +42,14 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size,i
     for(size_t i=0;i<c.elements.size();++i)
     {
         const nya_formats::nms_mesh_chunk::element &e=c.elements[i];
+        const nya_render::vbo::vertex_atrib_type type=nya_render::vbo::vertex_atrib_type(e.data_type);
         switch(e.type) //ToDo: data_type for all types
         {
-            case nya_formats::nms_mesh_chunk::pos: res.vbo.set_vertices(e.offset,e.dimension); break;
-            case nya_formats::nms_mesh_chunk::normal: res.vbo.set_normals(e.offset,nya_render::vbo::vertex_atrib_type(e.data_type)); break;
-            case nya_formats::nms_mesh_chunk::color: res.vbo.set_colors(e.offset,e.dimension); break;
+            case nya_formats::nms_mesh_chunk::pos: res.vbo.set_vertices(e.offset,e.dimension,type); break;
+            case nya_formats::nms_mesh_chunk::normal: res.vbo.set_normals(e.offset,type); break;
+            case nya_formats::nms_mesh_chunk::color: res.vbo.set_colors(e.offset,e.dimension,type); break;
             default:
-                res.vbo.set_tc(e.type-nya_formats::nms_mesh_chunk::tc0,e.offset,e.dimension); break;
+                res.vbo.set_tc(e.type-nya_formats::nms_mesh_chunk::tc0,e.offset,e.dimension,type); break;
         };
     }
 
