@@ -28,6 +28,8 @@ material::pass &material_default_pass(material &m)
     return m.get_pass(idx);
 }
 
+bool frustum_cull_enabled=true;
+
 }
 
 bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size,int version)
@@ -316,11 +318,6 @@ void mesh_internal::draw_group(int idx, const char *pass_name) const
 
     const shared_mesh::group &g=m_shared->groups[idx];
 
-    //ToDo: check aabb for groups
-    //if(g.aabb.delta*g.aabb.delta>0.0001)
-    //    if(get_camera().is_valid() && !get_camera()->get_frustum().test_intersect(g.aabb))
-    //        return;
-
     const material &m=mat(mat_idx);
     m.internal().set(pass_name);
     m_shared->vbo.bind();
@@ -334,7 +331,7 @@ void mesh::draw(const char *pass_name) const
     if(!pass_name)
         return;
 
-    if(internal().m_has_aabb && !get_camera().get_frustum().test_intersect(get_aabb()))
+    if(internal().m_has_aabb && frustum_cull_enabled && !get_camera().get_frustum().test_intersect(get_aabb()))
         return;
 
     for(int i=0;i<get_groups_count();++i)
@@ -353,14 +350,17 @@ void mesh::draw_group(int idx,const char *pass_name) const
     if(internal().mat(mat_idx).get_pass_idx(pass_name)<0)
         return;
 
-    internal().update_aabb_transform();
-    if(internal().m_groups[idx].has_aabb)
+    if(frustum_cull_enabled)
     {
-        if(!get_camera().get_frustum().test_intersect(internal().m_groups[idx].aabb))
+        internal().update_aabb_transform();
+        if(internal().m_groups[idx].has_aabb)
+        {
+            if(!get_camera().get_frustum().test_intersect(internal().m_groups[idx].aabb))
+                return;
+        }
+        else if(internal().m_has_aabb && !get_camera().get_frustum().test_intersect(get_aabb()))
             return;
     }
-    else if(internal().m_has_aabb && !get_camera().get_frustum().test_intersect(get_aabb()))
-        return;
 
     transform::set(internal().m_transform);
     shader_internal::set_skeleton(&internal().m_skeleton);
@@ -736,5 +736,7 @@ const nya_math::aabb &mesh::get_aabb() const
     internal().update_aabb_transform();
     return internal().m_aabb;
 }
+
+void mesh::set_frustum_cull(bool enable) { frustum_cull_enabled=enable; }
 
 }
