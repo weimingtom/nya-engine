@@ -3,6 +3,7 @@
 #import <Cocoa/Cocoa.h>
 
 #include "mmd_mesh.h"
+#include "render/debug_draw.h"
 
 class viewer_camera
 {
@@ -28,11 +29,13 @@ private:
 @interface PmdView : NSOpenGLView
 {
     NSPoint m_mouse_old;
-    bool backface_cull;
+    bool m_backface_cull;
+    bool m_show_bones;
 
     mmd_mesh m_mmd_mesh;
     nya_scene::mesh m_mesh;
     viewer_camera m_camera;
+    nya_render::debug_draw m_dd;
 
     NSTimer *m_animation_timer;
     unsigned long m_last_time;

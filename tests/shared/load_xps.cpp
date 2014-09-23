@@ -12,6 +12,7 @@ namespace
     struct color { unsigned char r,g,b,a; };
     struct face { unsigned int i0,i1,i2; };
     struct skining { unsigned short inds[4]; float weights[4]; };
+    nya_scene::material::param_proxy light_dir=nya_scene::material::param_proxy(nya_scene::material::param(-0.58,0.58,0.57,1.0));
 }
 
 class text_reader
@@ -457,9 +458,12 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
             m.load("xps.txt");
 
         if(rgp.shading==rgp.shading_no)
-            m.set_param(m.get_param_idx("light k"), nya_scene::material::param(1.0,0.0,0.0,0.0));
+            m.set_param(m.get_param_idx("light k"),nya_scene::material::param(1.0,0.0,0.0,0.0));
         else
-            m.set_param(m.get_param_idx("light k"), nya_scene::material::param(0.6,0.4,rgp.spec_k,0.0));
+        {
+            m.set_param(m.get_param_idx("light k"),nya_scene::material::param(0.6,0.4,rgp.spec_k,0.0));
+            m.set_param(m.get_param_idx("light dir"),light_dir);
+        }
 
         std::map<std::string,bool> has_semantics;
         for(int i=0;i<(int)tex_names.size();++i)
@@ -551,3 +555,5 @@ bool xps_loader::load_mesh_ascii(nya_scene::shared_mesh &res,nya_scene::resource
     text_reader r((const char *)data.get_data(),data.get_size());
     return ::load_mesh(res,r,name);
 }
+
+void xps_loader::set_light_dir(const nya_math::vec3 &dir) { light_dir->set(dir); }

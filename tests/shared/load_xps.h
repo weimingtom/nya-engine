@@ -25,6 +25,8 @@ public:
         //float bone_weight[4];
     };
 
+    static void set_light_dir(const nya_math::vec3 &dir);
+
 public:
     static bool load_mesh(nya_scene::shared_mesh &res,nya_scene::resource_data &data,const char* name);
     static bool load_mesh_ascii(nya_scene::shared_mesh &res,nya_scene::resource_data &data,const char* name);

@@ -176,6 +176,12 @@
                                     <action selector="backfaceCull:" target="-1" id="jQX-RF-2r5"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Show bones" id="n2C-Xe-Vfp">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="showBones:" target="-1" id="MkX-yi-4RC"/>
+                                </connections>
+                            </menuItem>
                             <menuItem title="Show Toolbar" keyEquivalent="t" id="297">
                                 <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>

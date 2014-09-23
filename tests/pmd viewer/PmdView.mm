@@ -339,6 +339,9 @@ private:
 
     m_camera.add_rot(pt.x-m_mouse_old.x,-(pt.y-m_mouse_old.y));
 
+    if([[NSApp currentEvent] modifierFlags] & NSCommandKeyMask)
+        xps_loader::set_light_dir(nya_math::vec3::normalize(nya_scene::get_camera().get_pos()));
+
     m_mouse_old=pt;
 
     if(!m_mmd_mesh.get_anim().is_valid())
@@ -604,9 +607,15 @@ private:
         doc->m_animation_name.clear();
     }
 
-    if(backface_cull!=doc->backface_cull)
+    if(m_backface_cull!=doc->m_backface_cull)
     {
-        backface_cull=doc->backface_cull;
+        m_backface_cull=doc->m_backface_cull;
+        [self setNeedsDisplay:YES];
+    }
+
+    if(m_show_bones!=doc->m_show_bones)
+    {
+        m_show_bones=doc->m_show_bones;
         [self setNeedsDisplay:YES];
     }
 
@@ -619,8 +628,6 @@ private:
         [self setNeedsDisplay:YES];
     }
 }
-
-//#include "render/debug_draw.h"
 
 - (void)draw
 {
@@ -762,10 +769,15 @@ private:
         m_mmd_mesh.draw();
     }
 
-    //nya_render::clear(false,true);
-    //static nya_render::debug_draw dd; dd.clear(); dd.set_point_size(3.0f);
-    //dd.add_skeleton(m_mmd_mesh.get_skeleton(),nya_math::vec4(0.0,0.0,1.0,1.0));
-    //dd.draw();
+    if(m_show_bones)
+    {
+        nya_render::clear(false,true);
+        m_dd.set_point_size(3.0f);
+        m_dd.clear();
+        m_dd.add_skeleton(m_mmd_mesh.get_skeleton(),nya_math::vec4(0.0,0.0,1.0,1.0));
+        m_dd.add_skeleton(m_mesh.get_skeleton(),nya_math::vec4(0.0,0.0,1.0,1.0));
+        m_dd.draw();
+    }
 }
 
 - (void)drawRect:(NSRect)rect
