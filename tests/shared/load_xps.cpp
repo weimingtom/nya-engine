@@ -556,4 +556,32 @@ bool xps_loader::load_mesh_ascii(nya_scene::shared_mesh &res,nya_scene::resource
     return ::load_mesh(res,r,name);
 }
 
+bool xps_loader::load_pose(nya_scene::shared_animation &res,nya_scene::resource_data &data,const char* name)
+{
+    text_reader r((const char *)data.get_data(),data.get_size());
+    while(r.get_remained())
+    {
+        std::string s=r.read_string();
+        size_t name_end=s.find(':');
+        if(name_end==std::string::npos)
+            break;
+
+        std::string name=s.substr(0,name_end);
+        s=s.substr(name_end+1);
+        std::istringstream iss(s);
+        nya_math::vec3 angle,pos,scale;
+        if(iss>>angle.x) if(iss>>angle.y) if(iss>>angle.z)
+            if(iss>>pos.x) if(iss>>pos.y) if(iss>>pos.z)
+                if(iss>>scale.x) if(iss>>scale.y) iss>>scale.z;
+
+        angle*=M_PI/180.0f;
+        const int bone=res.anim.add_bone(name.c_str());
+        res.anim.add_bone_pos_frame(bone,0,pos);
+        res.anim.add_bone_rot_frame(bone,0,nya_math::quat(angle.x,angle.y,angle.z));
+        //ToDo: scale
+    }
+
+    return true;
+}
+
 void xps_loader::set_light_dir(const nya_math::vec3 &dir) { light_dir->set(dir); }
