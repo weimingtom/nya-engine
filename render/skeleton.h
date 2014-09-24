@@ -23,6 +23,8 @@ public:
 
     nya_math::vec3 get_bone_pos(int idx) const;
     nya_math::quat get_bone_rot(int idx) const;
+    nya_math::vec3 get_bone_local_pos(int idx) const;
+    nya_math::quat get_bone_local_rot(int idx) const;
     nya_math::vec3 get_bone_original_pos(int idx) const;
     nya_math::quat get_bone_original_rot(int idx) const;
 

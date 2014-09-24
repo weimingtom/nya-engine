@@ -125,6 +125,22 @@ nya_math::quat skeleton::get_bone_rot(int idx) const
     return m_rot_tr[idx];
 }
 
+nya_math::vec3 skeleton::get_bone_local_pos(int idx) const
+{
+    if(idx<0 || idx>=(int)m_bones.size())
+        return nya_math::vec3();
+
+    return m_bones[idx].pos;
+}
+
+nya_math::quat skeleton::get_bone_local_rot(int idx) const
+{
+    if(idx<0 || idx>=(int)m_bones.size())
+        return nya_math::quat();
+
+    return m_bones[idx].rot;
+}
+
 nya_math::vec3 skeleton::get_bone_original_pos(int idx) const
 {
     if(idx<0 || idx>=(int)m_bones.size())
