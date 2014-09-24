@@ -109,10 +109,6 @@
 -(IBAction)backfaceCull:(id)sender
 {
     m_backface_cull=!m_backface_cull;
-    nya_render::state_override so=nya_render::get_state_override();
-    so.override_cull_face=m_backface_cull;
-    so.cull_face=false;
-    nya_render::set_state_override(so);
 }
 
 -(IBAction)showBones:(id)sender
