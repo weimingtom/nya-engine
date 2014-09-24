@@ -212,6 +212,8 @@ public:
               m_keep_aspect(none),m_visible(true), m_mouse_pressed(false),
               m_mouse_over(false), m_cached_rect(false) {}
 
+    virtual ~widget() {}
+
 protected:
     std::string m_id;
 
