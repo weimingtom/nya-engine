@@ -158,17 +158,6 @@ bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
             rgb_to_bgr((uchar*)color_data,tga.uncompressed_size);
     }
 
-    //const uchar *original_rle=(const uchar *)tga.data;
-    nya_memory::tmp_buffer_scoped test(tga.uncompressed_size*2);
-    tga.data=color_data;
-    tga.compressed_size=tga.encode_rle(test.get_data(),tga.uncompressed_size*2);
-    nya_memory::tmp_buffer_scoped test2(tga.uncompressed_size);
-    tga.data=test.get_data();
-    tga.rle=true;
-    tga.decode_rle(test2.get_data());
-    color_data=test2.get_data();
-    //const uchar *encoded_rle=(const uchar *)tga.data;
-
     res.tex.build_texture(color_data,tga.width,tga.height,color_format);
     tmp_data.free();
 
