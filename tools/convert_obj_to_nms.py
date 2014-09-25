@@ -125,7 +125,16 @@ if len(out.groups) > 0:
 for mat_name, mat in obj.materials.iteritems():
     m = nms_mesh.nms_material()
     m.name = mat_name
-    #ToDo: textures, params
+    p = nms_mesh.nms_param()
+    p.name = "nya_material"
+    p.value = "obj.txt" #ToDo
+    m.params.append(p)
+    for n, t in mat.textures.iteritems():
+        p = nms_mesh.nms_param()
+        p.name = n
+        p.value = t
+        m.textures.append(p)
+    #ToDo: params
     out.materials.append(m)
 
 out.write(sys.argv[2])

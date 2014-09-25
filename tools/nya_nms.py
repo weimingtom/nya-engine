@@ -94,9 +94,9 @@ class nms_mesh:
         jcount = len(self.joints)
 
         if mat_count:
-            ++chunks_count;
+            chunks_count += 1;
         if jcount:
-            ++chunks_count;
+            chunks_count += 1;
 
         out.add_uint(chunks_count)
 
