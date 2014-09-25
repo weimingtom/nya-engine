@@ -5,7 +5,7 @@
 #include "math/vector.h"
 
 namespace nya_memory { class memory_reader; class tmp_buffer_ref; }
-namespace nya_scene { class mesh; class shared_mesh; typedef nya_memory::tmp_buffer_ref resource_data; }
+namespace nya_scene { class mesh; class shared_mesh; class shared_animation; typedef nya_memory::tmp_buffer_ref resource_data; }
 
 struct xps_loader
 {
@@ -30,4 +30,5 @@ public:
 public:
     static bool load_mesh(nya_scene::shared_mesh &res,nya_scene::resource_data &data,const char* name);
     static bool load_mesh_ascii(nya_scene::shared_mesh &res,nya_scene::resource_data &data,const char* name);
+    static bool load_pose(nya_scene::shared_animation &res,nya_scene::resource_data &data,const char* name);
 };

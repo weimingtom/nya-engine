@@ -268,7 +268,7 @@ private:
     NSString *extension=[[[draggedFilenames objectAtIndex:0] pathExtension] lowercaseString];
     NSURL *url=[NSURL fileURLWithPath:[draggedFilenames objectAtIndex:0]];
 
-    if([extension compare:@"vmd"]==NSOrderedSame)
+    if([extension compare:@"vmd"]==NSOrderedSame || [extension compare:@"pose"]==NSOrderedSame)
     {
         [self loadAnim:[url path].UTF8String];
         return YES;
@@ -384,8 +384,10 @@ private:
 {
     nya_scene::animation anim;
     nya_scene::animation::register_load_function(vmd_loader::load,true);
+    nya_scene::animation::register_load_function(xps_loader::load_pose,false);
     anim.load(name.c_str());
     m_mmd_mesh.set_anim(anim);
+    m_mesh.set_anim(anim);
 
     m_last_time=nya_system::get_time();
 }
@@ -619,10 +621,11 @@ private:
         [self setNeedsDisplay:YES];
     }
 
-    if(m_mmd_mesh.get_anim().is_valid())
+    if(m_mmd_mesh.get_anim().is_valid() || m_mesh.get_anim().is_valid())
     {
         unsigned long time=nya_system::get_time();
         m_mmd_mesh.update(int(time-m_last_time));
+        m_mesh.update(int(time-m_last_time));
         m_last_time=time;
 
         [self setNeedsDisplay:YES];
