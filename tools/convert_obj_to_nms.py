@@ -1,15 +1,22 @@
+#!/usr/bin/env python
+
 #https://code.google.com/p/nya-engine/
 
 import sys
 from nya_nms import *
 
 class obj_mesh:
+    class obj_material:
+        def __init__(self):  
+            self.params = {}
+            self.textures = {}
+
     def __init__(self):
         self.vertices = []
         self.normals = []
         self.tcs = []
         self.faces = []
-        self.materials = []
+        self.materials = {}
 
     def load(self, filename):
         mat = None
@@ -43,7 +50,19 @@ class obj_mesh:
                 self.faces.append((v, n, tc, mat))
             elif values[0] in ('usemtl', 'usemat'):
                 mat = values[1]
-#            elif values[0] == 'mtllib': #ToDo
+            elif values[0] == 'mtllib':
+                curr_mat = ""
+                for line in open(values[1], "r"):
+                    if line.startswith('#'): continue
+                    values = line.split()
+                    if not values: continue
+                    if values[0] == 'newmtl':
+                        curr_mat = values[1]
+                        self.materials[curr_mat] = obj_mesh.obj_material()
+                    elif values[0].startswith('map_'):
+                        self.materials[curr_mat].textures[values[0]] = values[1]
+                    else:
+                        self.materials[curr_mat].params = map(float, values[1:])
 
 if len(sys.argv) < 3:
     print "please specify src and dst model names"
@@ -88,7 +107,7 @@ for i in range(len(obj.faces)):
         g = nms_mesh.nms_group()
         g.name = mat
         g.offset = i*3
-        g.mat_idx = len(out.groups)
+        g.mat_idx = [i for i, m in enumerate(obj.materials) if m==mat][0]
         out.groups.append(g)
         last_mat = mat
 
@@ -103,9 +122,9 @@ out.vcount = len(obj.faces)*3
 if len(out.groups) > 0:
     out.groups[-1].count = int(out.vcount - out.groups[-1].offset)
 
-for g in out.groups:
+for mat_name, mat in obj.materials.iteritems():
     m = nms_mesh.nms_material()
-    m.name = g.name
+    m.name = mat_name
     #ToDo: textures, params
     out.materials.append(m)
 
