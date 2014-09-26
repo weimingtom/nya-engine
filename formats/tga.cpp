@@ -47,7 +47,7 @@ size_t tga::decode_header(const void *data,size_t size)
     const short width=reader.read<short>();
     const short height=reader.read<short>();
     const char bitsperpixel=reader.read<char>();
-    const char imagedescriptor=reader.read<char>();
+    const unsigned char imagedescriptor=reader.read<char>();
 
     color_mode channels;
     bool rle=false;
@@ -117,12 +117,19 @@ size_t tga::encode_header(void *to_data,size_t to_size)
     if(!datatypecode)
         return 0;
 
+    unsigned char imagedescriptor=0;
+    if(horisontal_flip)
+        imagedescriptor|=0x10;
+    if(vertical_flip)
+        imagedescriptor|=0x20;
+
     char *out=(char *)to_data;
     memset(out,0,tga_minimum_header_size);
     memcpy(out+2,&datatypecode,1);
     memcpy(out+12,&width,2);
     memcpy(out+14,&height,2);
     memcpy(out+16,&bpp,1);
+    memcpy(out+17,&imagedescriptor,1);
 
     return tga_minimum_header_size;
 }
