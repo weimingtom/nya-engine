@@ -82,7 +82,7 @@ public:
         return std::string(text,len);
     }
 
-    skining read_skining(unsigned short version)
+    skining read_skining()
     {
         const std::string str=read_string();
         const std::string str2=read_string();
@@ -149,18 +149,9 @@ public:
 
     face read_face() { return read<face>(); }
 
-    skining read_skining(unsigned short version)
+    skining read_skining()
     {
         skining s;
-
-        if(version==1) //ToDo
-        {
-            memset(&s,0,sizeof(s));
-            s.weights[0]=1.0;
-
-            skip(10*4);
-            return s;
-        }
 
         for(int i=0;i<4;++i)
             s.inds[i]=read<unsigned short>();
@@ -423,9 +414,11 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
                 if(version==1) reader.skip(4*4); //I dunno
             }
 
+            if(version==1) reader.skip(4*4); //dunno
+
             if(bones_count)
             {
-                const skining s=reader.read_skining(version);
+                const skining s=reader.read_skining();
                 for(int k=0;k<4;++k)
                     v.bone_idx[k]=(float(s.inds[k])+0.5f)/bones_count, v.bone_weight[k]=s.weights[k];
             }
