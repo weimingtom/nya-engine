@@ -21,6 +21,9 @@ public:
         //color_r,
         greyscale,
 
+        color_rgb32f,
+        color_rgba32f,
+
         depth16,
         depth24,
         depth32,
@@ -71,6 +74,9 @@ public:
     unsigned int get_height() const { return m_height; }
     color_format get_color_format() const { return m_format; }
     bool is_cubemap() const;
+
+    static void get_default_filter(filter &minification,filter &magnification,filter &mipmap);
+    static unsigned int get_default_aniso();
 
 public:
     void release();

@@ -41,6 +41,8 @@ int get_bpp(texture::color_format format)
         case texture::color_bgra: return 32;
         case texture::greyscale: return 8;
         case texture::color_rgb: return 24;
+        case texture::color_rgb32f: return 32*3;
+        case texture::color_rgba32f: return 32*4;
         case texture::depth16: return 16;
         DIRECTX11_ONLY(case texture::depth24: return 32);
         OPENGL_ONLY(case texture::depth24: return 24);
@@ -177,6 +179,7 @@ void gl_select_multitex_layer(int idx)
 
     tex_glActiveTexture=(PFNGLACTIVETEXTUREARBPROC)get_extension("glActiveTexture");
     initialised=true;
+    gl_select_multitex_layer(idx);
 #endif
 }
 
@@ -483,6 +486,8 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         case depth24: source_format=gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; break;
         case depth32: source_format=gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; break;
 #else
+        case color_rgb32f: source_format=GL_RGB32F_ARB; gl_format=GL_RGB; precision=GL_FLOAT; break;
+        case color_rgba32f: source_format=GL_RGBA32F_ARB; gl_format=GL_RGBA; precision=GL_FLOAT; break;
         case depth16: source_format=GL_DEPTH_COMPONENT16; gl_format=GL_DEPTH_COMPONENT; break;
         case depth24: source_format=GL_DEPTH_COMPONENT24; gl_format=GL_DEPTH_COMPONENT; break;
         case depth32: source_format=GL_DEPTH_COMPONENT32; gl_format=GL_DEPTH_COMPONENT; break;
@@ -575,6 +580,8 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
             case color_bgra:
             case color_rgba:
             case greyscale:
+            case color_rgb32f:
+            case color_rgba32f:
             case depth16:
             case depth24:
             case depth32:
@@ -1155,6 +1162,15 @@ void texture::set_default_filter(filter minification,filter magnification,filter
 }
 
 void texture::set_default_aniso(unsigned int level) { default_aniso=level; }
+
+void texture::get_default_filter(filter &minification,filter &magnification,filter &mipmap)
+{
+    minification=default_min_filter;
+    magnification=default_mag_filter;
+    mipmap=default_mip_filter;
+}
+
+unsigned int texture::get_default_aniso() { return default_aniso; }
 
 bool texture::is_cubemap() const
 {
