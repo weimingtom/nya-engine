@@ -26,12 +26,7 @@ bool mmd_mesh::load(const char *name)
 
     m_morph_data=pmd_loader::get_additional_data(m_mesh);
     if(!m_morph_data)
-    {
-        if((m_morph_data=pmx_loader::get_additional_data(m_mesh)))
-           m_pos_count=4;
-    }
-    else
-        m_pos_count=2;
+        m_morph_data=pmx_loader::get_additional_data(m_mesh), m_is_pmx=true;
 
     if(m_morph_data)
         m_morphs.resize(m_morph_data->morphs.size());
@@ -58,6 +53,7 @@ void mmd_mesh::unload()
     m_morph_data=0;
     m_vbo.release();
     m_morphs.clear();
+    m_is_pmx=false;
 }
 
 void mmd_mesh::set_anim(const nya_scene::animation &anim,int layer)
@@ -139,8 +135,7 @@ void mmd_mesh::update(unsigned int dt)
         need_update_vbo=true;
 
         const nya_render::skeleton &sk=m_mesh.get_skeleton();
-        const bool is_pmx=m_pos_count>2;
-        if(is_pmx)
+        if(m_is_pmx)
         {
             const pmx_loader::vert *verts=(const pmx_loader::vert *)&m_original_vertex_data[0];
             for(int i=0;i<m_vbo.get_verts_count();++i)
@@ -151,7 +146,7 @@ void mmd_mesh::update(unsigned int dt)
                     if(verts[i].bone_weight[j]>0.001f)
                     {
                         const int idx=verts[i].bone_idx[j];
-                        pos+=(sk.get_bone_pos(idx)+sk.get_bone_rot(idx).rotate(verts[i].pos[j]))*verts[i].bone_weight[j];
+                        pos+=(sk.get_bone_pos(idx)+sk.get_bone_rot(idx).rotate(verts[i].pos-sk.get_bone_original_pos(idx)))*verts[i].bone_weight[j];
                     }
                 }
 
@@ -167,7 +162,7 @@ void mmd_mesh::update(unsigned int dt)
                 for(int j=0;j<2;++j)
                 {
                     const int idx=verts[i].bone_idx[j];
-                    pos+=(sk.get_bone_pos(idx)+sk.get_bone_rot(idx).rotate(verts[i].pos[j]))*
+                    pos+=(sk.get_bone_pos(idx)+sk.get_bone_rot(idx).rotate(verts[i].pos-sk.get_bone_original_pos(idx)))*
                          (j==0?verts[i].bone_weight:(1.0f-verts[i].bone_weight));
                 }
 
@@ -188,12 +183,9 @@ void mmd_mesh::update(unsigned int dt)
             for(int j=0;j<int(m.verts.size());++j)
             {
                 const unsigned int base=m.verts[j].idx*stride;
-                for(int k=0;k<m_pos_count*3;k+=3)
-                {
-                    m_vertex_data[base+k]+=m.verts[j].pos.x*delta;
-                    m_vertex_data[base+k+1]+=m.verts[j].pos.y*delta;
-                    m_vertex_data[base+k+2]+=m.verts[j].pos.z*delta;
-                }
+                m_vertex_data[base]+=m.verts[j].pos.x*delta;
+                m_vertex_data[base+1]+=m.verts[j].pos.y*delta;
+                m_vertex_data[base+2]+=m.verts[j].pos.z*delta;
             }
         }
 

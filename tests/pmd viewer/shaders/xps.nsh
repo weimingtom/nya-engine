@@ -23,8 +23,8 @@ void main()
     tc=gl_MultiTexCoord0.xy;
 
     vec3 n=gl_Normal;
-    vec3 t=gl_MultiTexCoord5.xyz;
-    vec3 bt=gl_MultiTexCoord6.xyz;
+    vec3 t=gl_MultiTexCoord4.xyz;
+    vec3 bt=gl_MultiTexCoord5.xyz;
     tbn=mat3(t,bt,n);
 
     gl_Position=gl_ModelViewProjectionMatrix*gl_Vertex;

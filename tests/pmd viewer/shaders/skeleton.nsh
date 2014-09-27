@@ -1,4 +1,4 @@
-@predefined bones_pos "nya bones pos"
+@predefined bones_pos "nya bones pos transform"
 @predefined bones_rot "nya bones rot"
 
 @vertex

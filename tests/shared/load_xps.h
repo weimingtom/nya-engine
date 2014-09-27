@@ -21,8 +21,8 @@ public:
         nya_math::vec2 tc;
         nya_math::vec2 tc2;
 
-        //float bone_idx[4];
-        //float bone_weight[4];
+        float bone_idx[4];
+        float bone_weight[4];
     };
 
     static void set_light_dir(const nya_math::vec3 &dir);

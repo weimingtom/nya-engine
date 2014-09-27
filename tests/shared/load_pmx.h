@@ -24,7 +24,7 @@ public:
 
     struct vert
     {
-        nya_math::vec3 pos[4];
+        nya_math::vec3 pos;
         nya_math::vec3 normal;
         nya_math::vec2 tc;
         float bone_idx[4];

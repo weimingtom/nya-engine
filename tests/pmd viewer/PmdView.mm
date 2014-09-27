@@ -530,11 +530,7 @@ private:
         const pmx_loader::vert *verts=(const pmx_loader::vert *)vert_buf.get_data();
         for(int i=0;i<vcount;++i)
         {
-            nya_math::vec3 pos;
-            for(int j=0;j<4;++j)
-                pos+=(sk.get_bone_pos(verts[i].bone_idx[j])+verts[i].pos[j])*verts[i].bone_weight[j];
-
-            obj.add_vec("v",pos);
+            obj.add_vec("v",verts[i].pos);
             obj.add_vec("vn",verts[i].normal);
             obj.add_vec("vt",verts[i].tc);
         }
@@ -544,12 +540,7 @@ private:
         const pmd_loader::vert *verts=(const pmd_loader::vert *)vert_buf.get_data();
         for(int i=0;i<vcount;++i)
         {
-            nya_math::vec3 pos;
-            for(int j=0;j<2;++j)
-                pos+=(sk.get_bone_pos(verts[i].bone_idx[j])+verts[i].pos[j])*
-                     (j==0?verts[i].bone_weight:(1.0f-verts[i].bone_weight));
-
-            obj.add_vec("v",pos);
+            obj.add_vec("v",verts[i].pos);
             obj.add_vec("vn",verts[i].normal);
             obj.add_vec("vt",verts[i].tc);
         }

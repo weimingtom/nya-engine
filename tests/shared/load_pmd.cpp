@@ -48,7 +48,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     std::vector<vert> vertices(vert_count);
     for(size_t i=0;i<vertices.size();++i)
     {
-        read_vector(vertices[i].pos[0],reader);
+        read_vector(vertices[i].pos,reader);
         read_vector(vertices[i].normal,reader);
 
         vertices[i].tc.x=reader.read<float>();
@@ -335,17 +335,10 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         }
     }
 
-    for(size_t i=0;i<vertices.size();++i)
-    {
-        vertices[i].pos[1]=vertices[i].pos[0]-res.skeleton.get_bone_pos(int(vertices[i].bone_idx[1]));
-        vertices[i].pos[0]-=res.skeleton.get_bone_pos(int(vertices[i].bone_idx[0]));
-    }
-
     res.vbo.set_vertex_data(&vertices[0],sizeof(vertices[0]),vert_count);
-    res.vbo.set_tc(2,3*sizeof(float),3); //pos2
-    res.vbo.set_normals(6*sizeof(float));
-    res.vbo.set_tc(0,9*sizeof(float),2);
-    res.vbo.set_tc(1,11*sizeof(float),3); //skin info
+    res.vbo.set_normals(3*sizeof(float));
+    res.vbo.set_tc(0,6*sizeof(float),2);
+    res.vbo.set_tc(1,8*sizeof(float),3); //skin info
 
     vertices.clear();
 

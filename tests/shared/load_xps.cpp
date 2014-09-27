@@ -90,7 +90,7 @@ public:
         std::istringstream iss2(str2);
         skining s; memset(&s,0,sizeof(s));
         if(iss>>s.inds[0]) if(iss>>s.inds[1]) if(iss>>s.inds[2]) iss>>s.inds[3];
-        if(iss2>>s.weights[0]) if(iss>>s.weights[1]) if(iss>>s.weights[2]) iss>>s.weights[3];
+        if(iss2>>s.weights[0]) if(iss2>>s.weights[1]) if(iss2>>s.weights[2]) iss2>>s.weights[3];
         return s;
     }
 
@@ -421,7 +421,11 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
             }
 
             if(bones_count)
-                reader.read_skining(version);
+            {
+                const skining s=reader.read_skining(version);
+                for(int k=0;k<4;++k)
+                    v.bone_idx[k]=float(s.inds[k])/bones_count, v.bone_weight[k]=s.weights[k];
+            }
         }
 
         const uint ioffset=(uint)indices.size();
@@ -509,11 +513,14 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
     res.vbo.set_vertex_data(&vertices[0],(uint)sizeof(vertices[0]),(uint)vertices.size());
 
     #define off(st, m) uint((size_t)(&((st *)0)->m))
+
     res.vbo.set_normals(off(xps_loader::vert,normal));
-    res.vbo.set_tc(5,off(xps_loader::vert,tangent),3);
-    res.vbo.set_tc(6,off(xps_loader::vert,bitangent),3);
+    res.vbo.set_tc(4,off(xps_loader::vert,tangent),3);
+    res.vbo.set_tc(5,off(xps_loader::vert,bitangent),3);
     res.vbo.set_tc(0,off(xps_loader::vert,tc),2);
     res.vbo.set_tc(1,off(xps_loader::vert,tc2),2);
+    res.vbo.set_tc(6,off(xps_loader::vert,bone_idx),4);
+    res.vbo.set_tc(7,off(xps_loader::vert,bone_weight),4);
 
     if(vertices.size()<65535)
     {

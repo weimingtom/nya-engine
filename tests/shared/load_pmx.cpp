@@ -85,9 +85,9 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     {
         vert &v=verts[i];
         
-        v.pos[0].x=reader.read<float>();
-        v.pos[0].y=reader.read<float>();
-        v.pos[0].z=-reader.read<float>();
+        v.pos.x=reader.read<float>();
+        v.pos.y=reader.read<float>();
+        v.pos.z=-reader.read<float>();
 
         v.normal.x=reader.read<float>();
         v.normal.y=reader.read<float>();
@@ -619,42 +619,9 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
         }
     }
 
-    for(int i=0;i<vert_count;++i)
-    {
-        vert &v=verts[i];
-        for(int j=3;j>=0;--j)
-        {
-            if(v.bone_weight[j]>0.0f)
-                v.pos[j]=v.pos[0]-res.skeleton.get_bone_pos(v.bone_idx[j]);
-        }
-    }
-/*
-    std::map<int,int> test;
-
-    for(int i=0;i<vert_count;++i)
-    {
-        vert &v=verts[i];
-        for(int j=3;j>=0;--j)
-        {
-            if(v.bone_weight[j]>0.0f)
-                test[v.bone_idx[j]]=0;
-        }
-    }
-*/
-/*
-    const pmx_morph &m=ad->morphs[58];
-    for(int i=0;i<int(m.verts.size());++i)
-    {
-        const pmx_morph_vertex &v=m.verts[i];
-        verts[v.idx].pos[0]+=v.pos;
-    }
-*/
     res.vbo.set_vertex_data(&verts[0],sizeof(vert),vert_count);
     int offset=0;
-    res.vbo.set_vertices(offset,3); offset+=sizeof(verts[0].pos[0]);
-    res.vbo.set_tc(3,offset,3); offset+=sizeof(verts[0].pos[1]);
-    res.vbo.set_tc(4,offset,3); offset+=sizeof(verts[0].pos[2]);
-    res.vbo.set_tc(5,offset,3); offset+=sizeof(verts[0].pos[3]);
+    res.vbo.set_vertices(offset,3); offset+=sizeof(verts[0].pos);
     res.vbo.set_normals(offset); offset+=sizeof(verts[0].normal);
     res.vbo.set_tc(0,offset,2); offset+=sizeof(verts[0].tc);
     res.vbo.set_tc(1,offset,4); offset+=sizeof(verts[0].bone_idx);

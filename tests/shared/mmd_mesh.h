@@ -65,7 +65,7 @@ public:
         return m_morph_data->morphs[idx].type;
     }
 
-    mmd_mesh(): m_morph_data(0), m_pos_count(0) {}
+    mmd_mesh(): m_morph_data(0), m_is_pmx(false) {}
 
 public:
     const nya_scene::mesh_internal &internal() const { return m_mesh.internal(); }
@@ -90,6 +90,5 @@ private:
 
     struct applied_anim { int layer; std::vector<int> curves_map; };
     std::vector<applied_anim> m_anims;
-
-    int m_pos_count;
+    bool m_is_pmx;
 };

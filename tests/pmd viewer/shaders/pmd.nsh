@@ -9,7 +9,7 @@ void main()
 
     int bone0=int(gl_MultiTexCoord1.x);
     int bone1=int(gl_MultiTexCoord1.y);
-    vec3 pos=mix(tr(gl_MultiTexCoord2.xyz,bone1),tr(gl_Vertex.xyz,bone0),gl_MultiTexCoord1.z);
+    vec3 pos=mix(tr(gl_Vertex.xyz,bone1),tr(gl_Vertex.xyz,bone0),gl_MultiTexCoord1.z);
     normal=mix(trn(gl_Normal,bone1),trn(gl_Normal,bone0),gl_MultiTexCoord1.z);
 
     vec3 r=normalize((gl_ModelViewProjectionMatrix * vec4(normal,0.0)).xyz);
