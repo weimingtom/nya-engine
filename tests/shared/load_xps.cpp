@@ -155,6 +155,9 @@ public:
 
         if(version==1) //ToDo
         {
+            memset(&s,0,sizeof(s));
+            s.weights[0]=1.0;
+
             skip(10*4);
             return s;
         }
