@@ -6,6 +6,8 @@
 #include "render/shader.h"
 #include "render/skeleton.h"
 #include "math/vector.h"
+#include "memory/optional.h"
+#include "scene/texture.h"
 
 namespace nya_scene
 {
@@ -22,7 +24,11 @@ struct shared_shader
         camera_pos=0,
         camera_rot,
         bones_pos,
+        bones_pos_tr,
         bones_rot,
+        bones_pos_tex,
+        bones_pos_tr_tex,
+        bones_rot_tex,
         viewport,
         model_pos,
         model_rot,
@@ -69,8 +75,21 @@ struct shared_shader
         predefines.clear();
         uniforms.clear();
         samplers.clear();
+        m_texture_buffers.free();
         return true;
     }
+
+    struct texture_buffers
+    {
+        nya_scene::texture m_skeleton_pos_texture;
+        nya_scene::texture m_skeleton_rot_texture;
+        const nya_render::skeleton *last_skeleton_pos_texture;
+        const nya_render::skeleton *last_skeleton_rot_texture;
+
+        texture_buffers():last_skeleton_pos_texture(0),last_skeleton_rot_texture(0) {}
+    };
+
+    mutable nya_memory::optional<texture_buffers> m_texture_buffers;
 
     //cache
     const mutable nya_render::skeleton *last_skeleton_pos;
@@ -85,17 +104,7 @@ public:
 
     static void set_skeleton(const nya_render::skeleton *skeleton) { m_skeleton=skeleton; }
     void reset_skeleton() { if(!m_shared.is_valid()) return; m_shared->last_skeleton_pos=0; m_shared->last_skeleton_rot=0; }
-    void skeleton_changed(const nya_render::skeleton *skeleton) const
-    {
-        if(!m_shared.is_valid())
-            return;
-
-        if(skeleton==m_shared->last_skeleton_pos)
-            m_shared->last_skeleton_pos=0;
-
-        if(skeleton==m_shared->last_skeleton_rot)
-            m_shared->last_skeleton_rot=0;
-    }
+    void skeleton_changed(const nya_render::skeleton *skeleton) const;
 
 public:
     int get_texture_slot(const char *semantic) const;
