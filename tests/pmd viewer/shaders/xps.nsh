@@ -9,6 +9,9 @@
 @uniform light_dir "light dir":local_rot=-0.58,0.58,0.57
 @uniform light_k "light k"=0.1,0.0,0.0,0.0
 
+@predefined bones_pos_map "nya bones pos transform texture"
+@predefined bones_rot_map "nya bones rot texture"
+
 @all
 
 varying vec3 pos;
@@ -17,17 +20,36 @@ varying mat3 tbn;
 
 @vertex
 
+uniform sampler2D bones_pos_map;
+uniform sampler2D bones_rot_map;
+
+vec3 rotate(vec3 v,vec4 q) { return v+cross(q.xyz,cross(q.xyz,v)+v*q.w)*2.0; }
+
 void main()
 {
-    pos=gl_Vertex.xyz;
     tc=gl_MultiTexCoord0.xy;
 
-    vec3 n=gl_Normal;
-    vec3 t=gl_MultiTexCoord4.xyz;
-    vec3 bt=gl_MultiTexCoord5.xyz;
-    tbn=mat3(t,bt,n);
+    vec2 tc=vec2(gl_MultiTexCoord6[0],0.0);
+    vec4 q=texture2D(bones_rot_map,tc);
+    pos=(rotate(gl_Vertex.xyz,q)+texture2D(bones_pos_map,tc).xyz)*gl_MultiTexCoord7[0];
+    vec3 n=rotate(gl_Normal,q)*gl_MultiTexCoord7[0];
+    vec3 t=rotate(gl_MultiTexCoord4.xyz,q)*gl_MultiTexCoord7[0];
 
-    gl_Position=gl_ModelViewProjectionMatrix*gl_Vertex;
+    for(int i=1;i<4;++i)
+    {
+        if(gl_MultiTexCoord7[i]>0.0)
+        {
+            tc=vec2(gl_MultiTexCoord6[i],0.0);
+            q=texture2D(bones_rot_map,tc);
+            pos+=(rotate(gl_Vertex.xyz,q)+texture2D(bones_pos_map,tc).xyz)*gl_MultiTexCoord7[i];
+            n+=rotate(gl_Normal,q)*gl_MultiTexCoord7[i];
+            t+=rotate(gl_MultiTexCoord4.xyz,q)*gl_MultiTexCoord7[i];
+        }
+    }
+
+    tbn=mat3(t,cross(t,n),n);
+
+    gl_Position=gl_ModelViewProjectionMatrix*vec4(pos,gl_Vertex.w);
 }
 
 @fragment
