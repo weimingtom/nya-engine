@@ -94,7 +94,16 @@ public:
         return s;
     }
 
-    void skip_color() { read_string(); } //ToDo: remove
+    color read_color()
+    {
+        const std::string s=read_string();
+        std::istringstream iss(s);
+        color c;
+        memset(&c,0,sizeof(c));
+        if(iss>>c.r) if(iss>>c.g) if(iss>>c.b) iss>>c.a;
+        return c;
+    }
+
     void skip(size_t) {}
 
     size_t get_remained() const
@@ -162,7 +171,7 @@ public:
         return s;
     }
 
-    void skip_color() { skip(4); } //ToDo: remove
+    color read_color() { return read<color>(); }
 
     binary_reader(const void *data,size_t size): memory_reader(data,size) {}
 };
@@ -403,7 +412,9 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
             v.pos=reader.read_vec3();
             v.normal=reader.read_vec3();
 
-            reader.skip_color(); //skip colors, 4 bytes
+            color c=reader.read_color();
+            v.color.x=c.r,v.color.y=c.g,v.color.z=c.b,v.color.w=c.a;
+            v.color/=255.0f;
 
             v.tc=reader.read_tc();
 
@@ -521,6 +532,7 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
 
     #define off(st, m) uint((size_t)(&((st *)0)->m))
 
+    res.vbo.set_colors(off(xps_loader::vert,color),4);
     res.vbo.set_normals(off(xps_loader::vert,normal));
     res.vbo.set_tc(4,off(xps_loader::vert,tangent),3);
     res.vbo.set_tc(5,off(xps_loader::vert,bitangent),3);

@@ -14,6 +14,8 @@ public:
     {
         nya_math::vec3 pos;
 
+        nya_math::vec4 color;
+
         nya_math::vec3 normal;
         nya_math::vec3 tangent;
         nya_math::vec3 bitangent;

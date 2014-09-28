@@ -17,6 +17,7 @@
 varying vec3 pos;
 varying vec2 tc;
 varying mat3 tbn;
+varying vec4 color;
 
 @vertex
 
@@ -28,6 +29,7 @@ vec3 rotate(vec3 v,vec4 q) { return v+cross(q.xyz,cross(q.xyz,v)+v*q.w)*2.0; }
 void main()
 {
     tc=gl_MultiTexCoord0.xy;
+    color=gl_Color;
 
     vec2 tc=vec2(gl_MultiTexCoord6[0],0.0);
     vec4 q=texture2D(bones_rot_map,tc);
@@ -81,6 +83,8 @@ void main()
     c.rgb+=pow(max(0.0,dot(v,lrn)),10.0)*light_k.z*texture2D(spec,tc).rgb;
     
     c.rgb*=texture2D(lightmap,tc).rgb;
+
+    c*=color;
 
     vec3 r=normalize(reflect(v,normal));
 	vec2 rtc = 0.5*r.xy/length(r)+0.5;
