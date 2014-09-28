@@ -98,10 +98,11 @@ public:
     {
         const std::string s=read_string();
         std::istringstream iss(s);
-        color c;
-        memset(&c,0,sizeof(c));
-        if(iss>>c.r) if(iss>>c.g) if(iss>>c.b) iss>>c.a;
-        return c;
+        unsigned int c[4]={255,255,255,255};
+        for(int i=0;i<4;++i) if(!(iss>>c[i])) break;
+        color out;
+        out.r=c[0],out.g=c[1],out.b=c[2],out.a=c[3];
+        return out;
     }
 
     void skip(size_t) {}
