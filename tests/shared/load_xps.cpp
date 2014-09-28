@@ -418,7 +418,18 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
 
             if(bones_count)
             {
-                const skining s=reader.read_skining();
+                skining s=reader.read_skining();
+
+                float w=0;
+                for(int k=0;k<4;++k)
+                    w+=s.weights[k];
+
+                if(w>0.001f)
+                {
+                    for(int k=0;k<4;++k)
+                        s.weights[k]/=w;
+                }
+
                 for(int k=0;k<4;++k)
                     v.bone_idx[k]=(float(s.inds[k])+0.5f)/bones_count, v.bone_weight[k]=s.weights[k];
             }
