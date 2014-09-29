@@ -210,10 +210,10 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
         if(p.name.empty())
             continue;
 
-        res.predefines.resize(res.predefines.size()+1);
-        res.predefines.back().type=(shared_shader::predefined_values)i;
         if(i==shared_shader::bones_pos_tex || i==shared_shader::bones_pos_tr_tex || i==shared_shader::bones_rot_tex)
         {
+            res.predefines.resize(res.predefines.size()+1);
+            res.predefines.back().type=(shared_shader::predefined_values)i;
             res.predefines.back().location=(int)res.samplers.size()+i-shared_shader::bones_pos_tex;
             res.shdr.set_sampler(p.name.c_str(),res.predefines.back().location);
         }
@@ -231,11 +231,12 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
         if(p.name.empty())
             continue;
 
+        if(i==shared_shader::bones_pos_tex || i==shared_shader::bones_pos_tr_tex || i==shared_shader::bones_rot_tex)
+            continue;
+
         res.predefines.resize(res.predefines.size()+1);
         res.predefines.back().transform=p.transform;
         res.predefines.back().type=(shared_shader::predefined_values)i;
-        if(i==shared_shader::bones_pos_tex || i==shared_shader::bones_pos_tr_tex || i==shared_shader::bones_rot_tex)
-            continue;
 
         res.predefines.back().location=res.shdr.get_handler(p.name.c_str());
     }
@@ -311,7 +312,7 @@ void shader_internal::set() const
                 if(m_skeleton && m_shared->last_skeleton_pos!=m_skeleton)
                 {
                     m_shared->shdr.set_uniform3_array(p.location,m_skeleton->get_pos_buffer(),m_skeleton->get_bones_count());
-                    //m_shared->last_skeleton_pos=m_skeleton;
+                    m_shared->last_skeleton_pos=m_skeleton;
                 }
             }
             break;
@@ -326,7 +327,7 @@ void shader_internal::set() const
                         pos[i]=m_skeleton->get_bone_pos(i)+m_skeleton->get_bone_rot(i).rotate(-m_skeleton->get_bone_original_pos(i));
 
                     m_shared->shdr.set_uniform3_array(p.location,(float *)tmp.get_data(),m_skeleton->get_bones_count());
-                    //m_shared->last_skeleton_pos=m_skeleton;
+                    m_shared->last_skeleton_pos=m_skeleton;
                 }
             }
             break;
@@ -336,7 +337,7 @@ void shader_internal::set() const
                 if(m_skeleton && m_shared->last_skeleton_rot!=m_skeleton)
                 {
                     m_shared->shdr.set_uniform4_array(p.location,m_skeleton->get_rot_buffer(),m_skeleton->get_bones_count());
-                    //m_shared->last_skeleton_rot=m_skeleton;
+                    m_shared->last_skeleton_rot=m_skeleton;
                 }
             }
             break;
@@ -522,7 +523,7 @@ void shader_internal::skeleton_changed(const nya_render::skeleton *skeleton) con
     if(!m_shared.is_valid())
         return;
 
-    if(skeleton==m_shared->last_skeleton_pos)
+    //if(skeleton==m_shared->last_skeleton_pos)
         m_shared->last_skeleton_pos=0;
 
     if(skeleton==m_shared->last_skeleton_rot)
