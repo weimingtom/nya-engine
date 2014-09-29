@@ -75,21 +75,22 @@ struct shared_shader
         predefines.clear();
         uniforms.clear();
         samplers.clear();
-        m_texture_buffers.free();
+        texture_buffers.free();
+        last_skeleton_pos=last_skeleton_rot=0;
         return true;
     }
 
     struct texture_buffers
     {
-        nya_scene::texture m_skeleton_pos_texture;
-        nya_scene::texture m_skeleton_rot_texture;
+        nya_scene::texture skeleton_pos_texture;
+        nya_scene::texture skeleton_rot_texture;
         const nya_render::skeleton *last_skeleton_pos_texture;
         const nya_render::skeleton *last_skeleton_rot_texture;
 
         texture_buffers():last_skeleton_pos_texture(0),last_skeleton_rot_texture(0) {}
     };
 
-    mutable nya_memory::optional<texture_buffers> m_texture_buffers;
+    mutable nya_memory::optional<texture_buffers> texture_buffers;
 
     //cache
     const mutable nya_render::skeleton *last_skeleton_pos;

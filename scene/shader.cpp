@@ -318,7 +318,7 @@ void shader_internal::set() const
 
             case shared_shader::bones_pos_tr:
             {
-                if(m_skeleton && m_shared->last_skeleton_pos!=m_skeleton)
+                //if(m_skeleton && m_shared->last_skeleton_pos!=m_skeleton)
                 {
                     nya_memory::tmp_buffer_scoped tmp(m_skeleton->get_bones_count()*3*4);
                     nya_math::vec3 *pos=(nya_math::vec3 *)tmp.get_data();
@@ -333,7 +333,7 @@ void shader_internal::set() const
 
             case shared_shader::bones_rot:
             {
-               // if(m_skeleton && m_shared->last_skeleton_rot!=m_skeleton)
+                //if(m_skeleton && m_shared->last_skeleton_rot!=m_skeleton)
                 {
                     m_shared->shdr.set_uniform4_array(p.location,m_skeleton->get_rot_buffer(),m_skeleton->get_bones_count());
                     m_shared->last_skeleton_rot=m_skeleton;
@@ -343,54 +343,54 @@ void shader_internal::set() const
 
             case shared_shader::bones_pos_tex:
             {
-                if(!m_shared->m_texture_buffers.is_valid())
-                    m_shared->m_texture_buffers.allocate();
+                if(!m_shared->texture_buffers.is_valid())
+                    m_shared->texture_buffers.allocate();
 
-                if(m_skeleton && m_shared->m_texture_buffers->last_skeleton_pos_texture!=m_skeleton)
+                if(m_skeleton && m_shared->texture_buffers->last_skeleton_pos_texture!=m_skeleton)
                 {
-                    build_bones_texture(m_shared->m_texture_buffers->m_skeleton_pos_texture,
+                    build_bones_texture(m_shared->texture_buffers->skeleton_pos_texture,
                                         m_skeleton->get_pos_buffer(),m_skeleton->get_bones_count(),nya_render::texture::color_rgb32f);
-                    m_shared->m_texture_buffers->last_skeleton_pos_texture=m_skeleton;
+                    m_shared->texture_buffers->last_skeleton_pos_texture=m_skeleton;
                 }
 
-                m_shared->m_texture_buffers->m_skeleton_pos_texture.internal().set(p.location);
+                m_shared->texture_buffers->skeleton_pos_texture.internal().set(p.location);
             }
             break;
 
             case shared_shader::bones_pos_tr_tex:
             {
-                if(!m_shared->m_texture_buffers.is_valid())
-                    m_shared->m_texture_buffers.allocate();
+                if(!m_shared->texture_buffers.is_valid())
+                    m_shared->texture_buffers.allocate();
 
-                if(m_skeleton && m_shared->m_texture_buffers->last_skeleton_pos_texture!=m_skeleton)
+                if(m_skeleton && m_shared->texture_buffers->last_skeleton_pos_texture!=m_skeleton)
                 {
                     nya_memory::tmp_buffer_scoped tmp(m_skeleton->get_bones_count()*3*4);
                     nya_math::vec3 *pos=(nya_math::vec3 *)tmp.get_data();
                     for(int i=0;i<m_skeleton->get_bones_count();++i)
                         pos[i]=m_skeleton->get_bone_pos(i)+m_skeleton->get_bone_rot(i).rotate(-m_skeleton->get_bone_original_pos(i));
 
-                    build_bones_texture(m_shared->m_texture_buffers->m_skeleton_pos_texture,
+                    build_bones_texture(m_shared->texture_buffers->skeleton_pos_texture,
                                         tmp.get_data(),m_skeleton->get_bones_count(),nya_render::texture::color_rgb32f);
-                    m_shared->m_texture_buffers->last_skeleton_pos_texture=m_skeleton;
+                    m_shared->texture_buffers->last_skeleton_pos_texture=m_skeleton;
                 }
 
-                m_shared->m_texture_buffers->m_skeleton_pos_texture.internal().set(p.location);
+                m_shared->texture_buffers->skeleton_pos_texture.internal().set(p.location);
             }
             break;
 
             case shared_shader::bones_rot_tex:
             {
-                if(!m_shared->m_texture_buffers.is_valid())
-                    m_shared->m_texture_buffers.allocate();
+                if(!m_shared->texture_buffers.is_valid())
+                    m_shared->texture_buffers.allocate();
 
-                if(m_skeleton && m_shared->m_texture_buffers->last_skeleton_rot_texture!=m_skeleton)
+                if(m_skeleton && m_shared->texture_buffers->last_skeleton_rot_texture!=m_skeleton)
                 {
-                    build_bones_texture(m_shared->m_texture_buffers->m_skeleton_rot_texture,
+                    build_bones_texture(m_shared->texture_buffers->skeleton_rot_texture,
                                         m_skeleton->get_rot_buffer(),m_skeleton->get_bones_count(),nya_render::texture::color_rgba32f);
-                    m_shared->m_texture_buffers->last_skeleton_rot_texture=m_skeleton;
+                    m_shared->texture_buffers->last_skeleton_rot_texture=m_skeleton;
                 }
 
-                m_shared->m_texture_buffers->m_skeleton_rot_texture.internal().set(p.location);
+                m_shared->texture_buffers->skeleton_rot_texture.internal().set(p.location);
             }
             break;
 
@@ -528,13 +528,13 @@ void shader_internal::skeleton_changed(const nya_render::skeleton *skeleton) con
     if(skeleton==m_shared->last_skeleton_rot)
         m_shared->last_skeleton_rot=0;
 
-    if(m_shared->m_texture_buffers.is_valid())
+    if(m_shared->texture_buffers.is_valid())
     {
-        if(skeleton==m_shared->m_texture_buffers->last_skeleton_pos_texture)
-            m_shared->m_texture_buffers->last_skeleton_pos_texture=0;
+        if(skeleton==m_shared->texture_buffers->last_skeleton_pos_texture)
+            m_shared->texture_buffers->last_skeleton_pos_texture=0;
 
-        if(skeleton==m_shared->m_texture_buffers->last_skeleton_rot_texture)
-            m_shared->m_texture_buffers->last_skeleton_rot_texture=0;
+        if(skeleton==m_shared->texture_buffers->last_skeleton_rot_texture)
+            m_shared->texture_buffers->last_skeleton_rot_texture=0;
     }
 }
 
