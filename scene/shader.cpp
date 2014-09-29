@@ -308,7 +308,7 @@ void shader_internal::set() const
 
             case shared_shader::bones_pos:
             {
-                if(m_skeleton && m_shared->last_skeleton_pos!=m_skeleton)
+                //if(m_skeleton && m_shared->last_skeleton_pos!=m_skeleton)
                 {
                     m_shared->shdr.set_uniform3_array(p.location,m_skeleton->get_pos_buffer(),m_skeleton->get_bones_count());
                     m_shared->last_skeleton_pos=m_skeleton;
@@ -333,7 +333,7 @@ void shader_internal::set() const
 
             case shared_shader::bones_rot:
             {
-                if(m_skeleton && m_shared->last_skeleton_rot!=m_skeleton)
+               // if(m_skeleton && m_shared->last_skeleton_rot!=m_skeleton)
                 {
                     m_shared->shdr.set_uniform4_array(p.location,m_skeleton->get_rot_buffer(),m_skeleton->get_bones_count());
                     m_shared->last_skeleton_rot=m_skeleton;
