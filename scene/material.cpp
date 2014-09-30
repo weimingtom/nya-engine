@@ -4,9 +4,14 @@
 #include "formats/text_parser.h"
 #include "formats/string_convert.h"
 #include "memory/invalid_object.h"
-#include "system/system.h"
 #include <list>
 #include <cstring>
+
+#ifdef _WIN32
+    #include <windows.h>
+#else
+    #include <sys/time.h>
+#endif
 
 namespace nya_scene
 {
@@ -33,6 +38,29 @@ namespace
         }
 
         return false;
+    }
+
+    unsigned long get_time()
+    {
+#ifdef _WIN32
+        static LARGE_INTEGER freq;
+        static bool initialised=false;
+        if(!initialised)
+        {
+            QueryPerformanceFrequency(&freq);
+            initialised=true;
+        }
+
+        LARGE_INTEGER time;
+        QueryPerformanceCounter(&time);
+
+        return unsigned long(time.QuadPart*1000/freq.QuadPart);
+#else
+        timeval tim;
+        gettimeofday(&tim, 0);
+        unsigned long sec=(unsigned long)tim.tv_sec;
+        return (sec*1000+(tim.tv_usec/1000));
+#endif
     }
 
     nya_scene::texture missing_texture(bool cube)
@@ -77,7 +105,7 @@ namespace
             initialised=true;
         }
 
-        if((nya_system::get_time()/200)%2>0)
+        if((get_time()/200)%2>0)
             return cube?missing_cube_white:missing_white;
 
         return cube?missing_cube_red:missing_red;
