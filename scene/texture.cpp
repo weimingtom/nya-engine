@@ -212,15 +212,21 @@ bool texture::is_cubemap() const
 
 void texture::build(const void *data,unsigned int width,unsigned int height,color_format format)
 {
-    texture_internal::shared_resources::shared_resource_mutable_ref ref=m_internal.get_shared_resources().create();
-    if(!ref.is_valid())
-	{
-		m_internal.unload();
+    texture_internal::shared_resources::shared_resource_mutable_ref ref;
+    if(m_internal.m_shared.get_ref_count()==1 && !m_internal.m_shared.get_name())  //was created and unique
+    {
+        ref=texture_internal::shared_resources::modify(m_internal.m_shared);
+        ref->tex.build_texture(data,width,height,format);
         return;
-	}
+    }
+
+    m_internal.unload();
+
+    ref=m_internal.get_shared_resources().create();
+    if(!ref.is_valid())
+        return;
 
     ref->tex.build_texture(data,width,height,format);
-
     m_internal.m_shared=ref;
 }
 

@@ -12,7 +12,7 @@ namespace nya_resources
 {
 
 template<typename t_res,int block_count> class shared_resources
-{    
+{
 private:
     virtual bool fill_resource(const char *name,t_res &res) { return false; }
     virtual bool release_resource(t_res &res) { return false; }
@@ -26,20 +26,20 @@ private:
         class shared_resource_ref
         {
             template<typename,int> friend class shared_resources;
-            
+
         public:
             bool is_valid() const { return m_res!=0; }
             const t_res *const_get() const { return m_res; }
             const t_res *operator -> () const { return m_res; };
-            
+
             const char *get_name() const
             {
                 if(!m_creator)
                     return 0;
-                
+
                 return m_creator->get_res_name(*this);
             }
-            
+
             int get_ref_count()
             {
                 if(!m_creator)
@@ -52,42 +52,42 @@ private:
             {
                 if(m_creator)
                     m_creator->free(*this);
-                
+
                 m_res=0;
                 m_res_holder=0;
                 m_creator=0;
             }
-            
+
         public:
             shared_resource_ref(): m_res(0), m_res_holder(0), m_creator(0) {}
-            
+
             shared_resource_ref(const shared_resource_ref &ref)
             {
                 m_res=ref.m_res;
                 m_res_holder=ref.m_res_holder;
                 m_creator=ref.m_creator;
-                
+
                 ref_count_inc();
             }
-            
+
             shared_resource_ref &operator=(const shared_resource_ref &ref)
             {
                 if(this==&ref)
                     return *this;
-                
+
                 free();
-                
+
                 m_res=ref.m_res;
                 m_res_holder=ref.m_res_holder;
                 m_creator=ref.m_creator;
-                
+
                 ref_count_inc();
-                
+
                 return *this;
             }
-            
+
             ~shared_resource_ref() { free(); }
-            
+
         protected:
             shared_resource_ref(t_res*res,res_holder*holder,shared_resources_creator *creator):
                                 m_res(res),m_res_holder(holder),m_creator(creator) {}
@@ -97,26 +97,26 @@ private:
                 if(m_creator)
                     m_creator->res_ref_count_inc(*this);
             }
-            
+
         protected:
             t_res *m_res;
-            
+
         private:
             res_holder *m_res_holder;
             shared_resources_creator *m_creator;
         };
-        
+
         class shared_resource_mutable_ref: public shared_resource_ref
         {
             template<typename,int> friend class shared_resources;
-            
+
         public:
             t_res *get() { return this->m_res; }
             t_res *operator -> () { return this->m_res; }
-            
+
         public:
             shared_resource_mutable_ref() { shared_resource_ref(); }
-            
+
         private:
             shared_resource_mutable_ref(t_res*res,res_holder*holder,shared_resources_creator *creator)
             { *(shared_resource_ref*)this=shared_resource_ref(res,holder,creator); }
@@ -178,6 +178,15 @@ private:
             ++m_ref_count;
 
             return shared_resource_mutable_ref(&(holder->res),holder,this);
+        }
+
+        static shared_resource_mutable_ref modify(shared_resource_ref &ref)
+        {
+            if(!ref.is_valid())
+                return shared_resource_mutable_ref();
+
+            ref.ref_count_inc();
+            return shared_resource_mutable_ref(&(ref.m_res_holder->res),ref.m_res_holder,ref.m_creator);
         }
 
         static int res_get_ref_count(const shared_resource_ref&ref)
@@ -253,7 +262,7 @@ private:
 
             if(!m_should_unload_unused)
                 return;
-            
+
             if(m_ref_count>0)
                 --m_ref_count;
             else
@@ -388,6 +397,8 @@ public:
 public:
     shared_resource_ref access(const char*name) { return m_creator->access(name); }
     shared_resource_mutable_ref create() { return m_creator->create(); }
+    static shared_resource_mutable_ref modify(shared_resource_ref &res) { return shared_resources_creator::modify(res); }
+
     shared_resources() { m_creator = new shared_resources_creator(this); }
 
 public:
