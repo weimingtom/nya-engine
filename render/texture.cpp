@@ -512,14 +512,17 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     if(m_tex<0)
         m_tex=texture_obj::add();
 
+    bool need_create=m_width!=width || m_height!=height || m_format!=format;
     if(!texture_obj::get(m_tex).tex_id)
     {
         glGenTextures(1,&texture_obj::get(m_tex).tex_id);
+        need_create=true;
     }
     else if(texture_obj::get(m_tex).gl_type!=GL_TEXTURE_2D)
     {
         glDeleteTextures(1,&texture_obj::get(m_tex).tex_id);
         glGenTextures(1,&texture_obj::get(m_tex).tex_id);
+        need_create=true;
     }
 
     m_width=width;
@@ -586,7 +589,10 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
             case depth24:
             case depth32:
                 size=w*h*(source_bpp/8);
-                glTexImage2D(GL_TEXTURE_2D,i,source_format,w,h,0,gl_format,precision,data_pointer);
+                if(need_create)
+                    glTexImage2D(GL_TEXTURE_2D,i,source_format,w,h,0,gl_format,precision,data_pointer);
+                else
+                    glTexSubImage2D(GL_TEXTURE_2D,i,0,0,w,h,gl_format,precision,data_pointer);
                 break;
 
   #ifndef OPENGL_ES
