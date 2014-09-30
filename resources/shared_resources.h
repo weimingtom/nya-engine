@@ -40,6 +40,14 @@ private:
                 return m_creator->get_res_name(*this);
             }
             
+            int get_ref_count()
+            {
+                if(!m_creator)
+                    return 0;
+
+                return m_creator->res_get_ref_count(*this);
+            }
+
             void free()
             {
                 if(m_creator)
@@ -170,6 +178,14 @@ private:
             ++m_ref_count;
 
             return shared_resource_mutable_ref(&(holder->res),holder,this);
+        }
+
+        static int res_get_ref_count(const shared_resource_ref&ref)
+        {
+            if(!ref.m_res_holder)
+                return 0;
+
+            return ref.m_res_holder->ref_count;
         }
 
         int reload_resources()
