@@ -331,7 +331,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     for(auto &l:srdata)
     {
         l.pSysMem=data;
-        l.SysMemPitch=width*4;
+        l.SysMemPitch=width*(format==dxt1?2:4);
         l.SysMemSlicePitch=0;
     }
 
@@ -682,7 +682,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 
     D3D11_SUBRESOURCE_DATA srdata;
     srdata.pSysMem=data?data[0]:0;
-    srdata.SysMemPitch=width*4;
+    srdata.SysMemPitch=width*(format==dxt1?2:4);
     srdata.SysMemSlicePitch=0;
 
     switch(format)
