@@ -12,6 +12,7 @@ class memory_writer
 {
 public:
     template<typename t> bool write(const t&v) { return write(&v,sizeof(t)); }
+    bool write_short(short v) { return write(&v,sizeof(v)); }
     bool write_int(int v) { return write(&v,sizeof(v)); }
     bool write_uint(unsigned int v) { return write(&v,sizeof(v)); }
     bool write_ushort(unsigned short v) { return write(&v,sizeof(v)); }
