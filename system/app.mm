@@ -50,7 +50,7 @@
     GLint framebufferHeight;
     float m_scale;
 
-    GLuint defaultFramebuffer, colorRenderbuffer, depthRenderbuffer;
+    GLuint defaultFramebuffer,colorRenderbuffer,msaaFramebuffer,msaaRenderBuffer,depthRenderbuffer;
 }
 
 @property (strong, nonatomic) EAGLContext *context;
@@ -77,15 +77,16 @@ namespace
     public:
         void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing,nya_system::app &app)
         {
-            start_fullscreen(w,h,app);
+            start_fullscreen(w,h,antialiasing,app);
         }
 
-        void start_fullscreen(unsigned int w,unsigned int h,nya_system::app &app)
+        void start_fullscreen(unsigned int w,unsigned int h,int antialiasing,nya_system::app &app)
         {
             if(m_responder)
                 return;
 
             m_responder=&app;
+            m_antialiasing=antialiasing;
 
             @autoreleasepool 
             {
@@ -113,23 +114,17 @@ namespace
         }
 
     public:
-        static shared_app &get_app()
-        {
-            static shared_app app;
-            return app;
-        }
-
-        nya_system::app *get_responder()
-        {
-            return m_responder;
-        }
+        static shared_app &get_app() { static shared_app app; return app; }
+        nya_system::app *get_responder() { return m_responder; }
+        int get_antialiasing() { return m_antialiasing; }
 
     public:
-        shared_app():m_responder(0),m_title("Nya engine") {}
+        shared_app():m_responder(0),m_antialiasing(0),m_title("Nya engine") {}
 
     private:
         nya_system::app *m_responder;
         std::string m_title;
+        int m_antialiasing;
     };
 }
 
@@ -253,6 +248,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 		case UIInterfaceOrientationPortraitUpsideDown: return @"UIInterfaceOrientationPortraitUpsideDown";
 		case UIInterfaceOrientationLandscapeLeft:      return @"UIInterfaceOrientationLandscapeLeft";
 		case UIInterfaceOrientationLandscapeRight:     return @"UIInterfaceOrientationLandscapeRight";
+        default: break;
 	}
 	return @"Unexpected";
 }
@@ -569,14 +565,34 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
         [context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer *)self.layer];
         glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &framebufferWidth);
         glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &framebufferHeight);
-
-        glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, framebufferWidth, framebufferHeight);
-        //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8_OES, framebufferWidth, framebufferHeight);
-
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorRenderbuffer);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
-        //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
+
+        const int aa=shared_app::get_app().get_antialiasing();
+        if(aa>0)
+        {
+            glGenFramebuffers(1, &msaaFramebuffer);
+            glBindFramebuffer(GL_FRAMEBUFFER, msaaFramebuffer);
+
+            glGenRenderbuffers(1, &msaaRenderBuffer);
+            glBindRenderbuffer(GL_RENDERBUFFER, msaaRenderBuffer);
+
+            glRenderbufferStorageMultisampleAPPLE(GL_RENDERBUFFER, aa, GL_RGB5_A1, framebufferWidth, framebufferHeight);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, msaaRenderBuffer);
+            glGenRenderbuffers(1, &depthRenderbuffer);
+
+            glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
+            glRenderbufferStorageMultisampleAPPLE(GL_RENDERBUFFER, aa, GL_DEPTH_COMPONENT16, framebufferWidth, framebufferHeight);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
+        }
+        else
+        {
+            glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, framebufferWidth, framebufferHeight);
+            //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8_OES, framebufferWidth, framebufferHeight);
+
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
+            //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
+        }
 
         if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             NSLog(@"Failed to make complete framebuffer object %x", glCheckFramebufferStatus(GL_FRAMEBUFFER));
@@ -590,6 +606,18 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
     [EAGLContext setCurrentContext:context];
 
+    if(msaaFramebuffer)
+    {
+        glDeleteFramebuffers(1,&msaaFramebuffer);
+        msaaFramebuffer=0;
+    }
+
+    if(msaaRenderBuffer)
+    {
+        glDeleteRenderbuffers(1,&msaaRenderBuffer);
+        msaaRenderBuffer=0;
+    }
+
     if(defaultFramebuffer)
     {
         glDeleteFramebuffers(1,&defaultFramebuffer);
@@ -600,6 +628,12 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
     {
         glDeleteRenderbuffers(1,&colorRenderbuffer);
         colorRenderbuffer=0;
+    }
+
+    if(depthRenderbuffer)
+    {
+        glDeleteRenderbuffers(1,&depthRenderbuffer);
+        depthRenderbuffer=0;
     }
 }
 
@@ -617,7 +651,11 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
                 responder->on_resize(framebufferWidth,framebufferHeight);
         }
 
-        glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebuffer);
+        if(msaaFramebuffer)
+            glBindFramebuffer(GL_FRAMEBUFFER, msaaFramebuffer);
+        else
+            glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebuffer);
+
         glViewport(0,0,framebufferWidth,framebufferHeight);
     }
 }
@@ -628,6 +666,16 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
         return false;
 
     [EAGLContext setCurrentContext:context];
+
+    GLenum attachments[]={GL_DEPTH_ATTACHMENT};
+    glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER_APPLE,1,attachments);
+
+    if(msaaFramebuffer)
+    {
+        glBindFramebuffer(GL_READ_FRAMEBUFFER_APPLE,msaaFramebuffer);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER_APPLE,defaultFramebuffer);
+        glResolveMultisampleFramebufferAPPLE();
+    }
 
     glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
 
@@ -689,7 +737,7 @@ public:
         [controller release];
     }
 
-    void start_fullscreen(unsigned int w,unsigned int h,nya_system::app &app)
+    void start_fullscreen(unsigned int w,unsigned int h,int antialiasing,nya_system::app &app)
     {
         //ToDo
 
@@ -1087,7 +1135,7 @@ void app::start_windowed(int x,int y,unsigned int w,unsigned int h,int antialias
 
 void app::start_fullscreen(unsigned int w,unsigned int h)
 {
-    shared_app::get_app().start_fullscreen(w,h,*this);
+    shared_app::get_app().start_fullscreen(w,h,0,*this);
 }
 
 void app::set_title(const char *title)
