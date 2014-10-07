@@ -695,6 +695,7 @@ bool shader::add_program(program_type type,const char*code)
     if(type==vertex)
     {
         const char *attribute_names[]={"nyaVertex","nyaNormal","nyaColor","nyaMultiTexCoord"};
+        const char *attribute_types[]={"vec4","vec3","vec4","vec4"};
 
         bool used_attribs[max_attributes]={false};
         shdr.mat_mvp=shdr.mat_mv=shdr.mat_p=-1;
@@ -759,7 +760,8 @@ bool shader::add_program(program_type type,const char*code)
             if(!used_attribs[i])
                 continue;
 
-            code_final.append("attribute vec4 "),code_final.append(attribute_names[i]),code_final.append(";\n");
+            code_final.append("attribute "),code_final.append(attribute_types[i]),code_final.append(" "),
+            code_final.append(attribute_names[i]),code_final.append(";\n");
             glBindAttribLocation(shdr.program,i,attribute_names[i]);
         }
 
@@ -809,10 +811,9 @@ bool shader::add_program(program_type type,const char*code)
         glGetShaderParam(object,GL_OBJECT_INFO_LOG_LENGTH_ARB,&log_len);
         if(log_len>0)
         {
-            GLchar *buf=new GLchar[log_len];
-            glGetInfoLogARB(object,log_len,&log_len,buf);
-            log()<<buf<<"\n";
-            delete []buf;
+            std::string log_text(log_len,0);
+            glGetInfoLogARB(object,log_len,&log_len,&log_text[0]);
+            log()<<log_text.c_str()<<"\n";
         }
 
         shdr.program=0;
