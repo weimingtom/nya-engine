@@ -630,23 +630,6 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     return true;
 }
 
-bool texture::is_dxt_supported()
-{
-#ifdef DIRECTX11
-    return true;
-#elif defined OPENGL_ES
-    return true;
-#else
-  #ifndef NO_EXTENSIONS_INIT
-    if(!glCompressedTexImage2D)
-        glCompressedTexImage2D=(PFNGLCOMPRESSEDTEXIMAGE2DARBPROC)get_extension("glCompressedTexImage2D");
-
-    return glCompressedTexImage2D!=0;
-  #endif
-    return true;
-#endif
-}
-
 bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int height,color_format format)
 {
     if(width==0 || height==0)
@@ -1068,48 +1051,6 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
     return true;
 }
 
-void texture::release()
-{
-    if(m_tex<0)
-        return;
-
-#ifdef DIRECTX11
-    if(!get_context())
-        return;
-
-    for(unsigned int i=0;i<max_layers;++i)
-    {
-        if(active_layers[i]==m_tex)
-        {
-            get_context()->PSSetShaderResources(i,0,0);
-            get_context()->PSSetSamplers(i,0,0);
-            active_layers[i]=-1;
-        }
-
-        if(current_layers[i]==m_tex)
-            current_layers[i]=-1;
-    }
-#else
-    for(unsigned int i=0;i<max_layers;++i)
-    {
-        if(active_layers[i]==m_tex)
-        {
-            gl_select_multitex_layer(i);
-            glBindTexture(texture_obj::get(m_tex).gl_type,0);
-            active_layers[i]=-1;
-        }
-
-        if(current_layers[i]==m_tex)
-            current_layers[i]=-1;
-    }
-#endif
-    texture_obj::remove(m_tex);
-
-    m_tex=-1;
-    m_width=0;
-    m_height=0;
-}
-
 void texture::set_wrap(bool repeat_s,bool repeat_t)
 {
     if(m_tex<0)
@@ -1190,6 +1131,23 @@ bool texture::is_cubemap() const
     return texture_obj::get(m_tex).is_cubemap;
 }
 
+bool texture::is_dxt_supported()
+{
+#ifdef DIRECTX11
+    return true;
+#elif defined OPENGL_ES
+    return true;
+#else
+  #ifndef NO_EXTENSIONS_INIT
+    if(!glCompressedTexImage2D)
+        glCompressedTexImage2D=(PFNGLCOMPRESSEDTEXIMAGE2DARBPROC)get_extension("glCompressedTexImage2D");
+
+    return glCompressedTexImage2D!=0;
+  #endif
+    return true;
+#endif
+}
+
 namespace
 {
 
@@ -1220,6 +1178,47 @@ void texture_obj::release()
     DIRECTX11_ONLY(if(tex) tex->Release());
     OPENGL_ONLY(if(tex_id) glDeleteTextures(1,&tex_id));
     *this=texture_obj();
+}
+
+void texture::release()
+{
+    if(m_tex<0)
+        return;
+
+#ifdef DIRECTX11
+    if(!get_context())
+        return;
+
+    for(unsigned int i=0;i<max_layers;++i)
+    {
+        if(active_layers[i]==m_tex)
+        {
+            get_context()->PSSetShaderResources(i,0,0);
+            get_context()->PSSetSamplers(i,0,0);
+            active_layers[i]=-1;
+        }
+
+        if(current_layers[i]==m_tex)
+            current_layers[i]=-1;
+    }
+#else
+    for(unsigned int i=0;i<max_layers;++i)
+    {
+        if(active_layers[i]==m_tex)
+        {
+            gl_select_multitex_layer(i);
+            glBindTexture(texture_obj::get(m_tex).gl_type,0);
+            active_layers[i]=-1;
+        }
+
+        if(current_layers[i]==m_tex)
+            current_layers[i]=-1;
+    }
+#endif
+    texture_obj::remove(m_tex);
+
+    m_tex=-1;
+    m_width=m_height=0;
 }
 
 }
