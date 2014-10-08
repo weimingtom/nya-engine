@@ -303,13 +303,11 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
     nya_system::app *responder=shared_app::get_app().get_responder();
     if(responder)
     {
-        responder->on_init_splash();
-
         [(EAGLView *)self.view setFramebuffer];
+        responder->on_init_splash();
         responder->on_splash(0);
-        [self present_frame];
-
         responder->on_init();
+        [(EAGLView *)self.view presentFramebuffer];
     }
 
     [self drawFrame];
@@ -464,13 +462,6 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
     if(responder)
         responder->on_frame(dt);
 
-    [self present_frame];
-}
-
--(void)present_frame
-{
-    const GLenum attachments[] = { GL_DEPTH_ATTACHMENT, GL_COLOR_ATTACHMENT0 };
-    glDiscardFramebufferEXT(GL_FRAMEBUFFER , sizeof(attachments)/sizeof(GLenum), attachments);
     [(EAGLView *)self.view presentFramebuffer];
 }
 
@@ -667,17 +658,20 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
     [EAGLContext setCurrentContext:context];
 
-    GLenum attachments[]={GL_DEPTH_ATTACHMENT};
-    glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER_APPLE,1,attachments);
-
     if(msaaFramebuffer)
     {
+        const GLenum attachments[]={GL_DEPTH_ATTACHMENT};
+        glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER_APPLE,1,attachments);
+
         glBindFramebuffer(GL_READ_FRAMEBUFFER_APPLE,msaaFramebuffer);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER_APPLE,defaultFramebuffer);
         glResolveMultisampleFramebufferAPPLE();
     }
 
     glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
+
+    const GLenum attachments[] = { GL_DEPTH_ATTACHMENT, GL_COLOR_ATTACHMENT0 };
+    glDiscardFramebufferEXT(GL_FRAMEBUFFER , sizeof(attachments)/sizeof(GLenum), attachments);
 
     return [context presentRenderbuffer:GL_RENDERBUFFER];
 }

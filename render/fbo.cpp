@@ -347,6 +347,9 @@ void fbo::unbind()
     dx_target target=get_default_target();
     set_target(target.color,target.depth);
 #else
+    if(!check_init_fbo())
+        return;
+
     glBindFramebuffer(GL_FRAMEBUFFER,default_fbo_idx);
 #endif
 }
