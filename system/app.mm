@@ -670,8 +670,8 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
     glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
 
-    const GLenum attachments[] = { GL_DEPTH_ATTACHMENT, GL_COLOR_ATTACHMENT0 };
-    glDiscardFramebufferEXT(GL_FRAMEBUFFER , sizeof(attachments)/sizeof(GLenum), attachments);
+    //const GLenum attachments[] = { GL_DEPTH_ATTACHMENT, GL_COLOR_ATTACHMENT0 };
+    //glDiscardFramebufferEXT(GL_FRAMEBUFFER , sizeof(attachments)/sizeof(GLenum), attachments);
 
     return [context presentRenderbuffer:GL_RENDERBUFFER];
 }
