@@ -36,6 +36,7 @@ private:
     nya_scene::mesh m_mesh;
     viewer_camera m_camera;
     nya_render::debug_draw m_dd;
+    nya_math::vec3 m_light_dir;
 
     NSTimer *m_animation_timer;
     unsigned long m_last_time;

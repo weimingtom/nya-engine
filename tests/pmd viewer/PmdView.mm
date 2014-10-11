@@ -340,7 +340,7 @@ private:
     m_camera.add_rot(pt.x-m_mouse_old.x,-(pt.y-m_mouse_old.y));
 
     if([[NSApp currentEvent] modifierFlags] & NSCommandKeyMask)
-        xps_loader::set_light_dir(nya_math::vec3::normalize(nya_scene::get_camera().get_pos()));
+        m_light_dir=nya_math::vec3::normalize(nya_scene::get_camera().get_pos());
 
     m_mouse_old=pt;
 
@@ -666,6 +666,8 @@ private:
         nya_render::set_clear_color(1.0f,1.0f,1.0f,0.0f);
         //nya_render::set_clear_color(0.2f,0.4f,0.5f,0.0f);
 
+        m_light_dir=nya_math::vec3(-1.0,1.0,1.0).normalize();
+
         nya_render::depth_test::enable(nya_render::depth_test::less);
 
         const bool is_mmd=doc->m_model_name[doc->m_model_name.length()-2]=='m';
@@ -750,6 +752,7 @@ private:
     so.override_cull_face=m_backface_cull;
     so.cull_face=false;
     nya_render::set_state_override(so);
+    xps_loader::set_light_dir(m_light_dir);
 
     nya_render::clear(true,true);
 

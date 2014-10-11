@@ -206,7 +206,7 @@ bool pmd_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
     }
 
     const ushort bones_count=reader.read<ushort>();
-    if(!reader.check_remained(bones_count*(20+sizeof(short)+5+sizeof(nya_math::vec3))))
+    if(!bones_count || !reader.check_remained(bones_count*(20+sizeof(short)+5+sizeof(nya_math::vec3))))
         return false;
 
     if(bones_count>gpu_skining_bones_limit)
