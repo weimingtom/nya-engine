@@ -5,6 +5,8 @@
           is_valid function
           log
           advanced is_supported function (public)
+ 
+          update vobj.vertex_array_object on attribute changes after the first draw
 */
 
 #include "vbo.h"
@@ -18,6 +20,10 @@
 
 #ifdef DIRECTX11
     #include "shader.h"
+#endif
+
+#ifdef OPENGL_ES
+    #define USE_VAO
 #endif
 
 namespace nya_render
@@ -65,13 +71,21 @@ namespace
         unsigned int verts_count;
         unsigned int allocated_verts_count;
 
+#ifdef USE_VAO
+        unsigned int vertex_array_object;
+#endif
         vbo::usage_hint vertex_usage;
 
         DIRECTX11_ONLY(ID3D11Buffer *vertex_loc,*index_loc);
         OPENGL_ONLY(unsigned int vertex_loc,index_loc);
 
         vbo_obj(): vertex_loc(0),index_loc(0),element_type(vbo::triangles),element_count(0),allocated_elements_count(0),
-                   verts_count(0),allocated_verts_count(0) {}
+                   verts_count(0),allocated_verts_count(0)
+        {
+#ifdef USE_VAO
+            vertex_array_object=0;
+#endif
+        }
 
     public:
         static int add() { return get_vbo_objs().add(); }
@@ -229,6 +243,11 @@ void vbo_obj::release()
     DIRECTX11_ONLY(if(index_loc) index_loc->Release());
     OPENGL_ONLY(if(vertex_loc) glDeleteBuffers(1,&vertex_loc));
     OPENGL_ONLY(if(index_loc) glDeleteBuffers(1,&index_loc));
+
+#ifdef USE_VAO
+    if(vertex_array_object!=0) glDeleteVertexArraysOES(1,&vertex_array_object);
+#endif
+
     *this=vbo_obj();
 }
 
@@ -240,28 +259,32 @@ void reset_vbo_state()
 {
 #ifdef DIRECTX11
 #else
+
+ #ifdef USE_VAO
+    glBindVertexArrayOES(0);
+ #else
     glBindBuffer(GL_ARRAY_BUFFER,0);
 
-  #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+   #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
     glDisableVertexAttribArray(vertex_attribute);
     glDisableVertexAttribArray(color_attribute);
     glDisableVertexAttribArray(normal_attribute);
-  #else
+   #else
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
-  #endif
+   #endif
 
     for(unsigned int i=0;i<vbo::max_tex_coord;++i)
     {
-#ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+   #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
         glDisableVertexAttribArray(tc0_attribute+i);
-#else
+   #else
         glClientActiveTexture(GL_TEXTURE0_ARB+i);
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-#endif
+   #endif
     }
-
+ #endif
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
 #endif
 
@@ -408,100 +431,114 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type) //To
         if(!vobj.vertices.has)
             return;
 
-        glBindBuffer(GL_ARRAY_BUFFER,vobj.vertex_loc);
-
-  #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
-        glEnableVertexAttribArray(vertex_attribute);
-        glVertexAttribPointer(vertex_attribute,vobj.vertices.dimension,get_gl_element_type(vobj.vertices.type),0,
-                              vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.vertices.offset));
-  #else
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glVertexPointer(vobj.vertices.dimension,get_gl_element_type(vobj.vertices.type),vobj.vertex_stride,(void*)0);
-  #endif
-        for(unsigned int i=0;i<max_tex_coord;++i)
+#ifdef USE_VAO
+        if(vobj.vertex_array_object>0)
         {
-            const vbo_obj::attribute &tc=vobj.tcs[i];
-            if(tc.has)
+            glBindVertexArrayOES(vobj.vertex_array_object);
+        }
+        else
+        {
+            glGenVertexArraysOES(1,&vobj.vertex_array_object);
+            glBindVertexArrayOES(vobj.vertex_array_object);
+
+            active_attributes=vbo_obj_atributes();
+#endif
+            glBindBuffer(GL_ARRAY_BUFFER,vobj.vertex_loc);
+
+      #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+            glEnableVertexAttribArray(vertex_attribute);
+            glVertexAttribPointer(vertex_attribute,vobj.vertices.dimension,get_gl_element_type(vobj.vertices.type),0,
+                                  vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.vertices.offset));
+      #else
+            glEnableClientState(GL_VERTEX_ARRAY);
+            glVertexPointer(vobj.vertices.dimension,get_gl_element_type(vobj.vertices.type),vobj.vertex_stride,(void*)0);
+      #endif
+            for(unsigned int i=0;i<max_tex_coord;++i)
             {
-                //if(vobj.vertex_stride!=active_attributes.vertex_stride || !tc.compare(active_attributes.tcs[i]))
+                const vbo_obj::attribute &tc=vobj.tcs[i];
+                if(tc.has)
                 {
-  #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
-                    if(!active_attributes.tcs[i].has)
-                        glEnableVertexAttribArray(tc0_attribute+i);
-                    glVertexAttribPointer(tc0_attribute+i,tc.dimension,get_gl_element_type(tc.type),0,
-                                          vobj.vertex_stride,(void*)(ptrdiff_t)(tc.offset));
-  #else
+                    //if(vobj.vertex_stride!=active_attributes.vertex_stride || !tc.compare(active_attributes.tcs[i]))
+                    {
+      #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+                        if(!active_attributes.tcs[i].has)
+                            glEnableVertexAttribArray(tc0_attribute+i);
+                        glVertexAttribPointer(tc0_attribute+i,tc.dimension,get_gl_element_type(tc.type),0,
+                                              vobj.vertex_stride,(void*)(ptrdiff_t)(tc.offset));
+      #else
+                        glClientActiveTexture(GL_TEXTURE0_ARB+i);
+                        if(!active_attributes.tcs[i].has)
+                            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+                        glTexCoordPointer(tc.dimension,get_gl_element_type(tc.type),vobj.vertex_stride,(void*)(ptrdiff_t)(tc.offset));
+      #endif
+                    }
+                }
+                else if(active_attributes.tcs[i].has)
+                {
+      #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+                    glDisableVertexAttribArray(tc0_attribute+i);
+      #else
                     glClientActiveTexture(GL_TEXTURE0_ARB+i);
-                    if(!active_attributes.tcs[i].has)
-                        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-                    glTexCoordPointer(tc.dimension,get_gl_element_type(tc.type),vobj.vertex_stride,(void*)(ptrdiff_t)(tc.offset));
-  #endif
+                    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+      #endif
                 }
             }
-            else if(active_attributes.tcs[i].has)
-            {
-  #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
-                glDisableVertexAttribArray(tc0_attribute+i);
-  #else
-                glClientActiveTexture(GL_TEXTURE0_ARB+i);
-                glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-  #endif
-            }
-        }
 
-        if(vobj.normals.has)
-        {
-            //if(vobj.vertex_stride!=active_attributes.vertex_stride || !vobj.normals.compare(active_attributes.normals))
+            if(vobj.normals.has)
             {
-  #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
-                if(!active_attributes.normals.has)
-                    glEnableVertexAttribArray(normal_attribute);
-                glVertexAttribPointer(normal_attribute,3,get_gl_element_type(vobj.normals.type),1,
-                                      vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.normals.offset));
-  #else
-                if(!active_attributes.normals.has)
-                    glEnableClientState(GL_NORMAL_ARRAY);
-                glNormalPointer(get_gl_element_type(vobj.normals.type),vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.normals.offset));
-  #endif
+                //if(vobj.vertex_stride!=active_attributes.vertex_stride || !vobj.normals.compare(active_attributes.normals))
+                {
+      #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+                    if(!active_attributes.normals.has)
+                        glEnableVertexAttribArray(normal_attribute);
+                    glVertexAttribPointer(normal_attribute,3,get_gl_element_type(vobj.normals.type),1,
+                                          vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.normals.offset));
+      #else
+                    if(!active_attributes.normals.has)
+                        glEnableClientState(GL_NORMAL_ARRAY);
+                    glNormalPointer(get_gl_element_type(vobj.normals.type),vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.normals.offset));
+      #endif
+                }
             }
-        }
-        else if(active_attributes.normals.has)
-        {
-  #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
-            glDisableVertexAttribArray(normal_attribute);
-  #else
-            glDisableClientState(GL_NORMAL_ARRAY);
-  #endif
-        }
-
-        if(vobj.colors.has)
-        {
-            //if(vobj.vertex_stride!=active_attributes.vertex_stride || !vobj.colors.compare(active_attributes.colors))
+            else if(active_attributes.normals.has)
             {
-  #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
-                if(!active_attributes.colors.has)
-                    glEnableVertexAttribArray(color_attribute);
-                glVertexAttribPointer(color_attribute,vobj.colors.dimension,get_gl_element_type(vobj.colors.type),0,
-                                      vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.colors.offset));
-  #else
-                if(!active_attributes.colors.has)
-                    glEnableClientState(GL_COLOR_ARRAY);
-                glColorPointer(vobj.colors.dimension,get_gl_element_type(vobj.colors.type),
-                               vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.colors.offset));
-  #endif
+      #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+                glDisableVertexAttribArray(normal_attribute);
+      #else
+                glDisableClientState(GL_NORMAL_ARRAY);
+      #endif
             }
-        }
-        else if(active_attributes.colors.has)
-        {
-  #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
-            glDisableVertexAttribArray(color_attribute);
-  #else
-            glDisableClientState(GL_COLOR_ARRAY);
-  #endif
-        }
 
+            if(vobj.colors.has)
+            {
+                //if(vobj.vertex_stride!=active_attributes.vertex_stride || !vobj.colors.compare(active_attributes.colors))
+                {
+      #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+                    if(!active_attributes.colors.has)
+                        glEnableVertexAttribArray(color_attribute);
+                    glVertexAttribPointer(color_attribute,vobj.colors.dimension,get_gl_element_type(vobj.colors.type),0,
+                                          vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.colors.offset));
+      #else
+                    if(!active_attributes.colors.has)
+                        glEnableClientState(GL_COLOR_ARRAY);
+                    glColorPointer(vobj.colors.dimension,get_gl_element_type(vobj.colors.type),
+                                   vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.colors.offset));
+      #endif
+                }
+            }
+            else if(active_attributes.colors.has)
+            {
+      #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+                glDisableVertexAttribArray(color_attribute);
+      #else
+                glDisableClientState(GL_COLOR_ARRAY);
+      #endif
+            }
+            active_attributes=vobj;
+#ifdef USE_VAO
+        }
+#endif
         active_verts=current_verts;
-        active_attributes=vobj;
     }
 
     const int gl_elem=get_gl_element_type(el_type);
