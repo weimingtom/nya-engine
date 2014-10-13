@@ -7,6 +7,8 @@
 
 #include <string>
 
+#include "render/render.h"
+
 #include "TargetConditionals.h"
 #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
 
@@ -647,7 +649,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
         else
             glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebuffer);
 
-        glViewport(0,0,framebufferWidth,framebufferHeight);
+        nya_render::set_viewport(0,0,framebufferWidth,framebufferHeight);
     }
 }
 
@@ -658,10 +660,11 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
     [EAGLContext setCurrentContext:context];
 
+    const GLenum attachments[]={GL_DEPTH_ATTACHMENT};
+    glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER_APPLE,1,attachments);
+
     if(msaaFramebuffer)
     {
-        const GLenum attachments[]={GL_DEPTH_ATTACHMENT};
-        glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER_APPLE,1,attachments);
 
         glBindFramebuffer(GL_READ_FRAMEBUFFER_APPLE,msaaFramebuffer);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER_APPLE,defaultFramebuffer);
@@ -882,7 +885,7 @@ private:
 
 -(void)reshape 
 {
-    glViewport(0,0,[self frame].size.width,[self frame].size.height);     
+    nya_render::set_viewport(0,0,[self frame].size.width,[self frame].size.height);
     m_app->on_resize([self frame].size.width,[self frame].size.height);
 
     [[self openGLContext] update];

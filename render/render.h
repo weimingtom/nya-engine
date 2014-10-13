@@ -25,8 +25,8 @@ struct rect
     rect(): x(0), y(0), width(0), height(0) {}
 };
 
-void set_viewport(int x,int y,int width,int height);
-inline void set_viewport(const rect &r) { set_viewport(r.x,r.y,r.width,r.height); }
+void set_viewport(int x,int y,int width,int height,bool force=false);
+inline void set_viewport(const rect &r,bool force=false) { set_viewport(r.x,r.y,r.width,r.height,force); }
 const rect &get_viewport();
 
 struct scissor

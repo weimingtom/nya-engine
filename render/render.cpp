@@ -76,8 +76,11 @@ void log_gl_errors(const char *place)
 #endif
 }
 
-void set_viewport(int x,int y,int w,int h)
+void set_viewport(int x,int y,int w,int h,bool force)
 {
+    if(!(viewport_rect.width!=w || viewport_rect.height!=h || viewport_rect.x!=x || viewport_rect.y!=y || force))
+        return;
+
 #ifdef DIRECTX11
 	if(!get_context())
 		return;
@@ -645,6 +648,7 @@ void apply_state(bool ignore_cache)
 
     if(ignore_cache)
     {
+        set_viewport(viewport_rect,true);
         texture::apply(true);
         shader::apply(true);
         reset_vbo_state();
