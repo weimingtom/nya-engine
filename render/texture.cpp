@@ -922,6 +922,7 @@ void texture::apply(bool ignore_cache)
                 continue;
 
             glBindTexture(texture_obj::get(active_layers[i]).gl_type,0);
+            active_layers[i]=-1;
             continue;
         }
 
@@ -935,6 +936,7 @@ void texture::apply(bool ignore_cache)
 
         glBindTexture(tex.gl_type,tex.tex_id);
 #endif
+        active_layers[i]=current_layers[i];
     }
 }
 
