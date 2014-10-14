@@ -5,8 +5,6 @@
           is_valid function
           log
           advanced is_supported function (public)
- 
-          update vobj.vertex_array_object on attribute changes after the first draw
 */
 
 #include "vbo.h"
@@ -73,6 +71,7 @@ namespace
 
 #ifdef USE_VAO
         unsigned int vertex_array_object;
+        unsigned int active_vao_ibuf;
 #endif
         vbo::usage_hint vertex_usage;
 
@@ -84,6 +83,7 @@ namespace
         {
 #ifdef USE_VAO
             vertex_array_object=0;
+            active_vao_ibuf=0;
 #endif
         }
 
@@ -96,6 +96,17 @@ namespace
 
     public:
         void release();
+
+#ifdef USE_VAO
+        void release_vao()
+        {
+            if(vertex_array_object==0)
+                return;
+
+            glDeleteVertexArraysOES(1,&vertex_array_object);
+            vertex_array_object=active_vao_ibuf=0;
+        }
+#endif
 
     public:
         typedef render_objects<vbo_obj> vbo_objs;
@@ -245,7 +256,7 @@ void vbo_obj::release()
     OPENGL_ONLY(if(index_loc) glDeleteBuffers(1,&index_loc));
 
 #ifdef USE_VAO
-    if(vertex_array_object!=0) glDeleteVertexArraysOES(1,&vertex_array_object);
+    release_vao();
 #endif
 
     *this=vbo_obj();
@@ -442,6 +453,7 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type) //To
             glBindVertexArrayOES(vobj.vertex_array_object);
 
             active_attributes=vbo_obj_atributes();
+            vobj.active_vao_ibuf=0;
 #endif
             glBindBuffer(GL_ARRAY_BUFFER,vobj.vertex_loc);
 
@@ -548,16 +560,19 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type) //To
         if(offset+count>iobj.element_count)
             return;
 
+#ifdef USE_VAO
+        if(iobj.index_loc!=vobj.active_vao_ibuf)
+        {
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,iobj.index_loc);
+            vobj.active_vao_ibuf=iobj.index_loc;
+        }
+#else
         if(current_inds!=active_inds)
         {
-            if(current_inds>=0)
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,iobj.index_loc);
-            else
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
-
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,iobj.index_loc);
             active_inds=current_inds;
         }
-
+#endif
         const unsigned int gl_elem_type=(iobj.element_size==index4b?GL_UNSIGNED_INT:GL_UNSIGNED_SHORT);
         glDrawElements(gl_elem,count,gl_elem_type,(void*)(ptrdiff_t)(offset*iobj.element_size));
     }
@@ -661,6 +676,12 @@ bool vbo::set_vertex_data(const void*data,unsigned int vert_stride,unsigned int 
 	obj.vertex_usage=usage;
     obj.vertex_stride=vert_stride;
 #else
+
+#ifdef USE_VAO
+    if(active_verts>=0)
+        glBindVertexArrayOES(0);
+#endif
+
     if(!obj.vertex_loc)
     {
         if(!check_init_vbo())
@@ -695,6 +716,10 @@ bool vbo::set_vertex_data(const void*data,unsigned int vert_stride,unsigned int 
     }
 
     active_verts=-1;
+
+  #ifdef USE_VAO
+    obj.release_vao();
+  #endif
 #endif
 
     obj.verts_count=vert_count;
@@ -748,6 +773,12 @@ bool vbo::set_index_data(const void*data,index_size size,unsigned int indices_co
     obj.elements_usage=usage;
     obj.element_size=size;
 #else
+
+#ifdef USE_VAO
+    if(active_verts>=0)
+        glBindVertexArrayOES(0);
+#endif
+
     if(!obj.index_loc)
     {
         if(!check_init_vbo())
@@ -781,7 +812,11 @@ bool vbo::set_index_data(const void*data,index_size size,unsigned int indices_co
         }
     }
 
-    active_inds=-1;
+    active_inds=obj.index_loc;
+
+  #ifdef USE_VAO
+    obj.active_vao_ibuf=0;
+  #endif
 #endif
 
     obj.element_count=indices_count;
@@ -798,6 +833,10 @@ void vbo::set_vertices(unsigned int offset,unsigned int dimension,vertex_atrib_t
 
 #ifdef DIRECTX11
     remove_layout(m_verts);
+#endif
+
+#ifdef USE_VAO
+    obj.release_vao();
 #endif
 
     if(dimension==0 || dimension>4)
@@ -826,6 +865,10 @@ void vbo::set_normals(unsigned int offset,vertex_atrib_type type)
     remove_layout(m_verts);
 #endif
 
+#ifdef USE_VAO
+    obj.release_vao();
+#endif
+
     obj.normals.has=true;
     obj.normals.offset=offset;
     obj.normals.type=type;
@@ -843,6 +886,10 @@ void vbo::set_tc(unsigned int tc_idx,unsigned int offset,unsigned int dimension,
 
 #ifdef DIRECTX11
     remove_layout(m_verts);
+#endif
+
+#ifdef USE_VAO
+    obj.release_vao();
 #endif
 
     vbo_obj::attribute &tc=obj.tcs[tc_idx];
@@ -867,6 +914,10 @@ void vbo::set_colors(unsigned int offset,unsigned int dimension,vertex_atrib_typ
 
 #ifdef DIRECTX11
     remove_layout(m_verts);
+#endif
+
+#ifdef USE_VAO
+    obj.release_vao();
 #endif
 
     if(dimension==0 || dimension>4)
