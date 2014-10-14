@@ -25,8 +25,8 @@ struct rect
     rect(): x(0), y(0), width(0), height(0) {}
 };
 
-void set_viewport(int x,int y,int width,int height,bool force=false);
-inline void set_viewport(const rect &r,bool force=false) { set_viewport(r.x,r.y,r.width,r.height,force); }
+void set_viewport(int x,int y,int width,int height,bool ignore_cache=false);
+inline void set_viewport(const rect &r,bool ignore_cache=false) { set_viewport(r.x,r.y,r.width,r.height,ignore_cache); }
 const rect &get_viewport();
 
 struct scissor
@@ -41,8 +41,8 @@ void set_orientation_matrix(const nya_math::mat4 &mat);
 
 void set_color(float r,float g,float b,float a);
 
-void set_clear_color(float r,float g,float b,float a);
-void set_clear_depth(float value);
+void set_clear_color(float r,float g,float b,float a,bool ignore_cache=false);
+void set_clear_depth(float value,bool ignore_cache=false);
 void clear(bool clear_color,bool clear_depth);
 
 struct blend

@@ -23,10 +23,8 @@ namespace
 
     nya_render::rect viewport_rect;
 
-#ifdef DIRECTX11
-	float dx_clear_color[4]={0.0f};
-	float dx_clear_depth=1.0f;
-#endif
+	float clear_color[4]={0.0f};
+	float clear_depth=1.0f;
 }
 
 void set_log(nya_log::log_base *l)
@@ -76,9 +74,9 @@ void log_gl_errors(const char *place)
 #endif
 }
 
-void set_viewport(int x,int y,int w,int h,bool force)
+void set_viewport(int x,int y,int w,int h,bool ignore_cache)
 {
-    if(!(viewport_rect.width!=w || viewport_rect.height!=h || viewport_rect.x!=x || viewport_rect.y!=y || force))
+    if(!(viewport_rect.width!=w || viewport_rect.height!=h || viewport_rect.x!=x || viewport_rect.y!=y || ignore_cache))
         return;
 
 #ifdef DIRECTX11
@@ -134,26 +132,38 @@ void set_color(float r,float g,float b,float a)
     current_state.color[3]=a;
 }
 
-void set_clear_color(float r,float g,float b,float a)
+void set_clear_color(float r,float g,float b,float a,bool ignore_cache)
 {
-#ifdef DIRECTX11
-	dx_clear_color[0]=r;
-	dx_clear_color[1]=g;
-	dx_clear_color[2]=b;
-	dx_clear_color[3]=a;
-#else
+#ifndef DIRECTX11
+    if(!(clear_color[0]!=r || clear_color[1]!=g || clear_color[2]!=b || clear_color[3]!=a || ignore_cache))
+        return;
+#endif
+
+	clear_color[0]=r;
+	clear_color[1]=g;
+	clear_color[2]=b;
+	clear_color[3]=a;
+
+#ifndef DIRECTX11
 	glClearColor(r,g,b,a);
 #endif
 }
 
-void set_clear_depth(float value)
+void set_clear_depth(float value,bool ignore_cache)
 {
-#ifdef DIRECTX11
-	dx_clear_depth=value;
-#elif defined OPENGL_ES
+#ifndef DIRECTX11
+    if(clear_depth==value && !ignore_cache)
+        return;
+#endif
+
+	clear_depth=value;
+
+#ifndef DIRECTX11
+  #if defined OPENGL_ES
 	glClearDepthf(value);
-#else
+  #else
 	glClearDepth(value);
+  #endif
 #endif
 }
 
@@ -166,10 +176,10 @@ void clear(bool color,bool depth)
     dx_target target=get_target();
 
     if(color && target.color)
-		get_context()->ClearRenderTargetView(target.color,dx_clear_color);
+		get_context()->ClearRenderTargetView(target.color,clear_color);
 
     if(depth && target.depth)
-        get_context()->ClearDepthStencilView(target.depth,D3D11_CLEAR_DEPTH,dx_clear_depth,0);
+        get_context()->ClearDepthStencilView(target.depth,D3D11_CLEAR_DEPTH,clear_depth,0);
 #else
 	unsigned int mode=0;
 	if(color)
@@ -652,6 +662,11 @@ void apply_state(bool ignore_cache)
         texture::apply(true);
         shader::apply(true);
         reset_vbo_state();
+
+#ifndef DIRECTX11
+        set_clear_color(clear_color[0],clear_color[1],clear_color[2],clear_color[3],true);
+        set_clear_depth(clear_depth,true);
+#endif
     }
 
     a=c;
