@@ -58,6 +58,8 @@ namespace
         vbo_obj_atributes(): vertex_stride(0) {}
     };
 
+    OPENGL_ONLY(vbo_obj_atributes active_attributes);
+
     struct vbo_obj: public vbo_obj_atributes
     {
         vbo::element_type element_type;
@@ -116,8 +118,6 @@ namespace
             return objs;
         }
     };
-
-    vbo_obj_atributes active_attributes;
 
 #ifdef DIRECTX11
 DXGI_FORMAT get_dx_format(int dimension,vbo::vertex_atrib_type type)
@@ -297,9 +297,11 @@ void reset_vbo_state()
     }
  #endif
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
+
+    //ToDo: reset all vao states
 #endif
 
-    active_attributes=vbo_obj_atributes();
+    OPENGL_ONLY(active_attributes=vbo_obj_atributes());
     active_verts=active_inds=-1;
     return;
 }
@@ -328,7 +330,7 @@ void vbo::draw(unsigned int offset,unsigned int count)
         draw(offset,count,vbo_obj::get(current_verts).element_type);
 }
 
-void vbo::draw(unsigned int offset,unsigned int count,element_type el_type) //ToDo: cache dx vbo state
+void vbo::draw(unsigned int offset,unsigned int count,element_type el_type)
 {
     if(current_verts<0 || !count)
         return;
@@ -338,52 +340,38 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type) //To
     apply_state();
 
     vbo_obj &vobj=vbo_obj::get(current_verts);
+    if(!vobj.vertices.has)
+        return;
 
 #ifdef DIRECTX11
-    UINT zero_offset = 0;
-    get_context()->IASetVertexBuffers(0,1,&vobj.vertex_loc,&vobj.vertex_stride,&zero_offset);
-
     ID3D11InputLayout *layout=get_layout(current_verts);
     if(!layout)
     {
         std::vector<D3D11_INPUT_ELEMENT_DESC> desc;
 
-        if(vobj.vertices.has)
-        {
-            D3D11_INPUT_ELEMENT_DESC d;
-            d.SemanticName="POSITION";
-            d.SemanticIndex=0;
-            d.Format=get_dx_format(vobj.vertices.dimension,vobj.vertices.type);
-            d.InputSlot=0;
-            d.AlignedByteOffset=vobj.vertices.offset;
-            d.InputSlotClass=D3D11_INPUT_PER_VERTEX_DATA;
-            d.InstanceDataStepRate=0;
-            desc.push_back(d);
-        }
+        D3D11_INPUT_ELEMENT_DESC d;
+        d.SemanticName="POSITION";
+        d.SemanticIndex=0;
+        d.Format=get_dx_format(vobj.vertices.dimension,vobj.vertices.type);
+        d.InputSlot=0;
+        d.AlignedByteOffset=vobj.vertices.offset;
+        d.InputSlotClass=D3D11_INPUT_PER_VERTEX_DATA;
+        d.InstanceDataStepRate=0;
+        desc.push_back(d);
 
         if(vobj.normals.has)
         {
-            D3D11_INPUT_ELEMENT_DESC d;
             d.SemanticName="NORMAL";
-            d.SemanticIndex=0;
             d.Format=get_dx_format(3,vobj.normals.type);
-            d.InputSlot=0;
             d.AlignedByteOffset=vobj.normals.offset;
-            d.InputSlotClass=D3D11_INPUT_PER_VERTEX_DATA;
-            d.InstanceDataStepRate=0;
             desc.push_back(d);
         }
 
         if(vobj.colors.has)
         {
-            D3D11_INPUT_ELEMENT_DESC d;
             d.SemanticName="COLOR";
-            d.SemanticIndex=0;
             d.Format=get_dx_format(vobj.colors.dimension,vobj.colors.type);
-            d.InputSlot=0;
             d.AlignedByteOffset=vobj.colors.offset;
-            d.InputSlotClass=D3D11_INPUT_PER_VERTEX_DATA;
-            d.InstanceDataStepRate=0;
             desc.push_back(d);
         }
 
@@ -393,14 +381,10 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type) //To
             if(!tc.has)
                 continue;
 
-            D3D11_INPUT_ELEMENT_DESC d;
             d.SemanticName="TEXCOORD";
             d.SemanticIndex=i;
             d.Format=get_dx_format(tc.dimension,tc.type);
-            d.InputSlot=0;
             d.AlignedByteOffset=tc.offset;
-            d.InputSlotClass=D3D11_INPUT_PER_VERTEX_DATA;
-            d.InstanceDataStepRate=0;
             desc.push_back(d);
         }
 
@@ -412,8 +396,17 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type) //To
         if(!layout)
             return;
     }
-	get_context()->IASetInputLayout(layout);
+
+    get_context()->IASetInputLayout(layout);
     set_dx_topology(el_type);
+
+    if(current_verts!=active_verts)
+    {
+        UINT zero_offset = 0;
+        get_context()->IASetVertexBuffers(0,1,&vobj.vertex_loc,&vobj.vertex_stride,&zero_offset);
+
+        active_verts=current_verts;
+    }
 
     if(current_inds>=0)
     {
@@ -421,10 +414,15 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type) //To
         if(offset+count>iobj.element_count)
             return;
 
-        switch(iobj.element_size)
+        if(current_inds!=active_inds)
         {
-            case index2b: get_context()->IASetIndexBuffer(iobj.index_loc,DXGI_FORMAT_R16_UINT,0); break;
-            case index4b: get_context()->IASetIndexBuffer(iobj.index_loc,DXGI_FORMAT_R32_UINT,0); break;
+            switch(iobj.element_size)
+            {
+                case index2b: get_context()->IASetIndexBuffer(iobj.index_loc,DXGI_FORMAT_R16_UINT,0); break;
+                case index4b: get_context()->IASetIndexBuffer(iobj.index_loc,DXGI_FORMAT_R32_UINT,0); break;
+            }
+
+            active_inds=current_inds;
         }
 
 		get_context()->DrawIndexed(count,offset,0);
@@ -439,9 +437,6 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type) //To
 #else
     if(current_verts!=active_verts)
     {
-        if(!vobj.vertices.has)
-            return;
-
 #ifdef USE_VAO
         if(vobj.vertex_array_object>0)
         {
@@ -715,8 +710,6 @@ bool vbo::set_vertex_data(const void*data,unsigned int vert_stride,unsigned int 
         }
     }
 
-    active_verts=-1;
-
   #ifdef USE_VAO
     obj.release_vao();
   #endif
@@ -726,6 +719,8 @@ bool vbo::set_vertex_data(const void*data,unsigned int vert_stride,unsigned int 
 
     if(!obj.vertices.has)
         set_vertices(0,3);
+    
+    active_verts=-1;
 
     return true;
 }
@@ -812,14 +807,13 @@ bool vbo::set_index_data(const void*data,index_size size,unsigned int indices_co
         }
     }
 
-    active_inds=obj.index_loc;
-
   #ifdef USE_VAO
     obj.active_vao_ibuf=0;
   #endif
 #endif
 
     obj.element_count=indices_count;
+    active_inds=-1;
 
     return true;
 }
@@ -831,13 +825,12 @@ void vbo::set_vertices(unsigned int offset,unsigned int dimension,vertex_atrib_t
 
     vbo_obj &obj=vbo_obj::get(m_verts);
 
-#ifdef DIRECTX11
-    remove_layout(m_verts);
-#endif
-
 #ifdef USE_VAO
     obj.release_vao();
 #endif
+
+    DIRECTX11_ONLY(remove_layout(m_verts));
+    OPENGL_ONLY(if(m_verts==active_verts) active_verts=-1);
 
     if(dimension==0 || dimension>4)
     {
@@ -849,9 +842,6 @@ void vbo::set_vertices(unsigned int offset,unsigned int dimension,vertex_atrib_t
     obj.vertices.offset=offset;
     obj.vertices.dimension=dimension;
     obj.vertices.type=type;
-
-    if(m_verts==active_verts)
-        active_verts=-1;
 }
 
 void vbo::set_normals(unsigned int offset,vertex_atrib_type type)
@@ -861,13 +851,12 @@ void vbo::set_normals(unsigned int offset,vertex_atrib_type type)
 
     vbo_obj &obj=vbo_obj::get(m_verts);
 
-#ifdef DIRECTX11
-    remove_layout(m_verts);
-#endif
-
 #ifdef USE_VAO
     obj.release_vao();
 #endif
+
+    DIRECTX11_ONLY(remove_layout(m_verts));
+    OPENGL_ONLY(if(m_verts==active_verts) active_verts=-1);
 
     obj.normals.has=true;
     obj.normals.offset=offset;
@@ -884,13 +873,12 @@ void vbo::set_tc(unsigned int tc_idx,unsigned int offset,unsigned int dimension,
 
     vbo_obj &obj=vbo_obj::get(m_verts);
 
-#ifdef DIRECTX11
-    remove_layout(m_verts);
-#endif
-
 #ifdef USE_VAO
     obj.release_vao();
 #endif
+
+    DIRECTX11_ONLY(remove_layout(m_verts));
+    OPENGL_ONLY(if(m_verts==active_verts) active_verts=-1);
 
     vbo_obj::attribute &tc=obj.tcs[tc_idx];
     if(dimension==0 || dimension>4)
@@ -912,13 +900,12 @@ void vbo::set_colors(unsigned int offset,unsigned int dimension,vertex_atrib_typ
 
     vbo_obj &obj=vbo_obj::get(m_verts);
 
-#ifdef DIRECTX11
-    remove_layout(m_verts);
-#endif
-
 #ifdef USE_VAO
     obj.release_vao();
 #endif
+
+    DIRECTX11_ONLY(remove_layout(m_verts));
+    OPENGL_ONLY(if(m_verts==active_verts) active_verts=-1);
 
     if(dimension==0 || dimension>4)
     {
