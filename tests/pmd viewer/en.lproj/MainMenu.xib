@@ -172,11 +172,12 @@
                     <menu key="submenu" title="View" id="296">
                         <items>
                             <menuItem title="Back face cull" keyEquivalent="b" id="sfu-uH-aWV">
+                                <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="backfaceCull:" target="-1" id="jQX-RF-2r5"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Show bones" id="n2C-Xe-Vfp">
+                            <menuItem title="Show bones" keyEquivalent="s" id="n2C-Xe-Vfp">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="showBones:" target="-1" id="MkX-yi-4RC"/>

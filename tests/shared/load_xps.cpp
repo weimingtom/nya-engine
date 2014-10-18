@@ -417,6 +417,8 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
             v.color.x=c.r,v.color.y=c.g,v.color.z=c.b,v.color.w=c.a;
             v.color/=255.0f;
 
+            v.color.w=1.0f;
+
             v.tc=reader.read_tc();
 
             for(int j=1;j<uvlayers;++j)
@@ -436,11 +438,13 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
                 for(int k=0;k<4;++k)
                     w+=s.weights[k];
 
-                if(w>0.001f)
+                if(w>0.0f)
                 {
                     for(int k=0;k<4;++k)
                         s.weights[k]/=w;
                 }
+                else
+                    s.weights[0]=1.0f;
 
                 for(int k=0;k<4;++k)
                     v.bone_idx[k]=(float(s.inds[k])+0.5f)/bones_count, v.bone_weight[k]=s.weights[k];
@@ -484,7 +488,7 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
             m.set_param(m.get_param_idx("light k"),nya_scene::material::param(1.0,0.0,0.0,0.0));
         else
         {
-            m.set_param(m.get_param_idx("light k"),nya_scene::material::param(0.6,0.4,rgp.spec_k,0.0));
+            m.set_param(m.get_param_idx("light k"),nya_scene::material::param(0.7,0.5,rgp.spec_k,0.0));
             m.set_param(m.get_param_idx("light dir"),light_dir);
         }
 

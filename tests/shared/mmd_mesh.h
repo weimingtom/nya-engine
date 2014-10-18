@@ -21,7 +21,6 @@ public:
     bool is_anim_finished(int layer=0) const { return m_mesh.is_anim_finished(layer); }
     void set_anim_time(unsigned int time,int layer=0) { m_mesh.set_anim_time(time,layer); }
 
-    //int get_morph_name();
     void set_morph(int idx,float value,bool overriden)
     {
         if(idx<0 || idx>=int(m_morphs.size()))
