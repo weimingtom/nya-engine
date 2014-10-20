@@ -80,6 +80,9 @@ struct vec3
 
     vec3 &normalize() { *this=normalize(*this); return *this; }
 
+    const vec2 &xy() const { return *(vec2*)&x; }
+    vec2 &xy() { return *(vec2*)&x; }
+
     static vec3 cross(const vec3 &a,const vec3 &b)
     {
         return vec3(a.y*b.z - a.z*b.y,
@@ -111,7 +114,7 @@ struct vec4
     vec4(float x,float y,float z,float w) { this->x=x; this->y=y;
                                             this->z=z; this->w=w; }
 
-    vec4(const float *v) { x=v[0]; y=v[1]; z=v[2]; w=v[3]; }
+    explicit vec4(const float *v) { x=v[0]; y=v[1]; z=v[2]; w=v[3]; }
 
     vec4 operator + (const vec4 &v) const { return vec4(x+v.x,y+v.y,z+v.z,w+v.w); }
 
@@ -133,7 +136,12 @@ struct vec4
 
     vec4 &normalize() { *this=normalize(*this); return *this; }
 
-    vec3 xyz() const { return vec3(x,y,z); }
+    const vec3 &xyz() const { return *(vec3*)&x; }
+    vec3 &xyz() { return *(vec3*)&x; }
+    const vec2 &xy() const { return *(vec2*)&x; }
+    vec2 &xy() { return *(vec2*)&x; }
+    const vec2 &zw() const { return *(vec2*)&z; }
+    vec2 &zw() { return *(vec2*)&z; }
 
     static vec4 normalize(const vec4 &v)
     {

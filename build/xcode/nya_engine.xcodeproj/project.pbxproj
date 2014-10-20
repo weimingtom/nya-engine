@@ -199,6 +199,8 @@
 		F2FF5FDA16C15CCE00C6A705 /* transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F2FF5FD716C15CCE00C6A705 /* transform.cpp */; };
 		F2FF5FDB16C15CCE00C6A705 /* transform.h in Headers */ = {isa = PBXBuildFile; fileRef = F2FF5FD816C15CCE00C6A705 /* transform.h */; };
 		F2FF5FDC16C15CCE00C6A705 /* transform.h in Headers */ = {isa = PBXBuildFile; fileRef = F2FF5FD816C15CCE00C6A705 /* transform.h */; };
+		F51B1F7419F4181300CA7CF0 /* screen_quad.h in Headers */ = {isa = PBXBuildFile; fileRef = F51B1F7319F4181300CA7CF0 /* screen_quad.h */; };
+		F51B1F7519F4181300CA7CF0 /* screen_quad.h in Headers */ = {isa = PBXBuildFile; fileRef = F51B1F7319F4181300CA7CF0 /* screen_quad.h */; };
 		F5398EE518AFF94A00E41909 /* dds.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5398EE318AFF94A00E41909 /* dds.cpp */; };
 		F5398EE618AFF94A00E41909 /* dds.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5398EE318AFF94A00E41909 /* dds.cpp */; };
 		F5398EE718AFF94A00E41909 /* dds.h in Headers */ = {isa = PBXBuildFile; fileRef = F5398EE418AFF94A00E41909 /* dds.h */; };
@@ -320,6 +322,7 @@
 		F2F0A0B21695F809007245BC /* matrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = matrix.cpp; path = ../../math/matrix.cpp; sourceTree = "<group>"; };
 		F2FF5FD716C15CCE00C6A705 /* transform.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = transform.cpp; path = ../../scene/transform.cpp; sourceTree = "<group>"; };
 		F2FF5FD816C15CCE00C6A705 /* transform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = transform.h; path = ../../scene/transform.h; sourceTree = "<group>"; };
+		F51B1F7319F4181300CA7CF0 /* screen_quad.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = screen_quad.h; sourceTree = "<group>"; };
 		F5398EE318AFF94A00E41909 /* dds.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dds.cpp; path = ../../formats/dds.cpp; sourceTree = "<group>"; };
 		F5398EE418AFF94A00E41909 /* dds.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dds.h; path = ../../formats/dds.h; sourceTree = "<group>"; };
 		F5528B0E189AC6FA001FE865 /* tga.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tga.cpp; path = ../../formats/tga.cpp; sourceTree = "<group>"; };
@@ -414,6 +417,7 @@
 				F25931EF15D858140092C7D8 /* render.cpp */,
 				F25931F015D858140092C7D8 /* render.h */,
 				F2CA66FA172C700800965F9F /* render_objects.h */,
+				F51B1F7319F4181300CA7CF0 /* screen_quad.h */,
 				F25931F115D858140092C7D8 /* shader.cpp */,
 				F25931F215D858140092C7D8 /* shader.h */,
 				F2F0A0961695A757007245BC /* skeleton.cpp */,
@@ -614,6 +618,7 @@
 				F2CA676A172D92CE00965F9F /* shaders_cache_provider.h in Headers */,
 				F5B3578F17FE8E2C001175FE /* optional.h in Headers */,
 				3D86813B1965B7F9008B8929 /* output_stream.h in Headers */,
+				F51B1F7519F4181300CA7CF0 /* screen_quad.h in Headers */,
 				3D8681291965B0C0008B8929 /* text_parser.h in Headers */,
 				3DE732E3195D9186008D6765 /* indexed_map.h in Headers */,
 				F55C5722180623B100FF6163 /* debug_draw.h in Headers */,
@@ -682,6 +687,7 @@
 				F2CA6769172D92CE00965F9F /* shaders_cache_provider.h in Headers */,
 				F5B3578E17FE8E2C001175FE /* optional.h in Headers */,
 				3D86813A1965B7F9008B8929 /* output_stream.h in Headers */,
+				F51B1F7419F4181300CA7CF0 /* screen_quad.h in Headers */,
 				3D8681281965B0C0008B8929 /* text_parser.h in Headers */,
 				3DE732E2195D9186008D6765 /* indexed_map.h in Headers */,
 				F55C5721180623B100FF6163 /* debug_draw.h in Headers */,

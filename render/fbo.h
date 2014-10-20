@@ -30,7 +30,7 @@ public:
 
 public:
     void bind();
-    void unbind();
+    static void unbind();
 
 public:
     fbo(): m_fbo_idx(-1) {}
