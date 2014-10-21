@@ -20,7 +20,7 @@
     #include "shader.h"
 #endif
 
-#ifdef OPENGL_ES
+#if defined OPENGL_ES && !defined ANDROID
     #define USE_VAO
 #endif
 
