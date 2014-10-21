@@ -270,31 +270,29 @@ void reset_vbo_state()
 {
 #ifdef DIRECTX11
 #else
-
  #ifdef USE_VAO
     glBindVertexArrayOES(0);
  #else
     glBindBuffer(GL_ARRAY_BUFFER,0);
 
    #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
-    glDisableVertexAttribArray(vertex_attribute);
-    glDisableVertexAttribArray(color_attribute);
-    glDisableVertexAttribArray(normal_attribute);
+    for(unsigned int i=0;i<tc0_attribute+vbo::max_tex_coord;++i)
+        glDisableVertexAttribArray(i);
    #else
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
-   #endif
 
-    for(unsigned int i=0;i<vbo::max_tex_coord;++i)
+    static int max_tex_coord=-1;
+    if(max_tex_coord<0)
+        glGetIntegerv(GL_MAX_TEXTURE_COORDS,&max_tex_coord);
+    for(unsigned int i=0;i<max_tex_coord;++i)
     {
-   #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
-        glDisableVertexAttribArray(tc0_attribute+i);
-   #else
         glClientActiveTexture(GL_TEXTURE0_ARB+i);
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-   #endif
     }
+   #endif
+
  #endif
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
 
