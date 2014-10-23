@@ -20,11 +20,23 @@ public:
         nya_math::vec3 tangent;
         nya_math::vec3 bitangent;
 
-        nya_math::vec2 tc;
-        nya_math::vec2 tc2;
+        nya_math::vec4 tc01;
+        nya_math::vec4 tc23;
 
         float bone_idx[4];
         float bone_weight[4];
+
+        nya_math::vec2 &tc(int idx)
+        {
+            switch(idx)
+            {
+                case 1: return tc01.zw();
+                case 2: return tc23.xy();
+                case 3: return tc23.zw();
+            }
+
+            return tc01.xy();
+        }
     };
 
     static void set_light_dir(const nya_math::vec3 &dir);

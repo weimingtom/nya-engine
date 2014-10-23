@@ -313,14 +313,14 @@ public:
     }
 };
 
-template<typename vert_t,typename ind_t> void calculate_tangents(vert_t *verts,unsigned int vcount,ind_t *inds,unsigned int icount)
+template<typename vert_t,typename ind_t> void calculate_tangents(vert_t *verts,unsigned int vcount,ind_t *inds,unsigned int icount,int uvlayer=0)
 {
     for(unsigned int i=0;i<icount;i+=3)
     {
         vert_t &v0=verts[inds[i]],&v1=verts[inds[i+1]],&v2=verts[inds[i+2]];
 
         const nya_math::vec3 &p0=v0.pos,&p1=v1.pos,&p2=v2.pos;
-        const nya_math::vec2 &tc0=v0.tc,&tc1=v1.tc,&tc2=v2.tc;
+        const nya_math::vec2 &tc0=v0.tc(uvlayer),&tc1=v1.tc(uvlayer),&tc2=v2.tc(uvlayer);
         const nya_math::vec3 p10=p1-p0,p20=p2-p0;
         const nya_math::vec2 tc10=tc1-tc0,tc20=tc2-tc0;
 
@@ -382,7 +382,7 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
         const std::string name=reader.read_string();
         const uint uvlayers=reader.template read<uint>();
         const uint tex_count=reader.template read<uint>();
-        if(tex_count>32)
+        if(tex_count>32 || uvlayers>4)
             return false;
 
         std::vector<std::string> tex_names(tex_count);
@@ -419,7 +419,7 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
 
             v.color.w=1.0f;
 
-            v.tc=reader.read_tc();
+            v.tc01.xy()=reader.read_tc();
 
             for(int j=1;j<uvlayers;++j)
             {
@@ -541,8 +541,8 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
     res.vbo.set_normals(off(xps_loader::vert,normal));
     res.vbo.set_tc(4,off(xps_loader::vert,tangent),3);
     res.vbo.set_tc(5,off(xps_loader::vert,bitangent),3);
-    res.vbo.set_tc(0,off(xps_loader::vert,tc),2);
-    res.vbo.set_tc(1,off(xps_loader::vert,tc2),2);
+    res.vbo.set_tc(0,off(xps_loader::vert,tc01),4);
+    res.vbo.set_tc(1,off(xps_loader::vert,tc23),4);
     res.vbo.set_tc(6,off(xps_loader::vert,bone_idx),4);
     res.vbo.set_tc(7,off(xps_loader::vert,bone_weight),4);
 
