@@ -154,9 +154,11 @@ void dds::flip_vertical(const void *from_data,void *to_data)
         {
             case bgr:
             case bgra:
+            case greyscale:
             {
-                flip_raw(w,h,pf==bgr?3:4,f,t);
-                offset+=w*h*(pf==bgr?3:4);
+                const int channels=pf==bgra?4:pf==bgr?3:1;
+                flip_raw(w,h,channels,f,t);
+                offset+=w*h*(channels);
             }
             break;
 
@@ -178,8 +180,30 @@ void dds::flip_vertical(const void *from_data,void *to_data)
                 offset+=s;
             }
             break;
+
+            case palette4_rgba:
+            case palette8_rgba:
+            {
+                return; //ToDo: not tested
+
+                const int offset=pf==palette8_rgba?256*4:16*4;
+                flip_raw(w,h,1,(const char *)f+offset,(char *)t+offset);
+            }
+            break;
         }
     }
+}
+
+void dds::decode_palette8_rgba(const void *from_data,void *to_data)
+{
+    //used memcpy instead of cast to avoid misalignment
+    unsigned int palette[256];
+    memcpy(palette,from_data,sizeof(palette));
+
+    const unsigned char *inds=(unsigned char *)from_data+sizeof(palette);
+    unsigned char *out=(unsigned char *)to_data; //alignment
+    for(unsigned int i=0;i<width*height;++i,++inds,out+=4)
+        memcpy(out,&palette[*inds],4);
 }
 
 size_t dds::decode_header(const void *data,size_t size)
@@ -222,8 +246,10 @@ size_t dds::decode_header(const void *data,size_t size)
     reader.skip(44);
 
     const uint dds_fourcc=0x00000004;
-    const uint dds_rgb=0x00000040;
-    const uint dds_alpha=0x00000001;
+    //const uint dds_rgb=0x00000040;
+    //const uint dds_alpha=0x00000001;
+    const uint dds_palette4=0x00000008;
+    const uint dds_palette8=0x00000020;
     const uint dds_cubemap=0x00000200;
 
     const dds_pixel_format pf=reader.read<dds_pixel_format>();
@@ -246,20 +272,29 @@ size_t dds::decode_header(const void *data,size_t size)
             this->data_size+=s;
         }
     }
-    else if(pf.flags & dds_rgb)
+    else
     {
-        if(pf.bit_mask[0]!=0xff0000 || pf.bit_mask[1]!=0xff00 || pf.bit_mask[2]!=0xff )
-            return 0;
-
-        if(pf.flags & dds_alpha)
+        if(pf.bpp==32)
         {
-            if(pf.bpp!=32 || pf.bit_mask[3]!=0xff000000U)
-                return 0;
+            //if(!(pf.flags & dds_alpha) || pf.bit_mask[3]!=0xff000000U)) //load anyway
+            //    return 0;
+
+            //if(!(pf.flags & dds_rgb) || pf.bit_mask[0]!=0xff0000 || pf.bit_mask[1]!=0xff00 || pf.bit_mask[2]!=0xff )
+            //    return 0;
 
             this->pf=bgra;
         }
         else if(pf.bpp==24)
             this->pf=bgr;
+        else if(pf.bpp==8)
+        {
+            if(pf.flags & dds_palette8)
+                this->pf=palette8_rgba;
+            else if(pf.flags & dds_palette4)
+                this->pf=palette4_rgba;
+            else
+                this->pf=greyscale;
+        }
         else
             return 0;
 
@@ -267,8 +302,6 @@ size_t dds::decode_header(const void *data,size_t size)
         for(uint i=0,w=width,h=height;i<mipmap_count;++i,w>1?w=w/2:w=1,h>1?h/=2:h=1)
             this->data_size+=w*h*(pf.bpp/8);
     }
-    else
-        return 0;
 
     reader.read<uint>(); //caps
     const uint caps2=reader.read<uint>();

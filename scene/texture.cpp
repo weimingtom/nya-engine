@@ -9,7 +9,7 @@
 namespace nya_scene
 {
 
-void rgb_to_bgr(unsigned char *data,size_t data_size)
+void bgr_to_rgb(unsigned char *data,size_t data_size)
 {
     if(!data)
         return;
@@ -39,7 +39,12 @@ bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
     nya_formats::dds dds;
     const size_t header_size=dds.decode_header(data.get_data(),data.get_size());
     if(!header_size)
+    {
+        nya_log::log()<<"unable to load dds: invalid or unsupported dds header in file "<<name<<"\n";
         return false;
+    }
+
+    nya_memory::tmp_buffer_ref tmp_buf;
 
     const int mipmap_count=dds.need_generate_mipmaps?-1:dds.mipmap_count;
     nya_render::texture::color_format cf;
@@ -51,12 +56,33 @@ bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
         case nya_formats::dds::dxt4:
         case nya_formats::dds::dxt5: cf=nya_render::texture::dxt5; break;
         case nya_formats::dds::bgra: cf=nya_render::texture::color_bgra; break;
-        case nya_formats::dds::bgr:
-            rgb_to_bgr((unsigned char*)dds.data,dds.data_size);
-            cf=nya_render::texture::dxt1;
-            break;
+        case nya_formats::dds::greyscale: cf=nya_render::texture::greyscale; break;
 
-        default: return false;
+        case nya_formats::dds::bgr:
+        {
+            bgr_to_rgb((unsigned char*)dds.data,dds.data_size);
+            cf=nya_render::texture::color_rgb;
+        }
+        break;
+
+        case nya_formats::dds::palette8_rgba:
+        {
+            if(dds.mipmap_count!=1 || dds.type!=nya_formats::dds::texture_2d) //ToDo
+            {
+                nya_log::log()<<"unable to load dds: uncomplete palette8_rgba support, unable to load file "<<name<<"\n";
+                return false;
+            }
+
+            cf=nya_render::texture::color_rgba;
+            dds.data_size=dds.width*dds.height*4;
+            tmp_buf.allocate(dds.data_size);
+            dds.decode_palette8_rgba(dds.data,tmp_buf.get_data());
+            dds.data=tmp_buf.get_data();
+            dds.pf=nya_formats::dds::bgra;
+        }
+        break;
+
+        default: nya_log::log()<<"unable to load dds: unsupported color format in file "<<name<<"\n"; return false;
     }
 
     switch(dds.type)
@@ -83,9 +109,10 @@ bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
         }
         break;
 
-        default: return false;
+        default: tmp_buf.free(); nya_log::log()<<"unable to load dds: unsupported texture type in file "<<name<<"\n"; return false;
     }
 
+    tmp_buf.free();
     return true;
 }
 
@@ -105,7 +132,7 @@ bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
         case 4: color_format=nya_render::texture::color_bgra; break;
         case 3: color_format=nya_render::texture::color_rgb; break;
         case 1: color_format=nya_render::texture::greyscale; break;
-        default: return false;
+        default: nya_log::log()<<"unable to load tga: unsupported color format in file "<<name<<"\n"; return false;
     }
 
     typedef unsigned char uchar;
@@ -118,13 +145,17 @@ bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
         if(!tga.decode_rle(tmp_data.get_data()))
         {
             tmp_data.free();
+            nya_log::log()<<"unable to load tga: unable to decode rle in file "<<name<<"\n";
             return false;
         }
 
         color_data=tmp_data.get_data();
     }
     else if(header_size+tga.uncompressed_size>data.get_size())
+    {
+        nya_log::log()<<"unable to load tga: lack of data, probably corrupted file "<<name<<"\n";
         return false;
+    }
 
     if(tga.channels==3 || tga.horisontal_flip || tga.vertical_flip)
     {
@@ -155,7 +186,7 @@ bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
         }
 
         if(tga.channels==3)
-            rgb_to_bgr((uchar*)color_data,tga.uncompressed_size);
+            bgr_to_rgb((uchar*)color_data,tga.uncompressed_size);
     }
 
     res.tex.build_texture(color_data,tga.width,tga.height,color_format);
