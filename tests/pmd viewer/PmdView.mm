@@ -64,13 +64,14 @@ void viewer_camera::update()
     nya_scene::get_camera().set_pos(pos.x,pos.y+10.0f,pos.z);
 }
 
-void bpp64to32(void *data,int width,int height,int channels)
 {
-    const unsigned short *from=(unsigned short *)data;
+void bps16to8(void *data,int width,int height,int channels)
+{
+    const unsigned char *from=(unsigned char *)data+1;
     unsigned char *to=(unsigned char *)data;
 
     for(int i=0;i<width*height*channels;++i)
-        to[i]=from[i];
+        to[i]=from[i+i];
 }
 
 void flip_vertical(unsigned char *data,int width,int height,int channels)
@@ -165,8 +166,8 @@ bool load_texture(nya_scene::shared_texture &res,nya_scene::resource_data &textu
 
     unsigned char *image_data=[image bitmapData];
 
-    if(bpp==64)
-        bpp64to32(image_data,width,height,channels);
+    if(bps==16)
+        bps16to8(image_data,width,height,channels);
 
     flip_vertical(image_data,width,height,channels);
 
