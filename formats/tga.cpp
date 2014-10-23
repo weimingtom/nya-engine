@@ -265,22 +265,21 @@ void tga::flip_vertical(const void *from_data,void *to_data)
 
     if(from_data==to_data)
     {
-        uchar tmp[4];
+        if(!line_size)
+            return;
+
         const int half=line_size*(height/2);
+        std::vector<uchar> line_data(line_size);
+        uchar *line=&line_data[0];
+        uchar *from=to;
+        to+=top;
 
         for(int offset=0;offset<half;offset+=line_size)
         {
-            uchar *ha=to+offset;
-            uchar *hb=to+top-offset;
-
-            for(int w=0;w<line_size;w+=channels)
-            {
-                uchar *a=ha+w;
-                uchar *b=hb+w;
-                memcpy(tmp,a,channels);
-                memcpy(a,b,channels);
-                memcpy(b,tmp,channels);
-            }
+            uchar *f=from+offset, *t=to-offset;
+            memcpy(line,f,line_size);
+            memcpy(f,t,line_size);
+            memcpy(t,line,line_size);
         }
     }
     else
