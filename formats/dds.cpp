@@ -25,22 +25,11 @@ static void flip_raw(int width,int height,int channels,const void *from_data,voi
     if(!height)
         return;
 
-    const size_t line_size=width*channels;
-    const size_t top=line_size*(height-1);
-
-    typedef unsigned char uchar;
-
-    uchar *to=(uchar*)to_data;
-
-    const size_t size=line_size*height;
-
-    const uchar *from=(const uchar*)from_data;
+    const size_t line_size=width*channels, size=line_size*height;
+    const unsigned char *from=(const unsigned char*)from_data;
+    unsigned char *to=(unsigned char*)to_data+line_size*(height-1);
     for(size_t offset=0;offset<size;offset+=line_size)
-    {
-        const uchar *ha=from+offset;
-        uchar *hb=to+top-offset;
-        memcpy(hb,ha,line_size);
-    }
+        memcpy(to-offset,from+offset,line_size);
 }
 
 static void flip_dxt1_block_full(unsigned char *data)

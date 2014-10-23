@@ -254,11 +254,10 @@ size_t tga::encode_rle(void *to_data,size_t to_size)
 
 void tga::flip_vertical(const void *from_data,void *to_data)
 {
-    if(!from_data || !to_data)
+    if(!from_data || !to_data || !height)
         return;
 
-    const int line_size=width*channels;
-    const int top=line_size*(height-1);
+    const int line_size=width*channels, top=line_size*(height-1);
 
     typedef unsigned char uchar;
 
@@ -266,8 +265,8 @@ void tga::flip_vertical(const void *from_data,void *to_data)
 
     if(from_data==to_data)
     {
-        const int half=line_size*height/2;
         uchar tmp[4];
+        const int half=line_size*(height/2);
 
         for(int offset=0;offset<half;offset+=line_size)
         {
@@ -287,12 +286,9 @@ void tga::flip_vertical(const void *from_data,void *to_data)
     else
     {
         const uchar *from=(const uchar*)from_data;
+        to+=top;
         for(size_t offset=0;offset<uncompressed_size;offset+=line_size)
-        {
-            const uchar *ha=from+offset;
-            uchar *hb=to+top-offset;
-            memcpy(hb,ha,line_size);
-        }
+            memcpy(to-offset,from+offset,line_size);
     }
 }
 
