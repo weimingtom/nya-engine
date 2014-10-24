@@ -64,7 +64,7 @@ void viewer_camera::update()
     nya_scene::get_camera().set_pos(pos.x,pos.y+10.0f,pos.z);
 }
 
-{
+
 void bps16to8(void *data,int width,int height,int channels)
 {
     const unsigned char *from=(unsigned char *)data+1;
