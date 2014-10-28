@@ -487,27 +487,13 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 - (id)initWithFrame:(CGRect)frame 
 {
     if((self=[super initWithFrame:frame]))
-    {   
+    {
         m_scale=1.0f;
-        SEL scaleSelector = NSSelectorFromString(@"scale");
-        SEL setContentScaleSelector = NSSelectorFromString(@"setContentScaleFactor:");
-        SEL getContentScaleSelector = NSSelectorFromString(@"contentScaleFactor");
-        if([self respondsToSelector: getContentScaleSelector] && [self respondsToSelector: setContentScaleSelector])
-        {
-            NSMethodSignature *scaleSignature = [UIScreen instanceMethodSignatureForSelector: scaleSelector];
-            NSInvocation *scaleInvocation = [NSInvocation invocationWithMethodSignature: scaleSignature];
-            [scaleInvocation setTarget: [UIScreen mainScreen]];
-            [scaleInvocation setSelector: scaleSelector];
-            [scaleInvocation invoke];
-
-            NSInteger returnLength=[[scaleInvocation methodSignature] methodReturnLength];
-            if(returnLength==sizeof(float))
-                [scaleInvocation getReturnValue: &m_scale];
-
-            [self setContentScaleFactor:m_scale];
-        }
 
         CAEAGLLayer *eaglLayer = (CAEAGLLayer *)self.layer;
+
+        if([[UIScreen mainScreen] respondsToSelector:@selector(scale)])
+            m_scale = eaglLayer.contentsScale = [[UIScreen mainScreen] scale];
 
         eaglLayer.opaque = TRUE;
         eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
