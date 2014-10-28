@@ -300,7 +300,6 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
     }
 
     [(EAGLView *)self.view setContext:context];
-    [(EAGLView *)self.view setFramebuffer];
 
     nya_system::app *responder=shared_app::get_app().get_responder();
     if(responder)
@@ -308,11 +307,9 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
         [(EAGLView *)self.view setFramebuffer];
         responder->on_init_splash();
         responder->on_splash(0);
-        responder->on_init();
         [(EAGLView *)self.view presentFramebuffer];
+        responder->on_init();
     }
-
-    [self drawFrame];
 }
 
 - (void)applicationWillResignActive:(NSNotification *)notification
