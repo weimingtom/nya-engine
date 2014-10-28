@@ -17,6 +17,9 @@ public:
     const t *operator -> () const { return m_ref; };
     t *operator -> () { return m_ref; };
 
+    bool operator == (const shared_ptr &other) { return other.m_ref==m_ref; }
+    bool operator != (const shared_ptr &other) { return other.m_ref!=m_ref; }
+
     int get_ref_count() { return m_ref_count?*m_ref_count:0; }
 
     void free()

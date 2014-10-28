@@ -281,12 +281,12 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
     {
         EAGLContext *aContext = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
         if(!aContext)
+        {
             NSLog(@"Failed to create ES2 context");
-        else if(![EAGLContext setCurrentContext:aContext])
-            NSLog(@"Failed to set ES context current");
+            exit(0);
+        }
 
         self.context=aContext;
-
         [aContext release];
 
         animating=NO;
