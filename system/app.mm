@@ -300,16 +300,19 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
     }
 
     [(EAGLView *)self.view setContext:context];
+    [(EAGLView *)self.view setFramebuffer];
 
     nya_system::app *responder=shared_app::get_app().get_responder();
     if(responder)
     {
-        [(EAGLView *)self.view setFramebuffer];
+        //[(EAGLView *)self.view setFramebuffer];
         responder->on_init_splash();
         responder->on_splash(0);
-        [(EAGLView *)self.view presentFramebuffer];
+        //[(EAGLView *)self.view presentFramebuffer];
         responder->on_init();
     }
+
+    [self drawFrame];
 }
 
 - (void)applicationWillResignActive:(NSNotification *)notification
@@ -552,7 +555,12 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
         glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
 
-        [context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer *)self.layer];
+        if(![context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer *)self.layer])
+        {
+            NSLog(@"Unable to get renderbufferStorage");
+            return;
+        }
+
         glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &framebufferWidth);
         glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &framebufferHeight);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorRenderbuffer);
