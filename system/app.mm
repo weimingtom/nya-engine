@@ -504,9 +504,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
             if(returnLength==sizeof(float))
                 [scaleInvocation getReturnValue: &m_scale];
 
-            typedef void (*CC_CONTENT_SCALE)(id, SEL, float);
-            CC_CONTENT_SCALE method = (CC_CONTENT_SCALE) [self methodForSelector: setContentScaleSelector];
-            method(self, setContentScaleSelector, m_scale);
+            [self setContentScaleFactor:m_scale];
         }
 
         CAEAGLLayer *eaglLayer = (CAEAGLLayer *)self.layer;
