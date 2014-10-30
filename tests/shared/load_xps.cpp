@@ -349,7 +349,7 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
 
     typedef unsigned int uint;
     uint bones_count=reader.template read<uint>();
-    if(bones_count>4096)
+    if(bones_count>32767) //sanity check
         return false;
 
     for(uint i=0;i<bones_count;++i)
@@ -374,6 +374,9 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
         path.resize(p+1);
 
     uint groups_count=reader.template read<uint>();
+    if(groups_count>4096) //sanity check
+        return false;
+
     for(uint i=0;i<groups_count;++i)
     {
         if(!reader.get_remained())
