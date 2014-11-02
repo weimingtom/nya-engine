@@ -907,6 +907,7 @@ void texture::apply(bool ignore_cache)
         {
             get_context()->PSSetShaderResources(i,0,0);
             get_context()->PSSetSamplers(i,0,0);
+            active_layers[i]=-1;
             continue;
         }
 
