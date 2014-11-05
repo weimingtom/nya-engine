@@ -189,6 +189,12 @@ struct nms_material_chunk
         std::vector<string_param> strings;
         std::vector<vector_param> vectors;
         std::vector<int_param> ints;
+
+    public:
+        void add_texture_info(const char *semantics,const char *filename,bool unique=true);
+        void add_string_param(const char *name,const char *value,bool unique=true);
+        void add_vector_param(const char *name,const nya_math::vec4 &value,bool unique=true);
+        void add_int_param(const char *name,int value,bool unique=true);
     };
 
     std::vector<material_info> materials;

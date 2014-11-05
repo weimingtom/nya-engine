@@ -401,6 +401,41 @@ size_t nms_material_chunk::write_to_buf(void *to_data,size_t to_size)
     return writer.get_offset();
 }
 
+template<typename t> t& add_param(const char *name,std::vector<t> &array,bool unique)
+{
+    if(unique)
+    {
+        for(size_t i=0;i<array.size();++i)
+            if(*((std::string *)&array[i])==name)
+                return array[i];
+    }
+
+    array.resize(array.size()+1);
+    ((std::string *)&array.back())->assign(name);
+    return array.back();
+}
+
+void nms_material_chunk::material_info::add_texture_info(const char *semantics,const char *filename,bool unique)
+{
+    if(semantics && filename)
+        add_param(semantics,textures,unique).filename.assign(filename);
+}
+
+void nms_material_chunk::material_info::add_string_param(const char *name,const char *value,bool unique)
+{
+    if(name && value) add_param(name,strings,unique).value.assign(value);
+}
+
+void nms_material_chunk::material_info::add_vector_param(const char *name,const nya_math::vec4 &value,bool unique)
+{
+    if(name) add_param(name,vectors,unique).value=value;
+}
+
+void nms_material_chunk::material_info::add_int_param(const char *name,int value,bool unique)
+{
+    if(name) add_param(name,ints,unique).value=value;
+}
+
 bool nms_skeleton_chunk::read(const void *data,size_t size,int version)
 {
     *this=nms_skeleton_chunk();
