@@ -458,4 +458,20 @@ bool nms_skeleton_chunk::read(const void *data,size_t size,int version)
     return true;
 }
 
+size_t nms_skeleton_chunk::write_to_buf(void *to_data,size_t to_size)
+{
+    nya_memory::memory_writer writer(to_data,to_size);
+    writer.write_uint((unsigned int)bones.size());
+    for(size_t i=0;i<bones.size();++i)
+    {
+        bone &b=bones[i];
+        writer.write_string(b.name);
+        writer.write(b.rot);
+        writer.write(b.pos);
+        writer.write_int(b.parent);
+    }
+
+    return writer.get_offset();
+}
+
 }

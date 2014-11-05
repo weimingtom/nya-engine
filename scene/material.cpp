@@ -158,7 +158,7 @@ bool material::load_text(shared_material &res,resource_data &data,const char* na
                 if(strcmp(subsection_type,"shader") == 0)
                 {
                     if(!p.m_shader.load(subsection_value))
-                        nya_log::log()<<"can't load shader when loding material '"<<name<<"'";
+                        nya_log::log()<<"can't load shader when loding material '"<<name<<"'\n";
                 }
                 else if(strcmp(subsection_type,"blend")==0)
                     p.get_state().blend=nya_formats::blend_mode_from_string(subsection_value,p.get_state().blend_src,p.get_state().blend_dst);
@@ -188,7 +188,7 @@ bool material::load_text(shared_material &res,resource_data &data,const char* na
                     res.m_textures[texture_idx].proxy=tex;
             }
             else
-                nya_log::log()<<"can't load texture when loading material "<<name<<"'";
+                nya_log::log()<<"can't load texture when loading material "<<name<<"'\n";
         }
         else if(strcmp(section_type,"@param")==0)
         {
@@ -203,7 +203,7 @@ bool material::load_text(shared_material &res,resource_data &data,const char* na
                 res.m_params.push_back(ph);
         }
         else
-            nya_log::log()<<"unknown section when loading material '"<<name<<"'";
+            nya_log::log()<<"unknown section when loading material '"<<name<<"'\n";
     }
 
     res.m_should_rebuild_passes_maps=true;
