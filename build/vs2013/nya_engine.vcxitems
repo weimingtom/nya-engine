@@ -5,7 +5,7 @@
     <HasSharedItems>true</HasSharedItems>
     <ItemsProjectGuid>{95da0acf-03e6-47eb-b369-3082dcdbbc84}</ItemsProjectGuid>
     <ItemsRootNamespace>nya_engine</ItemsRootNamespace>
-    <ItemsProjectName>nya_engine_shared</ItemsProjectName>
+    <ItemsProjectName>nya_engine (files)</ItemsProjectName>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
