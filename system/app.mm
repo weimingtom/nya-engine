@@ -178,6 +178,22 @@ namespace
     return false;
 }
 
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
+{
+    NSString *token = [[deviceToken description] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"<>"]];
+    token = [token stringByReplacingOccurrencesOfString:@" " withString:@""];
+    nya_system::app *responder=shared_app::get_app().get_responder();
+    if(responder)
+        responder->on_notification_token_register(token.UTF8String);
+}
+
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
+{
+    nya_system::app *responder=shared_app::get_app().get_responder();
+    if(responder)
+        responder->on_notification_token_error((int)error.code,error.description.UTF8String);
+}
+
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
     nya_system::app *responder=shared_app::get_app().get_responder();
