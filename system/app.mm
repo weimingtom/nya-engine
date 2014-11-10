@@ -201,6 +201,14 @@ namespace
         responder->on_notification_token_error((int)error.code,error.description.UTF8String);
 }
 
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
+{
+    NSString *str=[[userInfo objectForKey:@"aps"] objectForKey:@"alert"];
+    nya_system::app *responder=shared_app::get_app().get_responder();
+    if(responder)
+        responder->on_notification(str.UTF8String);
+}
+
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
     nya_system::app *responder=shared_app::get_app().get_responder();

@@ -36,6 +36,7 @@ public:
 
 public:
     virtual bool on_open_url(const char *url) { return false; }
+    virtual void on_notification(const char *message) {}
     virtual void on_notification_token_register(const char *token) {}
     virtual void on_notification_token_error(int code,const char *description) {}
 
