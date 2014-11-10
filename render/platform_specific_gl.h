@@ -169,7 +169,7 @@ namespace nya_render
         release_shaders();
         release_vbos();
         release_fbos();
-        release_states();
+        DIRECTX11_ONLY(release_states());
     }
 
     void invalidate_shaders();
