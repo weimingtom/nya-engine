@@ -2,6 +2,7 @@
 //https://code.google.com/p/nya-engine/
 
 #include "app.h"
+#include "app_internal.h"
 #include "system.h"
 #include "memory/tmp_buffer.h"
 
@@ -9,68 +10,7 @@
 
 #include "render/render.h"
 
-#include "TargetConditionals.h"
 #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
-
-#import <UIKit/UIKit.h>
-
-#import <OpenGLES/EAGL.h>
-
-#import <OpenGLES/ES2/gl.h>
-#import <OpenGLES/ES2/glext.h>
-
-#import <QuartzCore/QuartzCore.h>
-
-@interface view_controller : UIViewController 
-{
-    EAGLContext *context;
-
-    BOOL animating;
-    CFTimeInterval m_time;
-    float m_scale;
-
-    NSInteger animationFrameInterval;
-    __weak CADisplayLink *displayLink;
-}
-
-@property (readonly, nonatomic, getter=isAnimating) BOOL animating;
-@property (nonatomic) NSInteger animationFrameInterval;
-- (float)getScale;
-- (void)startAnimation;
-- (void)stopAnimation;
-@end
-
-@interface shared_app_delegate : UIResponder <UIApplicationDelegate>
-@property (strong, nonatomic) UIWindow *window;
-@property (strong, nonatomic) view_controller *viewController;
-@end
-
-@class EAGLContext;
-
-@interface EAGLView : UIView {
-    GLint framebufferWidth;
-    GLint framebufferHeight;
-    float m_scale;
-
-    GLuint defaultFramebuffer,colorRenderbuffer,msaaFramebuffer,msaaRenderBuffer,depthRenderbuffer;
-}
-
-@property (strong, nonatomic) EAGLContext *context;
-
-- (void)setFramebuffer;
-- (float)getScale;
-- (BOOL)presentFramebuffer;
-
-@end
-
-@interface view_controller ()
-@property (strong, nonatomic) EAGLContext *context;
-@property (weak, nonatomic) CADisplayLink *displayLink;
-- (void)applicationWillResignActive:(NSNotification *)notification;
-- (void)applicationDidBecomeActive:(NSNotification *)notification;
-- (void)applicationWillTerminate:(NSNotification *)notification;
-- (void)drawFrame;
-@end
 
 namespace
 {
@@ -130,6 +70,29 @@ namespace
     };
 }
 
+@class EAGLContext;
+
+@interface EAGLView : UIView {
+    GLint framebufferWidth;
+    GLint framebufferHeight;
+    float m_scale;
+
+    GLuint defaultFramebuffer,colorRenderbuffer,msaaFramebuffer,msaaRenderBuffer,depthRenderbuffer;
+}
+
+@property (strong, nonatomic) EAGLContext *context;
+
+- (void)setFramebuffer;
+- (float)getScale;
+- (BOOL)presentFramebuffer;
+
+@end
+
+@interface view_controller ()
+@property (strong, nonatomic) EAGLContext *context;
+@property (weak, nonatomic) CADisplayLink *displayLink;
+@end
+
 @implementation shared_app_delegate
 
 @synthesize window = _window;
@@ -150,63 +113,6 @@ namespace
     [self.window makeKeyAndVisible];
 
     return YES;
-}
-
-- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
-{
-    nya_system::app *responder=shared_app::get_app().get_responder();
-    if(responder)
-    {
-        NSString *s=[url absoluteString];
-        if(responder->on_open_url(s.UTF8String))
-            return true;
-    }
-
-    return false;
-}
-
-- (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url
-{
-    nya_system::app *responder=shared_app::get_app().get_responder();
-    if(responder)
-    {
-        NSString *s=[url absoluteString];
-        if(responder->on_open_url(s.UTF8String))
-            return true;
-    }
-
-    return false;
-}
-
-#ifdef __IPHONE_8_0
-- (void)application:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings
-{
-    [application registerForRemoteNotifications];
-}
-#endif
-
-- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
-{
-    NSString *token = [[deviceToken description] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"<>"]];
-    token = [token stringByReplacingOccurrencesOfString:@" " withString:@""];
-    nya_system::app *responder=shared_app::get_app().get_responder();
-    if(responder)
-        responder->on_notification_token_register(token.UTF8String);
-}
-
-- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
-{
-    nya_system::app *responder=shared_app::get_app().get_responder();
-    if(responder)
-        responder->on_notification_token_error((int)error.code,error.description.UTF8String);
-}
-
-- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
-{
-    NSString *str=[[userInfo objectForKey:@"aps"] objectForKey:@"alert"];
-    nya_system::app *responder=shared_app::get_app().get_responder();
-    if(responder)
-        responder->on_notification(str.UTF8String);
 }
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
@@ -256,6 +162,7 @@ namespace
 @implementation view_controller
 
 @synthesize animating;
+@synthesize scale;
 @synthesize context;
 @synthesize displayLink;
 
@@ -264,13 +171,8 @@ namespace
     EAGLView *view=[[EAGLView alloc] initWithFrame:[UIScreen mainScreen].bounds];
 
     self.view = view;
-    m_scale = [view getScale];
+    scale = [view getScale];
     [view release];
-}
-
-- (float)getScale
-{
-    return m_scale;
 }
 
 static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientation orientation) 
@@ -321,7 +223,6 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
         [aContext release];
 
         animating=NO;
-        animationFrameInterval=1;
         m_time=0.0;
         self.displayLink = nil;
 
@@ -436,34 +337,12 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 	self.context = nil;	
 }
 
-- (NSInteger)animationFrameInterval
-{
-    return animationFrameInterval;
-}
-
-- (void)setAnimationFrameInterval:(NSInteger)frameInterval
-{
-    /*
-	 Frame interval defines how many display frames must pass between each time the display link fires.
-	 The display link will only fire 30 times a second when the frame internal is two on a display that refreshes 60 times a second. The default frame interval setting of one will fire 60 times a second when the display refreshes at 60 times a second. A frame interval setting of less than one results in undefined behavior.
-	 */
-    if(frameInterval>=1)
-    {
-        animationFrameInterval = frameInterval;
-        if(animating)
-        {
-            [self stopAnimation];
-            [self startAnimation];
-        }
-    }
-}
-
 - (void)startAnimation
 {
     if(!animating)
     {
         CADisplayLink *aDisplayLink = [[UIScreen mainScreen] displayLinkWithTarget:self selector:@selector(drawFrame)];
-        [aDisplayLink setFrameInterval:animationFrameInterval];
+        [aDisplayLink setFrameInterval:1];
         [aDisplayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
         self.displayLink = aDisplayLink;
 
@@ -709,19 +588,6 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
 #else
 
-#include <Cocoa/Cocoa.h>
-#include <GLKit/GLKit.h>
-
-@interface shared_app_delegate : NSObject <NSApplicationDelegate>
-{
-    nya_system::app *m_app;
-    int m_antialiasing;
-}
-
--(id)init_with_responder:(nya_system::app*)responder antialiasing:(int)aa;
-
-@end
-
 namespace
 {
 
@@ -825,27 +691,6 @@ private:
 };
 
 }
-
-@interface gl_view : NSOpenGLView<NSWindowDelegate>
-{
-    NSTimer *m_animation_timer;
-    nya_system::app *m_app;
-    unsigned long m_time;
-
-    enum state
-    {
-        state_splash,
-        state_init,
-        state_draw
-    };
-
-    state m_state;
-
-    bool m_shift_pressed;
-    bool m_ctrl_pressed;
-    bool m_alt_pressed;
-}
-@end
 
 @implementation gl_view
 

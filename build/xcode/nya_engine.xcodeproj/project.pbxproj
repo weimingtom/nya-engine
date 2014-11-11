@@ -13,6 +13,8 @@
 		3D6D5F44196ABCB3008C1041 /* nms.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D6D5F40196ABCB3008C1041 /* nms.cpp */; };
 		3D6D5F4E196C3347008C1041 /* memory_writer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D6D5F4D196C3347008C1041 /* memory_writer.h */; };
 		3D6D5F4F196C3347008C1041 /* memory_writer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D6D5F4D196C3347008C1041 /* memory_writer.h */; };
+		3D76260E1A127EC9004E033C /* app_internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D76260D1A127EC9004E033C /* app_internal.h */; };
+		3D76260F1A127EC9004E033C /* app_internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D76260D1A127EC9004E033C /* app_internal.h */; };
 		3D8681221965B0C0008B8929 /* string_convert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D86811E1965B0C0008B8929 /* string_convert.cpp */; };
 		3D8681231965B0C0008B8929 /* string_convert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D86811E1965B0C0008B8929 /* string_convert.cpp */; };
 		3D8681241965B0C0008B8929 /* string_convert.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D86811F1965B0C0008B8929 /* string_convert.h */; };
@@ -227,6 +229,7 @@
 		3D6D5F3F196ABCB3008C1041 /* nms.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nms.h; path = ../../formats/nms.h; sourceTree = "<group>"; };
 		3D6D5F40196ABCB3008C1041 /* nms.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = nms.cpp; path = ../../formats/nms.cpp; sourceTree = "<group>"; };
 		3D6D5F4D196C3347008C1041 /* memory_writer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = memory_writer.h; sourceTree = "<group>"; };
+		3D76260D1A127EC9004E033C /* app_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = app_internal.h; sourceTree = "<group>"; };
 		3D86811E1965B0C0008B8929 /* string_convert.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = string_convert.cpp; path = ../../formats/string_convert.cpp; sourceTree = "<group>"; };
 		3D86811F1965B0C0008B8929 /* string_convert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = string_convert.h; path = ../../formats/string_convert.h; sourceTree = "<group>"; };
 		3D8681201965B0C0008B8929 /* text_parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = text_parser.cpp; path = ../../formats/text_parser.cpp; sourceTree = "<group>"; };
@@ -473,6 +476,7 @@
 			children = (
 				F25932BA15D865BF0092C7D8 /* app.mm */,
 				F259321315D858140092C7D8 /* app.h */,
+				3D76260D1A127EC9004E033C /* app_internal.h */,
 				F259321415D858140092C7D8 /* button_codes.h */,
 				F2CA6765172D92CE00965F9F /* shaders_cache_provider.cpp */,
 				F2CA6766172D92CE00965F9F /* shaders_cache_provider.h */,
@@ -596,6 +600,7 @@
 				F2F0A09E1695A758007245BC /* animation.h in Headers */,
 				F2F0A0A81695A794007245BC /* vector.h in Headers */,
 				3DE732E5195D9186008D6765 /* invalid_object.h in Headers */,
+				3D76260F1A127EC9004E033C /* app_internal.h in Headers */,
 				F2F0A0AA1695A794007245BC /* quaternion.h in Headers */,
 				F2F0A0AE1695A794007245BC /* bezier.h in Headers */,
 				F2F0A0B41695F809007245BC /* matrix.h in Headers */,
@@ -665,6 +670,7 @@
 				F2F0A09D1695A758007245BC /* animation.h in Headers */,
 				F2F0A0A71695A794007245BC /* vector.h in Headers */,
 				3DE732E4195D9186008D6765 /* invalid_object.h in Headers */,
+				3D76260E1A127EC9004E033C /* app_internal.h in Headers */,
 				F2F0A0A91695A794007245BC /* quaternion.h in Headers */,
 				F2F0A0AD1695A794007245BC /* bezier.h in Headers */,
 				F2F0A0B31695F809007245BC /* matrix.h in Headers */,
