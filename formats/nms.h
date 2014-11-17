@@ -223,6 +223,7 @@ struct nms_skeleton_chunk
 
 public:
     void sort();
+    int get_bone_idx(const char *name) const;
 
 public:
     bool read(const void *data,size_t size,int version);

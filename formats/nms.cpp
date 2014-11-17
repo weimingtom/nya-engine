@@ -463,6 +463,20 @@ void nms_skeleton_chunk::sort()
     }
 }
 
+int nms_skeleton_chunk::get_bone_idx(const char *name) const
+{
+    if(!name)
+        return -1;
+
+    for(int i=0;i<(int)bones.size();++i)
+    {
+        if(bones[i].name==name)
+            return i;
+    }
+
+    return -1;
+}
+
 bool nms_skeleton_chunk::read(const void *data,size_t size,int version)
 {
     *this=nms_skeleton_chunk();
