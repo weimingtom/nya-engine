@@ -466,7 +466,7 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
             bones[i].parent_name=bones[bones[i].parent].name;
 
     //dumb sort
-    for(int i=0;i<int(bones.size());++i) //ToDo: less dumb
+    for(int i=0;i<int(bones.size());++i)
     {
         bool had_sorted=false;
         for(int j=0;j<int(bones.size());++j)
@@ -477,8 +477,12 @@ bool pmx_loader::load(nya_scene::shared_mesh &res,nya_scene::resource_data &data
                 had_sorted=true;
                 std::swap(bones[j], bones[p]);
                 for(int k=0;k<bones.size();++k)
-                    if(bones[k].parent==j || bones[k].parent==p)
-                        bones[k].parent=pmx_bone::parent_idx_by_name(bones[k].parent_name,bones);
+                {
+                    if(bones[k].parent==j)
+                        bones[k].parent=p;
+                    else if(bones[k].parent==p)
+                        bones[k].parent=j;
+                }
             }
         }
 

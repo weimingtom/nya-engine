@@ -436,6 +436,33 @@ void nms_material_chunk::material_info::add_int_param(const char *name,int value
     if(name) add_param(name,ints,unique).value=value;
 }
 
+void nms_skeleton_chunk::sort()
+{
+    for(int i=0;i<int(bones.size());++i)
+    {
+        bool had_sorted=false;
+        for(int j=0;j<int(bones.size());++j)
+        {
+            const int p=bones[j].parent;
+            if(p<=j)
+                continue;
+
+            had_sorted=true;
+            std::swap(bones[j],bones[p]);
+            for(int k=0;k<bones.size();++k)
+            {
+                if(bones[k].parent==j)
+                    bones[k].parent=p;
+                else if(bones[k].parent==p)
+                    bones[k].parent=j;
+            }
+        }
+
+        if(!had_sorted)
+            break;
+    }
+}
+
 bool nms_skeleton_chunk::read(const void *data,size_t size,int version)
 {
     *this=nms_skeleton_chunk();

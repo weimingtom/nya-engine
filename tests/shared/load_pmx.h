@@ -79,15 +79,6 @@ public:
             
             std::vector<ik_link> links;
         } ik;
-
-        template<typename t> static int parent_idx_by_name(const std::string &name,t bones)
-        {
-            for(int i=0;i<int(bones.size());++i)
-                if(bones[i].name==name)
-                    return i;
-
-            return -1;
-        }
     };
 
     template<typename t> class flag

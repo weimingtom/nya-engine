@@ -109,9 +109,9 @@ void debug_draw::draw() const
 #ifndef OPENGL_ES
         glPointSize(m_point_size);
 #endif
-        m_vbo.bind();
         m_vbo.set_element_type(vbo::points);
         m_vbo.set_vertex_data(&m_point_verts[0],sizeof(vert),int(m_point_verts.size()));
+        m_vbo.bind();
         m_vbo.draw();
         m_vbo.unbind();
     }
@@ -119,9 +119,9 @@ void debug_draw::draw() const
     if(!m_line_verts.empty())
     {
         glLineWidth(m_line_width);
-        m_vbo.bind();
         m_vbo.set_element_type(vbo::lines);
         m_vbo.set_vertex_data(&m_line_verts[0],sizeof(vert),int(m_line_verts.size()));
+        m_vbo.bind();
         m_vbo.draw();
         m_vbo.unbind();
     }

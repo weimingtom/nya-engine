@@ -222,6 +222,9 @@ struct nms_skeleton_chunk
     std::vector<bone> bones;
 
 public:
+    void sort();
+
+public:
     bool read(const void *data,size_t size,int version);
 
 public:
