@@ -55,6 +55,7 @@ public:
 
 public:
     static bool load_vmd(shared_animation &res,resource_data &data,const char* name);
+    static bool load_nan(shared_animation &res,resource_data &data,const char* name);
 
 private:
     bool m_looped;

@@ -44,6 +44,83 @@ void animation::create(const shared_animation &res)
     m_mask.free();
 }
 
+bool animation::load_nan(shared_animation &res,resource_data &data,const char* name)
+{
+    nya_memory::memory_reader reader(data.get_data(),data.get_size());
+
+    const char nan_sign[]={'n','y','a',' ','a','n','i','m'};
+    if(!reader.test(nan_sign,sizeof(nan_sign)))
+        return false;
+
+    typedef unsigned int uint;
+    const uint version=reader.read<uint>();
+    if(version!=1)
+        return false;
+
+    enum curve_type //ToDo
+    {
+        pos_vec3_linear=10,
+        //pos_vec3_bezier=11,
+        rot_quat_linear=20,
+        //rot_quat_bezier=21,
+        //scale_vec3_linear=30,
+        curve_float_linear=70
+    };
+
+    const int bones_count=reader.read<int>();
+    for(int i=0;i<bones_count;++i)
+    {
+        const std::string bone_name=reader.read_string();
+        if(bone_name.empty())
+            return false;
+
+        unsigned char type=reader.read<unsigned char>();
+        uint frames_count=reader.read<uint>();
+        switch(type)
+        {
+            case pos_vec3_linear:
+            {
+                const int bone_idx=res.anim.add_bone(bone_name.c_str());
+                for(uint j=0;j<frames_count;++j)
+                {
+                    const uint time=reader.read<uint>();
+                    const nya_math::vec3 pos=reader.read<nya_math::vec3>();
+                    res.anim.add_bone_pos_frame(bone_idx,time,pos);
+                }
+            }
+            break;
+
+            case rot_quat_linear:
+            {
+                const int bone_idx=res.anim.add_bone(bone_name.c_str());
+                for(uint j=0;j<frames_count;++j)
+                {
+                    const uint time=reader.read<uint>();
+                    const nya_math::quat rot=reader.read<nya_math::quat>();
+                    res.anim.add_bone_rot_frame(bone_idx,time,rot);
+                }
+            }
+            break;
+
+            case curve_float_linear:
+            {
+                const int bone_idx=res.anim.add_curve(bone_name.c_str());
+                for(uint j=0;j<frames_count;++j)
+                {
+                    const uint time=reader.read<uint>();
+                    const float value=reader.read<float>();
+                    res.anim.add_curve_frame(bone_idx,time,value);
+                }
+            }
+            break;
+
+            default: return false;
+        }
+    }
+
+    return true;
+}
+
 bool animation::load_vmd(shared_animation &res,resource_data &data,const char* name)
 {
     nya_memory::memory_reader reader(data.get_data(),data.get_size());
