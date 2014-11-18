@@ -4,6 +4,7 @@
 
 #include <cstddef>
 #include <string.h>
+#include <string>
 
 namespace nya_memory
 {
@@ -27,7 +28,18 @@ public:
 
         return a;
     }
-    
+
+    std::string read_string() { return read_string<unsigned short>(); }
+    template <typename t> std::string read_string()
+    {
+        const t size=read<t>();
+        const char *str=(const char *)get_data();
+        if(!skip(size) || !size || !str)
+            return "";
+
+        return std::string(str,size);
+    }
+
     bool test(const void*data,size_t size)
     {
         if(size>m_size-m_offset)

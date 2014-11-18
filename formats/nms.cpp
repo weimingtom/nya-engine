@@ -11,21 +11,6 @@ namespace { const char nms_sign[]={'n','y','a',' ','m','e','s','h'}; }
 namespace nya_formats
 {
 
-static std::string read_string(nya_memory::memory_reader &reader)
-{
-    unsigned short size=reader.read<unsigned short>();
-    const char *str=(const char *)reader.get_data();
-    if(!size || !str || !reader.check_remained(size))
-    {
-        reader.skip(size);
-        return "";
-    }
-
-    reader.skip(size);
-
-    return std::string(str,size);
-}
-
 bool nms::read_chunks_info(const void *data,size_t size)
 {
     *this=nms();
@@ -185,7 +170,7 @@ size_t nms_mesh_chunk::read_header(const void *data, size_t size, int version)
                 *this=nms_mesh_chunk();
                 return 0;
         };
-        e.semantics=read_string(reader);
+        e.semantics=reader.read_string();
     }
 
     if(!vertex_stride)
@@ -243,7 +228,7 @@ size_t nms_mesh_chunk::read_header(const void *data, size_t size, int version)
         for(size_t j=0;j<l.groups.size();++j)
         {
             group &g=l.groups[j];
-            g.name=read_string(reader);
+            g.name=reader.read_string();
 
             g.aabb_min=reader.read<nya_math::vec3>();
             g.aabb_max=reader.read<nya_math::vec3>();
@@ -320,26 +305,26 @@ bool nms_material_chunk::read(const void *data,size_t size,int version)
     for(size_t i=0;i<materials.size();++i)
     {
         material_info &m=materials[i];
-        m.name=read_string(reader);
+        m.name=reader.read_string();
 
         m.textures.resize(reader.read<uint16_t>());
         for(size_t j=0;j<m.textures.size();++j)
         {
-            m.textures[j].semantics=read_string(reader);
-            m.textures[j].filename=read_string(reader);
+            m.textures[j].semantics=reader.read_string();
+            m.textures[j].filename=reader.read_string();
         }
 
         m.strings.resize(reader.read<uint16_t>());
         for(size_t j=0;j<m.strings.size();++j)
         {
-            m.strings[j].name=read_string(reader);
-            m.strings[j].value=read_string(reader);
+            m.strings[j].name=reader.read_string();
+            m.strings[j].value=reader.read_string();
         }
 
         m.vectors.resize(reader.read<uint16_t>());
         for(size_t j=0;j<m.vectors.size();++j)
         {
-            m.vectors[j].name=read_string(reader);
+            m.vectors[j].name=reader.read_string();
             m.vectors[j].value.x=reader.read<float>();
             m.vectors[j].value.y=reader.read<float>();
             m.vectors[j].value.z=reader.read<float>();
@@ -349,7 +334,7 @@ bool nms_material_chunk::read(const void *data,size_t size,int version)
         m.ints.resize(reader.read<uint16_t>());
         for(size_t j=0;j<m.ints.size();++j)
         {
-            m.ints[j].name=read_string(reader);
+            m.ints[j].name=reader.read_string();
             m.ints[j].value=reader.read<int32_t>();
         }
     }
@@ -490,7 +475,7 @@ bool nms_skeleton_chunk::read(const void *data,size_t size,int version)
     for(size_t i=0;i<bones.size();++i)
     {
         bone &b=bones[i];
-        b.name=read_string(reader);
+        b.name=reader.read_string();
         b.rot=reader.read<nya_math::quat>();
         b.pos=reader.read<nya_math::vec3>();
         b.parent=reader.read<int32_t>();
