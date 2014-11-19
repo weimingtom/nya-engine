@@ -20,26 +20,27 @@ def export():
 
     frames_count = 0
     pos_org = []
+    rot_org = []
 
     pos_bones = []
     rot_bones = []
 
     joints = cmds.ls(type="joint")
     for j in joints:
-        v = nya_vec3()
         p = cmds.xform(j,translation=1,q=1)
-        v.x = float(p[0])
-        v.y = float(p[1])
-        v.z = float(p[2])
-        pos_org.append(v)
+        pos_org.append(p)
+        r = cmds.xform(j,rotation=1,q=1)
+        rot_org.append(r)
+
+        name = str(j).replace("FBXASC032", " ");
 
         pf = nan_animation.bone_frames()
-        pf.name = str(j)
+        pf.name = name
         pf.type = 10
         pos_bones.append(pf);
 
         rf = nan_animation.bone_frames()
-        rf.name = str(j)
+        rf.name = name
         rf.type = 20
         rot_bones.append(rf);
 
@@ -54,17 +55,19 @@ def export():
         print "error: no animation frames"
         return
 
+    maya_frame_time = 1000/24 #ToDo
+
     for t in range(frames_count):
         cmds.currentTime(t)
 
         for i in range(len(joints)):
             p = cmds.xform(joints[i],translation=1,q=1)
             pf = nan_animation.pos_frame()
-            pf.time=t
+            pf.time=t*maya_frame_time
 
-            pf.pos.x = p[0] - pos_org[i].x
-            pf.pos.y = p[1] - pos_org[i].y
-            pf.pos.z = p[2] - pos_org[i].z
+            pf.pos.x = p[0] - pos_org[i][0]
+            pf.pos.y = p[1] - pos_org[i][1]
+            pf.pos.z = p[2] - pos_org[i][2]
 
             #ToDo: sort similar
 
@@ -72,22 +75,22 @@ def export():
 
             r = cmds.xform(joints[i],rotation=1,q=1)
             rf = nan_animation.rot_frame()
-            rf.time=t
-            rf.rot.from_pyr(r[0],r[1],r[2])
+            rf.time=t*maya_frame_time
+            rf.rot.from_pyr(r[0]-rot_org[i][0],r[1]-rot_org[i][1],r[2]-rot_org[i][2])
 
             #ToDo: sort similar
 
             rot_bones[i].frames.append(rf)
 
     for p in pos_bones:
-        if len(p.frames)<0:
+        if len(p.frames)==0:
             continue
         if len(p.frames)==1 and p.frames[0].pos==nya_vec3():
             continue
         anim.bones.append(p)
 
     for r in rot_bones:
-        if len(r.frames)<0:
+        if len(r.frames)==0:
             continue
         if len(r.frames)==1 and r.frames[0].rot==nya_quat():
             continue
