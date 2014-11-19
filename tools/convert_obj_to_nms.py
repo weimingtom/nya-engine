@@ -3,7 +3,7 @@
 #https://code.google.com/p/nya-engine/
 
 import sys
-from nya_nms import *
+from nya.nya_nms import *
 
 class obj_mesh:
     class obj_material:
