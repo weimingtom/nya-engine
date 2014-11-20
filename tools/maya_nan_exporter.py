@@ -57,7 +57,7 @@ def export():
 
     maya_frame_time = 1000/24 #ToDo
 
-    for t in range(frames_count):
+    for t in range(int(frames_count)):
         cmds.currentTime(t)
 
         for i in range(len(joints)):
