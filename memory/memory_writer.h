@@ -4,6 +4,7 @@
 
 #include <cstddef>
 #include <string.h>
+#include <string>
 
 namespace nya_memory
 {

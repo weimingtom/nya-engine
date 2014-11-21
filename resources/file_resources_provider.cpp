@@ -299,7 +299,7 @@ bool file_resources_provider::has(const char *name)
     return stat(file_name.c_str(),&sb)==0;
 }
 
-bool file_resources_provider::set_folder(const char*name,bool recursive)
+bool file_resources_provider::set_folder(const char*name,bool recursive,bool ignore_nonexistent)
 {
     clear_entries();
 
@@ -324,16 +324,14 @@ bool file_resources_provider::set_folder(const char*name,bool recursive)
     if(m_path.empty())
         return true;
 
-    struct stat sb;
-    if(stat(m_path.c_str(),&sb)==-1)
+    if(!ignore_nonexistent)
     {
-        log()<<"unable to set folder: invalid path "<<name<<"\n";
-        m_path.erase();
-        return false;
+        struct stat sb;
+        if(stat(m_path.c_str(),&sb)==-1)
+            log()<<"warning: unable to stat at path "<<name<<", probably does not exist\n";
+        else if(!S_ISDIR(sb.st_mode))
+            log()<<"warning: specified path is not a directory "<<name<<"\n";
     }
-
-    if(!S_ISDIR(sb.st_mode))
-        log()<<"warning: specified path is not a directory "<<name<<"\n";
 
     m_path.push_back('/');
 
