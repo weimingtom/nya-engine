@@ -451,7 +451,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         sdesc.MaxAnisotropy=default_aniso;
     }
 
-#ifdef WINDOWS_PHONE8
+#ifdef WINDOWS_METRO
     sdesc.MaxLOD=D3D11_FLOAT32_MAX;
 #else
     sdesc.MaxLOD=mip_count>=1?mip_count:has_mipmap?D3D11_FLOAT32_MAX:1;
