@@ -16,7 +16,7 @@ public:
     bool has(const char *resource_name);
 
 public:
-    bool set_folder(const char*,bool recursive=true);
+    bool set_folder(const char*,bool recursive=true,bool ignore_nonexistent=false);
 
 public:
     resource_info *first_res_info();
