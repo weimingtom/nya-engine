@@ -743,6 +743,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 
     m_width=width;
     m_height=height;
+    m_format=format;
 
 #else
     if(width>gl_get_max_tex_size() || height>gl_get_max_tex_size())
