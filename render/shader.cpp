@@ -37,6 +37,7 @@ namespace
 {
     compiled_shaders_provider *render_csp=0;
     int current_shader=-1,active_shader=-1;
+    bool shaders_validation=true;
 
     struct shader_obj
     {
@@ -823,22 +824,17 @@ bool shader::add_program(program_type type,const char*code)
 
 #ifdef OPENGL_ES
     shdr.objects[type]=object;
+#endif
 
     if(shdr.program && shdr.objects[vertex] && shdr.objects[pixel])
-#else
-    if(shdr.program)
-#endif
     {
         GLint result=0;
         glLinkProgramARB(shdr.program);
         glGetObjectParam(shdr.program,GL_OBJECT_LINK_STATUS_ARB,&result);
         if(!result)
         {
-#ifdef OPENGL_ES
             log()<<"Can`t link shader\n";
-#else
-            log()<<"Can`t link "<<type_str[type]<<" shader\n";
-#endif
+
             GLint log_len=0;
             glGetObjectParam(shdr.program,GL_OBJECT_INFO_LOG_LENGTH_ARB,&log_len);
             if(log_len>0)
@@ -869,16 +865,15 @@ bool shader::add_program(program_type type,const char*code)
             set_shader(-1);
         }
 
+        if(shaders_validation)
+        {
         result=0;
         glValidateProgramARB(shdr.program);
         glGetObjectParam(shdr.program,GL_OBJECT_VALIDATE_STATUS_ARB,&result);
         if(!result)
         {
-#ifdef OPENGL_ES
             log()<<"Can`t validate shader\n";
-#else
-            log()<<"Can`t validate "<<type_str[type]<<" shader\n";
-#endif
+
             GLint log_len=0;
             glGetObjectParam(shdr.program,GL_OBJECT_INFO_LOG_LENGTH_ARB,&log_len);
             if(log_len>0)
@@ -889,6 +884,7 @@ bool shader::add_program(program_type type,const char*code)
             }
             shdr.program=0; //??
             return false;
+        }
         }
 
 #ifdef SUPPORT_OLD_SHADERS
@@ -1336,5 +1332,7 @@ void shader::release()
     shader_obj::remove(m_shdr);
     m_shdr=-1;
 }
+
+void shader::set_shaders_validation(bool enable) { shaders_validation=enable; }
 
 }

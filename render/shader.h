@@ -57,6 +57,9 @@ public:
     unsigned int get_uniform_array_size(int idx) const;
 
 public:
+    static void set_shaders_validation(bool enable); //enabled by default
+
+public:
     void release();
 
 public:
