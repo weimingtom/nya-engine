@@ -778,7 +778,7 @@ bool shader::add_program(program_type type,const char*code)
                 int h=idx/10;
                 attrib_name+=char('0'+h);
                 idx-=h*10;
-            }
+        }
 
             attrib_name+=char('0'+idx);
             code_final.append("attribute vec4 "),code_final.append(attrib_name),code_final.append(";\n");
@@ -786,11 +786,11 @@ bool shader::add_program(program_type type,const char*code)
         }
     }
 
-#ifdef OPENGL_ES
+  #ifdef OPENGL_ES
     code_final.append("precision mediump float;\n");
 #endif
     code_final.append(code_str);
-    code=code_final.c_str();
+        code=code_final.c_str();
 
     //log()<<code<<"\n";
 #endif
@@ -824,9 +824,11 @@ bool shader::add_program(program_type type,const char*code)
 
 #ifdef OPENGL_ES
     shdr.objects[type]=object;
-#endif
 
     if(shdr.program && shdr.objects[vertex] && shdr.objects[pixel])
+#else
+    if(shdr.program)
+#endif
     {
         GLint result=0;
         glLinkProgramARB(shdr.program);
@@ -867,24 +869,24 @@ bool shader::add_program(program_type type,const char*code)
 
         if(shaders_validation)
         {
-        result=0;
-        glValidateProgramARB(shdr.program);
-        glGetObjectParam(shdr.program,GL_OBJECT_VALIDATE_STATUS_ARB,&result);
-        if(!result)
-        {
-            log()<<"Can`t validate shader\n";
-
-            GLint log_len=0;
-            glGetObjectParam(shdr.program,GL_OBJECT_INFO_LOG_LENGTH_ARB,&log_len);
-            if(log_len>0)
+            result=0;
+            glValidateProgramARB(shdr.program);
+            glGetObjectParam(shdr.program,GL_OBJECT_VALIDATE_STATUS_ARB,&result);
+            if(!result)
             {
-                std::string log_text(log_len,0);
-                glGetInfoLogARB(shdr.program,log_len,&log_len,&log_text[0]);
-                log()<<log_text.c_str()<<"\n";
+                log()<<"Can`t validate shader\n";
+
+                GLint log_len=0;
+                glGetObjectParam(shdr.program,GL_OBJECT_INFO_LOG_LENGTH_ARB,&log_len);
+                if(log_len>0)
+                {
+                    std::string log_text(log_len,0);
+                    glGetInfoLogARB(shdr.program,log_len,&log_len,&log_text[0]);
+                    log()<<log_text.c_str()<<"\n";
+                }
+                shdr.program=0; //??
+                return false;
             }
-            shdr.program=0; //??
-            return false;
-        }
         }
 
 #ifdef SUPPORT_OLD_SHADERS
@@ -896,6 +898,7 @@ bool shader::add_program(program_type type,const char*code)
 
     shdr.objects[type]=object;
 
+    //ToDo: on demand
     GLint uniforms_count=0;
 #ifdef OPENGL_ES
     glGetObjectParam(shdr.program,GL_ACTIVE_UNIFORMS,&uniforms_count);
