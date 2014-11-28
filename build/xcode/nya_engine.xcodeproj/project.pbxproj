@@ -415,8 +415,6 @@
 		F25931EC15D858140092C7D8 /* render */ = {
 			isa = PBXGroup;
 			children = (
-				3DE7961F1A28AF7300BF18C7 /* shader_code_parser.cpp */,
-				3DE796201A28AF7300BF18C7 /* shader_code_parser.h */,
 				F2F0A0981695A758007245BC /* animation.cpp */,
 				F2F0A0971695A758007245BC /* animation.h */,
 				F55C571D180623B100FF6163 /* debug_draw.cpp */,
@@ -431,6 +429,8 @@
 				F51B1F7319F4181300CA7CF0 /* screen_quad.h */,
 				F25931F115D858140092C7D8 /* shader.cpp */,
 				F25931F215D858140092C7D8 /* shader.h */,
+				3DE7961F1A28AF7300BF18C7 /* shader_code_parser.cpp */,
+				3DE796201A28AF7300BF18C7 /* shader_code_parser.h */,
 				F2F0A0961695A757007245BC /* skeleton.cpp */,
 				F2F0A0951695A757007245BC /* skeleton.h */,
 				F5DFDFE619C9A8E9006CC734 /* statistics.cpp */,

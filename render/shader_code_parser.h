@@ -22,6 +22,7 @@ public:
     {
         type_invalid,
         type_float,
+        type_vec2,
         type_vec3,
         type_vec4,
         type_mat4,
@@ -36,6 +37,8 @@ public:
         unsigned int array_size;
 
         variable():type(type_invalid),array_size(0){}
+        variable(variable_type type,const char *name,unsigned int array_size):
+                 type(type),name(name?name:""),array_size(array_size) {}
     };
 
     int get_uniforms_count();
@@ -46,7 +49,7 @@ public:
 
 public:
     shader_code_parser(const char *text,const char *replace_prefix_str="nya"):
-                       m_code(text?text:""),m_replace_str(replace_prefix_str?replace_prefix_str:"") {}
+                       m_code(text?text:""),m_replace_str(replace_prefix_str?replace_prefix_str:"") { remove_comments(); }
 private:
     void remove_comments();
 

@@ -1319,7 +1319,7 @@ unsigned int shader::get_uniform_array_size(int idx) const
     if(idx<0 || idx>=get_uniforms_count())
         return uniform_not_found;
 
-    return shader_obj::get(m_shdr).uniforms[idx].type;
+    return shader_obj::get(m_shdr).uniforms[idx].array_size;
 }
 
 void shader::release()

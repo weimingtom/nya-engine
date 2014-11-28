@@ -65,7 +65,56 @@ void shader_code_parser::remove_comments()
 
 bool shader_code_parser::parse_uniforms(bool remove)
 {
-    //ToDo
+    m_uniforms.clear();
+
+    for(size_t i=m_code.find("uniform");i!=std::string::npos;i=m_code.find("uniform",i+7))
+    {
+        size_t type_from=i+8;
+        while(m_code[type_from]<=' ') if(++type_from>=m_code.length()) return false;
+        size_t type_to=type_from;
+        while(m_code[type_to]>' ') if(++type_to>=m_code.length()) return false;
+
+        size_t name_from=type_to+1;
+        while(m_code[name_from]<=' ') if(++name_from>=m_code.length()) return false;
+        size_t name_to=name_from;
+        while(m_code[name_to]>' ' && m_code[name_to]!=';' && m_code[name_to]!='[') if(++name_to>=m_code.length()) return false;
+
+        const std::string name=m_code.substr(name_from,name_to-name_from);
+        const std::string type_name=m_code.substr(type_from,type_to-type_from);
+
+        size_t last=name_to;
+        while(m_code[last]!=';') if(++last>=m_code.length()) return false;
+
+        int count=1;
+        size_t array_from=m_code.find('[',name_to);
+        if(array_from<last)
+            count=atoi(&m_code[array_from+1]);
+
+        if(count<=0)
+            return false;
+
+        if(type_name.compare(0,3,"vec")==0)
+        {
+            char dim=(type_name.length()==4)?type_name[3]:'\0';
+            switch(dim)
+            {
+                case '2': m_uniforms.push_back(variable(type_vec2,name.c_str(),count)); break;
+                case '3': m_uniforms.push_back(variable(type_vec3,name.c_str(),count)); break;
+                case '4': m_uniforms.push_back(variable(type_vec4,name.c_str(),count)); break;
+                default: return false;
+            };
+        }
+        else if(type_name=="sampler2D")
+            m_uniforms.push_back(variable(type_sampler2d,name.c_str(),count));
+        else if(type_name=="samplerCube")
+            m_uniforms.push_back(variable(type_sampler_cube,name.c_str(),count));
+        else if(type_name=="float")
+            m_uniforms.push_back(variable(type_float,name.c_str(),count));
+
+        if(remove)
+            m_code.erase(i,last-i+1);
+    }
+
     return false;
 }
 
