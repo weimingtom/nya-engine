@@ -33,6 +33,10 @@
 		3DE732E3195D9186008D6765 /* indexed_map.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DE732E0195D9186008D6765 /* indexed_map.h */; };
 		3DE732E4195D9186008D6765 /* invalid_object.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DE732E1195D9186008D6765 /* invalid_object.h */; };
 		3DE732E5195D9186008D6765 /* invalid_object.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DE732E1195D9186008D6765 /* invalid_object.h */; };
+		3DE796211A28AF7300BF18C7 /* shader_code_parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DE7961F1A28AF7300BF18C7 /* shader_code_parser.cpp */; };
+		3DE796221A28AF7300BF18C7 /* shader_code_parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DE7961F1A28AF7300BF18C7 /* shader_code_parser.cpp */; };
+		3DE796231A28AF7300BF18C7 /* shader_code_parser.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DE796201A28AF7300BF18C7 /* shader_code_parser.h */; };
+		3DE796241A28AF7300BF18C7 /* shader_code_parser.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DE796201A28AF7300BF18C7 /* shader_code_parser.h */; };
 		F20E2D7E16999B7000395A1B /* material.h in Headers */ = {isa = PBXBuildFile; fileRef = F20E2D7616999B7000395A1B /* material.h */; };
 		F20E2D7F16999B7000395A1B /* material.h in Headers */ = {isa = PBXBuildFile; fileRef = F20E2D7616999B7000395A1B /* material.h */; };
 		F20E2D8016999B7000395A1B /* shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F20E2D7716999B7000395A1B /* shader.cpp */; };
@@ -239,6 +243,8 @@
 		3D8681381965B7F9008B8929 /* warning.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = warning.cpp; sourceTree = "<group>"; };
 		3DE732E0195D9186008D6765 /* indexed_map.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = indexed_map.h; sourceTree = "<group>"; };
 		3DE732E1195D9186008D6765 /* invalid_object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = invalid_object.h; sourceTree = "<group>"; };
+		3DE7961F1A28AF7300BF18C7 /* shader_code_parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shader_code_parser.cpp; sourceTree = "<group>"; };
+		3DE796201A28AF7300BF18C7 /* shader_code_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shader_code_parser.h; sourceTree = "<group>"; };
 		F20E2D7616999B7000395A1B /* material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = material.h; path = ../../scene/material.h; sourceTree = "<group>"; };
 		F20E2D7716999B7000395A1B /* shader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = shader.cpp; path = ../../scene/shader.cpp; sourceTree = "<group>"; };
 		F20E2D7816999B7000395A1B /* texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = texture.cpp; path = ../../scene/texture.cpp; sourceTree = "<group>"; };
@@ -409,6 +415,8 @@
 		F25931EC15D858140092C7D8 /* render */ = {
 			isa = PBXGroup;
 			children = (
+				3DE7961F1A28AF7300BF18C7 /* shader_code_parser.cpp */,
+				3DE796201A28AF7300BF18C7 /* shader_code_parser.h */,
 				F2F0A0981695A758007245BC /* animation.cpp */,
 				F2F0A0971695A758007245BC /* animation.h */,
 				F55C571D180623B100FF6163 /* debug_draw.cpp */,
@@ -572,6 +580,7 @@
 				F23AB52A168DBA16004B116E /* vbo.h in Headers */,
 				F23AB52B168DBA16004B116E /* composite_resources_provider.h in Headers */,
 				F23AB52C168DBA16004B116E /* file_resources_provider.h in Headers */,
+				3DE796241A28AF7300BF18C7 /* shader_code_parser.h in Headers */,
 				F23AB52D168DBA16004B116E /* resources.h in Headers */,
 				F23AB52E168DBA16004B116E /* shared_resources.h in Headers */,
 				F23AB530168DBA16004B116E /* button.h in Headers */,
@@ -642,6 +651,7 @@
 				F259323315D858140092C7D8 /* vbo.h in Headers */,
 				F259323515D858140092C7D8 /* composite_resources_provider.h in Headers */,
 				F259323715D858140092C7D8 /* file_resources_provider.h in Headers */,
+				3DE796231A28AF7300BF18C7 /* shader_code_parser.h in Headers */,
 				F259323915D858140092C7D8 /* resources.h in Headers */,
 				F259323A15D858140092C7D8 /* shared_resources.h in Headers */,
 				F259323F15D858140092C7D8 /* button.h in Headers */,
@@ -795,6 +805,7 @@
 				F2F0A0B61695F809007245BC /* matrix.cpp in Sources */,
 				3D86813F1965B7F9008B8929 /* warning.cpp in Sources */,
 				F23997951696406D00170768 /* transform.cpp in Sources */,
+				3DE796221A28AF7300BF18C7 /* shader_code_parser.cpp in Sources */,
 				F20E2D8116999B7000395A1B /* shader.cpp in Sources */,
 				F20E2D8316999B7000395A1B /* texture.cpp in Sources */,
 				F20E2D8516999B7000395A1B /* material.cpp in Sources */,
@@ -847,6 +858,7 @@
 				F2F0A09B1695A758007245BC /* skeleton.cpp in Sources */,
 				3D86813E1965B7F9008B8929 /* warning.cpp in Sources */,
 				F2F0A09F1695A758007245BC /* animation.cpp in Sources */,
+				3DE796211A28AF7300BF18C7 /* shader_code_parser.cpp in Sources */,
 				F2F0A0AB1695A794007245BC /* quaternion.cpp in Sources */,
 				F2F0A0AF1695A794007245BC /* bezier.cpp in Sources */,
 				F2F0A0B51695F809007245BC /* matrix.cpp in Sources */,
