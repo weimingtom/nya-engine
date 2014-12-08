@@ -36,7 +36,7 @@ shader_code_parser::variable shader_code_parser::get_uniform(int idx)
 int shader_code_parser::get_attributes_count()
 {
     if(m_attributes.empty())
-        parse_attributes(false);
+        parse_attributes(0);
 
     return (int)m_uniforms.size();
 }
