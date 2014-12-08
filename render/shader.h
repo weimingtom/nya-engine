@@ -44,6 +44,7 @@ public:
     {
         uniform_not_found,
         uniform_float,
+        uniform_vec2,
         uniform_vec3,
         uniform_vec4,
         uniform_mat4,

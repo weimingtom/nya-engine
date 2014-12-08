@@ -14,8 +14,25 @@ bool shader_code_parser::convert_to_hlsl()
 
 bool shader_code_parser::convert_to_modern_glsl()
 {
-    //ToDo
-    return false;
+    if(!parse_predefined_uniforms(m_replace_str.c_str()))
+        return false;
+
+    if(!parse_attributes(m_replace_str.c_str()))
+        return false;
+
+    std::string prefix("precision mediump float;\n");
+
+    for(int i=0;i<(int)m_attributes.size();++i)
+    {
+        prefix.append("attribute ");
+        prefix.append(m_attributes[i].type==type_vec3?"vec3 ":"vec4 ");
+        prefix.append(m_attributes[i].name);
+        prefix.append(";\n");
+    }
+
+    m_code.insert(0,prefix);
+
+    return true;
 }
 
 int shader_code_parser::get_uniforms_count()
@@ -26,7 +43,7 @@ int shader_code_parser::get_uniforms_count()
     return (int)m_uniforms.size();
 }
 
-shader_code_parser::variable shader_code_parser::get_uniform(int idx)
+shader_code_parser::variable shader_code_parser::get_uniform(int idx) const
 {
     if(idx<0 || idx>=(int)m_uniforms.size())
         return shader_code_parser::variable();
@@ -34,15 +51,9 @@ shader_code_parser::variable shader_code_parser::get_uniform(int idx)
     return m_uniforms[idx];
 }
 
-int shader_code_parser::get_attributes_count()
-{
-    if(m_attributes.empty())
-        parse_attributes(0);
+int shader_code_parser::get_attributes_count() const { return (int)m_attributes.size(); }
 
-    return (int)m_uniforms.size();
-}
-
-shader_code_parser::variable shader_code_parser::get_attribute(int idx)
+shader_code_parser::variable shader_code_parser::get_attribute(int idx) const
 {
     if(idx<0 || idx>=(int)m_attributes.size())
         return shader_code_parser::variable();
@@ -116,13 +127,74 @@ bool shader_code_parser::parse_uniforms(bool remove)
             m_code.erase(i,last-i+1);
     }
 
-    return false;
+    return true;
 }
 
-bool shader_code_parser::parse_attributes(const char *replace_str)
+namespace
 {
-    //ToDo
-    return false;
+
+template<typename t> void push_unique_to_vec(std::vector<t> &v,const t &e)
+{
+    for(size_t i=0;i<v.size();++i)
+    {
+        if(v[i].name==e.name)
+        {
+            v[i]=e;
+            return;
+        }
+    }
+
+    v.push_back(e);
+}
+
+}
+
+bool shader_code_parser::parse_predefined_uniforms(const char *replace_prefix_str)
+{
+    if(!replace_prefix_str)
+        return false;
+
+    const char *gl_matrix_names[]={"gl_ModelViewMatrix","gl_ModelViewProjectionMatrix","gl_ProjectionMatrix"};
+
+    for(size_t i=0;i<sizeof(gl_matrix_names)/sizeof(gl_matrix_names[0]);++i)
+    {
+        std::string to=std::string(replace_prefix_str)+std::string(gl_matrix_names[i]+3);
+        if(replace_string(gl_matrix_names[i],to.c_str()))
+            push_unique_to_vec(m_uniforms,variable(type_mat4,to.c_str(),1));
+    }
+
+    return true;
+}
+
+bool shader_code_parser::parse_attributes(const char *replace_prefix_str)
+{
+    if(!replace_prefix_str)
+        return false;
+
+    const char *gl_attr_names[]={"gl_Vertex","gl_Normal","gl_Color"};
+    variable_type gl_attr_types[]={type_vec4,type_vec3,type_vec4};
+
+    for(size_t i=0;i<sizeof(gl_attr_names)/sizeof(gl_attr_names[0]);++i)
+    {
+        std::string to=std::string(replace_prefix_str)+std::string(gl_attr_names[i]+3);
+        if(replace_string(gl_attr_names[i],to.c_str()))
+            push_unique_to_vec(m_attributes,variable(gl_attr_types[i],to.c_str(),0));
+    }
+
+    const char *tc_atr_name="gl_MultiTexCoord";
+
+    size_t start_pos=0;
+    while((start_pos=m_code.find(tc_atr_name,start_pos))!=std::string::npos)
+    {
+        m_code.replace(start_pos,3,replace_prefix_str);
+        start_pos+=strlen(tc_atr_name);
+        const int idx=atoi(&m_code[start_pos]);
+        char buf[255];
+        sprintf(buf,"%s%d",tc_atr_name,idx);
+        push_unique_to_vec(m_attributes,variable(type_vec4,buf,idx));
+    }
+
+    return true;
 }
 
 bool shader_code_parser::replace_main_function_header(const char *replace_str)

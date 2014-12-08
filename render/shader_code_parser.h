@@ -11,7 +11,7 @@ namespace nya_render
 class shader_code_parser
 {
 public:
-    const char *get_code() { return m_code.c_str(); }
+    const char *get_code() const { return m_code.c_str(); }
 
 public:
     bool convert_to_hlsl();
@@ -34,7 +34,12 @@ public:
     {
         variable_type type;
         std::string name;
-        unsigned int array_size;
+
+        union
+        {
+            unsigned int array_size;
+            unsigned int idx;
+        };
 
         variable():type(type_invalid),array_size(0){}
         variable(variable_type type,const char *name,unsigned int array_size):
@@ -42,10 +47,10 @@ public:
     };
 
     int get_uniforms_count();
-    variable get_uniform(int idx);
+    variable get_uniform(int idx) const;
 
-    int get_attributes_count();
-    variable get_attribute(int idx);
+    int get_attributes_count() const;
+    variable get_attribute(int idx) const;
 
 public:
     shader_code_parser(const char *text,const char *replace_prefix_str="nya"):
@@ -54,9 +59,10 @@ private:
     void remove_comments();
 
     bool parse_uniforms(bool remove);
-    bool parse_attributes(const char *replace_str);
+    bool parse_predefined_uniforms(const char *replace_prefix_str);
+    bool parse_attributes(const char *replace_prefix_str);
 
-    bool replace_main_function_header(const char *to);
+    bool replace_main_function_header(const char *replace_str);
     bool replace_string(const char *from,const char *to);
 
 private:
