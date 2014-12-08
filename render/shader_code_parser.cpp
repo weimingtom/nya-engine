@@ -1,6 +1,7 @@
 //https://code.google.com/p/nya-engine/
 
 #include "shader_code_parser.h"
+#include <stdlib.h>
 
 namespace nya_render
 {
