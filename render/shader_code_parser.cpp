@@ -8,6 +8,21 @@ namespace nya_render
 
 bool shader_code_parser::convert_to_hlsl()
 {
+    std::string prefix;
+
+    parse_predefined_uniforms(m_replace_str.c_str());
+    if(!m_uniforms.empty())
+    {
+        std::sort(m_uniforms.begin(),m_uniforms.end());
+
+        prefix.append("cbuffer ");
+        prefix.append(m_replace_str);
+        prefix.append("ConstantBuffer:register(b0){");
+        for(size_t i=0;i<m_uniforms.size();++i)
+            prefix.append("matrix "),prefix.append(m_uniforms[i].name),prefix.append(";");
+        prefix.append("}\n");
+    }
+
     parse_uniforms(true);
     parse_varying(true);
     std::sort(m_varying.begin(),m_varying.end());
@@ -16,9 +31,6 @@ bool shader_code_parser::convert_to_hlsl()
     //ToDo: vectors from float constructor
     replace_hlsl_types();
 
-    std::string prefix;
-
-    //ToDo: add predefined uniform buffer
     //ToDo: add uniform buffer
     //ToDo: add texture uniforms
     //ToDo: add vsin
@@ -131,8 +143,6 @@ namespace
 
 template<typename t> bool parse_vars(std::string &code,t& vars,const char *str,bool remove)
 {
-    vars.clear();
-
     const size_t str_len=strlen(str);
     for(size_t i=code.find(str);i!=std::string::npos;i=code.find(str,i))
     {
