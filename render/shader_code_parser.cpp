@@ -31,7 +31,6 @@ bool shader_code_parser::convert_to_modern_glsl()
     }
 
     m_code.insert(0,prefix);
-
     return true;
 }
 
@@ -81,7 +80,7 @@ bool shader_code_parser::parse_uniforms(bool remove)
 
     for(size_t i=m_code.find("uniform");i!=std::string::npos;i=m_code.find("uniform",i+7))
     {
-        size_t type_from=i+8;
+        size_t type_from=i+8; //strlen("uniform ")
         while(m_code[type_from]<=' ') if(++type_from>=m_code.length()) return false;
         size_t type_to=type_from;
         while(m_code[type_to]>' ') if(++type_to>=m_code.length()) return false;
@@ -158,7 +157,7 @@ bool shader_code_parser::parse_predefined_uniforms(const char *replace_prefix_st
 
     for(size_t i=0;i<sizeof(gl_matrix_names)/sizeof(gl_matrix_names[0]);++i)
     {
-        std::string to=std::string(replace_prefix_str)+std::string(gl_matrix_names[i]+3);
+        std::string to=std::string(replace_prefix_str)+std::string(gl_matrix_names[i]+3); //strlen("gl_")
         if(replace_string(gl_matrix_names[i],to.c_str()))
             push_unique_to_vec(m_uniforms,variable(type_mat4,to.c_str(),1));
     }
@@ -176,7 +175,7 @@ bool shader_code_parser::parse_attributes(const char *replace_prefix_str)
 
     for(size_t i=0;i<sizeof(gl_attr_names)/sizeof(gl_attr_names[0]);++i)
     {
-        std::string to=std::string(replace_prefix_str)+std::string(gl_attr_names[i]+3);
+        std::string to=std::string(replace_prefix_str)+std::string(gl_attr_names[i]+3); //strlen("gl_")
         if(replace_string(gl_attr_names[i],to.c_str()))
             push_unique_to_vec(m_attributes,variable(gl_attr_types[i],to.c_str(),0));
     }
@@ -186,7 +185,7 @@ bool shader_code_parser::parse_attributes(const char *replace_prefix_str)
     size_t start_pos=0;
     while((start_pos=m_code.find(tc_atr_name,start_pos))!=std::string::npos)
     {
-        m_code.replace(start_pos,3,replace_prefix_str);
+        m_code.replace(start_pos,3,replace_prefix_str); //strlen("gl_")
         start_pos+=strlen(tc_atr_name);
         const int idx=atoi(&m_code[start_pos]);
         char buf[255];
@@ -199,7 +198,37 @@ bool shader_code_parser::parse_attributes(const char *replace_prefix_str)
 
 bool shader_code_parser::replace_main_function_header(const char *replace_str)
 {
-    //ToDo
+    if(!replace_str)
+        return false;
+
+    size_t start_pos=0;
+    while((start_pos=m_code.find("void",start_pos))!=std::string::npos)
+    {
+        const size_t lbrace=m_code.find('(',start_pos+9); //strlen("void main")
+        if(lbrace==std::string::npos)
+            return false;
+
+        std::string main;
+        for(size_t i=start_pos+5;i<lbrace;++i) //strlen("void ")
+        {
+            if(m_code[i]>' ')
+                main+=m_code[i];
+        }
+
+        if(main!="main")
+        {
+            start_pos+=4; //strlen("void")
+            continue;
+        }
+
+        const size_t rbrace=m_code.find(')',lbrace);
+        if(rbrace==std::string::npos)
+            return false;
+
+        m_code.replace(start_pos,rbrace+1-start_pos,replace_str);
+        return true;
+    }
+
     return false;
 }
 
