@@ -61,8 +61,10 @@ private:
     bool parse_uniforms(bool remove);
     bool parse_predefined_uniforms(const char *replace_prefix_str);
     bool parse_attributes(const char *replace_prefix_str);
+    bool parse_varying(bool remove);
 
     bool replace_main_function_header(const char *replace_str);
+    bool replace_hlsl_types();
     bool replace_string(const char *from,const char *to);
 
 private:
@@ -70,6 +72,7 @@ private:
     std::string m_replace_str;
     std::vector<variable> m_uniforms;
     std::vector<variable> m_attributes;
+    std::vector<variable> m_varying;
 };
 
 }

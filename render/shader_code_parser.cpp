@@ -74,32 +74,36 @@ void shader_code_parser::remove_comments()
     }
 }
 
-bool shader_code_parser::parse_uniforms(bool remove)
+namespace
 {
-    m_uniforms.clear();
 
-    for(size_t i=m_code.find("uniform");i!=std::string::npos;i=m_code.find("uniform",i+7))
+template<typename t> bool parse_vars(std::string &code,t& vars,const char *str,bool remove)
     {
-        size_t type_from=i+8; //strlen("uniform ")
-        while(m_code[type_from]<=' ') if(++type_from>=m_code.length()) return false;
+    vars.clear();
+
+    const size_t str_len=strlen(str);
+    for(size_t i=code.find(str);i!=std::string::npos;i=code.find(str,i))
+    {
+        size_t type_from=i+str_len+1;
+        while(code[type_from]<=' ') if(++type_from>=code.length()) return false;
         size_t type_to=type_from;
-        while(m_code[type_to]>' ') if(++type_to>=m_code.length()) return false;
+        while(code[type_to]>' ') if(++type_to>=code.length()) return false;
 
         size_t name_from=type_to+1;
-        while(m_code[name_from]<=' ') if(++name_from>=m_code.length()) return false;
+        while(code[name_from]<=' ') if(++name_from>=code.length()) return false;
         size_t name_to=name_from;
-        while(m_code[name_to]>' ' && m_code[name_to]!=';' && m_code[name_to]!='[') if(++name_to>=m_code.length()) return false;
+        while(code[name_to]>' ' && code[name_to]!=';' && code[name_to]!='[') if(++name_to>=code.length()) return false;
 
-        const std::string name=m_code.substr(name_from,name_to-name_from);
-        const std::string type_name=m_code.substr(type_from,type_to-type_from);
+        const std::string name=code.substr(name_from,name_to-name_from);
+        const std::string type_name=code.substr(type_from,type_to-type_from);
 
         size_t last=name_to;
-        while(m_code[last]!=';') if(++last>=m_code.length()) return false;
+        while(code[last]!=';') if(++last>=code.length()) return false;
 
         int count=1;
-        size_t array_from=m_code.find('[',name_to);
+        size_t array_from=code.find('[',name_to);
         if(array_from<last)
-            count=atoi(&m_code[array_from+1]);
+            count=atoi(&code[array_from+1]);
 
         if(count<=0)
             return false;
@@ -109,25 +113,34 @@ bool shader_code_parser::parse_uniforms(bool remove)
             char dim=(type_name.length()==4)?type_name[3]:'\0';
             switch(dim)
             {
-                case '2': m_uniforms.push_back(variable(type_vec2,name.c_str(),count)); break;
-                case '3': m_uniforms.push_back(variable(type_vec3,name.c_str(),count)); break;
-                case '4': m_uniforms.push_back(variable(type_vec4,name.c_str(),count)); break;
+                case '2': vars.push_back(shader_code_parser::variable(shader_code_parser::type_vec2,name.c_str(),count)); break;
+                case '3': vars.push_back(shader_code_parser::variable(shader_code_parser::type_vec3,name.c_str(),count)); break;
+                case '4': vars.push_back(shader_code_parser::variable(shader_code_parser::type_vec4,name.c_str(),count)); break;
                 default: return false;
             };
         }
-        else if(type_name=="sampler2D")
-            m_uniforms.push_back(variable(type_sampler2d,name.c_str(),count));
-        else if(type_name=="samplerCube")
-            m_uniforms.push_back(variable(type_sampler_cube,name.c_str(),count));
         else if(type_name=="float")
-            m_uniforms.push_back(variable(type_float,name.c_str(),count));
+            vars.push_back(shader_code_parser::variable(shader_code_parser::type_float,name.c_str(),count));
+        else if(type_name=="sampler2D")
+            vars.push_back(shader_code_parser::variable(shader_code_parser::type_sampler2d,name.c_str(),count));
+        else if(type_name=="samplerCube")
+            vars.push_back(shader_code_parser::variable(shader_code_parser::type_sampler_cube,name.c_str(),count));
+        else
+            return false;
 
         if(remove)
-            m_code.erase(i,last-i+1);
+            code.erase(i,last-i+1);
+        else
+            i=last+1;
     }
 
     return true;
 }
+
+}
+
+bool shader_code_parser::parse_uniforms(bool remove) { return parse_vars(m_code,m_uniforms,"uniform",remove); }
+bool shader_code_parser::parse_varying(bool remove) { return parse_vars(m_code,m_varying,"varying",remove); }
 
 namespace
 {
@@ -193,6 +206,17 @@ bool shader_code_parser::parse_attributes(const char *replace_prefix_str)
         push_unique_to_vec(m_attributes,variable(type_vec4,buf,idx));
     }
 
+    return true;
+}
+
+bool shader_code_parser::replace_hlsl_types()
+{
+    replace_string("vec2","float2");
+    replace_string("vec3","float3");
+    replace_string("vec4","float4");
+    replace_string("mat2","float2x2");
+    replace_string("mat3","float3x3");
+    replace_string("mat4","float4x4");
     return true;
 }
 
