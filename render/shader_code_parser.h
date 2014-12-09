@@ -41,6 +41,8 @@ public:
             unsigned int idx;
         };
 
+        bool operator < (const variable &v) const { return name<v.name; }
+
         variable():type(type_invalid),array_size(0){}
         variable(variable_type type,const char *name,unsigned int array_size):
                  type(type),name(name?name:""),array_size(array_size) {}

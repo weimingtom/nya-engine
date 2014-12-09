@@ -8,7 +8,59 @@ namespace nya_render
 
 bool shader_code_parser::convert_to_hlsl()
 {
-    //ToDo
+    parse_uniforms(true);
+    parse_varying(true);
+    std::sort(m_varying.begin(),m_varying.end());
+
+    //ToDo: replace all * with mul() and add functions for vec*vec,vec*float,etc
+    //ToDo: vectors from float constructor
+    replace_hlsl_types();
+
+    std::string prefix;
+
+    //ToDo: add predefined uniform buffer
+    //ToDo: add uniform buffer
+    //ToDo: add texture uniforms
+    //ToDo: add vsin
+    //ToDo: add vsout
+    //ToDo: replace attributes with vsin.*
+    //ToDo: replace variables with vsout.*
+    //ToDo: replace texture sample functions
+    //ToDo: replace build-in functions
+
+    const char *gl_ps_out="gl_FragColor";
+    const std::string ps_out_var=m_replace_str+std::string(gl_ps_out+3); //strlen("gl_")
+    const bool is_fragment=replace_string(gl_ps_out,ps_out_var.c_str());
+    if(is_fragment)
+    {
+        prefix.append("static float4 ");
+        prefix.append(ps_out_var);
+        prefix.append(";\n");
+
+        const std::string main=std::string("void ")+m_replace_str+"main(vsout input)";
+        replace_main_function_header(main.c_str());
+        const std::string appnd=std::string("\nfloat4 main(vsout input):SV_TARGET{"+
+                                            m_replace_str+"main(input);return ")+ps_out_var+";}\n";
+        m_code.append(appnd);
+    }
+    else
+    {
+        const char *gl_vs_out="gl_Position";
+        const std::string vs_out_var=m_replace_str+std::string(gl_vs_out+3); //strlen("gl_")
+        replace_string(gl_vs_out,vs_out_var.c_str());
+
+        prefix.append("static float4 ");
+        prefix.append(vs_out_var);
+        prefix.append(";\n");
+
+        const std::string main=std::string("void ")+m_replace_str+"main(vsin input)";
+        replace_main_function_header("void nya_main(vsin input)");
+        const std::string appnd=std::string("\nvsout main(vsin input){"+
+                                            m_replace_str+"main(input);return ")+vs_out_var+";}\n";
+        m_code.append(appnd);
+    }
+
+    m_code.insert(0,prefix);
     return false;
 }
 
@@ -78,7 +130,7 @@ namespace
 {
 
 template<typename t> bool parse_vars(std::string &code,t& vars,const char *str,bool remove)
-    {
+{
     vars.clear();
 
     const size_t str_len=strlen(str);
