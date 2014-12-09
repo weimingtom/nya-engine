@@ -33,12 +33,13 @@ bool shader_code_parser::convert_to_hlsl()
 
     //ToDo: add uniform buffer
     //ToDo: add texture uniforms
-    //ToDo: add vsin
     //ToDo: add vsout
-    //ToDo: replace attributes with vsin.*
-    //ToDo: replace variables with vsout.*
+    //ToDo: replace input variables with nyain.*
+    //ToDo: replace output variables with nyaout.*
     //ToDo: replace texture sample functions
     //ToDo: replace build-in functions
+
+    const std::string input_var=m_replace_str+"in";
 
     const char *gl_ps_out="gl_FragColor";
     const std::string ps_out_var=m_replace_str+std::string(gl_ps_out+3); //strlen("gl_")
@@ -49,26 +50,53 @@ bool shader_code_parser::convert_to_hlsl()
         prefix.append(ps_out_var);
         prefix.append(";\n");
 
-        const std::string main=std::string("void ")+m_replace_str+"main(vsout input)";
+        const std::string main=std::string("void ")+m_replace_str+"main(vsout "+input_var+")";
         replace_main_function_header(main.c_str());
-        const std::string appnd=std::string("\nfloat4 main(vsout input):SV_TARGET{"+
-                                            m_replace_str+"main(input);return ")+ps_out_var+";}\n";
+        const std::string appnd=std::string("\nfloat4 main(vsout "+input_var+"):SV_TARGET{"+
+                                            m_replace_str+"main("+input_var+");return ")+ps_out_var+";}\n";
         m_code.append(appnd);
     }
     else
     {
-        const char *gl_vs_out="gl_Position";
-        const std::string vs_out_var=m_replace_str+std::string(gl_vs_out+3); //strlen("gl_")
-        replace_string(gl_vs_out,vs_out_var.c_str());
+        parse_attributes((input_var+".").c_str());
+        if(!m_attributes.empty())
+        {
+            int idx=0;
+            prefix.append("struct vsin{");
+            for(int i=0;i<(int)m_attributes.size();++i)
+            {
+                variable &a=m_attributes[i];
+                a.name=a.name.substr(input_var.size()+1);
+                if(a.name=="Vertex")
+                    prefix.append("float4 Vertex:POSITION;");
+                else if(a.name=="Normal")
+                    prefix.append("float3 Normal:NORMAL;");
+                else if(a.name=="Color")
+                    prefix.append("float4 Color:COLOR;");
+                else
+                {
+                    char buf[255];
+                    sprintf(buf,"float4 %s:TEXCOORD%d;",a.name.c_str(),idx++);
+                    prefix.append(buf);
+                }
+            }
+            prefix.append("};\n");
+        }
 
-        prefix.append("static float4 ");
-        prefix.append(vs_out_var);
+        const std::string out_var=m_replace_str+"out";
+
+        prefix.append("static vsout ");
+        prefix.append(out_var);
         prefix.append(";\n");
 
-        const std::string main=std::string("void ")+m_replace_str+"main(vsin input)";
-        replace_main_function_header("void nya_main(vsin input)");
-        const std::string appnd=std::string("\nvsout main(vsin input){"+
-                                            m_replace_str+"main(input);return ")+vs_out_var+";}\n";
+        const char *gl_vs_out="gl_Position";
+        const std::string vs_out_var=out_var+"."+m_replace_str+std::string(gl_vs_out+3); //strlen("gl_")
+        replace_string(gl_vs_out,vs_out_var.c_str());
+
+        const std::string main=std::string("void ")+m_replace_str+"main(vsin nyain)";
+        replace_main_function_header("void nya_main(vsin nyain)");
+        const std::string appnd=std::string("\nvsout main(vsin nyain){"+
+                                            m_replace_str+"main(nyain);return ")+out_var+";}\n";
         m_code.append(appnd);
     }
 
@@ -264,7 +292,7 @@ bool shader_code_parser::parse_attributes(const char *replace_prefix_str)
         start_pos+=strlen(tc_atr_name);
         const int idx=atoi(&m_code[start_pos]);
         char buf[255];
-        sprintf(buf,"%s%d",tc_atr_name,idx);
+        sprintf(buf,"%s%s%d",replace_prefix_str,tc_atr_name+3,idx);
         push_unique_to_vec(m_attributes,variable(type_vec4,buf,idx));
     }
 
