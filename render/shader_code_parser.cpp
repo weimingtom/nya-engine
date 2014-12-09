@@ -34,8 +34,6 @@ bool shader_code_parser::convert_to_hlsl()
     //ToDo: add uniform buffer
     //ToDo: add texture uniforms
     //ToDo: add vsout
-    //ToDo: replace input variables with nyain.*
-    //ToDo: replace output variables with nyaout.*
     //ToDo: replace texture sample functions
     //ToDo: replace build-in functions
 
@@ -52,6 +50,14 @@ bool shader_code_parser::convert_to_hlsl()
 
         const std::string main=std::string("void ")+m_replace_str+"main(vsout "+input_var+")";
         replace_main_function_header(main.c_str());
+
+        const size_t main_start=m_code.find(main);
+        for(int i=0;i<(int)m_varying.size();++i)
+        {
+            const std::string to=input_var+"."+m_varying[i].name;
+            replace_variable(m_varying[i].name.c_str(),to.c_str(),main_start);
+        }
+
         const std::string appnd=std::string("\nfloat4 main(vsout "+input_var+"):SV_TARGET{"+
                                             m_replace_str+"main("+input_var+");return ")+ps_out_var+";}\n";
         m_code.append(appnd);
@@ -89,14 +95,23 @@ bool shader_code_parser::convert_to_hlsl()
         prefix.append(out_var);
         prefix.append(";\n");
 
+        const std::string main=std::string("void ")+m_replace_str+"main(vsin "+input_var+")";
+        replace_main_function_header(main.c_str());
+
+        const size_t main_start=m_code.find(main);
+
         const char *gl_vs_out="gl_Position";
         const std::string vs_out_var=out_var+"."+m_replace_str+std::string(gl_vs_out+3); //strlen("gl_")
-        replace_string(gl_vs_out,vs_out_var.c_str());
+        replace_variable(gl_vs_out,vs_out_var.c_str(),main_start);
 
-        const std::string main=std::string("void ")+m_replace_str+"main(vsin nyain)";
-        replace_main_function_header("void nya_main(vsin nyain)");
-        const std::string appnd=std::string("\nvsout main(vsin nyain){"+
-                                            m_replace_str+"main(nyain);return ")+out_var+";}\n";
+        for(int i=0;i<(int)m_varying.size();++i)
+        {
+            const std::string to=out_var+"."+m_varying[i].name;
+            replace_variable(m_varying[i].name.c_str(),to.c_str(),main_start);
+        }
+
+        const std::string appnd=std::string("\nvsout main(vsin "+input_var+"){"+
+                                            m_replace_str+"main("+input_var+");return ")+out_var+";}\n";
         m_code.append(appnd);
     }
 
@@ -346,13 +361,12 @@ bool shader_code_parser::replace_main_function_header(const char *replace_str)
     return false;
 }
 
-bool shader_code_parser::replace_string(const char *from,const char *to)
+bool shader_code_parser::replace_string(const char *from,const char *to,size_t start_pos)
 {
     if(!from || !from[0] || !to)
         return false;
 
     bool result=false;
-    size_t start_pos=0;
     while((start_pos=m_code.find(from,start_pos))!=std::string::npos)
     {
         m_code.replace(start_pos,strlen(from),to);
@@ -360,6 +374,32 @@ bool shader_code_parser::replace_string(const char *from,const char *to)
         result=true;
     }
 
+    return result;
+}
+
+namespace { bool is_name_char(char c) { return (c>='a' && c<='z') || (c>='A' && c<='Z') || (c>='0' && c<='9') || c=='_'; } }
+
+bool shader_code_parser::replace_variable(const char *from,const char *to,size_t start_pos)
+{
+    if(!from || !from[0] || !to)
+        return false;
+
+    bool result=false;
+    const size_t from_len=strlen(from);
+    while((start_pos=m_code.find(from,start_pos))!=std::string::npos)
+    {
+        if((start_pos!=0 && is_name_char(m_code[start_pos-1])) ||
+           (start_pos+from_len<m_code.size() && is_name_char(m_code[start_pos+from_len])))
+        {
+            start_pos+=from_len;
+            continue;
+        }
+
+        m_code.replace(start_pos,from_len,to);
+        start_pos+=strlen(to);
+        result=true;
+    }
+    
     return result;
 }
 
