@@ -41,7 +41,7 @@ bool shader_code_parser::convert_to_hlsl()
 
     const char *gl_ps_out="gl_FragColor";
     const std::string ps_out_var=m_replace_str+std::string(gl_ps_out+3); //strlen("gl_")
-    const bool is_fragment=replace_string(gl_ps_out,ps_out_var.c_str());
+    const bool is_fragment=replace_variable(gl_ps_out,ps_out_var.c_str());
     if(is_fragment)
     {
         prefix.append("static float4 ");
@@ -276,7 +276,7 @@ bool shader_code_parser::parse_predefined_uniforms(const char *replace_prefix_st
     for(size_t i=0;i<sizeof(gl_matrix_names)/sizeof(gl_matrix_names[0]);++i)
     {
         std::string to=std::string(replace_prefix_str)+std::string(gl_matrix_names[i]+3); //strlen("gl_")
-        if(replace_string(gl_matrix_names[i],to.c_str()))
+        if(replace_variable(gl_matrix_names[i],to.c_str()))
             push_unique_to_vec(m_uniforms,variable(type_mat4,to.c_str(),1));
     }
 
@@ -294,7 +294,7 @@ bool shader_code_parser::parse_attributes(const char *replace_prefix_str)
     for(size_t i=0;i<sizeof(gl_attr_names)/sizeof(gl_attr_names[0]);++i)
     {
         std::string to=std::string(replace_prefix_str)+std::string(gl_attr_names[i]+3); //strlen("gl_")
-        if(replace_string(gl_attr_names[i],to.c_str()))
+        if(replace_variable(gl_attr_names[i],to.c_str()))
             push_unique_to_vec(m_attributes,variable(gl_attr_types[i],to.c_str(),0));
     }
 
@@ -316,12 +316,12 @@ bool shader_code_parser::parse_attributes(const char *replace_prefix_str)
 
 bool shader_code_parser::replace_hlsl_types()
 {
-    replace_string("vec2","float2");
-    replace_string("vec3","float3");
-    replace_string("vec4","float4");
-    replace_string("mat2","float2x2");
-    replace_string("mat3","float3x3");
-    replace_string("mat4","float4x4");
+    replace_variable("vec2","float2");
+    replace_variable("vec3","float3");
+    replace_variable("vec4","float4");
+    replace_variable("mat2","float2x2");
+    replace_variable("mat3","float3x3");
+    replace_variable("mat4","float4x4");
     return true;
 }
 
