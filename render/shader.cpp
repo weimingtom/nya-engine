@@ -7,6 +7,7 @@
 #include "shader.h"
 #include "platform_specific_gl.h"
 #include "render.h"
+#include "shader_code_parser.h"
 
 //#define CACHE_UNIFORM_CHANGES
 
