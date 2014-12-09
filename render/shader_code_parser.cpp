@@ -33,20 +33,31 @@ bool shader_code_parser::convert_to_hlsl()
 
     //ToDo: add uniform buffer
     //ToDo: add texture uniforms
-    //ToDo: add vsout
     //ToDo: replace texture sample functions
     //ToDo: replace build-in functions
 
-    const std::string input_var=m_replace_str+"in";
+    const char *gl_vs_out="gl_Position",*gl_ps_out="gl_FragColor";
 
-    const char *gl_ps_out="gl_FragColor";
+    prefix.append("struct vsout{float4 "),prefix.append(m_replace_str+std::string(gl_vs_out+3)),prefix.append(":POSITION;");
+    for(int i=0;i<(int)m_varying.size();++i)
+    {
+        const variable &v=m_varying[i];
+        const char *type_names[]={"float","float2","float3","float4"};
+        if(v.type==type_invalid || v.type-1>=sizeof(type_names)/sizeof(type_names[0]))
+            return false;
+
+        char buf[255];
+        sprintf(buf,"%s %s:TEXCOORD%d;",type_names[v.type-1],m_varying[i].name.c_str(),i);
+        prefix.append(buf);
+    }
+    prefix.append("};\n");
+
+    const std::string input_var=m_replace_str+"in";
     const std::string ps_out_var=m_replace_str+std::string(gl_ps_out+3); //strlen("gl_")
     const bool is_fragment=replace_variable(gl_ps_out,ps_out_var.c_str());
     if(is_fragment)
     {
-        prefix.append("static float4 ");
-        prefix.append(ps_out_var);
-        prefix.append(";\n");
+        prefix.append("static float4 "),prefix.append(ps_out_var),prefix.append(";\n");
 
         const std::string main=std::string("void ")+m_replace_str+"main(vsout "+input_var+")";
         replace_main_function_header(main.c_str());
@@ -67,9 +78,8 @@ bool shader_code_parser::convert_to_hlsl()
         parse_attributes((input_var+".").c_str());
         if(!m_attributes.empty())
         {
-            int idx=0;
             prefix.append("struct vsin{");
-            for(int i=0;i<(int)m_attributes.size();++i)
+            for(int i=0,idx=0;i<(int)m_attributes.size();++i)
             {
                 variable &a=m_attributes[i];
                 a.name=a.name.substr(input_var.size()+1);
@@ -90,17 +100,12 @@ bool shader_code_parser::convert_to_hlsl()
         }
 
         const std::string out_var=m_replace_str+"out";
-
-        prefix.append("static vsout ");
-        prefix.append(out_var);
-        prefix.append(";\n");
+        prefix.append("static vsout "),prefix.append(out_var),prefix.append(";\n");
 
         const std::string main=std::string("void ")+m_replace_str+"main(vsin "+input_var+")";
         replace_main_function_header(main.c_str());
 
         const size_t main_start=m_code.find(main);
-
-        const char *gl_vs_out="gl_Position";
         const std::string vs_out_var=out_var+"."+m_replace_str+std::string(gl_vs_out+3); //strlen("gl_")
         replace_variable(gl_vs_out,vs_out_var.c_str(),main_start);
 
