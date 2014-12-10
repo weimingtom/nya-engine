@@ -15,9 +15,9 @@ bool shader_code_parser::convert_to_hlsl()
     {
         std::sort(m_uniforms.begin(),m_uniforms.end());
 
-        prefix.append("cbuffer "),prefix.append(m_replace_str),prefix.append("ConstantBuffer:register(b0){");
+        prefix.append("cbuffer "+m_replace_str+"constant_buffer:register(b0){");
         for(size_t i=0;i<m_uniforms.size();++i)
-            prefix.append("matrix "),prefix.append(m_uniforms[i].name),prefix.append(";");
+            prefix.append("matrix "+m_uniforms[i].name+";");
         prefix.append("}\n");
     }
 
@@ -31,19 +31,53 @@ bool shader_code_parser::convert_to_hlsl()
     //ToDo: vectors from float constructor
     replace_hlsl_types();
 
-    //ToDo: add texture uniforms
-    //ToDo: replace texture sample functions
     //ToDo: replace build-in functions
+    replace_variable("mix","lerp");
+
+    bool has_samplers=false;
+    for(size_t i=predefined_count;i<m_uniforms.size();++i)
+    {
+        const variable &v=m_uniforms[i];
+        if(v.type!=type_sampler2d && v.type!=type_sampler_cube)
+            continue;
+
+        const char *types[]={"Texture2D","TextureCube"};
+
+        unsigned int reg=0;
+        std::map<std::string,unsigned int>::iterator it=m_samplers.find(v.name);
+        if(it==m_samplers.end())
+        {
+            for(it=m_samplers.begin();it!=m_samplers.end();++it) if(reg<=it->second) reg=it->second+1;
+            m_samplers[v.name]=reg;
+        }
+        else
+            reg=it->second;
+
+        char buf[512];
+        sprintf(buf,"%s %s: register(t%d); SamplerState %s_nya_st: register(s%d);\n",
+                types[v.type-type_sampler2d],v.name.c_str(),reg,v.name.c_str(),reg);
+        prefix.append(buf);
+        has_samplers=true;
+    }
+
+    if(has_samplers)
+    {
+        prefix.append("#define texture2D(a,b) a.Sample(a##"+m_replace_str+"st,(b))\n");
+        prefix.append("#define textureCube(a,b) a.Sample(a##"+m_replace_str+"st,(b))\n");
+    }
 
     const char *gl_vs_out="gl_Position",*gl_ps_out="gl_FragColor";
     const char *type_names[]={"float","float2","float3","float4","float4x4"};
 
-    prefix.append("struct vsout{float4 "),prefix.append(m_replace_str+std::string(gl_vs_out+3)),prefix.append(":POSITION;");
+    prefix.append("struct "+m_replace_str+"vsout{float4 "+m_replace_str+std::string(gl_vs_out+3)+":POSITION;");
     for(int i=0;i<(int)m_varying.size();++i)
     {
         const variable &v=m_varying[i];
-        if(v.type==type_invalid || v.type-1>=sizeof(type_names)/sizeof(type_names[0]))
+        if(v.type==type_invalid)
             return false;
+
+        if(v.type-1>=sizeof(type_names)/sizeof(type_names[0]))
+            continue;
 
         char buf[255];
         sprintf(buf,"%s %s:TEXCOORD%d;",type_names[v.type-1],m_varying[i].name.c_str(),i);
@@ -56,9 +90,9 @@ bool shader_code_parser::convert_to_hlsl()
     const bool is_fragment=replace_variable(gl_ps_out,ps_out_var.c_str());
     if(is_fragment)
     {
-        prefix.append("static float4 "),prefix.append(ps_out_var),prefix.append(";\n");
+        prefix.append("static float4 "+ps_out_var+";\n");
 
-        const std::string main=std::string("void ")+m_replace_str+"main(vsout "+input_var+")";
+        const std::string main=std::string("void ")+m_replace_str+"main("+m_replace_str+"vsout "+input_var+")";
         replace_main_function_header(main.c_str());
 
         const size_t main_start=m_code.find(main);
@@ -68,16 +102,15 @@ bool shader_code_parser::convert_to_hlsl()
             replace_variable(m_varying[i].name.c_str(),to.c_str(),main_start);
         }
 
-        const std::string appnd=std::string("\nfloat4 main(vsout "+input_var+"):SV_TARGET{"+
-                                            m_replace_str+"main("+input_var+");return ")+ps_out_var+";}\n";
-        m_code.append(appnd);
+        m_code.append("\nfloat4 main("+m_replace_str+"vsout "+input_var+"):SV_TARGET{"+
+                      m_replace_str+"main("+input_var+");return "+ps_out_var+";}\n");
     }
     else
     {
         parse_attributes((input_var+".").c_str());
         if(!m_attributes.empty())
         {
-            prefix.append("struct vsin{");
+            prefix.append("struct "+m_replace_str+"vsin{");
             for(int i=0,idx=0;i<(int)m_attributes.size();++i)
             {
                 variable &a=m_attributes[i];
@@ -99,9 +132,9 @@ bool shader_code_parser::convert_to_hlsl()
         }
 
         const std::string out_var=m_replace_str+"out";
-        prefix.append("static vsout "),prefix.append(out_var),prefix.append(";\n");
+        prefix.append("static "+m_replace_str+"vsout "+out_var+";\n");
 
-        const std::string main=std::string("void ")+m_replace_str+"main(vsin "+input_var+")";
+        const std::string main=std::string("void ")+m_replace_str+"main("+m_replace_str+"vsin "+input_var+")";
         replace_main_function_header(main.c_str());
 
         const size_t main_start=m_code.find(main);
@@ -114,23 +147,25 @@ bool shader_code_parser::convert_to_hlsl()
             replace_variable(m_varying[i].name.c_str(),to.c_str(),main_start);
         }
 
-        const std::string appnd=std::string("\nvsout main(vsin "+input_var+"){"+
-                                            m_replace_str+"main("+input_var+");return ")+out_var+";}\n";
-        m_code.append(appnd);
+        m_code.append("\n"+m_replace_str+"vsout main("+m_replace_str+"vsin "+input_var+"){"+
+                      m_replace_str+"main("+input_var+");return "+out_var+";}\n");
     }
 
     if(m_uniforms.size()>predefined_count)
     {
-        prefix.append("cbuffer "),prefix.append(m_replace_str),prefix.append("UniformsBuffer:register(b"),
+        prefix.append("cbuffer "+m_replace_str+"uniforms_buffer:register(b"),
         prefix.append(is_fragment?"2":"1"),prefix.append("){");
 
         for(size_t i=predefined_count;i<m_uniforms.size();++i)
         {
             const variable &v=m_uniforms[i];
-            if(v.type==type_invalid || v.type-1>=sizeof(type_names)/sizeof(type_names[0]))
+            if(v.type==type_invalid)
                 return false;
 
-            prefix.append(type_names[v.type-1]),prefix.append(" "),prefix.append(v.name);
+            if(v.type-1>=sizeof(type_names)/sizeof(type_names[0]))
+                continue;
+
+            prefix.append(type_names[v.type-1]),prefix.append(" "+v.name);
             if(v.array_size>1)
             {
                 char buf[255];
@@ -144,7 +179,8 @@ bool shader_code_parser::convert_to_hlsl()
     }
 
     m_code.insert(0,prefix);
-    return false;
+    m_varying.clear();
+    return true;
 }
 
 bool shader_code_parser::convert_to_modern_glsl()
@@ -161,8 +197,7 @@ bool shader_code_parser::convert_to_modern_glsl()
     {
         prefix.append("attribute ");
         prefix.append(m_attributes[i].type==type_vec3?"vec3 ":"vec4 ");
-        prefix.append(m_attributes[i].name);
-        prefix.append(";\n");
+        prefix.append(m_attributes[i].name+";\n");
     }
 
     m_code.insert(0,prefix);
@@ -405,7 +440,7 @@ bool shader_code_parser::replace_string(const char *from,const char *to,size_t s
     return result;
 }
 
-namespace { bool is_name_char(char c) { return (c>='a' && c<='z') || (c>='A' && c<='Z') || (c>='0' && c<='9') || c=='_'; } }
+namespace { bool is_name_char(char c) { return isalnum(c) || c=='_'; } }
 
 bool shader_code_parser::replace_variable(const char *from,const char *to,size_t start_pos)
 {

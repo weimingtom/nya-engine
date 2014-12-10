@@ -4,6 +4,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 namespace nya_render
 {
@@ -16,6 +17,8 @@ public:
 public:
     bool convert_to_hlsl();
     bool convert_to_modern_glsl();
+
+    void register_sampler(const char *name,unsigned int idx) { if(name) m_samplers[name]=idx; }
 
 public:
     enum variable_type
@@ -34,18 +37,12 @@ public:
     {
         variable_type type;
         std::string name;
-
-        union
-        {
-            unsigned int array_size;
-            unsigned int idx;
-        };
-
-        bool operator < (const variable &v) const { return name<v.name; }
+        union { unsigned int array_size,idx; };
 
         variable():type(type_invalid),array_size(0){}
         variable(variable_type type,const char *name,unsigned int array_size):
                  type(type),name(name?name:""),array_size(array_size) {}
+        bool operator < (const variable &v) const { return name<v.name; }
     };
 
     int get_uniforms_count();
@@ -55,7 +52,7 @@ public:
     variable get_attribute(int idx) const;
 
 public:
-    shader_code_parser(const char *text,const char *replace_prefix_str="nya"):
+    shader_code_parser(const char *text,const char *replace_prefix_str="_nya_"):
                        m_code(text?text:""),m_replace_str(replace_prefix_str?replace_prefix_str:"") { remove_comments(); }
 private:
     void remove_comments();
@@ -76,6 +73,7 @@ private:
     std::vector<variable> m_uniforms;
     std::vector<variable> m_attributes;
     std::vector<variable> m_varying;
+    std::map<std::string,unsigned int> m_samplers;
 };
 
 }
