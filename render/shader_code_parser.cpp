@@ -15,13 +15,13 @@ bool shader_code_parser::convert_to_hlsl()
     {
         std::sort(m_uniforms.begin(),m_uniforms.end());
 
-        prefix.append("cbuffer ");
-        prefix.append(m_replace_str);
-        prefix.append("ConstantBuffer:register(b0){");
+        prefix.append("cbuffer "),prefix.append(m_replace_str),prefix.append("ConstantBuffer:register(b0){");
         for(size_t i=0;i<m_uniforms.size();++i)
             prefix.append("matrix "),prefix.append(m_uniforms[i].name),prefix.append(";");
         prefix.append("}\n");
     }
+
+    const size_t predefined_count=m_uniforms.size();
 
     parse_uniforms(true);
     parse_varying(true);
@@ -31,18 +31,17 @@ bool shader_code_parser::convert_to_hlsl()
     //ToDo: vectors from float constructor
     replace_hlsl_types();
 
-    //ToDo: add uniform buffer
     //ToDo: add texture uniforms
     //ToDo: replace texture sample functions
     //ToDo: replace build-in functions
 
     const char *gl_vs_out="gl_Position",*gl_ps_out="gl_FragColor";
+    const char *type_names[]={"float","float2","float3","float4","float4x4"};
 
     prefix.append("struct vsout{float4 "),prefix.append(m_replace_str+std::string(gl_vs_out+3)),prefix.append(":POSITION;");
     for(int i=0;i<(int)m_varying.size();++i)
     {
         const variable &v=m_varying[i];
-        const char *type_names[]={"float","float2","float3","float4"};
         if(v.type==type_invalid || v.type-1>=sizeof(type_names)/sizeof(type_names[0]))
             return false;
 
@@ -118,6 +117,30 @@ bool shader_code_parser::convert_to_hlsl()
         const std::string appnd=std::string("\nvsout main(vsin "+input_var+"){"+
                                             m_replace_str+"main("+input_var+");return ")+out_var+";}\n";
         m_code.append(appnd);
+    }
+
+    if(m_uniforms.size()>predefined_count)
+    {
+        prefix.append("cbuffer "),prefix.append(m_replace_str),prefix.append("UniformsBuffer:register(b"),
+        prefix.append(is_fragment?"2":"1"),prefix.append("){");
+
+        for(size_t i=predefined_count;i<m_uniforms.size();++i)
+        {
+            const variable &v=m_uniforms[i];
+            if(v.type==type_invalid || v.type-1>=sizeof(type_names)/sizeof(type_names[0]))
+                return false;
+
+            prefix.append(type_names[v.type-1]),prefix.append(" "),prefix.append(v.name);
+            if(v.array_size>1)
+            {
+                char buf[255];
+                sprintf(buf,"[%d];",v.array_size);
+                prefix.append(buf);
+            }
+            else
+                prefix.append(";");
+        }
+        prefix.append("}\n");
     }
 
     m_code.insert(0,prefix);
