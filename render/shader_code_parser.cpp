@@ -28,11 +28,10 @@ bool shader_code_parser::convert_to_hlsl()
     std::sort(m_varying.begin(),m_varying.end());
 
     //ToDo: vectors from float constructor
-    //ToDo: replace all * with mul() and add functions for vec*vec,vec*float,etc
+
     replace_hlsl_mul();
     replace_hlsl_types();
 
-    //ToDo: replace built-in functions
     replace_variable("mix","lerp");
 
     bool has_samplers=false;
@@ -245,10 +244,7 @@ void shader_code_parser::remove_comments()
     }
 }
 
-namespace
-{
-
-template<typename t> bool parse_vars(std::string &code,t& vars,const char *str,bool remove)
+template<typename t> static bool parse_vars(std::string &code,t& vars,const char *str,bool remove)
 {
     const size_t str_len=strlen(str);
     for(size_t i=code.find(str);i!=std::string::npos;i=code.find(str,i))
@@ -306,15 +302,10 @@ template<typename t> bool parse_vars(std::string &code,t& vars,const char *str,b
     return true;
 }
 
-}
-
 bool shader_code_parser::parse_uniforms(bool remove) { return parse_vars(m_code,m_uniforms,"uniform",remove); }
 bool shader_code_parser::parse_varying(bool remove) { return parse_vars(m_code,m_varying,"varying",remove); }
 
-namespace
-{
-
-template<typename t> void push_unique_to_vec(std::vector<t> &v,const t &e)
+template<typename t> static void push_unique_to_vec(std::vector<t> &v,const t &e)
 {
     for(size_t i=0;i<v.size();++i)
     {
@@ -326,8 +317,6 @@ template<typename t> void push_unique_to_vec(std::vector<t> &v,const t &e)
     }
 
     v.push_back(e);
-}
-
 }
 
 bool shader_code_parser::parse_predefined_uniforms(const char *replace_prefix_str)
@@ -389,10 +378,88 @@ bool shader_code_parser::replace_hlsl_types()
     return true;
 }
 
+static size_t get_var_pos(const std::string &code,size_t pos,int add)
+{
+    int brace_count=0;
+    char lbrace=add>0?'(':')';
+    char rbrace=add>0?')':'(';
+    bool first_spaces=true;
+
+    for(size_t i=pos+add;i<code.size() && i>0;i+=add)
+    {
+        const char c=code[i];
+        if(first_spaces && c<=' ')
+            continue;
+
+        first_spaces=false;
+
+        if(c==lbrace)
+        {
+            ++brace_count;
+            continue;
+        }
+
+        if(c==rbrace)
+        {
+            --brace_count;
+            if(brace_count<0)
+                return add>0?i:i-add;
+
+            continue;
+        }
+
+        if(brace_count)
+            continue;
+
+        if(strchr(";+-=*/,<>%?&|:{} \t\n\r",c))
+            return add>0?i:i-add;
+    }
+
+    return pos;
+}
+
+static bool is_numeric_only_var(const std::string &s)
+{
+    for(size_t i=0;i<s.size();++i) if(isalpha(s[i]) || s[i]=='_') return false;
+    return true;
+}
+
+static bool is_space_only_var(const std::string &s)
+{
+    for(size_t i=0;i<s.size();++i) if(s[i]>' ') return false;
+    return true;
+}
+
 bool shader_code_parser::replace_hlsl_mul()
 {
-    //ToDo
-    return false;
+    size_t start_pos=0;
+    while((start_pos=m_code.find('*',start_pos))!=std::string::npos)
+    {
+        const size_t left=get_var_pos(m_code,start_pos,-1);
+        const size_t right=get_var_pos(m_code,start_pos,1);
+        if(left==start_pos || right==start_pos)
+            return false;
+
+        const std::string left_var=m_code.substr(left,start_pos-left);
+        const std::string right_var=m_code.substr(start_pos+1,right-start_pos-1);
+
+        if(is_space_only_var(right_var)) // *=
+        {
+            ++start_pos;
+            continue;
+        }
+
+        if(is_numeric_only_var(left_var) || is_numeric_only_var(right_var))
+        {
+            ++start_pos;
+            continue;
+        }
+
+        const std::string replace="mul("+left_var+","+right_var+")";
+        m_code.replace(left,right-left,replace);
+    }
+
+    return true;
 }
 
 bool shader_code_parser::replace_main_function_header(const char *replace_str)
@@ -447,7 +514,7 @@ bool shader_code_parser::replace_string(const char *from,const char *to,size_t s
     return result;
 }
 
-namespace { bool is_name_char(char c) { return isalnum(c) || c=='_'; } }
+static bool is_name_char(char c) { return isalnum(c) || c=='_'; }
 
 bool shader_code_parser::replace_variable(const char *from,const char *to,size_t start_pos)
 {
@@ -469,7 +536,7 @@ bool shader_code_parser::replace_variable(const char *from,const char *to,size_t
         start_pos+=strlen(to);
         result=true;
     }
-    
+
     return result;
 }
 
