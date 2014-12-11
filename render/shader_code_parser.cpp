@@ -449,6 +449,7 @@ bool shader_code_parser::replace_hlsl_mul()
             continue;
         }
 
+        //ToDo: not sure if matrix*scalar don't need mul, in case of fail replace || with &&
         if(is_numeric_only_var(left_var) || is_numeric_only_var(right_var))
         {
             ++start_pos;
