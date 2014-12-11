@@ -27,11 +27,12 @@ bool shader_code_parser::convert_to_hlsl()
     parse_varying(true);
     std::sort(m_varying.begin(),m_varying.end());
 
-    //ToDo: replace all * with mul() and add functions for vec*vec,vec*float,etc
     //ToDo: vectors from float constructor
+    //ToDo: replace all * with mul() and add functions for vec*vec,vec*float,etc
+    replace_hlsl_mul();
     replace_hlsl_types();
 
-    //ToDo: replace build-in functions
+    //ToDo: replace built-in functions
     replace_variable("mix","lerp");
 
     bool has_samplers=false;
@@ -386,6 +387,12 @@ bool shader_code_parser::replace_hlsl_types()
     replace_variable("mat3","float3x3");
     replace_variable("mat4","float4x4");
     return true;
+}
+
+bool shader_code_parser::replace_hlsl_mul()
+{
+    //ToDo
+    return false;
 }
 
 bool shader_code_parser::replace_main_function_header(const char *replace_str)

@@ -64,6 +64,7 @@ private:
 
     bool replace_main_function_header(const char *replace_str);
     bool replace_hlsl_types();
+    bool replace_hlsl_mul();
     bool replace_string(const char *from,const char *to,size_t start_pos=0);
     bool replace_variable(const char *from,const char *to,size_t start_pos=0);
 
