@@ -36,9 +36,9 @@ bool shader_code_parser::convert_to_hlsl()
     {
         prefix.append("float2 "+replace_constructor+"2(float a){return float2(a,a);} ");
         prefix.append("float2 "+replace_constructor+"2(float2 a){return a;}\n");
-        prefix.append("float3 "+replace_constructor+"3(float a){return float3(a,a);} ");
+        prefix.append("float3 "+replace_constructor+"3(float a){return float3(a,a,a);} ");
         prefix.append("float3 "+replace_constructor+"3(float3 a){return a;}\n");
-        prefix.append("float4 "+replace_constructor+"4(float a){return float4(a,a);} ");
+        prefix.append("float4 "+replace_constructor+"4(float a){return float4(a,a,a,a);} ");
         prefix.append("float4 "+replace_constructor+"4(float4 a){return a;}\n");
     }
 
