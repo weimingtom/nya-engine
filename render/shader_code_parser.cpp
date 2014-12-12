@@ -127,7 +127,7 @@ bool shader_code_parser::convert_to_hlsl()
             for(int i=0,idx=0;i<(int)m_attributes.size();++i)
             {
                 variable &a=m_attributes[i];
-                a.name=a.name.substr(input_var.size()+1);
+                a.name=a.name.substr(m_replace_str.size());
                 if(a.name=="Vertex")
                     prefix.append("float4 Vertex:POSITION;");
                 else if(a.name=="Normal")
