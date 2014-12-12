@@ -331,6 +331,7 @@
     <ClCompile Include="..\..\render\platform_specific_gl.cpp" />
     <ClCompile Include="..\..\render\render.cpp" />
     <ClCompile Include="..\..\render\shader.cpp" />
+    <ClCompile Include="..\..\render\shader_code_parser.cpp" />
     <ClCompile Include="..\..\render\skeleton.cpp" />
     <ClCompile Include="..\..\render\statistics.cpp" />
     <ClCompile Include="..\..\render\texture.cpp" />
@@ -398,6 +399,7 @@
     <ClInclude Include="..\..\render\platform_specific_gl.h" />
     <ClInclude Include="..\..\render\render.h" />
     <ClInclude Include="..\..\render\shader.h" />
+    <ClInclude Include="..\..\render\shader_code_parser.h" />
     <ClInclude Include="..\..\render\skeleton.h" />
     <ClInclude Include="..\..\render\statistics.h" />
     <ClInclude Include="..\..\render\texture.h" />

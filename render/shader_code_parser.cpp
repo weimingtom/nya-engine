@@ -2,6 +2,7 @@
 
 #include "shader_code_parser.h"
 #include <stdlib.h>
+#include <algorithm>
 
 namespace nya_render
 {
