@@ -48,7 +48,7 @@ public:
     int get_uniforms_count();
     variable get_uniform(int idx) const;
 
-    int get_attributes_count() const;
+    int get_attributes_count();
     variable get_attribute(int idx) const;
 
 public:
@@ -59,7 +59,7 @@ private:
 
     bool parse_uniforms(bool remove);
     bool parse_predefined_uniforms(const char *replace_prefix_str);
-    bool parse_attributes(const char *replace_prefix_str);
+    bool parse_attributes(const char *info_replace_str,const char *code_replace_str);
     bool parse_varying(bool remove);
 
     bool replace_main_function_header(const char *replace_str);

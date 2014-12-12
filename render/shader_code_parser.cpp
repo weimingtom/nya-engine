@@ -119,7 +119,7 @@ bool shader_code_parser::convert_to_hlsl()
     }
     else
     {
-        parse_attributes((input_var+".").c_str());
+        parse_attributes(m_replace_str.c_str(),(input_var+".").c_str());
         if(!m_attributes.empty())
         {
             prefix.append("struct "+m_replace_str+"vsin{");
@@ -203,7 +203,7 @@ bool shader_code_parser::convert_to_modern_glsl(const char *precision)
     if(!parse_predefined_uniforms(m_replace_str.c_str()))
         return false;
 
-    if(!parse_attributes(m_replace_str.c_str()))
+    if(!parse_attributes(m_replace_str.c_str(),m_replace_str.c_str()))
         return false;
 
     std::string prefix;
@@ -240,7 +240,13 @@ shader_code_parser::variable shader_code_parser::get_uniform(int idx) const
     return m_uniforms[idx];
 }
 
-int shader_code_parser::get_attributes_count() const { return (int)m_attributes.size(); }
+int shader_code_parser::get_attributes_count()
+{
+    if(m_attributes.empty())
+        parse_attributes(m_replace_str.c_str(),0);
+
+    return (int)m_attributes.size();
+}
 
 shader_code_parser::variable shader_code_parser::get_attribute(int idx) const
 {
@@ -356,9 +362,9 @@ bool shader_code_parser::parse_predefined_uniforms(const char *replace_prefix_st
     return true;
 }
 
-bool shader_code_parser::parse_attributes(const char *replace_prefix_str)
+bool shader_code_parser::parse_attributes(const char *info_replace_str,const char *code_replace_str)
 {
-    if(!replace_prefix_str)
+    if(!info_replace_str)
         return false;
 
     const char *gl_attr_names[]={"gl_Vertex","gl_Normal","gl_Color"};
@@ -366,9 +372,18 @@ bool shader_code_parser::parse_attributes(const char *replace_prefix_str)
 
     for(size_t i=0;i<sizeof(gl_attr_names)/sizeof(gl_attr_names[0]);++i)
     {
-        std::string to=std::string(replace_prefix_str)+std::string(gl_attr_names[i]+3); //strlen("gl_")
-        if(replace_variable(gl_attr_names[i],to.c_str()))
-            push_unique_to_vec(m_attributes,variable(gl_attr_types[i],to.c_str(),0));
+        const std::string info=std::string(info_replace_str)+std::string(gl_attr_names[i]+3); //strlen("gl_")
+        if(code_replace_str)
+        {
+            const std::string replace=std::string(code_replace_str)+std::string(gl_attr_names[i]+3); //strlen("gl_")
+            if(replace_variable(gl_attr_names[i],replace.c_str()))
+                push_unique_to_vec(m_attributes,variable(gl_attr_types[i],info.c_str(),0));
+        }
+        else
+        {
+            if(m_code.find(gl_attr_names[i],0)!=std::string::npos)
+                push_unique_to_vec(m_attributes,variable(gl_attr_types[i],info.c_str(),0));
+        }
     }
 
     const char *tc_atr_name="gl_MultiTexCoord";
@@ -376,11 +391,15 @@ bool shader_code_parser::parse_attributes(const char *replace_prefix_str)
     size_t start_pos=0;
     while((start_pos=m_code.find(tc_atr_name,start_pos))!=std::string::npos)
     {
-        m_code.replace(start_pos,3,replace_prefix_str); //strlen("gl_")
+        const size_t replace_start=start_pos;
         start_pos+=strlen(tc_atr_name);
         const int idx=atoi(&m_code[start_pos]);
+
+        if(code_replace_str)
+            m_code.replace(replace_start,3,code_replace_str); //strlen("gl_")
+
         char buf[255];
-        sprintf(buf,"%s%s%d",replace_prefix_str,tc_atr_name+3,idx);
+        sprintf(buf,"%s%s%d",info_replace_str,tc_atr_name+3,idx);
         push_unique_to_vec(m_attributes,variable(type_vec4,buf,idx));
     }
 
