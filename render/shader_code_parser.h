@@ -63,6 +63,7 @@ private:
     bool parse_varying(bool remove);
 
     bool replace_main_function_header(const char *replace_str);
+    bool replace_vec_from_float(const char *func_name);
     bool replace_hlsl_types();
     bool replace_hlsl_mul();
     bool replace_string(const char *from,const char *to,size_t start_pos=0);

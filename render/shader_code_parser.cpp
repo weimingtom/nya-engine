@@ -27,7 +27,16 @@ bool shader_code_parser::convert_to_hlsl()
     parse_varying(true);
     std::sort(m_varying.begin(),m_varying.end());
 
-    //ToDo: vectors from float constructor
+    std::string replace_constructor=m_replace_str+"float";
+    if(replace_vec_from_float(replace_constructor.c_str()))
+    {
+        prefix.append("float2 "+replace_constructor+"2(float a){return float2(a,a);}");
+        prefix.append("float2 "+replace_constructor+"2(float2 a){return a;}");
+        prefix.append("float3 "+replace_constructor+"3(float a){return float3(a,a);}");
+        prefix.append("float3 "+replace_constructor+"3(float3 a){return a;}");
+        prefix.append("float4 "+replace_constructor+"4(float a){return float4(a,a);}");
+        prefix.append("float4 "+replace_constructor+"4(float4 a){return a;}");
+    }
 
     replace_hlsl_mul();
     replace_hlsl_types();
@@ -432,6 +441,7 @@ static bool is_space_only_var(const std::string &s)
 
 bool shader_code_parser::replace_hlsl_mul()
 {
+    bool result=false;
     size_t start_pos=0;
     while((start_pos=m_code.find('*',start_pos))!=std::string::npos)
     {
@@ -458,9 +468,16 @@ bool shader_code_parser::replace_hlsl_mul()
 
         const std::string replace="mul("+left_var+","+right_var+")";
         m_code.replace(left,right-left,replace);
+        result=true;
     }
 
-    return true;
+    return result;
+}
+
+bool shader_code_parser::replace_vec_from_float(const char *func_name)
+{
+    //ToDo
+    return false;
 }
 
 bool shader_code_parser::replace_main_function_header(const char *replace_str)
