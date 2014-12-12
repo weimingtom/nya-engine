@@ -16,7 +16,7 @@ public:
 
 public:
     bool convert_to_hlsl();
-    bool convert_to_modern_glsl();
+    bool convert_to_modern_glsl(const char *precision="mediump");
 
     void register_sampler(const char *name,unsigned int idx) { if(name) m_samplers[name]=idx; }
 

@@ -8,6 +8,9 @@ namespace nya_render
 
 bool shader_code_parser::convert_to_hlsl()
 {
+    m_uniforms.clear();
+    m_attributes.clear();
+
     std::string prefix;
 
     parse_predefined_uniforms(m_replace_str.c_str());
@@ -30,12 +33,12 @@ bool shader_code_parser::convert_to_hlsl()
     std::string replace_constructor=m_replace_str+"cast_float";
     if(replace_vec_from_float(replace_constructor.c_str()))
     {
-        prefix.append("float2 "+replace_constructor+"2(float a){return float2(a,a);}");
-        prefix.append("float2 "+replace_constructor+"2(float2 a){return a;}");
-        prefix.append("float3 "+replace_constructor+"3(float a){return float3(a,a);}");
-        prefix.append("float3 "+replace_constructor+"3(float3 a){return a;}");
-        prefix.append("float4 "+replace_constructor+"4(float a){return float4(a,a);}");
-        prefix.append("float4 "+replace_constructor+"4(float4 a){return a;}");
+        prefix.append("float2 "+replace_constructor+"2(float a){return float2(a,a);} ");
+        prefix.append("float2 "+replace_constructor+"2(float2 a){return a;}\n");
+        prefix.append("float3 "+replace_constructor+"3(float a){return float3(a,a);} ");
+        prefix.append("float3 "+replace_constructor+"3(float3 a){return a;}\n");
+        prefix.append("float4 "+replace_constructor+"4(float a){return float4(a,a);} ");
+        prefix.append("float4 "+replace_constructor+"4(float4 a){return a;}\n");
     }
 
     replace_hlsl_mul();
@@ -192,15 +195,21 @@ bool shader_code_parser::convert_to_hlsl()
     return true;
 }
 
-bool shader_code_parser::convert_to_modern_glsl()
+bool shader_code_parser::convert_to_modern_glsl(const char *precision)
 {
+    m_uniforms.clear();
+    m_attributes.clear();
+
     if(!parse_predefined_uniforms(m_replace_str.c_str()))
         return false;
 
     if(!parse_attributes(m_replace_str.c_str()))
         return false;
 
-    std::string prefix("precision mediump float;\n");
+    std::string prefix;
+
+    for(int i=0;i<(int)m_uniforms.size();++i)
+        prefix.append("uniform mat4 "+m_uniforms[i].name+";\n");
 
     for(int i=0;i<(int)m_attributes.size();++i)
     {
@@ -208,6 +217,8 @@ bool shader_code_parser::convert_to_modern_glsl()
         prefix.append(m_attributes[i].type==type_vec3?"vec3 ":"vec4 ");
         prefix.append(m_attributes[i].name+";\n");
     }
+
+    prefix.append("precision "+std::string(precision)+" float;\n");
 
     m_code.insert(0,prefix);
     return true;
@@ -539,6 +550,7 @@ bool shader_code_parser::replace_vec_from_float(const char *func_name)
         {
             std::string replace=func_name+std::string(1,dim)+"("+m_code.substr(brace_start+1,brace_end-brace_start-1)+")";
             m_code.replace(start_pos,brace_end+1-start_pos,replace);
+            result=true;
         }
 
         start_pos+=3;
