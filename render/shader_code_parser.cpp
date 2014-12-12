@@ -27,7 +27,7 @@ bool shader_code_parser::convert_to_hlsl()
     parse_varying(true);
     std::sort(m_varying.begin(),m_varying.end());
 
-    std::string replace_constructor=m_replace_str+"float";
+    std::string replace_constructor=m_replace_str+"cast_float";
     if(replace_vec_from_float(replace_constructor.c_str()))
     {
         prefix.append("float2 "+replace_constructor+"2(float a){return float2(a,a);}");
@@ -474,10 +474,77 @@ bool shader_code_parser::replace_hlsl_mul()
     return result;
 }
 
+static bool is_name_char(char c) { return isalnum(c) || c=='_'; }
+
 bool shader_code_parser::replace_vec_from_float(const char *func_name)
 {
-    //ToDo
-    return false;
+    if(!func_name)
+        return false;
+
+    bool result=false;
+    size_t start_pos=0;
+    while((start_pos=m_code.find("vec",start_pos))!=std::string::npos)
+    {
+        if(start_pos>0 && is_name_char(m_code[start_pos-1]))
+        {
+            start_pos+=3;
+            continue;
+        }
+
+        if(start_pos+4>m_code.size()) //strlen("vec")+1
+            return false;
+
+        const char dim=m_code[start_pos+3];
+        if(!strchr("234",dim))
+        {
+            start_pos+=3;
+            continue;
+        }
+
+        size_t brace_start=start_pos+4;
+
+        while(m_code[brace_start]<=' ') if(++brace_start>=m_code.length()) return false;
+        if(m_code[brace_start]!='(')
+        {
+            start_pos+=3;
+            continue;
+        }
+
+        bool has_comma=false;
+        int brace_count=0;
+        size_t brace_end=brace_start;
+        while(++brace_end<m_code.length())
+        {
+            char c=m_code[brace_end];
+            if(c=='(')
+            {
+                ++brace_count;
+                continue;
+            }
+
+            if(c==')')
+            {
+                if(--brace_count<0) break;
+                continue;
+            }
+
+            if(!brace_count && c==',')
+            {
+                has_comma=true;
+                break;
+            }
+        }
+
+        if(!has_comma)
+        {
+            std::string replace=func_name+std::string(1,dim)+"("+m_code.substr(brace_start+1,brace_end-brace_start-1)+")";
+            m_code.replace(start_pos,brace_end+1-start_pos,replace);
+        }
+
+        start_pos+=3;
+    }
+
+    return result;
 }
 
 bool shader_code_parser::replace_main_function_header(const char *replace_str)
@@ -531,8 +598,6 @@ bool shader_code_parser::replace_string(const char *from,const char *to,size_t s
 
     return result;
 }
-
-static bool is_name_char(char c) { return isalnum(c) || c=='_'; }
 
 bool shader_code_parser::replace_variable(const char *from,const char *to,size_t start_pos)
 {
