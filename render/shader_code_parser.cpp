@@ -82,7 +82,7 @@ bool shader_code_parser::convert_to_hlsl()
     const char *gl_vs_out="gl_Position",*gl_ps_out="gl_FragColor";
     const char *type_names[]={"float","float2","float3","float4","float4x4"};
 
-    prefix.append("struct "+m_replace_str+"vsout{float4 "+m_replace_str+std::string(gl_vs_out+3)+":POSITION;");
+    prefix.append("struct "+m_replace_str+"vsout{float4 "+m_replace_str+std::string(gl_vs_out+3)+":SV_POSITION;");
     for(int i=0;i<(int)m_varying.size();++i)
     {
         const variable &v=m_varying[i];
