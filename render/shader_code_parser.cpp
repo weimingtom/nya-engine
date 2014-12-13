@@ -99,9 +99,10 @@ bool shader_code_parser::convert_to_hlsl()
     const bool is_fragment=replace_variable(gl_ps_out,ps_out_var.c_str());
     if(is_fragment)
     {
+        prefix.append("static "+m_replace_str+"vsout "+input_var+";\n");
         prefix.append("static float4 "+ps_out_var+";\n");
 
-        const std::string main=std::string("void ")+m_replace_str+"main("+m_replace_str+"vsout "+input_var+")";
+        const std::string main=std::string("void ")+m_replace_str+"main()";
         replace_main_function_header(main.c_str());
 
         const size_t main_start=m_code.find(main);
@@ -111,8 +112,8 @@ bool shader_code_parser::convert_to_hlsl()
             replace_variable(m_varying[i].name.c_str(),to.c_str(),main_start);
         }
 
-        m_code.append("\nfloat4 main("+m_replace_str+"vsout "+input_var+"):SV_TARGET{"+
-                      m_replace_str+"main("+input_var+");return "+ps_out_var+";}\n");
+        m_code.append("\nfloat4 main("+m_replace_str+"vsout "+input_var+"_):SV_TARGET{"+input_var+"="+input_var+"_;"+
+                      m_replace_str+"main();return "+ps_out_var+";}\n");
     }
     else
     {
@@ -137,13 +138,13 @@ bool shader_code_parser::convert_to_hlsl()
                     prefix.append(buf);
                 }
             }
-            prefix.append("};\n");
+            prefix.append("}"+input_var+";\n");
         }
 
         const std::string out_var=m_replace_str+"out";
         prefix.append("static "+m_replace_str+"vsout "+out_var+";\n");
 
-        const std::string main=std::string("void ")+m_replace_str+"main("+m_replace_str+"vsin "+input_var+")";
+        const std::string main=std::string("void ")+m_replace_str+"main()";
         replace_main_function_header(main.c_str());
 
         const size_t main_start=m_code.find(main);
@@ -156,8 +157,8 @@ bool shader_code_parser::convert_to_hlsl()
             replace_variable(m_varying[i].name.c_str(),to.c_str(),main_start);
         }
 
-        m_code.append("\n"+m_replace_str+"vsout main("+m_replace_str+"vsin "+input_var+"){"+
-                      m_replace_str+"main("+input_var+");return "+out_var+";}\n");
+        m_code.append("\n"+m_replace_str+"vsout main("+m_replace_str+"vsin "+input_var+"_){"+input_var+"="+input_var+"_;"+
+                      m_replace_str+"main();return "+out_var+";}\n");
     }
 
     if(m_uniforms.size()>predefined_count)
