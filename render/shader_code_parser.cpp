@@ -46,6 +46,10 @@ bool shader_code_parser::convert_to_hlsl()
     replace_hlsl_types();
 
     replace_variable("mix","lerp");
+    replace_variable("fract","frac");
+    replace_variable("inversesqrt","rsqrt");
+    if(replace_variable("pow",(m_replace_str+"pow").c_str()))
+        prefix.append("#define "+m_replace_str+"pow(f,e) pow(abs(f),e)\n");
 
     bool has_samplers=false;
     for(size_t i=predefined_count;i<m_uniforms.size();++i)
@@ -75,8 +79,14 @@ bool shader_code_parser::convert_to_hlsl()
 
     if(has_samplers)
     {
-        prefix.append("#define texture2D(a,b) a.Sample(a##"+m_replace_str+"st,(b))\n");
-        prefix.append("#define textureCube(a,b) a.Sample(a##"+m_replace_str+"st,(b))\n");
+        if(find_variable("texture2D")) prefix.append("#define texture2D(a,b) a.Sample(a##"+m_replace_str+"st,(b))\n");
+        if(find_variable("textureCube")) prefix.append("#define textureCube(a,b) a.Sample(a##"+m_replace_str+"st,(b))\n");
+        if(find_variable("texture2DProj"))
+        {
+            prefix.append("float2 "+m_replace_str+"tc_proj(float3 tc){return tc.xy/tc.z;}\n");
+            prefix.append("float2 "+m_replace_str+"tc_proj(float4 tc){return tc.xy/tc.w;}\n");
+            prefix.append("#define texture2DProj(a,b) a.Sample(a##"+m_replace_str+"st,"+m_replace_str+"tc_proj(b))\n");
+        }
     }
 
     const char *gl_vs_out="gl_Position",*gl_ps_out="gl_FragColor";
@@ -616,22 +626,6 @@ bool shader_code_parser::replace_main_function_header(const char *replace_str)
     return false;
 }
 
-bool shader_code_parser::replace_string(const char *from,const char *to,size_t start_pos)
-{
-    if(!from || !from[0] || !to)
-        return false;
-
-    bool result=false;
-    while((start_pos=m_code.find(from,start_pos))!=std::string::npos)
-    {
-        m_code.replace(start_pos,strlen(from),to);
-        start_pos+=strlen(to);
-        result=true;
-    }
-
-    return result;
-}
-
 bool shader_code_parser::replace_variable(const char *from,const char *to,size_t start_pos)
 {
     if(!from || !from[0] || !to)
@@ -654,6 +648,27 @@ bool shader_code_parser::replace_variable(const char *from,const char *to,size_t
     }
 
     return result;
+}
+
+bool shader_code_parser::find_variable(const char *str,size_t start_pos)
+{
+    if(!str)
+        return false;
+
+    const size_t str_len=strlen(str);
+    while((start_pos=m_code.find(str,start_pos))!=std::string::npos)
+    {
+        if((start_pos!=0 && is_name_char(m_code[start_pos-1])) ||
+           (start_pos+str_len<m_code.size() && is_name_char(m_code[start_pos+str_len])))
+        {
+            start_pos+=str_len;
+            continue;
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 }

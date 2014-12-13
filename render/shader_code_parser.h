@@ -66,8 +66,8 @@ private:
     bool replace_vec_from_float(const char *func_name);
     bool replace_hlsl_types();
     bool replace_hlsl_mul();
-    bool replace_string(const char *from,const char *to,size_t start_pos=0);
     bool replace_variable(const char *from,const char *to,size_t start_pos=0);
+    bool find_variable(const char *str,size_t start_pos=0);
 
 private:
     std::string m_code;
