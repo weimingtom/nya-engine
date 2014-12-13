@@ -2,12 +2,16 @@
 
 #include "shader_code_parser.h"
 #include <stdlib.h>
+#include <algorithm>
 
 namespace nya_render
 {
 
 bool shader_code_parser::convert_to_hlsl()
 {
+    m_uniforms.clear();
+    m_attributes.clear();
+
     std::string prefix;
 
     parse_predefined_uniforms(m_replace_str.c_str());
@@ -27,15 +31,15 @@ bool shader_code_parser::convert_to_hlsl()
     parse_varying(true);
     std::sort(m_varying.begin(),m_varying.end());
 
-    std::string replace_constructor=m_replace_str+"float";
+    std::string replace_constructor=m_replace_str+"cast_float";
     if(replace_vec_from_float(replace_constructor.c_str()))
     {
-        prefix.append("float2 "+replace_constructor+"2(float a){return float2(a,a);}");
-        prefix.append("float2 "+replace_constructor+"2(float2 a){return a;}");
-        prefix.append("float3 "+replace_constructor+"3(float a){return float3(a,a);}");
-        prefix.append("float3 "+replace_constructor+"3(float3 a){return a;}");
-        prefix.append("float4 "+replace_constructor+"4(float a){return float4(a,a);}");
-        prefix.append("float4 "+replace_constructor+"4(float4 a){return a;}");
+        prefix.append("float2 "+replace_constructor+"2(float a){return float2(a,a);} ");
+        prefix.append("float2 "+replace_constructor+"2(float2 a){return a;}\n");
+        prefix.append("float3 "+replace_constructor+"3(float a){return float3(a,a,a);} ");
+        prefix.append("float3 "+replace_constructor+"3(float3 a){return a;}\n");
+        prefix.append("float4 "+replace_constructor+"4(float a){return float4(a,a,a,a);} ");
+        prefix.append("float4 "+replace_constructor+"4(float4 a){return a;}\n");
     }
 
     replace_hlsl_mul();
@@ -78,7 +82,7 @@ bool shader_code_parser::convert_to_hlsl()
     const char *gl_vs_out="gl_Position",*gl_ps_out="gl_FragColor";
     const char *type_names[]={"float","float2","float3","float4","float4x4"};
 
-    prefix.append("struct "+m_replace_str+"vsout{float4 "+m_replace_str+std::string(gl_vs_out+3)+":POSITION;");
+    prefix.append("struct "+m_replace_str+"vsout{float4 "+m_replace_str+std::string(gl_vs_out+3)+":SV_POSITION;");
     for(int i=0;i<(int)m_varying.size();++i)
     {
         const variable &v=m_varying[i];
@@ -117,14 +121,14 @@ bool shader_code_parser::convert_to_hlsl()
     }
     else
     {
-        parse_attributes((input_var+".").c_str());
+        parse_attributes(m_replace_str.c_str(),(input_var+".").c_str());
         if(!m_attributes.empty())
         {
             prefix.append("struct "+m_replace_str+"vsin{");
             for(int i=0,idx=0;i<(int)m_attributes.size();++i)
             {
                 variable &a=m_attributes[i];
-                a.name=a.name.substr(input_var.size()+1);
+                a.name=a.name.substr(m_replace_str.size());
                 if(a.name=="Vertex")
                     prefix.append("float4 Vertex:POSITION;");
                 else if(a.name=="Normal")
@@ -193,15 +197,21 @@ bool shader_code_parser::convert_to_hlsl()
     return true;
 }
 
-bool shader_code_parser::convert_to_modern_glsl()
+bool shader_code_parser::convert_to_modern_glsl(const char *precision)
 {
+    m_uniforms.clear();
+    m_attributes.clear();
+
     if(!parse_predefined_uniforms(m_replace_str.c_str()))
         return false;
 
-    if(!parse_attributes(m_replace_str.c_str()))
+    if(!parse_attributes(m_replace_str.c_str(),m_replace_str.c_str()))
         return false;
 
-    std::string prefix("precision mediump float;\n");
+    std::string prefix;
+
+    for(int i=0;i<(int)m_uniforms.size();++i)
+        prefix.append("uniform mat4 "+m_uniforms[i].name+";\n");
 
     for(int i=0;i<(int)m_attributes.size();++i)
     {
@@ -209,6 +219,8 @@ bool shader_code_parser::convert_to_modern_glsl()
         prefix.append(m_attributes[i].type==type_vec3?"vec3 ":"vec4 ");
         prefix.append(m_attributes[i].name+";\n");
     }
+
+    prefix.append("precision "+std::string(precision)+" float;\n");
 
     m_code.insert(0,prefix);
     return true;
@@ -230,7 +242,13 @@ shader_code_parser::variable shader_code_parser::get_uniform(int idx) const
     return m_uniforms[idx];
 }
 
-int shader_code_parser::get_attributes_count() const { return (int)m_attributes.size(); }
+int shader_code_parser::get_attributes_count()
+{
+    if(m_attributes.empty())
+        parse_attributes(m_replace_str.c_str(),0);
+
+    return (int)m_attributes.size();
+}
 
 shader_code_parser::variable shader_code_parser::get_attribute(int idx) const
 {
@@ -346,9 +364,9 @@ bool shader_code_parser::parse_predefined_uniforms(const char *replace_prefix_st
     return true;
 }
 
-bool shader_code_parser::parse_attributes(const char *replace_prefix_str)
+bool shader_code_parser::parse_attributes(const char *info_replace_str,const char *code_replace_str)
 {
-    if(!replace_prefix_str)
+    if(!info_replace_str)
         return false;
 
     const char *gl_attr_names[]={"gl_Vertex","gl_Normal","gl_Color"};
@@ -356,9 +374,18 @@ bool shader_code_parser::parse_attributes(const char *replace_prefix_str)
 
     for(size_t i=0;i<sizeof(gl_attr_names)/sizeof(gl_attr_names[0]);++i)
     {
-        std::string to=std::string(replace_prefix_str)+std::string(gl_attr_names[i]+3); //strlen("gl_")
-        if(replace_variable(gl_attr_names[i],to.c_str()))
-            push_unique_to_vec(m_attributes,variable(gl_attr_types[i],to.c_str(),0));
+        const std::string info=std::string(info_replace_str)+std::string(gl_attr_names[i]+3); //strlen("gl_")
+        if(code_replace_str)
+        {
+            const std::string replace=std::string(code_replace_str)+std::string(gl_attr_names[i]+3); //strlen("gl_")
+            if(replace_variable(gl_attr_names[i],replace.c_str()))
+                push_unique_to_vec(m_attributes,variable(gl_attr_types[i],info.c_str(),0));
+        }
+        else
+        {
+            if(m_code.find(gl_attr_names[i],0)!=std::string::npos)
+                push_unique_to_vec(m_attributes,variable(gl_attr_types[i],info.c_str(),0));
+        }
     }
 
     const char *tc_atr_name="gl_MultiTexCoord";
@@ -366,11 +393,15 @@ bool shader_code_parser::parse_attributes(const char *replace_prefix_str)
     size_t start_pos=0;
     while((start_pos=m_code.find(tc_atr_name,start_pos))!=std::string::npos)
     {
-        m_code.replace(start_pos,3,replace_prefix_str); //strlen("gl_")
+        const size_t replace_start=start_pos;
         start_pos+=strlen(tc_atr_name);
         const int idx=atoi(&m_code[start_pos]);
+
+        if(code_replace_str)
+            m_code.replace(replace_start,3,code_replace_str); //strlen("gl_")
+
         char buf[255];
-        sprintf(buf,"%s%s%d",replace_prefix_str,tc_atr_name+3,idx);
+        sprintf(buf,"%s%s%d",info_replace_str,tc_atr_name+3,idx);
         push_unique_to_vec(m_attributes,variable(type_vec4,buf,idx));
     }
 
@@ -475,10 +506,78 @@ bool shader_code_parser::replace_hlsl_mul()
     return result;
 }
 
+static bool is_name_char(char c) { return isalnum(c) || c=='_'; }
+
 bool shader_code_parser::replace_vec_from_float(const char *func_name)
 {
-    //ToDo
-    return false;
+    if(!func_name)
+        return false;
+
+    bool result=false;
+    size_t start_pos=0;
+    while((start_pos=m_code.find("vec",start_pos))!=std::string::npos)
+    {
+        if(start_pos>0 && is_name_char(m_code[start_pos-1]))
+        {
+            start_pos+=3;
+            continue;
+        }
+
+        if(start_pos+4>m_code.size()) //strlen("vec")+1
+            return false;
+
+        const char dim=m_code[start_pos+3];
+        if(!strchr("234",dim))
+        {
+            start_pos+=3;
+            continue;
+        }
+
+        size_t brace_start=start_pos+4;
+
+        while(m_code[brace_start]<=' ') if(++brace_start>=m_code.length()) return false;
+        if(m_code[brace_start]!='(')
+        {
+            start_pos+=3;
+            continue;
+        }
+
+        bool has_comma=false;
+        int brace_count=0;
+        size_t brace_end=brace_start;
+        while(++brace_end<m_code.length())
+        {
+            char c=m_code[brace_end];
+            if(c=='(')
+            {
+                ++brace_count;
+                continue;
+            }
+
+            if(c==')')
+            {
+                if(--brace_count<0) break;
+                continue;
+            }
+
+            if(!brace_count && c==',')
+            {
+                has_comma=true;
+                break;
+            }
+        }
+
+        if(!has_comma)
+        {
+            std::string replace=func_name+std::string(1,dim)+"("+m_code.substr(brace_start+1,brace_end-brace_start-1)+")";
+            m_code.replace(start_pos,brace_end+1-start_pos,replace);
+            result=true;
+        }
+
+        start_pos+=3;
+    }
+
+    return result;
 }
 
 bool shader_code_parser::replace_main_function_header(const char *replace_str)
@@ -532,8 +631,6 @@ bool shader_code_parser::replace_string(const char *from,const char *to,size_t s
 
     return result;
 }
-
-static bool is_name_char(char c) { return isalnum(c) || c=='_'; }
 
 bool shader_code_parser::replace_variable(const char *from,const char *to,size_t start_pos)
 {

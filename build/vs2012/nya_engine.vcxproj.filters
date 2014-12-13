@@ -165,6 +165,9 @@
     <ClCompile Include="..\..\render\statistics.cpp">
       <Filter>render</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\render\shader_code_parser.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\log\log.h">
@@ -342,6 +345,9 @@
       <Filter>memory</Filter>
     </ClInclude>
     <ClInclude Include="..\..\render\statistics.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\render\shader_code_parser.h">
       <Filter>render</Filter>
     </ClInclude>
   </ItemGroup>
