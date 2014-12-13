@@ -119,11 +119,10 @@ bool shader_code_parser::convert_to_hlsl()
         const std::string main=std::string("void ")+m_replace_str+"main()";
         replace_main_function_header(main.c_str());
 
-        const size_t main_start=m_code.find(main);
         for(int i=0;i<(int)m_varying.size();++i)
         {
             const std::string to=input_var+"."+m_varying[i].name;
-            replace_variable(m_varying[i].name.c_str(),to.c_str(),main_start);
+            replace_variable(m_varying[i].name.c_str(),to.c_str());
         }
 
         m_code.append("\nfloat4 main("+m_replace_str+"vsout "+input_var+"_):SV_TARGET{"+input_var+"="+input_var+"_;"+
@@ -163,12 +162,12 @@ bool shader_code_parser::convert_to_hlsl()
 
         const size_t main_start=m_code.find(main);
         const std::string vs_out_var=out_var+"."+m_replace_str+std::string(gl_vs_out+3); //strlen("gl_")
-        replace_variable(gl_vs_out,vs_out_var.c_str(),main_start);
+        replace_variable(gl_vs_out,vs_out_var.c_str());
 
         for(int i=0;i<(int)m_varying.size();++i)
         {
             const std::string to=out_var+"."+m_varying[i].name;
-            replace_variable(m_varying[i].name.c_str(),to.c_str(),main_start);
+            replace_variable(m_varying[i].name.c_str(),to.c_str());
         }
 
         m_code.append("\n"+m_replace_str+"vsout main("+m_replace_str+"vsin "+input_var+"_){"+input_var+"="+input_var+"_;"+
