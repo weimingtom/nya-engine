@@ -152,7 +152,7 @@ bool shader_code_parser::convert_to_hlsl()
                     prefix.append(buf);
                 }
             }
-            prefix.append("}"+input_var+";\n");
+            prefix.append("}static "+input_var+";\n");
         }
 
         const std::string out_var=m_replace_str+"out";
