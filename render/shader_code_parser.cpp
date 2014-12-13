@@ -151,16 +151,16 @@ bool shader_code_parser::convert_to_hlsl()
                     prefix.append(buf);
                 }
             }
-            prefix.append("}static "+input_var+";\n");
+            prefix.append("};\n");
         }
 
         const std::string out_var=m_replace_str+"out";
         prefix.append("static "+m_replace_str+"vsout "+out_var+";\n");
+        prefix.append("static "+m_replace_str+"vsin "+input_var+";\n");
 
         const std::string main=std::string("void ")+m_replace_str+"main()";
         replace_main_function_header(main.c_str());
 
-        const size_t main_start=m_code.find(main);
         const std::string vs_out_var=out_var+"."+m_replace_str+std::string(gl_vs_out+3); //strlen("gl_")
         replace_variable(gl_vs_out,vs_out_var.c_str());
 
