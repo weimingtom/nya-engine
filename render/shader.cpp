@@ -184,6 +184,24 @@ namespace
         }
     };
 
+    shader::uniform_type get_uniform_type(shader_code_parser::variable_type type)
+    {
+        switch(type)
+        {
+            case shader_code_parser::type_float: return shader::uniform_float;
+            case shader_code_parser::type_vec2: return shader::uniform_vec2;
+            case shader_code_parser::type_vec3: return shader::uniform_vec3;
+            case shader_code_parser::type_vec4: return shader::uniform_vec4;
+            case shader_code_parser::type_mat4: return shader::uniform_mat4;
+            case shader_code_parser::type_sampler2d: return shader::uniform_sampler2d;
+            case shader_code_parser::type_sampler_cube: return shader::uniform_sampler_cube;
+
+            default:break;
+        }
+
+        return shader::uniform_not_found;
+    }
+
 #ifndef DIRECTX11
   #ifndef NO_EXTENSIONS_INIT
     PFNGLGENPROGRAMSARBPROC glGenProgramsARB = NULL;
@@ -207,7 +225,6 @@ namespace
     PFNGLGETOBJECTPARAMETERIVARBPROC glGetObjectParameterivARB = NULL;
     PFNGLGETINFOLOGARBPROC glGetInfoLogARB = NULL;
     PFNGLGETUNIFORMLOCATIONARBPROC glGetUniformLocationARB = NULL;
-    PFNGLGETACTIVEUNIFORMARBPROC glGetActiveUniformARB = NULL;
 #endif
 
   #ifdef OPENGL_ES
@@ -251,7 +268,6 @@ namespace
   #else
     #define glGetObjectParam glGetObjectParameterivARB
     #define glGetShaderParam glGetObjectParameterivARB
-    #define glGetActiveUniform glGetActiveUniformARB
   #endif
 
 bool check_init_shaders()
@@ -283,7 +299,6 @@ bool check_init_shaders()
     if(!(glGetObjectParameterivARB =(PFNGLGETOBJECTPARAMETERIVARBPROC) get_extension("glGetObjectParameteriv"))) return false;
     if(!(glGetInfoLogARB           =(PFNGLGETINFOLOGARBPROC)           get_extension("glGetInfoLog"))) return false;
     if(!(glGetUniformLocationARB   =(PFNGLGETUNIFORMLOCATIONARBPROC)   get_extension("glGetUniformLocation"))) return false;
-    if(!(glGetActiveUniformARB     =(PFNGLGETACTIVEUNIFORMARBPROC)     get_extension("glGetActiveUniform"))) return false;
   #endif
     failed=false;
     initialised=true;
@@ -400,6 +415,8 @@ bool shader::add_program(program_type type,const char*code)
     }
 
     const static char type_str[][12]={"vertex","pixel","geometry","tesselation"};
+
+    shader_code_parser parser(code);
 
     //ToDo: release or reuse if already exists
 
@@ -692,120 +709,17 @@ bool shader::add_program(program_type type,const char*code)
     }
 
 #ifdef SUPPORT_OLD_SHADERS
-    std::string code_str(code),code_final;
-
-    if(type==vertex)
-    {
-        const char *attribute_names[]={"nyaVertex","nyaNormal","nyaColor","nyaMultiTexCoord"};
-        const char *attribute_types[]={"vec4","vec3","vec4","vec4"};
-
-        bool used_attribs[max_attributes]={false};
-        shdr.mat_mvp=shdr.mat_mv=shdr.mat_p=-1;
-
-        for(size_t gl=code_str.find("gl_");gl!=std::string::npos;gl=code_str.find("gl_",gl+8))
-        {
-            if(code_str.size()<=gl+8)
-                break;
-
-            bool replace=false;
-
-            switch(code_str[gl+3])
-            {
-                case 'V': if(code_str.compare(gl+3,6,"Vertex")==0) replace=used_attribs[vertex_attribute]=true; break;
-                case 'N': if(code_str.compare(gl+3,6,"Normal")==0) replace=used_attribs[normal_attribute]=true; break;
-                case 'C': if(code_str.compare(gl+3,5,"Color")==0) replace=used_attribs[color_attribute]=true; break;
-
-                case 'M':
-                    if(code_str.compare(gl+3,13,"MultiTexCoord")==0)
-                    {
-                        if(code_str.size()<=gl+17)
-                            break;
-
-                        char n0=code_str[gl+16];
-                        char n1=code_str[gl+17];
-
-                        if(n0<'0' || n0>'9')
-                            break;
-
-                        int idx=n0-'0';
-                        if(n1>'0' && n1<='9')
-                            idx=idx*10+n1-'0';
-
-                        if(tc0_attribute+idx>=max_attributes)
-                            break;
-
-                        replace=used_attribs[tc0_attribute+idx]=true;
-                    }
-                    else if(code_str.size()>gl+15 && code_str.compare(gl+3,15,"ModelViewMatrix")==0)
-                        shdr.mat_mv=1,replace=true;
-                    else if(code_str.size()>gl+25 && code_str.compare(gl+3,25,"ModelViewProjectionMatrix")==0)
-                        shdr.mat_mvp=1,replace=true;
-                    break;
-
-                case 'P':
-                    if(code_str.size()>gl+16 && code_str.compare(gl+3,16,"ProjectionMatrix")==0)
-                        shdr.mat_p=1,replace=true;
-                    break;
-
-                //case 'T':     //ToDo: gl_TexCoord[] variables //break;
-            }
-
-            if(replace) code_str[gl]='n',code_str[gl+1]='y',code_str[gl+2]='a';
-        }
-
-        if(shdr.mat_mvp>0) code_final.append("uniform mat4 nyaModelViewProjectionMatrix;");
-        if(shdr.mat_mv>0) code_final.append("uniform mat4 nyaModelViewMatrix;");
-        if(shdr.mat_p>0) code_final.append("uniform mat4 nyaProjectionMatrix;");
-
-        for(int i=0;i<tc0_attribute;++i)
-        {
-            if(!used_attribs[i])
-                continue;
-
-            code_final.append("attribute "),code_final.append(attribute_types[i]),code_final.append(" "),
-            code_final.append(attribute_names[i]),code_final.append(";\n");
-            glBindAttribLocation(shdr.program,i,attribute_names[i]);
-        }
-
-        for(int i=tc0_attribute;i<max_attributes;++i)
-        {
-            if(!used_attribs[i])
-                continue;
-
-            std::string attrib_name(attribute_names[tc0_attribute]);
-            int idx=i-tc0_attribute;
-            if(idx>=10)
-            {
-                int h=idx/10;
-                attrib_name+=char('0'+h);
-                idx-=h*10;
-        }
-
-            attrib_name+=char('0'+idx);
-            code_final.append("attribute vec4 "),code_final.append(attrib_name),code_final.append(";\n");
-            glBindAttribLocation(shdr.program,i,attrib_name.c_str());
-        }
-    }
-
-  #ifdef OPENGL_ES
-    code_final.append("precision mediump float;\n");
-#endif
-    code_final.append(code_str);
-        code=code_final.c_str();
-
-    //log()<<code<<"\n";
+    parser.convert_to_modern_glsl();
+    code=parser.get_code();
 #endif
 
-    GLenum gl_type=GL_VERTEX_SHADER_ARB;
-    if(type==pixel)                                    //ToDo: switch and all cases
-        gl_type=GL_FRAGMENT_SHADER_ARB;
+    GLenum gl_type=type==pixel?GL_FRAGMENT_SHADER_ARB:GL_VERTEX_SHADER_ARB; //ToDo: switch all cases
 
     GLhandleARB object = glCreateShaderObjectARB(gl_type);
     glShaderSourceARB(object,1,&code,0);
     glCompileShaderARB(object);
     GLint compiled;
     glGetShaderParam(object,GL_OBJECT_COMPILE_STATUS_ARB,&compiled);
-
     if(!compiled)
     {
         GLint log_len=0;
@@ -891,43 +805,40 @@ bool shader::add_program(program_type type,const char*code)
         }
 
 #ifdef SUPPORT_OLD_SHADERS
-        if(shdr.mat_mvp>=0) shdr.mat_mvp=get_handler("nyaModelViewProjectionMatrix");
-        if(shdr.mat_mv>=0) shdr.mat_mv=get_handler("nyaModelViewMatrix");
-        if(shdr.mat_p>=0) shdr.mat_p=get_handler("nyaProjectionMatrix");
+        for(int i=0;i<(int)shdr.uniforms.size();++i)
+        {
+            if(shdr.uniforms[i].type!=uniform_mat4)
+                continue;
+
+            const std::string &name=shdr.uniforms[i].name;
+            if(name=="_nya_ModelViewProjectionMatrix") shdr.mat_mvp=get_handler(name.c_str());
+            else if(name=="_nya_ModelViewMatrix") shdr.mat_mv=get_handler(name.c_str());
+            else if(name=="_nya_ProjectionMatrix") shdr.mat_p=get_handler(name.c_str());
+        }
 #endif
     }
+
+#ifdef SUPPORT_OLD_SHADERS
+    for(int i=0;i<parser.get_attributes_count();++i)
+    {
+        const shader_code_parser::variable a=parser.get_attribute(i);
+        if(a.name=="_nya_Vertex") glBindAttribLocation(shdr.program,vertex_attribute,a.name.c_str());
+        else if(a.name=="_nya_Normal") glBindAttribLocation(shdr.program,normal_attribute,a.name.c_str());
+        else if(a.name=="_nya_Color") glBindAttribLocation(shdr.program,color_attribute,a.name.c_str());
+        else if(a.name.find("_nya_MultiTexCoord")==0) glBindAttribLocation(shdr.program,tc0_attribute+a.idx,a.name.c_str());
+    }
+#endif
 
     shdr.objects[type]=object;
-
-    //ToDo: on demand
-    GLint uniforms_count=0;
-#ifdef OPENGL_ES
-    glGetObjectParam(shdr.program,GL_ACTIVE_UNIFORMS,&uniforms_count);
-#else
-    glGetShaderParam(shdr.program,GL_ACTIVE_UNIFORMS,&uniforms_count);
 #endif
-    for(int i=0;i<uniforms_count;++i)
-    {
-        char name[128]; GLsizei name_len; GLint size; GLenum type;
-        glGetActiveUniform(shdr.program,i,GLsizei(sizeof(name)/sizeof(name[0])),&name_len,&size,&type,name);
 
-        if(!name_len)
-            continue;
-
-        shader_obj::uniform &u=shdr.add_uniform(name);
-        u.array_size=size;
-        switch(type)
+    for(int i=0;i<parser.get_uniforms_count();++i)
         {
-            case GL_FLOAT: u.type=uniform_float; break;
-            case GL_FLOAT_VEC3: u.type=uniform_vec3; break;
-            case GL_FLOAT_VEC4: u.type=uniform_vec4; break;
-            case GL_FLOAT_MAT4: u.type=uniform_mat4; break;
-            case GL_SAMPLER_2D: u.type=uniform_sampler2d; break;
-            case GL_SAMPLER_CUBE: u.type=uniform_sampler_cube; break;
-            default: u.type=uniform_not_found;
+        const shader_code_parser::variable from=parser.get_uniform(i);
+        shader_obj::uniform &to=shdr.add_uniform(from.name.c_str());
+        to.array_size=from.array_size;
+        to.type=get_uniform_type(from.type);
         }
-    }
-#endif
 
     return true;
 }
