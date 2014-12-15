@@ -92,7 +92,8 @@ bool shader_code_parser::convert_to_hlsl()
     const char *gl_vs_out="gl_Position",*gl_ps_out="gl_FragColor";
     const char *type_names[]={"float","float2","float3","float4","float4x4"};
 
-    prefix.append("struct "+m_replace_str+"vsout{float4 "+m_replace_str+std::string(gl_vs_out+3)+":SV_POSITION;");
+    std::string vs_pos_out=m_replace_str+std::string(gl_vs_out+3);
+    prefix.append("struct "+m_replace_str+"vsout{float4 "+vs_pos_out+":SV_POSITION;");
     for(int i=0;i<(int)m_varying.size();++i)
     {
         const variable &v=m_varying[i];
@@ -113,19 +114,27 @@ bool shader_code_parser::convert_to_hlsl()
     const bool is_fragment=replace_variable(gl_ps_out,ps_out_var.c_str());
     if(is_fragment)
     {
-        prefix.append("static "+m_replace_str+"vsout "+input_var+";\n");
         prefix.append("static float4 "+ps_out_var+";\n");
 
         const std::string main=std::string("void ")+m_replace_str+"main()";
         replace_main_function_header(main.c_str());
 
+        std::string in_var_assign;
         for(int i=0;i<(int)m_varying.size();++i)
         {
-            const std::string to=input_var+"."+m_varying[i].name;
-            replace_variable(m_varying[i].name.c_str(),to.c_str());
-        }
+            const variable &v=m_varying[i];
+            if(v.type==type_invalid)
+                return false;
 
-        m_code.append("\nfloat4 main("+m_replace_str+"vsout "+input_var+"_):SV_TARGET{"+input_var+"="+input_var+"_;"+
+            if(v.type-1>=sizeof(type_names)/sizeof(type_names[0]))
+                continue;
+
+            prefix.append("static "+std::string(type_names[v.type-1])+" "+m_varying[i].name+";");
+            in_var_assign.append(m_varying[i].name+"="+input_var+"."+m_varying[i].name+";");
+        }
+        prefix.append("\n");
+
+        m_code.append("\nfloat4 main("+m_replace_str+"vsout "+input_var+"):SV_TARGET{"+in_var_assign+
                       m_replace_str+"main();return "+ps_out_var+";}\n");
     }
     else
@@ -155,23 +164,33 @@ bool shader_code_parser::convert_to_hlsl()
         }
 
         const std::string out_var=m_replace_str+"out";
-        prefix.append("static "+m_replace_str+"vsout "+out_var+";\n");
         prefix.append("static "+m_replace_str+"vsin "+input_var+";\n");
 
         const std::string main=std::string("void ")+m_replace_str+"main()";
         replace_main_function_header(main.c_str());
-
         const std::string vs_out_var=out_var+"."+m_replace_str+std::string(gl_vs_out+3); //strlen("gl_")
-        replace_variable(gl_vs_out,vs_out_var.c_str());
 
+        replace_variable(gl_vs_out,vs_pos_out.c_str());
+
+        std::string out_var_assign;
+        prefix.append("static float4 "+vs_pos_out+";");
+        out_var_assign.append(out_var+"."+vs_pos_out+"="+vs_pos_out+";");
         for(int i=0;i<(int)m_varying.size();++i)
         {
-            const std::string to=out_var+"."+m_varying[i].name;
-            replace_variable(m_varying[i].name.c_str(),to.c_str());
+            const variable &v=m_varying[i];
+            if(v.type==type_invalid)
+                return false;
+
+            if(v.type-1>=sizeof(type_names)/sizeof(type_names[0]))
+                continue;
+
+            prefix.append("static "+std::string(type_names[v.type-1])+" "+m_varying[i].name+";");
+            out_var_assign.append(out_var+"."+m_varying[i].name+"="+m_varying[i].name+";");
         }
+        prefix.append("\n");
 
         m_code.append("\n"+m_replace_str+"vsout main("+m_replace_str+"vsin "+input_var+"_){"+input_var+"="+input_var+"_;"+
-                      m_replace_str+"main();return "+out_var+";}\n");
+                      m_replace_str+"main();"+m_replace_str+"vsout "+out_var+";"+out_var_assign+"return "+out_var+";}\n");
     }
 
     if(m_uniforms.size()>predefined_count)
