@@ -31,7 +31,7 @@ bool shader_code_parser::convert_to_hlsl()
     parse_varying(true);
     std::sort(m_varying.begin(),m_varying.end());
 
-    std::string replace_constructor=m_replace_str+"cast_float";
+    const std::string replace_constructor=m_replace_str+"cast_float";
     if(replace_vec_from_float(replace_constructor.c_str()))
     {
         prefix.append("float2 "+replace_constructor+"2(float a){return float2(a,a);} ");
@@ -42,7 +42,7 @@ bool shader_code_parser::convert_to_hlsl()
         prefix.append("float4 "+replace_constructor+"4(float4 a){return a;}\n");
     }
 
-    replace_hlsl_mul();
+    replace_hlsl_mul("mul");
     replace_hlsl_types();
 
     replace_variable("mix","lerp");
@@ -493,14 +493,31 @@ static bool is_numeric_only_var(const std::string &s)
     return true;
 }
 
-static bool is_space_only_var(const std::string &s)
+static void remove_var_spaces(std::string &s)
 {
-    for(size_t i=0;i<s.size();++i) if(s[i]>' ') return false;
-    return true;
+    if(s.empty())
+        return;
+
+    size_t f,t=0;
+    for(f=0;f<s.size();++f) if(s[f]>' ') break;
+    for(t=s.size();t>0;--t) if(s[t-1]>' ') break;
+
+    s=s.substr(f,t);
 }
 
-bool shader_code_parser::replace_hlsl_mul()
+bool shader_code_parser::replace_hlsl_mul(const char *func_name)
 {
+    if(!func_name)
+        return false;
+
+    typedef std::pair<size_t,size_t> scope;
+    scope global_scope=scope(0,std::string::npos);
+    std::map<std::string,scope> matrices;
+    for(int i=0;i<(int)m_varying.size();++i) if(m_varying[i].type==type_mat4) matrices[m_varying[i].name]=global_scope;
+    for(int i=0;i<(int)m_uniforms.size();++i) if(m_uniforms[i].type==type_mat4) matrices[m_uniforms[i].name]=global_scope;
+
+    //ToDo: find mat variables in code
+
     bool result=false;
     size_t start_pos=0;
     while((start_pos=m_code.find('*',start_pos))!=std::string::npos)
@@ -510,14 +527,17 @@ bool shader_code_parser::replace_hlsl_mul()
         if(left==start_pos || right==start_pos)
             return false;
 
-        const std::string left_var=m_code.substr(left,start_pos-left);
-        const std::string right_var=m_code.substr(start_pos+1,right-start_pos-1);
+        std::string left_var=m_code.substr(left,start_pos-left);
+        std::string right_var=m_code.substr(start_pos+1,right-start_pos-1);
 
-        if(is_space_only_var(right_var)) // *=
+        remove_var_spaces(right_var);
+        if(right_var.empty()) // *=
         {
             ++start_pos;
             continue;
         }
+
+        remove_var_spaces(left_var);
 
         //ToDo: not sure if matrix*scalar don't need mul, in case of fail replace || with &&
         if(is_numeric_only_var(left_var) || is_numeric_only_var(right_var))
@@ -526,7 +546,15 @@ bool shader_code_parser::replace_hlsl_mul()
             continue;
         }
 
-        const std::string replace="mul("+left_var+","+right_var+")";
+        //ToDo: detect mul(mat,mat) as mat
+        //ToDo: detect mat() constructors
+        if(matrices.find(left_var)==matrices.end() && matrices.find(right_var)==matrices.end())
+        {
+            ++start_pos;
+            continue;
+        }
+
+        const std::string replace=std::string(func_name)+"("+left_var+","+right_var+")";
         m_code.replace(left,right-left,replace);
         result=true;
     }
