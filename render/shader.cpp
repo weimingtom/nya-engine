@@ -184,7 +184,7 @@ namespace
         }
     };
 
-    shader::uniform_type get_uniform_type(shader_code_parser::variable_type type)
+    shader::uniform_type convert_uniform_type(shader_code_parser::variable_type type)
     {
         switch(type)
         {
@@ -837,7 +837,7 @@ bool shader::add_program(program_type type,const char*code)
         const shader_code_parser::variable from=parser.get_uniform(i);
         shader_obj::uniform &to=shdr.add_uniform(from.name.c_str());
         to.array_size=from.array_size;
-        to.type=get_uniform_type(from.type);
+        to.type=convert_uniform_type(from.type);
         }
 
     return true;
