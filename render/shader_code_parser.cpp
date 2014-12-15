@@ -288,15 +288,15 @@ shader_code_parser::variable shader_code_parser::get_attribute(int idx) const
 
 void shader_code_parser::remove_comments()
 {
-    while(m_code.find("/*")!=std::string::npos)
-    {
-        const size_t from=m_code.find("/*");
-        m_code.erase(from,(m_code.find("*/",from+2)-from)+2);
-    }
     while(m_code.find("//")!=std::string::npos)
     {
         const size_t from=m_code.find("//");
         m_code.erase(from,m_code.find_first_of("\n\r",from+1)-from);
+    }
+    while(m_code.find("/*")!=std::string::npos)
+    {
+        const size_t from=m_code.find("/*");
+        m_code.erase(from,(m_code.find("*/",from+2)-from)+2);
     }
 }
 
