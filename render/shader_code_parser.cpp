@@ -550,8 +550,6 @@ bool shader_code_parser::replace_hlsl_mul(const char *func_name)
         matrices[var]=std::pair<size_t,size_t>(end_pos,std::string::npos); //ToDo: find right scope border
     }
 
-    printf("matrices:\n"); for(auto &it:matrices) printf("%s\n",it.first.c_str()); printf("\n");
-
     bool result=false;
     start_pos=0;
     while((start_pos=m_code.find('*',start_pos))!=std::string::npos)
