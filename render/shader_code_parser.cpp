@@ -12,7 +12,7 @@ bool shader_code_parser::convert_to_hlsl()
     m_uniforms.clear();
     m_attributes.clear();
 
-    std::string prefix;
+    std::string prefix="#define DIRECTX11\n";
 
     parse_predefined_uniforms(m_replace_str.c_str());
     if(!m_uniforms.empty())
