@@ -978,7 +978,7 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
         return false;
 
     data.allocate(size);
-    data.copy_to(resource.pData,size);
+    data.copy_from(resource.pData,size);
 
     get_context()->Unmap(copy_tex,0);
     copy_tex->Release();

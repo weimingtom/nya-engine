@@ -14,8 +14,8 @@ class tmp_buffer;
 class tmp_buffer_ref
 {
 public:
-    bool copy_from(void*data,size_t size,size_t offset=0) const; //from buffer to data
-    bool copy_to(const void*data,size_t size,size_t offset=0); //from data to buffer
+    bool copy_from(const void*data,size_t size,size_t offset=0); //from data to buffer
+    bool copy_to(void*data,size_t size,size_t offset=0) const; //from buffer to data
 
 public:
     void *get_data(size_t offset=0) const;
@@ -40,8 +40,8 @@ private:
 class tmp_buffer_scoped
 {
 public:
-    bool copy_from(void*data,size_t size,size_t offset=0) const; //from buffer to data
-    bool copy_to(const void*data,size_t size,size_t offset=0); //from data to buffer
+    bool copy_from(const void*data,size_t size,size_t offset=0); //from data to buffer
+    bool copy_to(void*data,size_t size,size_t offset=0) const; //from buffer to data
 
 public:
     void *get_data(size_t offset=0) const;
@@ -64,6 +64,7 @@ namespace tmp_buffers
 {
     void force_free();
     size_t get_total_size();
+    void enable_alloc_log(bool enable);
 }
 
 }

@@ -46,7 +46,7 @@ bool tsb_anim::load(nya_resources::resource_data *anim_res)
 
     uint bones_size=header->bone_count*header->frame_count;
     m_data.resize(bones_size);
-    if(!anim_data.copy_from(&m_data[0],bones_size*sizeof(nya_math::mat4),sizeof(tsb_header)))
+    if(!anim_data.copy_to(&m_data[0],bones_size*sizeof(nya_math::mat4),sizeof(tsb_header)))
     {
         nya_resources::log()<<"Unable to load tsb animation file\n";
         return false;

@@ -172,7 +172,7 @@ bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
                     tga.flip_vertical(color_data,tmp_data.get_data());
             }
             else
-                tmp_data.copy_to(color_data,tga.uncompressed_size);
+                tmp_data.copy_from(color_data,tga.uncompressed_size);
 
             color_data=tmp_data.get_data();
         }

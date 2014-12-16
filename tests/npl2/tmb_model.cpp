@@ -249,7 +249,7 @@ bool tmb_model::load(nya_resources::resource_data *model_res)
     if(bones_count)
     {
         m_bones.resize(bones_count);
-        model_data.copy_from(&m_bones[0],bones_count*sizeof(nya_math::mat4),offset);
+        model_data.copy_to(&m_bones[0],bones_count*sizeof(nya_math::mat4),offset);
     }
     else
         m_bones.clear();

@@ -13,41 +13,25 @@ namespace nya_memory
 class tmp_buffer
 {
 private:
-    bool is_used() const
-    {
-        return m_used;
-    }
-
     void allocate(size_t size)
     {
         if(size>m_data.size())
         {
-            log()<<"tmp buf resized from "<<m_data.size()<<" to "<<size<<", ";
+            if(m_allocate_log_enabled) log()<<"tmp buf resized from "<<m_data.size()<<" to "<<size<<", ";
             m_data.resize(size);
-            log()<<get_total_size()<<" in "<<m_buffers.size()<<" buffers total)\n";
+            if(m_allocate_log_enabled) log()<<get_total_size()<<" in "<<m_buffers.size()<<" buffers total)\n";
         }
 
         m_size = size;
-
         m_used=true;
     }
 
-    size_t get_actual_size() const
-    {
-        return m_data.size();
-    }
+    bool is_used() const { return m_used; }
+    size_t get_actual_size() const { return m_data.size(); }
 
 public:
-    size_t get_size() const
-    {
-        return m_size;
-    }
-
-    void free()
-    {
-        m_size=0;
-        m_used=false;
-    }
+    size_t get_size() const { return m_size; }
+    void free() { m_size=0; m_used=false; }
 
     void *get_data(size_t offset)
     {
@@ -65,7 +49,7 @@ public:
         return &m_data[offset];
     }
 
-    bool copy_from(void *data,size_t size,size_t offset) const
+    bool copy_to(void *data,size_t size,size_t offset) const
     {
         if(size+offset>m_size)
             return false;
@@ -74,7 +58,7 @@ public:
         return true;
     }
 
-    bool copy_to(const void *data,size_t size,size_t offset)
+    bool copy_from(const void *data,size_t size,size_t offset)
     {
         if(size+offset>m_size)
             return false;
@@ -121,7 +105,7 @@ public:
         m_buffers.push_back(tmp_buffer());
         m_buffers.back().allocate(size);
 
-        log()<<"new tmp buf allocated ("<<m_buffers.size()<<" total)\n";
+        if(m_allocate_log_enabled) log()<<"new tmp buf allocated ("<<m_buffers.size()<<" total)\n";
 
         return &m_buffers.back();
     }
@@ -150,6 +134,8 @@ public:
         return size;
     }
 
+    static void enable_alloc_log(bool enable) { m_allocate_log_enabled=enable; }
+
     tmp_buffer(): m_used(false), m_size(0) {}
 
 private:
@@ -160,19 +146,11 @@ private:
 private:
     typedef std::list<tmp_buffer> buffers_list;
     static buffers_list m_buffers;
+    static bool m_allocate_log_enabled;
 };
 
 tmp_buffer::buffers_list tmp_buffer::m_buffers;
-
-void tmp_buffers::force_free()
-{
-    tmp_buffer::force_free();
-}
-
-size_t tmp_buffers::get_total_size()
-{
-    return tmp_buffer::get_total_size();
-}
+bool tmp_buffer::m_allocate_log_enabled=false;
 
 void *tmp_buffer_ref::get_data(size_t offset) const
 {
@@ -190,7 +168,7 @@ size_t tmp_buffer_ref::get_size() const
     return m_buf->get_size();
 }
 
-bool tmp_buffer_ref::copy_from(void*data,size_t size,size_t offset) const
+bool tmp_buffer_ref::copy_from(const void*data,size_t size,size_t offset)
 {
     if(!m_buf)
         return false;
@@ -198,7 +176,7 @@ bool tmp_buffer_ref::copy_from(void*data,size_t size,size_t offset) const
     return m_buf->copy_from(data,size,offset);
 }
 
-bool tmp_buffer_ref::copy_to(const void*data,size_t size,size_t offset)
+bool tmp_buffer_ref::copy_to(void*data,size_t size,size_t offset) const
 {
     if(!m_buf)
         return false;
@@ -223,31 +201,16 @@ void tmp_buffer_ref::free()
     m_buf=0;
 }
 
-void *tmp_buffer_scoped::get_data(size_t offset) const
-{
-    return m_buf->get_data(offset);
-}
-
-size_t tmp_buffer_scoped::get_size() const
-{
-    return m_buf->get_size();
-}
-
-bool tmp_buffer_scoped::copy_from(void*data,size_t size,size_t offset) const
-{
-    return m_buf->copy_from(data,size,offset);
-}
-
-bool tmp_buffer_scoped::copy_to(const void*data,size_t size,size_t offset)
-{
-    return m_buf->copy_to(data,size,offset);
-}
+void *tmp_buffer_scoped::get_data(size_t offset) const { return m_buf->get_data(offset); }
+size_t tmp_buffer_scoped::get_size() const { return m_buf->get_size();}
+bool tmp_buffer_scoped::copy_from(const void*data,size_t size,size_t offset) { return m_buf->copy_from(data,size,offset); }
+bool tmp_buffer_scoped::copy_to(void*data,size_t size,size_t offset) const { return m_buf->copy_to(data,size,offset); }
 
 tmp_buffer_scoped::tmp_buffer_scoped(size_t size): m_buf(tmp_buffer::allocate_new(size)) {}
+tmp_buffer_scoped::~tmp_buffer_scoped() { m_buf->free(); }
 
-tmp_buffer_scoped::~tmp_buffer_scoped()
-{
-    m_buf->free();
-}
+void tmp_buffers::force_free() { tmp_buffer::force_free(); }
+size_t tmp_buffers::get_total_size() { return tmp_buffer::get_total_size(); }
+void tmp_buffers::enable_alloc_log(bool enable) { tmp_buffer::enable_alloc_log(enable); }
 
 }

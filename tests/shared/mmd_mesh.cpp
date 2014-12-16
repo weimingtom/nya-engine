@@ -18,7 +18,7 @@ bool mmd_mesh::load(const char *name)
         return false;
 
     m_vertex_data.resize(vbo.get_vert_stride()*vbo.get_verts_count()/4);
-    buf.copy_from(&m_vertex_data[0],m_vertex_data.size()*4);
+    buf.copy_to(&m_vertex_data[0],m_vertex_data.size()*4);
     buf.free();
 
     if(m_mesh.get_skeleton().get_bones_count()>pmd_loader::gpu_skining_bones_limit)

@@ -32,12 +32,12 @@ public:
 
     bool read_all(void*data)
     {
-        return m_data.copy_from(data,m_data.get_size());
+        return m_data.copy_to(data,m_data.get_size());
     }
 
     bool read_chunk(void *data,size_t size,size_t offset)
     {
-        return m_data.copy_from(data,size,offset);
+        return m_data.copy_to(data,size,offset);
     }
 
 public:
