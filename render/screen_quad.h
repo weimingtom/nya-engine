@@ -2,7 +2,8 @@
 
 #pragma once
 
-#include "render/vbo.h"
+#include "vbo.h"
+#include "platform_specific_gl.h"
 
 namespace nya_render
 {
@@ -15,8 +16,9 @@ public:
         struct { float x,y,s,t; } verts[4];
         for(int i=0;i<4;++i)
         {
-            verts[i].x=i>1?-1.0:1.0,verts[i].y=i%2?1.0:-1.0;
-            verts[i].s=i>1? 0.0:1.0,verts[i].t=i%2?1.0:0.0;
+            verts[i].x=i>1?-1.0f:1.0f,verts[i].y=i%2?1.0f:-1.0f;
+            verts[i].s=i>1? 0.0f:1.0f,verts[i].t=i%2?1.0f:0.0f;
+            DIRECTX11_ONLY(verts[i].t=1.0f-verts[i].t);
         }
 
         m_mesh.set_vertex_data(verts,sizeof(verts[0]),4);
@@ -25,7 +27,7 @@ public:
         m_mesh.set_element_type(nya_render::vbo::triangle_strip);
     }
 
-    void draw() { m_mesh.bind(); m_mesh.draw(); m_mesh.unbind(); }
+    void draw() const { m_mesh.bind(); m_mesh.draw(); m_mesh.unbind(); }
     void release() { m_mesh.release(); }
 
 private:
