@@ -505,6 +505,8 @@ static void remove_var_spaces(std::string &s)
     s=s.substr(f,t);
 }
 
+static bool is_name_char(char c) { return isalnum(c) || c=='_'; }
+
 bool shader_code_parser::replace_hlsl_mul(const char *func_name)
 {
     if(!func_name)
@@ -512,14 +514,46 @@ bool shader_code_parser::replace_hlsl_mul(const char *func_name)
 
     typedef std::pair<size_t,size_t> scope;
     scope global_scope=scope(0,std::string::npos);
-    std::map<std::string,scope> matrices;
+    typedef std::map<std::string,scope> mat_map;
+    mat_map matrices;
     for(int i=0;i<(int)m_varying.size();++i) if(m_varying[i].type==type_mat4) matrices[m_varying[i].name]=global_scope;
     for(int i=0;i<(int)m_uniforms.size();++i) if(m_uniforms[i].type==type_mat4) matrices[m_uniforms[i].name]=global_scope;
 
-    //ToDo: find mat variables in code
+    size_t start_pos=0;
+    while((start_pos=m_code.find("mat",start_pos))!=std::string::npos)
+    {
+        if(start_pos!=0 && is_name_char(m_code[start_pos-1]))
+        {
+            start_pos+=3;//strlen("mat")
+            continue;
+        }
+
+        if(start_pos+5>=m_code.size()) //strlen("mat4 ")
+            break;
+
+        start_pos+=3;//strlen("mat")
+        if(!strchr("234",m_code[start_pos]))
+            continue;
+
+        if(is_name_char(m_code[++start_pos]))
+           continue;
+
+        const size_t end_pos=m_code.find(';',start_pos);
+        if(end_pos==std::string::npos)
+            break;
+
+        std::string var=m_code.substr(start_pos,end_pos-start_pos);
+        const size_t end_pos2=var.find('=');
+        if(end_pos2)
+            var.resize(end_pos2);
+        remove_var_spaces(var);
+        matrices[var]=std::pair<size_t,size_t>(end_pos,std::string::npos); //ToDo: find right scope border
+    }
+
+    printf("matrices:\n"); for(auto &it:matrices) printf("%s\n",it.first.c_str()); printf("\n");
 
     bool result=false;
-    size_t start_pos=0;
+    start_pos=0;
     while((start_pos=m_code.find('*',start_pos))!=std::string::npos)
     {
         const size_t left=get_var_pos(m_code,start_pos,-1);
@@ -546,10 +580,14 @@ bool shader_code_parser::replace_hlsl_mul(const char *func_name)
             continue;
         }
 
-        //ToDo: detect mul(mat,mat) as mat
-        //ToDo: detect mat() constructors
-        if(matrices.find(left_var)==matrices.end() && matrices.find(right_var)==matrices.end())
+        mat_map::const_iterator left_scope=matrices.find(left_var);
+        mat_map::const_iterator right_scope=matrices.find(right_var);
+        if((left_scope==matrices.end() || left_scope->second.first>start_pos || left_scope->second.second<start_pos) &&
+           (right_scope==matrices.end() || right_scope->second.first>start_pos || right_scope->second.second<start_pos))
         {
+            //ToDo: detect mul(mat,mat) as mat
+            //ToDo: detect mat() constructors
+
             ++start_pos;
             continue;
         }
@@ -561,8 +599,6 @@ bool shader_code_parser::replace_hlsl_mul(const char *func_name)
 
     return result;
 }
-
-static bool is_name_char(char c) { return isalnum(c) || c=='_'; }
 
 bool shader_code_parser::replace_vec_from_float(const char *func_name)
 {
