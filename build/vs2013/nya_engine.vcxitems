@@ -34,6 +34,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\render\platform_specific_gl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\render\render.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\render\shader.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\render\shader_code_parser.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\render\skeleton.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\render\statistics.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\render\texture.cpp" />
@@ -101,6 +102,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\render\platform_specific_gl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\render\render.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\render\shader.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\render\shader_code_parser.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\render\skeleton.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\render\statistics.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\render\texture.h" />
