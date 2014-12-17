@@ -58,7 +58,7 @@ private:
     void remove_comments();
 
     bool parse_uniforms(bool remove);
-    bool parse_predefined_uniforms(const char *replace_prefix_str);
+    bool parse_predefined_uniforms(const char *replace_prefix_str,bool replace);
     bool parse_attributes(const char *info_replace_str,const char *code_replace_str);
     bool parse_varying(bool remove);
 

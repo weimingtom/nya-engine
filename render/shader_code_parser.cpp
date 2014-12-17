@@ -14,7 +14,7 @@ bool shader_code_parser::convert_to_hlsl()
 
     std::string prefix="#define DIRECTX11\n";
 
-    parse_predefined_uniforms(m_replace_str.c_str());
+    parse_predefined_uniforms(m_replace_str.c_str(),true);
     if(!m_uniforms.empty())
     {
         std::sort(m_uniforms.begin(),m_uniforms.end());
@@ -230,7 +230,7 @@ bool shader_code_parser::convert_to_modern_glsl(const char *precision)
     m_uniforms.clear();
     m_attributes.clear();
 
-    if(!parse_predefined_uniforms(m_replace_str.c_str()))
+    if(!parse_predefined_uniforms(m_replace_str.c_str(),true))
         return false;
 
     if(!parse_attributes(m_replace_str.c_str(),m_replace_str.c_str()))
@@ -257,7 +257,10 @@ bool shader_code_parser::convert_to_modern_glsl(const char *precision)
 int shader_code_parser::get_uniforms_count()
 {
     if(m_uniforms.empty())
+    {
+        parse_predefined_uniforms(m_replace_str.c_str(),false);
         parse_uniforms(false);
+    }
 
     return (int)m_uniforms.size();
 }
@@ -375,7 +378,7 @@ template<typename t> static void push_unique_to_vec(std::vector<t> &v,const t &e
     v.push_back(e);
 }
 
-bool shader_code_parser::parse_predefined_uniforms(const char *replace_prefix_str)
+bool shader_code_parser::parse_predefined_uniforms(const char *replace_prefix_str,bool replace)
 {
     if(!replace_prefix_str)
         return false;
@@ -385,7 +388,12 @@ bool shader_code_parser::parse_predefined_uniforms(const char *replace_prefix_st
     for(size_t i=0;i<sizeof(gl_matrix_names)/sizeof(gl_matrix_names[0]);++i)
     {
         std::string to=std::string(replace_prefix_str)+std::string(gl_matrix_names[i]+3); //strlen("gl_")
-        if(replace_variable(gl_matrix_names[i],to.c_str()))
+        if(replace)
+        {
+            if(replace_variable(gl_matrix_names[i],to.c_str()))
+                push_unique_to_vec(m_uniforms,variable(type_mat4,to.c_str(),1));
+        }
+        else if(find_variable(gl_matrix_names[i]))
             push_unique_to_vec(m_uniforms,variable(type_mat4,to.c_str(),1));
     }
 
