@@ -57,13 +57,10 @@ namespace
         struct constants_buffer
         {
             mutable std::vector<float> buffer;
-            bool mvp_matrix;
-            bool mv_matrix;
-            bool p_matrix;
-
+            int mvp_matrix,mv_matrix,p_matrix;
             ID3D11Buffer *dx_buffer;
 
-            constants_buffer(): mvp_matrix(false),mv_matrix(false),p_matrix(false),dx_buffer(0) {}
+            constants_buffer(): mvp_matrix(-1),mv_matrix(-1),p_matrix(-1),dx_buffer(0) {}
         };
 
         constants_buffer constants;
@@ -85,7 +82,6 @@ namespace
             std::string name;
             int vs_offset;
             int ps_offset;
-            int dimension;
             int array_size;
             shader::uniform_type type;
 
@@ -429,207 +425,7 @@ bool shader::add_program(program_type type,const char*code)
 
     shader_obj &shdr=shader_obj::get(m_shdr);
 
-    std::string code_str(code);
-    std::string code_final;
-
-    shader_obj::uniforms_buffer &buf=(type==vertex)?shdr.vertex_uniforms:shdr.pixel_uniforms;
-    for(size_t i=code_str.find("uniform");i!=std::string::npos;i=code_str.find("uniform",i+7))
-    {
-        size_t prevln=code_str.rfind('\n',i);
-        if(prevln!=std::string::npos)
-        {
-            size_t comment=code_str.find("//",prevln);
-            if(comment<i)
-                continue;
-        }
-
-        size_t type_from=i+8;
-        while(code_str[type_from]<=' ') if(++type_from>=code_str.length()) return false;
-        size_t type_to=type_from;
-        while(code_str[type_to]>' ') if(++type_to>=code_str.length()) return false;
-
-        size_t name_from=type_to+1;
-        while(code_str[name_from]<=' ') if(++name_from>=code_str.length()) return false;
-        size_t name_to=name_from;
-        while(code_str[name_to]>' ' && code_str[name_to]!=';' && code_str[name_to]!='[') if(++name_to>=code_str.length()) return false;
-
-        const std::string name=code_str.substr(name_from,name_to-name_from);
-        const std::string type_name=code_str.substr(type_from,type_to-type_from);
-
-        size_t last=name_to;
-        while(code_str[last]!=';') if(++last>=code_str.length()) return false;
-
-        int count=1;
-        size_t array_from=code_str.find('[',name_to);
-        if(array_from<last)
-            count=atoi(&code_str[array_from+1]);
-
-        if(count<=0)
-            return false;
-
-        for(size_t c=i;c<=last;++c)
-            code_str[c]=' ';
-
-		if(type_name.compare(0,5,"float")==0)
-        {
-            shader_obj::uniform &u=shdr.add_uniform(name);
-            if(type==vertex)
-                u.vs_offset=(int)buf.buffer.size();
-            else
-                u.ps_offset=(int)buf.buffer.size();
-
-            char dim=(type_name.length()==6)?type_name[5]:'\0';
-            int dimension;
-            switch(dim)
-            {
-            case '3':
-                dimension=3;
-                u.type=uniform_vec3;
-                buf.buffer.resize(buf.buffer.size()+4*count,0.0f);
-                break;
-
-            case '4':
-                dimension=4;
-                u.type=uniform_vec4;
-                buf.buffer.resize(buf.buffer.size()+4*count,0.0f);
-                break;
-
-            default:  //ToDo: log error
-                return false;
-            };
-
-            if(u.vs_offset>=0 && u.ps_offset>=0) //ToDo: log error
-            {
-                if(u.array_size!=count)
-                    return false;
-
-                if(u.dimension!=dimension)
-                    return false;
-            }
-
-            u.array_size=count;
-            u.dimension=dimension;
-
-            buf.changed=true;
-        }
-        else if(type_name=="sampler2D")
-        {
-            int reg=-1;
-            for(int i=0;i<int(m_samplers.size());++i)
-            {
-				if(m_samplers[i].name==name)
-                {
-					reg=m_samplers[i].layer;
-                    break;
-                }
-            }
-
-            if(reg<0) //ToDo: log error
-                return false;
-
-            char buf[512];
-            sprintf(buf,"Texture2D %s: register(t%d); SamplerState %s_nya_st: register(s%d);\n",name.c_str(),reg,name.c_str(),reg);
-            code_final.append(buf);
-        }
-    }
-
-    if(!buf.buffer.empty())
-    {
-        code_final.append("cbuffer NyaUniformsBuffer : register");
-        if(type==vertex)
-            code_final.append("(b1){");
-        else
-            code_final.append("(b2){");
-
-        for(size_t i=0;i<shdr.uniforms.size();++i)
-        {
-            const shader_obj::uniform &u=shdr.uniforms[i];
-
-            if(type==vertex)
-            {
-                if(u.vs_offset<0)
-                    continue;
-            }
-            else if(type==pixel)
-            {
-                if(u.ps_offset<0)
-                    continue;
-            }
-
-            switch(u.dimension)
-            {
-            case 2:
-            case 3:
-            case 4:
-                code_final.append("float");
-                code_final.push_back('0'+u.dimension);
-                code_final.push_back(' ');
-                code_final.append(u.name);
-                if(u.array_size>1)
-                {
-                    char buf[255];
-                    sprintf(buf,"[%d]",u.array_size);
-                    code_final.append(buf);
-                }
-                code_final.push_back(';');
-                break;
-
-            default: return false;
-            }
-        }
-
-        code_final.append("}\n");
-
-        CD3D11_BUFFER_DESC desc(buf.buffer.size()*sizeof(float),D3D11_BIND_CONSTANT_BUFFER);
-        get_device()->CreateBuffer(&desc,nullptr,&buf.dx_buffer);
-    }
-
-    if(type==vertex)
-    {
-        shdr.layouts.clear();
-
-        shdr.constants.mvp_matrix=code_str.find("ModelViewProjectionMatrix")!=std::string::npos;
-        shdr.constants.mv_matrix=code_str.find("ModelViewMatrix")!=std::string::npos;
-        for(size_t i=code_str.find("ProjectionMatrix");i!=std::string::npos;
-                                                       i=code_str.find("ProjectionMatrix",i+16))
-        {
-            if(code_str[i-1]!='w')
-            {
-                shdr.constants.p_matrix=true;
-                break;
-            }
-        }
-
-        int size=0;
-        if(shdr.constants.mvp_matrix) size+=16;
-        if(shdr.constants.mv_matrix) size+=16;
-        if(shdr.constants.p_matrix) size+=16;
-
-        if(shdr.constants.dx_buffer)
-            shdr.constants.dx_buffer->Release();
-
-        shdr.constants.dx_buffer=0;
-
-        if(size>0)
-        {
-            code_final.append("cbuffer NyaConstantBuffer : register(b0){");
-            if(shdr.constants.mvp_matrix) code_final.append("matrix ModelViewProjectionMatrix;");
-            if(shdr.constants.mv_matrix) code_final.append("matrix ModelViewMatrix;");
-            if(shdr.constants.p_matrix) code_final.append("matrix ProjectionMatrix;");
-            code_final.append("}\n");
-
-            CD3D11_BUFFER_DESC desc(size*sizeof(float),D3D11_BIND_CONSTANT_BUFFER);
-            get_device()->CreateBuffer(&desc,nullptr,&shdr.constants.dx_buffer);
-        }
-
-        shdr.constants.buffer.resize(size);
-    }
-
-    code_final.append(code_str);
-
-    if(render_csp)
-        render_csp->get(code_final.c_str(),shdr.compiled[type]);
-
+    if(render_csp) render_csp->get(code,shdr.compiled[type]);
     if(!shdr.compiled[type].get_data())
     {
 #ifdef WINDOWS_METRO
@@ -637,18 +433,18 @@ bool shader::add_program(program_type type,const char*code)
                                                  "set compiled_shaders_provider and add compiled shaders cache\n";
         return false;
 #else
-        ID3D10Blob *compiled=0;
-	    ID3D10Blob *error=0;
-        if(type==vertex)
-    	    D3DCompile(code_final.c_str(),code_final.size(),0,0,0,"main","vs_4_0_level_9_3",0,0,&compiled,&error);
-        else if(type==pixel)
-            D3DCompile(code_final.c_str(),code_final.size(),0,0,0,"main","ps_4_0_level_9_3",0,0,&compiled,&error);
 
+        for(auto s:m_samplers) parser.register_sampler(s.name.c_str(),s.layer);
+        parser.convert_to_hlsl();
+        const char *profile=type==pixel?"ps_4_0_level_9_3":"vs_4_0_level_9_3";
+        ID3D10Blob *compiled=0, *error=0;
+        D3DCompile(parser.get_code(),strlen(parser.get_code()),0,0,0,"main",profile,0,0,&compiled,&error);
         if(error)
         {
             log()<<"Can`t compile "<<type_str[type]<<" shader: \n";
             std::string error_text((const char *)error->GetBufferPointer(),error->GetBufferSize());
             log()<<error_text.c_str()<<"\n";
+            log()<<"Shader code:\n"<<parser.get_code()<<"\n\n";
 
             error->Release();
             return false;
@@ -658,29 +454,95 @@ bool shader::add_program(program_type type,const char*code)
         memcpy(shdr.compiled[type].get_data(),compiled->GetBufferPointer(),compiled->GetBufferSize());
         compiled->Release();
 
-        if(render_csp)
-            render_csp->set(code_final.c_str(),shdr.compiled[type]);
+        if(render_csp) render_csp->set(code,shdr.compiled[type]); //ToDo
 #endif
+    }
+
+    if(type==vertex && get_device()->CreateVertexShader(shdr.compiled[type].get_data(),
+                                            shdr.compiled[type].get_size(),nullptr,&shdr.vertex_program)<0)
+    {
+        log()<<"Can`t create "<<type_str[type]<<" shader\n";
+        return false;
+    }
+
+    if(type==pixel && get_device()->CreatePixelShader(shdr.compiled[type].get_data(),
+                                           shdr.compiled[type].get_size(),nullptr,&shdr.pixel_program)<0)
+    {
+        log()<<"Can`t create "<<type_str[type]<<" shader\n";
+        return false;
     }
 
     if(type==vertex)
     {
-        if(get_device()->CreateVertexShader(shdr.compiled[type].get_data(),
-                                            shdr.compiled[type].get_size(),nullptr,&shdr.vertex_program)<0)
+        shdr.layouts.clear();
+
+        int size=0;
+        for(int i=0;i<parser.get_uniforms_count();++i)
         {
-            log()<<"Can`t create "<<type_str[type]<<" shader\n";
-            return false;
+            const shader_code_parser::variable v=parser.get_uniform(i);
+            if(v.type!=shader_code_parser::type_mat4)
+                continue;
+
+            if(v.name=="_nya_ModelViewProjectionMatrix") shdr.constants.mvp_matrix=size,size+=16;
+            else if(v.name=="_nya_ModelViewMatrix") shdr.constants.mv_matrix=size,size+=16;
+            else if(v.name=="_nya_ProjectionMatrix") shdr.constants.p_matrix=size,size+=16;
         }
+
+        if(shdr.constants.dx_buffer)
+            shdr.constants.dx_buffer->Release(),shdr.constants.dx_buffer=0;
+
+        if(size>0)
+        {
+            CD3D11_BUFFER_DESC desc(size*sizeof(float),D3D11_BIND_CONSTANT_BUFFER);
+            get_device()->CreateBuffer(&desc,nullptr,&shdr.constants.dx_buffer);
+        }
+        shdr.constants.buffer.resize(size,0.0f);
     }
 
-    if(type==pixel)
+    shader_obj::uniforms_buffer &buf=(type==vertex)?shdr.vertex_uniforms:shdr.pixel_uniforms;
+
+    if(buf.dx_buffer)
+        buf.dx_buffer->Release(),buf.dx_buffer=0;
+
+    int uniforms_buf_size=0;
+    for(int i=0;i<parser.get_uniforms_count();++i)
     {
-        if(get_device()->CreatePixelShader(shdr.compiled[type].get_data(),
-                                           shdr.compiled[type].get_size(),nullptr,&shdr.pixel_program)<0)
+        const shader_code_parser::variable v=parser.get_uniform(i);
+        if(v.type==shader_code_parser::type_mat4)
         {
-            log()<<"Can`t create "<<type_str[type]<<" shader\n";
-            return false;
+            if(v.name=="_nya_ModelViewProjectionMatrix") continue;
+            if(v.name=="_nya_ModelViewMatrix") continue;
+            if(v.name=="_nya_ProjectionMatrix") continue;
         }
+
+        if(v.type==shader_code_parser::type_sampler2d || v.type==shader_code_parser::type_sampler_cube)
+            continue;
+
+        shader_obj::uniform &u=shdr.add_uniform(v.name);
+        if(type==vertex)
+            u.vs_offset=uniforms_buf_size;
+        else
+            u.ps_offset=uniforms_buf_size;
+
+        if(u.vs_offset>=0 && u.ps_offset>=0) //ToDo: log error
+        {
+            if(u.array_size!=v.array_size)
+                return false;
+
+            if(u.type!=convert_uniform_type(v.type))
+                return false;
+        }
+
+        u.array_size=v.array_size;
+        u.type=convert_uniform_type(v.type);
+        uniforms_buf_size+=(v.type==shader_code_parser::type_mat4?16:4)*v.array_size;
+    }
+    buf.buffer.resize(uniforms_buf_size,0.0f);
+    if(uniforms_buf_size>0)
+    {
+        CD3D11_BUFFER_DESC desc(uniforms_buf_size*sizeof(float),D3D11_BIND_CONSTANT_BUFFER);
+        get_device()->CreateBuffer(&desc,nullptr,&buf.dx_buffer);
+        buf.changed=true;
     }
 
 #else
@@ -833,12 +695,12 @@ bool shader::add_program(program_type type,const char*code)
 #endif
 
     for(int i=0;i<parser.get_uniforms_count();++i)
-        {
+    {
         const shader_code_parser::variable from=parser.get_uniform(i);
         shader_obj::uniform &to=shdr.add_uniform(from.name.c_str());
         to.array_size=from.array_size;
         to.type=convert_uniform_type(from.type);
-        }
+    }
 
     return true;
 }
@@ -866,27 +728,17 @@ void shader::apply(bool ignore_cache)
     {
         if(shdr.constants.dx_buffer)
         {
-            int offset=0;
-            if(shdr.constants.mvp_matrix)
-            {
-                memcpy(&shdr.constants.buffer[0],
-                       transform::get().get_modelviewprojection_matrix().m[0],16*sizeof(float));
-                offset+=16;
-            }
-
-            if(shdr.constants.mv_matrix)
-            {
-                memcpy(&shdr.constants.buffer[0]+offset,
+            if(shdr.constants.mv_matrix>=0)
+                memcpy(&shdr.constants.buffer[shdr.constants.mv_matrix],
                        transform::get().get_modelview_matrix().m[0],16*sizeof(float));
-                offset+=16;
-            }
 
-            if(shdr.constants.p_matrix)
-            {
-                memcpy(&shdr.constants.buffer[0]+offset,
+            if(shdr.constants.mvp_matrix>=0)
+                memcpy(&shdr.constants.buffer[shdr.constants.mvp_matrix],
+                       transform::get().get_modelviewprojection_matrix().m[0],16*sizeof(float));
+
+            if(shdr.constants.p_matrix>=0)
+                memcpy(&shdr.constants.buffer[shdr.constants.p_matrix],
                        transform::get().get_projection_matrix().m[0],16*sizeof(float));
-                offset+=16;
-            }
 
             get_context()->UpdateSubresource(shdr.constants.dx_buffer,0,NULL,&shdr.constants.buffer[0],0,0);
         }
