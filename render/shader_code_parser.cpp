@@ -236,7 +236,7 @@ bool shader_code_parser::convert_to_modern_glsl(const char *precision)
     if(!parse_attributes(m_replace_str.c_str(),m_replace_str.c_str()))
         return false;
 
-    std::string prefix;
+    std::string prefix="#define OPENGL_ES\n";
 
     for(int i=0;i<(int)m_uniforms.size();++i)
         prefix.append("uniform mat4 "+m_uniforms[i].name+";\n");
