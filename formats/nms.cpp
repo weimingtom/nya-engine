@@ -434,7 +434,7 @@ void nms_skeleton_chunk::sort()
 
             had_sorted=true;
             std::swap(bones[j],bones[p]);
-            for(int k=0;k<bones.size();++k)
+            for(int k=0;k<(int)bones.size();++k)
             {
                 if(bones[k].parent==j)
                     bones[k].parent=p;
