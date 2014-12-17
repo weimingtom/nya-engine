@@ -155,8 +155,8 @@
     <Image Include="..\..\..\tests\test cube\tiles\IconicTileSmall.png" />
   </ItemGroup>
   <ItemGroup>
-    <Media Include="3284333113d.nsc" />
-    <Media Include="732712638d.nsc" />
+    <Media Include="2450442300d.nsc" />
+    <Media Include="4103747690d.nsc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsPhone\v$(TargetPlatformVersion)\Microsoft.Cpp.WindowsPhone.$(TargetPlatformVersion).targets" />

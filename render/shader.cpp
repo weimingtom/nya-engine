@@ -454,7 +454,7 @@ bool shader::add_program(program_type type,const char*code)
         memcpy(shdr.compiled[type].get_data(),compiled->GetBufferPointer(),compiled->GetBufferSize());
         compiled->Release();
 
-        if(render_csp) render_csp->set(code,shdr.compiled[type]); //ToDo
+        if(render_csp) render_csp->set(code,shdr.compiled[type]);
 #endif
     }
 

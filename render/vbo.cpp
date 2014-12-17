@@ -286,7 +286,7 @@ void reset_vbo_state()
     static int max_tex_coord=-1;
     if(max_tex_coord<0)
         glGetIntegerv(GL_MAX_TEXTURE_COORDS,&max_tex_coord);
-    for(unsigned int i=0;i<max_tex_coord;++i)
+    for(int i=0;i<max_tex_coord;++i)
     {
         glClientActiveTexture(GL_TEXTURE0_ARB+i);
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);

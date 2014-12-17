@@ -16,21 +16,21 @@ class test_cube: public nya_system::app
 private:
 	void on_init_splash()
 	{
-	    nya_log::get_log()<<"on_init_splash\n";
+	    nya_log::log()<<"on_init_splash\n";
 
 		nya_render::set_clear_color(0.0f,0.6f,0.7f,1.0f);
 	}
 
 	void on_splash(unsigned int dt)
 	{
-	    nya_log::get_log()<<"on_splash\n";
+	    nya_log::log()<<"on_splash\n";
 
 		nya_render::clear(true,true);
     }
 
 	void on_init()
 	{
-	    nya_log::get_log()<<"on_init\n";
+	    nya_log::log()<<"on_init\n";
 
 	    nya_render::set_clear_color(0.2f,0.4f,0.5f,0.0f);
 		nya_render::set_clear_depth(1.0f);
@@ -72,39 +72,19 @@ private:
 #endif
 
 		const char *vs_code=
-#ifdef DIRECTX11
-            "struct vsin {	float3 pos : POSITION; float3 color : COLOR0; };"
-		    "struct vsout { float4 pos : SV_POSITION; float3 color : COLOR0; };"
-			"vsout main(vsin input)"
-            "{"
-                "vsout output;"
-                "output.pos=mul(ModelViewProjectionMatrix,float4(input.pos,1.0));"
-                "output.color=input.color;"
-                "return output;"
-            "}";
-#else
 			"varying vec4 color;"
 			"void main()"
 			"{"
 				"color=gl_Color;"
                 "gl_Position=gl_ModelViewProjectionMatrix*gl_Vertex;"
 			"}";
-#endif
 
 		const char *ps_code=
-#ifdef DIRECTX11
-            "struct psin { float4 pos : SV_POSITION; float3 color : COLOR0; };"
-            "float4 main(psin input):SV_TARGET"
-            "{"
-                "return float4(input.color,1.0f);"
-            "}";
-#else
 			"varying vec4 color;"
 			"void main()"
 			"{"
 				"gl_FragColor=color;"
 			"}";
-#endif
 
 		m_shader.add_program(nya_render::shader::vertex,vs_code);
 		m_shader.add_program(nya_render::shader::pixel,ps_code);
@@ -147,7 +127,7 @@ private:
 
     void on_resize(unsigned int w,unsigned int h)
     {
-        nya_log::get_log()<<"on_resize "<<w<<" "<<h<<"\n";
+        nya_log::log()<<"on_resize "<<w<<" "<<h<<"\n";
 
         if(!w || !h)
             return;
@@ -159,7 +139,7 @@ private:
 
 	void on_free()
 	{
-		nya_log::get_log()<<"on_free\n";
+		nya_log::log()<<"on_free\n";
 
 		m_vbo.release();
 		m_shader.release();
@@ -175,7 +155,7 @@ private:
 };
 
 #ifdef _WIN32
-    #ifdef WINDOWS_PHONE8
+    #ifdef WINDOWS_METRO
         int main( Platform::Array<Platform::String^>^ args)
     #else
     	int CALLBACK WinMain(HINSTANCE,HINSTANCE,LPSTR,int)
@@ -191,8 +171,8 @@ private:
     nya_log::set_log(&log);
     */
 
-#ifndef WINDOWS_PHONE8
-    nya_log::get_log()<<"test cube started from path "
+#ifndef WINDOWS_METRO
+    nya_log::log()<<"test cube started from path "
                       <<nya_system::get_app_path()<<"\n";
 #endif
 
