@@ -119,8 +119,8 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
             }
 
             desc.samplers[semantics]=name;
-            int tex_idx=(int)res.samplers.size();
-            res.samplers[semantics]=tex_idx;
+            if(std::find(res.samplers.begin(),res.samplers.end(),semantics)==res.samplers.end())
+                res.samplers.push_back(semantics);
         }
         else if(strcmp(section_type,"@vertex")==0)
         {
@@ -200,9 +200,8 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
     //log()<<"vertex <"<<res.vertex.c_str()<<">\n";
     //log()<<"pixel <"<<res.pixel.c_str()<<">\n";
 
-    for(shared_shader::samplers_map::iterator it=res.samplers.begin();
-        it!=res.samplers.end();++it)
-        res.shdr.set_sampler(desc.samplers[it->first].c_str(),it->second);
+    for(unsigned int i=0;i<(unsigned int)res.samplers.size();++i)
+        res.shdr.set_sampler(desc.samplers[res.samplers[i]].c_str(),i);
 
     for(int i=0;i<shared_shader::predefines_count;++i)
     {
@@ -441,23 +440,21 @@ int shader_internal::get_texture_slot(const char *semantics) const
     if(!semantics || !m_shared.is_valid())
         return -1;
 
-    shared_shader::samplers_map::const_iterator it=m_shared->samplers.find(semantics);
-    if(it==m_shared->samplers.end())
-        return -1;
+    for(int i=0;i<(int)m_shared->samplers.size();++i)
+    {
+        if(m_shared->samplers[i]==semantics)
+            return i;
+    }
 
-    return it->second;
+    return -1;
 }
 
 const char *shader_internal::get_texture_semantics(int slot) const
 {
-    for(shared_shader::samplers_map::const_iterator it=m_shared->samplers.begin();
-        it!=m_shared->samplers.end();++it)
-    {
-        if(it->second==slot)
-            return it->first.c_str();
-    }
+    if(!m_shared.is_valid() || slot<0 || slot>=(int)m_shared->samplers.size())
+        return 0;
 
-    return 0;
+    return m_shared->samplers[slot].c_str();
 }
 
 int shader_internal::get_texture_slots_count() const
@@ -471,9 +468,7 @@ int shader_internal::get_texture_slots_count() const
 const shared_shader::uniform &shader_internal::get_uniform(int idx) const
 {
     if(!m_shared.is_valid() || idx<0 || idx >=(int)m_shared->uniforms.size())
-    {
         return nya_memory::get_invalid_object<shared_shader::uniform>();
-    }
 
     return m_shared->uniforms[idx];
 }

@@ -16,8 +16,7 @@ struct shared_shader
 {
     nya_render::shader shdr;
 
-    typedef std::map<std::string,int> samplers_map;
-    samplers_map samplers;
+    std::vector<std::string> samplers;
 
     enum predefined_values
     {
