@@ -2,11 +2,12 @@
 
 #pragma once
 
-#include "log/output_stream.h"
 #include "math/vector.h"
 #include <string>
 #include <vector>
 #include <list>
+
+namespace nya_log { class ostream_base; }
 
 namespace nya_formats
 {
@@ -17,7 +18,6 @@ public:
     static const size_t no_size=(size_t)-1;
 
     bool load_from_data(const char *data,size_t text_size=no_size);
-    bool load_from_file(const char *filename);
 
     int get_sections_count() const { return (int)m_sections.size(); }
     const char *get_section_type(int idx) const;

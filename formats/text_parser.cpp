@@ -1,10 +1,8 @@
 //https://code.google.com/p/nya-engine/
 
 #include "text_parser.h"
-#include "log/warning.h"
+#include "log/log.h"
 #include "memory/invalid_object.h"
-#include "resources/resources.h"
-#include "memory/tmp_buffer.h"
 
 #include <iostream>
 #include <sstream>
@@ -237,22 +235,6 @@ bool text_parser::load_from_data(const char *text,size_t text_size)
         m_sections[sections_count-1].value=std::string(text+subsection_start_idx,subsection_end_idx-subsection_start_idx);
 
     return true;
-}
-
-bool text_parser::load_from_file(const char *filename)
-{
-    nya_resources::resource_data* res=nya_resources::get_resources_provider().access(filename);
-    if(!res)
-    {
-        nya_log::log()<<"file load error: unable to access resource '"<<filename<<"'\n";
-        return false;
-    }
-
-    const size_t data_size=res->get_size();
-    nya_memory::tmp_buffer_scoped buf(data_size);
-    res->read_all(buf.get_data());
-    res->release();
-    return load_from_data((const char*)buf.get_data(),data_size);
 }
 
 void text_parser::fill_section(section &s,const line &l)
