@@ -10,6 +10,7 @@ xcschememanagement.plist
 *.suo
 *.ncb
 *.sdf
+*.opensdf
 *.vcproj.*.user
 *.vcxproj.user
 *.pro.user
