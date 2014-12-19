@@ -3,11 +3,13 @@
 #include <stdio.h>
 #include <string.h>
 #include "log/log.h"
+#include "render/shader_code_parser.h"
 #include <D3Dcompiler.h>
 #include <io.h>
 #include <fcntl.h>
 
 #pragma comment(lib, "D3DCompiler.lib")
+#pragma warning(disable: 4996)
 
 const char *help="Usage: shader_compiler mode\n"
                  "accepts shader's code from stdin\n"
@@ -16,15 +18,15 @@ const char *help="Usage: shader_compiler mode\n"
                  "modes:\n"
                  "hlsl - compiles hlsl shader\n"
                  "hlsl2asm - compiles hlsl shader and returns text assembly\n"
-                 //"glsl - compiles glsl shader\n"
-                 //"glsl2hlsl - converts glsl shader to hlsl\n"
+                 "glsl - compiles glsl shader\n"
+                 "glsl2hlsl - converts glsl shader to hlsl\n"
                  //"nshvs - compiles vertex shader from nsh\n"
                  //"nshps - compiles pixel shader from nsh\n"
                  "\n";
 
                  //ToDo: allow sampler index assignment
 
-bool copmile_hlsl_code(const char *code,bool text_asm)
+bool compile_hlsl_code(const char *code,bool text_asm)
 {
     if(!code)
         return false;
@@ -93,26 +95,35 @@ int main(int argc, char* argv[])
     }
 
     if(strcmp(argv[1],"hlsl")==0)
-        return copmile_hlsl_code(shader_code.c_str(),false)?0:-1;
+        return compile_hlsl_code(shader_code.c_str(),false)?0:-1;
 
     if(strcmp(argv[1],"hlsl2asm")==0)
-        return copmile_hlsl_code(shader_code.c_str(),true)?0:-1;
+        return compile_hlsl_code(shader_code.c_str(),true)?0:-1;
 
+    const bool is_glsl2hlsl=strcmp(argv[1],"glsl2hlsl")==0;
+    if(is_glsl2hlsl || strcmp(argv[1],"glsl")==0)
+    {
+        nya_render::shader_code_parser parser(shader_code.c_str());
+        if(!parser.convert_to_hlsl())
+        {
+            fprintf(stderr,"Error: cannot convert to hlsl\n");
+            return -1;
+        }
+
+        if(is_glsl2hlsl)
+        {
+            fwrite(parser.get_code(),1,strlen(parser.get_code()),stdout);
+            return 0;
+        }
+        else
+            return compile_hlsl_code(shader_code.c_str(),false)?0:-1;
+    }
 /*
-    if(strcmp(argv[1],"nshvs")==0)
+    const bool is_nshvs=strcmp(argv[1],"nshvs")==0;
+    if(is_nshvs || strcmp(argv[1],"nshps")==0)
     {
     }
-    else if(strcmp(argv[1],"nshps")==0)
-    {
-    }
-    else if(strcmp(argv[1],"glsl")==0)
-    {
-    }
-    else if(strcmp(argv[1],"glsl2hlsl")==0)
-    {
-    }
-    */
-
+*/
     fprintf(stderr,"Error: invalid compile mode: %s\n",argv[1]);
 
 	return -1;
