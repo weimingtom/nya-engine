@@ -68,6 +68,11 @@ bool compile_hlsl_code(const char *code,bool text_asm)
     return true;
 }
 
+bool nsh2hlsl(bool fragment,std::string &result)
+{
+    return false;
+}
+
 int main(int argc, char* argv[])
 {
     if(argc<2)
@@ -116,15 +121,22 @@ int main(int argc, char* argv[])
             return 0;
         }
         else
-            return compile_hlsl_code(shader_code.c_str(),false)?0:-1;
+            return compile_hlsl_code(parser.get_code(),false)?0:-1;
     }
-/*
+
     const bool is_nshvs=strcmp(argv[1],"nshvs")==0;
     if(is_nshvs || strcmp(argv[1],"nshps")==0)
     {
-    }
-*/
-    fprintf(stderr,"Error: invalid compile mode: %s\n",argv[1]);
+        std::string hlsl_code;
+        if(!nsh2hlsl(is_nshvs,hlsl_code))
+        {
+            fprintf(stderr,"Error: cannot convert to hlsl\n");
+            return -1;
+        }
 
+        return compile_hlsl_code(hlsl_code.c_str(),false)?0:-1;
+    }
+
+    fprintf(stderr,"Error: invalid compile mode: %s\n",argv[1]);
 	return -1;
 }
