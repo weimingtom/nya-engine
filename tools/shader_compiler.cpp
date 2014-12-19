@@ -16,15 +16,15 @@ const char *help="Usage: shader_compiler mode\n"
                  "modes:\n"
                  "hlsl - compiles hlsl shader\n"
                  "hlsl2asm - compiles hlsl shader and returns text assembly\n"
-                 "glsl - compiles glsl shader\n"
-                 "glsl2hlsl - converts glsl shader to hlsl\n"
-                 "nshvs - compiles vertex shader from nsh\n"
-                 "nshps - compiles pixel shader from nsh\n"
+                 //"glsl - compiles glsl shader\n"
+                 //"glsl2hlsl - converts glsl shader to hlsl\n"
+                 //"nshvs - compiles vertex shader from nsh\n"
+                 //"nshps - compiles pixel shader from nsh\n"
                  "\n";
 
                  //ToDo: allow sampler index assignment
 
-bool copmile_hlsl_code(const char *code)
+bool copmile_hlsl_code(const char *code,bool text_asm)
 {
     if(!code)
         return false;
@@ -35,14 +35,33 @@ bool copmile_hlsl_code(const char *code)
     D3DCompile(code,strlen(code),0,0,0,"main",profile,0,0,&compiled,&error);
     if(error)
     {
-        fprintf(stderr,"Can`t compile shader with profile %s\n",profile);
+        fprintf(stderr,"Error: can`t compile shader with profile %s\n",profile);
         std::string error_text((const char *)error->GetBufferPointer(),error->GetBufferSize());
         fprintf(stderr,"%s\n",error_text.c_str());
         error->Release();
         return false;
     }
 
-    fwrite(compiled->GetBufferPointer(),1,compiled->GetBufferSize(),stdout);
+    if(!compiled)
+    {
+        fprintf(stderr,"Error: unknown compile error\n");
+        return false;
+    }
+
+    if(text_asm)
+    {
+        ID3D10Blob *asm_blob;
+        D3DDisassemble(compiled->GetBufferPointer(),compiled->GetBufferSize(),
+                       D3D_DISASM_ENABLE_INSTRUCTION_NUMBERING,"",&asm_blob);
+        if(!asm_blob)
+            return false;
+
+        fwrite(asm_blob->GetBufferPointer(),1,asm_blob->GetBufferSize(),stdout);
+        asm_blob->Release();
+    }
+    else
+        fwrite(compiled->GetBufferPointer(),1,compiled->GetBufferSize(),stdout);
+
     compiled->Release();
     return true;
 }
@@ -74,12 +93,12 @@ int main(int argc, char* argv[])
     }
 
     if(strcmp(argv[1],"hlsl")==0)
-        return copmile_hlsl_code(shader_code.c_str())?0:-1;
+        return copmile_hlsl_code(shader_code.c_str(),false)?0:-1;
 
-    /*
     if(strcmp(argv[1],"hlsl2asm")==0)
-    {
-    }
+        return copmile_hlsl_code(shader_code.c_str(),true)?0:-1;
+
+/*
     if(strcmp(argv[1],"nshvs")==0)
     {
     }
