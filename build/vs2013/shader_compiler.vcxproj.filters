@@ -5,22 +5,28 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Source Files\nya">
+      <UniqueIdentifier>{76e0ca9a-d685-4b00-90ed-bf7151c88348}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\tools\shader_compiler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\render\shader_code_parser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\formats\text_parser.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\nya</Filter>
     </ClCompile>
     <ClCompile Include="..\..\log\log.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\nya</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\system\shaders_cache_provider.cpp">
+      <Filter>Source Files\nya</Filter>
     </ClCompile>
     <ClCompile Include="..\..\log\stdout_log.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\nya</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\formats\text_parser.cpp">
+      <Filter>Source Files\nya</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

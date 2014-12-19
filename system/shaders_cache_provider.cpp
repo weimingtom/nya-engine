@@ -2,6 +2,7 @@
 
 #include "shaders_cache_provider.h"
 #include "render/platform_specific_gl.h"
+#include "system/shaders_cache_provider.h"
 
 #include <string.h>
 #include <stdio.h>
