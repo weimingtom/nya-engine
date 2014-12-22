@@ -4,10 +4,10 @@
 
 #include "resources.h"
 #include <string>
+#include <vector>
 
 namespace nya_resources
 {
-class file_resource_info;
 
 class file_resources_provider: public resources_provider
 {
@@ -19,20 +19,19 @@ public:
     bool set_folder(const char*,bool recursive=true,bool ignore_nonexistent=false);
 
 public:
-    resource_info *first_res_info();
+    int get_resources_count();
+    const char *get_resource_name(int idx);
 
 public:
-    file_resources_provider(): m_entries(0), m_recursive(true) {}
-    ~file_resources_provider() { clear_entries(); }
+    file_resources_provider(): m_recursive(true) {}
 
 private:
-    void enumerate_folder(const char*folder_name,file_resource_info **last);
-    void clear_entries();
+    void enumerate_folder(const char*folder_name);
 
 private:
-    file_resource_info *m_entries;
     std::string m_path;
     bool m_recursive;
+    std::vector<std::string> m_resource_names;
 };
 
 }

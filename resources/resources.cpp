@@ -3,11 +3,15 @@
 #include "resources.h"
 #include "file_resources_provider.h"
 //#include "system/system.h"
+#include <string.h>
+
+#if defined(_WIN32)
+    #define strncasecmp _strnicmp
+#endif
 
 namespace
 {
     nya_resources::resources_provider *res_provider=0;
-
     nya_log::log_base *resources_log=0;
 }
 
@@ -46,6 +50,18 @@ nya_log::log_base &log()
 
     resources_log->set_tag(resources_log_tag);
     return *resources_log;
+}
+
+bool check_extension(const char *name,const char *ext)
+{
+    if(!name || !ext)
+        return false;
+
+    const size_t name_len=strlen(name),ext_len=strlen(ext);
+    if(ext_len>name_len)
+        return false;
+
+    return strcasecmp(name+name_len-ext_len,ext);
 }
 
 }

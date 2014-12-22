@@ -7,85 +7,6 @@
 namespace nya_resources
 {
 
-class composite_entry_info: public resource_info
-{
-public:
-    void set_info(resource_info *info) { m_info=info; }
-    void set_next(composite_entry_info *next) { m_next=next; }
-
-public:
-    resource_data *access()
-    {
-        if(!m_info)
-        {
-            log()<<"unable to acess entry: invalid info\n";
-            return 0;
-        }
-
-        return m_info->access();
-    }
-
-    const char *get_name() const
-    {
-        if(!m_info)
-        {
-            log()<<"unable to get entry name: invalid info\n";
-            return 0;
-        }
-
-        if(m_ignore_case)
-            return m_lowcase_name.c_str();
-
-        return m_info->get_name();
-    }
-
-    bool check_extension(const char *ext) const
-    {
-        if(!m_info)
-        {
-            log()<<"unable to check entry extension: invalid info\n";
-            return 0;
-        }
-
-        if(m_ignore_case)
-        {
-            std::string ext_str(ext);
-
-            std::transform(ext_str.begin(),ext_str.end(),ext_str.begin(),::tolower);
-
-            return m_info->check_extension(ext_str.c_str());
-        }
-
-        return m_info->check_extension(ext);
-    }
-
-    resource_info *get_next() const { return m_next; };
-
-public:
-    composite_entry_info(): m_info(0), m_next(0), m_ignore_case(false) {}
-
-private:
-    resource_info *m_info;
-    composite_entry_info *m_next;
-
-public:
-    std::string m_lowcase_name;
-    bool m_ignore_case;
-};
-
-}
-
-namespace
-{
-    nya_memory::pool<nya_resources::composite_entry_info,32> entries;
-}
-
-namespace nya_resources
-{
-
-typedef std::map<std::string,resource_info*> res_info_map;
-typedef res_info_map::iterator res_info_iterator;
-
 void composite_resources_provider::add_provider(resources_provider *provider)
 {
     if(!provider)
@@ -94,58 +15,32 @@ void composite_resources_provider::add_provider(resources_provider *provider)
         return;
     }
 
+    m_resource_names.clear();
     m_providers.push_back(provider);
-
     if(m_cache_entries)
-        cache_provider(provider);
+        cache_provider((int)m_providers.size()-1);
 }
 
-void composite_resources_provider::cache_provider(resources_provider *provider)
+void composite_resources_provider::cache_provider(int idx)
 {
-    if(!provider)
+    if(idx<0 || idx>=(int)m_providers.size())
         return;
 
-    resource_info *entry=provider->first_res_info();
-    while(entry)
+    resources_provider *provider=m_providers[idx];
+    for(int i=0;i<provider->get_resources_count();++i)
     {
-        const char *name=entry->get_name();
+        const char *name=provider->get_resource_name(i);
         if(!name)
-        {
-            entry=entry->get_next();
             continue;
-        }
 
         std::string name_str(name);
 
         if(m_ignore_case)
             std::transform(name_str.begin(),name_str.end(),name_str.begin(),::tolower);
 
-        std::pair<res_info_iterator,bool> ir=m_resources_info.insert(std::make_pair(name_str,entry));
-        if(!ir.second)
-        {
-            //log()<<"unable to add composite provider entry "<<entry->get_name()
-            //        <<": already exist\n";
-        }
-        else
-        {
-            composite_entry_info *last_entry=entries.allocate();
-
-            last_entry->set_info(entry);
-            if(m_ignore_case)
-            {
-                last_entry->m_ignore_case=true;
-                last_entry->m_lowcase_name=name_str;
-            }
-
-            if(m_last_entry)
-                m_last_entry->set_next(last_entry);
-            else
-                m_entries=last_entry;
-
-            m_last_entry=last_entry;
-        }
-
-        entry=entry->get_next();
+        entry &e=m_cached_entries[name_str];
+        e.original_name.assign(name);
+        e.prov_idx=idx;
     }
 }
 
@@ -168,34 +63,26 @@ resource_data *composite_resources_provider::access(const char *resource_name)
         return 0;
     }
 
-    res_info_iterator it;
+    entries_map::iterator it;
 
     if(m_ignore_case)
     {
         std::string res_str(resource_name);
         std::transform(res_str.begin(),res_str.end(),res_str.begin(),::tolower);
 
-        it=m_resources_info.find(res_str.c_str());
+        it=m_cached_entries.find(res_str.c_str());
     }
     else
-        it=m_resources_info.find(resource_name);
+        it=m_cached_entries.find(resource_name);
 
-    if(it==m_resources_info.end())
+    if(it==m_cached_entries.end())
     {
         log()<<"unable to access composite entry "<<resource_name
                 <<": not found\n";
         return 0;
     }
 
-    resource_info *entry=it->second;
-    if(!entry)
-    {
-        log()<<"unable to access composite entry "<<resource_name
-                <<": invalid entry\n";
-        return 0;
-    }
-
-    return entry->access();
+    return m_providers[it->second.prov_idx]->access(it->second.original_name.c_str());
 }
 
 bool composite_resources_provider::has(const char *resource_name)
@@ -214,19 +101,15 @@ bool composite_resources_provider::has(const char *resource_name)
         return false;
     }
 
-    res_info_iterator it;
-
     if(m_ignore_case)
     {
         std::string res_str(resource_name);
         std::transform(res_str.begin(),res_str.end(),res_str.begin(),::tolower);
 
-        it=m_resources_info.find(res_str.c_str());
+        return m_cached_entries.find(res_str.c_str())!=m_cached_entries.end();
     }
-    else
-        it=m_resources_info.find(resource_name);
 
-    return it!=m_resources_info.end();
+    return m_cached_entries.find(resource_name)!=m_cached_entries.end();
 }
 
 void composite_resources_provider::enable_cache()
@@ -234,44 +117,72 @@ void composite_resources_provider::enable_cache()
     if(m_cache_entries)
         return;
 
-    for(size_t i=0;i<m_providers.size();++i)
-        cache_provider(m_providers[i]);
+    m_cached_entries.clear();
+    for(int i=0;i<(int)m_providers.size();++i)
+        cache_provider(i);
 
     m_cache_entries=true;
 }
 
-resource_info *composite_resources_provider::first_res_info()
+int composite_resources_provider::get_resources_count()
 {
-    enable_cache();
+    if(m_resource_names.empty())
+    {
+        if(m_cache_entries)
+        {
+            for(entries_map::const_iterator it=m_cached_entries.begin();
+                it!=m_cached_entries.end();++it)
+                m_resource_names.push_back(it->first);
+        }
+        else
+        {
+            std::map<std::string,bool> already_has;
+            for(size_t i=0;i<m_providers.size();++i)
+            {
+                for(int j=0;j<m_providers[i]->get_resources_count();++j)
+                {
+                    const char *name=m_providers[i]->get_resource_name(j);
+                    if(!name)
+                        continue;
 
-    return m_entries;
+                    if(already_has.find(name)!=already_has.end())
+                        continue;
+
+                    m_resource_names.push_back(name);
+                    already_has[name]=true;
+                }
+            }
+        }
+    }
+
+    return (int)m_resource_names.size();
 }
 
-composite_resources_provider::~composite_resources_provider()
+const char *composite_resources_provider::get_resource_name(int idx)
 {
-    resource_info *entry=m_entries;
-    while(entry)
-    {
-        resource_info *next_entry=entry->get_next();
-        entries.free((composite_entry_info*)entry);
-        entry=next_entry;
-    }
+    if(idx<0 || idx>=get_resources_count())
+        return 0;
+
+    return m_resource_names[idx].c_str();
 }
 
 void composite_resources_provider::set_ignore_case(bool ignore)
 {
-    if(ignore && !m_ignore_case)
-    {
-        //todo: convert all to lowcase
-        //and set all entries m_ignore_case to true
-    }
-    else if(!ignore && m_ignore_case)
-    {
-        //todo: restore original case
-        //and set all entries m_ignore_case to false
-    }
+    if(ignore==m_ignore_case)
+        return;
 
     m_ignore_case=ignore;
+    m_resource_names.clear();
+
+    m_cached_entries.clear();
+    if(m_cache_entries)
+    {
+        for(int i=0;i<(int)m_providers.size();++i)
+            cache_provider(i);
+    }
+
+    if(ignore)
+        enable_cache();
 }
 
 }

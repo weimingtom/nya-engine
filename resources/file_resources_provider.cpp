@@ -1,5 +1,7 @@
 //https://code.google.com/p/nya-engine/
 
+//ToDo: move lru to nya_memory
+
 #include "file_resources_provider.h"
 #include "memory/pool.h"
 
@@ -204,56 +206,12 @@ private:
     size_t m_size;
 };
 
-class file_resource_info: public resource_info
-{
-public:
-    std::string name;
-    std::string path;
-    file_resource_info *next;
-
-public:
-    file_resource_info(): next(0) {}
-
-private:
-    resource_data *access();
-    const char *get_name() const { return name.c_str(); };
-    bool check_extension(const char *ext) const
-    {
-        if(!ext)
-            return false;
-
-        std::string ext_str(ext);
-        return (name.size() >= ext_str.size() &&
-                std::equal(name.end()-ext_str.size(),name.end(),ext_str.begin()));
-    }
-
-    resource_info *get_next() const { return next; };
-};
-
-}
-
-namespace
-{
-    nya_memory::pool<nya_resources::file_resource,8> file_resources;
-    nya_memory::pool<nya_resources::file_resource_info,32> entries;
 }
 
 namespace nya_resources
 {
 
-resource_data *file_resource_info::access()
-{
-    file_resource *file = file_resources.allocate();
-    if(!file->open((path+name).c_str()))
-    {
-        log()<<"unable to access file "<<name.c_str()
-                    <<" at path "<<path.c_str()<<"\n";
-        file_resources.free(file);
-        return 0;
-    }
-
-    return file;
-}
+namespace { nya_memory::pool<nya_resources::file_resource,8> file_resources; }
 
 resource_data *file_resources_provider::access(const char *resource_name)
 {
@@ -301,8 +259,7 @@ bool file_resources_provider::has(const char *name)
 
 bool file_resources_provider::set_folder(const char*name,bool recursive,bool ignore_nonexistent)
 {
-    clear_entries();
-
+    m_resource_names.clear();
     m_recursive=recursive;
 
     if(!name)
@@ -334,26 +291,12 @@ bool file_resources_provider::set_folder(const char*name,bool recursive,bool ign
     }
 
     m_path.push_back('/');
-
     return true;
 }
 
-void file_resources_provider::clear_entries()
+void file_resources_provider::enumerate_folder(const char*folder_name)
 {
-    file_resource_info *entry=m_entries;
-    while(entry)
-    {
-        file_resource_info *next=entry->next;
-        entries.free(entry);
-        entry=next;
-    }
-
-    m_entries=0;
-}
-
-void file_resources_provider::enumerate_folder(const char*folder_name,file_resource_info **last)
-{
-    if(!folder_name || !last)
+    if(!folder_name)
         return;
 
     std::string folder_name_str(folder_name);
@@ -412,23 +355,16 @@ void file_resources_provider::enumerate_folder(const char*folder_name,file_resou
         if(dp->d_type==DT_DIR && m_recursive)
 #endif
         {
-            enumerate_folder((folder_name_str+"/"+name).c_str(),last);
+            enumerate_folder((folder_name_str+"/"+name).c_str());
             continue;
         }
 
-        file_resource_info *entry=entries.allocate();
-
+        std::string entry_name;
         if(!folder_name_str.empty() && folder_name_str != ".")
-        {
-            entry->name=folder_name_str;
-            entry->name.push_back('/');
-        }
+            entry_name=folder_name_str+'/';
 
-        entry->name.append(name);
-
-        entry->path=m_path;
-        entry->next=*last;
-        *last=entry;
+        entry_name.append(name);
+        m_resource_names.push_back(entry_name);
     }
 #ifdef _WIN32
     _findclose(hdl);
@@ -437,17 +373,20 @@ void file_resources_provider::enumerate_folder(const char*folder_name,file_resou
 #endif
 }
 
-resource_info *file_resources_provider::first_res_info()
+int file_resources_provider::get_resources_count()
 {
-    if(m_entries)
-        return m_entries;
+    if(m_resource_names.empty())
+        enumerate_folder(m_path.empty()?".":"");
 
-    file_resource_info *last=0;
-    enumerate_folder(m_path.empty()?".":"",&last);
+    return (int)m_resource_names.size();
+}
 
-    m_entries=last;
+const char *file_resources_provider::get_resource_name(int idx)
+{
+    if(idx<0 || idx>=get_resources_count())
+        return 0;
 
-    return m_entries;
+    return m_resource_names[idx].c_str();
 }
 
 bool file_resource::read_all(void*data)
