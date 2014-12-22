@@ -73,9 +73,10 @@ const char *get_app_path()
         if(!local)
             return 0;
 
-        const wchar_t *wp=local->Path->Data();
+        Platform::String^ ilp = local->Path;
+        const wchar_t *wp = ilp->Data();
         const char *p=path;
-        for(int i=0;i<local->Path->Length();++i) //ToDo
+        for(size_t i=0;i<local->Path->Length();++i) //ToDo
             path[i]=(char)wp[i];
 
         for(int i=0;i<max_path;++i)
