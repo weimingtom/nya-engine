@@ -253,7 +253,8 @@ int main(int argc, char* argv[])
             return -1;
         }
 
-        return compile_hlsl_code(parser.get_code(),false)?0:-1;
+        printf("%s",parser.get_code());
+        return 0;
     }
 
     fprintf(stderr,"Error: invalid compile mode: %s\n",argv[1]);
