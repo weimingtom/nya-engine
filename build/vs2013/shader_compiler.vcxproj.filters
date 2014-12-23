@@ -28,5 +28,11 @@
     <ClCompile Include="..\..\formats\text_parser.cpp">
       <Filter>Source Files\nya</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\resources\file_resources_provider.cpp">
+      <Filter>Source Files\nya</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\resources\resources.cpp">
+      <Filter>Source Files\nya</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

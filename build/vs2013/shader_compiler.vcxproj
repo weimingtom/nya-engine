@@ -86,6 +86,8 @@
     <ClCompile Include="..\..\log\log.cpp" />
     <ClCompile Include="..\..\log\stdout_log.cpp" />
     <ClCompile Include="..\..\render\shader_code_parser.cpp" />
+    <ClCompile Include="..\..\resources\file_resources_provider.cpp" />
+    <ClCompile Include="..\..\resources\resources.cpp" />
     <ClCompile Include="..\..\system\shaders_cache_provider.cpp" />
     <ClCompile Include="..\..\tools\shader_compiler.cpp" />
   </ItemGroup>

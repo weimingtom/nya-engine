@@ -6,6 +6,7 @@
 #include "render/shader_code_parser.h"
 #include "formats/text_parser.h"
 #include "system/shaders_cache_provider.h"
+#include "resources/file_resources_provider.h"
 #include <D3Dcompiler.h>
 #include <io.h>
 #include <fcntl.h>
@@ -69,6 +70,33 @@ bool compile_hlsl_code(const char *code,bool text_asm)
     return true;
 }
 
+bool generate_cache( const char* dir_from,  const char* dir_to, bool recursive )
+{
+    if(!dir_from || !dir_to)
+        return false;
+
+    nya_system::compiled_shaders_provider csp;
+    csp.set_save_path(dir_to);
+
+    nya_resources::file_resources_provider fp;
+    fp.set_folder(dir_from);
+    std::string shader_text;
+    for(int i=0;i<fp.get_resources_count();++i)
+    {
+        nya_resources::resource_data *data=fp.access(fp.get_resource_name(i));
+        if(!data)
+            continue;
+
+        shader_text.resize(data->get_size());
+        data->read_all(&shader_text[0]);
+        data->release();
+
+        //ToDo
+    }
+
+    return true;
+}
+
 int main(int argc, char* argv[])
 {
     if(argc<2)
@@ -122,10 +150,7 @@ int main(int argc, char* argv[])
             return -1;
         }
 
-        nya_system::compiled_shaders_provider csp;
-        csp.set_save_path(argv[3]);
-
-        //ToDo
+        return generate_cache(argv[2],argv[3],true)?0:-1;
     }
 
     fprintf(stderr,"Error: invalid compile mode: %s\n",argv[1]);
