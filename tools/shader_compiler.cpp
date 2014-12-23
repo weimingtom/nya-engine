@@ -28,11 +28,8 @@ const char *help="Usage: shader_compiler %%mode%%\n"
                  //ToDo: allow sampler index assignment
                  //or glsl2hlsl is only for debug purpose?
 
-bool compile_hlsl_code(const char *code,bool text_asm)
+ID3D10Blob *compile_hlsl(const char *code)
 {
-    if(!code)
-        return false;
-
     const bool is_ps=strstr(code,"SV_TARGET")!=0;
     const char *profile=is_ps?"ps_4_0_level_9_3":"vs_4_0_level_9_3";
     ID3D10Blob *compiled=0, *error=0;
@@ -43,14 +40,23 @@ bool compile_hlsl_code(const char *code,bool text_asm)
         std::string error_text((const char *)error->GetBufferPointer(),error->GetBufferSize());
         fprintf(stderr,"%s\n",error_text.c_str());
         error->Release();
-        return false;
+        return 0;
     }
 
     if(!compiled)
-    {
-        fprintf(stderr,"Error: unknown compile error\n");
+        fprintf(stderr,"Error: compile error\n");
+
+    return compiled;
+}
+
+bool compile_hlsl_code(const char *code,bool text_asm)
+{
+    if(!code)
         return false;
-    }
+
+    ID3D10Blob *compiled=compile_hlsl(code);
+    if(!compiled)
+        return false;
 
     if(text_asm)
     {
@@ -91,7 +97,11 @@ bool generate_cache( const char* dir_from,  const char* dir_to, bool recursive )
         data->read_all(&shader_text[0]);
         data->release();
 
-        //ToDo
+        /*
+        ID3D10Blob *blob=compile_hlsl(text);
+        if(!blob)
+            continue;
+        */
     }
 
     return true;
