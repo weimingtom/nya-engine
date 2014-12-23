@@ -22,7 +22,7 @@ namespace nya_system
             return csp;
         }
 
-    private:
+    public:
         bool get(const char *text,nya_render::compiled_shader &shader);
         bool set(const char *text,const nya_render::compiled_shader &shader);
 

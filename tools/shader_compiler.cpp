@@ -136,6 +136,7 @@ bool load_nya_shader(const char* name,std::string &code_vs,std::string &code_ps)
             if(text)
                 code_ps.append(text);
         }
+        //ToDo: sampler idx
     }
 
     return true;
@@ -147,7 +148,7 @@ bool generate_cache( const char* dir_from,  const char* dir_to, bool recursive )
         return false;
 
     nya_system::compiled_shaders_provider csp;
-    csp.set_save_path(dir_to);
+    csp.set_save_path((std::string(dir_to)+"\\").c_str());
 
     nya_resources::file_resources_provider fp;
     nya_resources::set_resources_provider(&fp);
@@ -155,14 +156,31 @@ bool generate_cache( const char* dir_from,  const char* dir_to, bool recursive )
     std::string shader_text;
     for(int i=0;i<fp.get_resources_count();++i)
     {
-        std::string vs,ps;
-        load_nya_shader(fp.get_resource_name(i),vs,ps);
-
-        /*
-        ID3D10Blob *blob=compile_hlsl(text);
-        if(!blob)
+        const char *name=fp.get_resource_name(i);
+        if(!nya_resources::check_extension(name,".nsh"))
             continue;
-        */
+
+        std::string code[2];
+        load_nya_shader(name,code[0],code[1]);
+
+        for(int j=0;j<2;++j)
+        {
+            nya_render::shader_code_parser parser(code[j].c_str());
+            if(!parser.convert_to_hlsl())
+            {
+                fprintf(stderr,"Error: cannot convert to hlsl\n");
+                continue;
+            }
+
+            ID3D10Blob *blob=compile_hlsl(parser.get_code());
+            if(!blob)
+                continue;
+
+            nya_render::compiled_shader cs(blob->GetBufferSize());
+            memcpy(cs.get_data(),blob->GetBufferPointer(),blob->GetBufferSize());
+            blob->Release();
+            csp.set(code[j].c_str(),cs);
+        }
     }
 
     return true;
@@ -181,6 +199,18 @@ int main(int argc, char* argv[])
     setmode(fileno(stdin),O_BINARY);
 
     nya_log::set_log(&nya_log::no_log());
+    
+    if(strcmp(argv[1],"gencache")==0)
+    {
+        if(argc!=4)
+        {
+            fprintf(stderr,"Error: src and dst dir not specified\n");
+            printf("Usage: shader_compiler gencache %%src_dir%% %%dst_dir%%\n");
+            return -1;
+        }
+
+        return generate_cache(argv[2],argv[3],true)?0:-1;
+    }
 
     std::string shader_code;
     char buf[512];
@@ -210,18 +240,6 @@ int main(int argc, char* argv[])
         }
 
         return compile_hlsl_code(parser.get_code(),false)?0:-1;
-    }
-
-    if(strcmp(argv[1],"gencache")==0)
-    {
-        if(argc!=4)
-        {
-            fprintf(stderr,"Error: src and dst dir not specified\n");
-            printf("Usage: shader_compiler gencache %%src_dir%% %%dst_dir%%\n");
-            return -1;
-        }
-
-        return generate_cache(argv[2],argv[3],true)?0:-1;
     }
 
     fprintf(stderr,"Error: invalid compile mode: %s\n",argv[1]);

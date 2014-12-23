@@ -1,15 +1,10 @@
 //https://code.google.com/p/nya-engine/
 
 #include "shaders_cache_provider.h"
-#include "render/platform_specific_gl.h"
-#include "system/shaders_cache_provider.h"
+#include "resources/resources.h"
 
 #include <string.h>
 #include <stdio.h>
-
-#ifdef DIRECTX11
-    #include "resources/resources.h"
-#endif
 
 //ToDo: hash collisions
 
@@ -18,7 +13,6 @@ namespace nya_system
 
 bool compiled_shaders_provider::get(const char *text,nya_render::compiled_shader &shader)
 {
-#ifdef DIRECTX11
     shader=nya_render::compiled_shader();
 
     if(!text)
@@ -34,14 +28,10 @@ bool compiled_shaders_provider::get(const char *text,nya_render::compiled_shader
     data->release();
 
     return true;
-#else
-    return false;
-#endif
 }
 
 bool compiled_shaders_provider::set(const char *text,const nya_render::compiled_shader &shader)
 {
-#ifdef DIRECTX11
     if(!text)
         return false;
 
@@ -57,9 +47,6 @@ bool compiled_shaders_provider::set(const char *text,const nya_render::compiled_
     fclose(f);
 
     return true;
-#else
-    return false;
-#endif
 }
 
 std::string compiled_shaders_provider::crc(const char *text)
