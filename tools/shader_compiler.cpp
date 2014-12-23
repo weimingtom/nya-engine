@@ -76,6 +76,71 @@ bool compile_hlsl_code(const char *code,bool text_asm)
     return true;
 }
 
+bool load_nya_shader(const char* name,std::string &code_vs,std::string &code_ps)
+{
+    nya_resources::resource_data *rdata=nya_resources::get_resources_provider().access(name);
+    if(!rdata)
+        return false;
+
+    std::string shader_text;
+    shader_text.resize(rdata->get_size());
+    rdata->read_all(&shader_text[0]);
+    rdata->release();
+
+    nya_formats::text_parser parser;
+    parser.load_from_data((const char *)shader_text.c_str());
+    for(int section_idx=0;section_idx<parser.get_sections_count();++section_idx)
+    {
+        const char *section_type=parser.get_section_type(section_idx);
+        if(strcmp(section_type,"@include")==0)
+        {
+            const char *file=parser.get_section_name(section_idx);
+            if(!file)
+            {
+                nya_log::log()<<"unable to load shader include in shader "<<name<<": invalid filename\n";
+                return false;
+            }
+
+            std::string path(name);
+            size_t p=path.rfind("/");
+            if(p==std::string::npos)
+                p=path.rfind("\\");
+
+            if(p==std::string::npos)
+                path.clear();
+            else
+                path.resize(p+1);
+
+            path.append(file);
+
+            load_nya_shader(path.c_str(),code_vs,code_ps);
+        }
+        else if(strcmp(section_type,"@all")==0)
+        {
+            const char *text=parser.get_section_value(section_idx);
+            if(text)
+            {
+                code_vs.append(text);
+                code_ps.append(text);
+            }
+        }
+        else if(strcmp(section_type,"@vertex")==0)
+        {
+            const char *text=parser.get_section_value(section_idx);
+            if(text)
+                code_vs.append(text);
+        }
+        else if(strcmp(section_type,"@fragment")==0)
+        {
+            const char *text=parser.get_section_value(section_idx);
+            if(text)
+                code_ps.append(text);
+        }
+    }
+
+    return true;
+}
+
 bool generate_cache( const char* dir_from,  const char* dir_to, bool recursive )
 {
     if(!dir_from || !dir_to)
@@ -85,17 +150,13 @@ bool generate_cache( const char* dir_from,  const char* dir_to, bool recursive )
     csp.set_save_path(dir_to);
 
     nya_resources::file_resources_provider fp;
+    nya_resources::set_resources_provider(&fp);
     fp.set_folder(dir_from);
     std::string shader_text;
     for(int i=0;i<fp.get_resources_count();++i)
     {
-        nya_resources::resource_data *data=fp.access(fp.get_resource_name(i));
-        if(!data)
-            continue;
-
-        shader_text.resize(data->get_size());
-        data->read_all(&shader_text[0]);
-        data->release();
+        std::string vs,ps;
+        load_nya_shader(fp.get_resource_name(i),vs,ps);
 
         /*
         ID3D10Blob *blob=compile_hlsl(text);
