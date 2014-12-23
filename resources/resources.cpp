@@ -61,7 +61,7 @@ bool check_extension(const char *name,const char *ext)
     if(ext_len>name_len)
         return false;
 
-    return strcasecmp(name+name_len-ext_len,ext);
+    return strcasecmp(name+name_len-ext_len-1,ext);
 }
 
 }

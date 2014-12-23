@@ -177,24 +177,19 @@ private:
         unsigned long arch_add_time=0;
         unsigned long attrib_time=0;
 
-        nya_resources::resource_info *arch_info=fprov.first_res_info();
         static nya_memory::pool<nya_resources::pl2_resources_provider,32> pl2_providers;
-        while(arch_info)
+        for(int i=0;i<fprov.get_resources_count();++i)
         {
-            std::string arch_name(arch_info->get_name());
-            size_t pos=arch_name.find_last_of(".");
-            if(pos==std::string::npos||arch_name.substr(pos)!=".pl2")
-            {
-                arch_info=arch_info->get_next();
+            const char *name=fprov.get_resource_name(i);
+            if(!nya_resources::check_extension(name,".pl2"))
                 continue;
-            }
 
             nya_resources::pl2_resources_provider *prov=pl2_providers.allocate();
 
             unsigned long t0=nya_system::get_time();
 
             //nya_log::log()<<arch_name.c_str()<<"\n";
-            prov->open_archieve(arch_info->access());
+            prov->open_archieve(fprov.access(name));
 
             unsigned long t1=nya_system::get_time();
 
@@ -212,7 +207,6 @@ private:
             unsigned long t3=nya_system::get_time();
 
             //nya_resources::log()<<arch_name.c_str()<<"\n";
-            arch_info=arch_info->get_next();
 
             arch_open_time+=t1-t0;
             arch_add_time+=t2-t1;
@@ -250,9 +244,12 @@ private:
         nya_resources::set_resources_provider(&cprov);
 
         nya_log::log()<<"Total res system init time: "<<nya_system::get_time()-time_start<<"\n";
-        nya_log::log()<<"Average open archieve time: "<<float(arch_open_time)/arch_count<<"\n";
-        nya_log::log()<<"Average add archieve time: "<<float(arch_add_time)/arch_count<<"\n";
-        nya_log::log()<<"Average attrib time: "<<float(attrib_time)/arch_count<<"\n";
+        if(arch_count>0)
+        {
+            nya_log::log()<<"Average open archieve time: "<<float(arch_open_time)/arch_count<<"\n";
+            nya_log::log()<<"Average add archieve time: "<<float(arch_add_time)/arch_count<<"\n";
+            nya_log::log()<<"Average attrib time: "<<float(attrib_time)/arch_count<<"\n";
+        }
     }
 
 private:
@@ -303,16 +300,17 @@ void debug_extract_pl2(const char *name)
 
     nya_resources::pl2_resources_provider arch;
     arch.open_archieve(arch_data);
-    nya_resources::resource_info *info=arch.first_res_info();
-    while(info)
+    for(int i=0;i<arch.get_resources_count();++i)
     {
-        std::string n=std::string("pl2_out/")+name+"_"+info->get_name();
-        debug_write_data(info->access(),n.c_str());
+        const char *res_name=arch.get_resource_name(i);
+        if(!res_name)
+            continue;
 
-        info=info->get_next();
+        const std::string n=std::string("pl2_out/")+name+"_"+res_name;
+        debug_write_data(arch.access(res_name),n.c_str());
     }
 
-    std::string n=std::string("pl2_out/")+name+"_"+"attribute.txt";
+    const std::string n=std::string("pl2_out/")+name+"_"+"attribute.txt";
     debug_write_data(arch.access_attribute(),n.c_str());
 
     arch.close_archieve();

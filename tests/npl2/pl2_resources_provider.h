@@ -3,10 +3,10 @@
 #pragma once
 
 #include "resources/resources.h"
+#include <vector>
 
 namespace nya_resources
 {
-class pl2_entry_info;
 
 class pl2_resources_provider: public resources_provider
 {
@@ -32,20 +32,32 @@ public:
     resource_data *access_attribute();
 
 public:
-    resource_info *first_res_info();
+    int get_resources_count() { return (int)m_entries.size(); }
+    const char *get_resource_name(int idx);
 
 public:
     resource_data *access(const char *resource_name);
     bool has(const char *resource_name);
 
 public:
-    pl2_resources_provider(): m_archieve_data(0), m_entries(0), m_attribute(0) {}
+    pl2_resources_provider(): m_archieve_data(0) {}
     ~pl2_resources_provider() { close_archieve(); }
 
 private:
     resource_data *m_archieve_data;
-    pl2_entry_info *m_entries;
-    pl2_entry_info *m_attribute;
+
+    struct entry
+    {
+        std::string name;
+        unsigned int offset;
+        unsigned int packed_size;
+        unsigned int size;
+    };
+
+    resource_data *access(const entry &e);
+
+    std::vector<entry> m_entries;
+    entry m_attribute;
 };
 
 }

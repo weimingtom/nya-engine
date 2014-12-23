@@ -102,13 +102,12 @@ void scene::init()
     for(size_t i=0;i<m_anim_list.size();++i)
         anim_map[m_anim_list[i].name[0]]=true;
 
-    nya_resources::resource_info *info=nya_resources::get_resources_provider().first_res_info();
-    while(info)
+    for(int i=0;i<nya_resources::get_resources_provider().get_resources_count();++i)
     {
-        if(info->check_extension(".txt"))
+        const char *name=nya_resources::get_resources_provider().get_resource_name(i);
+        if(nya_resources::check_extension(name,".txt"))
         {
-            //nya_log::log()<<"script: "<<info->get_name()<<"\n";
-            nya_resources::resource_data *data=info->access();
+            nya_resources::resource_data *data=nya_resources::get_resources_provider().access(name);
             if(data)
             {
                 script_buf.resize(data->get_size());
@@ -189,8 +188,6 @@ void scene::init()
                 data->release();
             }
         }
-
-        info=info->get_next();
     }
 
     m_curr_anim = m_anim_list.begin();
