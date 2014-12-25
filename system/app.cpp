@@ -17,6 +17,7 @@
     #include <ppl.h>
     #include <agile.h>
     #include <d3d11_1.h>
+    #include <math.h>
 
     using namespace Windows::ApplicationModel;
     using namespace Windows::ApplicationModel::Core;
@@ -198,8 +199,8 @@ protected:
     {
         m_windowBounds = m_window->Bounds;
 
-        m_renderTargetSize.Width = int(m_windowBounds.Width * get_resolution_scale());
-        m_renderTargetSize.Height = int(m_windowBounds.Height * get_resolution_scale());
+        m_renderTargetSize.Width = floorf(m_windowBounds.Width * get_resolution_scale());
+        m_renderTargetSize.Height = floorf(m_windowBounds.Height * get_resolution_scale());
 
         DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {0};
         swapChainDesc.Width=static_cast<UINT>(m_renderTargetSize.Width);
