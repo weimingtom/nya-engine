@@ -25,9 +25,6 @@ const char *help="Usage: shader_compiler %%mode%%\n"
                  "or use: shader_compiler gencache %%src_dir%% %%dst_dir%%"
                  "\n";
 
-                 //ToDo: allow sampler index assignment
-                 //or glsl2hlsl is only for debug purpose?
-
 ID3D10Blob *compile_hlsl(const char *code)
 {
     const bool is_ps=strstr(code,"SV_TARGET")!=0;
