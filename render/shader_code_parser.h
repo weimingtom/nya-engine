@@ -18,8 +18,6 @@ public:
     bool convert_to_hlsl();
     bool convert_to_modern_glsl(const char *precision="mediump");
 
-    void register_sampler(const char *name,unsigned int idx) { if(name) m_samplers[name]=idx; }
-
 public:
     enum variable_type
     {
@@ -75,7 +73,6 @@ private:
     std::vector<variable> m_uniforms;
     std::vector<variable> m_attributes;
     std::vector<variable> m_varying;
-    std::map<std::string,unsigned int> m_samplers;
 };
 
 }

@@ -291,7 +291,6 @@ void scene::init()
     //"  gl_FragColor=vcolor;"
     "}";
 
-    m_shader_scenery.set_sampler("base_map",0);
     m_shader_scenery.add_program(nya_render::shader::vertex,vprogram);
     m_shader_scenery.add_program(nya_render::shader::pixel,fprogram);
 
@@ -301,7 +300,6 @@ void scene::init()
     scenery_anim_vs_str.append("#define vcolor_enabled\n");
     scenery_anim_vs_str.append(uber_vs);
 
-    m_shader_scenery_anim.set_sampler("base_map",0);
     m_shader_scenery_anim.add_program(nya_render::shader::vertex,scenery_anim_vs_str.c_str());
     m_shader_scenery_anim.add_program(nya_render::shader::pixel,fprogram);
 
@@ -346,7 +344,6 @@ void scene::init()
     char_vs_str.append(uber_vs);
     char_ps_str.append(char_ps);
 
-    m_shader.set_sampler("base_map",0);
     m_shader.add_program(nya_render::shader::vertex,char_vs_str.c_str());
     m_shader.add_program(nya_render::shader::pixel,char_ps_str.c_str());
 

@@ -51,7 +51,7 @@ bool shader_code_parser::convert_to_hlsl()
     if(replace_variable("pow",(m_replace_str+"pow").c_str()))
         prefix.append("#define "+m_replace_str+"pow(f,e) pow(abs(f),e)\n");
 
-    bool has_samplers=false;
+    int samplers_count=0;
     for(size_t i=predefined_count;i<m_uniforms.size();++i)
     {
         const variable &v=m_uniforms[i];
@@ -60,24 +60,14 @@ bool shader_code_parser::convert_to_hlsl()
 
         const char *types[]={"Texture2D","TextureCube"};
 
-        unsigned int reg=0;
-        std::map<std::string,unsigned int>::iterator it=m_samplers.find(v.name);
-        if(it==m_samplers.end())
-        {
-            for(it=m_samplers.begin();it!=m_samplers.end();++it) if(reg<=it->second) reg=it->second+1;
-            m_samplers[v.name]=reg;
-        }
-        else
-            reg=it->second;
-
         char buf[512];
         sprintf(buf,"%s %s: register(t%d); SamplerState %s_nya_st: register(s%d);\n",
-                types[v.type-type_sampler2d],v.name.c_str(),reg,v.name.c_str(),reg);
+                types[v.type-type_sampler2d],v.name.c_str(),samplers_count,v.name.c_str(),samplers_count);
         prefix.append(buf);
-        has_samplers=true;
+        ++samplers_count;
     }
 
-    if(has_samplers)
+    if(samplers_count>0)
     {
         if(find_variable("texture2D")) prefix.append("#define texture2D(a,b) a.Sample(a##"+m_replace_str+"st,(b))\n");
         if(find_variable("textureCube")) prefix.append("#define textureCube(a,b) a.Sample(a##"+m_replace_str+"st,(b))\n");

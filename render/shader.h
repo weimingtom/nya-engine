@@ -29,15 +29,14 @@ public:
     static void apply(bool ignore_cache=false);
 
 public:
-    void set_sampler(const char*name,unsigned int layer);
-    int get_sampler_layer(const char *name) const;
-
-public:
     int get_handler(const char*name) const;
     void set_uniform(unsigned int handler,float f0,float f1=0.0f,float f2=0.0f,float f3=0.0f) const;
     void set_uniform3_array(unsigned int handler,const float *f,unsigned int count) const;
     void set_uniform4_array(unsigned int handler,const float *f,unsigned int count) const;
     void set_uniform16_array(unsigned int handler,const float *f,unsigned int count,bool transpose=false) const;
+
+public:
+    int get_sampler_layer(const char *name) const;
 
 public:
     enum uniform_type
@@ -68,18 +67,6 @@ public:
 
 private:
     int m_shdr;
-
-    struct sampler
-    {
-        std::string name;
-        unsigned int layer;
-
-        sampler():layer(0){}
-        sampler(const char *name,unsigned int layer):
-                            name(name),layer(layer){}
-    };
-
-    std::vector<sampler> m_samplers;
 };
 
 class compiled_shader

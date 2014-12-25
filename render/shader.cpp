@@ -433,8 +433,6 @@ bool shader::add_program(program_type type,const char*code)
                                                  "set compiled_shaders_provider and add compiled shaders cache\n";
         return false;
 #else
-
-        for(auto s:m_samplers) parser.register_sampler(s.name.c_str(),s.layer);
         parser.convert_to_hlsl();
         const char *profile=type==pixel?"ps_4_0_level_9_3":"vs_4_0_level_9_3";
         ID3D10Blob *compiled=0, *error=0;
@@ -598,14 +596,23 @@ bool shader::add_program(program_type type,const char*code)
         return false;
     }
     glAttachObjectARB(shdr.program,object);
-
-#ifdef OPENGL_ES
-    shdr.objects[type]=object;
-
-    if(shdr.program && shdr.objects[vertex] && shdr.objects[pixel])
-#else
-    if(shdr.program)
 #endif
+
+    for(int i=0;i<parser.get_uniforms_count();++i)
+    {
+        const shader_code_parser::variable from=parser.get_uniform(i);
+        shader_obj::uniform &to=shdr.add_uniform(from.name.c_str());
+        to.array_size=from.array_size;
+        to.type=convert_uniform_type(from.type);
+    }
+
+#ifndef DIRECTX11
+  #ifdef OPENGL_ES
+    shdr.objects[type]=object;
+    if(shdr.program && shdr.objects[vertex] && shdr.objects[pixel])
+  #else
+    if(shdr.program)
+  #endif
     {
         GLint result=0;
         glLinkProgramARB(shdr.program);
@@ -631,14 +638,19 @@ bool shader::add_program(program_type type,const char*code)
         {
             set_shader(m_shdr);
 
-            for(size_t i=0;i<m_samplers.size();++i)
+            for(size_t i=0,layer=0;i<shdr.uniforms.size();++i)
             {
-                const sampler &s=m_samplers[i];
-                int handler=glGetUniformLocationARB(shdr.program,s.name.c_str());
+                const shader_obj::uniform &u=shdr.uniforms[i];
+                if(u.type!=uniform_sampler2d && u.type!=uniform_sampler_cube)
+                    continue;
+
+                int handler=glGetUniformLocationARB(shdr.program,u.name.c_str());
                 if(handler>=0)
-                    glUniform1iARB(handler,s.layer);
+                    glUniform1iARB(handler,(int)layer);
                 else
-                    log()<<"Unable to set shader sampler \'"<<s.name.c_str()<<"\': probably not found\n";
+                    log()<<"Unable to set shader sampler \'"<<u.name.c_str()<<"\': probably not found\n";
+
+                ++layer;
             }
 
             set_shader(-1);
@@ -666,7 +678,7 @@ bool shader::add_program(program_type type,const char*code)
             }
         }
 
-#ifdef SUPPORT_OLD_SHADERS
+  #ifdef SUPPORT_OLD_SHADERS
         for(int i=0;i<(int)shdr.uniforms.size();++i)
         {
             if(shdr.uniforms[i].type!=uniform_mat4)
@@ -677,10 +689,10 @@ bool shader::add_program(program_type type,const char*code)
             else if(name=="_nya_ModelViewMatrix") shdr.mat_mv=get_handler(name.c_str());
             else if(name=="_nya_ProjectionMatrix") shdr.mat_p=get_handler(name.c_str());
         }
-#endif
+  #endif
     }
 
-#ifdef SUPPORT_OLD_SHADERS
+  #ifdef SUPPORT_OLD_SHADERS
     for(int i=0;i<parser.get_attributes_count();++i)
     {
         const shader_code_parser::variable a=parser.get_attribute(i);
@@ -689,18 +701,10 @@ bool shader::add_program(program_type type,const char*code)
         else if(a.name=="_nya_Color") glBindAttribLocation(shdr.program,color_attribute,a.name.c_str());
         else if(a.name.find("_nya_MultiTexCoord")==0) glBindAttribLocation(shdr.program,tc0_attribute+a.idx,a.name.c_str());
     }
-#endif
+  #endif
 
     shdr.objects[type]=object;
 #endif
-
-    for(int i=0;i<parser.get_uniforms_count();++i)
-    {
-        const shader_code_parser::variable from=parser.get_uniform(i);
-        shader_obj::uniform &to=shdr.add_uniform(from.name.c_str());
-        to.array_size=from.array_size;
-        to.type=convert_uniform_type(from.type);
-    }
 
     return true;
 }
@@ -792,35 +796,28 @@ void shader::apply(bool ignore_cache)
 #endif
 }
 
-void shader::set_sampler(const char*name,unsigned int layer)
-{
-    if(!name || !name[0])
-    {
-        log()<<"Unable to set shader sampler: invalid name\n";
-        return;
-    }
-
-    for(size_t i=0;i<m_samplers.size();++i)
-    {
-        if(m_samplers[i].layer!=layer)
-            continue;
-
-        m_samplers[i].name.assign(name);
-        return;
-    }
-
-    m_samplers.push_back(sampler(name,layer));
-}
-
 int shader::get_sampler_layer(const char *name) const
 {
     if(!name)
+    {
+        log()<<"Unable to get sampler layer: invalid name\n";
+        return -1;
+    }
+
+    if(m_shdr<0)
         return -1;
 
-    for(size_t i=0;i<m_samplers.size();++i)
+    const shader_obj &shdr=shader_obj::get(m_shdr);
+    for(size_t i=0,layer=0;i<shdr.uniforms.size();++i)
     {
-        if(m_samplers[i].name==name)
-            return m_samplers[i].layer;
+        const shader_obj::uniform &u=shdr.uniforms[i];
+        if(u.type!=uniform_sampler2d && u.type!=uniform_sampler_cube)
+            continue;
+
+        if(u.name==name)
+            return (int)layer;
+
+        ++layer;
     }
 
     return -1;
@@ -830,15 +827,15 @@ int shader::get_handler(const char *name) const
 {
     if(!name || !name[0])
     {
-        log()<<"Unable to set shader handler: invalid name\n";
+        log()<<"Unable to get shader handler: invalid name\n";
         return -1;
     }
 
     if(m_shdr<0)
         return -1;
-    
+
+    const shader_obj &shdr=shader_obj::get(m_shdr);
 #ifdef DIRECTX11
-    shader_obj &shdr=shader_obj::get(m_shdr);
     for(int i=0;i<(int)shdr.uniforms.size();++i)
     {
         if(shdr.uniforms[i].name==name)
@@ -849,13 +846,13 @@ int shader::get_handler(const char *name) const
 #else
     set_shader(m_shdr);
 
-    if(!shader_obj::get(m_shdr).program)
+    if(!shdr.program)
     {
         log()<<"Unable to get shader handler \'"<<name<<"\': invalid program\n";
         return -1;
     }
 
-    return glGetUniformLocationARB(shader_obj::get(m_shdr).program,name);
+    return glGetUniformLocationARB(shdr.program,name);
 #endif
 }
 
@@ -1088,7 +1085,6 @@ unsigned int shader::get_uniform_array_size(int idx) const
 
 void shader::release()
 {
-    m_samplers.clear();
     if(m_shdr<0)
         return;
 

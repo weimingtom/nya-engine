@@ -28,9 +28,7 @@ void widget_renderer::init()
                               "    float alpha=texture2D(alpha_map,tc.xy).r;"
                               "    gl_FragColor=vec4(color.rgb,alpha);"
                               "}");
-    
-    m_text_shader.set_sampler("alpha_map",0);
-    
+
     m_ui_shader.add_program(nya_render::shader::vertex,
                             "varying vec4 tc;"
                             "varying vec4 color;"
@@ -53,9 +51,7 @@ void widget_renderer::init()
                             //"    gl_FragColor=gl_TexCoord[1]*base;"
                             "    gl_FragColor=color;"
                             "}");
-    
-    m_ui_shader.set_sampler("base_map",0);
-    
+
     m_font_tex=nya_resources::get_shared_textures().access("font.tga");
     //m_ui_tex=nya_resources::get_shared_textures().access("ui.tga");
 }

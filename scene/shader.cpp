@@ -119,8 +119,6 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
             }
 
             desc.samplers[semantics]=name;
-            if(std::find(res.samplers.begin(),res.samplers.end(),semantics)==res.samplers.end())
-                res.samplers.push_back(semantics);
         }
         else if(strcmp(section_type,"@vertex")==0)
         {
@@ -200,24 +198,6 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
     //log()<<"vertex <"<<res.vertex.c_str()<<">\n";
     //log()<<"pixel <"<<res.pixel.c_str()<<">\n";
 
-    for(unsigned int i=0;i<(unsigned int)res.samplers.size();++i)
-        res.shdr.set_sampler(desc.samplers[res.samplers[i]].c_str(),i);
-
-    for(int i=0;i<shared_shader::predefines_count;++i)
-    {
-        const shader_description::predefined &p=desc.predefines[i];
-        if(p.name.empty())
-            continue;
-
-        if(i==shared_shader::bones_pos_tex || i==shared_shader::bones_pos_tr_tex || i==shared_shader::bones_rot_tex)
-        {
-            res.predefines.resize(res.predefines.size()+1);
-            res.predefines.back().type=(shared_shader::predefined_values)i;
-            res.predefines.back().location=(int)res.samplers.size()+i-shared_shader::bones_pos_tex;
-            res.shdr.set_sampler(p.name.c_str(),res.predefines.back().location);
-        }
-    }
-
     if(!res.shdr.add_program(nya_render::shader::vertex,desc.vertex.c_str()))
         return false;
 
@@ -230,18 +210,33 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
         if(p.name.empty())
             continue;
 
-        if(i==shared_shader::bones_pos_tex || i==shared_shader::bones_pos_tr_tex || i==shared_shader::bones_rot_tex)
-            continue;
-
         res.predefines.resize(res.predefines.size()+1);
-        res.predefines.back().transform=p.transform;
         res.predefines.back().type=(shared_shader::predefined_values)i;
+        if(i==shared_shader::bones_pos_tex || i==shared_shader::bones_pos_tr_tex || i==shared_shader::bones_rot_tex)
+        {
+            res.predefines.back().location=res.shdr.get_sampler_layer(p.name.c_str());
+            continue;
+        }
 
+        res.predefines.back().transform=p.transform;
         res.predefines.back().location=res.shdr.get_handler(p.name.c_str());
     }
 
     for(int i=0;i<(int)res.uniforms.size();++i)
         res.uniforms[i].location=res.shdr.get_handler(desc.uniforms[res.uniforms[i].name].c_str());
+
+    for(shader_description::strings_map::const_iterator it=desc.samplers.begin();
+        it!=desc.samplers.end();++it)
+    {
+        int layer=res.shdr.get_sampler_layer(it->second.c_str());
+        if(layer<0)
+            continue;
+
+        if(layer>=(int)res.samplers.size())
+            res.samplers.resize(layer+1);
+
+        res.samplers[layer]=it->first;
+    }
 
     return true;
 }

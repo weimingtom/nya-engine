@@ -76,7 +76,7 @@ bool compile_hlsl_code(const char *code,bool text_asm)
     return true;
 }
 
-bool load_nya_shader(const char* name,std::string &code_vs,std::string &code_ps,std::vector<std::string> &samplers)
+bool load_nya_shader(const char* name,std::string &code_vs,std::string &code_ps)
 {
     nya_resources::resource_data *rdata=nya_resources::get_resources_provider().access(name);
     if(!rdata)
@@ -113,7 +113,7 @@ bool load_nya_shader(const char* name,std::string &code_vs,std::string &code_ps,
 
             path.append(file);
 
-            load_nya_shader(path.c_str(),code_vs,code_ps,samplers);
+            load_nya_shader(path.c_str(),code_vs,code_ps);
         }
         else if(strcmp(section_type,"@all")==0)
         {
@@ -135,18 +135,6 @@ bool load_nya_shader(const char* name,std::string &code_vs,std::string &code_ps,
             const char *text=parser.get_section_value(section_idx);
             if(text)
                 code_ps.append(text);
-        }
-        else if(strcmp(section_type,"@sampler")==0)
-        {
-            const char *semantics=parser.get_section_name(section_idx,1);
-            if(!semantics)
-            {
-                nya_log::log()<<"unable to load shader "<<name<<": invalid sampler syntax\n";
-                return false;
-            }
-
-            if(std::find(samplers.begin(),samplers.end(),semantics)==samplers.end())
-                samplers.push_back(semantics);
         }
     }
 
@@ -172,14 +160,11 @@ bool generate_cache( const char* dir_from,  const char* dir_to, bool recursive )
             continue;
 
         std::string code[2];
-        std::vector<std::string> samplers;
-        load_nya_shader(name,code[0],code[1],samplers);
+        load_nya_shader(name,code[0],code[1]);
 
         for(int j=0;j<2;++j)
         {
             nya_render::shader_code_parser parser(code[j].c_str());
-            for(int i=0;i<(int)samplers.size();++i)
-                parser.register_sampler(samplers[i].c_str(),i);
             if(!parser.convert_to_hlsl())
             {
                 fprintf(stderr,"Error: cannot convert to hlsl\n");
