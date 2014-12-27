@@ -219,6 +219,10 @@
 		F55C5720180623B100FF6163 /* debug_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55C571D180623B100FF6163 /* debug_draw.cpp */; };
 		F55C5721180623B100FF6163 /* debug_draw.h in Headers */ = {isa = PBXBuildFile; fileRef = F55C571E180623B100FF6163 /* debug_draw.h */; };
 		F55C5722180623B100FF6163 /* debug_draw.h in Headers */ = {isa = PBXBuildFile; fileRef = F55C571E180623B100FF6163 /* debug_draw.h */; };
+		F5A0B0751A4E16520074854E /* lru.h in Headers */ = {isa = PBXBuildFile; fileRef = F5A0B0731A4E16520074854E /* lru.h */; };
+		F5A0B0761A4E16520074854E /* lru.h in Headers */ = {isa = PBXBuildFile; fileRef = F5A0B0731A4E16520074854E /* lru.h */; };
+		F5A0B0771A4E16520074854E /* tag_list.h in Headers */ = {isa = PBXBuildFile; fileRef = F5A0B0741A4E16520074854E /* tag_list.h */; };
+		F5A0B0781A4E16520074854E /* tag_list.h in Headers */ = {isa = PBXBuildFile; fileRef = F5A0B0741A4E16520074854E /* tag_list.h */; };
 		F5AFDF411846C81400457928 /* shared_ptr.h in Headers */ = {isa = PBXBuildFile; fileRef = F5AFDF401846C81400457928 /* shared_ptr.h */; };
 		F5AFDF421846C81400457928 /* shared_ptr.h in Headers */ = {isa = PBXBuildFile; fileRef = F5AFDF401846C81400457928 /* shared_ptr.h */; };
 		F5B3578E17FE8E2C001175FE /* optional.h in Headers */ = {isa = PBXBuildFile; fileRef = F5B3578D17FE8E2C001175FE /* optional.h */; };
@@ -338,6 +342,8 @@
 		F5528B0F189AC6FA001FE865 /* tga.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tga.h; path = ../../formats/tga.h; sourceTree = "<group>"; };
 		F55C571D180623B100FF6163 /* debug_draw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = debug_draw.cpp; sourceTree = "<group>"; };
 		F55C571E180623B100FF6163 /* debug_draw.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = debug_draw.h; sourceTree = "<group>"; };
+		F5A0B0731A4E16520074854E /* lru.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lru.h; sourceTree = "<group>"; };
+		F5A0B0741A4E16520074854E /* tag_list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tag_list.h; sourceTree = "<group>"; };
 		F5AFDF401846C81400457928 /* shared_ptr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shared_ptr.h; sourceTree = "<group>"; };
 		F5B3578D17FE8E2C001175FE /* optional.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = optional.h; sourceTree = "<group>"; };
 		F5DFDFE619C9A8E9006CC734 /* statistics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = statistics.cpp; sourceTree = "<group>"; };
@@ -517,6 +523,7 @@
 			children = (
 				3DE732E0195D9186008D6765 /* indexed_map.h */,
 				3DE732E1195D9186008D6765 /* invalid_object.h */,
+				F5A0B0731A4E16520074854E /* lru.h */,
 				F259322115D858140092C7D8 /* memory.cpp */,
 				F259322215D858140092C7D8 /* memory.h */,
 				F22ADA301694C15100B01B4A /* memory_reader.h */,
@@ -524,6 +531,7 @@
 				F5B3578D17FE8E2C001175FE /* optional.h */,
 				F259322315D858140092C7D8 /* pool.h */,
 				F5AFDF401846C81400457928 /* shared_ptr.h */,
+				F5A0B0741A4E16520074854E /* tag_list.h */,
 				F259322415D858140092C7D8 /* tmp_buffer.cpp */,
 				F259322515D858140092C7D8 /* tmp_buffer.h */,
 			);
@@ -608,6 +616,7 @@
 				F2F0A09A1695A758007245BC /* skeleton.h in Headers */,
 				F2F0A09E1695A758007245BC /* animation.h in Headers */,
 				F2F0A0A81695A794007245BC /* vector.h in Headers */,
+				F5A0B0781A4E16520074854E /* tag_list.h in Headers */,
 				3DE732E5195D9186008D6765 /* invalid_object.h in Headers */,
 				3D76260F1A127EC9004E033C /* app_internal.h in Headers */,
 				F2F0A0AA1695A794007245BC /* quaternion.h in Headers */,
@@ -615,6 +624,7 @@
 				F2F0A0B41695F809007245BC /* matrix.h in Headers */,
 				F23997931696406D00170768 /* transform.h in Headers */,
 				3D6D5F4F196C3347008C1041 /* memory_writer.h in Headers */,
+				F5A0B0761A4E16520074854E /* lru.h in Headers */,
 				F20E2D7F16999B7000395A1B /* material.h in Headers */,
 				F20E2D8916999B7000395A1B /* texture.h in Headers */,
 				F20E2D8B16999B7000395A1B /* shader.h in Headers */,
@@ -679,6 +689,7 @@
 				F2F0A0991695A758007245BC /* skeleton.h in Headers */,
 				F2F0A09D1695A758007245BC /* animation.h in Headers */,
 				F2F0A0A71695A794007245BC /* vector.h in Headers */,
+				F5A0B0771A4E16520074854E /* tag_list.h in Headers */,
 				3DE732E4195D9186008D6765 /* invalid_object.h in Headers */,
 				3D76260E1A127EC9004E033C /* app_internal.h in Headers */,
 				F2F0A0A91695A794007245BC /* quaternion.h in Headers */,
@@ -686,6 +697,7 @@
 				F2F0A0B31695F809007245BC /* matrix.h in Headers */,
 				F23997921696406D00170768 /* transform.h in Headers */,
 				3D6D5F4E196C3347008C1041 /* memory_writer.h in Headers */,
+				F5A0B0751A4E16520074854E /* lru.h in Headers */,
 				F20E2D7E16999B7000395A1B /* material.h in Headers */,
 				F20E2D8816999B7000395A1B /* texture.h in Headers */,
 				F20E2D8A16999B7000395A1B /* shader.h in Headers */,
