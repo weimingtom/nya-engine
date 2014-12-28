@@ -592,7 +592,7 @@ void apply_state(bool ignore_cache)
     if(c.color[0]!=a.color[0] || c.color[1]!=a.color[1] || c.color[2]!=a.color[2]
                                         || c.color[3]!=a.color[3] || ignore_cache)
     {
-#ifdef OPENGL_ES
+#ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
         glVertexAttrib4f(color_attribute,c.color[0],c.color[1],c.color[2],c.color[3]);
 #else
         glColor4f(c.color[0],c.color[1],c.color[2],c.color[3]);

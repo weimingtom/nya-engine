@@ -1140,15 +1140,13 @@ bool texture::is_dxt_supported()
 #ifdef DIRECTX11
     return true;
 #elif defined OPENGL_ES
-    return true;
+    return false;
 #else
   #ifndef NO_EXTENSIONS_INIT
     if(!glCompressedTexImage2D)
         glCompressedTexImage2D=(PFNGLCOMPRESSEDTEXIMAGE2DARBPROC)get_extension("glCompressedTexImage2D");
-
-    return glCompressedTexImage2D!=0;
   #endif
-    return true;
+    return glCompressedTexImage2D!=0;
 #endif
 }
 

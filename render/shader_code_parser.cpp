@@ -215,7 +215,7 @@ bool shader_code_parser::convert_to_hlsl()
     return true;
 }
 
-bool shader_code_parser::convert_to_modern_glsl(const char *precision)
+bool shader_code_parser::convert_to_glsl_es2(const char *precision)
 {
     m_uniforms.clear();
     m_attributes.clear();
@@ -239,7 +239,51 @@ bool shader_code_parser::convert_to_modern_glsl(const char *precision)
     }
 
     prefix.append("precision "+std::string(precision)+" float;\n");
+    m_code.insert(0,prefix);
+    return true;
+}
 
+bool shader_code_parser::convert_to_modern_glsl()
+{
+    m_uniforms.clear();
+    m_attributes.clear();
+
+    if(!parse_predefined_uniforms(m_replace_str.c_str(),true))
+        return false;
+
+    if(!parse_attributes(m_replace_str.c_str(),m_replace_str.c_str()))
+        return false;
+
+    std::string prefix="#version 330\n";
+
+    for(int i=0;i<(int)m_uniforms.size();++i)
+        prefix.append("uniform mat4 "+m_uniforms[i].name+";\n");
+
+    for(int i=0;i<(int)m_attributes.size();++i)
+    {
+        prefix.append("in ");
+        prefix.append(m_attributes[i].type==type_vec3?"vec3 ":"vec4 ");
+        prefix.append(m_attributes[i].name+";\n");
+    }
+
+    //prefix.append("precision highp float;\n");
+
+    replace_variable("texture2D","texture");
+
+    const char *gl_ps_out="gl_FragColor";
+    std::string ps_out_var=m_replace_str+std::string(gl_ps_out+3);
+    const bool is_fragment=replace_variable(gl_ps_out,ps_out_var.c_str());
+    if(is_fragment)
+    {
+        prefix.append("layout(location=0) out vec4 "+ps_out_var+";\n");
+        replace_variable("varying","in");
+    }
+    else
+    {
+        //replace_variable("attribute","in");
+        replace_variable("varying","out");
+    }
+    
     m_code.insert(0,prefix);
     return true;
 }

@@ -16,7 +16,8 @@ public:
 
 public:
     bool convert_to_hlsl();
-    bool convert_to_modern_glsl(const char *precision="mediump");
+    bool convert_to_glsl_es2(const char *precision="mediump");
+    bool convert_to_modern_glsl();
 
 public:
     enum variable_type

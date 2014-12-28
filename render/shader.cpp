@@ -237,6 +237,8 @@ namespace
     #define glCompileShaderARB glCompileShader
     #define glGetInfoLogARB glGetShaderInfoLog
 
+    #define glBindAttribLocationARB glBindAttribLocation
+
     #define glGetUniformLocationARB glGetUniformLocation
     #define glUniform1iARB glUniform1i
     #define glUniform4fARB glUniform4f
@@ -569,7 +571,11 @@ bool shader::add_program(program_type type,const char*code)
     }
 
 #ifdef SUPPORT_OLD_SHADERS
+  #ifdef OPENGL_ES
+    parser.convert_to_glsl_es2();
+  #else
     parser.convert_to_modern_glsl();
+  #endif
     code=parser.get_code();
 #endif
 
@@ -673,8 +679,8 @@ bool shader::add_program(program_type type,const char*code)
                     glGetInfoLogARB(shdr.program,log_len,&log_len,&log_text[0]);
                     log()<<log_text.c_str()<<"\n";
                 }
-                shdr.program=0; //??
-                return false;
+                //shdr.program=0; //??
+                //return false;
             }
         }
 
@@ -696,10 +702,10 @@ bool shader::add_program(program_type type,const char*code)
     for(int i=0;i<parser.get_attributes_count();++i)
     {
         const shader_code_parser::variable a=parser.get_attribute(i);
-        if(a.name=="_nya_Vertex") glBindAttribLocation(shdr.program,vertex_attribute,a.name.c_str());
-        else if(a.name=="_nya_Normal") glBindAttribLocation(shdr.program,normal_attribute,a.name.c_str());
-        else if(a.name=="_nya_Color") glBindAttribLocation(shdr.program,color_attribute,a.name.c_str());
-        else if(a.name.find("_nya_MultiTexCoord")==0) glBindAttribLocation(shdr.program,tc0_attribute+a.idx,a.name.c_str());
+        if(a.name=="_nya_Vertex") glBindAttribLocationARB(shdr.program,vertex_attribute,a.name.c_str());
+        else if(a.name=="_nya_Normal") glBindAttribLocationARB(shdr.program,normal_attribute,a.name.c_str());
+        else if(a.name=="_nya_Color") glBindAttribLocationARB(shdr.program,color_attribute,a.name.c_str());
+        else if(a.name.find("_nya_MultiTexCoord")==0) glBindAttribLocationARB(shdr.program,tc0_attribute+a.idx,a.name.c_str());
     }
   #endif
 
