@@ -1,7 +1,7 @@
 #pragma once
 
 #include "invalid_object.h"
-#include <vector>
+#include <list>
 #include <map>
 
 namespace nya_memory
@@ -9,17 +9,36 @@ namespace nya_memory
 
 template<class t,size_t count> class lru
 {
+protected:
+    virtual void on_access(const char *name,t& value) {}
+    virtual void on_free(const char *name,t& value) {}
+
 public:
     t &access(const char *name)
     {
         if(!name)
             return get_invalid_object<t>();
 
-        //ToDo: actual lru, lol
+        typename map::iterator it=m_map.find(name);
+		if(it!=m_map.end())
+        {
+			m_list.splice(m_list.begin(),m_list,it->second);
+			return it->second->second;
+		}
 
-        static t e;
-        on_access(name,e);
-        return e;
+		if(m_list.size()>=count)
+        {
+            typename list::iterator last=m_list.end();
+			last--;
+            on_free(last->first.c_str(),last->second);
+			m_map.erase(last->first);
+			m_list.pop_back();
+		}
+
+		m_list.push_front(entry(name,t()));
+		m_map[name]=m_list.begin();
+        on_access(name,m_list.front().second);
+        return m_list.front().second;
     }
 
     void free(const char *name)
@@ -27,31 +46,31 @@ public:
         if(!name)
             return;
 
-        map::iterator it=m_map.find(name);
+        typename map::iterator it=m_map.find(name);
         if(it==m_map.end())
             return;
 
-        on_free(name,m_elements[it->second].second);
-        m_elements.erase(m_elements.begin()+it->second);
+        on_free(it->first.c_str(),it->second->second);
+        m_list.erase(it->second);
         m_map.erase(it);
     }
 
     void clear()
     {
-        for(size_t i=0;i<m_elements.size();++i)
-            on_free(m_elements[i].first.c_str(),m_elements[i].second);
-        m_elements.clear();
+        for(typename list::iterator it=m_list.begin();it!=m_list.end();++it)
+            on_free(it->first.c_str(),it->second);
+        m_list.clear();
         m_map.clear();
     }
 
-protected:
-    virtual void on_access(const char *name,t& value) {}
-    virtual void on_free(const char *name,t& value) {}
+public: lru(){}
+private: lru(const lru &); void operator = (const lru &); //non copyable
 
 private:
     typedef std::pair<std::string,t> entry;
-    std::vector<entry> m_elements;
-    typedef std::map<std::string,size_t> map;
+    typedef std::list<entry> list;
+    typedef std::map<std::string,typename list::iterator> map;
+    list m_list;
     map m_map;
 };
 
