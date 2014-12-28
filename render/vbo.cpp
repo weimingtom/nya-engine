@@ -24,6 +24,16 @@
     #define USE_VAO
 #endif
 
+#if defined USE_VAO && defined __APPLE__ && !defined OPENGL_ES
+    #import <OpenGL/gl3.h>
+#endif
+
+#ifdef OPENGL_ES
+    #define glDeleteVertexArrays glDeleteVertexArraysOES
+    #define glBindVertexArray glBindVertexArrayOES
+    #define glGenVertexArrays glGenVertexArraysOES
+#endif
+
 namespace nya_render
 {
 
@@ -105,7 +115,7 @@ namespace
             if(vertex_array_object==0)
                 return;
 
-            glDeleteVertexArraysOES(1,&vertex_array_object);
+            glDeleteVertexArrays(1,&vertex_array_object);
             vertex_array_object=active_vao_ibuf=0;
         }
 #endif
@@ -271,7 +281,7 @@ void reset_vbo_state()
 #ifdef DIRECTX11
 #else
  #ifdef USE_VAO
-    glBindVertexArrayOES(0);
+    glBindVertexArray(0);
  #else
     glBindBuffer(GL_ARRAY_BUFFER,0);
 
@@ -438,12 +448,12 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type)
 #ifdef USE_VAO
         if(vobj.vertex_array_object>0)
         {
-            glBindVertexArrayOES(vobj.vertex_array_object);
+            glBindVertexArray(vobj.vertex_array_object);
         }
         else
         {
-            glGenVertexArraysOES(1,&vobj.vertex_array_object);
-            glBindVertexArrayOES(vobj.vertex_array_object);
+            glGenVertexArrays(1,&vobj.vertex_array_object);
+            glBindVertexArray(vobj.vertex_array_object);
 
             active_attributes=vbo_obj_atributes();
             vobj.active_vao_ibuf=0;
@@ -672,7 +682,7 @@ bool vbo::set_vertex_data(const void*data,unsigned int vert_stride,unsigned int 
 
 #ifdef USE_VAO
     if(active_verts>=0)
-        glBindVertexArrayOES(0);
+        glBindVertexArray(0);
 #endif
 
     if(!obj.vertex_loc)
@@ -769,7 +779,7 @@ bool vbo::set_index_data(const void*data,index_size size,unsigned int indices_co
 
 #ifdef USE_VAO
     if(active_verts>=0)
-        glBindVertexArrayOES(0);
+        glBindVertexArray(0);
 #endif
 
     if(!obj.index_loc)
