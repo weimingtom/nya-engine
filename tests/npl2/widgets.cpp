@@ -41,8 +41,8 @@ void widget_renderer::init()
                             "}");
     
     m_ui_shader.add_program(nya_render::shader::pixel,
-                            "uniform sampler2D base_map;"
-                            "varying vec4 tc;"
+                            //"uniform sampler2D base_map;"
+                            //"varying vec4 tc;"
                             "varying vec4 color;"
                             
                             "void main(void)"
