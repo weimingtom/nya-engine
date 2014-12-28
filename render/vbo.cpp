@@ -20,18 +20,19 @@
     #include "shader.h"
 #endif
 
-#if defined OPENGL_ES && !defined ANDROID
+//#if defined OPENGL_ES && !defined ANDROID
+#ifdef __APPLE__
     #define USE_VAO
 #endif
 
-#if defined USE_VAO && defined __APPLE__ && !defined OPENGL_ES
-    #import <OpenGL/gl3.h>
-#endif
-
 #ifdef OPENGL_ES
-    #define glDeleteVertexArrays glDeleteVertexArraysOES
-    #define glBindVertexArray glBindVertexArrayOES
     #define glGenVertexArrays glGenVertexArraysOES
+    #define glBindVertexArray glBindVertexArrayOES
+    #define glDeleteVertexArrays glDeleteVertexArraysOES
+#elif __APPLE__
+    #define glGenVertexArrays glGenVertexArraysAPPLE
+    #define glBindVertexArray glBindVertexArrayAPPLE
+    #define glDeleteVertexArrays glDeleteVertexArraysAPPLE
 #endif
 
 namespace nya_render
