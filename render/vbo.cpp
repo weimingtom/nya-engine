@@ -19,7 +19,6 @@
     #include "shader.h"
 #endif
 
-//#if defined OPENGL_ES && !defined ANDROID
 #ifdef __APPLE__
     #define USE_VAO
 #endif
