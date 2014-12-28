@@ -4,7 +4,6 @@
     ToDo:
           is_valid function
           log
-          advanced is_supported function (public)
 */
 
 #include "vbo.h"
