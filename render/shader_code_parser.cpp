@@ -243,7 +243,7 @@ bool shader_code_parser::convert_to_glsl_es2(const char *precision)
     return true;
 }
 
-bool shader_code_parser::convert_to_modern_glsl()
+bool shader_code_parser::convert_to_glsl3()
 {
     m_uniforms.clear();
     m_attributes.clear();

@@ -574,7 +574,7 @@ bool shader::add_program(program_type type,const char*code)
   #ifdef OPENGL_ES
     parser.convert_to_glsl_es2();
   #else
-    parser.convert_to_modern_glsl();
+    parser.convert_to_glsl3();
   #endif
     code=parser.get_code();
 #endif
