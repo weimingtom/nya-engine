@@ -74,17 +74,25 @@ public:
 
         return m_elements[idx];
     }
-/*
+
     void remove(int idx)
     {
         if(idx<0 || idx>=(int)m_elements.size())
             return;
 
-        //ToDo: remove from tags
+        for(map::iterator it=m_tags.begin();it!=m_tags.end();++it)
+        {
+            std::vector<int>::iterator e=std::find(it->second.begin(),it->second.end(),idx);
+            if(e==it->second.end())
+                continue;
 
-        m_elements.erase(idx);
+            *e=it->second.back();
+            it->second.pop_back();
+        }
+
+        m_elements.erase(m_elements.begin()+idx);
     }
-*/
+
     void clear() { m_elements.clear(),m_tags.clear(); }
 
 private:
