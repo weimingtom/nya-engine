@@ -27,10 +27,18 @@
     #define glGenVertexArrays glGenVertexArraysOES
     #define glBindVertexArray glBindVertexArrayOES
     #define glDeleteVertexArrays glDeleteVertexArraysOES
-#elif __APPLE__
+#elif defined __APPLE__ && !defined OPENGL3
     #define glGenVertexArrays glGenVertexArraysAPPLE
     #define glBindVertexArray glBindVertexArrayAPPLE
     #define glDeleteVertexArrays glDeleteVertexArraysAPPLE
+#endif
+
+#ifdef OPENGL_ES
+    #define GL_HALF_FLOAT GL_HALF_FLOAT_OES
+#endif
+
+#ifndef GL_HALF_FLOAT
+    #define GL_HALF_FLOAT GL_HALF_FLOAT_ARB
 #endif
 
 namespace nya_render
@@ -187,11 +195,7 @@ int get_gl_element_type(vbo::vertex_atrib_type type)
     switch(type)
     {
         case vbo::float32: return GL_FLOAT;
-#ifdef OPENGL_ES
-        case vbo::float16: return GL_HALF_FLOAT_OES;
-#else
-        case vbo::float16: return GL_HALF_FLOAT_ARB;
-#endif
+        case vbo::float16: return GL_HALF_FLOAT;
     }
 
     return GL_FLOAT;
