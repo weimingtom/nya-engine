@@ -56,7 +56,7 @@ void log_gl_errors(const char *place)
             case GL_INVALID_ENUM: log()<<"invalid enum"; break;
             case GL_INVALID_VALUE: log()<<"invalid value"; break;
             case GL_INVALID_OPERATION: log()<<"invalid operation"; break;
-#ifndef OPENGL_ES
+#if !defined OPENGL_ES && !defined OPENGL3
             case GL_STACK_OVERFLOW: log()<<"stack overflow"; break;
             case GL_STACK_UNDERFLOW: log()<<"stack underflow"; break;
 #endif

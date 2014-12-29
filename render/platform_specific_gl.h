@@ -2,6 +2,9 @@
 
 #pragma once
 
+//#define NYA_DIRECTX11
+//#define NYA_OPENGL3
+
 #include "render_objects.h"
 
 #ifdef _WIN32
@@ -18,8 +21,6 @@
             #endif
         #endif
     #endif
-
-    //#define NYA_DIRECTX11
 
     #if defined WINDOWS_METRO || defined NYA_DIRECTX11
         #define DIRECTX11
@@ -41,11 +42,20 @@
 
         #define OPENGL_ES
     #else
-        #include <OpenGL/gl.h>
-        #include <OpenGL/glext.h>
+        #ifdef NYA_OPENGL3
+            #define OPENGL3
+        #endif
+
+        #ifdef OPENGL3
+            #include <OpenGL/gl3.h>
+        #else
+            #include <OpenGL/gl.h>
+            #include <OpenGL/glext.h>
+        #endif
+
+        #define NO_EXTENSIONS_INIT
     #endif
 
-    #define NO_EXTENSIONS_INIT
 #elif ANDROID
     #include <GLES2/gl2.h>
     #include <GLES2/gl2ext.h>
@@ -56,7 +66,7 @@
     #include <GL/glext.h>
 #endif
 
-#ifdef OPENGL_ES
+#if defined OPENGL_ES || defined OPENGL3
     #define ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
     #define NO_EXTENSIONS_INIT
 #endif

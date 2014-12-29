@@ -932,6 +932,9 @@ private:
     {
         NSOpenGLPFADoubleBuffer,
         NSOpenGLPFADepthSize, 32,
+#ifdef OPENGL3
+        NSOpenGLPFAOpenGLProfile,NSOpenGLProfileVersion3_2Core,
+#endif
         0
     };
 
@@ -940,6 +943,9 @@ private:
         NSOpenGLPFADoubleBuffer,
         NSOpenGLPFADepthSize, 32,
         NSOpenGLPFASampleBuffers,1,NSOpenGLPFASamples,0,
+#ifdef OPENGL3
+        NSOpenGLPFAOpenGLProfile,NSOpenGLProfileVersion3_2Core,
+#endif
         0
     };  attrs_aniso[6]=m_antialiasing;
 
