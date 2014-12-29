@@ -31,6 +31,11 @@ namespace
   #ifndef NO_EXTENSIONS_INIT
     PFNGLCOMPRESSEDTEXIMAGE2DARBPROC glCompressedTexImage2D=0;
   #endif
+
+  #ifdef OPENGL3
+    #define GL_LUMINANCE GL_RED
+    #define GL_TEXTURE_SWIZZLE_RGBA 0x8E46
+  #endif
 #endif
 
 int get_bpp(texture::color_format format)
@@ -572,6 +577,14 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     if(!pot) gl_setup_pack_alignment();
     gl_setup_texture(GL_TEXTURE_2D,!pot && !is_platform_restrictions_ignored(),has_mipmap);
 
+#ifdef OPENGL3
+    if(format==greyscale)
+    {
+        const int swizzle[]={GL_RED,GL_RED,GL_RED,GL_ONE};
+        glTexParameteriv(GL_TEXTURE_2D,GL_TEXTURE_SWIZZLE_RGBA,swizzle);
+    }
+#endif
+
 #ifndef OPENGL_ES
     if(mip_count>1) //is_platform_restrictions_ignored() &&
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAX_LEVEL,mip_count-1);
@@ -833,6 +846,14 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 
     if(!pot) gl_setup_pack_alignment();
     gl_setup_texture(GL_TEXTURE_CUBE_MAP,true,has_mipmap);
+
+#ifdef OPENGL3
+    if(format==greyscale)
+    {
+        const int swizzle[]={GL_RED,GL_RED,GL_RED,GL_ONE};
+        glTexParameteriv(GL_TEXTURE_2D,GL_TEXTURE_SWIZZLE_RGBA,swizzle);
+    }
+#endif
 
   #ifdef GL_GENERATE_MIPMAP
     if(has_mipmap) glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_GENERATE_MIPMAP,GL_TRUE);
