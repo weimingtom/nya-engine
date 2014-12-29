@@ -10,8 +10,8 @@ namespace nya_memory
 template<class t,size_t count> class lru
 {
 protected:
-    virtual void on_access(const char *name,t& value) {}
-    virtual void on_free(const char *name,t& value) {}
+    virtual bool on_access(const char *name,t& value) { return false; }
+    virtual bool on_free(const char *name,t& value) { return true; }
 
 public:
     t &access(const char *name)
@@ -36,8 +36,13 @@ public:
 		}
 
 		m_list.push_front(entry(name,t()));
-		m_map[name]=m_list.begin();
-        on_access(name,m_list.front().second);
+        if(!on_access(name,m_list.front().second))
+        {
+            m_list.pop_front();
+            return get_invalid_object<t>();
+        }
+
+        m_map[name]=m_list.begin();
         return m_list.front().second;
     }
 
