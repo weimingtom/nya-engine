@@ -50,9 +50,9 @@
             #include <OpenGL/gl3.h>
         #else
             #include <OpenGL/gl.h>
-            #include <OpenGL/glext.h>
         #endif
 
+        #include <OpenGL/glext.h>
         #define NO_EXTENSIONS_INIT
     #endif
 

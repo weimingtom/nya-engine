@@ -269,6 +269,8 @@ bool shader_code_parser::convert_to_glsl3()
     //prefix.append("precision highp float;\n");
 
     replace_variable("texture2D","texture");
+    replace_variable("texture2DProj","textureProj");
+    replace_variable("textureCube","texture");
 
     const char *gl_ps_out="gl_FragColor";
     std::string ps_out_var=m_replace_str+std::string(gl_ps_out+3);

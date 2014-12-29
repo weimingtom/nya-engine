@@ -5,10 +5,10 @@
 #include "app_internal.h"
 #include "system.h"
 #include "memory/tmp_buffer.h"
+#include "render/render.h"
+#include "render/platform_specific_gl.h"
 
 #include <string>
-
-#include "render/render.h"
 
 #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
 
