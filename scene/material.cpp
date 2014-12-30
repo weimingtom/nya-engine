@@ -240,28 +240,20 @@ void material_internal::set(const char *pass_name) const
     for(int slot_idx=0;slot_idx<(int)p.m_textures_slots_map.size();++slot_idx)
     {
         int texture_idx=p.m_textures_slots_map[slot_idx];
-        if(texture_idx>=0)
+        if(texture_idx<0)
+            continue;
+
+        if(m_textures[texture_idx].proxy.is_valid())
         {
-            if(m_textures[texture_idx].proxy.is_valid())
+            if(!m_textures[texture_idx].proxy->internal().set(slot_idx))
             {
-                if(!m_textures[texture_idx].proxy->internal().set(slot_idx))
-                {
-                    nya_log::warning()<<"invalid texture for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"\n";
-
-                    missing_texture(is_shader_sampler_cube(p.m_shader,slot_idx)).internal().set(slot_idx);
-                }
-            }
-            else
-            {
-                nya_log::warning()<<"invalid texture proxy for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"\n";
-
+                nya_log::warning()<<"invalid texture for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"\n";
                 missing_texture(is_shader_sampler_cube(p.m_shader,slot_idx)).internal().set(slot_idx);
             }
         }
         else
         {
-            nya_log::warning()<<"missing texture for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"\n";
-
+            nya_log::warning()<<"invalid texture proxy for semantics '"<<p.m_shader.internal().get_texture_semantics(slot_idx)<<"' in material '"<<m_name<<"\n";
             missing_texture(is_shader_sampler_cube(p.m_shader,slot_idx)).internal().set(slot_idx);
         }
     }
@@ -412,8 +404,11 @@ void material_internal::pass::update_maps(const material_internal &m) const
     std::fill(m_textures_slots_map.begin(),m_textures_slots_map.end(),-1);
     for(int slot_idx=0;slot_idx<m_shader.internal().get_texture_slots_count();++slot_idx)
     {
-        const std::string semantics=m_shader.internal().get_texture_semantics(slot_idx);
-        int texture_idx=m.get_texture_idx(semantics.c_str());
+        const char *semantics=m_shader.internal().get_texture_semantics(slot_idx);
+        if(!semantics || !semantics[0])
+            continue;
+
+        const int texture_idx=m.get_texture_idx(semantics);
         if(texture_idx>=0)
             m_textures_slots_map[slot_idx]=texture_idx;
     }
@@ -538,7 +533,13 @@ void material_internal::update_passes_maps() const
     {
         const nya_scene::shader_internal &s=iter->get_shader().internal();
         for(int i=0;i<s.get_texture_slots_count();++i)
-            tex_semantics[s.get_texture_semantics(i)]=true;
+        {
+            const char *semantics=s.get_texture_semantics(i);
+            if(!semantics || !semantics[0])
+                continue;
+
+            tex_semantics[semantics]=true;
+        }
     }
 
     for(std::map<std::string,bool>::const_iterator iter=tex_semantics.begin();iter!=tex_semantics.end();++iter)
