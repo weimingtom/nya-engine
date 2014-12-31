@@ -37,7 +37,6 @@
 #else
 
 #include <Cocoa/Cocoa.h>
-#include <GLKit/GLKit.h>
 
 @interface shared_app_delegate : NSObject <NSApplicationDelegate>
 {
