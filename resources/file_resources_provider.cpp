@@ -4,6 +4,7 @@
 
 #include "file_resources_provider.h"
 #include "memory/pool.h"
+#include "memory/lru.h"
 
 #include <stdio.h>
 
@@ -25,152 +26,16 @@ namespace nya_resources
 class file_ref
 {
 public:
-    void init(const char *name)
+    void init(const char *name) { m_name.assign(name?name:""); }
+
+    FILE *access() { return get_lru().access(m_name.c_str()); }
+
+    void free() { get_lru().free(m_name.c_str()); }
+
+    class lru: public nya_memory::lru<FILE *,64>
     {
-        if(name)
-            m_name.assign(name);
-        else
-            m_name.erase();
-    }
-
-    FILE *access() { return get_lru().access(*this); }
-
-    void free() { get_lru().free(*this); }
-
-    class lru
-    {
-    public:
-        FILE *access(file_ref &ref)
-        {
-            if(ref.m_id>=0)
-            {
-                entry *relink=&m_entries[ref.m_id];
-                if(relink==m_last)
-                {
-                    m_first->prev=relink;
-                    relink->next=m_first;
-                    m_first=relink;
-                    m_last=relink->prev;
-                    m_last->next=0;
-                    relink->prev=0;
-                }
-                else if(relink!=m_first)
-                {
-                    relink->next->prev=relink->prev;
-                    relink->prev->next=relink->next;
-                    relink->next=m_first;
-                    m_first->prev=relink;
-                    m_first=relink;
-                    relink->prev=0;
-                }
-
-                return relink->descriptor;
-            }
-
-              //ToDo: file descriptor share ?
-            FILE *f=fopen(ref.m_name.c_str(),"rb");
-            if(!f)
-                return 0;
-
-            entry *relink=m_last;
-
-            if(relink->descriptor)
-            {
-                fclose(relink->descriptor);
-                relink->descriptor=0;
-            }
-
-            if(relink->ref)
-                relink->ref->m_id=-1;
-
-            relink->descriptor=f;
-            relink->ref=&ref;
-            ref.m_id=relink->id;
-
-            m_first->prev=relink;
-            relink->next=m_first;
-            m_first=relink;
-            m_last=relink->prev;
-            m_last->next=0;
-            relink->prev=0;
-
-            return f;
-        }
-
-        void free(file_ref &ref)
-        {
-            if(ref.m_id<0)
-                return;
-
-            entry *relink=&m_entries[ref.m_id];
-            ref.m_id=-1;
-
-            if(relink->descriptor)
-            {
-                fclose(relink->descriptor);
-                relink->descriptor=0;
-            }
-
-            if(relink==m_last)
-                return;
-
-            if(relink==m_first)
-            {
-                m_first=relink->next;
-                m_first->prev=0;
-                m_last->next=relink;
-                relink->prev=m_last;
-                m_last=relink;
-                relink->next=0;
-            }
-            else
-            {
-                relink->next->prev=relink->prev;
-                relink->prev->next=relink->next;
-                relink->prev=m_last;
-                m_last->next=relink;
-                m_last=relink;
-                relink->next=0;
-            }
-        }
-
-        lru()
-        {
-            for(int i=0;i<max_opened_descriptors-1;++i)
-            {
-                m_entries[i].next=&m_entries[i+1];
-                m_entries[i+1].prev=&m_entries[i];
-
-                m_entries[i].id=i;
-            }
-
-            m_entries[max_opened_descriptors-1].id=max_opened_descriptors-1;
-
-            m_first=&m_entries[0];
-            m_last=&m_entries[max_opened_descriptors-1];
-        }
-
-    private:
-        struct entry
-        {
-            int id;
-
-            FILE *descriptor;
-            file_ref *ref;
-
-            entry *prev;
-            entry *next;
-
-            entry(): id(-1),descriptor(0),ref(0),
-                     prev(0),next(0) {}
-        };
-
-    private:
-        entry *m_first;
-        entry *m_last;
-
-        const static int max_opened_descriptors=64;
-        entry m_entries[max_opened_descriptors];
+        bool on_access(const char *name,FILE *& f) { return name?(f=fopen(name,"rb"))!=0:false; }
+        bool on_free(const char *name,FILE *& f) { return fclose(f)==0; }
     };
 
     static lru &get_lru()
@@ -179,10 +44,7 @@ public:
         return cache;
     }
 
-    file_ref(): m_id(-1) {}
-
 private:
-    int m_id;
     std::string m_name;
 };
 
