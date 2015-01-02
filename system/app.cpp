@@ -72,9 +72,9 @@ public:
 
         m_height=int(m_renderTargetSize.Height);
         m_app.on_resize((unsigned int)m_renderTargetSize.Width,(unsigned int)m_renderTargetSize.Height);
-        m_app.on_init_splash();
         m_time=nya_system::get_time();
-        //update_splash(app);
+        if(m_app.on_splash())
+            m_swap_chain->Present(1, 0);
         m_app.on_init();
 
         m_time=nya_system::get_time();
@@ -324,10 +324,6 @@ public:
     {
     }
 
-    void update_splash(nya_system::app &app)
-    {
-    }
-
 public:
     static shared_app &get_app()
     {
@@ -566,9 +562,17 @@ public:
         nya_render::set_viewport(0,0,w,h);
 
         app.on_resize(w,h);
-        app.on_init_splash();
         m_time=nya_system::get_time();
-        update_splash(app);
+
+        if(app.on_splash())
+        {
+#ifdef DIRECTX11
+            m_swap_chain->Present(0,0);
+#else
+            SwapBuffers(m_hdc);
+#endif        
+        }
+
         app.on_init();
 
         m_time=nya_system::get_time();
@@ -1026,9 +1030,11 @@ public:
             glEnable(GL_MULTISAMPLE_ARB);
 
         app.on_resize(w,h);
-        app.on_init_splash();
         m_time=nya_system::get_time();
-        update_splash(app);
+
+        if(app.on_splash())
+            glXSwapBuffers(m_dpy,m_win);
+
         app.on_init();
 
         m_time=nya_system::get_time();
@@ -1161,16 +1167,6 @@ public:
         XSetStandardProperties(m_dpy,m_win,title,title,None,0,0,NULL);
     }
 
-    void update_splash(nya_system::app &app)
-    {
-        unsigned long time=nya_system::get_time();
-        unsigned int dt=(unsigned)(time-m_time);
-        m_time=time;
-
-        app.on_splash(dt);
-        glXSwapBuffers(m_dpy,m_win);
-    }
-
 public:
     static shared_app &get_app()
     {
@@ -1213,11 +1209,6 @@ void app::set_title(const char *title)
 
 void app::set_mouse_pos(int x,int y)
 {
-}
-
-void app::update_splash()
-{
-    shared_app::get_app().update_splash(*this);
 }
 
 void app::finish()

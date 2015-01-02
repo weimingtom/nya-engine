@@ -237,10 +237,10 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
     nya_system::app *responder=shared_app::get_app().get_responder();
     if(responder)
     {
-        //[(EAGLView *)self.view setFramebuffer];
-        responder->on_init_splash();
-        responder->on_splash(0);
-        //[(EAGLView *)self.view presentFramebuffer];
+        [(EAGLView *)self.view setFramebuffer];
+        if(responder->on_splash())
+            [(EAGLView *)self.view presentFramebuffer];
+
         responder->on_init();
     }
 
@@ -710,7 +710,7 @@ private:
     [[NSRunLoop currentRunLoop] addTimer:m_animation_timer forMode:NSDefaultRunLoopMode];
     [[NSRunLoop currentRunLoop] addTimer:m_animation_timer forMode:NSEventTrackingRunLoopMode];
 
-    m_state=state_splash;
+    m_state=state_init;
 }
 
 - (void)animate:(id)sender
@@ -722,20 +722,16 @@ private:
 {
     switch(m_state)
     {
-        case state_splash:
-        {
-            m_app->on_init_splash();
-            m_app->on_splash(0);
-            m_state=state_init;
-        }
-        break;
-
         case state_init:
         {
+            const bool had_splash=m_app->on_splash();
             m_app->on_init();
             m_time=nya_system::get_time();
             m_state=state_draw;
+            if(had_splash)
+                break;
         }
+
         case state_draw:
         {
             const unsigned long time=nya_system::get_time();
@@ -1013,11 +1009,6 @@ void app::set_title(const char *title)
 
 void app::set_mouse_pos(int x,int y)
 {
-}
-
-void app::update_splash()
-{
-    //shared_app::get_app().update_splash(*this);
 }
 
 void app::finish()

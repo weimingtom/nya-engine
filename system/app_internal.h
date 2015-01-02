@@ -55,7 +55,6 @@
 
     enum state
     {
-        state_splash,
         state_init,
         state_draw
     };

@@ -17,9 +17,8 @@ enum mouse_button
 class app
 {
 public:
-    virtual void on_init_splash() {}
+    virtual bool on_splash() { return false; } //shown if true
     virtual void on_init() {}
-    virtual void on_splash(unsigned int dt) {}
     virtual void on_frame(unsigned int dt) {}
     virtual void on_free() {}
 
@@ -42,9 +41,7 @@ public:
     void set_title(const char *title);
 
 public:
-    void limit_framerate(unsigned int fps);
     void set_mouse_pos(int x,int y);
-    void update_splash();
     void finish();
 };
 
