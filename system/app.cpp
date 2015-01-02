@@ -827,7 +827,7 @@ private:
 
 				const unsigned int x11key=get_x11_key(key);
 				if(x11key)
-					app->on_keyboard(x11key,true);
+					app->on_keyboard(x11key,false);
             }
             break;
         };
