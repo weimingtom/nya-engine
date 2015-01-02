@@ -25,18 +25,12 @@
 class npl2: public nya_system::app
 {
 private:
-	void on_init_splash()
-	{
-	    nya_log::log()<<"on_init_splash\n";
-
-	    nya_render::set_clear_color(0,0.6,0.7,1);
-	}
-
-	void on_splash(unsigned int dt)
+	bool on_splash()
 	{
 	    nya_log::log()<<"on_splash\n";
-
+	    nya_render::set_clear_color(0,0.6,0.7,1);
 	    nya_render::clear(true,false);
+        return true;
     }
 
 	void on_init()

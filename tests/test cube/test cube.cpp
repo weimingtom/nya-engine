@@ -14,18 +14,14 @@
 class test_cube: public nya_system::app
 {
 private:
-	void on_init_splash()
-	{
-	    nya_log::log()<<"on_init_splash\n";
-
-		nya_render::set_clear_color(0.0f,0.6f,0.7f,1.0f);
-	}
-
-	void on_splash(unsigned int dt)
+	bool on_splash()
 	{
 	    nya_log::log()<<"on_splash\n";
 
+		nya_render::set_clear_color(0.0f,0.6f,0.7f,1.0f);
 		nya_render::clear(true,true);
+
+        return true;
     }
 
 	void on_init()
