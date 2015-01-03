@@ -854,20 +854,6 @@ public:
             SetWindowTextA(m_hwnd,title);
     }
 
-    void update_splash(nya_system::app &app)
-    {
-        unsigned long time=nya_system::get_time();
-        unsigned int dt=(unsigned)(time-m_time);
-        m_time=time;
-
-        app.on_splash(dt);
-
-  #ifdef DIRECTX11
-  #else
-        SwapBuffers(m_hdc);
-  #endif
-    }
-
 public:
     static shared_app &get_app()
     {
@@ -925,7 +911,6 @@ public:
 
     void finish(nya_system::app &app) {}
     void set_title(const char *title) {}
-    void update_splash(nya_system::app &app) {}
 
 public:
     static shared_app &get_app()
