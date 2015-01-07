@@ -184,6 +184,7 @@ public:
 
     // skeleton
     const nya_render::skeleton &get_skeleton() const { return internal().m_skeleton; }
+    int get_bones_count() const { return get_skeleton().get_bones_count(); }
     int get_bone_idx(const char *name) { return internal().m_skeleton.get_bone_idx(name); }
     nya_math::vec3 get_bone_pos(int bone_idx,bool local=false,bool ignore_animations=false);
     nya_math::quat get_bone_rot(int bone_idx,bool local=false);
