@@ -147,9 +147,15 @@ bool file_resources_provider::set_folder(const char*name,bool recursive,bool ign
     {
         struct stat sb;
         if(stat(m_path.c_str(),&sb)==-1)
+        {
             log()<<"warning: unable to stat at path "<<name<<", probably does not exist\n";
+            return false;
+        }
         else if(!S_ISDIR(sb.st_mode))
+        {
             log()<<"warning: specified path is not a directory "<<name<<"\n";
+            return false;
+        }
     }
 
     m_path.push_back('/');
