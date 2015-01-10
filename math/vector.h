@@ -40,6 +40,8 @@ struct vec2
     static vec2 min(const vec2 &a,const vec2 &b) { return vec2(a.x<b.x?a.x:b.x, a.y<b.y?a.y:b.y); }
 
     static vec2 normalize(const vec2 &v) { float len=v.length(); return len<0.00001f? vec2(1.0f,0.0f): v*(1.0f/len); }
+
+    static vec2 abs(const vec2 &v) { return vec2(fabsf(v.x),fabsf(v.y)); }
 };
 
 inline vec2 operator * ( float a, const vec2& v ) { return vec2(v.x*a,v.y*a); }
@@ -83,6 +85,8 @@ struct vec3
     static vec3 min(const vec3 &a,const vec3 &b) { return vec3(a.x<b.x?a.x:b.x, a.y<b.y?a.y:b.y, a.z<b.z?a.z:b.z); }
 
     static vec3 normalize(const vec3 &v) { float len=v.length(); return len<0.00001f? vec3(1.0f,0.0f,0.0f): v*(1.0f/len); }
+
+    static vec3 abs(const vec3 &v) { return vec3(fabsf(v.x),fabsf(v.y),fabsf(v.z)); }
 };
 
 inline vec3 operator * ( float a, const vec3& v ) { return vec3(v.x*a,v.y*a,v.z*a); }
@@ -132,6 +136,8 @@ struct vec4
     static vec4 min(const vec4 &a,const vec4 &b) { return vec4(a.x<b.x?a.x:b.x, a.y<b.y?a.y:b.y, a.z<b.z?a.z:b.z, a.w<b.w?a.w:b.w); }
 
     static vec4 normalize(const vec4 &v) { float len=v.length(); return len<0.00001f? vec4(1.0f,0.0f,0.0f,0.0): v*(1.0f/len); }
+
+    static vec4 abs(const vec4 &v) { return vec4(fabsf(v.x),fabsf(v.y),fabsf(v.z),fabsf(v.w)); }
 };
 
 inline vec4 operator * ( float a, const vec4& v ) { return vec4(v.x*a,v.y*a,v.z*a,v.w*a); }
