@@ -19,6 +19,8 @@ struct vec2
     vec2 operator + (const vec2 &v) const { return vec2(x+v.x,y+v.y); }
     vec2 operator - (const vec2 &v) const { return vec2(x-v.x,y-v.y); }
     float operator * (const vec2 &v) const { return x*v.x+y*v.y; }
+    vec2 operator * (const float a) const { return vec2(x*a,y*a); }
+    vec2 operator / (const float a) const { return vec2(x/a,y/a); }
 
     vec2 operator - () const { return vec2(-x,-y); }
 
@@ -32,24 +34,15 @@ struct vec2
 
     vec2 &abs() { x=fabsf(x); y=fabsf(y); return *this; }
 
-    vec2 &normalize()
-    {
-        float len=length();
-        if(len<0.00001f)
-        {
-            x=1.0f;
-            y=0.0f;
-        }
-        else
-            *this *=(1.0f/len);
+    vec2 &normalize() { return *this=normalize(*this); }
 
-        return *this;
-    }
+    static vec2 max(const vec2 &a,const vec2 &b) { return vec2(a.x>b.x?a.x:b.x, a.y>b.y?a.y:b.y); }
+    static vec2 min(const vec2 &a,const vec2 &b) { return vec2(a.x<b.x?a.x:b.x, a.y<b.y?a.y:b.y); }
+
+    static vec2 normalize(const vec2 &v) { float len=v.length(); return len<0.00001f? vec2(1.0f,0.0f): v*(1.0f/len); }
 };
 
 inline vec2 operator * ( float a, const vec2& v ) { return vec2(v.x*a,v.y*a); }
-inline vec2 operator * ( const vec2& v, float a ) { return vec2(v.x*a,v.y*a); }
-inline vec2 operator / ( const vec2& v, float a ) { return vec2(v.x/a,v.y/a); }
 
 struct vec3
 {
@@ -65,6 +58,7 @@ struct vec3
     vec3 operator - (const vec3 &v) const { return vec3(x-v.x,y-v.y,z-v.z); }
     float operator * (const vec3 &v) const { return x*v.x+y*v.y+z*v.z; }
     vec3 operator * (const float a) const { return vec3(x*a,y*a,z*a); }
+    vec3 operator / (const float a) const { return vec3(x/a,y/a,z/a); }
 
     vec3 operator - () const { return vec3(-x,-y,-z); }
 
@@ -78,30 +72,20 @@ struct vec3
 
     vec3 &abs() { x=fabsf(x); y=fabsf(y); z=fabsf(z); return *this; }
 
-    vec3 &normalize() { *this=normalize(*this); return *this; }
+    vec3 &normalize() { return *this=normalize(*this); }
 
     const vec2 &xy() const { return *(vec2*)&x; }
     vec2 &xy() { return *(vec2*)&x; }
 
-    static vec3 cross(const vec3 &a,const vec3 &b)
-    {
-        return vec3(a.y*b.z - a.z*b.y,
-                    a.z*b.x - a.x*b.z,
-                    a.x*b.y - a.y*b.x);
-    }
+    static vec3 cross(const vec3 &a,const vec3 &b) { return vec3(a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x); }
 
-    static vec3 normalize(const vec3 &v)
-    {
-        float len=v.length();
-        if(len<0.00001f)
-            return vec3(1.0f,0.0f,0.0f);
+    static vec3 max(const vec3 &a,const vec3 &b) { return vec3(a.x>b.x?a.x:b.x, a.y>b.y?a.y:b.y, a.z>b.z?a.z:b.z); }
+    static vec3 min(const vec3 &a,const vec3 &b) { return vec3(a.x<b.x?a.x:b.x, a.y<b.y?a.y:b.y, a.z<b.z?a.z:b.z); }
 
-        return v*(1.0f/len);
-    }
+    static vec3 normalize(const vec3 &v) { float len=v.length(); return len<0.00001f? vec3(1.0f,0.0f,0.0f): v*(1.0f/len); }
 };
 
 inline vec3 operator * ( float a, const vec3& v ) { return vec3(v.x*a,v.y*a,v.z*a); }
-inline vec3 operator / ( const vec3& v, float a ) { return vec3(v.x/a,v.y/a,v.z/a); }
 
 struct vec4
 {
@@ -121,6 +105,7 @@ struct vec4
     vec4 operator - (const vec4 &v) const { return vec4(x-v.x,y-v.y,z-v.z,w-v.w); }
     float operator * (const vec4 &v) const { return x*v.x+y*v.y+z*v.z+w*v.w; }
     vec4 operator * (const float a) const { return vec4(x*a,y*a,z*a,w*a); }
+    vec4 operator / (const float a) const { return vec4(x/a,y/a,z/a,w/a); }
 
     vec4 operator - () const { return vec4(-x,-y,-z,-w); }
 
@@ -134,7 +119,7 @@ struct vec4
 
     vec4 &abs() { x=fabsf(x); y=fabsf(y); z=fabsf(z); w=fabsf(w); return *this; }
 
-    vec4 &normalize() { *this=normalize(*this); return *this; }
+    vec4 &normalize() { return *this=normalize(*this); }
 
     const vec3 &xyz() const { return *(vec3*)&x; }
     vec3 &xyz() { return *(vec3*)&x; }
@@ -143,18 +128,13 @@ struct vec4
     const vec2 &zw() const { return *(vec2*)&z; }
     vec2 &zw() { return *(vec2*)&z; }
 
-    static vec4 normalize(const vec4 &v)
-    {
-        float len=v.length();
-        if(len<0.00001f)
-            return vec4(1.0f,0.0f,0.0f,0.0f);
+    static vec4 max(const vec4 &a,const vec4 &b) { return vec4(a.x>b.x?a.x:b.x, a.y>b.y?a.y:b.y, a.z>b.z?a.z:b.z, a.w>b.w?a.w:b.w); }
+    static vec4 min(const vec4 &a,const vec4 &b) { return vec4(a.x<b.x?a.x:b.x, a.y<b.y?a.y:b.y, a.z<b.z?a.z:b.z, a.w<b.w?a.w:b.w); }
 
-        return v*(1.0f/len);
-    }
+    static vec4 normalize(const vec4 &v) { float len=v.length(); return len<0.00001f? vec4(1.0f,0.0f,0.0f,0.0): v*(1.0f/len); }
 };
 
 inline vec4 operator * ( float a, const vec4& v ) { return vec4(v.x*a,v.y*a,v.z*a,v.w*a); }
-inline vec4 operator / ( const vec4& v, float a ) { return vec4(v.x/a,v.y/a,v.z/a,v.w/a); }
 
 }
 
