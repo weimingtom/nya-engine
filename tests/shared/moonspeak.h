@@ -189,4 +189,5 @@ if(i<64588) return c45[i-64576];
 return 0;
 #undef z
 #undef y
+#undef x
 }
