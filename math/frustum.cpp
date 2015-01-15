@@ -41,7 +41,7 @@ bool frustum::test_intersect(const aabb &box) const
 	for(int i=0;i<6;++i)
 	{
         const plane &p=m_planes[i];
-		if(box.origin*p.n+box.delta*p.abs_n+p.d<0.0f)
+		if(box.origin*p.n+(box.delta*p.abs_n+p.d)<0.0f)
 			return false;
 	}
 
@@ -89,9 +89,7 @@ frustum::frustum(const mat4 &m)
             p.d/=len;
         }
 
-        p.abs_n.x=fabsf(p.n.x);
-        p.abs_n.y=fabsf(p.n.y);
-        p.abs_n.z=fabsf(p.n.z);
+        p.abs_n=nya_math::vec3::abs(p.n);
     }
 }
 

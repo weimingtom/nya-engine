@@ -57,19 +57,19 @@ mat4 &mat4::rotate(float angle,float x,float y,float z)
 
     mat4 rot;
 
-    rot[0][0]=(one_minus_cos*xx)+cos_a;
-    rot[0][1]=(one_minus_cos*xy)-zs;
-    rot[0][2]=(one_minus_cos*zx)+ys;
+    rot[0][0]=one_minus_cos*xx+cos_a;
+    rot[0][1]=one_minus_cos*xy-zs;
+    rot[0][2]=one_minus_cos*zx+ys;
     rot[0][3]=0;
 
-    rot[1][0]=(one_minus_cos*xy)+zs;
-    rot[1][1]=(one_minus_cos*yy)+cos_a;
-    rot[1][2]=(one_minus_cos*yz)-xs;
+    rot[1][0]=one_minus_cos*xy+zs;
+    rot[1][1]=one_minus_cos*yy+cos_a;
+    rot[1][2]=one_minus_cos*yz-xs;
     rot[1][3]=0;
 
-    rot[2][0]=(one_minus_cos*zx)-ys;
-    rot[2][1]=(one_minus_cos*yz)+xs;
-    rot[2][2]=(one_minus_cos*zz)+cos_a;
+    rot[2][0]=one_minus_cos*zx-ys;
+    rot[2][1]=one_minus_cos*yz+xs;
+    rot[2][2]=one_minus_cos*zz+cos_a;
     rot[2][3]=0;
 
     rot[3][0]=0;
@@ -179,10 +179,10 @@ mat4 mat4::operator*(const mat4 &mat) const
     mat4 out;
     for(int i=0;i<4;++i)
     for(int j=0;j<4;++j)
-        out[i][j]=(m[i][0]*mat[0][j])+
-                    (m[i][1]*mat[1][j])+
-                    (m[i][2]*mat[2][j])+
-                    (m[i][3]*mat[3][j]);
+        out[i][j]=m[i][0]*mat[0][j]+
+                  m[i][1]*mat[1][j]+
+                  m[i][2]*mat[2][j]+
+                  m[i][3]*mat[3][j];
     return out;
 }
 
