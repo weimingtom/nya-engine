@@ -1,7 +1,5 @@
 //https://code.google.com/p/nya-engine/
 
-//ToDo: move lru to nya_memory
-
 #include "file_resources_provider.h"
 #include "memory/pool.h"
 #include "memory/lru.h"

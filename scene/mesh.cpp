@@ -45,7 +45,7 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size,i
     {
         const nya_formats::nms_mesh_chunk::element &e=c.elements[i];
         const nya_render::vbo::vertex_atrib_type type=nya_render::vbo::vertex_atrib_type(e.data_type);
-        switch(e.type) //ToDo: data_type for all types
+        switch(e.type)
         {
             case nya_formats::nms_mesh_chunk::pos: res.vbo.set_vertices(e.offset,e.dimension,type); break;
             case nya_formats::nms_mesh_chunk::normal: res.vbo.set_normals(e.offset,type); break;
