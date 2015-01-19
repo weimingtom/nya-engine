@@ -114,7 +114,7 @@
 /* Begin PBXNativeTarget section */
 		F52FEB001A651C8000C09F52 /* test-cube */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F51A291F1A683FE5002472F2 /* Build configuration list */;
+			buildConfigurationList = F51A291F1A683FE5002472F2 /* Build configuration list for PBXNativeTarget "test-cube" */;
 			buildPhases = (
 				F52FEAFD1A651C8000C09F52 /* Sources */,
 				F52FEAFE1A651C8000C09F52 /* Frameworks */,
@@ -207,6 +207,8 @@
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_CXX_LIBRARY = "compiler-default";
+				CONFIGURATION_BUILD_DIR = ../../bin/mac_debug;
+				CONFIGURATION_TEMP_DIR = ../../obj/mac_debug;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -214,7 +216,9 @@
 					"$(inherited)",
 					"/Users/vlad/Development/nya-engine/bin/mac_debug",
 				);
+				OBJROOT = ../../obj/;
 				PRODUCT_NAME = "test-cube";
+				SYMROOT = ../../bin/;
 				USER_HEADER_SEARCH_PATHS = ../../;
 			};
 			name = Debug;
@@ -224,13 +228,17 @@
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_CXX_LIBRARY = "compiler-default";
+				CONFIGURATION_BUILD_DIR = ../../bin/mac_release;
+				CONFIGURATION_TEMP_DIR = ../../obj/mac_release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"/Users/vlad/Development/nya-engine/bin/mac_debug",
 				);
+				OBJROOT = ../../obj/;
 				PRODUCT_NAME = "test-cube";
+				SYMROOT = ../../bin/;
 				USER_HEADER_SEARCH_PATHS = ../../;
 			};
 			name = Release;
@@ -308,7 +316,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		F51A291F1A683FE5002472F2 /* Build configuration list */ = {
+		F51A291F1A683FE5002472F2 /* Build configuration list for PBXNativeTarget "test-cube" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F51A291D1A683FE5002472F2 /* Debug */,
