@@ -5,6 +5,8 @@
 #include "memory/memory_reader.h"
 #include "zlib.h"
 
+//ToDo: log
+
 namespace nya_resources
 {
 
@@ -83,7 +85,7 @@ bool zip_resources_provider::open_archive(nya_resources::resource_data *data)
         zip_entry entry;
 
         reader.skip(6);
-        const ushort compression=reader.read<ushort>();
+        entry.compression=reader.read<ushort>();
         reader.skip(8);
         entry.packed_size=reader.read<uint>();
         entry.unpacked_size=reader.read<uint>();
@@ -107,9 +109,6 @@ bool zip_resources_provider::open_archive(nya_resources::resource_data *data)
                 continue;
         }
 
-        if(compression!=8)
-            continue;
-
         m_entries.push_back(entry);
     }
 
@@ -127,6 +126,9 @@ public:
 
     bool read_all(void*data)
     {
+        if(m_compression==0)
+            return m_res?m_res->read_all(data):false;
+
         if(m_data.get_size()>0)
             return m_data.copy_to(data,m_data.get_size());
 
@@ -135,6 +137,9 @@ public:
 
     bool read_chunk(void *data,size_t size,size_t offset)
     {
+        if(m_compression==0)
+            return m_res?m_res->read_chunk(data,size,offset):false;
+
         m_data.allocate(m_unpacked_size);
         if(!unpack_to(m_data.get_data()))
         {
@@ -148,12 +153,15 @@ public:
     void release() { m_data.free(); delete this; }
 
 public:
-    zip_resource(nya_resources::resource_data *res, unsigned int offset,unsigned int packed_size,unsigned int unpacked_size):
-                 m_res(res),m_offset(offset),m_packed_size(packed_size),m_unpacked_size(unpacked_size) {}
+    zip_resource(nya_resources::resource_data *res,unsigned int compression,unsigned int offset,unsigned int packed_size,unsigned int unpacked_size):
+                 m_res(res),m_compression(compression),m_offset(offset),m_packed_size(packed_size),m_unpacked_size(unpacked_size) {}
 private:
     bool unpack_to(void *data)
     {
         if(!data || !m_res)
+            return false;
+
+        if(m_compression!=8)
             return false;
 
         size_t offset=m_offset;
@@ -205,7 +213,7 @@ private:
 private:
     nya_resources::resource_data *m_res;
     nya_memory::tmp_buffer_ref m_data;
-    unsigned int m_offset,m_packed_size,m_unpacked_size;
+    unsigned int m_compression,m_offset,m_packed_size,m_unpacked_size;
 };
 
 }
@@ -220,7 +228,7 @@ resource_data *zip_resources_provider::access(const char *resource_name)
     {
         const zip_entry &e=m_entries[i];
         if(e.name==name)
-            return new zip_resource(m_res,e.offset,e.packed_size,e.unpacked_size);
+            return new zip_resource(m_res,e.compression,e.offset,e.packed_size,e.unpacked_size);
     }
 
     return 0;

@@ -34,6 +34,7 @@ private:
     struct zip_entry
     {
         std::string name;
+        unsigned int compression;
         unsigned int offset;
         unsigned int packed_size;
         unsigned int unpacked_size;
