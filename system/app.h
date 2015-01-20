@@ -31,6 +31,9 @@ public:
     virtual void on_mouse_button(mouse_button button,bool pressed) {}
     virtual void on_mouse_scroll(int dx,int dy) {}
     virtual void on_keyboard(unsigned int key,bool pressed) {}
+    virtual void on_touch(int x,int y,unsigned int touch_idx,bool pressed) {}
+
+public:
     virtual void on_resize(unsigned int w,unsigned int h) {}
 
 public:

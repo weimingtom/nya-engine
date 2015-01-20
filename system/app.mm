@@ -40,6 +40,53 @@ namespace
         {
         }
 
+        int get_touch_id(void *touch)
+        {
+            if(!touch)
+                return -1;
+
+            for(int i=0;i<(int)m_touches.size();++i)
+            {
+                if(m_touches[i]==touch)
+                    return i;
+            }
+
+            return -1;
+        }
+
+        int add_touch_id(void *touch)
+        {
+            if(!touch)
+                return -1;
+
+            int touch_id=get_touch_id(touch);
+            if(touch_id>=0)
+                return touch_id;
+
+            for(int i=0;i<(int)m_touches.size();++i)
+            {
+                if(m_touches[i])
+                    continue;
+
+                m_touches[i]=touch;
+                return i;
+            }
+
+            m_touches.push_back(touch);
+            return (int)m_touches.size()-1;
+        }
+
+        void remove_touch_id(void *touch)
+        {
+            for(size_t i=0;i<m_touches.size();++i)
+            {
+                if(m_touches[i]!=touch)
+                    continue;
+
+                m_touches[i]=0;
+            }
+        }
+
         void set_title(const char *title)
         {
             if(!title)
@@ -67,6 +114,7 @@ namespace
         nya_system::app *m_responder;
         std::string m_title;
         int m_antialiasing;
+        std::vector<void *> m_touches;
     };
 }
 
@@ -112,48 +160,74 @@ namespace
 
     [self.window makeKeyAndVisible];
 
+    [self.viewController.view setMultipleTouchEnabled:YES];
+
     return YES;
+}
+
+-(void)touch:(NSSet *)touches withEvent:(UIEvent *)event pressed:(BOOL)pressed button:(BOOL)button
+{
+    nya_system::app *responder=shared_app::get_app().get_responder();
+    if(!responder)
+        return;
+
+    const float scale=[self.viewController getScale];
+    for(UITouch *touch in touches)
+    {
+        int idx=shared_app::get_app().get_touch_id(touch);
+        if(pressed)
+        {
+            if(button)
+            {
+                if(idx>=0)
+                    continue;
+
+                idx=shared_app::get_app().add_touch_id(touch);
+            }
+            else if(idx<0)
+                continue;
+        }
+        else
+        {
+            if(idx<0)
+                continue;
+
+            shared_app::get_app().remove_touch_id(touch);
+        }
+
+        const CGPoint tappedPt = [touch locationInView: self.viewController.view];
+        const int x=tappedPt.x*scale;
+        const int y=(self.viewController.view.bounds.size.height-tappedPt.y)*scale;
+
+        responder->on_touch(x,y,idx,pressed);
+
+        if(idx!=0)
+            continue;
+
+        responder->on_mouse_move(x,y);
+        if(button)
+            responder->on_mouse_button(nya_system::mouse_left,pressed);
+    }
 }
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    nya_system::app *responder=shared_app::get_app().get_responder();
-    if(!responder)
-        return;
-
-    const float scale=[self.viewController getScale];
-
-    CGPoint tappedPt = [[touches anyObject] locationInView: self.viewController.view];
-    responder->on_mouse_move(tappedPt.x*scale,(self.viewController.view.bounds.size.height-tappedPt.y)*scale);
-    responder->on_mouse_button(nya_system::mouse_left,true);
+    [self touch:touches withEvent:event pressed:true button:true];
 };
 
 -(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    nya_system::app *responder=shared_app::get_app().get_responder();
-    if(!responder)
-        return;
-
-    //UITouch *touchSample = [[event allTouches] anyObject];
-    //int count=[touchSample tapCount];
-
-    const float scale=[self.viewController getScale];
-
-    CGPoint tappedPt = [[touches anyObject] locationInView: self.viewController.view];
-    responder->on_mouse_move(tappedPt.x*scale,(self.viewController.view.bounds.size.height-tappedPt.y)*scale);
+    [self touch:touches withEvent:event pressed:true button:false];
 };
 
 -(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    nya_system::app *responder=shared_app::get_app().get_responder();
-    if(!responder)
-        return;
+    [self touch:touches withEvent:event pressed:false button:true];
+};
 
-    const float scale=[self.viewController getScale];
-
-    CGPoint tappedPt = [[touches anyObject] locationInView: self.viewController.view];
-    responder->on_mouse_move(tappedPt.x*scale,(self.viewController.view.bounds.size.height-tappedPt.y)*scale);
-    responder->on_mouse_button(nya_system::mouse_left,false);
+-(void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    [self touch:touches withEvent:event pressed:false button:true];
 };
 
 @end
