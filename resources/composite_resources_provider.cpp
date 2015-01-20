@@ -21,6 +21,32 @@ void composite_resources_provider::add_provider(resources_provider *provider)
         cache_provider((int)m_providers.size()-1);
 }
 
+inline std::string fix_name(const char *name)
+{
+    if(!name)
+        return std::string();
+
+    std::string name_str(name);
+    for(size_t i=0;i<name_str.size();++i)
+    {
+        if(name_str[i]=='\\')
+            name_str[i]='/';
+    }
+
+    std::string out;
+    char prev=0;
+    for(size_t i=0;i<name_str.size();++i)
+    {
+        if(prev=='/' && name_str[i]=='/')
+            continue;
+
+        prev=name_str[i];
+        out.push_back(prev);
+    }
+    
+    return out;
+}
+
 void composite_resources_provider::cache_provider(int idx)
 {
     if(idx<0 || idx>=(int)m_providers.size())
@@ -33,7 +59,7 @@ void composite_resources_provider::cache_provider(int idx)
         if(!name)
             continue;
 
-        std::string name_str(name);
+        std::string name_str=fix_name(name);
 
         if(m_ignore_case)
             std::transform(name_str.begin(),name_str.end(),name_str.begin(),::tolower);
@@ -67,13 +93,13 @@ resource_data *composite_resources_provider::access(const char *resource_name)
 
     if(m_ignore_case)
     {
-        std::string res_str(resource_name);
+        std::string res_str=fix_name(resource_name);
         std::transform(res_str.begin(),res_str.end(),res_str.begin(),::tolower);
 
-        it=m_cached_entries.find(res_str.c_str());
+        it=m_cached_entries.find(res_str);
     }
     else
-        it=m_cached_entries.find(resource_name);
+        it=m_cached_entries.find(fix_name(resource_name));
 
     if(it==m_cached_entries.end())
     {
@@ -103,13 +129,13 @@ bool composite_resources_provider::has(const char *resource_name)
 
     if(m_ignore_case)
     {
-        std::string res_str(resource_name);
+        std::string res_str=fix_name(resource_name);
         std::transform(res_str.begin(),res_str.end(),res_str.begin(),::tolower);
 
-        return m_cached_entries.find(res_str.c_str())!=m_cached_entries.end();
+        return m_cached_entries.find(res_str)!=m_cached_entries.end();
     }
 
-    return m_cached_entries.find(resource_name)!=m_cached_entries.end();
+    return m_cached_entries.find(fix_name(resource_name))!=m_cached_entries.end();
 }
 
 void composite_resources_provider::enable_cache()
