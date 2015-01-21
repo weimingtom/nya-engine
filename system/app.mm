@@ -38,6 +38,8 @@ namespace
 
         void finish(nya_system::app &app)
         {
+            app.on_free();
+            exit(0);
         }
 
         int get_touch_id(void *touch)
@@ -703,6 +705,8 @@ public:
 
     void finish(nya_system::app &app)
     {
+        app.on_free();
+        exit(0);
     }
 
     void set_title(const char *title)
