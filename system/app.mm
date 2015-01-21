@@ -903,7 +903,7 @@ private:
         case '\t': return nya_system::key_tab;
         case '0': return nya_system::key_0;
 
-        case 0x1f: return nya_system::key_escape;
+        case 0x1b: return nya_system::key_escape;
         case 0x7f: return nya_system::key_backspace;
 
         case NSEndFunctionKey: return nya_system::key_end;
