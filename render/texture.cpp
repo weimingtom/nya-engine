@@ -295,10 +295,16 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     if(format==dxt1 || format==dxt3 || format==dxt5)
     {
         if(!data || mip_count==0)
+        {
+            log()<<"Unable to build texture: dxt format with invalid data\n";
             return false;
+        }
 
         if(!is_dxt_supported())
+        {
+            log()<<"Unable to build texture: dxt not supported on this platform\n";
             return false;
+        }
 
         if(mip_count<0)
             mip_count=1;
@@ -315,7 +321,10 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 
 #ifdef DIRECTX11
     if(!get_device())
+    {
+        log()<<"Unable to build texture: invalid device\n";
         return false;
+    }
 
     if(m_tex>=0)
         release();
@@ -380,7 +389,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         case dxt3: desc.Format=DXGI_FORMAT_BC2_UNORM; break;
         case dxt5: desc.Format=DXGI_FORMAT_BC3_UNORM; break;
 
-        default: return false;
+        default: log()<<"Unable to build texture: unsupported format\n"; return false;
     }
 
     desc.SampleDesc.Count=1;
@@ -430,14 +439,20 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     buf_mip.free();
 
     if(!tex)
+    {
+        log()<<"Unable to build texture: unable to create texture\n";
         return false;
+    }
 
     ID3D11ShaderResourceView *srv=0;
     if(format<depth16 || format>depth32) //ToDo
     {
         get_device()->CreateShaderResourceView(tex,0,&srv);
         if(!srv)
+        {
+            log()<<"Unable to build texture: unable to create shader resource view\n";
             return false;
+        }
 
         if(need_generate_mips && width==height)
             get_context()->GenerateMips(srv);
@@ -509,7 +524,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         case dxt3: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT3_EXT; break;
         case dxt5: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT5_EXT; break;
 #endif
-        default: break;
+        default: log()<<"Unable to build texture: unsupported format\n"; break;
     };
 
     const unsigned int source_bpp=get_bpp(format);
@@ -660,10 +675,16 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     if(is_dxt)
     {
         if(!data)// || mip_count==0) //ToDo
+        {
+            log()<<"Unable to build cube texture: dxt format with invalid data\n";
             return false;
+        }
 
         if(!is_dxt_supported())
+        {
+            log()<<"Unable to build cube texture: dxt not supported on this platform\n";
             return false;
+        }
     }
 
     const bool pot=((width&(width-1))==0 && (height&(height-1))==0);
@@ -671,7 +692,10 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 
 #ifdef DIRECTX11
     if(!get_device())
+    {
+        log()<<"Unable to build cube texture: invalid device\n";
         return false;
+    }
 
     if(m_tex>=0)
         release();
@@ -703,7 +727,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
         case depth24: desc.Format=DXGI_FORMAT_D24_UNORM_S8_UINT; break; //ToDo if data != 0
         case depth32: desc.Format=DXGI_FORMAT_D32_FLOAT; break;
 
-        default: return false;
+        default: log()<<"Unable to build cube texture: unsupported format\n"; return false;
     }
 
     desc.SampleDesc.Count=1;
@@ -743,13 +767,19 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
         get_device()->CreateTexture2D(&desc,data?srdatas:0,&tex);
 
     if(!tex)
+    {
+        log()<<"Unable to build cube texture: unable to create texture\n";
         return false;
+    }
 
     ID3D11ShaderResourceView *srv;
     get_device()->CreateShaderResourceView(tex,0,&srv);
     if(!srv)
+    {
+        log()<<"Unable to build cube texture: unable to create shader resource view\n";
         return false;
-    
+    }
+
     m_tex=texture_obj::add();
     texture_obj::get(m_tex).tex=tex;
     texture_obj::get(m_tex).dx_format=desc.Format;
@@ -789,7 +819,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
         case dxt3: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT3_EXT; break;
         case dxt5: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT5_EXT; break;
 #endif
-        default: break;
+        default: log()<<"Unable to build texture: unsupported format\n"; break;
     };
 
     if(!source_format || !gl_format)
@@ -861,7 +891,10 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 
     const unsigned int source_bpp=get_bpp(format);
     if(!source_bpp)
+    {
+        log()<<"Unable to build cube texture: unsupported bpp\n";
         return false;
+    }
 
     for(int i=0;i<int(sizeof(cube_faces)/sizeof(cube_faces[0]));++i)
     {

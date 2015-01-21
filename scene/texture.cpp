@@ -85,6 +85,8 @@ bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
         default: nya_log::log()<<"unable to load dds: unsupported color format in file "<<name<<"\n"; return false;
     }
 
+    bool result=false;
+
     switch(dds.type)
     {
         case nya_formats::dds::texture_2d:
@@ -93,10 +95,10 @@ bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
             {
                 nya_memory::tmp_buffer_scoped tmp_data(dds.data_size);
                 dds.flip_vertical(dds.data,tmp_data.get_data());
-                res.tex.build_texture(tmp_data.get_data(),dds.width,dds.height,cf,mipmap_count);
+                result=res.tex.build_texture(tmp_data.get_data(),dds.width,dds.height,cf,mipmap_count);
             }
             else
-                res.tex.build_texture(dds.data,dds.width,dds.height,cf,mipmap_count);
+                result=res.tex.build_texture(dds.data,dds.width,dds.height,cf,mipmap_count);
         }
         break;
 
@@ -105,15 +107,20 @@ bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
             const void *data[6];
             for(int i=0;i<6;++i)
                 data[i]=(const char *)dds.data+i*dds.data_size/6;
-            res.tex.build_cubemap(data,dds.width,dds.height,cf);
+            result=res.tex.build_cubemap(data,dds.width,dds.height,cf);
         }
         break;
 
-        default: tmp_buf.free(); nya_log::log()<<"unable to load dds: unsupported texture type in file "<<name<<"\n"; return false;
+        default:
+        {
+            nya_log::log()<<"unable to load dds: unsupported texture type in file "<<name<<"\n";
+            tmp_buf.free();
+            return false;
+        }
     }
 
     tmp_buf.free();
-    return true;
+    return result;
 }
 
 bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
@@ -189,10 +196,10 @@ bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
             bgr_to_rgb((uchar*)color_data,tga.uncompressed_size);
     }
 
-    res.tex.build_texture(color_data,tga.width,tga.height,color_format);
+    const bool result=res.tex.build_texture(color_data,tga.width,tga.height,color_format);
     tmp_data.free();
 
-    return true;
+    return result;
 }
 
 bool texture_internal::set(int slot) const
@@ -241,24 +248,23 @@ bool texture::is_cubemap() const
     return internal().get_shared_data()->tex.is_cubemap();
 }
 
-void texture::build(const void *data,unsigned int width,unsigned int height,color_format format)
+bool texture::build(const void *data,unsigned int width,unsigned int height,color_format format)
 {
     texture_internal::shared_resources::shared_resource_mutable_ref ref;
     if(m_internal.m_shared.get_ref_count()==1 && !m_internal.m_shared.get_name())  //was created and unique
     {
         ref=texture_internal::shared_resources::modify(m_internal.m_shared);
-        ref->tex.build_texture(data,width,height,format);
-        return;
+        return ref->tex.build_texture(data,width,height,format);
     }
 
     m_internal.unload();
 
     ref=m_internal.get_shared_resources().create();
     if(!ref.is_valid())
-        return;
+        return false;
 
-    ref->tex.build_texture(data,width,height,format);
     m_internal.m_shared=ref;
+    return ref->tex.build_texture(data,width,height,format);
 }
 
 }

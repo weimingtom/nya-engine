@@ -55,7 +55,7 @@ public:
 
 public:
     typedef nya_render::texture::color_format color_format;
-    void build(const void *data,unsigned int width,unsigned int height,color_format format);
+    bool build(const void *data,unsigned int width,unsigned int height,color_format format);
 
 public:
     texture() { texture_internal::default_load_function(load_tga); texture_internal::default_load_function(load_dds); }
