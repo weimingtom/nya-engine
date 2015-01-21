@@ -88,13 +88,19 @@ public:
         if(!function)
             return;
 
-        if(get_load_functions().has_default && clear_default)
+        if(clear_default)
         {
-            get_load_functions().f.clear();
-            get_load_functions().has_default=false;
+            get_load_functions().clear_default=true;
+            for(int i=0;i<(int)get_load_functions().f.size();)
+            {
+                if(get_load_functions().f[i].second)
+                    get_load_functions().f.erase(get_load_functions().f.begin()+i);
+                else
+                    ++i;
+            }
         }
 
-        get_load_functions().add(function);
+        get_load_functions().add(function,false);
     }
 
     static void default_load_function(load_function function)
@@ -102,11 +108,10 @@ public:
         if(!function)
             return;
 
-        if(!get_load_functions().f.empty() && !get_load_functions().has_default)
+        if(get_load_functions().clear_default)
             return;
 
-        get_load_functions().add(function);
-        get_load_functions().has_default=true;
+        get_load_functions().add(function,true);
     }
 
 public:
@@ -140,7 +145,7 @@ protected:
 
             for(size_t i=0;i<scene_shared::get_load_functions().f.size();++i)
             {
-                if(scene_shared::get_load_functions().f[i](res,res_data,name))
+                if(scene_shared::get_load_functions().f[i].first(res,res_data,name))
                 {
                     res_data.free();
                     return true;
@@ -173,22 +178,24 @@ public:
 private:
     struct load_functions
     {
-        std::vector<load_function> f;
-        bool has_default;
+        std::vector<std::pair<load_function,bool> > f;
+        bool clear_default;
 
-        void add(load_function function)
+        void add(load_function function,bool is_default)
         {
             if(!function)
                 return;
 
             for(size_t i=0;i<f.size();++i)
-                if(f[i]==function)
+                if(f[i].first==function)
                     return;
 
-            f.push_back(function);
+            f.resize(f.size()+1);
+            f.back().first=function;
+            f.back().second=is_default;
         }
 
-        load_functions(): has_default(false) {}
+        load_functions(): clear_default(false) {}
     };
 
     static load_functions &get_load_functions()
