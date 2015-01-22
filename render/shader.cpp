@@ -1,9 +1,5 @@
 //https://code.google.com/p/nya-engine/
 
-/*
-    ToDo: more log, cleanup ARB
-*/
-
 #include "shader.h"
 #include "shader_code_parser.h"
 #include "platform_specific_gl.h"
@@ -404,7 +400,10 @@ void remove_layout(int mesh_idx) { shader_obj::remove_layout(mesh_idx); }
 bool shader::add_program(program_type type,const char*code)
 {
     if(type>pixel)
+    {
+        log()<<"Unable to add shader program: invalid shader type\n";
         return false;
+    }
 
     if(!code || !code[0])
     {
@@ -420,7 +419,10 @@ bool shader::add_program(program_type type,const char*code)
 
 #ifdef DIRECTX11
     if(!get_device())
+    {
+        log()<<"Unable to add shader program: invalid directx device, use nya_render::set_device()\n";
         return false;
+    }
 
     if(m_shdr<0)
         m_shdr=shader_obj::add();
@@ -435,7 +437,13 @@ bool shader::add_program(program_type type,const char*code)
                                                  "set compiled_shaders_provider and add compiled shaders cache\n";
         return false;
 #else
-        parser.convert_to_hlsl();
+        if(!parser.convert_to_hlsl())
+        {
+            log()<<"Unable to add shader program: cannot convert shader code to hlsl\n";
+            log()<<parser.get_error()<<"\n";
+            return false;
+        }
+
         const char *profile=type==pixel?"ps_4_0_level_9_3":"vs_4_0_level_9_3";
         ID3D10Blob *compiled=0, *error=0;
         D3DCompile(parser.get_code(),strlen(parser.get_code()),0,0,0,"main",profile,0,0,&compiled,&error);
@@ -524,13 +532,19 @@ bool shader::add_program(program_type type,const char*code)
         else
             u.ps_offset=uniforms_buf_size;
 
-        if(u.vs_offset>=0 && u.ps_offset>=0) //ToDo: log error
+        if(u.vs_offset>=0 && u.ps_offset>=0)
         {
             if(u.array_size!=v.array_size)
+            {
+                log()<<"Unable to add shader program: uniform variable declared in both vs and ps has different array size\n";
                 return false;
+            }
 
             if(u.type!=convert_uniform_type(v.type))
+            {
+                log()<<"Unable to add shader program: uniform variable declared in both vs and ps has different type\n";
                 return false;
+            }
         }
 
         u.array_size=v.array_size;
@@ -572,9 +586,21 @@ bool shader::add_program(program_type type,const char*code)
 
 #ifdef SUPPORT_OLD_SHADERS
   #ifdef OPENGL_ES
-    parser.convert_to_glsl_es2();
+    if(!parser.convert_to_glsl_es2())
+    {
+        log()<<"Unable to add shader program: cannot convert shader code to glsl for es2\n";
+        log()<<parser.get_error()<<"\n";
+        return false;
+    }
+
   #else
-    parser.convert_to_glsl3();
+    if(!parser.convert_to_glsl3())
+    {
+        log()<<"Unable to add shader program: cannot convert shader code to glsl3\n";
+        log()<<parser.get_error()<<"\n";
+        return false;
+    }
+
   #endif
     code=parser.get_code();
 #endif

@@ -322,7 +322,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 #ifdef DIRECTX11
     if(!get_device())
     {
-        log()<<"Unable to build texture: invalid device\n";
+        log()<<"Unable to build texture: invalid directx device, use nya_render::set_device()\n";
         return false;
     }
 
@@ -693,7 +693,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 #ifdef DIRECTX11
     if(!get_device())
     {
-        log()<<"Unable to build cube texture: invalid device\n";
+        log()<<"Unable to build cube texture: invalid directx device, use nya_render::set_device()\n";
         return false;
     }
 

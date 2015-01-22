@@ -13,6 +13,7 @@ class shader_code_parser
 {
 public:
     const char *get_code() const { return m_code.c_str(); }
+    const char *get_error() const { return m_error.c_str(); }
 
 public:
     bool convert_to_hlsl();
@@ -69,11 +70,8 @@ private:
     bool find_variable(const char *str,size_t start_pos=0);
 
 private:
-    std::string m_code;
-    std::string m_replace_str;
-    std::vector<variable> m_uniforms;
-    std::vector<variable> m_attributes;
-    std::vector<variable> m_varying;
+    std::string m_code,m_replace_str,m_error;
+    std::vector<variable> m_uniforms,m_attributes,m_varying;
 };
 
 }
