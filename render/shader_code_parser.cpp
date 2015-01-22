@@ -27,8 +27,18 @@ bool shader_code_parser::convert_to_hlsl()
 
     const size_t predefined_count=m_uniforms.size();
 
-    parse_uniforms(true);
-    parse_varying(true);
+    if(!parse_uniforms(true))
+    {
+        m_error.append("unable to parse uniforms\n");
+        return false;
+    }
+
+    if(!parse_varying(true))
+    {
+        m_error.append("unable to parse varying\n");
+        return false;
+    }
+
     std::sort(m_varying.begin(),m_varying.end());
 
     const std::string replace_constructor=m_replace_str+"cast_float";
@@ -107,14 +117,21 @@ bool shader_code_parser::convert_to_hlsl()
         prefix.append("static float4 "+ps_out_var+";\n");
 
         const std::string main=std::string("void ")+m_replace_str+"main()";
-        replace_main_function_header(main.c_str());
+        if(replace_main_function_header(main.c_str()))
+        {
+            m_error.append("main function not found\n");
+            return false;
+        }
 
         std::string in_var_assign;
         for(int i=0;i<(int)m_varying.size();++i)
         {
             const variable &v=m_varying[i];
             if(v.type==type_invalid)
+            {
+                m_error.append("invalid variable \'"+v.name+"\' type\n");
                 return false;
+            }
 
             if(v.type-1>=sizeof(type_names)/sizeof(type_names[0]))
                 continue;
@@ -129,7 +146,12 @@ bool shader_code_parser::convert_to_hlsl()
     }
     else
     {
-        parse_attributes(m_replace_str.c_str(),(input_var+".").c_str());
+        if(!parse_attributes(m_replace_str.c_str(),(input_var+".").c_str()))
+        {
+            m_error.append("unable to parse attributes\n");
+            return false;
+        }
+
         if(!m_attributes.empty())
         {
             prefix.append("struct "+m_replace_str+"vsin{");
@@ -221,10 +243,16 @@ bool shader_code_parser::convert_to_glsl_es2(const char *precision)
     m_attributes.clear();
 
     if(!parse_predefined_uniforms(m_replace_str.c_str(),true))
+    {
+        m_error.append("unable to parse predefined uniforms\n");
         return false;
+    }
 
     if(!parse_attributes(m_replace_str.c_str(),m_replace_str.c_str()))
+    {
+        m_error.append("unable to parse predefined attributes\n");
         return false;
+    }
 
     std::string prefix="#define OPENGL_ES\n";
 
@@ -249,10 +277,16 @@ bool shader_code_parser::convert_to_glsl3()
     m_attributes.clear();
 
     if(!parse_predefined_uniforms(m_replace_str.c_str(),true))
+    {
+        m_error.append("unable to parse predefined uniforms\n");
         return false;
+    }
 
     if(!parse_attributes(m_replace_str.c_str(),m_replace_str.c_str()))
+    {
+        m_error.append("unable to parse predefined attributes\n");
         return false;
+    }
 
     std::string prefix="#version 330\n";
 
@@ -339,7 +373,7 @@ void shader_code_parser::remove_comments()
     }
 }
 
-template<typename t> static bool parse_vars(std::string &code,t& vars,const char *str,bool remove)
+template<typename t> static bool parse_vars(std::string &code,std::string &error,t& vars,const char *str,bool remove)
 {
     const size_t str_len=strlen(str);
     for(size_t i=code.find(str);i!=std::string::npos;i=code.find(str,i))
@@ -358,7 +392,14 @@ template<typename t> static bool parse_vars(std::string &code,t& vars,const char
         const std::string type_name=code.substr(type_from,type_to-type_from);
 
         size_t last=name_to;
-        while(code[last]!=';') if(++last>=code.length()) return false;
+        while(code[last]!=';')
+        {
+            if(++last>=code.length())
+            {
+                error.append("unclosed ; on variable declaration\n");
+                return false;
+            }
+        }
 
         int count=1;
         size_t array_from=code.find('[',name_to);
@@ -397,8 +438,8 @@ template<typename t> static bool parse_vars(std::string &code,t& vars,const char
     return true;
 }
 
-bool shader_code_parser::parse_uniforms(bool remove) { return parse_vars(m_code,m_uniforms,"uniform",remove); }
-bool shader_code_parser::parse_varying(bool remove) { return parse_vars(m_code,m_varying,"varying",remove); }
+bool shader_code_parser::parse_uniforms(bool remove) { return parse_vars(m_code,m_error,m_uniforms,"uniform",remove); }
+bool shader_code_parser::parse_varying(bool remove) { return parse_vars(m_code,m_error,m_varying,"varying",remove); }
 
 template<typename t> static void push_unique_to_vec(std::vector<t> &v,const t &e)
 {
@@ -601,7 +642,10 @@ bool shader_code_parser::replace_hlsl_mul(const char *func_name)
         const size_t left=get_var_pos(m_code,start_pos,-1);
         const size_t right=get_var_pos(m_code,start_pos,1);
         if(left==start_pos || right==start_pos)
+        {
+            m_error.append("unable to parse variables in '*' to 'mul' replacement\n");
             return false;
+        }
 
         std::string left_var=m_code.substr(left,start_pos-left);
         std::string right_var=m_code.substr(start_pos+1,right-start_pos-1);
@@ -658,7 +702,10 @@ bool shader_code_parser::replace_vec_from_float(const char *func_name)
         }
 
         if(start_pos+4>m_code.size()) //strlen("vec")+1
+        {
+            m_error.append("incomplite vec declaration: code end spotted\n");
             return false;
+        }
 
         const char dim=m_code[start_pos+3];
         if(!strchr("234",dim))
@@ -724,7 +771,10 @@ bool shader_code_parser::replace_main_function_header(const char *replace_str)
     {
         const size_t lbrace=m_code.find('(',start_pos+9); //strlen("void main")
         if(lbrace==std::string::npos)
+        {
+            m_error.append("can't find '(' in void function declaration\n");
             return false;
+        }
 
         std::string main;
         for(size_t i=start_pos+5;i<lbrace;++i) //strlen("void ")
@@ -741,7 +791,10 @@ bool shader_code_parser::replace_main_function_header(const char *replace_str)
 
         const size_t rbrace=m_code.find(')',lbrace);
         if(rbrace==std::string::npos)
+        {
+            m_error.append("can't find ')' in void function declaration\n");
             return false;
+        }
 
         m_code.replace(start_pos,rbrace+1-start_pos,replace_str);
         return true;
