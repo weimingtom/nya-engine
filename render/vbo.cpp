@@ -110,8 +110,8 @@ namespace
         static int add() { return get_vbo_objs().add(); }
         static vbo_obj &get(int idx) { return get_vbo_objs().get(idx); }
         static void remove(int idx) { return get_vbo_objs().remove(idx); }
-        static void invalidate_all() { return get_vbo_objs().invalidate_all(); }
-        static void release_all() { return get_vbo_objs().release_all(); }
+        static int invalidate_all() { return get_vbo_objs().invalidate_all(); }
+        static int release_all() { return get_vbo_objs().release_all(); }
 
     public:
         void release();
@@ -258,8 +258,8 @@ bool check_init_vbo()
 
 }
 
-void invalidate_vbos() { vbo_obj::invalidate_all(); }
-void release_vbos() { vbo_obj::release_all(); reset_vbo_state(); current_verts=current_inds=-1; }
+int invalidate_vbos() { return vbo_obj::invalidate_all(); }
+int release_vbos() { return vbo_obj::release_all(); reset_vbo_state(); current_verts=current_inds=-1; }
 
 void vbo_obj::release()
 {

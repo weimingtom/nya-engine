@@ -44,37 +44,43 @@ public:
     }
 
     template<typename ta>
-    void apply_to_all(ta &applier)
+    int apply_to_all(ta &applier)
     {
+        int count=0;
         for(int i=0;i<(int)m_objects.size();++i)
         {
             if(m_objects[i].free)
                 continue;
 
-            applier.apply(m_objects[i].data);
+            applier.apply(m_objects[i].data),++count;
         }
+        return count;
     }
 
-    void release_all()
+    int release_all()
     {
+        int count=0;
         for(int i=0;i<(int)m_objects.size();++i)
         {
             if(m_objects[i].free)
                 continue;
 
-            m_objects[i].data.release();
+            m_objects[i].data.release(),++count;
         }
+        return count;
     }
 
-    void invalidate_all()
+    int invalidate_all()
     {
+        int count=0;
         for(int i=0;i<(int)m_objects.size();++i)
         {
             if(m_objects[i].free)
                 continue;
 
-            m_objects[i].data=t();
+            m_objects[i].data=t(),++count;
         }
+        return count;
     }
 
 private:

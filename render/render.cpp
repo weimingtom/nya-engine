@@ -732,21 +732,25 @@ render_api get_render_api()
 #endif
 }
 
-void release_resources()
+unsigned int release_resources()
 {
-    release_textures();
-    release_shaders();
-    release_vbos();
-    release_fbos();
+    unsigned int count=0;
+    count+=release_textures();
+    count+=release_shaders();
+    count+=release_vbos();
+    count+=release_fbos();
     DIRECTX11_ONLY(release_states());
+    return count;
 }
 
-void invalidate_resources() //on context loss, etc
+unsigned int invalidate_resources()
 {
-    texture_obj::invalidate_all();
-    invalidate_shaders();
-    invalidate_vbos();
-    invalidate_fbos();
+    unsigned int count=0;
+    count+=texture_obj::invalidate_all();
+    count+=invalidate_shaders();
+    count+=invalidate_vbos();
+    count+=invalidate_fbos();
+    return count;
 }
 
 }

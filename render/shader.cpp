@@ -140,8 +140,8 @@ namespace
         static int add() { return get_shader_objs().add(); }
         static shader_obj &get(int idx) { return get_shader_objs().get(idx); }
         static void remove(int idx) { return get_shader_objs().remove(idx); }
-        static void invalidate_all() { return get_shader_objs().invalidate_all(); }
-        static void release_all() { return get_shader_objs().release_all(); }
+        static int invalidate_all() { return get_shader_objs().invalidate_all(); }
+        static int release_all() { return get_shader_objs().release_all(); }
 
 #ifdef DIRECTX11
         static void remove_layout(int mesh_idx)
@@ -305,8 +305,8 @@ bool check_init_shaders()
 #endif
 }
 
-void invalidate_shaders() { shader_obj::invalidate_all(); }
-void release_shaders() { shader_obj::release_all(); current_shader=active_shader=-1; }
+int invalidate_shaders() { return shader_obj::invalidate_all(); }
+int release_shaders() { return shader_obj::release_all(); current_shader=active_shader=-1; }
 
 void shader_obj::release()
 {

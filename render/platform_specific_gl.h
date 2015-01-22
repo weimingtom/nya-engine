@@ -131,8 +131,8 @@ namespace nya_render
         static texture_obj &get(int idx) { return get_texture_objs().get(idx); }
         static void remove(int idx) { return get_texture_objs().remove(idx); }
         static unsigned int get_used_vmem_size();
-        static void invalidate_all() { get_texture_objs().invalidate_all(); }
-        static void release_all() { get_texture_objs().release_all(); }
+        static int invalidate_all() { return get_texture_objs().invalidate_all(); }
+        static int release_all() { return get_texture_objs().release_all(); }
 
     public:
         void release();
@@ -167,13 +167,13 @@ namespace nya_render
 #endif
     void reset_vbo_state();
 
-    inline void release_textures() { texture_obj::release_all(); }
-    void release_vbos();
-    void release_shaders();
-    void release_fbos();
+    inline int release_textures() { return texture_obj::release_all(); }
+    int release_vbos();
+    int release_shaders();
+    int release_fbos();
     void release_states();
 
-    void invalidate_shaders();
-    void invalidate_vbos();
-    void invalidate_fbos();
+    int invalidate_shaders();
+    int invalidate_vbos();
+    int invalidate_fbos();
 }

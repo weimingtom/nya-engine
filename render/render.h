@@ -17,12 +17,8 @@ void log_gl_errors(const char *place=0);
 
 struct rect
 {
-    int x;
-    int y;
-    int width;
-    int height;
-
-    rect(): x(0), y(0), width(0), height(0) {}
+    int x,y,width,height;
+    rect(): x(0),y(0),width(0),height(0) {}
 };
 
 void set_viewport(int x,int y,int width,int height,bool ignore_cache=false);
@@ -32,6 +28,7 @@ const rect &get_viewport();
 struct scissor
 {
     static void enable(int x,int y,int w,int h);
+    static inline void enable(const rect &r) { enable(r.x,r.y,r.width,r.height); }
     static void disable();
 };
 
@@ -180,8 +177,9 @@ enum render_api
 
 render_api get_render_api();
 
-void release_resources(); //if wasn't released manually or just to be sure
-void invalidate_resources(); //on context loss, etc
+//returns count
+unsigned int release_resources(); //if wasn't released manually or just to be sure
+unsigned int invalidate_resources(); //on context loss, etc
 
 //dx-specific
 ID3D11Device *get_device();
