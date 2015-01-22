@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3D0F0BE31A716C5000FEF7EC /* scalar.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D0F0BE21A716C5000FEF7EC /* scalar.h */; };
+		3D0F0BE41A716C5000FEF7EC /* scalar.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D0F0BE21A716C5000FEF7EC /* scalar.h */; };
 		3D6D5F41196ABCB3008C1041 /* nms.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D6D5F3F196ABCB3008C1041 /* nms.h */; };
 		3D6D5F42196ABCB3008C1041 /* nms.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D6D5F3F196ABCB3008C1041 /* nms.h */; };
 		3D6D5F43196ABCB3008C1041 /* nms.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D6D5F40196ABCB3008C1041 /* nms.cpp */; };
@@ -234,6 +236,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3D0F0BE21A716C5000FEF7EC /* scalar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scalar.h; path = ../../math/scalar.h; sourceTree = "<group>"; };
 		3D6D5F3F196ABCB3008C1041 /* nms.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nms.h; path = ../../formats/nms.h; sourceTree = "<group>"; };
 		3D6D5F40196ABCB3008C1041 /* nms.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = nms.cpp; path = ../../formats/nms.cpp; sourceTree = "<group>"; };
 		3D6D5F4D196C3347008C1041 /* memory_writer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = memory_writer.h; sourceTree = "<group>"; };
@@ -552,6 +555,7 @@
 				F2F0A0B11695F809007245BC /* matrix.h */,
 				F2F0A0A41695A794007245BC /* quaternion.cpp */,
 				F2F0A0A31695A794007245BC /* quaternion.h */,
+				3D0F0BE21A716C5000FEF7EC /* scalar.h */,
 				F2F0A0A21695A794007245BC /* vector.h */,
 			);
 			name = math;
@@ -639,6 +643,7 @@
 				F25216A316EC14F400A1B2A6 /* animation.h in Headers */,
 				F29B45FF16F3821500C4CC36 /* frustum.h in Headers */,
 				F2CA66FC172C700800965F9F /* render_objects.h in Headers */,
+				3D0F0BE41A716C5000FEF7EC /* scalar.h in Headers */,
 				F2CA676A172D92CE00965F9F /* shaders_cache_provider.h in Headers */,
 				F5B3578F17FE8E2C001175FE /* optional.h in Headers */,
 				3D86813B1965B7F9008B8929 /* output_stream.h in Headers */,
@@ -712,6 +717,7 @@
 				F25216A216EC14F400A1B2A6 /* animation.h in Headers */,
 				F29B45FE16F3821500C4CC36 /* frustum.h in Headers */,
 				F2CA66FB172C700800965F9F /* render_objects.h in Headers */,
+				3D0F0BE31A716C5000FEF7EC /* scalar.h in Headers */,
 				F2CA6769172D92CE00965F9F /* shaders_cache_provider.h in Headers */,
 				F5B3578E17FE8E2C001175FE /* optional.h in Headers */,
 				3D86813A1965B7F9008B8929 /* output_stream.h in Headers */,
