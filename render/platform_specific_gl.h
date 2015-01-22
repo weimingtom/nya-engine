@@ -173,24 +173,7 @@ namespace nya_render
     void release_fbos();
     void release_states();
 
-    inline void release_resources()
-    {
-        release_textures();
-        release_shaders();
-        release_vbos();
-        release_fbos();
-        DIRECTX11_ONLY(release_states());
-    }
-
     void invalidate_shaders();
     void invalidate_vbos();
     void invalidate_fbos();
-
-    inline void invalidate_resources() //on context loss, etc
-    {
-        texture_obj::invalidate_all();
-        invalidate_shaders();
-        invalidate_vbos();
-        invalidate_fbos();
-    }
 }

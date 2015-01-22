@@ -170,6 +170,19 @@ const state_override &get_state_override();
 
 void apply_state(bool ignore_cache=false);
 
+enum render_api
+{
+    render_api_opengl,
+    render_api_opengl3,
+    render_api_opengl_es2,
+    render_api_directx11
+};
+
+render_api get_render_api();
+
+void release_resources(); //if wasn't released manually or just to be sure
+void invalidate_resources(); //on context loss, etc
+
 //dx-specific
 ID3D11Device *get_device();
 void set_device(ID3D11Device *device);

@@ -221,7 +221,7 @@ namespace
     PFNGLGETOBJECTPARAMETERIVARBPROC glGetObjectParameterivARB = NULL;
     PFNGLGETINFOLOGARBPROC glGetInfoLogARB = NULL;
     PFNGLGETUNIFORMLOCATIONARBPROC glGetUniformLocationARB = NULL;
-#endif
+  #endif
 
   #ifdef OPENGL_ES
     #define glCreateProgramObjectARB glCreateProgram

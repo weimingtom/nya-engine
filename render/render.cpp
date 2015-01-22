@@ -719,5 +719,34 @@ void set_context(ID3D11DeviceContext *context)
 }
 #endif
 
+render_api get_render_api()
+{
+#if defined DIRECTX11
+    return render_api_directx11;
+#elif defined OPENGL_ES
+    return render_api_opengl_es2;
+#elif defined OPENGL3
+    return render_api_opengl3;
+#else
+    return render_api_opengl;
+#endif
+}
+
+void release_resources()
+{
+    release_textures();
+    release_shaders();
+    release_vbos();
+    release_fbos();
+    DIRECTX11_ONLY(release_states());
+}
+
+void invalidate_resources() //on context loss, etc
+{
+    texture_obj::invalidate_all();
+    invalidate_shaders();
+    invalidate_vbos();
+    invalidate_fbos();
+}
 
 }
