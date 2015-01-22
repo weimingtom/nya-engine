@@ -36,6 +36,10 @@ void set_projection_matrix(const nya_math::mat4 &mat);
 void set_modelview_matrix(const nya_math::mat4 &mat);
 void set_orientation_matrix(const nya_math::mat4 &mat);
 
+const nya_math::mat4 &get_projection_matrix();
+const nya_math::mat4 &get_modelview_matrix();
+const nya_math::mat4 &get_orientation_matrix();
+
 void set_color(float r,float g,float b,float a);
 
 void set_clear_color(float r,float g,float b,float a,bool ignore_cache=false);
