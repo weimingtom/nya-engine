@@ -54,7 +54,7 @@ namespace
         LARGE_INTEGER time;
         QueryPerformanceCounter(&time);
 
-        return unsigned long(time.QuadPart*1000/freq.QuadPart);
+        return (unsigned long)(time.QuadPart*1000/freq.QuadPart);
 #else
         timeval tim;
         gettimeofday(&tim, 0);
