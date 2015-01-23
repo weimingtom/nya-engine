@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		3D0F0BE31A716C5000FEF7EC /* scalar.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D0F0BE21A716C5000FEF7EC /* scalar.h */; };
 		3D0F0BE41A716C5000FEF7EC /* scalar.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D0F0BE21A716C5000FEF7EC /* scalar.h */; };
+		3D0F0BE71A72881100FEF7EC /* app.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D0F0BE61A72881100FEF7EC /* app.cpp */; };
+		3D0F0BE81A72881100FEF7EC /* app.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D0F0BE61A72881100FEF7EC /* app.cpp */; };
 		3D6D5F41196ABCB3008C1041 /* nms.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D6D5F3F196ABCB3008C1041 /* nms.h */; };
 		3D6D5F42196ABCB3008C1041 /* nms.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D6D5F3F196ABCB3008C1041 /* nms.h */; };
 		3D6D5F43196ABCB3008C1041 /* nms.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D6D5F40196ABCB3008C1041 /* nms.cpp */; };
@@ -237,6 +239,7 @@
 
 /* Begin PBXFileReference section */
 		3D0F0BE21A716C5000FEF7EC /* scalar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scalar.h; path = ../../math/scalar.h; sourceTree = "<group>"; };
+		3D0F0BE61A72881100FEF7EC /* app.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = app.cpp; sourceTree = "<group>"; };
 		3D6D5F3F196ABCB3008C1041 /* nms.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nms.h; path = ../../formats/nms.h; sourceTree = "<group>"; };
 		3D6D5F40196ABCB3008C1041 /* nms.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = nms.cpp; path = ../../formats/nms.cpp; sourceTree = "<group>"; };
 		3D6D5F4D196C3347008C1041 /* memory_writer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = memory_writer.h; sourceTree = "<group>"; };
@@ -432,14 +435,14 @@
 				F2EB8EEA16D42A9C002B7B9A /* fbo.h */,
 				F25931ED15D858140092C7D8 /* platform_specific_gl.cpp */,
 				F25931EE15D858140092C7D8 /* platform_specific_gl.h */,
+				F2CA66FA172C700800965F9F /* render_objects.h */,
 				F25931EF15D858140092C7D8 /* render.cpp */,
 				F25931F015D858140092C7D8 /* render.h */,
-				F2CA66FA172C700800965F9F /* render_objects.h */,
 				F51B1F7319F4181300CA7CF0 /* screen_quad.h */,
-				F25931F115D858140092C7D8 /* shader.cpp */,
-				F25931F215D858140092C7D8 /* shader.h */,
 				3DE7961F1A28AF7300BF18C7 /* shader_code_parser.cpp */,
 				3DE796201A28AF7300BF18C7 /* shader_code_parser.h */,
+				F25931F115D858140092C7D8 /* shader.cpp */,
+				F25931F215D858140092C7D8 /* shader.h */,
 				F2F0A0961695A757007245BC /* skeleton.cpp */,
 				F2F0A0951695A757007245BC /* skeleton.h */,
 				F5DFDFE619C9A8E9006CC734 /* statistics.cpp */,
@@ -492,6 +495,7 @@
 			isa = PBXGroup;
 			children = (
 				F25932BA15D865BF0092C7D8 /* app.mm */,
+				3D0F0BE61A72881100FEF7EC /* app.cpp */,
 				F259321315D858140092C7D8 /* app.h */,
 				3D76260D1A127EC9004E033C /* app_internal.h */,
 				F259321415D858140092C7D8 /* button_codes.h */,
@@ -527,10 +531,10 @@
 				3DE732E0195D9186008D6765 /* indexed_map.h */,
 				3DE732E1195D9186008D6765 /* invalid_object.h */,
 				F5A0B0731A4E16520074854E /* lru.h */,
-				F259322115D858140092C7D8 /* memory.cpp */,
-				F259322215D858140092C7D8 /* memory.h */,
 				F22ADA301694C15100B01B4A /* memory_reader.h */,
 				3D6D5F4D196C3347008C1041 /* memory_writer.h */,
+				F259322115D858140092C7D8 /* memory.cpp */,
+				F259322215D858140092C7D8 /* memory.h */,
 				F5B3578D17FE8E2C001175FE /* optional.h */,
 				F259322315D858140092C7D8 /* pool.h */,
 				F5AFDF401846C81400457928 /* shared_ptr.h */,
@@ -824,6 +828,7 @@
 				3D86813F1965B7F9008B8929 /* warning.cpp in Sources */,
 				F23997951696406D00170768 /* transform.cpp in Sources */,
 				3DE796221A28AF7300BF18C7 /* shader_code_parser.cpp in Sources */,
+				3D0F0BE81A72881100FEF7EC /* app.cpp in Sources */,
 				F20E2D8116999B7000395A1B /* shader.cpp in Sources */,
 				F20E2D8316999B7000395A1B /* texture.cpp in Sources */,
 				F20E2D8516999B7000395A1B /* material.cpp in Sources */,
@@ -877,6 +882,7 @@
 				3D86813E1965B7F9008B8929 /* warning.cpp in Sources */,
 				F2F0A09F1695A758007245BC /* animation.cpp in Sources */,
 				3DE796211A28AF7300BF18C7 /* shader_code_parser.cpp in Sources */,
+				3D0F0BE71A72881100FEF7EC /* app.cpp in Sources */,
 				F2F0A0AB1695A794007245BC /* quaternion.cpp in Sources */,
 				F2F0A0AF1695A794007245BC /* bezier.cpp in Sources */,
 				F2F0A0B51695F809007245BC /* matrix.cpp in Sources */,

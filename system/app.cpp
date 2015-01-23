@@ -920,6 +920,7 @@ public:
     }
 };
 
+#elif defined __APPLE__ //implemented in app.mm
 #else
 
 //  fullscreen:
@@ -1174,6 +1175,8 @@ private:
 
 #endif
 
+#ifndef __APPLE__ //implemented in app.mm
+
 namespace nya_system
 {
 
@@ -1202,3 +1205,5 @@ void app::finish()
 }
 
 }
+
+#endif
