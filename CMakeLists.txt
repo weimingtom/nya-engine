@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 2.8.0 FATAL_ERROR)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
+
 macro (define_source_files)
     set (temp_src_dir ${ARGN})
     file (GLOB temp_src_list RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "${temp_src_dir}/*.h" "${temp_src_dir}/*.cpp")
