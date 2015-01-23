@@ -124,7 +124,7 @@ namespace nya_render
         unsigned int gl_type;
         bool has_mipmaps;
 
-        texture_obj(): tex_id(0),gl_type(0),size(0),is_cubemap(false),has_mipmaps(false) {}
+        texture_obj(): size(0),is_cubemap(false),tex_id(0),gl_type(0),has_mipmaps(false) {}
 #endif
     public:
         static int add() { return get_texture_objs().add(); }

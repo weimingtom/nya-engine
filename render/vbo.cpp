@@ -79,14 +79,14 @@ namespace
 
     struct vbo_obj: public vbo_obj_atributes
     {
+        DIRECTX11_ONLY(ID3D11Buffer *vertex_loc,*index_loc);
+        OPENGL_ONLY(unsigned int vertex_loc,index_loc);
+
+        unsigned int verts_count,allocated_verts_count;
+        unsigned int element_count,allocated_elements_count;
         vbo::element_type element_type;
         vbo::index_size element_size;
-        unsigned int element_count;
         vbo::usage_hint elements_usage;
-        unsigned int allocated_elements_count;
-
-        unsigned int verts_count;
-        unsigned int allocated_verts_count;
 
 #ifdef USE_VAO
         unsigned int vertex_array_object;
@@ -94,11 +94,8 @@ namespace
 #endif
         vbo::usage_hint vertex_usage;
 
-        DIRECTX11_ONLY(ID3D11Buffer *vertex_loc,*index_loc);
-        OPENGL_ONLY(unsigned int vertex_loc,index_loc);
-
-        vbo_obj(): vertex_loc(0),index_loc(0),element_type(vbo::triangles),element_count(0),allocated_elements_count(0),
-                   verts_count(0),allocated_verts_count(0)
+        vbo_obj(): vertex_loc(0),index_loc(0),verts_count(0),allocated_verts_count(0),
+                   element_count(0),allocated_elements_count(0),element_type(vbo::triangles)
         {
 #ifdef USE_VAO
             vertex_array_object=0;

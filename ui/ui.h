@@ -209,8 +209,9 @@ public:
               m_center_x(0),m_center_y(0),m_width(0),m_height(0),
               m_align_left(true),m_align_right(false),
               m_align_top(false),m_align_bottom(true),
-              m_keep_aspect(none),m_visible(true), m_mouse_pressed(false),
-              m_mouse_over(false), m_cached_rect(false) {}
+              m_keep_aspect(none),m_visible(true),
+              m_mouse_over(false), m_mouse_pressed(false),
+              m_cached_rect(false) {}
 
     virtual ~widget() {}
 

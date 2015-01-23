@@ -44,7 +44,8 @@ struct dds
     size_t data_size;
     size_t mip0_data_size;
 
-    dds(): width(0),height(0),data(0),mip0_data_size(0),data_size(0),mipmap_count(0), need_generate_mipmaps(false) {}
+    dds(): width(0),height(0),mipmap_count(0),need_generate_mipmaps(false),
+           data(0),data_size(0),mip0_data_size(0) {}
 
 public:
     size_t decode_header(const void *data,size_t size); //0 if invalid
