@@ -30,6 +30,8 @@ bool tdcg_loader::load_hardsave(nya_scene::shared_mesh &res,nya_scene::resource_
     if(!reader.test(png_header, sizeof(png_header)))
         return false;
 
+    std::vector<vert> verts;
+
     typedef unsigned int uint;
     while(reader.get_remained())
     {
@@ -108,15 +110,21 @@ bool tdcg_loader::load_hardsave(nya_scene::shared_mesh &res,nya_scene::resource_
                     const uint groups_count=reader.read<uint>();
                     for(uint j=0;j<groups_count;++j)
                     {
+                        nya_scene::shared_mesh::group g;
+                        g.name=name;
+                        g.offset=(uint)verts.size();
+                        g.elem_type=nya_render::vbo::triangle_strip;
+
                         const uint shader_params_idx=reader.read<uint>();
                         const uint bone_indices_count=reader.read<uint>();
                         for(uint k=0;k<bone_indices_count;++k)
                             reader.read<uint>();
 
-                        const uint verts_count=reader.read<uint>();
-                        for(uint k=0;k<verts_count;++k)
+                        g.count=reader.read<uint>();
+                        verts.resize(g.offset+g.count);
+                        for(uint k=0;k<g.count;++k)
                         {
-                            vert v; //ToDo
+                            vert &v=verts[g.offset+k];
                             v.pos=reader.read<nya_math::vec3>();
                             v.normal=reader.read<nya_math::vec3>();
                             v.tc=reader.read<nya_math::vec2>();
@@ -124,12 +132,15 @@ bool tdcg_loader::load_hardsave(nya_scene::shared_mesh &res,nya_scene::resource_
                             if(skin_count>4)
                                 return false;
 
+                            memset(v.bone_weight,0,sizeof(v.bone_weight));
                             for(uint l=0;l<skin_count;++l)
                             {
                                 v.bone_idx[l]=reader.read<uint>();
                                 v.bone_weight[l]=reader.read<float>();
                             }
                         }
+
+                        res.groups.push_back(g);
                     }
                 }
             }
@@ -145,7 +156,24 @@ bool tdcg_loader::load_hardsave(nya_scene::shared_mesh &res,nya_scene::resource_
         reader.skip(4); //CRC
     }
 
+    if(verts.empty())
+        return false;
+
+    res.vbo.set_vertex_data(&verts[0],(uint)sizeof(vert),(uint)verts.size());
+
+#define off(st, m) uint((size_t)(&((st *)0)->m))
+    res.vbo.set_vertices(off(vert,pos),3);
+    res.vbo.set_normals(off(vert,normal));
+    res.vbo.set_tc(0,off(vert,tc),2);
+    res.vbo.set_tc(1,off(vert,bone_idx),4);
+    res.vbo.set_tc(2,off(vert,bone_weight),4);
+
     //ToDo
+
+    res.materials.resize(1);
+    nya_scene::material &m=res.materials.back();
+    nya_scene::material::pass &p=m.get_pass(m.add_pass("opaque"));//nya_scene::material::default_pass));
+    p.set_shader(nya_scene::shader("tdcg.nsh"));
 
     return true;
 }
