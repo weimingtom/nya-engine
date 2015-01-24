@@ -21,7 +21,7 @@ struct vec2
     float y;
 
     vec2(): x(0),y(0) {}
-    vec2(float x,float y) { this->x=x; this->y=y; }
+    vec2(float x,float y) { this->x=x,this->y=y; }
     vec2(const float *v) { x=v[0]; y=v[1]; }
 
     vec2 operator + (const vec2 &v) const { return vec2(x+v.x,y+v.y); }
@@ -63,7 +63,7 @@ struct vec3
     float z;
 
     vec3(): x(0),y(0),z(0) {}
-    vec3(float x,float y,float z) { this->x=x; this->y=y; this->z=z; }
+    vec3(float x,float y,float z) { this->x=x,this->y=y,this->z=z; }
     explicit vec3(const float *v) { x=v[0]; y=v[1]; z=v[2]; }
 
     vec3 operator + (const vec3 &v) const { return vec3(x+v.x,y+v.y,z+v.z); }
@@ -111,8 +111,8 @@ struct vec4
     float w;
 
     vec4(): x(0),y(0),z(0),w(0) {}
-    vec4(float x,float y,float z,float w) { this->x=x; this->y=y;
-                                            this->z=z; this->w=w; }
+    vec4(float x,float y,float z,float w) { this->x=x,this->y=y,this->z=z,this->w=w; }
+    vec4(const vec3 &v,float w) { this->x=v.x,this->y=v.y,this->z=v.z,this->w=w; }
 
     explicit vec4(const float *v) { x=v[0]; y=v[1]; z=v[2]; w=v[3]; }
 

@@ -16,9 +16,9 @@ void main()
 
 @fragment
 
-//uniform sampler2D base;
+uniform sampler2D base;
 
 void main()
 {
-    gl_FragColor=vec4(normal,1.0);//texture2D(base,tc);
+    gl_FragColor=texture2D(base,tc);
 }
