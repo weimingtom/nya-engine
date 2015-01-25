@@ -233,7 +233,7 @@ bool tdcg_loader::load_hardsave(nya_scene::shared_mesh &res,nya_scene::resource_
                         g.material_idx=(uint)res.materials.size();
                         res.materials.resize(g.material_idx+1);
                         nya_scene::material &m=res.materials.back();
-                        nya_scene::material::pass &p=m.get_pass(m.add_pass("opaque"));//nya_scene::material::default_pass));
+                        nya_scene::material::pass &p=m.get_pass(m.add_pass(nya_scene::material::default_pass));
                         p.set_shader(nya_scene::shader("tdcg.nsh"));
 
                         if(shader_params_idx>=(uint)params.size())
@@ -241,6 +241,8 @@ bool tdcg_loader::load_hardsave(nya_scene::shared_mesh &res,nya_scene::resource_
 
                         shader_params &sp=params[shader_params_idx];
                         m.set_texture("diffuse",textures[sp.textures["ColorTex"]]);
+                        p.get_state().set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
+                        p.get_state().set_cull_face(true);
 
                         res.groups.push_back(g);
                     }
