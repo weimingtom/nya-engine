@@ -220,14 +220,38 @@ bool tdcg_loader::load_hardsave(nya_scene::shared_mesh &res,nya_scene::resource_
                             v.tc=reader.read<nya_math::vec2>();
                             const uint skin_count=reader.read<uint>();
                             if(skin_count>4)
-                                return false;
-
-                            memset(v.bone_weight,0,sizeof(v.bone_weight));
-                            for(uint l=0;l<skin_count;++l)
                             {
-                                v.bone_idx[l]=reader.read<uint>();
-                                v.bone_weight[l]=reader.read<float>();
+                                std::vector<std::pair<float,uint> > weights(skin_count);
+                                for(uint l=0;l<skin_count;++l)
+                                {
+                                    weights[l].second=reader.read<uint>();
+                                    weights[l].first=reader.read<float>();
+                                }
+
+                                std::sort(weights.rbegin(),weights.rend());
+                                for(uint l=0;l<4;++l)
+                                {
+                                    v.bone_idx[l]=weights[l].second;
+                                    v.bone_weight[l]=weights[l].first;
+                                }
                             }
+                            else
+                            {
+                                for(uint l=0;l<skin_count;++l)
+                                {
+                                    v.bone_idx[l]=reader.read<uint>();
+                                    v.bone_weight[l]=reader.read<float>();
+                                }
+
+                                for(uint l=skin_count;l<4;++l)
+                                    v.bone_weight[l]=0.0f;
+                            }
+
+                            float w=0.0f;
+                            for(uint l=0;l<4;++l) w+=v.bone_weight[l];
+
+                            const float eps=0.001f;
+                            if(fabsf(1.0f-w)<eps && w>eps) for(uint l=0;l<4;++l) v.bone_weight[l]/=w;
                         }
 
                         g.material_idx=(uint)res.materials.size();
