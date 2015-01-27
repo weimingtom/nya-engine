@@ -21,7 +21,7 @@ int warnings_counter::add_warning(const char *msg)
     return (int)(iter-m_warnings.begin());
 }
 
-int warnings_counter::get_count_for_warning_with_idx(int idx)
+unsigned int warnings_counter::get_warnings_count(int idx)
 {
     if(idx<0 || idx>=(int)m_warnings.size())
         return 0;
@@ -29,7 +29,7 @@ int warnings_counter::get_count_for_warning_with_idx(int idx)
     return m_warnings[idx].second;
 }
 
-const char *warnings_counter::get_warning_message_with_idx(int idx)
+const char *warnings_counter::get_warning_message(int idx)
 {
     if(idx<0 || idx>=(int)m_warnings.size())
         return 0;
@@ -37,20 +37,19 @@ const char *warnings_counter::get_warning_message_with_idx(int idx)
     return m_warnings[idx].first.c_str();
 }
 
+unsigned int warnings_counter::get_total_warnings_count()
+{
+    unsigned int count=0;
+    for(size_t i=0;i<m_warnings.size();++i)
+        count+=m_warnings[i].second;
+    return count;
+}
+
 void warning_ostream::flush()
 {
     if(get_text()[0])
         m_counter.add_warning(get_text());
 }
-
-#if defined DEBUG || defined _DEBUG
-std::string get_line_descriptor(const char *filename, int line_number)
-{
-    std::ostringstream ss;
-    ss<<"line "<<line_number<<" in '"<<filename<<"'";
-    return ss.str();
-}
-#endif
 
 warnings_counter &get_warnings_counter() { static warnings_counter wc; return wc; }
 warning_ostream warning() { return warning_ostream( get_warnings_counter() ); }
