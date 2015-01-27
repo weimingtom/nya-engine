@@ -20,7 +20,7 @@ public:
 
     void set_pos(float x,float y,float z) { set_pos(nya_math::vec3(x,y,z)); }
     void set_pos(const nya_math::vec3 &pos);
-    void set_rot(float yaw,float pitch,float roll);
+    void set_rot(float yaw,float pitch,float roll); //degree
     void set_rot(const nya_math::quat &rot);
     void set_rot(const nya_math::vec3 &direction);
 
