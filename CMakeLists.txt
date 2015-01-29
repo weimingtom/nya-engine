@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 2.8.0 FATAL_ERROR)
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+   set (MACOSX 1)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
+   set (ANDROID 1)
+endif ()
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
 
@@ -21,6 +27,14 @@ define_source_files (resources)
 define_source_files (scene)
 define_source_files (system)
 define_source_files (ui)
+
+if (MACOSX)
+    list (REMOVE_ITEM src_files "system/app.cpp")
+    list (APPEND src_files "system/app.mm")
+    # # clang gives 'file: XXX has no symbols' error for empty source files
+    # # remove this line if anything changes
+    list (REMOVE_ITEM src_files "render/platform_specific_gl.cpp")
+endif ()
 
 include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 
