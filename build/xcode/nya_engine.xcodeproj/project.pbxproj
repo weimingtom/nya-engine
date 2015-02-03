@@ -33,6 +33,10 @@
 		3D86813D1965B7F9008B8929 /* warning.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D8681371965B7F9008B8929 /* warning.h */; };
 		3D86813E1965B7F9008B8929 /* warning.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D8681381965B7F9008B8929 /* warning.cpp */; };
 		3D86813F1965B7F9008B8929 /* warning.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D8681381965B7F9008B8929 /* warning.cpp */; };
+		3D942ABC1A8109760078DC1D /* ktx.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D942ABA1A8109760078DC1D /* ktx.h */; };
+		3D942ABD1A8109760078DC1D /* ktx.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D942ABA1A8109760078DC1D /* ktx.h */; };
+		3D942ABE1A8109760078DC1D /* ktx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D942ABB1A8109760078DC1D /* ktx.cpp */; };
+		3D942ABF1A8109760078DC1D /* ktx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D942ABB1A8109760078DC1D /* ktx.cpp */; };
 		3DE732E2195D9186008D6765 /* indexed_map.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DE732E0195D9186008D6765 /* indexed_map.h */; };
 		3DE732E3195D9186008D6765 /* indexed_map.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DE732E0195D9186008D6765 /* indexed_map.h */; };
 		3DE732E4195D9186008D6765 /* invalid_object.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DE732E1195D9186008D6765 /* invalid_object.h */; };
@@ -251,6 +255,8 @@
 		3D8681361965B7F9008B8929 /* output_stream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = output_stream.h; sourceTree = "<group>"; };
 		3D8681371965B7F9008B8929 /* warning.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = warning.h; sourceTree = "<group>"; };
 		3D8681381965B7F9008B8929 /* warning.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = warning.cpp; sourceTree = "<group>"; };
+		3D942ABA1A8109760078DC1D /* ktx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ktx.h; path = ../../formats/ktx.h; sourceTree = "<group>"; };
+		3D942ABB1A8109760078DC1D /* ktx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ktx.cpp; path = ../../formats/ktx.cpp; sourceTree = "<group>"; };
 		3DE732E0195D9186008D6765 /* indexed_map.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = indexed_map.h; sourceTree = "<group>"; };
 		3DE732E1195D9186008D6765 /* invalid_object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = invalid_object.h; sourceTree = "<group>"; };
 		3DE7961F1A28AF7300BF18C7 /* shader_code_parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shader_code_parser.cpp; sourceTree = "<group>"; };
@@ -568,6 +574,8 @@
 		F5528B0D189AC5B8001FE865 /* formats */ = {
 			isa = PBXGroup;
 			children = (
+				3D942ABB1A8109760078DC1D /* ktx.cpp */,
+				3D942ABA1A8109760078DC1D /* ktx.h */,
 				F5398EE318AFF94A00E41909 /* dds.cpp */,
 				F5398EE418AFF94A00E41909 /* dds.h */,
 				3D6D5F40196ABCB3008C1041 /* nms.cpp */,
@@ -591,6 +599,7 @@
 			files = (
 				F23AB526168DBA16004B116E /* platform_specific_gl.h in Headers */,
 				F23AB527168DBA16004B116E /* render.h in Headers */,
+				3D942ABD1A8109760078DC1D /* ktx.h in Headers */,
 				F23AB528168DBA16004B116E /* shader.h in Headers */,
 				F23AB529168DBA16004B116E /* texture.h in Headers */,
 				F23AB52A168DBA16004B116E /* vbo.h in Headers */,
@@ -665,6 +674,7 @@
 			files = (
 				F259322715D858140092C7D8 /* platform_specific_gl.h in Headers */,
 				F259322915D858140092C7D8 /* render.h in Headers */,
+				3D942ABC1A8109760078DC1D /* ktx.h in Headers */,
 				F259322B15D858140092C7D8 /* shader.h in Headers */,
 				F259322F15D858140092C7D8 /* texture.h in Headers */,
 				F259323315D858140092C7D8 /* vbo.h in Headers */,
@@ -816,6 +826,7 @@
 				F23AB51D168DBA16004B116E /* stdout_log.cpp in Sources */,
 				F23AB51E168DBA16004B116E /* memory.cpp in Sources */,
 				F23AB51F168DBA16004B116E /* tmp_buffer.cpp in Sources */,
+				3D942ABF1A8109760078DC1D /* ktx.cpp in Sources */,
 				3D8681271965B0C0008B8929 /* text_parser.cpp in Sources */,
 				F22AD9FF16946EC000B01B4A /* mesh.cpp in Sources */,
 				F22ADA0116946EC000B01B4A /* scene.cpp in Sources */,
@@ -870,6 +881,7 @@
 				F259324F15D858140092C7D8 /* log.cpp in Sources */,
 				F259325115D858140092C7D8 /* plain_file_log.cpp in Sources */,
 				F259325315D858140092C7D8 /* stdout_log.cpp in Sources */,
+				3D942ABE1A8109760078DC1D /* ktx.cpp in Sources */,
 				3D8681261965B0C0008B8929 /* text_parser.cpp in Sources */,
 				F259325515D858140092C7D8 /* memory.cpp in Sources */,
 				F259325815D858140092C7D8 /* tmp_buffer.cpp in Sources */,
