@@ -58,12 +58,16 @@ public:
     bool build(const void *data,unsigned int width,unsigned int height,color_format format);
 
 public:
-    texture() { texture_internal::default_load_function(load_tga); texture_internal::default_load_function(load_dds); }
+    texture() { texture_internal::default_load_function(load_tga);
+                texture_internal::default_load_function(load_dds);
+                texture_internal::default_load_function(load_ktx); }
+
     texture(const char *name) { *this=texture(); load(name); }
 
 public:
     static bool load_tga(shared_texture &res,resource_data &data,const char* name);
     static bool load_dds(shared_texture &res,resource_data &data,const char* name);
+    static bool load_ktx(shared_texture &res,resource_data &data,const char* name);
 
     static void set_load_dds_flip(bool flip) { m_load_dds_flip=flip; }
 

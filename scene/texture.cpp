@@ -5,6 +5,7 @@
 #include "memory/tmp_buffer.h"
 #include "formats/tga.h"
 #include "formats/dds.h"
+#include "formats/ktx.h"
 
 namespace nya_scene
 {
@@ -21,6 +22,44 @@ void bgr_to_rgb(unsigned char *data,size_t data_size)
         data[i]=data2[i];
         data2[i]=tmp;
     }
+}
+
+bool texture::load_ktx(shared_texture &res,resource_data &data,const char* name)
+{
+    if(!data.get_size())
+        return false;
+
+    if(data.get_size()<12)
+        return false;
+
+    if(memcmp((const char *)data.get_data()+1,"KTX ",4)!=0)
+        return false;
+
+    nya_formats::ktx ktx;
+    const size_t header_size=ktx.decode_header(data.get_data(),data.get_size());
+    if(!header_size)
+    {
+        nya_log::log()<<"unable to load ktx: invalid or unsupported ktx header in file "<<name<<"\n";
+        return false;
+    }
+
+    nya_render::texture::color_format cf;
+
+    switch(ktx.pf)
+    {
+        case nya_formats::ktx::rgb: cf=nya_render::texture::color_rgb; break;
+        case nya_formats::ktx::rgba: cf=nya_render::texture::color_rgba; break;
+        case nya_formats::ktx::bgra: cf=nya_render::texture::color_bgra; break;
+
+        case nya_formats::ktx::etc1: cf=nya_render::texture::etc1; break;
+        case nya_formats::ktx::etc2: cf=nya_render::texture::etc2; break;
+        case nya_formats::ktx::etc2_eac: cf=nya_render::texture::etc2_eac; break;
+        case nya_formats::ktx::etc2_a1: cf=nya_render::texture::etc2_a1; break;
+
+        default: nya_log::log()<<"unable to load ktx: unsupported color format in file "<<name<<"\n"; return false;
+    }
+
+    return res.tex.build_texture(ktx.data,ktx.width,ktx.height,cf,ktx.mipmap_count,4);
 }
 
 bool texture::m_load_dds_flip=false;

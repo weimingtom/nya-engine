@@ -15,7 +15,6 @@ public:
     enum color_format
     {
         color_rgb,
-        //color_bgr,
         color_rgba,
         color_bgra,
         //color_r,
@@ -34,14 +33,19 @@ public:
         dxt5,
 
         dxt2=dxt3,
-        dxt4=dxt5
+        dxt4=dxt5,
+
+        etc1,
+        etc2,
+        etc2_eac,
+        etc2_a1
     };
 
     static bool is_dxt_supported();
 
 public:
     //mip_count=-1 means "generate mipmaps". You have to provide a single mip or a complete mipmap pyramid instead
-    bool build_texture(const void *data,unsigned int width,unsigned int height,color_format format,int mip_count=-1);
+    bool build_texture(const void *data,unsigned int width,unsigned int height,color_format format,int mip_count=-1,unsigned int mip_padding=0);
 
 	//order: positive_x,negative_x,positive_y,negative_y,positive_z,negative_z
 	bool build_cubemap(const void *data[6],unsigned int width,unsigned int height,color_format format);

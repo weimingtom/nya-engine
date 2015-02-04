@@ -36,6 +36,14 @@ namespace
     #define GL_LUMINANCE GL_RED
     #define GL_TEXTURE_SWIZZLE_RGBA 0x8E46
   #endif
+
+  #ifdef OPENGL_ES
+    #define GL_ETC1_RGB8_OES 0x8D64
+    #define GL_COMPRESSED_RGB8_ETC2 0x9274
+    #define GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2   0x9276
+    #define GL_COMPRESSED_RGBA8_ETC2_EAC   0x9278
+  #endif
+
 #endif
 
 int get_bpp(texture::color_format format)
@@ -56,6 +64,11 @@ int get_bpp(texture::color_format format)
         case texture::dxt1: return 4;
         case texture::dxt3: return 8;
         case texture::dxt5: return 8;
+
+        case texture::etc1: return 4;
+        case texture::etc2: return 4;
+        case texture::etc2_a1: return 4;
+        case texture::etc2_eac: return 8;
     };
 
     return 0;
@@ -283,7 +296,7 @@ void bgra_to_rgba(const unsigned char *from,unsigned char *to,size_t data_size)
 
 }
 
-bool texture::build_texture(const void *data,unsigned int width,unsigned int height,color_format format,int mip_count)
+bool texture::build_texture(const void *data,unsigned int width,unsigned int height,color_format format,int mip_count,unsigned int mip_padding)
 {
     if(width==0 || height==0)
     {
@@ -303,6 +316,18 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         if(!is_dxt_supported())
         {
             log()<<"Unable to build texture: dxt not supported on this platform\n";
+            return false;
+        }
+
+        if(mip_count<0)
+            mip_count=1;
+    }
+
+    if(format==etc1 || format==etc2 || format==etc2_a1 || format==etc2_eac)
+    {
+        if(!data || mip_count==0)
+        {
+            log()<<"Unable to build texture: etc format with invalid data\n";
             return false;
         }
 
@@ -358,12 +383,12 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
             if(format==dxt1 || format==dxt3 || format==dxt5)
             {
                 srdata[i].SysMemPitch=(w>4?w:4)/4 * get_bpp(format)*2;
-                mem_data+=(h>4?h:4)/4 * srdata[i].SysMemPitch;
+                mem_data+=(h>4?h:4)/4 * srdata[i].SysMemPitch+mip_padding;
             }
             else
             {
                 srdata[i].SysMemPitch=w*4;
-                mem_data+=srdata[i].SysMemPitch*h;
+                mem_data+=srdata[i].SysMemPitch*h+mip_padding;
             }
         }
     }
@@ -429,7 +454,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
             prev_data=srdata[i+1].pSysMem=mem_data;
             w=w>1?w/2:1,h=h>1?h/2:1;
             srdata[i+1].SysMemPitch=w*4;
-            mem_data+=srdata[i+1].SysMemPitch*h;
+            mem_data+=srdata[i+1].SysMemPitch*h+mip_padding;
         }
     }
 
@@ -508,6 +533,11 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         case depth16: source_format=gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_SHORT; break;
         case depth24: source_format=gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; break;
         case depth32: source_format=gl_format=GL_DEPTH_COMPONENT; precision=GL_UNSIGNED_INT; break;
+
+        case etc1: source_format=gl_format=GL_ETC1_RGB8_OES; break;
+        case etc2: source_format=gl_format=GL_COMPRESSED_RGB8_ETC2; break;
+        case etc2_a1: source_format=gl_format=GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2; break;
+        case etc2_eac: source_format=gl_format=GL_COMPRESSED_RGBA8_ETC2_EAC; break;
 #else
   #ifdef OPENGL3
         case color_rgb32f: source_format=GL_RGB32F; gl_format=GL_RGB; precision=GL_FLOAT; break;
@@ -524,6 +554,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         case dxt3: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT3_EXT; break;
         case dxt5: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT5_EXT; break;
 #endif
+
         default: log()<<"Unable to build texture: unsupported format\n"; break;
     };
 
@@ -631,17 +662,20 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
                     glTexSubImage2D(GL_TEXTURE_2D,i,0,0,w,h,gl_format,precision,data_pointer);
                 break;
 
-  #ifndef OPENGL_ES
+            case etc1:
+            case etc2:
+            case etc2_eac:
+            case etc2_a1:
             case dxt1:
             case dxt3:
             case dxt5:
                 size=(w>4?w:4)/4 * (h>4?h:4)/4 * source_bpp*2;
                 glCompressedTexImage2D(GL_TEXTURE_2D,i,gl_format,w,h,0,size,data_pointer);
                 break;
-  #endif
+
             default: break;
         }
-        data_pointer+=size;
+        data_pointer+=(size+mip_padding);
     }
 
     //    glTexSubImage2D(GL_TEXTURE_2D,0,0,0,width,height,gl_format,precision,data);
