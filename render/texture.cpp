@@ -38,9 +38,13 @@ namespace
   #endif
 
   #ifdef OPENGL_ES
+    #define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT 0x83F1
+    #define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT 0x83F2
+    #define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83F3
+
     #define GL_COMPRESSED_RGB8_ETC2 0x9274
-    #define GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2   0x9276
-    #define GL_COMPRESSED_RGBA8_ETC2_EAC   0x9278
+    #define GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2 0x9276
+    #define GL_COMPRESSED_RGBA8_ETC2_EAC 0x9278
 
     #ifdef __APPLE__
         #define GL_ETC1_RGB8_OES GL_COMPRESSED_RGB8_ETC2
@@ -563,11 +567,10 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         case depth16: source_format=GL_DEPTH_COMPONENT16; gl_format=GL_DEPTH_COMPONENT; break;
         case depth24: source_format=GL_DEPTH_COMPONENT24; gl_format=GL_DEPTH_COMPONENT; break;
         case depth32: source_format=GL_DEPTH_COMPONENT32; gl_format=GL_DEPTH_COMPONENT; break;
-
+#endif
         case dxt1: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT1_EXT; break;
         case dxt3: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT3_EXT; break;
         case dxt5: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT5_EXT; break;
-#endif
 
         default: log()<<"Unable to build texture: unsupported format\n"; break;
     };
@@ -858,11 +861,10 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 #endif
         case greyscale: source_format=GL_LUMINANCE; gl_format=GL_LUMINANCE; break;
 
-#ifndef OPENGL_ES
         case dxt1: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT1_EXT; break;
         case dxt3: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT3_EXT; break;
         case dxt5: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT5_EXT; break;
-#endif
+
         default: log()<<"Unable to build texture: unsupported format\n"; break;
     };
 
