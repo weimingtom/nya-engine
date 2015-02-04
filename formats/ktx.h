@@ -16,6 +16,9 @@ struct ktx
 
     enum pixel_format
     {
+        rgb,
+        rgba,
+        bgra,
         etc1,
         etc2,
         etc2_eac,

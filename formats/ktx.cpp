@@ -23,7 +23,7 @@ struct ktx_header
     uint array_elements_count;
     uint faces_count;
     uint mipmap_count;
-    uint key_value_count;
+    uint key_value_size;
 };
 
 size_t ktx::decode_header(const void *data,size_t size)
@@ -43,12 +43,7 @@ size_t ktx::decode_header(const void *data,size_t size)
     if(header.endianess!=0x04030201)
         return 0;
 
-    for(uint i=0;i<header.key_value_count;++i)
-    {
-        const uint size=reader.read<uint>();
-        const uint padding=3-(size+3)%4;
-        reader.skip(size+padding);
-    }
+    reader.skip(header.key_value_size);
 
     const bool is_cubemap=header.faces_count==6;
     if(is_cubemap || header.faces_count!=1)
@@ -58,18 +53,49 @@ size_t ktx::decode_header(const void *data,size_t size)
         return 0;
 
     pixel_format pf;
-    switch(header.gl_internal_format)
+
+    switch(header.gl_format)
     {
-        case 0x8D64: pf=etc1; break;
-        case 0x9274: pf=etc2; break;
-        case 0x9278: pf=etc2_eac; break;
-        case 0x9276: pf=etc2_a1; break;
-        default: return 0;
+        case 0x1907: pf=rgb; break;
+        case 0x1908: pf=rgba; break;
+        case 0x80E1: pf=bgra; break;
+
+        case 0:
+        {
+            switch(header.gl_internal_format)
+            {
+                case 0x8D64: pf=etc1; break;
+                case 0x9274: pf=etc2; break;
+                case 0x9278: pf=etc2_eac; break;
+                case 0x9276: pf=etc2_a1; break;
+                default:
+                    return 0;
+            }
+        }
+        break;
+
+        default:
+            return 0;
     }
 
+    if(!header.mipmap_count)
+        return 0;
+
     uint data_size=0;
-    for(uint i=0,w=header.width,h=header.height;i<header.mipmap_count;++i,w=w>1?w/2:1,h=h>1?h/2:1)
-        data_size += ((w+3)>>2) * ((h+3)>>2) * pf==etc2_eac?16:8;
+    if(pf<etc1)
+    {
+        for(uint i=0,w=width,h=height;i<mipmap_count;++i,w>1?w=w/2:w=1,h>1?h/=2:h=1)
+            this->data_size+=w*h*(pf==rgb?3:4);
+    }
+    else
+    {
+        for(uint i=0,w=header.width,h=header.height;i<header.mipmap_count;++i,w=w>1?w/2:1,h=h>1?h/2:1)
+            data_size += ((w+3)>>2) * ((h+3)>>2) * (pf==etc2_eac?16:8);
+    }
+
+    reader.skip(4);
+
+    data_size+=(header.mipmap_count-1)*4;
 
     if(!reader.check_remained(data_size))
         return 0;
