@@ -92,8 +92,8 @@ namespace nya_render
     };
 #endif
 
-#ifndef NO_EXTENSIONS_INIT
     bool has_extension(const char *name);
+#ifndef NO_EXTENSIONS_INIT
     void *get_extension(const char*ext_name);
 #endif
 

@@ -27,7 +27,6 @@ public:
         depth24,
         depth32,
 
-        //if is_dxt_supported()
         dxt1,
         dxt3,
         dxt5,

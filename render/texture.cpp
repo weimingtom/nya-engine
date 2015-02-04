@@ -38,10 +38,15 @@ namespace
   #endif
 
   #ifdef OPENGL_ES
-    #define GL_ETC1_RGB8_OES 0x8D64
     #define GL_COMPRESSED_RGB8_ETC2 0x9274
     #define GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2   0x9276
     #define GL_COMPRESSED_RGBA8_ETC2_EAC   0x9278
+
+    #ifdef __APPLE__
+        #define GL_ETC1_RGB8_OES GL_COMPRESSED_RGB8_ETC2
+    #else
+        #define GL_ETC1_RGB8_OES 0x8D64
+    #endif
   #endif
 
 #endif
@@ -171,6 +176,17 @@ D3D11_SAMPLER_DESC dx_setup_filtration()
 }
 
 #else
+bool init_compressed_extension()
+{
+#ifndef NO_EXTENSIONS_INIT
+    if(!glCompressedTexImage2D)
+        glCompressedTexImage2D=(PFNGLCOMPRESSEDTEXIMAGE2DARBPROC)get_extension("glCompressedTexImage2D");
+    return glCompressedTexImage2D!=0;
+#else
+    return true;
+#endif
+}
+
 void gl_select_multitex_layer(int idx)
 {
     if(idx==int(active_layer))
@@ -313,11 +329,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
             return false;
         }
 
-        if(!is_dxt_supported())
-        {
-            log()<<"Unable to build texture: dxt not supported on this platform\n";
-            return false;
-        }
+        OPENGL_ONLY(if(!init_compressed_extension()) return false;);
 
         if(mip_count<0)
             mip_count=1;
@@ -330,6 +342,8 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
             log()<<"Unable to build texture: etc format with invalid data\n";
             return false;
         }
+
+        OPENGL_ONLY(if(!init_compressed_extension()) return false;);
 
         if(mip_count<0)
             mip_count=1;
@@ -714,11 +728,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
             return false;
         }
 
-        if(!is_dxt_supported())
-        {
-            log()<<"Unable to build cube texture: dxt not supported on this platform\n";
-            return false;
-        }
+        OPENGL_ONLY(if(!init_compressed_extension()) return false;);
     }
 
     const bool pot=((width&(width-1))==0 && (height&(height-1))==0);
@@ -1231,14 +1241,10 @@ bool texture::is_dxt_supported()
 {
 #ifdef DIRECTX11
     return true;
-#elif defined OPENGL_ES
-    return false;
 #else
-  #ifndef NO_EXTENSIONS_INIT
-    if(!glCompressedTexImage2D)
-        glCompressedTexImage2D=(PFNGLCOMPRESSEDTEXIMAGE2DARBPROC)get_extension("glCompressedTexImage2D");
-  #endif
-    return glCompressedTexImage2D!=0;
+    bool checked=false,supported=false;
+    if(!checked) checked=true,supported=has_extension("GL_EXT_texture_compression_s3tc");
+    return supported;
 #endif
 }
 

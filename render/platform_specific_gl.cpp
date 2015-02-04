@@ -1,14 +1,24 @@
 //https://code.google.com/p/nya-engine/
 
 #include "platform_specific_gl.h"
-
-#ifndef NO_EXTENSIONS_INIT
-
-#include "render.h"
 #include <string>
 
 namespace nya_render
 {
+
+bool has_extension(const char *name)
+{
+    const char *exts=(const char*)glGetString(GL_EXTENSIONS);
+    if(!exts)
+        return false;
+
+    if(std::string(exts).find(name)==std::string::npos)
+        return false;
+    
+    return true;
+}
+
+#ifndef NO_EXTENSIONS_INIT
 
 void *get_exact_extension(const char*ext_name)
 {
@@ -46,21 +56,9 @@ void *get_extension(const char*ext_name)
     return extention;
 }
 
-bool has_extension(const char *name)
-{
-    const char *exts=(const char*)glGetString(GL_EXTENSIONS);
-    if(!exts)
-        return false;
-
-    if(std::string(exts).find(name)==std::string::npos)
-        return false;
-
-    return true;
-}
-
-}
-
 #endif
+
+}
 
 namespace nya_render
 {
