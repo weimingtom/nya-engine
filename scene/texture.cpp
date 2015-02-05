@@ -94,6 +94,7 @@ bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
         case nya_formats::dds::dxt3: cf=nya_render::texture::dxt3; break;
         case nya_formats::dds::dxt4:
         case nya_formats::dds::dxt5: cf=nya_render::texture::dxt5; break;
+
         case nya_formats::dds::bgra: cf=nya_render::texture::color_bgra; break;
         case nya_formats::dds::greyscale: cf=nya_render::texture::greyscale; break;
 
@@ -115,7 +116,7 @@ bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
             cf=nya_render::texture::color_rgba;
             dds.data_size=dds.width*dds.height*4;
             tmp_buf.allocate(dds.data_size);
-            dds.decode_palette8_rgba(dds.data,tmp_buf.get_data());
+            dds.decode_palette8_rgba(tmp_buf.get_data());
             dds.data=tmp_buf.get_data();
             dds.pf=nya_formats::dds::bgra;
         }
@@ -130,6 +131,16 @@ bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
     {
         case nya_formats::dds::texture_2d:
         {
+            if(!nya_render::texture::is_dxt_supported())
+            {
+                tmp_buf.allocate(dds.get_decoded_size());
+                dds.decode_dxt(tmp_buf.get_data());
+                dds.data_size=tmp_buf.get_size();
+                dds.data=tmp_buf.get_data();
+                cf=nya_render::texture::color_rgba;
+                dds.pf=nya_formats::dds::bgra;
+            }
+
             if(m_load_dds_flip)
             {
                 nya_memory::tmp_buffer_scoped tmp_data(dds.data_size);

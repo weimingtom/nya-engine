@@ -183,16 +183,193 @@ void dds::flip_vertical(const void *from_data,void *to_data)
     }
 }
 
-void dds::decode_palette8_rgba(const void *from_data,void *to_data)
+size_t dds::get_decoded_size() const
 {
+    size_t size=0;
+    for(uint i=0,w=width,h=height;i<mipmap_count;++i,w>1?w=w/2:w=1,h>1?h/=2:h=1)
+        size+=w*h*4;
+
+    return type==texture_cube?size*6:size;
+}
+
+void dds::decode_palette8_rgba(void *decoded_data) const
+{
+    if(pf!=palette8_rgba)
+        return;
+
     //used memcpy instead of cast to avoid misalignment
     unsigned int palette[256];
-    memcpy(palette,from_data,sizeof(palette));
+    memcpy(palette,data,sizeof(palette));
 
-    const unsigned char *inds=(unsigned char *)from_data+sizeof(palette);
-    unsigned char *out=(unsigned char *)to_data; //alignment
+    const unsigned char *inds=(unsigned char *)data+sizeof(palette);
+    unsigned char *out=(unsigned char *)decoded_data; //alignment
     for(unsigned int i=0;i<width*height;++i,++inds,out+=4)
         memcpy(out,&palette[*inds],4);
+}
+
+inline int unpack565(const unsigned char* src,unsigned char* dst)
+{
+    typedef unsigned char uchar;
+
+    int value=(int)src[0] | ((int)src[1]<<8);
+
+    const uchar r=(uchar)((value >> 11) & 0x1f);
+    const uchar g=(uchar)((value >> 5) & 0x3f);
+    const uchar b=(uchar)(value & 0x1f);
+
+    dst[0]=(r << 3) | (r >> 2);
+    dst[1]=(g << 2) | (g >> 4);
+    dst[2]=(b << 3) | (b >> 2);
+    dst[3]=255;
+
+    return value;
+}
+
+inline void decompress_color(const void *src,void *dst,bool is_dxt1)
+{
+    typedef unsigned char uchar;
+
+    const uchar* src_buf=(uchar *)src;
+    if(!is_dxt1)
+        src_buf+=8;
+
+    uchar codes[16];
+    const int a=unpack565(src_buf,codes), b=unpack565(src_buf+2,codes+4);
+
+    for(int i=0;i<3;++i)
+    {
+        const int c=codes[i], d=codes[i+4];
+
+        if(is_dxt1 && a<=b)
+        {
+            codes[i+8]=(uchar)((c+d)/2);
+            codes[i+12]=0;
+        }
+        else
+        {
+            codes[i+8]=(uchar)((c*2+d)/3);
+            codes[i+12]=(uchar)((c+d*2)/3);
+        }
+    }
+
+    codes[8+3]=255;
+    codes[12+3]=(is_dxt1 && a<=b)?0:255;
+
+    uchar indices[16];
+    for(int i=0;i<4;++i)
+    {
+        const uchar packed=src_buf[i+4];
+        uchar* ind=indices + i*4;
+
+        ind[0]=packed & 0x3;
+        ind[1]=(packed >> 2) & 0x3;
+        ind[2]=(packed >> 4) & 0x3;
+        ind[3]=(packed >> 6) & 0x3;
+    }
+
+    for(int i=0;i<16;++i)
+    {
+        const uchar offset=indices[i]*4;
+        for(int j=0;j<4;++j)
+            ((uchar *)dst)[i*4 + j]=codes[offset+j];
+    }
+}
+
+inline void decompress_dxt3_alpha(const void *src,void *dst)
+{
+    typedef unsigned char uchar;
+
+    const uchar *src_buf=(uchar *)src;
+    uchar *dst_buf=(uchar *)dst;
+
+    for(int i=0;i<8*8;i+=8,++src_buf)
+    {
+        const uchar lo= *src_buf & 0x0f, hi= *src_buf & 0xf0;
+        dst_buf[i+3] = lo | (lo<<4);
+        dst_buf[i+7] = hi | (hi>>4);
+    }
+}
+
+inline void decompress_dxt5_alpha(const void *src,void *dst)
+{
+    typedef unsigned char uchar;
+
+    const uchar *src_buf=(uchar *)src;
+    uchar *dst_buf=(uchar *)dst;
+
+    const int alpha0=src_buf[0], alpha1=src_buf[1];
+
+    uchar codes[8];
+    codes[0]=src_buf[0], codes[1]=src_buf[1];
+    if(alpha0<=alpha1)
+    {
+        for(int i=1;i<5;++i)
+            codes[i+1]=(uchar)(((5-i)*alpha0 + i*alpha1 )/5);
+
+        codes[6]=0, codes[7]=255;
+    }
+    else
+    {
+        for(int i=1;i<7;++i)
+            codes[i+1]=(uchar)(((7-i)*alpha0 + i*alpha1 )/7);
+    }
+
+    src_buf+=2;
+    uchar indices[16];
+    uchar* dest=indices;
+    for(int i=0;i<2;++i)
+    {
+        unsigned int value=0;
+        for(int j=0;j<3;++j)
+            value|=((*src_buf++) << 8*j);
+
+        for(int j=0;j<8;++j)
+            *dest++ = (uchar)(value >> 3*j) & 0x7;
+    }
+
+    for(int i=0;i<16;++i)
+        dst_buf[4*i+3]=codes[indices[i]];
+}
+
+void dds::decode_dxt(void *decoded_data) const
+{
+    typedef unsigned int uint;
+    const char* src_buf=(char *)data;
+    const uint bpb=pf==dxt1?8:16;
+
+    for(uint i=0,w=width,h=height;i<mipmap_count;++i,w>1?w/=2:w=1,h>1?h/=2:h=1)
+    {
+        for(uint y=0;y<h;y+=4) for(uint x=0;x<w;x+=4)
+        {
+            uint rgba[16];
+
+            switch(pf)
+            {
+                case dxt1: decompress_color(src_buf,rgba,true); break;
+
+                case dxt2:
+                case dxt3:
+                    decompress_color(src_buf,rgba,false);
+                    decompress_dxt3_alpha(src_buf,rgba);
+                    break;
+
+                case dxt4:
+                case dxt5:
+                    decompress_color(src_buf,rgba,false);
+                    decompress_dxt5_alpha(src_buf,rgba);
+                    break;
+
+                default: return;
+            }
+
+            for(uint py=0,sy=y; py<16 && sy<h; py+=4,++sy)
+                memcpy((uint *)decoded_data+w*sy+x,&rgba[py],((x+4<w)?4:(w-x))*sizeof(uint));
+            
+            src_buf+=bpb;
+        }
+
+        decoded_data=(uint *)decoded_data+w*h;
+    }
 }
 
 size_t dds::decode_header(const void *data,size_t size)
