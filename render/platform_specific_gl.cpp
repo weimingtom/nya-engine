@@ -7,6 +7,7 @@
 namespace nya_render
 {
 
+#ifndef DIRECTX11
 bool has_extension(const char *name)
 {
     const char *exts=(const char*)glGetString(GL_EXTENSIONS);
@@ -18,6 +19,7 @@ bool has_extension(const char *name)
     
     return true;
 }
+#endif
 
 #ifndef NO_EXTENSIONS_INIT
 
