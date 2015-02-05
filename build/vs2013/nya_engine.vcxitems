@@ -14,6 +14,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\formats\dds.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\formats\ktx.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\formats\nms.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\formats\string_convert.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\formats\text_parser.cpp" />
@@ -74,11 +75,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\formats\dds.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\formats\ktx.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\formats\nms.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\formats\string_convert.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\formats\text_parser.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\formats\tga.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\log\log.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\log\output_stream.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\log\plain_file_log.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\log\stdout_log.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\log\warning.h" />
@@ -87,20 +90,25 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\math\frustum.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\math\matrix.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\math\quaternion.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\math\scalar.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\math\vector.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\memory\indexed_map.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\memory\invalid_object.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\memory\lru.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\memory\memory.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\memory\memory_reader.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\memory\memory_writer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\memory\optional.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\memory\pool.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\memory\shared_ptr.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\memory\tag_list.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\memory\tmp_buffer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\render\animation.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\render\fbo.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\render\platform_specific_gl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\render\render.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\render\render_objects.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\render\screen_quad.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\render\shader.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\render\shader_code_parser.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\render\skeleton.h" />
@@ -124,6 +132,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\scene\texture.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\scene\transform.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\system\app.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\system\app_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\system\button_codes.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\system\shaders_cache_provider.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\system\system.h" />

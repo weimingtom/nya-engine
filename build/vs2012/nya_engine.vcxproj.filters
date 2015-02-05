@@ -168,6 +168,9 @@
     <ClCompile Include="..\..\render\shader_code_parser.cpp">
       <Filter>render</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\formats\ktx.cpp">
+      <Filter>formats</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\log\log.h">
@@ -349,6 +352,27 @@
     </ClInclude>
     <ClInclude Include="..\..\render\shader_code_parser.h">
       <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\formats\ktx.h">
+      <Filter>formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\log\output_stream.h">
+      <Filter>log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\math\scalar.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\memory\lru.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\memory\tag_list.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\render\render_objects.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\system\app_internal.h">
+      <Filter>system</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

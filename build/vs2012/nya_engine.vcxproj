@@ -311,6 +311,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\formats\dds.cpp" />
+    <ClCompile Include="..\..\formats\ktx.cpp" />
     <ClCompile Include="..\..\formats\nms.cpp" />
     <ClCompile Include="..\..\formats\string_convert.cpp" />
     <ClCompile Include="..\..\formats\text_parser.cpp" />
@@ -371,11 +372,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\formats\dds.h" />
+    <ClInclude Include="..\..\formats\ktx.h" />
     <ClInclude Include="..\..\formats\nms.h" />
     <ClInclude Include="..\..\formats\string_convert.h" />
     <ClInclude Include="..\..\formats\text_parser.h" />
     <ClInclude Include="..\..\formats\tga.h" />
     <ClInclude Include="..\..\log\log.h" />
+    <ClInclude Include="..\..\log\output_stream.h" />
     <ClInclude Include="..\..\log\plain_file_log.h" />
     <ClInclude Include="..\..\log\stdout_log.h" />
     <ClInclude Include="..\..\log\warning.h" />
@@ -384,20 +387,24 @@
     <ClInclude Include="..\..\math\frustum.h" />
     <ClInclude Include="..\..\math\matrix.h" />
     <ClInclude Include="..\..\math\quaternion.h" />
+    <ClInclude Include="..\..\math\scalar.h" />
     <ClInclude Include="..\..\math\vector.h" />
     <ClInclude Include="..\..\memory\indexed_map.h" />
     <ClInclude Include="..\..\memory\invalid_object.h" />
+    <ClInclude Include="..\..\memory\lru.h" />
     <ClInclude Include="..\..\memory\memory.h" />
     <ClInclude Include="..\..\memory\memory_reader.h" />
     <ClInclude Include="..\..\memory\memory_writer.h" />
     <ClInclude Include="..\..\memory\optional.h" />
     <ClInclude Include="..\..\memory\pool.h" />
     <ClInclude Include="..\..\memory\shared_ptr.h" />
+    <ClInclude Include="..\..\memory\tag_list.h" />
     <ClInclude Include="..\..\memory\tmp_buffer.h" />
     <ClInclude Include="..\..\render\animation.h" />
     <ClInclude Include="..\..\render\fbo.h" />
     <ClInclude Include="..\..\render\platform_specific_gl.h" />
     <ClInclude Include="..\..\render\render.h" />
+    <ClInclude Include="..\..\render\render_objects.h" />
     <ClInclude Include="..\..\render\shader.h" />
     <ClInclude Include="..\..\render\shader_code_parser.h" />
     <ClInclude Include="..\..\render\skeleton.h" />
@@ -421,6 +428,7 @@
     <ClInclude Include="..\..\scene\texture.h" />
     <ClInclude Include="..\..\scene\transform.h" />
     <ClInclude Include="..\..\system\app.h" />
+    <ClInclude Include="..\..\system\app_internal.h" />
     <ClInclude Include="..\..\system\button_codes.h" />
     <ClInclude Include="..\..\system\shaders_cache_provider.h" />
     <ClInclude Include="..\..\system\system.h" />
