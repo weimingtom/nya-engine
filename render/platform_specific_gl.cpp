@@ -1,6 +1,7 @@
 //https://code.google.com/p/nya-engine/
 
 #include "platform_specific_gl.h"
+#include "render.h"
 #include <string>
 
 namespace nya_render
@@ -58,10 +59,6 @@ void *get_extension(const char*ext_name)
 
 #endif
 
-}
-
-namespace nya_render
-{
 namespace { bool ignore_platform_restrictions; }
 void set_ignore_platform_restrictions(bool ignore) { ignore_platform_restrictions=ignore; }
 bool is_platform_restrictions_ignored() { return ignore_platform_restrictions; }
