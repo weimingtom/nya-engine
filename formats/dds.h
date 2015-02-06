@@ -49,7 +49,10 @@ struct dds
 public:
     size_t decode_header(const void *data,size_t size); //0 if invalid
     void flip_vertical(const void *from_data,void *to_data);
-    void decode_palette8_rgba(const void *from_data,void *to_data); //width*height*4 to_data buf required
+
+    size_t get_decoded_size() const;
+    void decode_palette8_rgba(void *decoded_data) const; //width*height*4 to_data buf required
+    void decode_dxt(void *decoded_data) const; //decoded_data must be allocated with get_decoded_size()
 };
 
 }

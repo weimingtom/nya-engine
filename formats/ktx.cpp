@@ -68,6 +68,11 @@ size_t ktx::decode_header(const void *data,size_t size)
                 case 0x9274: pf=etc2; break;
                 case 0x9278: pf=etc2_eac; break;
                 case 0x9276: pf=etc2_a1; break;
+
+                case 0x8c01: pf=pvr_rgb2b; break;
+                case 0x8c00: pf=pvr_rgb4b; break;
+                case 0x8c03: pf=pvr_rgba2b; break;
+                case 0x8c02: pf=pvr_rgba4b; break;
                 default:
                     return 0;
             }
@@ -82,14 +87,15 @@ size_t ktx::decode_header(const void *data,size_t size)
         return 0;
 
     uint data_size=0;
-    if(pf<etc1)
+    for(uint i=0,w=header.width,h=header.height;i<header.mipmap_count;++i,w>1?w/=2:w=1,h>1?h/=2:h=1)
     {
-        for(uint i=0,w=width,h=height;i<mipmap_count;++i,w>1?w=w/2:w=1,h>1?h/=2:h=1)
-            this->data_size+=w*h*(pf==rgb?3:4);
-    }
-    else
-    {
-        for(uint i=0,w=header.width,h=header.height;i<header.mipmap_count;++i,w=w>1?w/2:1,h=h>1?h/2:1)
+        if(pf<etc1)
+            data_size+=w*h*(pf==rgb?3:4);
+        else if(pf==pvr_rgb2b || pf==pvr_rgba2b)
+            data_size+=((w>16?w:16)*(h>8?h:8)*2 + 7)/8;
+        else if(pf==pvr_rgb4b || pf==pvr_rgba4b)
+            data_size+=((w>8?w:8)*(h>8?h:8)*4 + 7)/8;
+        else
             data_size += ((w+3)>>2) * ((h+3)>>2) * (pf==etc2_eac?16:8);
     }
 

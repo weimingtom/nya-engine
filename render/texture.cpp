@@ -42,6 +42,13 @@ namespace
     #define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT 0x83F2
     #define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83F3
 
+    #ifndef GL_IMG_texture_compression_pvrtc
+      #define GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG 0x8c00
+      #define GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG 0x8c01
+      #define GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG 0x8c02
+      #define GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG 0x8c03
+    #endif
+
     #define GL_COMPRESSED_RGB8_ETC2 0x9274
     #define GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2 0x9276
     #define GL_COMPRESSED_RGBA8_ETC2_EAC 0x9278
@@ -78,6 +85,11 @@ int get_bpp(texture::color_format format)
         case texture::etc2: return 4;
         case texture::etc2_a1: return 4;
         case texture::etc2_eac: return 8;
+
+        case texture::pvr_rgb2b: return 2;
+        case texture::pvr_rgb4b: return 4;
+        case texture::pvr_rgba2b: return 2;
+        case texture::pvr_rgba4b: return 4;
     };
 
     return 0;
@@ -223,7 +235,7 @@ void gl_select_multitex_layer(int idx)
 
 void gl_setup_filtration(int target,bool has_mips,texture::filter minif,texture::filter magnif,texture::filter mip)
 {
-    glTexParameteri(target,GL_TEXTURE_MAG_FILTER,minif==texture::filter_nearest?GL_NEAREST:GL_LINEAR);
+    glTexParameteri(target,GL_TEXTURE_MAG_FILTER,magnif==texture::filter_nearest?GL_NEAREST:GL_LINEAR);
 
     GLint filter;
 
@@ -244,7 +256,7 @@ void gl_setup_filtration(int target,bool has_mips,texture::filter minif,texture:
                 filter=GL_LINEAR_MIPMAP_LINEAR;
         }
     }
-    else if(magnif==texture::filter_nearest)
+    else if(minif==texture::filter_nearest)
         filter=GL_NEAREST;
     else
         filter=GL_LINEAR;
@@ -325,11 +337,11 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         return false;
     }
 
-    if(format==dxt1 || format==dxt3 || format==dxt5)
+    if(format>=dxt1)
     {
         if(!data || mip_count==0)
         {
-            log()<<"Unable to build texture: dxt format with invalid data\n";
+            log()<<"Unable to build texture: compressed format with invalid data\n";
             return false;
         }
 
@@ -339,21 +351,15 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
             mip_count=1;
     }
 
-    if(format==etc1 || format==etc2 || format==etc2_a1 || format==etc2_eac)
-    {
-        if(!data || mip_count==0)
-        {
-            log()<<"Unable to build texture: etc format with invalid data\n";
-            return false;
-        }
-
-        OPENGL_ONLY(if(!init_compressed_extension()) return false;);
-
-        if(mip_count<0)
-            mip_count=1;
-    }
+    const bool is_pvrtc=format==pvr_rgb2b || format==pvr_rgba2b || format==pvr_rgb4b || format==pvr_rgba4b;
 
     const bool pot=((width&(width-1))==0 && (height&(height-1))==0);
+
+    if(is_pvrtc && width!=height && !pot)
+    {
+        log()<<"Unable to build texture: pvr compression supports only square pot textures\n";
+        return false;
+    }
 
     if(!data)
         mip_count=0;
@@ -556,6 +562,11 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         case etc2: source_format=gl_format=GL_COMPRESSED_RGB8_ETC2; break;
         case etc2_a1: source_format=gl_format=GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2; break;
         case etc2_eac: source_format=gl_format=GL_COMPRESSED_RGBA8_ETC2_EAC; break;
+
+        case pvr_rgb2b: source_format=gl_format=GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG; break;
+        case pvr_rgb4b: source_format=gl_format=GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG; break;
+        case pvr_rgba2b: source_format=gl_format=GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG; break;
+        case pvr_rgba4b: source_format=gl_format=GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG; break;
 #else
   #ifdef OPENGL3
         case color_rgb32f: source_format=GL_RGB32F; gl_format=GL_RGB; precision=GL_FLOAT; break;
@@ -640,6 +651,9 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     if(!pot) gl_setup_pack_alignment();
     gl_setup_texture(GL_TEXTURE_2D,!pot && !is_platform_restrictions_ignored(),has_mipmap);
 
+    if(is_pvrtc)
+        gl_setup_filtration(GL_TEXTURE_2D,has_mipmap,filter_linear,filter_linear,filter_nearest);
+
 #ifdef OPENGL3
     if(format==greyscale)
     {
@@ -661,37 +675,33 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     for(int i=0;i<(mip_count<=0?1:mip_count);++i,w=w>1?w/2:1,h=h>1?h/2:1)
     {
         unsigned int size=0;
-        switch (format)
+        if(format<dxt1)
         {
-            case color_rgb:
-            case color_bgra:
-            case color_rgba:
-            case greyscale:
-            case color_rgb32f:
-            case color_rgba32f:
-            case depth16:
-            case depth24:
-            case depth32:
-                size=w*h*(source_bpp/8);
-                if(need_create)
-                    glTexImage2D(GL_TEXTURE_2D,i,source_format,w,h,0,gl_format,precision,data_pointer);
-                else
-                    glTexSubImage2D(GL_TEXTURE_2D,i,0,0,w,h,gl_format,precision,data_pointer);
-                break;
-
-            case etc1:
-            case etc2:
-            case etc2_eac:
-            case etc2_a1:
-            case dxt1:
-            case dxt3:
-            case dxt5:
-                size=(w>4?w:4)/4 * (h>4?h:4)/4 * source_bpp*2;
-                glCompressedTexImage2D(GL_TEXTURE_2D,i,gl_format,w,h,0,size,data_pointer);
-                break;
-
-            default: break;
+            size=w*h*(source_bpp/8);
+            if(need_create)
+                glTexImage2D(GL_TEXTURE_2D,i,source_format,w,h,0,gl_format,precision,data_pointer);
+            else
+                glTexSubImage2D(GL_TEXTURE_2D,i,0,0,w,h,gl_format,precision,data_pointer);
         }
+        else
+        {
+            if(is_pvrtc)
+            {
+                if(format==pvr_rgb2b || format==pvr_rgba2b)
+                    size=((w>16?w:16)*(h>8?h:8)*2 + 7)/8;
+                else
+                    size=((w>8?w:8)*(h>8?h:8)*4 + 7)/8;
+
+                if(size<32)
+                    break;
+            }
+            else
+                size=(w>4?w:4)/4 * (h>4?h:4)/4 * source_bpp*2;
+
+            glCompressedTexImage2D(GL_TEXTURE_2D,i,gl_format,w,h,0,size,data_pointer);
+            log_gl_errors();
+        }
+
         data_pointer+=(size+mip_padding);
     }
 
