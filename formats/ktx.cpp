@@ -87,24 +87,16 @@ size_t ktx::decode_header(const void *data,size_t size)
         return 0;
 
     uint data_size=0;
-    if(pf<etc1)
+    for(uint i=0,w=header.width,h=header.height;i<header.mipmap_count;++i,w>1?w/=2:w=1,h>1?h/=2:h=1)
     {
-        for(uint i=0,w=width,h=height;i<mipmap_count;++i,w>1?w=w/2:w=1,h>1?h/=2:h=1)
-            this->data_size+=w*h*(pf==rgb?3:4);
-    }
-    else
-    {
-        uint bpp;
-        switch(pf)
-        {
-            case pvr_rgb2b:
-            case pvr_rgba2b:bpp=2;break;
-            case etc2_eac:bpp=8;break;
-            default:bpp=4;break;
-        }
-
-        for(uint i=0,w=header.width,h=header.height;i<header.mipmap_count;++i,w=w>1?w/2:1,h=h>1?h/2:1)
-            data_size += ((w+3)>>2) * ((h+3)>>2) * bpp * 2;
+        if(pf<etc1)
+            data_size+=w*h*(pf==rgb?3:4);
+        else if(pf==pvr_rgb2b || pf==pvr_rgba2b)
+            data_size+=((w>16?w:16)*(h>8?h:8)*2 + 7)/8;
+        else if(pf==pvr_rgb4b || pf==pvr_rgba4b)
+            data_size+=((w>8?w:8)*(h>8?h:8)*4 + 7)/8;
+        else
+            data_size += ((w+3)>>2) * ((h+3)>>2) * (pf==etc2_eac?16:8);
     }
 
     reader.skip(4);

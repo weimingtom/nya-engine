@@ -56,6 +56,11 @@ bool texture::load_ktx(shared_texture &res,resource_data &data,const char* name)
         case nya_formats::ktx::etc2_eac: cf=nya_render::texture::etc2_eac; break;
         case nya_formats::ktx::etc2_a1: cf=nya_render::texture::etc2_a1; break;
 
+        case nya_formats::ktx::pvr_rgb2b: cf=nya_render::texture::pvr_rgb2b; break;
+        case nya_formats::ktx::pvr_rgb4b: cf=nya_render::texture::pvr_rgb4b; break;
+        case nya_formats::ktx::pvr_rgba2b: cf=nya_render::texture::pvr_rgba2b; break;
+        case nya_formats::ktx::pvr_rgba4b: cf=nya_render::texture::pvr_rgba4b; break;
+
         default: nya_log::log()<<"unable to load ktx: unsupported color format in file "<<name<<"\n"; return false;
     }
 

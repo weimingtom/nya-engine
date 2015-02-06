@@ -37,7 +37,12 @@ public:
         etc1,
         etc2,
         etc2_eac,
-        etc2_a1
+        etc2_a1,
+
+        pvr_rgb2b,
+        pvr_rgb4b,
+        pvr_rgba2b,
+        pvr_rgba4b
     };
 
     static bool is_dxt_supported();
