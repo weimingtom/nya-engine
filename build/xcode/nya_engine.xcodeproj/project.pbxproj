@@ -786,7 +786,7 @@
 		F25931D915D857C40092C7D8 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0460;
+				LastUpgradeCheck = 0510;
 			};
 			buildConfigurationList = F25931DC15D857C40092C7D8 /* Build configuration list for PBXProject "nya_engine" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -923,7 +923,6 @@
 		F23AB542168DBA16004B116E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				EXECUTABLE_PREFIX = lib;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
@@ -939,7 +938,6 @@
 		F23AB543168DBA16004B116E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
 				EXECUTABLE_PREFIX = lib;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
@@ -975,6 +973,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				OBJROOT = ../../obj/;
+				ONLY_ACTIVE_ARCH = YES;
 				SKIP_INSTALL = YES;
 				SYMROOT = ../../bin/;
 				USER_HEADER_SEARCH_PATHS = ../../;
