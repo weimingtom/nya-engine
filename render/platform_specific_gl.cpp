@@ -61,7 +61,7 @@ void *get_extension(const char*ext_name)
 
 #endif
 
-namespace { bool ignore_platform_restrictions; }
+namespace { bool ignore_platform_restrictions=false; }
 void set_ignore_platform_restrictions(bool ignore) { ignore_platform_restrictions=ignore; }
 bool is_platform_restrictions_ignored() { return ignore_platform_restrictions; }
 }
