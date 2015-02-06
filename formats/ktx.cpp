@@ -98,13 +98,13 @@ size_t ktx::decode_header(const void *data,size_t size)
         switch(pf)
         {
             case pvr_rgb2b:
-            case pvr_rgba2b:bpp=4;break;
-            case etc2_eac:bpp=16;break;
-            default:bpp=8;break;
+            case pvr_rgba2b:bpp=2;break;
+            case etc2_eac:bpp=8;break;
+            default:bpp=4;break;
         }
 
         for(uint i=0,w=header.width,h=header.height;i<header.mipmap_count;++i,w=w>1?w/2:1,h=h>1?h/2:1)
-            data_size += ((w+3)>>2) * ((h+3)>>2) * bpp;
+            data_size += ((w+3)>>2) * ((h+3)>>2) * bpp * 2;
     }
 
     reader.skip(4);
