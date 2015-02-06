@@ -186,7 +186,7 @@ void dds::flip_vertical(const void *from_data,void *to_data)
 size_t dds::get_decoded_size() const
 {
     size_t size=0;
-    for(uint i=0,w=width,h=height;i<mipmap_count;++i,w>1?w=w/2:w=1,h>1?h/=2:h=1)
+    for(unsigned int i=0,w=width,h=height;i<mipmap_count;++i,w>1?w=w/2:w=1,h>1?h/=2:h=1)
         size+=w*h*4;
 
     return type==texture_cube?size*6:size;
