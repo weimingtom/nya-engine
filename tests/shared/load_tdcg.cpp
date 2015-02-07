@@ -264,7 +264,15 @@ bool tdcg_loader::load_hardsave(nya_scene::shared_mesh &res,nya_scene::resource_
                             return false;
 
                         shader_params &sp=params[shader_params_idx];
-                        m.set_texture("diffuse",textures[sp.textures["ColorTex"]]);
+                        for(std::map<std::string,std::string>::iterator it=sp.textures.begin();it!=sp.textures.end();++it)
+                            m.set_texture(it->first.c_str(),textures[it->second]);
+
+                        for(std::map<std::string,float>::iterator it=sp.floats.begin();it!=sp.floats.end();++it)
+                            m.set_param(m.get_param_idx(it->first.c_str()),it->second,0.0f,0.0f,0.0f);
+
+                        for(std::map<std::string,nya_math::vec4>::iterator it=sp.vectors.begin();it!=sp.vectors.end();++it)
+                            m.set_param(m.get_param_idx(it->first.c_str()),it->second);
+
                         p.get_state().set_blend(true,nya_render::blend::src_alpha,nya_render::blend::inv_src_alpha);
                         p.get_state().set_cull_face(true);
 
