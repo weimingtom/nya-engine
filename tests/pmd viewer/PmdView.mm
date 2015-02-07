@@ -5,6 +5,7 @@
 
 #include "load_vmd.h"
 #include "load_xps.h"
+#include "load_tdcg.h"
 
 #include "scene/camera.h"
 #include "system/system.h"
@@ -662,6 +663,7 @@ private:
             nya_scene::mesh::register_load_function(pmd_loader::load,false);
             nya_scene::mesh::register_load_function(xps_loader::load_mesh,false);
             nya_scene::mesh::register_load_function(xps_loader::load_mesh_ascii,false);
+            nya_scene::mesh::register_load_function(tdcg_loader::load_hardsave,false);
         }
 
         nya_render::set_clear_color(1.0f,1.0f,1.0f,0.0f);
@@ -671,13 +673,21 @@ private:
 
         nya_render::depth_test::enable(nya_render::depth_test::less);
 
-        const bool is_mmd=doc->m_model_name[doc->m_model_name.length()-2]=='m';
+        const bool is_mmd=nya_resources::check_extension(doc->m_model_name.c_str(),"pmd") ||
+                          nya_resources::check_extension(doc->m_model_name.c_str(),"pmx");
         if(is_mmd)
             m_mmd_mesh.load(doc->m_model_name.c_str());
         else
         {
+            const bool is_xps=nya_resources::check_extension(doc->m_model_name.c_str(),"xps") ||
+                              nya_resources::check_extension(doc->m_model_name.c_str(),"mesh") ||
+                              nya_resources::check_extension(doc->m_model_name.c_str(),"ascii");
+
             m_mesh.load(doc->m_model_name.c_str());
-            m_mesh.set_scale(10.0);
+
+            if(is_xps)
+                m_mesh.set_scale(10.0);
+
             m_mesh.draw();
         }
 
@@ -757,19 +767,34 @@ private:
 
     nya_render::clear(true,true);
 
+    const bool is_xps=nya_resources::check_extension(doc->m_model_name.c_str(),"xps") ||
+                      nya_resources::check_extension(doc->m_model_name.c_str(),"mesh") ||
+                      nya_resources::check_extension(doc->m_model_name.c_str(),"ascii");
+
     if(!m_show_groups.empty())
     {
         for(int i=0;i<int(m_show_groups.size());++i) if(m_show_groups[i]) m_mmd_mesh.draw_group(i);
 
-        for(int i=0;i<int(m_show_groups.size());++i) if(m_show_groups[i]) m_mesh.draw_group(i,"opaque");
-        for(int i=0;i<int(m_show_groups.size());++i) if(m_show_groups[i]) m_mesh.draw_group(i,"transparent_clip");
-        for(int i=0;i<int(m_show_groups.size());++i) if(m_show_groups[i]) m_mesh.draw_group(i,"transparent_blend");
+        if(is_xps)
+        {
+            for(int i=0;i<int(m_show_groups.size());++i) if(m_show_groups[i]) m_mesh.draw_group(i,"opaque");
+            for(int i=0;i<int(m_show_groups.size());++i) if(m_show_groups[i]) m_mesh.draw_group(i,"transparent_clip");
+            for(int i=0;i<int(m_show_groups.size());++i) if(m_show_groups[i]) m_mesh.draw_group(i,"transparent_blend");
+        }
+        else
+            for(int i=0;i<int(m_show_groups.size());++i) if(m_show_groups[i]) m_mesh.draw_group(i);
     }
     else
     {
-        m_mesh.draw("opaque");
-        m_mesh.draw("transparent_clip");
-        m_mesh.draw("transparent_blend");
+        if(is_xps)
+        {
+            m_mesh.draw("opaque");
+            m_mesh.draw("transparent_clip");
+            m_mesh.draw("transparent_blend");
+        }
+        else
+            m_mesh.draw();
+
         m_mmd_mesh.draw();
     }
 
