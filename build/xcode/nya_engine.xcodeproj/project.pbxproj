@@ -235,6 +235,10 @@
 		F5AFDF421846C81400457928 /* shared_ptr.h in Headers */ = {isa = PBXBuildFile; fileRef = F5AFDF401846C81400457928 /* shared_ptr.h */; };
 		F5B3578E17FE8E2C001175FE /* optional.h in Headers */ = {isa = PBXBuildFile; fileRef = F5B3578D17FE8E2C001175FE /* optional.h */; };
 		F5B3578F17FE8E2C001175FE /* optional.h in Headers */ = {isa = PBXBuildFile; fileRef = F5B3578D17FE8E2C001175FE /* optional.h */; };
+		F5C1390D1A8776E20058A171 /* postprocess.h in Headers */ = {isa = PBXBuildFile; fileRef = F5C139091A8776E20058A171 /* postprocess.h */; };
+		F5C1390E1A8776E20058A171 /* postprocess.h in Headers */ = {isa = PBXBuildFile; fileRef = F5C139091A8776E20058A171 /* postprocess.h */; };
+		F5C1390F1A8776E20058A171 /* postprocess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5C1390A1A8776E20058A171 /* postprocess.cpp */; };
+		F5C139101A8776E20058A171 /* postprocess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5C1390A1A8776E20058A171 /* postprocess.cpp */; };
 		F5DFDFE819C9A8E9006CC734 /* statistics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5DFDFE619C9A8E9006CC734 /* statistics.cpp */; };
 		F5DFDFE919C9A8E9006CC734 /* statistics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5DFDFE619C9A8E9006CC734 /* statistics.cpp */; };
 		F5DFDFEA19C9A8E9006CC734 /* statistics.h in Headers */ = {isa = PBXBuildFile; fileRef = F5DFDFE719C9A8E9006CC734 /* statistics.h */; };
@@ -358,6 +362,8 @@
 		F5A0B0741A4E16520074854E /* tag_list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tag_list.h; sourceTree = "<group>"; };
 		F5AFDF401846C81400457928 /* shared_ptr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shared_ptr.h; sourceTree = "<group>"; };
 		F5B3578D17FE8E2C001175FE /* optional.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = optional.h; sourceTree = "<group>"; };
+		F5C139091A8776E20058A171 /* postprocess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = postprocess.h; path = ../../scene/postprocess.h; sourceTree = "<group>"; };
+		F5C1390A1A8776E20058A171 /* postprocess.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = postprocess.cpp; path = ../../scene/postprocess.cpp; sourceTree = "<group>"; };
 		F5DFDFE619C9A8E9006CC734 /* statistics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = statistics.cpp; sourceTree = "<group>"; };
 		F5DFDFE719C9A8E9006CC734 /* statistics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = statistics.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -391,6 +397,8 @@
 				F20E2D7616999B7000395A1B /* material.h */,
 				F22AD9FA16946EC000B01B4A /* mesh.cpp */,
 				F22AD9FD16946EC000B01B4A /* mesh.h */,
+				F5C1390A1A8776E20058A171 /* postprocess.cpp */,
+				F5C139091A8776E20058A171 /* postprocess.h */,
 				F2D7D35B16AC1EF400C7DEE5 /* proxy.h */,
 				F22AD9FB16946EC000B01B4A /* scene.cpp */,
 				F22AD9FC16946EC000B01B4A /* scene.h */,
@@ -607,6 +615,7 @@
 				F23AB52C168DBA16004B116E /* file_resources_provider.h in Headers */,
 				3DE796241A28AF7300BF18C7 /* shader_code_parser.h in Headers */,
 				F23AB52D168DBA16004B116E /* resources.h in Headers */,
+				F5C1390E1A8776E20058A171 /* postprocess.h in Headers */,
 				F23AB52E168DBA16004B116E /* shared_resources.h in Headers */,
 				F23AB530168DBA16004B116E /* button.h in Headers */,
 				F5DFDFEB19C9A8E9006CC734 /* statistics.h in Headers */,
@@ -682,6 +691,7 @@
 				F259323715D858140092C7D8 /* file_resources_provider.h in Headers */,
 				3DE796231A28AF7300BF18C7 /* shader_code_parser.h in Headers */,
 				F259323915D858140092C7D8 /* resources.h in Headers */,
+				F5C1390D1A8776E20058A171 /* postprocess.h in Headers */,
 				F259323A15D858140092C7D8 /* shared_resources.h in Headers */,
 				F259323F15D858140092C7D8 /* button.h in Headers */,
 				F5DFDFEA19C9A8E9006CC734 /* statistics.h in Headers */,
@@ -857,6 +867,7 @@
 				F25216A116EC14F400A1B2A6 /* animation.cpp in Sources */,
 				F29B460116F3821500C4CC36 /* frustum.cpp in Sources */,
 				F2CA6768172D92CE00965F9F /* shaders_cache_provider.cpp in Sources */,
+				F5C139101A8776E20058A171 /* postprocess.cpp in Sources */,
 				F55C5720180623B100FF6163 /* debug_draw.cpp in Sources */,
 				F5DFDFE919C9A8E9006CC734 /* statistics.cpp in Sources */,
 			);
@@ -912,6 +923,7 @@
 				F25216A016EC14F400A1B2A6 /* animation.cpp in Sources */,
 				F29B460016F3821500C4CC36 /* frustum.cpp in Sources */,
 				F2CA6767172D92CE00965F9F /* shaders_cache_provider.cpp in Sources */,
+				F5C1390F1A8776E20058A171 /* postprocess.cpp in Sources */,
 				F55C571F180623B100FF6163 /* debug_draw.cpp in Sources */,
 				F5DFDFE819C9A8E9006CC734 /* statistics.cpp in Sources */,
 			);
