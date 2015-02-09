@@ -363,12 +363,12 @@ void dds::decode_dxt(void *decoded_data) const
             }
 
             for(uint py=0,sy=y; py<16 && sy<h; py+=4,++sy)
-                memcpy((uint *)decoded_data+w*sy+x,&rgba[py],((x+4<w)?4:(w-x))*sizeof(uint));
+                memcpy((char *)decoded_data+(w*sy+x)*4,&rgba[py],((x+4<w)?4:(w-x))*sizeof(uint));
             
             src_buf+=bpb;
         }
 
-        decoded_data=(uint *)decoded_data+w*h;
+        decoded_data=(char *)decoded_data+(w*h)*4;
     }
 }
 
