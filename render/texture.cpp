@@ -1254,10 +1254,21 @@ bool texture::is_dxt_supported()
 #ifdef DIRECTX11
     return true;
 #else
+  #ifdef OPENGL_ES
+    return false;
+  #else
+    return true;
+  #endif
+#endif
+
+//ToDo
+/*
+#else
     static bool checked=false,supported=false;
     if(!checked) checked=true,supported=has_extension("GL_EXT_texture_compression_s3tc");
     return supported;
 #endif
+*/
 }
 
 namespace
