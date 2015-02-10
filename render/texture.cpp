@@ -699,7 +699,6 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
                 size=(w>4?w:4)/4 * (h>4?h:4)/4 * source_bpp*2;
 
             glCompressedTexImage2D(GL_TEXTURE_2D,i,gl_format,w,h,0,size,data_pointer);
-            log_gl_errors();
         }
 
         data_pointer+=(size+mip_padding);
@@ -1254,10 +1253,21 @@ bool texture::is_dxt_supported()
 #ifdef DIRECTX11
     return true;
 #else
-    bool checked=false,supported=false;
+  #ifdef OPENGL_ES
+    return false;
+  #else
+    return true;
+  #endif
+#endif
+
+//ToDo
+/*
+#else
+    static bool checked=false,supported=false;
     if(!checked) checked=true,supported=has_extension("GL_EXT_texture_compression_s3tc");
     return supported;
 #endif
+*/
 }
 
 namespace

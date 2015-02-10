@@ -370,7 +370,7 @@ void dds::decode_dxt(void *decoded_data) const
                 src_buf+=bpb;
             }
 
-            decoded_data=(uint *)decoded_data+w*h;
+            decoded_data=(char *)decoded_data+(w*h)*4;
         }
     }
 }

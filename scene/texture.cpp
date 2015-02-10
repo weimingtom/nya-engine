@@ -90,7 +90,7 @@ bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
 
     nya_memory::tmp_buffer_ref tmp_buf;
 
-    const int mipmap_count=dds.need_generate_mipmaps?-1:dds.mipmap_count;
+    int mipmap_count=dds.need_generate_mipmaps?-1:dds.mipmap_count;
     nya_render::texture::color_format cf;
     switch(dds.pf)
     {
@@ -144,6 +144,8 @@ bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
                 dds.data=tmp_buf.get_data();
                 cf=nya_render::texture::color_rgba;
                 dds.pf=nya_formats::dds::bgra;
+                if(mipmap_count>1)
+                    mipmap_count=-1;
             }
 
             if(m_load_dds_flip)
@@ -167,6 +169,8 @@ bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
                 dds.data=tmp_buf.get_data();
                 cf=nya_render::texture::color_rgba;
                 dds.pf=nya_formats::dds::bgra;
+                if(mipmap_count>1)
+                    mipmap_count=-1;
             }
 
             const void *data[6];

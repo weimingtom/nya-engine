@@ -125,7 +125,6 @@
 		F25216A116EC14F400A1B2A6 /* animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F252169E16EC14E400A1B2A6 /* animation.cpp */; };
 		F25216A216EC14F400A1B2A6 /* animation.h in Headers */ = {isa = PBXBuildFile; fileRef = F252169F16EC14F100A1B2A6 /* animation.h */; };
 		F25216A316EC14F400A1B2A6 /* animation.h in Headers */ = {isa = PBXBuildFile; fileRef = F252169F16EC14F100A1B2A6 /* animation.h */; };
-		F259322615D858140092C7D8 /* platform_specific_gl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F25931ED15D858140092C7D8 /* platform_specific_gl.cpp */; };
 		F259322715D858140092C7D8 /* platform_specific_gl.h in Headers */ = {isa = PBXBuildFile; fileRef = F25931EE15D858140092C7D8 /* platform_specific_gl.h */; };
 		F259322815D858140092C7D8 /* render.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F25931EF15D858140092C7D8 /* render.cpp */; };
 		F259322915D858140092C7D8 /* render.h in Headers */ = {isa = PBXBuildFile; fileRef = F25931F015D858140092C7D8 /* render.h */; };
@@ -231,10 +230,15 @@
 		F5A0B0761A4E16520074854E /* lru.h in Headers */ = {isa = PBXBuildFile; fileRef = F5A0B0731A4E16520074854E /* lru.h */; };
 		F5A0B0771A4E16520074854E /* tag_list.h in Headers */ = {isa = PBXBuildFile; fileRef = F5A0B0741A4E16520074854E /* tag_list.h */; };
 		F5A0B0781A4E16520074854E /* tag_list.h in Headers */ = {isa = PBXBuildFile; fileRef = F5A0B0741A4E16520074854E /* tag_list.h */; };
+		F5A6D40B1A856B6100C8952B /* platform_specific_gl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F25931ED15D858140092C7D8 /* platform_specific_gl.cpp */; };
 		F5AFDF411846C81400457928 /* shared_ptr.h in Headers */ = {isa = PBXBuildFile; fileRef = F5AFDF401846C81400457928 /* shared_ptr.h */; };
 		F5AFDF421846C81400457928 /* shared_ptr.h in Headers */ = {isa = PBXBuildFile; fileRef = F5AFDF401846C81400457928 /* shared_ptr.h */; };
 		F5B3578E17FE8E2C001175FE /* optional.h in Headers */ = {isa = PBXBuildFile; fileRef = F5B3578D17FE8E2C001175FE /* optional.h */; };
 		F5B3578F17FE8E2C001175FE /* optional.h in Headers */ = {isa = PBXBuildFile; fileRef = F5B3578D17FE8E2C001175FE /* optional.h */; };
+		F5C1390D1A8776E20058A171 /* postprocess.h in Headers */ = {isa = PBXBuildFile; fileRef = F5C139091A8776E20058A171 /* postprocess.h */; };
+		F5C1390E1A8776E20058A171 /* postprocess.h in Headers */ = {isa = PBXBuildFile; fileRef = F5C139091A8776E20058A171 /* postprocess.h */; };
+		F5C1390F1A8776E20058A171 /* postprocess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5C1390A1A8776E20058A171 /* postprocess.cpp */; };
+		F5C139101A8776E20058A171 /* postprocess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5C1390A1A8776E20058A171 /* postprocess.cpp */; };
 		F5DFDFE819C9A8E9006CC734 /* statistics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5DFDFE619C9A8E9006CC734 /* statistics.cpp */; };
 		F5DFDFE919C9A8E9006CC734 /* statistics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5DFDFE619C9A8E9006CC734 /* statistics.cpp */; };
 		F5DFDFEA19C9A8E9006CC734 /* statistics.h in Headers */ = {isa = PBXBuildFile; fileRef = F5DFDFE719C9A8E9006CC734 /* statistics.h */; };
@@ -358,6 +362,8 @@
 		F5A0B0741A4E16520074854E /* tag_list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tag_list.h; sourceTree = "<group>"; };
 		F5AFDF401846C81400457928 /* shared_ptr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shared_ptr.h; sourceTree = "<group>"; };
 		F5B3578D17FE8E2C001175FE /* optional.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = optional.h; sourceTree = "<group>"; };
+		F5C139091A8776E20058A171 /* postprocess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = postprocess.h; path = ../../scene/postprocess.h; sourceTree = "<group>"; };
+		F5C1390A1A8776E20058A171 /* postprocess.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = postprocess.cpp; path = ../../scene/postprocess.cpp; sourceTree = "<group>"; };
 		F5DFDFE619C9A8E9006CC734 /* statistics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = statistics.cpp; sourceTree = "<group>"; };
 		F5DFDFE719C9A8E9006CC734 /* statistics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = statistics.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -391,6 +397,8 @@
 				F20E2D7616999B7000395A1B /* material.h */,
 				F22AD9FA16946EC000B01B4A /* mesh.cpp */,
 				F22AD9FD16946EC000B01B4A /* mesh.h */,
+				F5C1390A1A8776E20058A171 /* postprocess.cpp */,
+				F5C139091A8776E20058A171 /* postprocess.h */,
 				F2D7D35B16AC1EF400C7DEE5 /* proxy.h */,
 				F22AD9FB16946EC000B01B4A /* scene.cpp */,
 				F22AD9FC16946EC000B01B4A /* scene.h */,
@@ -607,6 +615,7 @@
 				F23AB52C168DBA16004B116E /* file_resources_provider.h in Headers */,
 				3DE796241A28AF7300BF18C7 /* shader_code_parser.h in Headers */,
 				F23AB52D168DBA16004B116E /* resources.h in Headers */,
+				F5C1390E1A8776E20058A171 /* postprocess.h in Headers */,
 				F23AB52E168DBA16004B116E /* shared_resources.h in Headers */,
 				F23AB530168DBA16004B116E /* button.h in Headers */,
 				F5DFDFEB19C9A8E9006CC734 /* statistics.h in Headers */,
@@ -682,6 +691,7 @@
 				F259323715D858140092C7D8 /* file_resources_provider.h in Headers */,
 				3DE796231A28AF7300BF18C7 /* shader_code_parser.h in Headers */,
 				F259323915D858140092C7D8 /* resources.h in Headers */,
+				F5C1390D1A8776E20058A171 /* postprocess.h in Headers */,
 				F259323A15D858140092C7D8 /* shared_resources.h in Headers */,
 				F259323F15D858140092C7D8 /* button.h in Headers */,
 				F5DFDFEA19C9A8E9006CC734 /* statistics.h in Headers */,
@@ -786,7 +796,7 @@
 		F25931D915D857C40092C7D8 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0460;
+				LastUpgradeCheck = 0510;
 			};
 			buildConfigurationList = F25931DC15D857C40092C7D8 /* Build configuration list for PBXProject "nya_engine" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -857,6 +867,7 @@
 				F25216A116EC14F400A1B2A6 /* animation.cpp in Sources */,
 				F29B460116F3821500C4CC36 /* frustum.cpp in Sources */,
 				F2CA6768172D92CE00965F9F /* shaders_cache_provider.cpp in Sources */,
+				F5C139101A8776E20058A171 /* postprocess.cpp in Sources */,
 				F55C5720180623B100FF6163 /* debug_draw.cpp in Sources */,
 				F5DFDFE919C9A8E9006CC734 /* statistics.cpp in Sources */,
 			);
@@ -866,7 +877,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F259322615D858140092C7D8 /* platform_specific_gl.cpp in Sources */,
 				F259322815D858140092C7D8 /* render.cpp in Sources */,
 				F259322A15D858140092C7D8 /* shader.cpp in Sources */,
 				F259322E15D858140092C7D8 /* texture.cpp in Sources */,
@@ -904,6 +914,7 @@
 				F5528B10189AC6FA001FE865 /* tga.cpp in Sources */,
 				F20E2D8016999B7000395A1B /* shader.cpp in Sources */,
 				F20E2D8216999B7000395A1B /* texture.cpp in Sources */,
+				F5A6D40B1A856B6100C8952B /* platform_specific_gl.cpp in Sources */,
 				F20E2D8416999B7000395A1B /* material.cpp in Sources */,
 				F20E2D8616999B7000395A1B /* camera.cpp in Sources */,
 				F2BFD321169C1AF400ED4A9E /* constants.cpp in Sources */,
@@ -912,6 +923,7 @@
 				F25216A016EC14F400A1B2A6 /* animation.cpp in Sources */,
 				F29B460016F3821500C4CC36 /* frustum.cpp in Sources */,
 				F2CA6767172D92CE00965F9F /* shaders_cache_provider.cpp in Sources */,
+				F5C1390F1A8776E20058A171 /* postprocess.cpp in Sources */,
 				F55C571F180623B100FF6163 /* debug_draw.cpp in Sources */,
 				F5DFDFE819C9A8E9006CC734 /* statistics.cpp in Sources */,
 			);
@@ -923,10 +935,8 @@
 		F23AB542168DBA16004B116E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				EXECUTABLE_PREFIX = lib;
-				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 5.1.1;
 				OBJROOT = ../../obj/;
@@ -939,9 +949,7 @@
 		F23AB543168DBA16004B116E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
 				EXECUTABLE_PREFIX = lib;
-				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 5.1.1;
 				OBJROOT = ../../obj/;
@@ -955,8 +963,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
@@ -965,25 +971,19 @@
 				CONFIGURATION_BUILD_DIR = ../../bin/mac_debug/;
 				CONFIGURATION_TEMP_DIR = ../../obj/mac_debug/;
 				COPY_PHASE_STRIP = NO;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				OBJROOT = ../../obj/;
-				ONLY_ACTIVE_ARCH = NO;
-				SDKROOT = macosx;
+				ONLY_ACTIVE_ARCH = YES;
 				SKIP_INSTALL = YES;
 				SYMROOT = ../../bin/;
 				USER_HEADER_SEARCH_PATHS = ../../;
@@ -994,8 +994,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
@@ -1005,17 +1003,12 @@
 				CONFIGURATION_TEMP_DIR = ../../obj/mac_release/;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				OBJROOT = ../../obj/;
-				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				SYMROOT = ../../bin/;
 				USER_HEADER_SEARCH_PATHS = ../../;
@@ -1025,15 +1018,11 @@
 		F25931E715D857C40092C7D8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
-				COMBINE_HIDPI_IMAGES = YES;
 				EXECUTABLE_PREFIX = lib;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
-				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				OBJROOT = ../../obj/;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
 				SYMROOT = ../../bin/;
 			};
 			name = Debug;
@@ -1041,15 +1030,11 @@
 		F25931E815D857C40092C7D8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
-				COMBINE_HIDPI_IMAGES = YES;
 				EXECUTABLE_PREFIX = lib;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
-				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				OBJROOT = ../../obj/;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
 				SYMROOT = ../../bin/;
 			};
 			name = Release;
