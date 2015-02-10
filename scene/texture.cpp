@@ -159,6 +159,16 @@ bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
 
         case nya_formats::dds::texture_cube: //ToDo: mipmap_count
         {
+            if(!nya_render::texture::is_dxt_supported())
+            {
+                tmp_buf.allocate(dds.get_decoded_size());
+                dds.decode_dxt(tmp_buf.get_data());
+                dds.data_size=tmp_buf.get_size();
+                dds.data=tmp_buf.get_data();
+                cf=nya_render::texture::color_rgba;
+                dds.pf=nya_formats::dds::bgra;
+            }
+
             const void *data[6];
             for(int i=0;i<6;++i)
                 data[i]=(const char *)dds.data+i*dds.data_size/6;
