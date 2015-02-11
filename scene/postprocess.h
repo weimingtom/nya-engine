@@ -34,13 +34,13 @@ struct shared_postprocess
 class postprocess: public scene_shared<shared_postprocess>
 {
 private:
-    virtual void draw_scene(const char *pass,const char *tags) const {}
+    virtual void draw_scene(const char *pass,const char *tags) {}
 
 public:
     bool load(const char *name) { return scene_shared::load(name); }
     void unload() { scene_shared::unload(); }
     void resize(unsigned int width,unsigned int height);
-    void draw(int dt) const;
+    void draw(int dt);
 
 public:
     postprocess(): m_width(0),m_height(0) { default_load_function(load_text); }

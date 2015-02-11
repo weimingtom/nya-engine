@@ -11,7 +11,7 @@ void postprocess::resize(unsigned int width,unsigned int height)
     update_targets();
 }
 
-void postprocess::draw(int dt) const
+void postprocess::draw(int dt)
 {
     //ToDo
 }
@@ -23,7 +23,7 @@ bool postprocess::load_text(shared_postprocess &res,resource_data &data,const ch
     return false;
 }
 
-void update_targets()
+void postprocess::update_targets()
 {
     //ToDo
 }
