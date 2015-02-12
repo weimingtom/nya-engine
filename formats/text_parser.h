@@ -16,9 +16,9 @@ class text_parser
 {
 public:
     static const size_t no_size=(size_t)-1;
-
     bool load_from_data(const char *data,size_t text_size=no_size);
 
+public:
     int get_sections_count() const { return (int)m_sections.size(); }
     const char *get_section_type(int idx) const;
     int get_section_names_count(int idx) const;
@@ -27,6 +27,7 @@ public:
     const char *get_section_value(int idx) const;
     nya_math::vec4 get_section_value_vector(int idx) const;
 
+public:
     int get_subsections_count(int section_idx) const;
     const char *get_subsection_type(int section_idx,int idx) const;
     const char *get_subsection_value(int section_idx,int idx) const;
