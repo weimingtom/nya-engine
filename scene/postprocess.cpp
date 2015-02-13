@@ -11,6 +11,13 @@ bool postprocess::load(const char *name)
     if(!scene_shared::load(name))
         return false;
 
+    for(int i=0;i<(int)m_shared->lines.size();++i)
+    {
+        const shared_postprocess::line &l=m_shared->lines[i];
+        if(l.type=="if")
+            m_conditions[l.name]=false;
+    }
+
     update();
     return true;
 }
@@ -36,7 +43,7 @@ bool postprocess::load_text(shared_postprocess &res,resource_data &data,const ch
     for(int i=0;i<parser.get_sections_count();++i)
     {
         shared_postprocess::line &l=res.lines[i];
-        l.type.assign(parser.get_section_type(i));
+        l.type.assign(parser.get_section_type(i)+1);
         const char *name=parser.get_section_name(i);
         l.name.assign(name?name:"");
 
@@ -79,7 +86,60 @@ bool postprocess::get_condition(const char *condition) const
 
 void postprocess::update()
 {
-    //ToDo
+    if(!m_shared.is_valid())
+        return;
+
+    std::vector<bool> ifs;
+
+    for(int i=0;i<(int)m_shared->lines.size();++i)
+    {
+        const shared_postprocess::line &l=m_shared->lines[i];
+
+
+        if(l.type=="if")
+        {
+            ifs.resize(ifs.size()+1);
+            ifs.back()=m_conditions[l.name];
+            continue;
+        }
+        else if(l.type=="else")
+        {
+            if(ifs.empty())
+            {
+                //ToDo: log error
+                return;
+            }
+            else
+                ifs.back()=!ifs.back();
+            continue;
+        }
+        else if(l.type=="end")
+        {
+            if(ifs.empty())
+            {
+                //ToDo: log error
+                return;
+            }
+            else
+                ifs.pop_back();
+            continue;
+        }
+
+        bool should_contiue=false;
+        for(int j=0;j<(int)ifs.size();++j)
+        {
+            if(!ifs[j])
+            {
+                should_contiue=true;
+                break;
+            }
+        }
+
+        if(should_contiue)
+            continue;
+
+        //ToDo
+    }
 }
 
 void postprocess::unload()
