@@ -2,6 +2,7 @@
 
 #include "postprocess.h"
 #include "formats/text_parser.h"
+#include "scene.h"
 
 namespace nya_scene
 {
@@ -30,7 +31,18 @@ void postprocess::resize(unsigned int width,unsigned int height)
 
 void postprocess::draw(int dt)
 {
-    //ToDo
+    for(size_t i=0;i<m_op.size();++i)
+    {
+        const size_t idx=m_op[i].idx;
+        switch(m_op[i].type)
+        {
+            case type_draw_scene:
+                draw_scene(m_op_draw_scene[idx].pass.c_str(),m_op_draw_scene[idx].tags.c_str());
+                break;
+
+            //ToDo
+        }
+    }
 }
 
 bool postprocess::load_text(shared_postprocess &res,resource_data &data,const char* name)
@@ -95,7 +107,6 @@ void postprocess::update()
     {
         const shared_postprocess::line &l=m_shared->lines[i];
 
-
         if(l.type=="if")
         {
             ifs.resize(ifs.size()+1);
@@ -106,7 +117,7 @@ void postprocess::update()
         {
             if(ifs.empty())
             {
-                //ToDo: log error
+                log()<<"postprocess: syntax error - else without if in file "<<m_shared.get_name()<<"\n";
                 return;
             }
             else
@@ -117,7 +128,7 @@ void postprocess::update()
         {
             if(ifs.empty())
             {
-                //ToDo: log error
+                log()<<"postprocess: syntax error - end without if in file "<<m_shared.get_name()<<"\n";
                 return;
             }
             else
@@ -138,7 +149,22 @@ void postprocess::update()
         if(should_contiue)
             continue;
 
-        //ToDo
+        if(l.type=="target")
+        {
+            //ToDo
+        }
+        else if(l.type=="draw_scene")
+        {
+            m_op.resize(m_op.size()+1);
+            m_op.back().type=type_draw_scene;
+            m_op.back().idx=m_op_draw_scene.size();
+            m_op_draw_scene.resize(m_op_draw_scene.size()+1);
+            m_op_draw_scene.back().pass=l.name;
+            if(!l.values.empty())
+                m_op_draw_scene.back().tags=l.values.front().second;
+        }
+        else
+            log()<<"postprocess: unknown operation "<<l.type<<" in file "<<m_shared.get_name()<<"\n";
     }
 }
 

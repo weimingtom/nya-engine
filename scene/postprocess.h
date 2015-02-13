@@ -57,6 +57,31 @@ private:
     nya_memory::shared_ptr<nya_render::screen_quad> m_quad;
     typedef std::map<std::string,bool> conditions_map;
     conditions_map m_conditions;
+
+    enum op_types
+    {
+        type_set_target,
+        type_set_texture,
+        type_set_shader,
+        type_draw_scene,
+        type_draw_quad
+    };
+
+    struct op
+    {
+        op_types type;
+        size_t idx;
+    };
+
+    std::vector<op> m_op;
+
+    struct op_draw_scene
+    {
+        std::string pass;
+        std::string tags;
+    };
+
+    std::vector<op_draw_scene> m_op_draw_scene;
 };
 
 }
