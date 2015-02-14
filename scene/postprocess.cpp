@@ -19,7 +19,11 @@ bool postprocess::load(const char *name)
             m_conditions[l.name]=false;
     }
 
+    m_quad=nya_memory::shared_ptr<nya_render::screen_quad>(nya_render::screen_quad());
+    m_quad->init();
+
     update();
+
     return true;
 }
 
@@ -36,13 +40,24 @@ void postprocess::draw(int dt)
         const size_t idx=m_op[i].idx;
         switch(m_op[i].type)
         {
+            case type_set_shader:
+                m_op_set_shader[idx].sh.internal().set();
+                break;
+
             case type_draw_scene:
                 draw_scene(m_op_draw_scene[idx].pass.c_str(),m_op_draw_scene[idx].tags.c_str());
+                break;
+
+            case type_draw_quad:
+                nya_render::set_state(nya_render::state());
+                m_quad->draw();
                 break;
 
             //ToDo
         }
     }
+
+    nya_scene::shader_internal::unset();
 }
 
 bool postprocess::load_text(shared_postprocess &res,resource_data &data,const char* name)
@@ -80,6 +95,9 @@ void postprocess::set_condition(const char *condition,bool value)
     if(it==m_conditions.end())
         return;
 
+    if(it->second==value)
+        return;
+
     it->second=value;
     update();
 }
@@ -94,6 +112,15 @@ bool postprocess::get_condition(const char *condition) const
         return false;
 
     return it->second;
+}
+
+template <typename op_t,typename t,typename op_e> t &add_op(op_t &ops,std::vector<t> &spec_ops,op_e type)
+{
+    ops.resize(ops.size()+1);
+    ops.back().type=type;
+    ops.back().idx=spec_ops.size();
+    spec_ops.resize(spec_ops.size()+1);
+    return spec_ops.back();
 }
 
 void postprocess::update()
@@ -155,13 +182,20 @@ void postprocess::update()
         }
         else if(l.type=="draw_scene")
         {
-            m_op.resize(m_op.size()+1);
-            m_op.back().type=type_draw_scene;
-            m_op.back().idx=m_op_draw_scene.size();
-            m_op_draw_scene.resize(m_op_draw_scene.size()+1);
-            m_op_draw_scene.back().pass=l.name;
+            op_draw_scene &o=add_op(m_op,m_op_draw_scene,type_draw_scene);
+            o.pass=l.name;
             if(!l.values.empty())
-                m_op_draw_scene.back().tags=l.values.front().second;
+                o.tags=l.values.front().second;
+        }
+        else if(l.type=="draw_shader")
+        {
+            op_set_shader &o=add_op(m_op,m_op_set_shader,type_set_shader);
+            o.sh.load(l.name.c_str());
+        }
+        else if(l.type=="draw_quad")
+        {
+            m_op.resize(m_op.size()+1);
+            m_op.back().type=type_draw_quad;
         }
         else
             log()<<"postprocess: unknown operation "<<l.type<<" in file "<<m_shared.get_name()<<"\n";
@@ -174,6 +208,8 @@ void postprocess::unload()
         m_quad->release();
     m_quad.free();
     scene_shared::unload();
+    m_op.clear();
+    m_op_draw_scene.clear();
 }
 
 }

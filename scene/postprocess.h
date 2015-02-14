@@ -82,6 +82,13 @@ private:
     };
 
     std::vector<op_draw_scene> m_op_draw_scene;
+
+    struct op_set_shader
+    {
+        nya_scene::shader sh;
+    };
+
+    std::vector<op_set_shader> m_op_set_shader;
 };
 
 }
