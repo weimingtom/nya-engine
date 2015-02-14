@@ -3,7 +3,6 @@
 #include "postprocess.h"
 #include "formats/text_parser.h"
 #include "scene.h"
-#include "render.h"
 
 namespace nya_scene
 {
@@ -36,6 +35,8 @@ void postprocess::resize(unsigned int width,unsigned int height)
 
 void postprocess::draw(int dt)
 {
+    nya_render::rect prev_rect=nya_render::get_viewport();
+
     nya_render::state state;
     std::vector<size_t> textures_set;
     for(size_t i=0;i<m_op.size();++i)
@@ -48,7 +49,8 @@ void postprocess::draw(int dt)
                 break;
 
             case type_set_target:
-                m_targets[idx]->bind(); //ToDo: viewport
+                nya_render::set_viewport(m_targets[idx].rect);
+                m_targets[idx].fbo->bind();
                 break;
 
             case type_set_texture:
@@ -71,6 +73,7 @@ void postprocess::draw(int dt)
         }
     }
 
+    nya_render::set_viewport(prev_rect);
     nya_scene::shader_internal::unset();
     nya_render::fbo::unbind();
     for(size_t i=0;i<textures_set.size();++i)
@@ -149,7 +152,8 @@ void postprocess::update()
 
     std::vector<bool> ifs;
     m_targets.resize(1);
-    m_targets.back()=nya_memory::shared_ptr<nya_render::fbo>(nya_render::fbo());
+    m_targets.back().rect.width=m_width,m_targets.back().rect.height=m_height;
+    m_targets.back().fbo=nya_memory::shared_ptr<nya_render::fbo>(nya_render::fbo());
     typedef std::map<std::string,size_t> targets_map;
     targets_map targets;
 
@@ -215,7 +219,8 @@ void postprocess::update()
             {
                 targets[l.name]=m_targets.size();
                 m_targets.resize(m_targets.size()+1);
-                m_targets.back()=nya_memory::shared_ptr<nya_render::fbo>(nya_render::fbo());
+                m_targets.back().rect.width=w,m_targets.back().rect.height=h;
+                m_targets.back().fbo=nya_memory::shared_ptr<nya_render::fbo>(nya_render::fbo());
             }
             else
             {
@@ -240,7 +245,7 @@ void postprocess::update()
                 m_textures.resize(m_textures.size()+1);
 
                 if(m_textures.back().build(0,w,h,nya_render::texture::color_rgba))
-                    m_targets.back()->set_color_target(m_textures.back().internal().get_shared_data()->tex);
+                    m_targets.back().fbo->set_color_target(m_textures.back().internal().get_shared_data()->tex);
             }
 
             if(depth)
@@ -257,7 +262,7 @@ void postprocess::update()
                 m_textures.resize(m_textures.size()+1);
 
                 if(m_textures.back().build(0,w,h,nya_render::texture::depth16))
-                    m_targets.back()->set_depth_target(m_textures.back().internal().get_shared_data()->tex);
+                    m_targets.back().fbo->set_depth_target(m_textures.back().internal().get_shared_data()->tex);
             }
         }
         else if(l.type=="set_shader")
@@ -328,8 +333,8 @@ void postprocess::clear_ops()
 
     for(size_t i=0;i<m_targets.size();++i)
     {
-        if(m_targets[i].get_ref_count()==1)
-            m_targets[i]->release();
+        if(m_targets[i].fbo.get_ref_count()==1)
+            m_targets[i].fbo->release();
     }
 
     m_targets.clear();

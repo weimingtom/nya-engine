@@ -6,6 +6,7 @@
 #include "scene/shader.h"
 #include "render/screen_quad.h"
 #include "render/fbo.h"
+#include "render/render.h"
 #include "memory/shared_ptr.h"
 
 namespace nya_scene
@@ -97,7 +98,14 @@ private:
     typedef std::map<std::string,size_t> textures_map;
     textures_map m_textures_map;
     std::vector<nya_scene::texture> m_textures;
-    std::vector<nya_memory::shared_ptr<nya_render::fbo> > m_targets;
+
+    struct op_target
+    {
+        nya_memory::shared_ptr<nya_render::fbo> fbo;
+        nya_render::rect rect;
+    };
+
+    std::vector<op_target> m_targets;
 };
 
 }
