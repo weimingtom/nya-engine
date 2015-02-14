@@ -3,6 +3,7 @@
 #include "postprocess.h"
 #include "formats/text_parser.h"
 #include "scene.h"
+#include "render.h"
 
 namespace nya_scene
 {
@@ -35,6 +36,7 @@ void postprocess::resize(unsigned int width,unsigned int height)
 
 void postprocess::draw(int dt)
 {
+    nya_render::state state;
     for(size_t i=0;i<m_op.size();++i)
     {
         const size_t idx=m_op[i].idx;
@@ -49,7 +51,7 @@ void postprocess::draw(int dt)
                 break;
 
             case type_draw_quad:
-                nya_render::set_state(nya_render::state());
+                nya_render::set_state(state);
                 m_quad->draw();
                 break;
 
@@ -187,7 +189,7 @@ void postprocess::update()
             if(!l.values.empty())
                 o.tags=l.values.front().second;
         }
-        else if(l.type=="draw_shader")
+        else if(l.type=="set_shader")
         {
             op_set_shader &o=add_op(m_op,m_op_set_shader,type_set_shader);
             o.sh.load(l.name.c_str());
@@ -210,6 +212,7 @@ void postprocess::unload()
     scene_shared::unload();
     m_op.clear();
     m_op_draw_scene.clear();
+    m_op_set_shader.clear();
 }
 
 }
