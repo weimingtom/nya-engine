@@ -167,7 +167,7 @@ void postprocess::update()
             ifs.back()=m_conditions[l.name];
             continue;
         }
-        else if(l.type=="else")
+        else if(l.type=="else") //ToDo: else if
         {
             if(ifs.empty())
             {
@@ -209,7 +209,7 @@ void postprocess::update()
             const char *width=l.get_value("width"),*height=l.get_value("height");
             unsigned int w=m_width,h=m_height;
 
-            //ToDo: parse ariphmetics
+            //ToDo: parse math expression
             if(width)
                 w=atoi(width);
             if(height)
