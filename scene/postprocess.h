@@ -50,6 +50,7 @@ public:
 
 private:
     void update();
+    void clear_ops();
 
 private:
     unsigned int m_width;

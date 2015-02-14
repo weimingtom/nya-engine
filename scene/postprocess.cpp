@@ -127,6 +127,8 @@ template <typename op_t,typename t,typename op_e> t &add_op(op_t &ops,std::vecto
 
 void postprocess::update()
 {
+    clear_ops();
+
     if(!m_shared.is_valid())
         return;
 
@@ -210,6 +212,11 @@ void postprocess::unload()
         m_quad->release();
     m_quad.free();
     scene_shared::unload();
+    clear_ops();
+}
+
+void postprocess::clear_ops()
+{
     m_op.clear();
     m_op_draw_scene.clear();
     m_op_set_shader.clear();
