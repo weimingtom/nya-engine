@@ -17,6 +17,8 @@ struct shared_postprocess
     {
         std::string type,name;
         std::vector<std::pair<std::string,std::string> > values;
+
+        const char *get_value(const char *name) const;
     };
 
     std::vector<line> lines;
@@ -64,6 +66,7 @@ private:
         type_set_target,
         type_set_texture,
         type_set_shader,
+        type_clear,
         type_draw_scene,
         type_draw_quad
     };
@@ -90,6 +93,11 @@ private:
     };
 
     std::vector<op_set_shader> m_op_set_shader;
+
+    typedef std::map<std::string,size_t> textures_map;
+    textures_map m_textures_map;
+    std::vector<nya_scene::texture> m_textures;
+    std::vector<nya_memory::shared_ptr<nya_render::fbo> > m_targets;
 };
 
 }

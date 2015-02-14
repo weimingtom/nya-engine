@@ -37,6 +37,7 @@ void postprocess::resize(unsigned int width,unsigned int height)
 void postprocess::draw(int dt)
 {
     nya_render::state state;
+    std::vector<size_t> textures_set;
     for(size_t i=0;i<m_op.size();++i)
     {
         const size_t idx=m_op[i].idx;
@@ -44,6 +45,19 @@ void postprocess::draw(int dt)
         {
             case type_set_shader:
                 m_op_set_shader[idx].sh.internal().set();
+                break;
+
+            case type_set_target:
+                m_targets[idx]->bind(); //ToDo: viewport
+                break;
+
+            case type_set_texture:
+                textures_set.push_back(idx);
+                m_textures[idx].internal().set(); //ToDo: layer
+                break;
+
+            case type_clear:
+                nya_render::clear(true,true); //ToDo: clear separately
                 break;
 
             case type_draw_scene:
@@ -54,12 +68,13 @@ void postprocess::draw(int dt)
                 nya_render::set_state(state);
                 m_quad->draw();
                 break;
-
-            //ToDo
         }
     }
 
     nya_scene::shader_internal::unset();
+    nya_render::fbo::unbind();
+    for(size_t i=0;i<textures_set.size();++i)
+        m_textures[i].internal().unset();
 }
 
 bool postprocess::load_text(shared_postprocess &res,resource_data &data,const char* name)
@@ -133,6 +148,10 @@ void postprocess::update()
         return;
 
     std::vector<bool> ifs;
+    m_targets.resize(1);
+    m_targets.back()=nya_memory::shared_ptr<nya_render::fbo>(nya_render::fbo());
+    typedef std::map<std::string,size_t> targets_map;
+    targets_map targets;
 
     for(int i=0;i<(int)m_shared->lines.size();++i)
     {
@@ -182,19 +201,103 @@ void postprocess::update()
 
         if(l.type=="target")
         {
-            //ToDo
-        }
-        else if(l.type=="draw_scene")
-        {
-            op_draw_scene &o=add_op(m_op,m_op_draw_scene,type_draw_scene);
-            o.pass=l.name;
-            if(!l.values.empty())
-                o.tags=l.values.front().second;
+            const char *color=l.get_value("color"),*depth=l.get_value("depth");
+            const char *width=l.get_value("width"),*height=l.get_value("height");
+            unsigned int w=m_width,h=m_height;
+
+            //ToDo: parse ariphmetics
+            if(width)
+                w=atoi(width);
+            if(height)
+                h=atoi(height);
+
+            if(targets.find(l.name)==targets.end())
+            {
+                targets[l.name]=m_targets.size();
+                m_targets.resize(m_targets.size()+1);
+                m_targets.back()=nya_memory::shared_ptr<nya_render::fbo>(nya_render::fbo());
+            }
+            else
+            {
+                log()<<"postprocess: target "<<l.name<<" redifinition in file "<<m_shared.get_name()<<"\n";
+                continue;
+            }
+
+            if(!w || !h)
+                continue;
+
+            if(color)
+            {
+                textures_map::iterator it=m_textures_map.find(color);
+                if(it!=m_textures_map.end())
+                {
+                    const nya_scene::texture &t=m_textures[it->second];
+                    if(t.get_width()!=w || t.get_height()!=h)
+                        log()<<"postprocess: texture "<<color<<" with different size in file "<<m_shared.get_name()<<"\n";
+                }
+
+                m_textures_map[color]=m_textures.size();
+                m_textures.resize(m_textures.size()+1);
+
+                if(m_textures.back().build(0,w,h,nya_render::texture::color_rgba))
+                    m_targets.back()->set_color_target(m_textures.back().internal().get_shared_data()->tex);
+            }
+
+            if(depth)
+            {
+                textures_map::iterator it=m_textures_map.find(depth);
+                if(it!=m_textures_map.end())
+                {
+                    const nya_scene::texture &t=m_textures[it->second];
+                    if(t.get_width()!=w || t.get_height()!=h)
+                        log()<<"postprocess: texture "<<depth<<" with different size in file "<<m_shared.get_name()<<"\n";
+                }
+
+                m_textures_map[depth]=m_textures.size();
+                m_textures.resize(m_textures.size()+1);
+
+                if(m_textures.back().build(0,w,h,nya_render::texture::depth16))
+                    m_targets.back()->set_depth_target(m_textures.back().internal().get_shared_data()->tex);
+            }
         }
         else if(l.type=="set_shader")
         {
             op_set_shader &o=add_op(m_op,m_op_set_shader,type_set_shader);
             o.sh.load(l.name.c_str());
+        }
+        else if(l.type=="set_target")
+        {
+            m_op.resize(m_op.size()+1);
+            m_op.back().type=type_set_target;
+            targets_map::const_iterator it=targets.find(l.name);
+            m_op.back().idx=it==targets.end()?0:it->second;
+        }
+        else if(l.type=="set_texture")
+        {
+            if(l.values.empty())
+                continue;
+
+            textures_map::const_iterator it=m_textures_map.find(l.values.front().first);
+            if(it==m_textures_map.end())
+                continue; //ToDo: create texture and function get_texture
+
+            m_op.resize(m_op.size()+1);
+            m_op.back().type=type_set_texture;
+            m_op.back().idx=it->second;
+        }
+        else if(l.type=="clear")
+        {
+            m_op.resize(m_op.size()+1);
+            m_op.back().type=type_clear;
+        }
+        else if(l.type=="draw_scene")
+        {
+            op_draw_scene &o=add_op(m_op,m_op_draw_scene,type_draw_scene);
+            o.pass=l.name;
+            if(l.values.empty())
+                continue;
+
+            o.tags=l.values.front().first;
         }
         else if(l.type=="draw_quad")
         {
@@ -220,6 +323,30 @@ void postprocess::clear_ops()
     m_op.clear();
     m_op_draw_scene.clear();
     m_op_set_shader.clear();
+    m_textures_map.clear();
+    m_textures.clear();
+
+    for(size_t i=0;i<m_targets.size();++i)
+    {
+        if(m_targets[i].get_ref_count()==1)
+            m_targets[i]->release();
+    }
+
+    m_targets.clear();
+}
+
+const char *shared_postprocess::line::get_value(const char *name) const
+{
+    if(!name)
+        return 0;
+
+    for(size_t i=0;i<values.size();++i)
+    {
+        if(values[i].first==name)
+            return values[i].second.c_str();
+    }
+
+    return 0;
 }
 
 }

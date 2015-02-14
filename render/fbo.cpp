@@ -201,7 +201,10 @@ void fbo::release()
 void fbo::bind()
 {
 	if(m_fbo_idx<0)
+    {
+        unbind();
 		return;
+    }
 
     fbo_obj &fbo=fbo_obj::get(m_fbo_idx);
 
