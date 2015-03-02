@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8.0 FATAL_ERROR)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    set(MACOSX 1)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Android")
+   set(ANDROID 1)
 endif()
 
 macro(define_source_files)
