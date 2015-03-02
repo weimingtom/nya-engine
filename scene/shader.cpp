@@ -422,14 +422,6 @@ void shader_internal::set() const
     }
 }
 
-void shader_internal::unset() const
-{
-    if(!m_shared.is_valid())
-        return;
-
-    m_shared->shdr.unbind();
-}
-
 int shader_internal::get_texture_slot(const char *semantics) const
 {
     if(!semantics || !m_shared.is_valid())

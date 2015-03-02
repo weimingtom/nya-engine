@@ -100,7 +100,7 @@ class shader_internal: public scene_shared<shared_shader>
 {
 public:
     void set() const;
-    void unset() const;
+    static void unset() { nya_render::shader::unbind(); }
 
     static void set_skeleton(const nya_render::skeleton *skeleton) { m_skeleton=skeleton; }
     void reset_skeleton() { if(!m_shared.is_valid()) return; m_shared->last_skeleton_pos=0; m_shared->last_skeleton_rot=0; }

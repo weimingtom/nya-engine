@@ -339,36 +339,39 @@ void dds::decode_dxt(void *decoded_data) const
 
     for(uint i=0,w=width,h=height;i<mipmap_count;++i,w>1?w/=2:w=1,h>1?h/=2:h=1)
     {
-        for(uint y=0;y<h;y+=4) for(uint x=0;x<w;x+=4)
+        for(uint f=0;f<(type==texture_cube?6:1);++f)
         {
-            uint rgba[16];
-
-            switch(pf)
+            for(uint y=0;y<h;y+=4) for(uint x=0;x<w;x+=4)
             {
-                case dxt1: decompress_color(src_buf,rgba,true); break;
+                uint rgba[16];
 
-                case dxt2:
-                case dxt3:
-                    decompress_color(src_buf,rgba,false);
-                    decompress_dxt3_alpha(src_buf,rgba);
-                    break;
+                switch(pf)
+                {
+                    case dxt1: decompress_color(src_buf,rgba,true); break;
 
-                case dxt4:
-                case dxt5:
-                    decompress_color(src_buf,rgba,false);
-                    decompress_dxt5_alpha(src_buf,rgba);
-                    break;
+                    case dxt2:
+                    case dxt3:
+                        decompress_color(src_buf,rgba,false);
+                        decompress_dxt3_alpha(src_buf,rgba);
+                        break;
 
-                default: return;
+                    case dxt4:
+                    case dxt5:
+                        decompress_color(src_buf,rgba,false);
+                        decompress_dxt5_alpha(src_buf,rgba);
+                        break;
+
+                    default: return;
+                }
+
+                for(uint py=0,sy=y; py<16 && sy<h; py+=4,++sy)
+                    memcpy((uint *)decoded_data+w*sy+x,&rgba[py],((x+4<w)?4:(w-x))*sizeof(uint));
+                
+                src_buf+=bpb;
             }
 
-            for(uint py=0,sy=y; py<16 && sy<h; py+=4,++sy)
-                memcpy((uint *)decoded_data+w*sy+x,&rgba[py],((x+4<w)?4:(w-x))*sizeof(uint));
-            
-            src_buf+=bpb;
+            decoded_data=(char *)decoded_data+(w*h)*4;
         }
-
-        decoded_data=(uint *)decoded_data+w*h;
     }
 }
 
