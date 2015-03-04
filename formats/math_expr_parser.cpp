@@ -21,10 +21,10 @@ inline int precedence(char op)
     return 0;
 }
 
-inline bool infix_to_rpn(const std::vector<std::string>& from,std::vector<std::string>& to)
+inline bool infix_to_rpn(const std::vector<std::string> &from,std::vector<std::string> &to)
 {
     std::stack<char> stc;
-    for(size_t i =0; i < from.size(); i++)
+    for(size_t i=0;i<from.size();i++)
     {
         if(from[i].empty())
             continue;
