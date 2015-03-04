@@ -16,7 +16,7 @@ bool postprocess::load(const char *name)
     for(int i=0;i<(int)m_shared->lines.size();++i)
     {
         const shared_postprocess::line &l=m_shared->lines[i];
-        if(l.type=="if")
+        if(l.type=="if" || l.type=="elif" || l.type=="else_if")
             m_conditions[l.name]=false;
     }
 
@@ -151,7 +151,7 @@ void postprocess::update()
     if(!m_shared.is_valid())
         return;
 
-    std::vector<bool> ifs;
+    std::vector<std::pair<bool,bool> > ifs;
     m_targets.resize(1);
     m_targets.back().rect.width=m_width,m_targets.back().rect.height=m_height;
     m_targets.back().fbo=nya_memory::shared_ptr<nya_render::fbo>(nya_render::fbo());
@@ -165,18 +165,37 @@ void postprocess::update()
         if(l.type=="if")
         {
             ifs.resize(ifs.size()+1);
-            ifs.back()=m_conditions[l.name];
+            ifs.back().first=ifs.back().second=m_conditions[l.name];
             continue;
         }
-        else if(l.type=="else") //ToDo: else if
+        else if(l.type=="else")
         {
             if(ifs.empty())
             {
                 log()<<"postprocess: syntax error - else without if in file "<<m_shared.get_name()<<"\n";
                 return;
             }
-            else
-                ifs.back()=!ifs.back();
+
+            ifs.back().second=!ifs.back().first;
+            continue;
+        }
+        else if(l.type=="elif" || l.type=="else_if")
+        {
+            if(ifs.empty())
+            {
+                log()<<"postprocess: syntax error - else without if in file "<<m_shared.get_name()<<"\n";
+                return;
+            }
+
+            if(ifs.back().first)
+            {
+                ifs.back().second=false;
+                continue;
+            }
+
+            ifs.back().second=m_conditions[l.name];
+            if(ifs.back().second)
+                ifs.back().first=true;
             continue;
         }
         else if(l.type=="end")
@@ -194,7 +213,7 @@ void postprocess::update()
         bool should_contiue=false;
         for(int j=0;j<(int)ifs.size();++j)
         {
-            if(!ifs[j])
+            if(!ifs[j].second)
             {
                 should_contiue=true;
                 break;
