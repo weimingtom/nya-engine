@@ -12,7 +12,7 @@ class math_expr_parser
 {
 public:
     bool parse(const char *expr);
-    int set_var(const char *name,float value,bool allow_unfound=true);
+    bool set_var(const char *name,float value,bool allow_unfound=true);
     float calculate() const;
 
     math_expr_parser() {}
@@ -20,6 +20,7 @@ public:
 
 private:
     float get_value(const std::string &str) const;
+    void add_var(const std::string &str);
 
 private:
     std::vector<std::pair<std::string,float> > m_vars;

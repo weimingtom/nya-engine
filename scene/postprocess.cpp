@@ -2,6 +2,7 @@
 
 #include "postprocess.h"
 #include "formats/text_parser.h"
+#include "formats/math_expr_parser.h"
 #include "scene.h"
 
 namespace nya_scene
@@ -207,13 +208,12 @@ void postprocess::update()
         {
             const char *color=l.get_value("color"),*depth=l.get_value("depth");
             const char *width=l.get_value("width"),*height=l.get_value("height");
-            unsigned int w=m_width,h=m_height;
 
-            //ToDo: parse math expression
-            if(width)
-                w=atoi(width);
-            if(height)
-                h=atoi(height);
+            nya_formats::math_expr_parser p;
+            p.set_var("width",m_width);
+            p.set_var("height",m_height);
+            const unsigned int w=p.parse(width)?(unsigned int)p.calculate():m_width;
+            const unsigned int h=p.parse(height)?(unsigned int)p.calculate():m_height;
 
             if(targets.find(l.name)==targets.end())
             {

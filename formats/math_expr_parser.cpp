@@ -105,40 +105,61 @@ bool math_expr_parser::parse(const char *expr)
             continue;
         }
 
-        tokens.push_back(str);
-        str.clear();
+        if(!str.empty())
+        {
+            tokens.push_back(str);
+            if(isalpha(str.front()))
+                add_var(str.c_str());
+            str.clear();
+        }
+
         tokens.push_back(std::string(c,1));
     }
 
     if(!str.empty())
+    {
         tokens.push_back(str);
+        if(isalpha(str.front()))
+            add_var(str.c_str());
+    }
 
     return infix_to_rpn(tokens,m_tokens);
 }
 
-int math_expr_parser::set_var(const char *name,float value,bool allow_unfound)
+bool math_expr_parser::set_var(const char *name,float value,bool allow_unfound)
 {
     if(!name)
-        return -1;
+        return false;
 
     for(int i=0;i<(int)m_vars.size();++i)
     {
         if(m_vars[i].first==name)
         {
             m_vars[i].second=value;
-            return i;
+            return true;
         }
     }
 
     if(!allow_unfound)
-        return -1;
+        return false;
 
     const int idx=(int)m_vars.size();
     m_vars.resize(idx+1);
     m_vars.back().first=name;
     m_vars.back().second=value;
 
-    return idx;
+    return true;
+}
+
+void math_expr_parser::add_var(const std::string &str)
+{
+    for(int i=0;i<(int)m_vars.size();++i)
+    {
+        if(m_vars[i].first==str)
+            return;
+    }
+
+    set_var(str.c_str(),0.0f,true);
 }
 
 float math_expr_parser::get_value(const std::string &str) const
