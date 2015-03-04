@@ -679,13 +679,13 @@ private:
             m_mmd_mesh.load(doc->m_model_name.c_str());
         else
         {
-            const bool is_xps=nya_resources::check_extension(doc->m_model_name.c_str(),"xps") ||
-                              nya_resources::check_extension(doc->m_model_name.c_str(),"mesh") ||
-                              nya_resources::check_extension(doc->m_model_name.c_str(),"ascii");
+            m_is_xps=nya_resources::check_extension(doc->m_model_name.c_str(),"xps") ||
+                     nya_resources::check_extension(doc->m_model_name.c_str(),"mesh") ||
+                     nya_resources::check_extension(doc->m_model_name.c_str(),"ascii");
 
             m_mesh.load(doc->m_model_name.c_str());
 
-            if(is_xps)
+            if(m_is_xps)
                 m_mesh.set_scale(10.0);
 
             m_mesh.draw();
@@ -767,15 +767,11 @@ private:
 
     nya_render::clear(true,true);
 
-    const bool is_xps=nya_resources::check_extension(doc->m_model_name.c_str(),"xps") ||
-                      nya_resources::check_extension(doc->m_model_name.c_str(),"mesh") ||
-                      nya_resources::check_extension(doc->m_model_name.c_str(),"ascii");
-
     if(!m_show_groups.empty())
     {
         for(int i=0;i<int(m_show_groups.size());++i) if(m_show_groups[i]) m_mmd_mesh.draw_group(i);
 
-        if(is_xps)
+        if(m_is_xps)
         {
             for(int i=0;i<int(m_show_groups.size());++i) if(m_show_groups[i]) m_mesh.draw_group(i,"opaque");
             for(int i=0;i<int(m_show_groups.size());++i) if(m_show_groups[i]) m_mesh.draw_group(i,"transparent_clip");
@@ -786,7 +782,7 @@ private:
     }
     else
     {
-        if(is_xps)
+        if(m_is_xps)
         {
             m_mesh.draw("opaque");
             m_mesh.draw("transparent_clip");
