@@ -235,6 +235,10 @@
 		F5AFDF421846C81400457928 /* shared_ptr.h in Headers */ = {isa = PBXBuildFile; fileRef = F5AFDF401846C81400457928 /* shared_ptr.h */; };
 		F5B3578E17FE8E2C001175FE /* optional.h in Headers */ = {isa = PBXBuildFile; fileRef = F5B3578D17FE8E2C001175FE /* optional.h */; };
 		F5B3578F17FE8E2C001175FE /* optional.h in Headers */ = {isa = PBXBuildFile; fileRef = F5B3578D17FE8E2C001175FE /* optional.h */; };
+		F5BCA1A01AA6E5ED00EEBEAC /* math_expr_parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BCA19E1AA6E5ED00EEBEAC /* math_expr_parser.cpp */; };
+		F5BCA1A11AA6E5ED00EEBEAC /* math_expr_parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BCA19E1AA6E5ED00EEBEAC /* math_expr_parser.cpp */; };
+		F5BCA1A21AA6E5ED00EEBEAC /* math_expr_parser.h in Headers */ = {isa = PBXBuildFile; fileRef = F5BCA19F1AA6E5ED00EEBEAC /* math_expr_parser.h */; };
+		F5BCA1A31AA6E5ED00EEBEAC /* math_expr_parser.h in Headers */ = {isa = PBXBuildFile; fileRef = F5BCA19F1AA6E5ED00EEBEAC /* math_expr_parser.h */; };
 		F5C1390D1A8776E20058A171 /* postprocess.h in Headers */ = {isa = PBXBuildFile; fileRef = F5C139091A8776E20058A171 /* postprocess.h */; };
 		F5C1390E1A8776E20058A171 /* postprocess.h in Headers */ = {isa = PBXBuildFile; fileRef = F5C139091A8776E20058A171 /* postprocess.h */; };
 		F5C1390F1A8776E20058A171 /* postprocess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5C1390A1A8776E20058A171 /* postprocess.cpp */; };
@@ -362,6 +366,8 @@
 		F5A0B0741A4E16520074854E /* tag_list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tag_list.h; sourceTree = "<group>"; };
 		F5AFDF401846C81400457928 /* shared_ptr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shared_ptr.h; sourceTree = "<group>"; };
 		F5B3578D17FE8E2C001175FE /* optional.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = optional.h; sourceTree = "<group>"; };
+		F5BCA19E1AA6E5ED00EEBEAC /* math_expr_parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = math_expr_parser.cpp; path = ../../formats/math_expr_parser.cpp; sourceTree = "<group>"; };
+		F5BCA19F1AA6E5ED00EEBEAC /* math_expr_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = math_expr_parser.h; path = ../../formats/math_expr_parser.h; sourceTree = "<group>"; };
 		F5C139091A8776E20058A171 /* postprocess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = postprocess.h; path = ../../scene/postprocess.h; sourceTree = "<group>"; };
 		F5C1390A1A8776E20058A171 /* postprocess.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = postprocess.cpp; path = ../../scene/postprocess.cpp; sourceTree = "<group>"; };
 		F5DFDFE619C9A8E9006CC734 /* statistics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = statistics.cpp; sourceTree = "<group>"; };
@@ -582,10 +588,12 @@
 		F5528B0D189AC5B8001FE865 /* formats */ = {
 			isa = PBXGroup;
 			children = (
-				3D942ABB1A8109760078DC1D /* ktx.cpp */,
-				3D942ABA1A8109760078DC1D /* ktx.h */,
 				F5398EE318AFF94A00E41909 /* dds.cpp */,
 				F5398EE418AFF94A00E41909 /* dds.h */,
+				3D942ABB1A8109760078DC1D /* ktx.cpp */,
+				3D942ABA1A8109760078DC1D /* ktx.h */,
+				F5BCA19E1AA6E5ED00EEBEAC /* math_expr_parser.cpp */,
+				F5BCA19F1AA6E5ED00EEBEAC /* math_expr_parser.h */,
 				3D6D5F40196ABCB3008C1041 /* nms.cpp */,
 				3D6D5F3F196ABCB3008C1041 /* nms.h */,
 				3D86811E1965B0C0008B8929 /* string_convert.cpp */,
@@ -627,6 +635,7 @@
 				F5528B13189AC6FA001FE865 /* tga.h in Headers */,
 				F23AB536168DBA16004B116E /* system.h in Headers */,
 				F23AB538168DBA16004B116E /* log.h in Headers */,
+				F5BCA1A31AA6E5ED00EEBEAC /* math_expr_parser.h in Headers */,
 				F23AB539168DBA16004B116E /* plain_file_log.h in Headers */,
 				F23AB53A168DBA16004B116E /* stdout_log.h in Headers */,
 				F23AB53B168DBA16004B116E /* memory.h in Headers */,
@@ -703,6 +712,7 @@
 				F5528B12189AC6FA001FE865 /* tga.h in Headers */,
 				F259324C15D858140092C7D8 /* system.h in Headers */,
 				F259325015D858140092C7D8 /* log.h in Headers */,
+				F5BCA1A21AA6E5ED00EEBEAC /* math_expr_parser.h in Headers */,
 				F259325215D858140092C7D8 /* plain_file_log.h in Headers */,
 				F259325415D858140092C7D8 /* stdout_log.h in Headers */,
 				F259325615D858140092C7D8 /* memory.h in Headers */,
@@ -836,6 +846,7 @@
 				F23AB51D168DBA16004B116E /* stdout_log.cpp in Sources */,
 				F23AB51E168DBA16004B116E /* memory.cpp in Sources */,
 				F23AB51F168DBA16004B116E /* tmp_buffer.cpp in Sources */,
+				F5BCA1A11AA6E5ED00EEBEAC /* math_expr_parser.cpp in Sources */,
 				3D942ABF1A8109760078DC1D /* ktx.cpp in Sources */,
 				3D8681271965B0C0008B8929 /* text_parser.cpp in Sources */,
 				F22AD9FF16946EC000B01B4A /* mesh.cpp in Sources */,
@@ -892,6 +903,7 @@
 				F259325115D858140092C7D8 /* plain_file_log.cpp in Sources */,
 				F259325315D858140092C7D8 /* stdout_log.cpp in Sources */,
 				3D942ABE1A8109760078DC1D /* ktx.cpp in Sources */,
+				F5BCA1A01AA6E5ED00EEBEAC /* math_expr_parser.cpp in Sources */,
 				3D8681261965B0C0008B8929 /* text_parser.cpp in Sources */,
 				F259325515D858140092C7D8 /* memory.cpp in Sources */,
 				F259325815D858140092C7D8 /* tmp_buffer.cpp in Sources */,
