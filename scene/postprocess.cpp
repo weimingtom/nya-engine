@@ -263,8 +263,8 @@ void postprocess::update()
     m_targets.resize(1);
     m_targets.back().rect.width=m_width,m_targets.back().rect.height=m_height;
     m_targets.back().fbo=nya_memory::shared_ptr<nya_render::fbo>(nya_render::fbo());
-    typedef std::map<std::string,size_t> targets_map;
-    targets_map targets;
+    textures_map targets;
+    textures_map current_tex;
 
     for(int i=0;i<(int)m_shared->lines.size();++i)
     {
@@ -404,7 +404,7 @@ void postprocess::update()
         {
             m_op.resize(m_op.size()+1);
             m_op.back().type=type_set_target;
-            targets_map::const_iterator it=targets.find(l.name);
+            textures_map::const_iterator it=targets.find(l.name);
             m_op.back().idx=it==targets.end()?0:it->second;
         }
         else if(l.type=="set_texture")
@@ -416,9 +416,7 @@ void postprocess::update()
             if(it==m_textures_map.end())
                 continue; //ToDo: create texture and function get_texture
 
-            op_set_texture &o=add_op(m_op,m_op_set_texture,type_set_texture);
-            o.tex_idx=it->second;
-            o.layer=0;
+            current_tex[l.name]=it->second;
         }
         else if(l.type=="clear")
         {
@@ -436,13 +434,22 @@ void postprocess::update()
         }
         else if(l.type=="draw_quad")
         {
-            m_op.resize(m_op.size()+1);
-            m_op.back().type=type_draw_quad;
-
             if(m_op_set_shader.empty())
                 continue;
 
-            //ToDo: update texture slots
+            for(textures_map::const_iterator it=current_tex.begin();it!=current_tex.end();++it)
+            {
+                const int idx=m_op_set_shader.back().sh.internal().get_texture_slot(it->first.c_str());
+                if(idx<0)
+                    continue;
+
+                op_set_texture &o=add_op(m_op,m_op_set_texture,type_set_texture);
+                o.tex_idx=it->second;
+                o.layer=idx;
+            }
+
+            m_op.resize(m_op.size()+1);
+            m_op.back().type=type_draw_quad;
         }
         else
             log()<<"postprocess: unknown operation "<<l.type<<" in file "<<m_shared.get_name()<<"\n";
