@@ -105,9 +105,13 @@ private:
 
     std::vector<op_set_shader> m_op_set_shader;
 
-    typedef std::map<std::string,size_t> textures_map;
-    textures_map m_textures_map;
-    std::vector<nya_scene::texture> m_textures;
+    struct op_set_texture
+    {
+        size_t tex_idx;
+        int layer;
+    };
+
+    std::vector<op_set_texture> m_op_set_texture;
 
     struct op_target
     {
@@ -116,6 +120,10 @@ private:
     };
 
     std::vector<op_target> m_targets;
+
+    typedef std::map<std::string,size_t> textures_map;
+    textures_map m_textures_map;
+    std::vector<nya_scene::texture> m_textures;
 };
 
 }

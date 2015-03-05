@@ -56,8 +56,11 @@ void postprocess::draw(int dt)
                 break;
 
             case type_set_texture:
-                textures_set.push_back(idx);
-                m_textures[idx].internal().set(); //ToDo: layer
+                {
+                    const size_t tex_idx=m_op_set_texture[idx].tex_idx;
+                    textures_set.push_back(tex_idx);
+                    m_textures[tex_idx].internal().set(m_op_set_texture[idx].layer);
+                }
                 break;
 
             case type_clear:
@@ -79,7 +82,7 @@ void postprocess::draw(int dt)
     nya_scene::shader_internal::unset();
     nya_render::fbo::unbind();
     for(size_t i=0;i<textures_set.size();++i)
-        m_textures[i].internal().unset();
+        m_textures[textures_set[i]].internal().unset();
 }
 
 bool postprocess::load_text(shared_postprocess &res,resource_data &data,const char* name)
@@ -413,9 +416,9 @@ void postprocess::update()
             if(it==m_textures_map.end())
                 continue; //ToDo: create texture and function get_texture
 
-            m_op.resize(m_op.size()+1);
-            m_op.back().type=type_set_texture;
-            m_op.back().idx=it->second;
+            op_set_texture &o=add_op(m_op,m_op_set_texture,type_set_texture);
+            o.tex_idx=it->second;
+            o.layer=0;
         }
         else if(l.type=="clear")
         {
@@ -435,6 +438,11 @@ void postprocess::update()
         {
             m_op.resize(m_op.size()+1);
             m_op.back().type=type_draw_quad;
+
+            if(m_op_set_shader.empty())
+                continue;
+
+            //ToDo: update texture slots
         }
         else
             log()<<"postprocess: unknown operation "<<l.type<<" in file "<<m_shared.get_name()<<"\n";
