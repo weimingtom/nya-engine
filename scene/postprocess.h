@@ -44,6 +44,12 @@ public:
     void set_condition(const char *condition,bool value);
     bool get_condition(const char *condition) const;
 
+    void set_variable(const char *name,float value);
+    float get_variable(const char *name) const;
+
+    void set_shader_param(const char *name,const nya_math::vec4 &value);
+    const nya_math::vec4 &get_shader_param(const char *name) const;
+
 public:
     postprocess(): m_width(0),m_height(0) { default_load_function(load_text); }
     ~postprocess() { unload(); }
@@ -53,14 +59,17 @@ public:
 
 private:
     void update();
+    void update_shader_param(int idx);
     void clear_ops();
 
 private:
     unsigned int m_width;
     unsigned int m_height;
     nya_memory::shared_ptr<nya_render::screen_quad> m_quad;
-    typedef std::map<std::string,bool> conditions_map;
-    conditions_map m_conditions;
+
+    std::vector<std::pair<std::string,bool> > m_conditions;
+    std::vector<std::pair<std::string,float> > m_variables;
+    std::vector<std::pair<std::string,nya_math::vec4> > m_shader_params;
 
     enum op_types
     {
@@ -91,6 +100,7 @@ private:
     struct op_set_shader
     {
         nya_scene::shader sh;
+        std::vector<int> params_map;
     };
 
     std::vector<op_set_shader> m_op_set_shader;

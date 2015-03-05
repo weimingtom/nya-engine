@@ -3,6 +3,7 @@
 #include "postprocess.h"
 #include "formats/text_parser.h"
 #include "formats/math_expr_parser.h"
+#include "memory/invalid_object.h"
 #include "scene.h"
 
 namespace nya_scene
@@ -13,18 +14,9 @@ bool postprocess::load(const char *name)
     if(!scene_shared::load(name))
         return false;
 
-    for(int i=0;i<(int)m_shared->lines.size();++i)
-    {
-        const shared_postprocess::line &l=m_shared->lines[i];
-        if(l.type=="if" || l.type=="elif" || l.type=="else_if")
-            m_conditions[l.name]=false;
-    }
-
     m_quad=nya_memory::shared_ptr<nya_render::screen_quad>(nya_render::screen_quad());
     m_quad->init();
-
     update();
-
     return true;
 }
 
@@ -47,6 +39,15 @@ void postprocess::draw(int dt)
         {
             case type_set_shader:
                 m_op_set_shader[idx].sh.internal().set();
+                for(int j=0;j<(int)m_op_set_shader[idx].params_map.size();++j)
+                {
+                    const int param_idx=m_op_set_shader[idx].params_map[j];
+                    if(param_idx<0)
+                        continue;
+
+                    const nya_math::vec4 &v=m_shader_params[param_idx].second;
+                    m_op_set_shader[idx].sh.internal().set_uniform_value(j,v.x,v.y,v.z,v.w);
+                }
                 break;
 
             case type_set_target:
@@ -112,14 +113,19 @@ void postprocess::set_condition(const char *condition,bool value)
     if(!condition)
         return;
 
-    conditions_map::iterator it=m_conditions.find(condition);
-    if(it==m_conditions.end())
-        return;
+    for(size_t i=0;i<m_conditions.size();++i)
+    {
+        if(m_conditions[i].first==condition)
+        {
+            m_conditions[i].second=value;
+            update();
+            return;
+        }
+    }
 
-    if(it->second==value)
-        return;
-
-    it->second=value;
+    m_conditions.resize(m_conditions.size()+1);
+    m_conditions.back().first=condition;
+    m_conditions.back().second=value;
     update();
 }
 
@@ -128,11 +134,110 @@ bool postprocess::get_condition(const char *condition) const
     if(!condition)
         return false;
 
-    conditions_map::const_iterator it=m_conditions.find(condition);
-    if(it==m_conditions.end())
-        return false;
+    for(size_t i=0;i<m_conditions.size();++i)
+    {
+        if(m_conditions[i].first==condition)
+            return m_conditions[i].second;
+    }
 
-    return it->second;
+    return false;
+}
+
+void postprocess::set_variable(const char *name,float value)
+{
+    if(!name)
+        return;
+
+    for(size_t i=0;i<m_variables.size();++i)
+    {
+        if(m_variables[i].first==name)
+        {
+            m_variables[i].second=value;
+            update();
+            return;
+        }
+    }
+
+    m_variables.resize(m_variables.size()+1);
+    m_variables.back().first=name;
+    m_variables.back().second=value;
+    update();
+}
+
+float postprocess::get_variable(const char *name) const
+{
+    if(!name)
+        return 0.0f;
+
+    for(size_t i=0;i<m_conditions.size();++i)
+    {
+        if(m_conditions[i].first==name)
+            return m_conditions[i].second;
+    }
+    
+    return 0.0f;
+}
+
+void postprocess::set_shader_param(const char *name,const nya_math::vec4 &value)
+{
+    if(!name)
+        return;
+
+    for(int i=0;i<(int)m_shader_params.size();++i)
+    {
+        if(m_shader_params[i].first==name)
+        {
+            m_shader_params[i].second=value;
+            update_shader_param(i);
+            return;
+        }
+    }
+
+    const int idx=(int)m_shader_params.size();
+    m_shader_params.resize(idx+1);
+    m_shader_params.back().first=name;
+    m_shader_params.back().second=value;
+    update_shader_param(idx);
+    update();
+}
+
+void postprocess::update_shader_param(int param_idx)
+{
+    if(param_idx<0 || param_idx>=(int)m_shader_params.size())
+        return;
+
+    for(size_t i=0;i<m_op_set_shader.size();++i)
+    {
+        int idx=-1;
+        for(int j=0;j<m_op_set_shader[i].sh.internal().get_uniforms_count();++j)
+        {
+            if(m_op_set_shader[i].sh.internal().get_uniform(j).name!=m_shader_params[param_idx].first)
+                continue;
+
+            idx=j;
+            break;
+        }
+
+        if(idx<0)
+            continue;
+
+        m_op_set_shader[i].params_map.resize(m_op_set_shader[i].sh.internal().get_uniforms_count(),-1);
+        m_op_set_shader[i].params_map[idx]=param_idx;
+    }
+}
+
+const nya_math::vec4 &postprocess::get_shader_param(const char *name) const
+{
+    if(!name)
+        return nya_memory::get_invalid_object<nya_math::vec4>();
+
+    for(size_t i=0;i<m_shader_params.size();++i)
+    {
+        if(m_shader_params[i].first==name)
+            return m_shader_params[i].second;
+    }
+
+    return nya_memory::get_invalid_object<nya_math::vec4>();
 }
 
 template <typename op_t,typename t,typename op_e> t &add_op(op_t &ops,std::vector<t> &spec_ops,op_e type)
@@ -165,7 +270,7 @@ void postprocess::update()
         if(l.type=="if")
         {
             ifs.resize(ifs.size()+1);
-            ifs.back().first=ifs.back().second=m_conditions[l.name];
+            ifs.back().first=ifs.back().second=get_condition(l.name.c_str());
             continue;
         }
         else if(l.type=="else")
@@ -193,7 +298,7 @@ void postprocess::update()
                 continue;
             }
 
-            ifs.back().second=m_conditions[l.name];
+            ifs.back().second=get_condition(l.name.c_str());
             if(ifs.back().second)
                 ifs.back().first=true;
             continue;
@@ -229,8 +334,11 @@ void postprocess::update()
             const char *width=l.get_value("width"),*height=l.get_value("height");
 
             nya_formats::math_expr_parser p;
-            p.set_var("width",m_width);
-            p.set_var("height",m_height);
+            p.set_var("screen_width",m_width);
+            p.set_var("screen_height",m_height);
+            for(size_t i=0;i<m_variables.size();++i)
+                p.set_var(m_conditions[i].first.c_str(),m_conditions[i].second);
+
             const unsigned int w=p.parse(width)?(unsigned int)p.calculate():m_width;
             const unsigned int h=p.parse(height)?(unsigned int)p.calculate():m_height;
 
@@ -331,6 +439,9 @@ void postprocess::update()
         else
             log()<<"postprocess: unknown operation "<<l.type<<" in file "<<m_shared.get_name()<<"\n";
     }
+
+    for(int i=0;i<(int)m_shader_params.size();++i)
+        update_shader_param(i);
 }
 
 void postprocess::unload()
