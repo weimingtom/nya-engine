@@ -633,7 +633,7 @@ bool shader_code_parser::replace_hlsl_mul(const char *func_name)
         if(end_pos2)
             var.resize(end_pos2);
         remove_var_spaces(var);
-        matrices[var]=std::pair<size_t,size_t>(end_pos,std::string::npos); //ToDo: find right scope border
+        matrices[var]=std::make_pair(end_pos,std::string::npos); //ToDo: find right scope border
     }
 
     bool result=false;
