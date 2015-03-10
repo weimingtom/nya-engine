@@ -312,6 +312,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\formats\dds.cpp" />
     <ClCompile Include="..\..\formats\ktx.cpp" />
+    <ClCompile Include="..\..\formats\math_expr_parser.cpp" />
     <ClCompile Include="..\..\formats\nms.cpp" />
     <ClCompile Include="..\..\formats\string_convert.cpp" />
     <ClCompile Include="..\..\formats\text_parser.cpp" />
@@ -374,6 +375,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\formats\dds.h" />
     <ClInclude Include="..\..\formats\ktx.h" />
+    <ClInclude Include="..\..\formats\math_expr_parser.h" />
     <ClInclude Include="..\..\formats\nms.h" />
     <ClInclude Include="..\..\formats\string_convert.h" />
     <ClInclude Include="..\..\formats\text_parser.h" />

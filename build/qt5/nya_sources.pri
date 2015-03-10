@@ -10,6 +10,8 @@ QMAKE_OBJECTIVE_CXXFLAGS_WARN_ON = -Wall -Wno-unused-parameter -Wno-reorder
 
 SOURCES += \
     $${NYA_ENGINE_PATH}/formats/dds.cpp \
+    $${NYA_ENGINE_PATH}/formats/ktx.cpp \
+    $${NYA_ENGINE_PATH}/formats/math_expr_parser.cpp \
     $${NYA_ENGINE_PATH}/formats/nms.cpp \
     $${NYA_ENGINE_PATH}/formats/string_convert.cpp \
     $${NYA_ENGINE_PATH}/formats/text_parser.cpp \
@@ -44,6 +46,7 @@ SOURCES += \
     $${NYA_ENGINE_PATH}/scene/camera.cpp \
     $${NYA_ENGINE_PATH}/scene/material.cpp \
     $${NYA_ENGINE_PATH}/scene/mesh.cpp \
+    $${NYA_ENGINE_PATH}/scene/postprocess.cpp \
     $${NYA_ENGINE_PATH}/scene/scene.cpp \
     $${NYA_ENGINE_PATH}/scene/shader.cpp \
     $${NYA_ENGINE_PATH}/scene/texture.cpp \
@@ -64,6 +67,8 @@ macx: SOURCES -= $${NYA_ENGINE_PATH}/render/platform_specific_gl.cpp
 
 HEADERS += \
     $${NYA_ENGINE_PATH}/formats/dds.h \
+    $${NYA_ENGINE_PATH}/formats/ktx.h \
+    $${NYA_ENGINE_PATH}/formats/math_expr_parser.h \
     $${NYA_ENGINE_PATH}/formats/nms.h \
     $${NYA_ENGINE_PATH}/formats/string_convert.h \
     $${NYA_ENGINE_PATH}/formats/text_parser.h \
@@ -111,6 +116,7 @@ HEADERS += \
     $${NYA_ENGINE_PATH}/scene/camera.h \
     $${NYA_ENGINE_PATH}/scene/material.h \
     $${NYA_ENGINE_PATH}/scene/mesh.h \
+    $${NYA_ENGINE_PATH}/scene/postprocess.h \
     $${NYA_ENGINE_PATH}/scene/proxy.h \
     $${NYA_ENGINE_PATH}/scene/scene.h \
     $${NYA_ENGINE_PATH}/scene/shader.h \
