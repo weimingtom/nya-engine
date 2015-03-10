@@ -113,6 +113,9 @@
       <Filter>scene</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\scene\mesh.cpp">
+        <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\scene\postprocess.cpp">
       <Filter>scene</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\log\plain_file_log.cpp">
@@ -311,6 +314,9 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\scene\mesh.h">
       <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\scene\postprocess.h">
+        <Filter>log</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\log\plain_file_log.h">
       <Filter>log</Filter>

@@ -52,6 +52,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\scene\camera.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\scene\material.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\scene\mesh.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\scene\postprocess.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\scene\scene.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\scene\shader.cpp">
       <ObjectFileName>$(IntDir)scene\</ObjectFileName>
@@ -125,6 +126,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\scene\camera.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\scene\material.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\scene\mesh.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\scene\postprocess.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\scene\proxy.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\scene\scene.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\scene\shader.h" />
