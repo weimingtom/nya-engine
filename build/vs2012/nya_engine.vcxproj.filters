@@ -171,6 +171,9 @@
     <ClCompile Include="..\..\formats\ktx.cpp">
       <Filter>formats</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\scene\postprocess.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\log\log.h">
@@ -373,6 +376,9 @@
     </ClInclude>
     <ClInclude Include="..\..\system\app_internal.h">
       <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\scene\postprocess.h">
+      <Filter>scene</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

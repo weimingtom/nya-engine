@@ -349,6 +349,7 @@
     <ClCompile Include="..\..\scene\camera.cpp" />
     <ClCompile Include="..\..\scene\material.cpp" />
     <ClCompile Include="..\..\scene\mesh.cpp" />
+    <ClCompile Include="..\..\scene\postprocess.cpp" />
     <ClCompile Include="..\..\scene\scene.cpp" />
     <ClCompile Include="..\..\scene\shader.cpp">
       <ObjectFileName>$(IntDir)scene\</ObjectFileName>
@@ -421,6 +422,7 @@
     <ClInclude Include="..\..\scene\camera.h" />
     <ClInclude Include="..\..\scene\material.h" />
     <ClInclude Include="..\..\scene\mesh.h" />
+    <ClInclude Include="..\..\scene\postprocess.h" />
     <ClInclude Include="..\..\scene\proxy.h" />
     <ClInclude Include="..\..\scene\scene.h" />
     <ClInclude Include="..\..\scene\shader.h" />
