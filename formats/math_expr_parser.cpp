@@ -165,7 +165,14 @@ void math_expr_parser::add_var(const std::string &str)
 float math_expr_parser::get_value(const std::string &str) const
 {
     if(!isalpha(str.front()))
-        return strtof(str.c_str(),NULL);
+    {
+        float out=0.0f;
+        std::istringstream iss(str);
+        if(iss>>out)
+            return out;
+
+        return 0.0f;
+    }
 
     for(int i=0;i<(int)m_vars.size();++i)
     {
