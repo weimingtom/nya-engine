@@ -1,21 +1,31 @@
 //https://code.google.com/p/nya-engine/
 
-#include "log/log.h"
 #include "system/app.h"
 #include "system/system.h"
 #include "render/vbo.h"
 #include "render/shader.h"
 #include "render/render.h"
-#include "render/platform_specific_gl.h" 
 #include "system/shaders_cache_provider.h"
+#include "log/log.h"
 
-#include "stdio.h"
+#ifdef _WIN32
+  #include "render/platform_specific_gl.h" //for WINDOWS_METRO define
+#endif
+
+#include <stdio.h>
 
 class test_cube: public nya_system::app
 {
 private:
 	bool on_splash()
 	{
+        /*
+         nya_log::plain_file_log log;
+         log.open((std::string(nya_system::get_app_path())+"log.txt").c_str());
+
+         nya_log::set_log(&log);
+         */
+
 	    nya_log::log()<<"on_splash\n";
 
 		nya_render::set_clear_color(0.0f,0.6f,0.7f,1.0f);
@@ -60,12 +70,13 @@ private:
         m_vbo.set_index_data(indices,nya_render::vbo::index2b,
 			     sizeof(indices)/sizeof(unsigned short));
 
-#ifdef DIRECTX11
-        static nya_system::compiled_shaders_provider csp;
-        csp.set_load_path( nya_system::get_app_path() );
-        csp.set_save_path( nya_system::get_app_path() );
-        nya_render::set_compiled_shaders_provider( &csp );
-#endif
+        if(nya_render::get_render_api()==nya_render::render_api_directx11)
+        {
+            static nya_system::compiled_shaders_provider csp;
+            csp.set_load_path( nya_system::get_app_path() );
+            csp.set_save_path( nya_system::get_app_path() );
+            nya_render::set_compiled_shaders_provider( &csp );
+        }
 
 		const char *vs_code=
 			"varying vec4 color;"
@@ -104,11 +115,8 @@ private:
 		m_vbo.unbind();
 		m_shader.unbind();
 
-	    static unsigned int fps_counter=0;
-	    static unsigned int fps_update_timer=0;
-
+	    static unsigned int fps_counter=0,fps_update_timer=0;
 	    ++fps_counter;
-
 	    fps_update_timer+=dt;
 	    if(fps_update_timer>1000)
 	    {
@@ -151,32 +159,18 @@ private:
 };
 
 #ifdef _WIN32
-    #ifdef WINDOWS_METRO
-        int main( Platform::Array<Platform::String^>^ args)
-    #else
-    	int CALLBACK WinMain(HINSTANCE,HINSTANCE,LPSTR,int)
-    #endif
+  #ifdef WINDOWS_METRO
+    int main( Platform::Array<Platform::String^>^ args)
+  #else
+    int CALLBACK WinMain(HINSTANCE,HINSTANCE,LPSTR,int)
+  #endif
 #else
 	int main(int argc, char **argv)
 #endif
 {
-    /*
-    nya_log::plain_file_log log;
-    log.open((std::string(nya_system::get_app_path())+"log.txt").c_str());
-
-    nya_log::set_log(&log);
-    */
-
-#ifndef WINDOWS_METRO
-    nya_log::log()<<"test cube started from path "
-                      <<nya_system::get_app_path()<<"\n";
-#endif
-
     test_cube app;
     app.set_title("Loading, please wait...");
     app.start_windowed(100,100,640,480,0);
-
-//  log.close();
 
     return 0;
 }
