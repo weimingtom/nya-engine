@@ -1142,7 +1142,7 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
     color_format format=m_format;
     if(format>=dxt1)
     {
-        size=m_width*m_height*4;
+        size=m_width*m_height*4*(is_cubemap()?6:1);
         format=color_bgra;
     }
 
