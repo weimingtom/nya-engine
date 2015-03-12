@@ -1061,7 +1061,7 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
         return false;
 
     const texture_obj &tex=texture_obj::get(m_tex);
-    unsigned int size=m_width*m_height*get_bpp(m_format)/8;
+    unsigned int size=m_width*m_height*get_bpp(m_format)/8*(is_cubemap()?6:1);
     if(!size)
         return false;
 
