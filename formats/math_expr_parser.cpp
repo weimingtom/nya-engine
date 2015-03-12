@@ -211,7 +211,7 @@ float math_expr_parser::calculate() const
                 case '*': result=d1*d2; break;
                 case '/': result=d1/d2; break;
                 case '^': result=powf(d1,d2); break;
-                case '%': result=int(d1)%int(d2); break;
+                case '%': result=float(int(d1)%int(d2)); break;
             }
         }
         else
