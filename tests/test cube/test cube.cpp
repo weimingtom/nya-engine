@@ -12,8 +12,6 @@
   #include "render/platform_specific_gl.h" //for WINDOWS_METRO define
 #endif
 
-#include <stdio.h>
-
 class test_cube: public nya_system::app
 {
 private:
@@ -120,9 +118,9 @@ private:
 	    fps_update_timer+=dt;
 	    if(fps_update_timer>1000)
 	    {
-            char name[255];
-            sprintf(name,"test cube %d fps",fps_counter);
-            set_title(name);
+            nya_log::memory_ostream str;
+            str<<"test cube "<<fps_counter<<" fps";
+            set_title(str.get_text());
 
             fps_update_timer%=1000;
             fps_counter=0;
