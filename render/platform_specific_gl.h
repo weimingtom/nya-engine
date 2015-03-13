@@ -56,7 +56,7 @@
         #define NO_EXTENSIONS_INIT
     #endif
 
-#elif ANDROID
+#elif __ANDROID__
     #include <GLES2/gl2.h>
     #include <GLES2/gl2ext.h>
     #define OPENGL_ES

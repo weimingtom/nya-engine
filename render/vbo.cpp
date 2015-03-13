@@ -958,7 +958,7 @@ bool vbo::get_vertex_data( nya_memory::tmp_buffer_ref &data ) const
     current_verts=-1;
 
 #ifdef OPENGL_ES
-  #ifdef ANDROID
+  #ifdef __ANDROID__
     //ToDo
     data.free();
     return false;
@@ -1005,7 +1005,7 @@ bool vbo::get_index_data( nya_memory::tmp_buffer_ref &data ) const
     current_inds=-1;
 
   #ifdef OPENGL_ES
-  #ifdef ANDROID
+  #ifdef __ANDROID__
     //ToDo
     data.free();
     return false;

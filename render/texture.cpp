@@ -365,6 +365,11 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
         return false;
     }
 
+#ifdef __ANDROID__
+    if(format==color_bgra && mip_count>1) //ToDo
+        mip_count=-1;
+#endif
+
     if(!data)
         mip_count=0;
     else if(!pot)
@@ -646,9 +651,16 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
         m_format=color_rgba;
         if(data)
         {
-            temp_buf.allocate(width*height*4*(is_cubemap?6:1));
-            bgra_to_rgba((const unsigned char *)data,(unsigned char *)temp_buf.get_data(),temp_buf.get_size());
-            data=temp_buf.get_data();
+            const size_t size=width*height*4;
+            temp_buf.allocate(size*(is_cubemap?6:1));
+
+            unsigned char *to_data=(unsigned char *)temp_buf.get_data();
+            for(int i=0;i<(is_cubemap?6:1);++i)
+            {
+                bgra_to_rgba((const unsigned char *)(data_a[i]),to_data,size);
+                data_a[i]=to_data;
+                to_data+=size;
+            }
         }
     }
   #endif
@@ -689,14 +701,10 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
     for(int j=0;j<(is_cubemap?6:1);++j)
     {
         const char *data_pointer=data_a?(const char*)data_a[j]:0;
-
         unsigned int w=width,h=height;
-
-    for(int i=0;i<(mip_count<=0?1:mip_count);++i,w=w>1?w/2:1,h=h>1?h/2:1)
-    {
-
+        for(int i=0;i<(mip_count<=0?1:mip_count);++i,w=w>1?w/2:1,h=h>1?h/2:1)
+        {
             const int gl_type=is_cubemap?cube_faces[j]:GL_TEXTURE_2D;
-
             unsigned int size=0;
             if(format<dxt1)
             {

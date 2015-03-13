@@ -894,7 +894,7 @@ private:
 
 }
   #endif
-#elif ANDROID //unimplemented
+#elif __ANDROID__ //unimplemented
 
 class shared_app
 {
