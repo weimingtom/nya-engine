@@ -34,7 +34,7 @@ namespace
 {
     compiled_shaders_provider *render_csp=0;
     int current_shader=-1,active_shader=-1;
-    bool shaders_validation=true;
+    bool shaders_validation=false;
 
     struct shader_obj
     {

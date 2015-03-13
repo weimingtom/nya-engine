@@ -475,7 +475,7 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
     nya_memory::tmp_buffer_ref buf_rgb;
     nya_memory::tmp_buffer_ref buf_mip;
 
-    if((format==color_rgb || format==greyscale) && data)
+    if((format==color_rgb || format==greyscale) && data) //ToDo: mipmaps
     {
         buf_rgb.allocate(srdata[0].SysMemPitch*height);
         srdata[0].pSysMem=buf_rgb.get_data();
