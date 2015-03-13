@@ -337,9 +337,9 @@ void dds::decode_dxt(void *decoded_data) const
     const char* src_buf=(char *)data;
     const uint bpb=pf==dxt1?8:16;
 
-    for(uint i=0,w=width,h=height;i<mipmap_count;++i,w>1?w/=2:w=1,h>1?h/=2:h=1)
+    for(int f=0;f<(type==texture_cube?6:1);++f)
     {
-        for(int f=0;f<(type==texture_cube?6:1);++f)
+        for(uint i=0,w=width,h=height;i<mipmap_count;++i,w>1?w/=2:w=1,h>1?h/=2:h=1)
         {
             for(uint y=0;y<h;y+=4) for(uint x=0;x<w;x+=4)
             {

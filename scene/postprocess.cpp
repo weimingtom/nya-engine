@@ -337,8 +337,8 @@ void postprocess::update()
             const char *width=l.get_value("width"),*height=l.get_value("height");
 
             nya_formats::math_expr_parser p;
-            p.set_var("screen_width",m_width);
-            p.set_var("screen_height",m_height);
+            p.set_var("screen_width",float(m_width));
+            p.set_var("screen_height",float(m_height));
             for(size_t i=0;i<m_variables.size();++i)
                 p.set_var(m_conditions[i].first.c_str(),m_conditions[i].second);
 
