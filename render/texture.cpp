@@ -688,7 +688,7 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
 
     for(int j=0;j<(is_cubemap?6:1);++j)
     {
-        const char *data_pointer=(const char*)data_a[j];
+        const char *data_pointer=data_a?(const char*)data_a[j]:0;
 
         unsigned int w=width,h=height;
 
