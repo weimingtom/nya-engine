@@ -176,7 +176,7 @@ bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
             const void *data[6];
             for(int i=0;i<6;++i)
                 data[i]=(const char *)dds.data+i*dds.data_size/6;
-            result=res.tex.build_cubemap(data,dds.width,dds.height,cf);
+            result=res.tex.build_cubemap(data,dds.width,dds.height,cf,mipmap_count);
         }
         break;
 

@@ -6,8 +6,6 @@
 
 #include "memory/tmp_buffer.h"
 
-//ToDo: mipmaps and dxt support for cubemaps
-
 namespace nya_render
 {
 
@@ -328,7 +326,8 @@ void bgra_to_rgba(const unsigned char *from,unsigned char *to,size_t data_size)
 
 }
 
-bool texture::build_texture(const void *data,unsigned int width,unsigned int height,color_format format,int mip_count,unsigned int mip_padding)
+bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int width,unsigned int height,
+                            color_format format,int mip_count,unsigned int mip_padding)
 {
     if(width==0 || height==0)
     {
@@ -336,6 +335,11 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         release();
         return false;
     }
+
+    if(is_cubemap && width!=height)
+        return false;
+
+    const void *data=data_a?data_a[0]:0;
 
     if(format>=dxt1)
     {
@@ -388,31 +392,34 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     desc.MipLevels=mip_count?mip_count:1;
     if(need_generate_mips)
         desc.MipLevels=get_tex_mips_count(width,height);
-    desc.ArraySize=1;
+    desc.ArraySize=is_cubemap?6:1;
 
-    std::vector<D3D11_SUBRESOURCE_DATA> srdata(desc.MipLevels);
-    for(auto &l:srdata)
+    std::vector<D3D11_SUBRESOURCE_DATA> srdata(desc.MipLevels*desc.ArraySize);
+    for(unsigned int f=0,s=0;f<desc.ArraySize;++f)
     {
-        l.pSysMem=data;
-        l.SysMemPitch=width*(format==dxt1?2:4);
-        l.SysMemSlicePitch=0;
-    }
-
-    if(!need_generate_mips && mip_count>1)
-    {
-        const char *mem_data=(const char *)data;
-        for(int i=0,w=width,h=height;i<(mip_count<=0?1:mip_count);++i,w=w>1?w/2:1,h=h>1?h/2:1)
+        for(auto &l:srdata)
         {
-            srdata[i].pSysMem=mem_data;
-            if(format==dxt1 || format==dxt3 || format==dxt5)
+            l.pSysMem=data_a?data_a[f]:0;;
+            l.SysMemPitch=width*(format==dxt1?2:4);
+            l.SysMemSlicePitch=0;
+        }
+
+        if(!need_generate_mips && mip_count>1)
+        {
+            const char *mem_data=(const char *)(data_a?data_a[f]:0);
+            for(int i=0,w=width,h=height;i<(mip_count<=0?1:mip_count);++i,w=w>1?w/2:1,h=h>1?h/2:1,++s)
             {
-                srdata[i].SysMemPitch=(w>4?w:4)/4 * get_bpp(format)*2;
-                mem_data+=(h>4?h:4)/4 * srdata[i].SysMemPitch+mip_padding;
-            }
-            else
-            {
-                srdata[i].SysMemPitch=w*4;
-                mem_data+=srdata[i].SysMemPitch*h+mip_padding;
+                srdata[s].pSysMem=mem_data;
+                if(format==dxt1 || format==dxt3 || format==dxt5)
+                {
+                    srdata[s].SysMemPitch=(w>4?w:4)/4 * get_bpp(format)*2;
+                    mem_data+=(h>4?h:4)/4 * srdata[s].SysMemPitch+mip_padding;
+                }
+                else
+                {
+                    srdata[s].SysMemPitch=w*4;
+                    mem_data+=srdata[s].SysMemPitch*h+mip_padding;
+                }
             }
         }
     }
@@ -453,16 +460,24 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
     if(need_generate_mips)
         desc.MiscFlags=D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
+    if(is_cubemap)
+        desc.MiscFlags|=D3D11_RESOURCE_MISC_TEXTURECUBE;
+
     //desc.MiscFlags=D3D11_RESOURCE_MISC_GDI_COMPATIBLE;
+
+    ID3D11Texture2D *tex=0;
 
     nya_memory::tmp_buffer_ref buf_rgb;
     nya_memory::tmp_buffer_ref buf_mip;
 
-    ID3D11Texture2D *tex=0;
     if((format==color_rgb || format==greyscale) && data)
     {
         buf_rgb.allocate(srdata[0].SysMemPitch*height);
         srdata[0].pSysMem=buf_rgb.get_data();
+
+        if(is_cubemap)
+            return false; //ToDo
+
         dx_convert_to_format((unsigned char *)data,(unsigned char *)buf_rgb.get_data(),height*width,format);
     }
 
@@ -594,10 +609,10 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         return false;
     }
 
-    //bool create_new=(!m_tex_id || m_width!=width || m_height!=height || m_type!=texture_2d || m_format!=format);
-
     if(m_tex<0)
         m_tex=texture_obj::add();
+
+    const int gl_type=is_cubemap?GL_TEXTURE_CUBE_MAP:GL_TEXTURE_2D;
 
     bool need_create=m_width!=width || m_height!=height || m_format!=format;
     if(!texture_obj::get(m_tex).tex_id)
@@ -605,7 +620,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         glGenTextures(1,&texture_obj::get(m_tex).tex_id);
         need_create=true;
     }
-    else if(texture_obj::get(m_tex).gl_type!=GL_TEXTURE_2D)
+    else if(texture_obj::get(m_tex).gl_type!=gl_type)
     {
         glDeleteTextures(1,&texture_obj::get(m_tex).tex_id);
         glGenTextures(1,&texture_obj::get(m_tex).tex_id);
@@ -614,7 +629,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 
     m_width=width;
     m_height=height;
-    texture_obj::get(m_tex).gl_type=GL_TEXTURE_2D;
+    texture_obj::get(m_tex).gl_type=gl_type;
     m_format=format;
 
 #ifdef OPENGL_ES
@@ -631,7 +646,7 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
         m_format=color_rgba;
         if(data)
         {
-            temp_buf.allocate(width*height*4);
+            temp_buf.allocate(width*height*4*(is_cubemap?6:1));
             bgra_to_rgba((const unsigned char *)data,(unsigned char *)temp_buf.get_data(),temp_buf.get_size());
             data=temp_buf.get_data();
         }
@@ -641,363 +656,105 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 
     if(active_layers[active_layer]>=0)
     {
-        if(texture_obj::get(active_layers[active_layer]).gl_type!=GL_TEXTURE_2D)
+        if(texture_obj::get(active_layers[active_layer]).gl_type!=gl_type)
             glBindTexture(texture_obj::get(active_layers[active_layer]).gl_type,0);
     }
 
-    glBindTexture(GL_TEXTURE_2D,texture_obj::get(m_tex).tex_id);
+    glBindTexture(gl_type,texture_obj::get(m_tex).tex_id);
     active_layers[active_layer]=-1;
 
     if(!pot) gl_setup_pack_alignment();
-    gl_setup_texture(GL_TEXTURE_2D,!pot && !is_platform_restrictions_ignored(),has_mipmap);
+    gl_setup_texture(gl_type,!pot && !is_platform_restrictions_ignored(),has_mipmap);
 
     if(is_pvrtc)
-        gl_setup_filtration(GL_TEXTURE_2D,has_mipmap,filter_linear,filter_linear,filter_nearest);
+        gl_setup_filtration(gl_type,has_mipmap,filter_linear,filter_linear,filter_nearest);
 
 #ifdef OPENGL3
     if(format==greyscale)
     {
         const int swizzle[]={GL_RED,GL_RED,GL_RED,GL_ONE};
-        glTexParameteriv(GL_TEXTURE_2D,GL_TEXTURE_SWIZZLE_RGBA,swizzle);
+        glTexParameteriv(gl_type,GL_TEXTURE_SWIZZLE_RGBA,swizzle);
     }
 #endif
 
 #ifndef OPENGL_ES
     if(mip_count>1) //is_platform_restrictions_ignored() &&
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAX_LEVEL,mip_count-1);
+        glTexParameteri(gl_type,GL_TEXTURE_MAX_LEVEL,mip_count-1);
 #endif
 
   #ifdef GL_GENERATE_MIPMAP
-    if(has_mipmap && mip_count<0) glTexParameteri(GL_TEXTURE_2D,GL_GENERATE_MIPMAP,GL_TRUE);
+    if(has_mipmap && mip_count<0) glTexParameteri(gl_type,GL_GENERATE_MIPMAP,GL_TRUE);
   #endif
-    unsigned int w=width,h=height;
-    const char *data_pointer=(const char*)data;
+
+    for(int j=0;j<(is_cubemap?6:1);++j)
+    {
+        const char *data_pointer=(const char*)data_a[j];
+
+        unsigned int w=width,h=height;
+
     for(int i=0;i<(mip_count<=0?1:mip_count);++i,w=w>1?w/2:1,h=h>1?h/2:1)
     {
-        unsigned int size=0;
-        if(format<dxt1)
-        {
-            size=w*h*(source_bpp/8);
-            if(need_create)
-                glTexImage2D(GL_TEXTURE_2D,i,source_format,w,h,0,gl_format,precision,data_pointer);
-            else
-                glTexSubImage2D(GL_TEXTURE_2D,i,0,0,w,h,gl_format,precision,data_pointer);
-        }
-        else
-        {
-            if(is_pvrtc)
-            {
-                if(format==pvr_rgb2b || format==pvr_rgba2b)
-                    size=((w>16?w:16)*(h>8?h:8)*2 + 7)/8;
-                else
-                    size=((w>8?w:8)*(h>8?h:8)*4 + 7)/8;
 
-                if(size<32)
-                    break;
+            const int gl_type=is_cubemap?cube_faces[j]:GL_TEXTURE_2D;
+
+            unsigned int size=0;
+            if(format<dxt1)
+            {
+                size=w*h*(source_bpp/8);
+                if(need_create || is_cubemap)
+                    glTexImage2D(gl_type,i,source_format,w,h,0,gl_format,precision,data_pointer);
+                else
+                    glTexSubImage2D(gl_type,i,0,0,w,h,gl_format,precision,data_pointer);
             }
             else
-                size=(w>4?w:4)/4 * (h>4?h:4)/4 * source_bpp*2;
+            {
+                if(is_pvrtc)
+                {
+                    if(format==pvr_rgb2b || format==pvr_rgba2b)
+                        size=((w>16?w:16)*(h>8?h:8)*2 + 7)/8;
+                    else
+                        size=((w>8?w:8)*(h>8?h:8)*4 + 7)/8;
 
-            glCompressedTexImage2D(GL_TEXTURE_2D,i,gl_format,w,h,0,size,data_pointer);
+                    if(size<32)
+                        break;
+                }
+                else
+                    size=(w>4?w:4)/4 * (h>4?h:4)/4 * source_bpp*2;
+
+                glCompressedTexImage2D(gl_type,i,gl_format,w,h,0,size,data_pointer);
+            }
+
+            data_pointer+=(size+mip_padding);
         }
-
-        data_pointer+=(size+mip_padding);
     }
 
-    //    glTexSubImage2D(GL_TEXTURE_2D,0,0,0,width,height,gl_format,precision,data);
   #ifndef GL_GENERATE_MIPMAP
-    if(has_mipmap && mip_count<0) glGenerateMipmap(GL_TEXTURE_2D);
+    if(has_mipmap && mip_count<0) glGenerateMipmap(gl_type);
   #endif
 
   #ifdef __ANDROID__
     temp_buf.free();
   #endif
-    glBindTexture(GL_TEXTURE_2D,0);
+    glBindTexture(gl_type,0);
 #endif
 
-    texture_obj::get(m_tex).size=get_tex_memory_size(m_width,m_height,m_format,mip_count);
-    texture_obj::get(m_tex).is_cubemap=false;
+    texture_obj::get(m_tex).size=get_tex_memory_size(m_width,m_height,m_format,mip_count)*(is_cubemap?6:1);
+    texture_obj::get(m_tex).is_cubemap=is_cubemap;
     texture_obj::get(m_tex).has_mipmaps=has_mipmap;
 
     return true;
 }
 
-bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int height,color_format format)
+bool texture::build_texture(const void *data,unsigned int width,unsigned int height,color_format format,int mip_count,unsigned int mip_padding)
 {
-    if(width==0 || height==0)
-    {
-        log()<<"Unable to build cube texture: invalid width/height\n";
-        release();
-        return false;
-    }
+    const void *data_a[6]={data};
 
-    const bool is_dxt=(format==dxt1 || format==dxt3 || format==dxt5);
-    if(is_dxt)
-    {
-        if(!data)// || mip_count==0) //ToDo
-        {
-            log()<<"Unable to build cube texture: dxt format with invalid data\n";
-            return false;
-        }
-
-        OPENGL_ONLY(if(!init_compressed_extension()) return false;);
-    }
-
-    const bool pot=((width&(width-1))==0 && (height&(height-1))==0);
-    const bool has_mipmap=(data && pot);
-
-#ifdef DIRECTX11
-    if(!get_device())
-    {
-        log()<<"Unable to build cube texture: invalid directx device, use nya_render::set_device()\n";
-        return false;
-    }
-
-    if(m_tex>=0)
-        release();
-
-    D3D11_TEXTURE2D_DESC desc;
-    memset(&desc,0,sizeof(desc));
-
-    desc.Width=width;
-    desc.Height=height;
-    desc.MipLevels=1;
-    desc.ArraySize=6;
-
-    D3D11_SUBRESOURCE_DATA srdata;
-    srdata.pSysMem=data?data[0]:0;
-    srdata.SysMemPitch=width*(format==dxt1?2:4);
-    srdata.SysMemSlicePitch=0;
-
-    switch(format)
-    {
-        case greyscale:
-        case color_rgb:
-        case color_rgba:
-            desc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;
-        break;
-
-        case color_bgra: desc.Format=DXGI_FORMAT_B8G8R8A8_UNORM; break;
-
-        case depth16: desc.Format=DXGI_FORMAT_D16_UNORM; break;
-        case depth24: desc.Format=DXGI_FORMAT_D24_UNORM_S8_UINT; break; //ToDo if data != 0
-        case depth32: desc.Format=DXGI_FORMAT_D32_FLOAT; break;
-
-        default: log()<<"Unable to build cube texture: unsupported format\n"; return false;
-    }
-
-    desc.SampleDesc.Count=1;
-    desc.Usage=D3D11_USAGE_DEFAULT;
-    desc.BindFlags=D3D11_BIND_SHADER_RESOURCE|D3D11_BIND_RENDER_TARGET;
-    if(data)
-        desc.MiscFlags=D3D11_RESOURCE_MISC_GENERATE_MIPS;
-
-    desc.MiscFlags|=D3D11_RESOURCE_MISC_TEXTURECUBE;
-
-    //desc.MiscFlags=D3D11_RESOURCE_MISC_GDI_COMPATIBLE;
-
-    D3D11_SUBRESOURCE_DATA srdatas[6];
-    for(int i=0;i<6;++i)
-    {
-        srdatas[i]=srdata;
-        srdatas[i].pSysMem=data?data[i]:0;
-    }
-
-    ID3D11Texture2D *tex=0;
-    if((format==color_rgb || format==greyscale) && data)
-    {
-        size_t size=srdata.SysMemPitch*height;
-        nya_memory::tmp_buffer_scoped buf(size*6);
-        srdata.pSysMem=buf.get_data();
-
-        unsigned char *to=(unsigned char *)buf.get_data();
-        for(int i=0;i<6;++i,to+=size)
-        {
-            dx_convert_to_format((const unsigned char *)data[i],to,height*width,format);
-            srdatas[i].pSysMem=to;
-        }
-
-        get_device()->CreateTexture2D(&desc,srdatas,&tex);
-    }
-    else
-        get_device()->CreateTexture2D(&desc,data?srdatas:0,&tex);
-
-    if(!tex)
-    {
-        log()<<"Unable to build cube texture: unable to create texture\n";
-        return false;
-    }
-
-    ID3D11ShaderResourceView *srv;
-    get_device()->CreateShaderResourceView(tex,0,&srv);
-    if(!srv)
-    {
-        log()<<"Unable to build cube texture: unable to create shader resource view\n";
-        return false;
-    }
-
-    m_tex=texture_obj::add();
-    texture_obj::get(m_tex).tex=tex;
-    texture_obj::get(m_tex).dx_format=desc.Format;
-    texture_obj::get(m_tex).srv=srv;
-
-    auto sdesc=dx_setup_filtration();
-    get_device()->CreateSamplerState(&sdesc,&texture_obj::get(m_tex).sampler_state);
-
-    m_width=width;
-    m_height=height;
-    m_format=format;
-
-#else
-    if(width>gl_get_max_tex_size() || height>gl_get_max_tex_size())
-    {
-        log()<<"Unable to build cube texture: width or height is too high, maximum is "<<gl_get_max_tex_size()<<"\n";
-        release();
-        return false;
-    }
-
-    unsigned int source_format=0;
-    unsigned int gl_format=0;
-
-    switch(format)
-    {
-        case color_rgb: source_format=GL_RGB; gl_format=GL_RGB; break;
-        case color_rgba: source_format=GL_RGBA; gl_format=GL_RGBA; break;
-#ifdef __ANDROID__
-        case color_bgra: source_format=GL_RGBA; gl_format=GL_RGBA; break;
-#else
-        case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; break;
-#endif
-        case greyscale: source_format=GL_LUMINANCE; gl_format=GL_LUMINANCE; break;
-
-        case dxt1: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT1_EXT; break;
-        case dxt3: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT3_EXT; break;
-        case dxt5: source_format=gl_format=GL_COMPRESSED_RGBA_S3TC_DXT5_EXT; break;
-
-        default: log()<<"Unable to build texture: unsupported format\n"; break;
-    };
-
-    if(!source_format || !gl_format)
-    {
-        log()<<"Unable to build cube texture: unsuppored color format\n";
-        release();
-        return false;
-    }
-
-#ifdef OPENGL_ES
-    if(format==depth24)
-        format=depth32;
-
-    if(format==color_rgb)
-        format=color_rgba;
-
-  #ifdef __ANDROID__
-    const bool swap_rb=(format==color_bgra);
-    if(swap_rb)
-        format=color_rgba;
-  #endif
-
-#endif
-
-    if(m_format!=format)
-        release();
-
-    if(m_tex<0)
-        m_tex=texture_obj::add();
-
-    if(!texture_obj::get(m_tex).tex_id)
-    {
-        glGenTextures(1,&texture_obj::get(m_tex).tex_id);
-    }
-    else if(texture_obj::get(m_tex).gl_type!=GL_TEXTURE_CUBE_MAP)
-    {
-        glDeleteTextures(1,&texture_obj::get(m_tex).tex_id);
-        glGenTextures(1,&texture_obj::get(m_tex).tex_id);
-    }
-
-    m_width=width;
-    m_height=height;
-    texture_obj::get(m_tex).gl_type=GL_TEXTURE_CUBE_MAP;
-    m_format=format;
-
-    if(active_layers[active_layer]>=0)
-    {
-        if(texture_obj::get(active_layers[active_layer]).gl_type!=GL_TEXTURE_CUBE_MAP)
-            glBindTexture(texture_obj::get(active_layers[active_layer]).gl_type,0);
-    }
-
-    glBindTexture(GL_TEXTURE_CUBE_MAP,texture_obj::get(m_tex).tex_id);
-    active_layers[active_layer]=-1;
-
-    if(!pot) gl_setup_pack_alignment();
-    gl_setup_texture(GL_TEXTURE_CUBE_MAP,true,has_mipmap);
-
-#ifdef OPENGL3
-    if(format==greyscale)
-    {
-        const int swizzle[]={GL_RED,GL_RED,GL_RED,GL_ONE};
-        glTexParameteriv(GL_TEXTURE_2D,GL_TEXTURE_SWIZZLE_RGBA,swizzle);
-    }
-#endif
-
-  #ifdef GL_GENERATE_MIPMAP
-    if(has_mipmap) glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_GENERATE_MIPMAP,GL_TRUE);
-  #endif
-
-    const unsigned int source_bpp=get_bpp(format);
-    if(!source_bpp)
-    {
-        log()<<"Unable to build cube texture: unsupported bpp\n";
-        return false;
-    }
-
-    for(int i=0;i<int(sizeof(cube_faces)/sizeof(cube_faces[0]));++i)
-    {
-        if(is_dxt)
-            glCompressedTexImage2D(cube_faces[i],0,gl_format,width,height,0,width*height*source_bpp/8,data[i]);
-        else
-        {
-  #ifdef __ANDROID__
-            nya_memory::tmp_buffer_ref temp_buf;
-            if(swap_rb &&data && data[i])
-            {
-                temp_buf.allocate(width*height*4);
-                bgra_to_rgba((const unsigned char *)data[i],(unsigned char *)temp_buf.get_data(),temp_buf.get_size());
-                data[i]=temp_buf.get_data();
-            }
-  #endif
-            glTexImage2D(cube_faces[i],0,source_format,width,height,0,gl_format,GL_UNSIGNED_BYTE,data?data[i]:0);
-  #ifdef __ANDROID__
-            temp_buf.free();
-  #endif
-        }
-    }
-
-  #ifndef GL_GENERATE_MIPMAP
-    if(has_mipmap) glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-  #endif
-
-    glBindTexture(GL_TEXTURE_CUBE_MAP,0);
-#endif
-    texture_obj::get(m_tex).size=get_tex_memory_size(m_width,m_height,m_format,-1)*6;
-    texture_obj::get(m_tex).is_cubemap=true;
-    texture_obj::get(m_tex).has_mipmaps=has_mipmap;
-
-    return true;
+    return build_texture(data_a,false,width,height,format,mip_count,mip_padding);
 }
 
-bool texture::build_cubemap(const void *data,unsigned int width,unsigned int height,color_format format)
+bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int height,color_format format,int mip_count,unsigned int mip_padding)
 {
-    if(!data)
-        return build_cubemap((const void **)0,width,height,format);
-
-    unsigned int side_size=width*height*get_bpp(format)/8;
-    const char *data_ptr=(const char *)data;
-    const void *data_ptrs[6];
-    for(int i=0;i<6;++i,data_ptr+=side_size)
-        data_ptrs[i]=data_ptr;
-
-    return build_cubemap(data_ptrs,width,height,format);
+    return build_texture(data,true,width,height,format,mip_count,mip_padding);
 }
 
 void texture::bind(unsigned int layer) const { if(layer>=max_layers) return; current_layers[layer]=m_tex; }
