@@ -159,7 +159,7 @@ bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
         }
         break;
 
-        case nya_formats::dds::texture_cube: //ToDo: mipmap_count
+        case nya_formats::dds::texture_cube:
         {
             if(!nya_render::texture::is_dxt_supported())
             {

@@ -103,7 +103,7 @@ void set_viewport(int x,int y,int w,int h,bool ignore_cache)
 
 const rect &get_viewport()
 {
-    if(viewport_rect.width==viewport_rect.height)
+    if(viewport_rect.width==0 && viewport_rect.height==0)
     {
 #ifdef DIRECTX11
         //ToDo
@@ -581,7 +581,7 @@ void apply_state(bool ignore_cache)
 
 #ifdef DIRECTX11
     //ToDo: color
-    
+
     if(c.cull_order!=a.cull_order || c.cull_face!=a.cull_face || ignore_cache)
         cull_face_state.apply();
 
