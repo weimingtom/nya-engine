@@ -1,7 +1,6 @@
 //https://code.google.com/p/nya-engine/
 
 #include "math_expr_parser.h"
-
 #include <sstream>
 #include <stack>
 #include <math.h>
@@ -29,7 +28,7 @@ inline bool infix_to_rpn(const std::vector<std::string> &from,std::vector<std::s
         if(from[i].empty())
             continue;
 
-        const char c=from[i].front();
+        const char c=from[i][0];
 
         if(c=='(')
         {
@@ -108,7 +107,7 @@ bool math_expr_parser::parse(const char *expr)
         if(!str.empty())
         {
             tokens.push_back(str);
-            if(isalpha(str.front()))
+            if(isalpha(str[0]))
                 add_var(str.c_str());
             str.clear();
         }
@@ -119,7 +118,7 @@ bool math_expr_parser::parse(const char *expr)
     if(!str.empty())
     {
         tokens.push_back(str);
-        if(isalpha(str.front()))
+        if(isalpha(str[0]))
             add_var(str.c_str());
     }
 
@@ -164,7 +163,10 @@ void math_expr_parser::add_var(const std::string &str)
 
 float math_expr_parser::get_value(const std::string &str) const
 {
-    if(!isalpha(str.front()))
+    if(str.empty())
+        return 0.0;
+
+    if(!isalpha(str[0]))
     {
         float out=0.0f;
         std::istringstream iss(str);
@@ -189,7 +191,7 @@ float math_expr_parser::calculate() const
     for(size_t i=0;i<m_tokens.size();++i)
     {
         const std::string &token=m_tokens[i];
-        if(!precedence(token.front()))
+        if(!precedence(token[0]))
         {
             st.push(token);
             continue;
@@ -204,7 +206,7 @@ float math_expr_parser::calculate() const
             const float d1=get_value(st.top());
             st.pop();
 
-            switch(token.front())
+            switch(token[0])
             {
                 case '+': result=d1+d2; break;
                 case '-': result=d1-d2; break;
@@ -215,7 +217,7 @@ float math_expr_parser::calculate() const
             }
         }
         else
-            result=token.front()=='-'?-d2:d2;
+            result=token[0]=='-'?-d2:d2;
 
         std::ostringstream s;
         s<<result;
