@@ -485,8 +485,8 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
 
         for(unsigned int i=0;i<desc.ArraySize;++i)
         {
-            unsigned char *to_data=(char *)buf_rgb.get_data()+face_size*i
-            dx_convert_to_format(srdata[i].pSysMem,to_data,width*height,format);
+            unsigned char *to_data=(unsigned char *)buf_rgb.get_data()+face_size*i
+            dx_convert_to_format((unsigned char *)(srdata[i].pSysMem),to_data,width*height,format);
             srdata[i].pSysMem=to_data;
         }
     }
