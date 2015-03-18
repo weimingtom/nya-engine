@@ -401,37 +401,7 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
     if(need_generate_mips)
         desc.MipLevels=get_tex_mips_count(width,height);
     desc.ArraySize=is_cubemap?6:1;
-
-    std::vector<D3D11_SUBRESOURCE_DATA> srdata(desc.MipLevels*desc.ArraySize);
-    for(unsigned int f=0,s=0;f<desc.ArraySize;++f)
-    {
-        for(auto &l:srdata)
-        {
-            l.pSysMem=data_a?data_a[f]:0;;
-            l.SysMemPitch=width*(format==dxt1?2:4);
-            l.SysMemSlicePitch=0;
-        }
-
-        if(!need_generate_mips && mip_count>1)
-        {
-            const char *mem_data=(const char *)(data_a?data_a[f]:0);
-            for(int i=0,w=width,h=height;i<(mip_count<=0?1:mip_count);++i,w=w>1?w/2:1,h=h>1?h/2:1,++s)
-            {
-                srdata[s].pSysMem=mem_data;
-                if(format==dxt1 || format==dxt3 || format==dxt5)
-                {
-                    srdata[s].SysMemPitch=(w>4?w:4)/4 * get_bpp(format)*2;
-                    mem_data+=(h>4?h:4)/4 * srdata[s].SysMemPitch+mip_padding;
-                }
-                else
-                {
-                    srdata[s].SysMemPitch=w*4;
-                    mem_data+=srdata[s].SysMemPitch*h+mip_padding;
-                }
-            }
-        }
-    }
-
+    
     m_format=format;
 
     switch(format)
@@ -454,6 +424,37 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
         case dxt5: desc.Format=DXGI_FORMAT_BC3_UNORM; break;
 
         default: log()<<"Unable to build texture: unsupported format\n"; return false;
+    }
+
+    std::vector<D3D11_SUBRESOURCE_DATA> srdata(desc.MipLevels*desc.ArraySize);
+    for(unsigned int f=0,s=0;f<desc.ArraySize;++f)
+    {
+        for(unsigned int i=0;i<desc.MipLevels;++i)
+        {
+            auto &l=srdata[f*desc.MipLevels+i];
+            l.pSysMem=data_a?data_a[f]:0;;
+            l.SysMemPitch=width*get_bpp(m_format)/8;
+            l.SysMemSlicePitch=0;
+        }
+
+        if(!need_generate_mips && mip_count>1)
+        {
+            const char *mem_data=(const char *)(data_a?data_a[f]:0);
+            for(int i=0,w=width,h=height;i<(mip_count<=0?1:mip_count);++i,w=w>1?w/2:1,h=h>1?h/2:1,++s)
+            {
+                srdata[s].pSysMem=mem_data;
+                if(format==dxt1 || format==dxt3 || format==dxt5)
+                {
+                    srdata[s].SysMemPitch=(w>4?w:4)/4 * get_bpp(m_format)*2;
+                    mem_data+=(h>4?h:4)/4 * srdata[s].SysMemPitch+mip_padding;
+                }
+                else
+                {
+                    srdata[s].SysMemPitch=w*4;
+                    mem_data+=srdata[s].SysMemPitch*h+mip_padding;
+                }
+            }
+        }
     }
 
     desc.SampleDesc.Count=1;
@@ -486,8 +487,9 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
         for(unsigned int i=0;i<desc.ArraySize;++i)
         {
             unsigned char *to_data=(unsigned char *)buf_rgb.get_data()+face_size*i;
-            dx_convert_to_format((unsigned char *)(srdata[i].pSysMem),to_data,width*height,format);
-            srdata[i].pSysMem=to_data;
+            dx_convert_to_format((unsigned char *)(srdata[i*desc.MipLevels].pSysMem),to_data,width*height,format);
+            for(unsigned int j=0;j<desc.MipLevels;++j)
+                srdata[i*desc.MipLevels+j].pSysMem=to_data;
         }
     }
 
