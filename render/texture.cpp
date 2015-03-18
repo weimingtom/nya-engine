@@ -480,11 +480,15 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
 
     if((format==color_rgb || format==greyscale) && data) //ToDo: mipmaps
     {
-        buf_rgb.allocate(srdata[0].SysMemPitch*height*desc.ArraySize);
-        dx_convert_to_format((unsigned char *)data,(unsigned char *)buf_rgb.get_data(),width*height*desc.ArraySize,format);
+        const unsigned int face_size=srdata[0].SysMemPitch*height;
+        buf_rgb.allocate(face_size*desc.ArraySize);
 
         for(unsigned int i=0;i<desc.ArraySize;++i)
-            srdata[i].pSysMem=(char *)buf_rgb.get_data()+width*height*4*i;
+        {
+            unsigned char *to_data=(char *)buf_rgb.get_data()+face_size*i
+            dx_convert_to_format(srdata[i].pSysMem,to_data,width*height,format);
+            srdata[i].pSysMem=to_data;
+        }
     }
 
     if(need_generate_mips && width!=height && !is_platform_restrictions_ignored())
