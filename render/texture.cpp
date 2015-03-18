@@ -366,7 +366,7 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
     }
 
 #ifdef __ANDROID__
-    if(format==color_bgra && mip_count>1) //ToDo
+    if(format==color_bgra && mip_count>1 && data) //ToDo
         mip_count=-1;
 #endif
 
@@ -386,6 +386,9 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
 
     if(m_tex>=0)
         release();
+
+    if((format==color_rgb || format==greyscale) && data && mip_count>1) //ToDo
+        mip_count=-1;
 
     D3D11_TEXTURE2D_DESC desc;
     memset(&desc,0,sizeof(desc));
@@ -477,13 +480,11 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
 
     if((format==color_rgb || format==greyscale) && data) //ToDo: mipmaps
     {
-        if(is_cubemap)
-            return false; //ToDo
+        buf_rgb.allocate(srdata[0].SysMemPitch*height*desc.ArraySize);
+        dx_convert_to_format((unsigned char *)data,(unsigned char *)buf_rgb.get_data(),width*height*desc.ArraySize,format);
 
-        buf_rgb.allocate(srdata[0].SysMemPitch*height);
-        srdata[0].pSysMem=buf_rgb.get_data();
-
-        dx_convert_to_format((unsigned char *)data,(unsigned char *)buf_rgb.get_data(),height*width,format);
+        for(int i=0;i<desc.ArraySize;++i)
+            srdata[i].pSysMem=(char *)buf_rgb.get_data()+width*height*4;
     }
 
     if(need_generate_mips && width!=height && !is_platform_restrictions_ignored())
