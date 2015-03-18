@@ -483,8 +483,8 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
         buf_rgb.allocate(srdata[0].SysMemPitch*height*desc.ArraySize);
         dx_convert_to_format((unsigned char *)data,(unsigned char *)buf_rgb.get_data(),width*height*desc.ArraySize,format);
 
-        for(int i=0;i<desc.ArraySize;++i)
-            srdata[i].pSysMem=(char *)buf_rgb.get_data()+width*height*4;
+        for(unsigned int i=0;i<desc.ArraySize;++i)
+            srdata[i].pSysMem=(char *)buf_rgb.get_data()+width*height*4*i;
     }
 
     if(need_generate_mips && width!=height && !is_platform_restrictions_ignored())
