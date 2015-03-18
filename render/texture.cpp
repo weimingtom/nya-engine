@@ -477,11 +477,11 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
 
     if((format==color_rgb || format==greyscale) && data) //ToDo: mipmaps
     {
-        buf_rgb.allocate(srdata[0].SysMemPitch*height);
-        srdata[0].pSysMem=buf_rgb.get_data();
-
         if(is_cubemap)
             return false; //ToDo
+
+        buf_rgb.allocate(srdata[0].SysMemPitch*height);
+        srdata[0].pSysMem=buf_rgb.get_data();
 
         dx_convert_to_format((unsigned char *)data,(unsigned char *)buf_rgb.get_data(),height*width,format);
     }
