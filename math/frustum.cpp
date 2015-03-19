@@ -6,6 +6,12 @@
 namespace nya_math
 {
 
+aabb::aabb(const nya_math::vec3 &aabb_min,const nya_math::vec3 &aabb_max)
+{
+    delta=(aabb_max-aabb_min)*0.5f;
+    origin=aabb_min+delta;
+}
+
 aabb::aabb(const aabb &b,const vec3 &p,const quat &q,const vec3 &s)
 {
     delta.x=s.x*b.delta.x;

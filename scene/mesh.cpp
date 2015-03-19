@@ -38,8 +38,7 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size,i
     if(!c.read_header(data,size,version))
         return false;
 
-    res.aabb.delta=(c.aabb_max-c.aabb_min)*0.5f;
-    res.aabb.origin=c.aabb_min+res.aabb.delta;
+    res.aabb=nya_math::aabb(c.aabb_min,c.aabb_max);
 
     for(size_t i=0;i<c.elements.size();++i)
     {
@@ -75,8 +74,7 @@ bool mesh::load_nms_mesh_section(shared_mesh &res,const void *data,size_t size,i
 
             to.name=from.name;
 
-            to.aabb.delta=(from.aabb_max-from.aabb_min)*0.5f;
-            to.aabb.origin=from.aabb_min+to.aabb.delta;
+            to.aabb=nya_math::aabb(from.aabb_min,from.aabb_max);
 
             to.material_idx=from.material_idx;
             to.offset=from.offset;
@@ -225,11 +223,11 @@ bool mesh_internal::init_from_shared()
         m_shared->materials[i].internal().skeleton_changed(&m_skeleton);
 
     m_recalc_aabb=true;
-    m_has_aabb=m_shared->aabb.delta*m_shared->aabb.delta>0.0001;
+    m_has_aabb=m_shared->aabb.delta*m_shared->aabb.delta>0.0001f;
 
     m_groups.resize(m_shared->groups.size());
     for(int i=0;i<(int)m_groups.size();++i)
-        m_groups[i].has_aabb=m_shared->groups[i].aabb.delta*m_shared->groups[i].aabb.delta>0.0001;
+        m_groups[i].has_aabb=m_shared->groups[i].aabb.delta*m_shared->groups[i].aabb.delta>0.0001f;
 
     return true;
 }
