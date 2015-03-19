@@ -443,7 +443,7 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
             for(int i=0,w=width,h=height;i<(mip_count<=0?1:mip_count);++i,w=w>1?w/2:1,h=h>1?h/2:1,++s)
             {
                 srdata[s].pSysMem=mem_data;
-                if(format==dxt1 || format==dxt3 || format==dxt5)
+                if(format>=dxt1)
                 {
                     srdata[s].SysMemPitch=(w>4?w:4)/4 * get_bpp(m_format)*2;
                     mem_data+=(h>4?h:4)/4 * srdata[s].SysMemPitch+mip_padding;
@@ -461,7 +461,7 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
     desc.Usage=D3D11_USAGE_DEFAULT;
     if(format==depth16 || format==depth24 || format==depth32)
         desc.BindFlags=D3D11_BIND_DEPTH_STENCIL;//ToDo: D3D11_BIND_SHADER_RESOURCE
-    else if(format==dxt1 || format==dxt3 || format==dxt5)
+    else if(format>=dxt1)
         desc.BindFlags=D3D11_BIND_SHADER_RESOURCE;
     else
         desc.BindFlags=D3D11_BIND_SHADER_RESOURCE|D3D11_BIND_RENDER_TARGET;
