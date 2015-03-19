@@ -433,7 +433,10 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
         {
             auto &l=srdata[f*desc.MipLevels+i];
             l.pSysMem=data_a?data_a[f]:0;;
-            l.SysMemPitch=width*get_bpp(m_format)/8;
+            if(format>=dxt1)
+                l.SysMemPitch=(width>4?width:4)/4 * get_bpp(m_format)*2;
+            else
+                l.SysMemPitch=width*get_bpp(m_format)/8;
             l.SysMemSlicePitch=0;
         }
 
@@ -450,7 +453,7 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
                 }
                 else
                 {
-                    srdata[s].SysMemPitch=w*4;
+                    srdata[s].SysMemPitch=w*get_bpp(m_format)/8;
                     mem_data+=srdata[s].SysMemPitch*h+mip_padding;
                 }
             }
