@@ -432,7 +432,7 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
         for(unsigned int i=0;i<desc.MipLevels;++i)
         {
             auto &l=srdata[f*desc.MipLevels+i];
-            l.pSysMem=data_a?data_a[f]:0;;
+            l.pSysMem=data_a?data_a[f]:0;
             if(format>=dxt1)
                 l.SysMemPitch=(width>4?width:4)/4 * get_bpp(m_format)*2;
             else
