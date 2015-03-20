@@ -794,8 +794,10 @@ void texture::apply(bool ignore_cache)
 #ifdef DIRECTX11
         if(current_layers[i]<0)
         {
-            get_context()->PSSetShaderResources(i,0,0);
-            get_context()->PSSetSamplers(i,0,0);
+            ID3D11ShaderResourceView * srv_null[]={0};
+            get_context()->PSSetShaderResources(i,1,srv_null);
+            ID3D11SamplerState *ss_null[]={0};
+            get_context()->PSSetSamplers(i,1,ss_null);
             active_layers[i]=-1;
             continue;
         }
@@ -1090,8 +1092,10 @@ void texture::release()
     {
         if(active_layers[i]==m_tex)
         {
-            get_context()->PSSetShaderResources(i,0,0);
-            get_context()->PSSetSamplers(i,0,0);
+            ID3D11ShaderResourceView * srv_null[]={0};
+            get_context()->PSSetShaderResources(i,1,srv_null);
+            ID3D11SamplerState *ss_null[]={0};
+            get_context()->PSSetSamplers(i,1,ss_null);
             active_layers[i]=-1;
         }
 
