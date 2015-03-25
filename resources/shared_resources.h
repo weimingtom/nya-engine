@@ -115,7 +115,7 @@ private:
             t_res *operator -> () { return this->m_res; }
 
         public:
-            shared_resource_mutable_ref() { shared_resource_ref(); }
+            shared_resource_mutable_ref() {}
 
         private:
             shared_resource_mutable_ref(t_res*res,res_holder*holder,shared_resources_creator *creator)
