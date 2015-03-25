@@ -123,11 +123,12 @@ size_t tga::encode_header(void *to_data,size_t to_size)
     if(vertical_flip)
         imagedescriptor|=0x20;
 
+    unsigned short w=width,h=height;
     char *out=(char *)to_data;
     memset(out,0,tga_minimum_header_size);
     memcpy(out+2,&datatypecode,1);
-    memcpy(out+12,&width,2);
-    memcpy(out+14,&height,2);
+    memcpy(out+12,&w,2);
+    memcpy(out+14,&h,2);
     memcpy(out+16,&bpp,1);
     memcpy(out+17,&imagedescriptor,1);
 
