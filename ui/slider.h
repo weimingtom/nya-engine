@@ -54,11 +54,10 @@ protected:
     }
 
 public:
-    slider(): m_value(0),m_mouse_pressed(false),m_mouse_last(0),m_slider_size(10),m_vertical(false) {}
+    slider(): m_value(0),m_mouse_last(0),m_slider_size(10),m_vertical(false) {}
 
 protected:
     float m_value;
-    bool m_mouse_pressed;
     uint m_mouse_last;
 
 protected:

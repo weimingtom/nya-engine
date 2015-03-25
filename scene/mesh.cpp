@@ -176,7 +176,7 @@ bool mesh::load_nms_material_section(shared_mesh &res,const void *data,size_t si
 
 bool mesh::load_nms(shared_mesh &res,resource_data &data,const char* name)
 {
-    if(!data.get_size() || data.get_size()<8 || memcmp(data.get_data(),"nya mesh ",8)!=0)
+    if(!data.get_size() || data.get_size()<8 || memcmp(data.get_data(),"nya mesh",8)!=0)
         return false;
 
     nya_formats::nms m;
