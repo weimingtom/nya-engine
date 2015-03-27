@@ -21,15 +21,18 @@ public:
     };
 
 public:
-    void set_color_target(const texture &tex);
-    void set_color_target(const texture &tex,cubemap_side side);
+    void set_color_target(const texture &tex,unsigned int attachment_idx=0);
+    void set_color_target(const texture &tex,cubemap_side side,unsigned int attachment_idx=0);
     void set_depth_target(const texture &tex);
+
+public:
+    static unsigned int get_max_color_attachments();
 
 public:
     void release();
 
 public:
-    void bind();
+    void bind() const;
     static void unbind();
 
 public:

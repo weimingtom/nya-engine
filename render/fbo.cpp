@@ -4,6 +4,8 @@
 #include "render.h"
 #include "platform_specific_gl.h"
 
+//ToDo: mrt on dx11
+
 namespace nya_render
 {
 
@@ -85,27 +87,53 @@ bool check_init_fbo()
     initialised=true,failed=false;
     return true;
 }
+
+#ifndef GL_MAX_COLOR_ATTACHMENTS
+    #define GL_MAX_COLOR_ATTACHMENTS 0x8CDF
 #endif
+
+int gl_target(int side)
+{
+    switch(side)
+    {
+        case fbo::cube_positive_x: return GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+        case fbo::cube_negative_x: return GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
+        case fbo::cube_positive_y: return GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+        case fbo::cube_negative_y: return GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+        case fbo::cube_positive_z: return GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
+        case fbo::cube_negative_z: return GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
+    }
+
+    return GL_TEXTURE_2D;
 }
+
+#endif
 
 struct fbo_obj
 {
-    int color_tex_idx;
+    struct attachment
+    {
+        int tex_idx;
+        int cubemap_side;
+        OPENGL_ONLY(unsigned int last_target_idx);
+        OPENGL_ONLY(int last_gl_type);
+
+        attachment(): tex_idx(-1),cubemap_side(-1)
+        {
+            OPENGL_ONLY(last_target_idx=0);
+            OPENGL_ONLY(last_gl_type=-1);
+        }
+    };
+
+    std::vector<attachment> color_attachments;
     int depth_tex_idx;
+    OPENGL_ONLY(unsigned int fbo_idx);
+    OPENGL_ONLY(int depth_target_idx);
 
-#ifdef DIRECTX11
-    int cubemap_side;
-
-    fbo_obj(): color_tex_idx(-1),depth_tex_idx(-1),cubemap_side(-1) {}
-#else
-    unsigned int fbo_idx;
-
-    unsigned int color_target_idx;
-    unsigned int color_gl_target;
-    unsigned int depth_target_idx;
-
-    fbo_obj(): color_tex_idx(-1),depth_tex_idx(-1),fbo_idx(0),color_target_idx(0),color_gl_target(GL_TEXTURE_2D),depth_target_idx(0) {}
-#endif
+    fbo_obj(): depth_tex_idx(-1)
+    {
+        OPENGL_ONLY(fbo_idx=depth_target_idx=0);
+    }
 
 public:
     static int add() { return get_fbo_objs().add(); }
@@ -126,20 +154,29 @@ private:
     }
 };
 
+}
+
 int release_fbos() { return fbo_obj::release_all(); }
 int invalidate_fbos() { return fbo_obj::invalidate_all(); }
 
-void fbo::set_color_target(const texture &tex,cubemap_side side)
+void fbo::set_color_target(const texture &tex,cubemap_side side,unsigned int attachment_idx)
 {
+    if(attachment_idx>=get_max_color_attachments())
+        return;
+
     if(m_fbo_idx<0)
         m_fbo_idx=fbo_obj::add();
 
     fbo_obj &fbo=fbo_obj::get(m_fbo_idx);
-    fbo.color_tex_idx=tex.m_tex;
 
-#ifdef DIRECTX11
-    fbo.cubemap_side=side;
-#else
+    if(attachment_idx>=fbo.color_attachments.size())
+        fbo.color_attachments.resize(attachment_idx+1);
+
+    fbo_obj::attachment &a=fbo.color_attachments[attachment_idx];
+    a.tex_idx=tex.m_tex;
+    a.cubemap_side=side;
+
+#ifndef DIRECTX11
     if(!fbo.fbo_idx)
     {
         if(!check_init_fbo())
@@ -147,25 +184,13 @@ void fbo::set_color_target(const texture &tex,cubemap_side side)
 
         glGenFramebuffers(1,&fbo.fbo_idx);
     }
-
-    if(!fbo.fbo_idx)
-        return;
-
-    fbo.color_gl_target=GL_TEXTURE_2D;
-    switch(side)
-    {
-        case cube_positive_x: fbo.color_gl_target=GL_TEXTURE_CUBE_MAP_POSITIVE_X; break;
-        case cube_negative_x: fbo.color_gl_target=GL_TEXTURE_CUBE_MAP_NEGATIVE_X; break;
-        case cube_positive_y: fbo.color_gl_target=GL_TEXTURE_CUBE_MAP_POSITIVE_Y; break;
-        case cube_negative_y: fbo.color_gl_target=GL_TEXTURE_CUBE_MAP_NEGATIVE_Y; break;
-        case cube_positive_z: fbo.color_gl_target=GL_TEXTURE_CUBE_MAP_POSITIVE_Z; break;
-        case cube_negative_z: fbo.color_gl_target=GL_TEXTURE_CUBE_MAP_NEGATIVE_Z; break;
-        default: break;
-    }
 #endif
 }
 
-void fbo::set_color_target(const texture &tex) { set_color_target(tex,cubemap_side(-1)); }
+void fbo::set_color_target(const texture &tex,unsigned int attachment_idx)
+{
+    set_color_target(tex,cubemap_side(-1),attachment_idx);
+}
 
 void fbo::set_depth_target(const texture &tex)
 {
@@ -191,14 +216,21 @@ void fbo::release()
 	if(m_fbo_idx<0)
 		return;
 
-    const fbo_obj &fbo=fbo_obj::get(m_fbo_idx);
-    OPENGL_ONLY(if(fbo.fbo_idx) glBindFramebuffer(GL_FRAMEBUFFER,default_fbo_idx));
+    fbo_obj &fbo=fbo_obj::get(m_fbo_idx);
+
+#ifndef DIRECTX11
+    if(fbo.fbo_idx)
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER,default_fbo_idx);
+        glDeleteFramebuffers(1,&fbo.fbo_idx);
+    }
+#endif
 
     fbo_obj::remove(m_fbo_idx);
     m_fbo_idx=-1;
 }
 
-void fbo::bind()
+void fbo::bind() const
 {
 	if(m_fbo_idx<0)
     {
@@ -215,15 +247,17 @@ void fbo::bind()
     ID3D11RenderTargetView *color=0;
     ID3D11DepthStencilView *depth=0;
 
-    if(fbo.color_tex_idx>=0)
+    if(!fbo.color_attachments.empty() && fbo.color_attachments[0].tex_idx>=0)
     {
-        texture_obj &tex=texture_obj::get(fbo.color_tex_idx);
-        ID3D11RenderTargetView *&tex_color=tex.color_targets[fbo.cubemap_side>=0?fbo.cubemap_side:0];
+        fbo_obj::attachment &a=fbo.color_attachments[0];
+
+        texture_obj &tex=texture_obj::get(a.tex_idx);
+        ID3D11RenderTargetView *&tex_color=tex.color_targets[a.cubemap_side>=0?a.cubemap_side:0];
         if(!tex_color && tex.tex)
         {
             D3D11_RENDER_TARGET_VIEW_DESC rtvd;
             rtvd.Format=tex.dx_format;
-            if(fbo.cubemap_side<0)
+            if(a.cubemap_side<0)
             {
 	            rtvd.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2D;
 	            rtvd.Texture2D.MipSlice=0;
@@ -231,7 +265,7 @@ void fbo::bind()
             else
             {
                 rtvd.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
-                rtvd.Texture2DArray.FirstArraySlice=fbo.cubemap_side;
+                rtvd.Texture2DArray.FirstArraySlice=a.cubemap_side;
                 rtvd.Texture2DArray.ArraySize=1;
                 rtvd.Texture2DArray.MipSlice=0;
             }
@@ -264,48 +298,39 @@ void fbo::bind()
 
     glBindFramebuffer(GL_FRAMEBUFFER,fbo.fbo_idx);
 
-    if(fbo.color_tex_idx>=0)
+    bool has_color_target=false;
+
+    for(size_t i=0;i<fbo.color_attachments.size();++i)
     {
-        const texture_obj &tex=texture_obj::get(fbo.color_tex_idx);
+        fbo_obj::attachment &a=fbo.color_attachments[i];
 
-        const bool color_target_was_invalid=fbo.color_target_idx==0;
-
-        if(fbo.color_target_idx!=tex.tex_id)
-        {
-            if(fbo.color_gl_target==GL_TEXTURE_2D)
-            {
-                if(tex.gl_type==GL_TEXTURE_2D)
-                    fbo.color_target_idx=tex.tex_id;
-                else
-                    fbo.color_target_idx=0;
-            }
-            else
-            {
-                if(tex.gl_type!=GL_TEXTURE_2D)
-                    fbo.color_target_idx=tex.tex_id;
-                else
-                    fbo.color_target_idx=0;
-            }
-        }
-        else
-        {
-            //ToDo: check if tex.gl_type changed
-        }
-
-        if(color_target_was_invalid && fbo.color_target_idx && fbo.depth_target_idx)
-        {
 #ifndef OPENGL_ES
+        const bool color_target_was_invalid=a.last_target_idx==0;
+#endif
+        const texture_obj &tex=texture_obj::get(a.tex_idx);
+
+        const int gl_type=a.cubemap_side<0?tex.gl_type:gl_target(a.cubemap_side);
+        if(gl_type!=a.last_gl_type && a.last_gl_type>=0)
+        {
+            glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0+int(i),a.last_gl_type,0,0);
+            a.last_gl_type=tex.tex_id?gl_type:-1;
+        }
+
+        if(tex.tex_id!=a.last_target_idx)
+        {
+            glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0+int(i),gl_type,tex.tex_id,0);
+            a.last_target_idx=tex.tex_id;
+        }
+
+#ifndef OPENGL_ES
+        if(color_target_was_invalid && tex.tex_id && fbo.depth_target_idx)
+        {
             glDrawBuffer(GL_COLOR_ATTACHMENT0);
             glReadBuffer(GL_COLOR_ATTACHMENT0);
-#endif
         }
-
-        glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,fbo.color_gl_target,fbo.color_target_idx,0);
-    }
-    else if(fbo.color_target_idx)
-    {
-        glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,0,0);
-        fbo.depth_tex_idx=0;
+#endif
+        if(tex.tex_id)
+            has_color_target=true;
     }
 
     if(fbo.depth_tex_idx>=0)
@@ -326,7 +351,7 @@ void fbo::bind()
                 glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,tex.tex_id,0);
                 fbo.depth_target_idx=tex.tex_id;
 #ifndef OPENGL_ES
-                if(!fbo.color_target_idx && fbo.depth_target_idx)
+                if(!has_color_target && fbo.depth_target_idx)
                 {
                     glDrawBuffer(GL_NONE);
                     glReadBuffer(GL_NONE);
@@ -354,6 +379,19 @@ void fbo::unbind()
         return;
 
     glBindFramebuffer(GL_FRAMEBUFFER,default_fbo_idx);
+#endif
+}
+
+unsigned int fbo::get_max_color_attachments()
+{
+#ifdef DIRECTX11
+    return 1; //D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT; //ToDo
+#else
+    static int max_attachments=-1;
+    if(max_attachments<0)
+        glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &max_attachments);
+
+    return max_attachments;
 #endif
 }
 
