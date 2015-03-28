@@ -59,7 +59,9 @@ void postprocess::draw(int dt)
                 {
                     const size_t tex_idx=m_op_set_texture[idx].tex_idx;
                     textures_set.push_back(tex_idx);
-                    m_textures[tex_idx].internal().set(m_op_set_texture[idx].layer);
+                    const texture_proxy &t=m_textures[tex_idx].second;
+                    if(t.is_valid())
+                        t->internal().set(m_op_set_texture[idx].layer);
                 }
                 break;
 
@@ -79,10 +81,14 @@ void postprocess::draw(int dt)
     }
 
     nya_render::set_viewport(prev_rect);
-    nya_scene::shader_internal::unset();
+    shader_internal::unset();
     nya_render::fbo::unbind();
     for(size_t i=0;i<textures_set.size();++i)
-        m_textures[textures_set[i]].internal().unset();
+    {
+        const texture_proxy &t=m_textures[textures_set[i]].second;
+        if(t.is_valid())
+            t->internal().unset();
+    }
 }
 
 bool postprocess::load_text(shared_postprocess &res,resource_data &data,const char* name)
@@ -111,74 +117,57 @@ bool postprocess::load_text(shared_postprocess &res,resource_data &data,const ch
     return true;
 }
 
-void postprocess::set_condition(const char *condition,bool value)
+template<typename t> bool set_value(std::vector<std::pair<std::string, t> > &vec,const char *name,const t &value)
 {
-    if(!condition)
-        return;
-
-    for(size_t i=0;i<m_conditions.size();++i)
-    {
-        if(m_conditions[i].first==condition)
-        {
-            m_conditions[i].second=value;
-            update();
-            return;
-        }
-    }
-
-    m_conditions.resize(m_conditions.size()+1);
-    m_conditions.back().first=condition;
-    m_conditions.back().second=value;
-    update();
-}
-
-bool postprocess::get_condition(const char *condition) const
-{
-    if(!condition)
+    if(!name)
         return false;
 
-    for(size_t i=0;i<m_conditions.size();++i)
+    for(int i=0;i<(int)vec.size();++i)
     {
-        if(m_conditions[i].first==condition)
-            return m_conditions[i].second;
+        if(vec[i].first!=name)
+            continue;
+
+        vec[i].second=value;
+        return true;
     }
 
-    return false;
+    vec.push_back(std::make_pair(name,value));
+    return true;
 }
 
-void postprocess::set_variable(const char *name,float value)
+template<typename t> int get_idx(const std::vector<std::pair<std::string, t> > &vec,const char *name)
 {
     if(!name)
-        return;
+        return -1;
 
-    for(size_t i=0;i<m_variables.size();++i)
+    for(int i=0;i<(int)vec.size();++i)
     {
-        if(m_variables[i].first==name)
-        {
-            m_variables[i].second=value;
-            update();
-            return;
-        }
+        if(vec[i].first==name)
+            return i;
     }
 
-    m_variables.resize(m_variables.size()+1);
-    m_variables.back().first=name;
-    m_variables.back().second=value;
-    update();
+    return -1;
 }
 
+void postprocess::set_condition(const char *condition,bool value) { if(set_value(m_conditions,condition,value)) update(); }
+bool postprocess::get_condition(const char *condition) const
+{
+    const int i=get_idx(m_conditions,condition);
+    return i<0?false:m_conditions[i].second;
+}
+
+void postprocess::set_variable(const char *name,float value) { if(set_value(m_variables,name,value)) update(); }
 float postprocess::get_variable(const char *name) const
 {
-    if(!name)
-        return 0.0f;
+    const int i=get_idx(m_variables,name);
+    return i<0?0.0f:m_variables[i].second;
+}
 
-    for(size_t i=0;i<m_conditions.size();++i)
-    {
-        if(m_conditions[i].first==name)
-            return m_conditions[i].second;
-    }
-    
-    return 0.0f;
+void postprocess::set_texture(const char *name,const texture_proxy &tex) { set_value(m_textures,name,tex); }
+const texture_proxy &postprocess::get_texture(const char *name) const
+{
+    const int i=get_idx(m_textures,name);
+    return i<0?nya_memory::get_invalid_object<texture_proxy>():m_textures[i].second;
 }
 
 void postprocess::set_shader_param(const char *name,const nya_math::vec4 &value)
@@ -186,20 +175,16 @@ void postprocess::set_shader_param(const char *name,const nya_math::vec4 &value)
     if(!name)
         return;
 
-    for(int i=0;i<(int)m_shader_params.size();++i)
+    const int i=get_idx(m_shader_params,name);
+    if(i>=0)
     {
-        if(m_shader_params[i].first==name)
-        {
-            m_shader_params[i].second=value;
-            update_shader_param(i);
-            return;
-        }
+        m_shader_params[i].second=value;
+        update_shader_param(i);
+        return;
     }
 
     const int idx=(int)m_shader_params.size();
-    m_shader_params.resize(idx+1);
-    m_shader_params.back().first=name;
-    m_shader_params.back().second=value;
+    m_shader_params.push_back(std::make_pair(name,value));
     update_shader_param(idx);
     update();
 }
@@ -231,16 +216,8 @@ void postprocess::update_shader_param(int param_idx)
 
 const nya_math::vec4 &postprocess::get_shader_param(const char *name) const
 {
-    if(!name)
-        return nya_memory::get_invalid_object<nya_math::vec4>();
-
-    for(size_t i=0;i<m_shader_params.size();++i)
-    {
-        if(m_shader_params[i].first==name)
-            return m_shader_params[i].second;
-    }
-
-    return nya_memory::get_invalid_object<nya_math::vec4>();
+    const int i=get_idx(m_shader_params,name);
+    return i<0?nya_memory::get_invalid_object<nya_math::vec4>():m_shader_params[i].second;
 }
 
 template <typename op_t,typename t,typename op_e> t &add_op(op_t &ops,std::vector<t> &spec_ops,op_e type)
@@ -263,8 +240,9 @@ void postprocess::update()
     m_targets.resize(1);
     m_targets.back().rect.width=m_width,m_targets.back().rect.height=m_height;
     m_targets.back().fbo=nya_memory::shared_ptr<nya_render::fbo>(nya_render::fbo());
-    textures_map targets;
-    textures_map current_tex;
+    typedef std::map<std::string,bool> string_map;
+    string_map targets;
+    string_map current_tex;
 
     for(int i=0;i<(int)m_shared->lines.size();++i)
     {
@@ -363,36 +341,38 @@ void postprocess::update()
 
             if(color)
             {
-                textures_map::iterator it=m_textures_map.find(color);
-                if(it!=m_textures_map.end())
+                texture_proxy t=get_texture(color);
+                if(t.is_valid())
                 {
-                    const nya_scene::texture &t=m_textures[it->second];
-                    if(t.get_width()!=w || t.get_height()!=h)
+                    if(t->get_width()!=w || t->get_height()!=h)
                         log()<<"postprocess: texture "<<color<<" with different size in file "<<m_shared.get_name()<<"\n";
                 }
+                else
+                {
+                    t.create();
+                    t->build(0,w,h,nya_render::texture::color_rgba);
+                }
 
-                m_textures_map[color]=m_textures.size();
-                m_textures.resize(m_textures.size()+1);
-
-                if(m_textures.back().build(0,w,h,nya_render::texture::color_rgba))
-                    m_targets.back().fbo->set_color_target(m_textures.back().internal().get_shared_data()->tex);
+                m_textures.push_back(std::make_pair(color,t));
+                m_targets.back().fbo->set_color_target(t->internal().get_shared_data()->tex);
             }
 
             if(depth)
             {
-                textures_map::iterator it=m_textures_map.find(depth);
-                if(it!=m_textures_map.end())
+                texture_proxy t=get_texture(depth);
+                if(t.is_valid())
                 {
-                    const nya_scene::texture &t=m_textures[it->second];
-                    if(t.get_width()!=w || t.get_height()!=h)
+                    if(t->get_width()!=w || t->get_height()!=h)
                         log()<<"postprocess: texture "<<depth<<" with different size in file "<<m_shared.get_name()<<"\n";
                 }
+                else
+                {
+                    t.create();
+                    t->build(0,w,h,nya_render::texture::depth24);
+                }
 
-                m_textures_map[depth]=m_textures.size();
-                m_textures.resize(m_textures.size()+1);
-
-                if(m_textures.back().build(0,w,h,nya_render::texture::depth16))
-                    m_targets.back().fbo->set_depth_target(m_textures.back().internal().get_shared_data()->tex);
+                m_textures.push_back(std::make_pair(depth,t));
+                m_targets.back().fbo->set_color_target(t->internal().get_shared_data()->tex);
             }
         }
         else if(l.type=="set_shader")
@@ -404,7 +384,7 @@ void postprocess::update()
         {
             m_op.resize(m_op.size()+1);
             m_op.back().type=type_set_target;
-            textures_map::const_iterator it=targets.find(l.name);
+            string_map::const_iterator it=targets.find(l.name);
             m_op.back().idx=it==targets.end()?0:it->second;
         }
         else if(l.type=="set_texture")
@@ -412,11 +392,14 @@ void postprocess::update()
             if(l.values.empty())
                 continue;
 
-            textures_map::const_iterator it=m_textures_map.find(l.values.front().first);
-            if(it==m_textures_map.end())
-                continue; //ToDo: create texture and function get_texture
+            int idx=get_idx(m_textures,l.values.front().first.c_str());
+            if(idx<0)
+            {
+                idx=(int)m_textures.size();
+                m_textures.push_back(std::make_pair(l.values.front().first,texture_proxy()));
+            }
 
-            current_tex[l.name]=it->second;
+            current_tex[l.name]=idx;
         }
         else if(l.type=="clear")
         {
@@ -437,7 +420,7 @@ void postprocess::update()
             if(m_op_set_shader.empty())
                 continue;
 
-            for(textures_map::const_iterator it=current_tex.begin();it!=current_tex.end();++it)
+            for(string_map::const_iterator it=current_tex.begin();it!=current_tex.end();++it)
             {
                 const int idx=m_op_set_shader.back().sh.internal().get_texture_slot(it->first.c_str());
                 if(idx<0)
@@ -473,7 +456,6 @@ void postprocess::clear_ops()
     m_op.clear();
     m_op_draw_scene.clear();
     m_op_set_shader.clear();
-    m_textures_map.clear();
     m_textures.clear();
 
     for(size_t i=0;i<m_targets.size();++i)
@@ -487,16 +469,8 @@ void postprocess::clear_ops()
 
 const char *shared_postprocess::line::get_value(const char *name) const
 {
-    if(!name)
-        return 0;
-
-    for(size_t i=0;i<values.size();++i)
-    {
-        if(values[i].first==name)
-            return values[i].second.c_str();
-    }
-
-    return 0;
+    const int i=get_idx(values,name);
+    return i<0?0:values[i].second.c_str();
 }
 
 }

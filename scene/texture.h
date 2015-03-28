@@ -4,6 +4,7 @@
 
 #include "shared_resources.h"
 #include "render/texture.h"
+#include "proxy.h"
 
 namespace nya_scene
 {
@@ -78,5 +79,7 @@ private:
     texture_internal m_internal;
     static bool m_load_dds_flip;
 };
+
+typedef proxy<texture> texture_proxy;
 
 }

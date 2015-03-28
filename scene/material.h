@@ -2,19 +2,13 @@
 
 #pragma once
 
-#include "proxy.h"
 #include "render/render.h"
 #include "scene.h"
 #include "shader.h"
 #include "texture.h"
 
-#include <string>
-#include <vector>
-
 namespace nya_scene
 {
-
-typedef proxy<texture> texture_proxy;
 
 class material_internal;
 typedef material_internal shared_material;

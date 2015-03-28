@@ -7,7 +7,6 @@
 #include "render/screen_quad.h"
 #include "render/fbo.h"
 #include "render/render.h"
-#include "memory/shared_ptr.h"
 
 namespace nya_scene
 {
@@ -47,6 +46,9 @@ public:
     void set_variable(const char *name,float value);
     float get_variable(const char *name) const;
 
+    void set_texture(const char *name,const texture_proxy &tex);
+    const texture_proxy &get_texture(const char *name) const;
+
     void set_shader_param(const char *name,const nya_math::vec4 &value);
     const nya_math::vec4 &get_shader_param(const char *name) const;
 
@@ -63,12 +65,12 @@ private:
     void clear_ops();
 
 private:
-    unsigned int m_width;
-    unsigned int m_height;
+    unsigned int m_width,m_height;
     nya_memory::shared_ptr<nya_render::screen_quad> m_quad;
 
     std::vector<std::pair<std::string,bool> > m_conditions;
     std::vector<std::pair<std::string,float> > m_variables;
+    std::vector<std::pair<std::string,nya_scene::texture_proxy> > m_textures;
     std::vector<std::pair<std::string,nya_math::vec4> > m_shader_params;
 
     enum op_types
@@ -120,10 +122,6 @@ private:
     };
 
     std::vector<op_target> m_targets;
-
-    typedef std::map<std::string,size_t> textures_map;
-    textures_map m_textures_map;
-    std::vector<nya_scene::texture> m_textures;
 };
 
 }
