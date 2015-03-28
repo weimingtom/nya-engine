@@ -351,9 +351,9 @@ void postprocess::update()
                 {
                     t.create();
                     t->build(0,w,h,nya_render::texture::color_rgba);
+                    m_textures.push_back(std::make_pair(color,t));
                 }
 
-                m_textures.push_back(std::make_pair(color,t));
                 m_targets.back().fbo->set_color_target(t->internal().get_shared_data()->tex);
             }
 
@@ -369,9 +369,9 @@ void postprocess::update()
                 {
                     t.create();
                     t->build(0,w,h,nya_render::texture::depth24);
+                    m_textures.push_back(std::make_pair(depth,t));
                 }
 
-                m_textures.push_back(std::make_pair(depth,t));
                 m_targets.back().fbo->set_color_target(t->internal().get_shared_data()->tex);
             }
         }
