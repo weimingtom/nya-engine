@@ -81,8 +81,8 @@ struct shared_shader
 
     struct texture_buffers
     {
-        nya_scene::texture skeleton_pos_texture;
-        nya_scene::texture skeleton_rot_texture;
+        texture skeleton_pos_texture;
+        texture skeleton_rot_texture;
         const nya_render::skeleton *last_skeleton_pos_texture;
         const nya_render::skeleton *last_skeleton_rot_texture;
 

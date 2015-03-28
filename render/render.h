@@ -138,14 +138,14 @@ struct state
 
     state():
         blend(false),
-        blend_src(nya_render::blend::one),
-        blend_dst(nya_render::blend::zero),
+        blend_src(blend::one),
+        blend_dst(blend::zero),
 
         cull_face(false),
-        cull_order(nya_render::cull_face::ccw),
+        cull_order(cull_face::ccw),
 
         depth_test(true),
-        depth_comparsion(nya_render::depth_test::less),
+        depth_comparsion(depth_test::less),
 
         zwrite(true),
         color_write(true)

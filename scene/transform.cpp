@@ -5,10 +5,10 @@
 #include "camera.h"
 #include "memory/invalid_object.h"
 
-namespace { const nya_scene::transform *active_transform=0; }
-
 namespace nya_scene
 {
+
+namespace { const transform *active_transform=0; }
 
 void transform::set(const transform &tr)
 {
@@ -64,7 +64,7 @@ nya_math::aabb transform::transform_aabb(const nya_math::aabb &box) const
 
 void transform::apply() const
 {
-    nya_math::mat4 mat=nya_scene::get_camera().get_view_matrix();
+    nya_math::mat4 mat=get_camera().get_view_matrix();
     mat.translate(m_pos).rotate(m_rot).scale(m_scale.x,m_scale.y,m_scale.z);
 
     nya_render::set_modelview_matrix(mat);

@@ -766,7 +766,7 @@ bool vbo::set_index_data(const void*data,index_size size,unsigned int indices_co
 	index_buffer_data.SysMemPitch=0;
 	index_buffer_data.SysMemSlicePitch=0;
 	CD3D11_BUFFER_DESC index_buffer_desc(buffer_size,D3D11_BIND_INDEX_BUFFER);
-	if(nya_render::get_device()->CreateBuffer(&index_buffer_desc,&index_buffer_data,&obj.index_loc)<0)
+	if(get_device()->CreateBuffer(&index_buffer_desc,&index_buffer_data,&obj.index_loc)<0)
 	{
 		log()<<"Unable to set indices: unable to create buffer\n";
 		obj.index_loc=0;

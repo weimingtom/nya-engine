@@ -249,7 +249,7 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
 
 namespace
 {
-    void build_bones_texture(nya_scene::texture &tex,const void *data,unsigned int count,nya_render::texture::color_format format)
+    void build_bones_texture(texture &tex,const void *data,unsigned int count,nya_render::texture::color_format format)
     {
         nya_render::texture::filter f[3];
         nya_render::texture::get_default_filter(f[0],f[1],f[2]);

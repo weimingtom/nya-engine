@@ -14,7 +14,7 @@ struct aabb
     vec3 delta;
 
     aabb() {}
-    aabb(const nya_math::vec3 &aabb_min,const nya_math::vec3 &aabb_max);
+    aabb(const vec3 &aabb_min,const vec3 &aabb_max);
     aabb(const aabb &source,const vec3 &pos,const quat &rot,const vec3 &scale);
 };
 

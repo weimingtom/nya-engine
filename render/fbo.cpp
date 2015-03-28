@@ -11,7 +11,7 @@ namespace nya_render
 
 namespace
 {
-    DIRECTX11_ONLY(nya_render::dx_target default_target,target);
+    DIRECTX11_ONLY(dx_target default_target,target);
     OPENGL_ONLY(int default_fbo_idx=0);
 }
 

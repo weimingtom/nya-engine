@@ -15,13 +15,13 @@ namespace
 {
     nya_log::log_base *render_log=0;
 
-    nya_render::state current_state;
-    nya_render::state applied_state;
+    state current_state;
+    state applied_state;
 
-    nya_render::state_override override_state;
+    state_override override_state;
     bool has_state_override=false;
 
-    nya_render::rect viewport_rect;
+    rect viewport_rect;
 
 	float clear_color[4]={0.0f};
 	float clear_depth=1.0f;
@@ -449,7 +449,7 @@ public:
         ID3D11BlendState *state=get(dx_blend_mode(current_state.blend_src),
                                                         dx_blend_mode(current_state.blend_dst));
         const float blend_factor[]={1.0f,1.0f,1.0f,1.0f};
-        nya_render::get_context()->OMSetBlendState(state,blend_factor,current_state.color_write?0xffffffff:0);
+        get_context()->OMSetBlendState(state,blend_factor,current_state.color_write?0xffffffff:0);
     }
 
     void release()
@@ -524,7 +524,7 @@ public:
         }
 
         ID3D11DepthStencilState *state=get(current_state.depth_test,current_state.zwrite,dx_depth_comparsion);
-        nya_render::get_context()->OMSetDepthStencilState(state,1);
+        get_context()->OMSetDepthStencilState(state,1);
     }
 
     void release()
@@ -686,7 +686,7 @@ namespace
 void discard_state()
 {
     invalidate_resources();
-    applied_state=current_state=nya_render::state();
+    applied_state=current_state=state();
 
     cull_face_state=cull_face_state_class();
     depth_state=decltype(depth_state)();

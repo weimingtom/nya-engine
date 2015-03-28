@@ -6,7 +6,7 @@
 namespace nya_math
 {
 
-aabb::aabb(const nya_math::vec3 &aabb_min,const nya_math::vec3 &aabb_max)
+aabb::aabb(const vec3 &aabb_min,const vec3 &aabb_max)
 {
     delta=(aabb_max-aabb_min)*0.5f;
     origin=aabb_min+delta;
@@ -18,19 +18,19 @@ aabb::aabb(const aabb &b,const vec3 &p,const quat &q,const vec3 &s)
     delta.y=s.y*b.delta.y;
     delta.z=s.z*b.delta.z;
 
-    const nya_math::vec3 v[4]=
+    const vec3 v[4]=
     {
-        nya_math::vec3(delta.x,delta.y,delta.z),
-        nya_math::vec3(delta.x,-delta.y,delta.z),
-        nya_math::vec3(delta.x,delta.y,-delta.z),
-        nya_math::vec3(delta.x,-delta.y,-delta.z)
+        vec3(delta.x,delta.y,delta.z),
+        vec3(delta.x,-delta.y,delta.z),
+        vec3(delta.x,delta.y,-delta.z),
+        vec3(delta.x,-delta.y,-delta.z)
     };
 
-    delta=nya_math::vec3();
+    delta=vec3();
 
     for(int i=0;i<4;++i)
     {
-        const nya_math::vec3 t=q.rotate(v[i]).abs();
+        const vec3 t=q.rotate(v[i]).abs();
         if(t.x>delta.x) delta.x=t.x;
         if(t.y>delta.y) delta.y=t.y;
         if(t.z>delta.z) delta.z=t.z;
@@ -95,7 +95,7 @@ frustum::frustum(const mat4 &m)
             p.d/=len;
         }
 
-        p.abs_n=nya_math::vec3::abs(p.n);
+        p.abs_n=vec3::abs(p.n);
     }
 }
 

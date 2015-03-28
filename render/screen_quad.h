@@ -24,14 +24,14 @@ public:
         m_mesh.set_vertex_data(verts,sizeof(verts[0]),4);
         m_mesh.set_vertices(0,2);
         m_mesh.set_tc(0,2*4,2);
-        m_mesh.set_element_type(nya_render::vbo::triangle_strip);
+        m_mesh.set_element_type(vbo::triangle_strip);
     }
 
     void draw() const { m_mesh.bind(); m_mesh.draw(); m_mesh.unbind(); }
     void release() { m_mesh.release(); }
 
 private:
-    nya_render::vbo m_mesh;
+    vbo m_mesh;
 };
 
 }

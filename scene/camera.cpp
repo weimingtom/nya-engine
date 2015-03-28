@@ -119,7 +119,7 @@ camera_proxy &get_camera_proxy() { return active_camera; }
 camera &get_camera()
 {
     if(!active_camera.is_valid())
-        return nya_memory::get_invalid_object<nya_scene::camera>();
+        return nya_memory::get_invalid_object<camera>();
 
     return *active_camera.operator->();
 }

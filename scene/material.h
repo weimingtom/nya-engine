@@ -70,7 +70,7 @@ private:
         param_proxy m;
         param_array_proxy a;
 
-        void apply_to_shader(const nya_scene::shader &shader, int uniform_idx) const;
+        void apply_to_shader(const shader &shader, int uniform_idx) const;
     };
 
     struct material_texture
@@ -85,8 +85,8 @@ private:
         const char *get_name() const {return m_name.c_str();}
         nya_render::state &get_state() {return m_render_state;}
         const nya_render::state &get_state() const {return m_render_state;}
-        const nya_scene::shader &get_shader() const {return m_shader;}
-        void set_shader(const nya_scene::shader &shader);
+        const shader &get_shader() const {return m_shader;}
+        void set_shader(const shader &shader);
         void set_pass_param(const char *name,const param &value); //material param override
 
     public:
@@ -102,7 +102,7 @@ private:
 
         std::string m_name;
         nya_render::state m_render_state;
-        nya_scene::shader m_shader;
+        shader m_shader;
         mutable bool m_shader_changed;
         mutable std::vector<int> m_uniforms_idxs_map;
         mutable std::vector<int> m_textures_slots_map;

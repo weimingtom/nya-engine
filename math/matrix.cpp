@@ -28,7 +28,7 @@ mat4 &mat4::translate(float x,float y,float z)
     return *this;
 }
 
-mat4 &mat4::translate(const nya_math::vec3 &v)
+mat4 &mat4::translate(const vec3 &v)
 {
     for(int i=0;i<4;++i)
         m[3][i]+=m[0][i]*v.x+m[1][i]*v.y+m[2][i]*v.z;
@@ -80,9 +80,9 @@ mat4 &mat4::rotate(float angle,float x,float y,float z)
     return *this=rot*(*this);
 }
 
-mat4 &mat4::rotate( const nya_math::quat &q )
+mat4 &mat4::rotate( const quat &q )
 {
-    return *this=nya_math::mat4(q)*(*this);
+    return *this=mat4(q)*(*this);
 }
 
 mat4 &mat4::perspective(float fov,float aspect,float near,float far)

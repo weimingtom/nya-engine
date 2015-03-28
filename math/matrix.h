@@ -15,9 +15,9 @@ struct mat4
 
     mat4 &identity();
     mat4 &translate(float x,float y,float z);
-    mat4 &translate(const nya_math::vec3 &v);
+    mat4 &translate(const vec3 &v);
     mat4 &rotate(float angle,float x,float y,float z); //angle in degrees
-    mat4 &rotate(const nya_math::quat &q);
+    mat4 &rotate(const quat &q);
     mat4 &scale(float sx,float sy,float sz);
     mat4 &scale(float s) { return scale(s,s,s); }
 

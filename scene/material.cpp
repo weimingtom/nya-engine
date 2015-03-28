@@ -22,7 +22,7 @@ namespace
 {
     bool enable_highlight_missing_texture=true;
 
-    bool is_shader_sampler_cube(const nya_scene::shader &sh,unsigned int layer)
+    bool is_shader_sampler_cube(const shader &sh,unsigned int layer)
     {
         if(!sh.internal().get_shared_data().is_valid())
             return false;
@@ -63,19 +63,19 @@ namespace
 #endif
     }
 
-    nya_scene::texture missing_texture(bool cube)
+    texture missing_texture(bool cube)
     {
         if(!enable_highlight_missing_texture)
         {
-            static nya_scene::texture invalid;
+            static texture invalid;
             return invalid;
         }
 
-        static nya_scene::texture missing_red;
-        static nya_scene::texture missing_white;
+        static texture missing_red;
+        static texture missing_white;
 
-        static nya_scene::texture missing_cube_red;
-        static nya_scene::texture missing_cube_white;
+        static texture missing_cube_red;
+        static texture missing_cube_white;
 
         static bool initialised=false;
         if(!initialised)
@@ -83,22 +83,22 @@ namespace
             const unsigned char red_data[4]={255,0,0,255};
             const unsigned char white_data[4]={255,255,255,255};
 
-            nya_scene::shared_texture red_res;
+            shared_texture red_res;
             red_res.tex.build_texture(red_data,1,1,nya_render::texture::color_rgba);
             missing_red.create(red_res);
 
-            nya_scene::shared_texture white_res;
+            shared_texture white_res;
             white_res.tex.build_texture(white_data,1,1,nya_render::texture::color_rgba);
             missing_white.create(white_res);
 
             const void *cube_red_data[6]={red_data,red_data,red_data,red_data,red_data,red_data};
             const void *cube_white_data[6]={white_data,white_data,white_data,white_data,white_data,white_data};
 
-            nya_scene::shared_texture cube_red_res;
+            shared_texture cube_red_res;
             cube_red_res.tex.build_cubemap(cube_red_data,1,1,nya_render::texture::color_rgba);
             missing_cube_red.create(cube_red_res);
 
-            nya_scene::shared_texture cube_white_res;
+            shared_texture cube_white_res;
             cube_white_res.tex.build_cubemap(cube_white_data,1,1,nya_render::texture::color_rgba);
             missing_cube_white.create(cube_white_res);
 
@@ -112,7 +112,7 @@ namespace
     }
 }
 
-void material_internal::param_holder::apply_to_shader(const nya_scene::shader &shader,int uniform_idx) const
+void material_internal::param_holder::apply_to_shader(const shader &shader,int uniform_idx) const
 {
     if(p.is_valid())
     {
@@ -327,7 +327,7 @@ material_internal::pass &material_internal::pass::operator=(const pass &p)
     return *this;
 }
 
-void material_internal::pass::set_shader(const nya_scene::shader &shader)
+void material_internal::pass::set_shader(const shader &shader)
 {
     m_shader=shader;
     m_shader_changed=true;
@@ -485,7 +485,7 @@ void material_internal::update_passes_maps() const
     std::list<std::pair<std::string,nya_math::vec4> > parameters_to_add;
     for(int pass_idx=0;pass_idx<(int)m_passes.size();++pass_idx)
     {
-        const nya_scene::shader &sh=m_passes[pass_idx].m_shader;
+        const shader &sh=m_passes[pass_idx].m_shader;
         for(int uniform_idx=0;uniform_idx<sh.internal().get_uniforms_count();++uniform_idx)
         {
             const std::string name = sh.internal().get_uniform(uniform_idx).name;
@@ -531,7 +531,7 @@ void material_internal::update_passes_maps() const
 
     for(std::vector<pass>::const_iterator iter=m_passes.begin();iter!=m_passes.end();++iter)
     {
-        const nya_scene::shader_internal &s=iter->get_shader().internal();
+        const shader_internal &s=iter->get_shader().internal();
         for(int i=0;i<s.get_texture_slots_count();++i)
         {
             const char *semantics=s.get_texture_semantics(i);

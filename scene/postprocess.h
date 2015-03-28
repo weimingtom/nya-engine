@@ -107,7 +107,7 @@ private:
 
     struct op_set_shader
     {
-        nya_scene::shader sh;
+        shader sh;
         std::vector<int> params_map;
     };
 
