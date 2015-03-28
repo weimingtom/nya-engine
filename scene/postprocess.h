@@ -68,9 +68,15 @@ private:
     unsigned int m_width,m_height;
     nya_memory::shared_ptr<nya_render::screen_quad> m_quad;
 
+    struct tex_holder
+    {
+        bool user_set; texture_proxy tex;
+        tex_holder() {} tex_holder(bool u,const texture_proxy &t): user_set(u),tex(t) {}
+    };
+
     std::vector<std::pair<std::string,bool> > m_conditions;
     std::vector<std::pair<std::string,float> > m_variables;
-    std::vector<std::pair<std::string,nya_scene::texture_proxy> > m_textures;
+    std::vector<std::pair<std::string,tex_holder> > m_textures;
     std::vector<std::pair<std::string,nya_math::vec4> > m_shader_params;
 
     enum op_types

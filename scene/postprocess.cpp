@@ -59,7 +59,7 @@ void postprocess::draw(int dt)
                 {
                     const size_t tex_idx=m_op_set_texture[idx].tex_idx;
                     textures_set.push_back(tex_idx);
-                    const texture_proxy &t=m_textures[tex_idx].second;
+                    const texture_proxy &t=m_textures[tex_idx].second.tex;
                     if(t.is_valid())
                         t->internal().set(m_op_set_texture[idx].layer);
                 }
@@ -85,7 +85,7 @@ void postprocess::draw(int dt)
     nya_render::fbo::unbind();
     for(size_t i=0;i<textures_set.size();++i)
     {
-        const texture_proxy &t=m_textures[textures_set[i]].second;
+        const texture_proxy &t=m_textures[textures_set[i]].second.tex;
         if(t.is_valid())
             t->internal().unset();
     }
@@ -163,11 +163,16 @@ float postprocess::get_variable(const char *name) const
     return i<0?0.0f:m_variables[i].second;
 }
 
-void postprocess::set_texture(const char *name,const texture_proxy &tex) { set_value(m_textures,name,tex); update(); }
+void postprocess::set_texture(const char *name,const texture_proxy &tex)
+{
+    set_value(m_textures,name,tex_holder(true,tex));
+    update(); //ToDo: update targets only
+}
+
 const texture_proxy &postprocess::get_texture(const char *name) const
 {
     const int i=get_idx(m_textures,name);
-    return i<0?nya_memory::get_invalid_object<texture_proxy>():m_textures[i].second;
+    return i<0?nya_memory::get_invalid_object<texture_proxy>():m_textures[i].second.tex;
 }
 
 void postprocess::set_shader_param(const char *name,const nya_math::vec4 &value)
@@ -243,6 +248,16 @@ void postprocess::update()
     typedef std::map<std::string,size_t> string_map;
     string_map targets;
     string_map current_tex;
+
+    for(int i=(int)m_textures.size()-1;i>=0;--i)
+    {
+        if(m_textures[i].second.user_set)
+            continue;
+
+        m_textures.erase(m_textures.begin()+i);
+    }
+
+    //ToDo: don't create unused targets
 
     for(int i=0;i<(int)m_shared->lines.size();++i)
     {
@@ -351,7 +366,7 @@ void postprocess::update()
                 {
                     t.create();
                     t->build(0,w,h,nya_render::texture::color_rgba);
-                    m_textures.push_back(std::make_pair(color,t));
+                    m_textures.push_back(std::make_pair(color,tex_holder(false,t)));
                 }
 
                 m_targets.back().fbo->set_color_target(t->internal().get_shared_data()->tex);
@@ -369,7 +384,7 @@ void postprocess::update()
                 {
                     t.create();
                     t->build(0,w,h,nya_render::texture::depth24);
-                    m_textures.push_back(std::make_pair(depth,t));
+                    m_textures.push_back(std::make_pair(depth,tex_holder(false,t)));
                 }
 
                 m_targets.back().fbo->set_depth_target(t->internal().get_shared_data()->tex);
@@ -396,7 +411,7 @@ void postprocess::update()
             if(idx<0)
             {
                 idx=(int)m_textures.size();
-                m_textures.push_back(std::make_pair(l.values.front().first,texture_proxy()));
+                m_textures.push_back(std::make_pair(l.values.front().first,tex_holder(false,texture_proxy())));
             }
 
             current_tex[l.name]=idx;
@@ -448,6 +463,7 @@ void postprocess::unload()
         m_quad->release();
     m_quad.free();
     scene_shared::unload();
+    m_textures.clear();
     clear_ops();
 }
 
@@ -456,7 +472,6 @@ void postprocess::clear_ops()
     m_op.clear();
     m_op_draw_scene.clear();
     m_op_set_shader.clear();
-    m_textures.clear();
 
     for(size_t i=0;i<m_targets.size();++i)
     {
