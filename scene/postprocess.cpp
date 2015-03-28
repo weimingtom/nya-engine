@@ -372,7 +372,7 @@ void postprocess::update()
                     m_textures.push_back(std::make_pair(depth,t));
                 }
 
-                m_targets.back().fbo->set_color_target(t->internal().get_shared_data()->tex);
+                m_targets.back().fbo->set_depth_target(t->internal().get_shared_data()->tex);
             }
         }
         else if(l.type=="set_shader")
