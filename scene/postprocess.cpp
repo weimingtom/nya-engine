@@ -163,7 +163,7 @@ float postprocess::get_variable(const char *name) const
     return i<0?0.0f:m_variables[i].second;
 }
 
-void postprocess::set_texture(const char *name,const texture_proxy &tex) { set_value(m_textures,name,tex); }
+void postprocess::set_texture(const char *name,const texture_proxy &tex) { set_value(m_textures,name,tex); update(); }
 const texture_proxy &postprocess::get_texture(const char *name) const
 {
     const int i=get_idx(m_textures,name);
@@ -240,7 +240,7 @@ void postprocess::update()
     m_targets.resize(1);
     m_targets.back().rect.width=m_width,m_targets.back().rect.height=m_height;
     m_targets.back().fbo=nya_memory::shared_ptr<nya_render::fbo>(nya_render::fbo());
-    typedef std::map<std::string,bool> string_map;
+    typedef std::map<std::string,size_t> string_map;
     string_map targets;
     string_map current_tex;
 
