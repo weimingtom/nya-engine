@@ -223,7 +223,11 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
     }
 
     for(int i=0;i<(int)res.uniforms.size();++i)
-        res.uniforms[i].location=res.shdr.get_handler(desc.uniforms[res.uniforms[i].name].c_str());
+    {
+        const int l=res.uniforms[i].location=res.shdr.get_handler(desc.uniforms[res.uniforms[i].name].c_str());
+        const nya_math::vec4 &v=res.uniforms[i].default_value;
+        res.shdr.set_uniform(l,v.x,v.y,v.z,v.w);
+    }
 
     for(shader_description::strings_map::const_iterator it=desc.samplers.begin();
         it!=desc.samplers.end();++it)
