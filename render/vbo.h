@@ -28,7 +28,8 @@ public:
     enum vertex_atrib_type
     {
         float16,
-        float32
+        float32,
+        uint8
     };
 
     enum usage_hint

@@ -136,6 +136,9 @@ namespace
 #ifdef DIRECTX11
 DXGI_FORMAT get_dx_format(int dimension,vbo::vertex_atrib_type type)
 {
+    if(type==vbo::uint8_t)
+        return DXGI_FORMAT_R8G8B8A8_UINT;
+
     if(type==vbo::float16)
     {
         switch(dimension)
@@ -191,8 +194,9 @@ int get_gl_element_type(vbo::vertex_atrib_type type)
 {
     switch(type)
     {
-        case vbo::float32: return GL_FLOAT;
         case vbo::float16: return GL_HALF_FLOAT;
+        case vbo::float32: return GL_FLOAT;
+        case vbo::uint8: return GL_UNSIGNED_BYTE;
     }
 
     return GL_FLOAT;

@@ -83,7 +83,8 @@ struct nms_mesh_chunk
     enum vertex_atrib_type
     {
         float16,
-        float32
+        float32,
+        uint8
     };
 
     enum ind_size
