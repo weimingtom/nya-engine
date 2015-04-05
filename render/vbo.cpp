@@ -136,8 +136,8 @@ namespace
 #ifdef DIRECTX11
 DXGI_FORMAT get_dx_format(int dimension,vbo::vertex_atrib_type type)
 {
-    if(type==vbo::uint8_t)
-        return DXGI_FORMAT_R8G8B8A8_UINT;
+    if(type==vbo::uint8)
+        return DXGI_FORMAT_R8G8B8A8_UNORM;
 
     if(type==vbo::float16)
     {
@@ -466,7 +466,7 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type)
 
       #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
             glEnableVertexAttribArray(vertex_attribute);
-            glVertexAttribPointer(vertex_attribute,vobj.vertices.dimension,get_gl_element_type(vobj.vertices.type),0,
+            glVertexAttribPointer(vertex_attribute,vobj.vertices.dimension,get_gl_element_type(vobj.vertices.type),true,
                                   vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.vertices.offset));
       #else
             glEnableClientState(GL_VERTEX_ARRAY);
@@ -482,7 +482,7 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type)
       #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
                         if(!active_attributes.tcs[i].has)
                             glEnableVertexAttribArray(tc0_attribute+i);
-                        glVertexAttribPointer(tc0_attribute+i,tc.dimension,get_gl_element_type(tc.type),0,
+                        glVertexAttribPointer(tc0_attribute+i,tc.dimension,get_gl_element_type(tc.type),true,
                                               vobj.vertex_stride,(void*)(ptrdiff_t)(tc.offset));
       #else
                         glClientActiveTexture(GL_TEXTURE0_ARB+i);
@@ -510,7 +510,7 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type)
       #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
                     if(!active_attributes.normals.has)
                         glEnableVertexAttribArray(normal_attribute);
-                    glVertexAttribPointer(normal_attribute,3,get_gl_element_type(vobj.normals.type),1,
+                    glVertexAttribPointer(normal_attribute,3,get_gl_element_type(vobj.normals.type),true,
                                           vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.normals.offset));
       #else
                     if(!active_attributes.normals.has)
@@ -535,7 +535,7 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type)
       #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
                     if(!active_attributes.colors.has)
                         glEnableVertexAttribArray(color_attribute);
-                    glVertexAttribPointer(color_attribute,vobj.colors.dimension,get_gl_element_type(vobj.colors.type),0,
+                    glVertexAttribPointer(color_attribute,vobj.colors.dimension,get_gl_element_type(vobj.colors.type),true,
                                           vobj.vertex_stride,(void*)(ptrdiff_t)(vobj.colors.offset));
       #else
                     if(!active_attributes.colors.has)
