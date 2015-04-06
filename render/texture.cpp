@@ -674,8 +674,7 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
     glBindTexture(gl_type,texture_obj::get(m_tex).tex_id);
     active_layers[active_layer]=-1;
 
-    bool bad_alignment = !pot && (width * source_bpp / 8) % 4 != 0;
-
+    const bool bad_alignment=!pot && (width*source_bpp/8)%4!=0;
     if(bad_alignment)
         glPixelStorei(GL_UNPACK_ALIGNMENT,1);
 
