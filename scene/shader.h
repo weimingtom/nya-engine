@@ -22,6 +22,7 @@ struct shared_shader
     {
         camera_pos=0,
         camera_rot,
+        camera_dir,
         bones_pos,
         bones_pos_tr,
         bones_rot,

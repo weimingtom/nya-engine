@@ -142,7 +142,7 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
                 return false;
             }
 
-            const char *predefined_semantics[]={"nya camera position","nya camera rotation",
+            const char *predefined_semantics[]={"nya camera pos","nya camera rot","nya camera dir",
                                                 "nya bones pos","nya bones pos transform","nya bones rot",
                                                 "nya bones pos texture","nya bones pos transform texture","nya bones rot texture",
                                                 "nya viewport","nya model pos","nya model rot","nya model scale"};
@@ -158,6 +158,18 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
                     desc.predefines[i].transform=transform_from_string(parser.get_section_option(section_idx));
                     break;
                 }
+            }
+
+            //compatibility crutch, will be removed
+            if(strcmp(semantics,"nya camera position")==0)
+            {
+                desc.predefines[shared_shader::camera_pos].name=name;
+                desc.predefines[shared_shader::camera_pos].transform=transform_from_string(parser.get_section_option(section_idx));
+            }
+            else if(strcmp(semantics,"nya camera rotation")==0)
+            {
+                desc.predefines[shared_shader::camera_rot].name=name;
+                desc.predefines[shared_shader::camera_rot].transform=transform_from_string(parser.get_section_option(section_idx));
             }
         }
         else if(strcmp(section_type,"@uniform")==0)
@@ -290,6 +302,21 @@ void shader_internal::set() const
                 else
                 {
                     const nya_math::vec3 v=get_camera().get_pos();
+                    m_shared->shdr.set_uniform(p.location,v.x,v.y,v.z);
+                }
+            }
+            break;
+
+            case shared_shader::camera_dir:
+            {
+                if(p.transform==shared_shader::local_rot || p.transform==shared_shader::local)
+                {
+                    const nya_math::vec3 v=transform::get().inverse_rot(get_camera().get_dir());
+                    m_shared->shdr.set_uniform(p.location,v.x,v.y,v.z);
+                }
+                else
+                {
+                    const nya_math::vec3 v=get_camera().get_dir();
                     m_shared->shdr.set_uniform(p.location,v.x,v.y,v.z);
                 }
             }
