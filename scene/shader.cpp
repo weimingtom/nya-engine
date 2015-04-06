@@ -142,6 +142,12 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
                 return false;
             }
 
+            //compatibility crutch, will be removed
+            if(strcmp(semantics,"nya camera position")==0)
+                semantics = "nya camera pos";
+            else if(strcmp(semantics,"nya camera rotation")==0)
+                semantics = "nya camera rot";
+
             const char *predefined_semantics[]={"nya camera pos","nya camera rot","nya camera dir",
                                                 "nya bones pos","nya bones pos transform","nya bones rot",
                                                 "nya bones pos texture","nya bones pos transform texture","nya bones rot texture",
@@ -158,18 +164,6 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
                     desc.predefines[i].transform=transform_from_string(parser.get_section_option(section_idx));
                     break;
                 }
-            }
-
-            //compatibility crutch, will be removed
-            if(strcmp(semantics,"nya camera position")==0)
-            {
-                desc.predefines[shared_shader::camera_pos].name=name;
-                desc.predefines[shared_shader::camera_pos].transform=transform_from_string(parser.get_section_option(section_idx));
-            }
-            else if(strcmp(semantics,"nya camera rotation")==0)
-            {
-                desc.predefines[shared_shader::camera_rot].name=name;
-                desc.predefines[shared_shader::camera_rot].transform=transform_from_string(parser.get_section_option(section_idx));
             }
         }
         else if(strcmp(section_type,"@uniform")==0)
