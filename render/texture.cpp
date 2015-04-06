@@ -285,17 +285,6 @@ void gl_setup_texture(int target,bool clamp,bool has_mips)
         glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MAX_ANISOTROPY_EXT,float(default_aniso));
 }
 
-void gl_setup_pack_alignment()
-{
-    static bool set=false;
-    if(set)
-        return;
-
-    glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-    glPixelStorei(GL_PACK_ALIGNMENT,1);
-    set=true;
-}
-
 unsigned int gl_get_max_tex_size()
 {
     static unsigned int max_tex_size=0;
@@ -685,7 +674,11 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
     glBindTexture(gl_type,texture_obj::get(m_tex).tex_id);
     active_layers[active_layer]=-1;
 
-    if(!pot) gl_setup_pack_alignment();
+    bool bad_alignment = !pot && (width * source_bpp / 8) % 4 != 0;
+
+    if(bad_alignment)
+        glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+
     gl_setup_texture(gl_type,!pot && !is_platform_restrictions_ignored(),has_mipmap);
 
     if(is_pvrtc)
@@ -745,6 +738,9 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
             data_pointer+=(size+mip_padding);
         }
     }
+
+    if(bad_alignment)
+        glPixelStorei(GL_UNPACK_ALIGNMENT,4);
 
   #ifndef GL_GENERATE_MIPMAP
     if(has_mipmap && mip_count<0) glGenerateMipmap(gl_type);
