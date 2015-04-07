@@ -27,6 +27,8 @@
     #define glGenVertexArrays glGenVertexArraysOES
     #define glBindVertexArray glBindVertexArrayOES
     #define glDeleteVertexArrays glDeleteVertexArraysOES
+    #define glDrawElementsInstancedARB glDrawElementsInstancedEXT
+    #define glDrawArraysInstancedARB glDrawArraysInstancedEXT
 #elif defined __APPLE__ && !defined OPENGL3
     #define glGenVertexArrays glGenVertexArraysAPPLE
     #define glBindVertexArray glBindVertexArrayAPPLE
@@ -210,6 +212,8 @@ int get_gl_element_type(vbo::vertex_atrib_type type)
     PFNGLGETBUFFERSUBDATAARBPROC glGetBufferSubData;
     PFNGLDELETEBUFFERSARBPROC glDeleteBuffers;
     PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTexture;
+    PFNGLDRAWELEMENTSINSTANCEDARBPROC glDrawElementsInstancedARB;
+    PFNGLDRAWARRAYSINSTANCEDARBPROC glDrawArraysInstancedARB;
   #endif
 
   #ifndef GL_ARRAY_BUFFER
@@ -250,6 +254,9 @@ bool check_init_vbo()
     if(!(glGetBufferSubData=(PFNGLGETBUFFERSUBDATAARBPROC)get_extension("glGetBufferSubData"))) return false;
     if(!(glDeleteBuffers=(PFNGLDELETEBUFFERSARBPROC)get_extension("glDeleteBuffers"))) return false;
     if(!(glClientActiveTexture=(PFNGLCLIENTACTIVETEXTUREARBPROC)get_extension("glClientActiveTexture"))) return false;
+
+    glDrawElementsInstancedARB=(PFNGLDRAWELEMENTSINSTANCEDARBPROC)get_extension("glDrawElementsInstanced");
+    glDrawArraysInstancedARB=(PFNGLDRAWARRAYSINSTANCEDARBPROC)get_extension("glDrawArraysInstanced");
 #endif
 
     initialised=true,failed=false;
@@ -342,9 +349,9 @@ void vbo::draw(unsigned int offset,unsigned int count)
         draw(offset,count,vbo_obj::get(current_verts).element_type);
 }
 
-void vbo::draw(unsigned int offset,unsigned int count,element_type el_type)
+void vbo::draw(unsigned int offset,unsigned int count,element_type el_type,unsigned int instances)
 {
-    if(current_verts<0 || !count)
+    if(current_verts<0 || !count || instances<1)
         return;
 
     shader::apply();
@@ -437,14 +444,20 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type)
             active_inds=current_inds;
         }
 
-		get_context()->DrawIndexed(count,offset,0);
+        if(instances>1)
+   		    get_context()->DrawIndexedInstanced(count,instances,offset,0,0);
+        else
+   		    get_context()->DrawIndexed(count,offset,0);
 	}
 	else
 	{
         if(offset+count>vobj.verts_count)
             return;
 
-		get_context()->Draw(count,offset);
+        if(instances>1)
+		    get_context()->DrawInstanced(count,instances,offset,0);
+        else
+		    get_context()->Draw(count,offset);
 	}
 #else
     if(current_verts!=active_verts)
@@ -581,23 +594,29 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type)
         }
 #endif
         const unsigned int gl_elem_type=(iobj.element_size==index4b?GL_UNSIGNED_INT:GL_UNSIGNED_SHORT);
-        glDrawElements(gl_elem,count,gl_elem_type,(void*)(ptrdiff_t)(offset*iobj.element_size));
+        if(instances>1 && glDrawElementsInstancedARB)
+            glDrawElementsInstancedARB(gl_elem,count,gl_elem_type,(void*)(ptrdiff_t)(offset*iobj.element_size),instances);
+        else
+            glDrawElements(gl_elem,count,gl_elem_type,(void*)(ptrdiff_t)(offset*iobj.element_size));
     }
     else
     {
         if(offset+count>vobj.verts_count)
             return;
 
-        glDrawArrays(gl_elem,offset,count);
+        if(instances>1 && glDrawArraysInstancedARB)
+            glDrawArraysInstancedARB(gl_elem,offset,count,instances);
+        else
+            glDrawArrays(gl_elem,offset,count);
     }
 #endif
 
     if(statistics::enabled())
     {
         ++statistics::get().draw_count;
-        statistics::get().verts_count+=count;
+        statistics::get().verts_count+=count*instances;
 
-        const unsigned int tri_count=el_type==vbo::triangles?count/3:el_type==vbo::triangle_strip?count-2:0;
+        const unsigned int tri_count=el_type==(vbo::triangles?count/3:el_type==vbo::triangle_strip?count-2:0)*instances;
         if(get_state().blend)
             statistics::get().transparent_poly_count+=tri_count;
         else
