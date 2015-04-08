@@ -596,7 +596,7 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type,unsig
         }
 #endif
         const unsigned int gl_elem_type=(iobj.element_size==index4b?GL_UNSIGNED_INT:GL_UNSIGNED_SHORT);
-    #ifdef glDrawElementsInstancedARB
+    #ifndef __ANDROID__
         if(instances>1 && glDrawElementsInstancedARB)
             glDrawElementsInstancedARB(gl_elem,count,gl_elem_type,(void*)(ptrdiff_t)(offset*iobj.element_size),instances);
         else
@@ -608,7 +608,7 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type,unsig
         if(offset+count>vobj.verts_count)
             return;
 
-    #ifdef glDrawArraysInstancedARB
+    #ifndef __ANDROID__
         if(instances>1 && glDrawArraysInstancedARB)
             glDrawArraysInstancedARB(gl_elem,offset,count,instances);
         else
