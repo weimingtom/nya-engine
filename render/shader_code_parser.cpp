@@ -5,6 +5,8 @@
 #include <string.h>
 #include <algorithm>
 
+//ToDo: DX11 instance id (SV_InstanceID)
+
 namespace nya_render
 {
 
@@ -13,7 +15,7 @@ bool shader_code_parser::convert_to_hlsl()
     m_uniforms.clear();
     m_attributes.clear();
 
-    std::string prefix="#define DIRECTX11\n";
+    std::string prefix="#define DIRECTX11 1\n";
 
     parse_predefined_uniforms(m_replace_str.c_str(),true);
     if(!m_uniforms.empty())
@@ -238,6 +240,14 @@ bool shader_code_parser::convert_to_hlsl()
     return true;
 }
 
+bool shader_code_parser::convert_to_glsl()
+{
+    if(replace_variable("gl_InstanceID","gl_InstanceIDARB"))
+        m_code.insert(0,"#extension GL_ARB_draw_instanced : enable\n");
+
+    return true;
+}
+
 bool shader_code_parser::convert_to_glsl_es2(const char *precision)
 {
     m_uniforms.clear();
@@ -255,7 +265,10 @@ bool shader_code_parser::convert_to_glsl_es2(const char *precision)
         return false;
     }
 
-    std::string prefix="#define OPENGL_ES\n";
+    std::string prefix="#define OPENGL_ES2 1\n";
+
+    if(replace_variable("gl_InstanceID","gl_InstanceIDEXT"))
+        prefix.append("#extension GL_EXT_draw_instanced : enable\n");
 
     for(int i=0;i<(int)m_uniforms.size();++i)
         prefix.append("uniform mat4 "+m_uniforms[i].name+";\n");
@@ -289,7 +302,7 @@ bool shader_code_parser::convert_to_glsl3()
         return false;
     }
 
-    std::string prefix="#version 330\n";
+    std::string prefix="#version 330\n#define OPENGL3 1\n";
 
     for(int i=0;i<(int)m_uniforms.size();++i)
         prefix.append("uniform mat4 "+m_uniforms[i].name+";\n");

@@ -602,8 +602,10 @@ bool shader::add_program(program_type type,const char*code)
     }
 
   #endif
-    code=parser.get_code();
+#else
+    parser.convert_to_glsl();
 #endif
+    code=parser.get_code();
 
     GLenum gl_type=type==pixel?GL_FRAGMENT_SHADER_ARB:GL_VERTEX_SHADER_ARB; //ToDo: switch all cases
 
