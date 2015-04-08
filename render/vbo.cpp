@@ -60,7 +60,7 @@ namespace
         struct attribute
         {
             bool has;
-            vbo::vertex_atrib_type type:CHAR_BIT;
+            vbo::vertex_atrib_type type:8;
             short dimension;
             unsigned int offset;
 
