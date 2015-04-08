@@ -27,8 +27,10 @@
     #define glGenVertexArrays glGenVertexArraysOES
     #define glBindVertexArray glBindVertexArrayOES
     #define glDeleteVertexArrays glDeleteVertexArraysOES
+  #ifdef __APPLE__
     #define glDrawElementsInstancedARB glDrawElementsInstancedEXT
     #define glDrawArraysInstancedARB glDrawArraysInstancedEXT
+  #endif
 #elif defined __APPLE__ && !defined OPENGL3
     #define glGenVertexArrays glGenVertexArraysAPPLE
     #define glBindVertexArray glBindVertexArrayAPPLE
