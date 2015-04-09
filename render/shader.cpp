@@ -6,6 +6,11 @@
 #include "render.h"
 
 //#define CACHE_UNIFORM_CHANGES
+//#define CACHE_UNIFORM_ARRAY_CHANGES
+
+#ifdef CACHE_UNIFORM_ARRAY_CHANGES
+    #define CACHE_UNIFORM_CHANGES
+#endif
 
 #ifdef OPENGL_ES
     #define GLhandleARB GLuint
@@ -33,7 +38,7 @@ namespace nya_render
 namespace
 {
     compiled_shaders_provider *render_csp=0;
-    int current_shader=-1,active_shader=-1;
+    int current_shader= -1,active_shader= -1;
     bool shaders_validation=false;
 
     struct shader_obj
@@ -91,7 +96,7 @@ namespace
                 objects[i]=0;
 
 #ifdef SUPPORT_OLD_SHADERS
-            mat_mvp=mat_mv=mat_p=-1;
+            mat_mvp=mat_mv=mat_p= -1;
 #endif
         }
 
@@ -103,6 +108,9 @@ namespace
         {
             std::string name;
             int array_size;
+#ifdef CACHE_UNIFORM_CHANGES
+            int value_offset;
+#endif
             shader::uniform_type type;
 
             uniform(): array_size(1) {}
@@ -115,6 +123,9 @@ namespace
     public:
         std::vector<uniform> uniforms;
 
+#ifdef CACHE_UNIFORM_CHANGES
+        std::vector<float> values_buffer;
+#endif
         uniform &add_uniform(const std::string &name)
         {
             for(int i=0;i<int(uniforms.size());++i)
@@ -302,7 +313,7 @@ bool check_init_shaders()
 }
 
 int invalidate_shaders() { return shader_obj::invalidate_all(); }
-int release_shaders() { return shader_obj::release_all(); current_shader=active_shader=-1; }
+int release_shaders() { return shader_obj::release_all(); current_shader=active_shader= -1; }
 
 void shader_obj::release()
 {
@@ -384,14 +395,14 @@ void remove_layout(int mesh_idx) { shader_obj::remove_layout(mesh_idx); }
         if(idx<0)
         {
             glUseProgramObjectARB(0);
-            active_shader=-1;
+            active_shader= -1;
             return;
         }
 
         shader_obj &shdr=shader_obj::get(idx);
         glUseProgramObjectARB(shdr.program);
         if(!shdr.program)
-            active_shader=-1;
+            active_shader= -1;
         else
             active_shader=idx;
     }
@@ -641,6 +652,28 @@ bool shader::add_program(program_type type,const char*code)
     }
 
 #ifndef DIRECTX11
+  #ifdef CACHE_UNIFORM_CHANGES
+    shdr.values_buffer.clear();
+    for(size_t i=0;i<shdr.uniforms.size();++i)
+    {
+        shader_obj::uniform &u=shdr.uniforms[i];
+        if(u.type>uniform_mat4)
+            continue;
+
+    #ifndef CACHE_UNIFORM_ARRAY_CHANGES
+        if(u.array_size>1)
+        {
+            u.value_offset= -1;
+            continue;
+        }
+    #endif
+
+        const int size=(u.type==uniform_mat4?16:4)*u.array_size;
+        u.value_offset=(int)shdr.values_buffer.size();
+        shdr.values_buffer.resize(u.value_offset+size,0.0f);
+    }
+  #endif
+
   #ifdef OPENGL_ES
     shdr.objects[type]=object;
     if(shdr.program && shdr.objects[vertex] && shdr.objects[pixel])
@@ -744,7 +777,7 @@ bool shader::add_program(program_type type,const char*code)
 }
 
 void shader::bind() const { current_shader=m_shdr; }
-void shader::unbind() { current_shader=-1; }
+void shader::unbind() { current_shader= -1; }
 
 void shader::apply(bool ignore_cache)
 {
@@ -752,7 +785,7 @@ void shader::apply(bool ignore_cache)
     if(current_shader<0)
     {
         if(ignore_cache)
-            active_shader=-1;
+            active_shader= -1;
 
         return;
     }
@@ -892,11 +925,12 @@ int shader::get_handler(const char *name) const
 
 void shader::set_uniform(unsigned int i,float f0,float f1,float f2,float f3) const
 {
-#ifdef DIRECTX11
     if(m_shdr<0)
         return;
 
     shader_obj &shdr=shader_obj::get(m_shdr);
+
+#ifdef DIRECTX11
     if(i>=(int)shdr.uniforms.size())
         return;
 
@@ -919,25 +953,26 @@ void shader::set_uniform(unsigned int i,float f0,float f1,float f2,float f3) con
     }
 
 #else
-    if(m_shdr<0)
+    if(!shdr.program)
         return;
+
+  #ifdef CACHE_UNIFORM_CHANGES
+    //ToDo
+  #endif
 
     set_shader(m_shdr);
-
-    if(!shader_obj::get(m_shdr).program)
-        return;
-
     glUniform4fARB(i,f0,f1,f2,f3);
 #endif
 }
 
 void shader::set_uniform3_array(unsigned int i,const float *f,unsigned int count) const
 {
-#ifdef DIRECTX11
     if(m_shdr<0)
         return;
 
     shader_obj &shdr=shader_obj::get(m_shdr);
+
+#ifdef DIRECTX11
     if(i>=(int)shdr.uniforms.size())
         return;
 
@@ -950,7 +985,7 @@ void shader::set_uniform3_array(unsigned int i,const float *f,unsigned int count
         const int size=sizeof(float)*3;
         for(int i=0,o=u.vs_offset,o2=0;i<int(count);++i,o+=4,o2+=3)
         {
-#ifdef CACHE_UNIFORM_CHANGES
+#ifdef CACHE_UNIFORM_ARRAY_CHANGES
             if(memcmp(&shdr.vertex_uniforms.buffer[o],&f[o2],size)==0)
                 continue;
 #endif
@@ -963,7 +998,7 @@ void shader::set_uniform3_array(unsigned int i,const float *f,unsigned int count
         const int size=sizeof(float)*3;
         for(int i=0,o=u.ps_offset,o2=0;i<int(count);++i,o+=4,o2+=3)
         {
-#ifdef CACHE_UNIFORM_CHANGES
+#ifdef CACHE_UNIFORM_ARRAY_CHANGES
             if(memcmp(&shdr.pixel_uniforms.buffer[o],&f[o2],size)==0)
                 continue;
 #endif
@@ -973,25 +1008,22 @@ void shader::set_uniform3_array(unsigned int i,const float *f,unsigned int count
     }
 
 #else
-    if(m_shdr<0)
+    if(!shdr.program || !f)
         return;
 
     set_shader(m_shdr);
-
-    if(!shader_obj::get(m_shdr).program || !f)
-        return;
-
     glUniform3fvARB(i,count,f);
 #endif
 }
 
 void shader::set_uniform4_array(unsigned int i,const float *f,unsigned int count) const
 {
-#ifdef DIRECTX11
     if(m_shdr<0)
         return;
 
     shader_obj &shdr=shader_obj::get(m_shdr);
+
+#ifdef DIRECTX11
     if(i>=(int)shdr.uniforms.size())
         return;
 
@@ -1002,7 +1034,7 @@ void shader::set_uniform4_array(unsigned int i,const float *f,unsigned int count
     if(u.vs_offset>=0)
     {
         const size_t size=sizeof(float)*4*count;
-#ifdef CACHE_UNIFORM_CHANGES
+#ifdef CACHE_UNIFORM_ARRAY_CHANGES
         if(memcmp(&shdr.vertex_uniforms.buffer[u.vs_offset],f,size)!=0)
 #endif
         {
@@ -1013,7 +1045,7 @@ void shader::set_uniform4_array(unsigned int i,const float *f,unsigned int count
     if(u.ps_offset>=0)
     {
         const size_t size=sizeof(float)*4*count;
-#ifdef CACHE_UNIFORM_CHANGES
+#ifdef CACHE_UNIFORM_ARRAY_CHANGES
         if(memcmp(&shdr.pixel_uniforms.buffer[u.ps_offset],f,size)!=0)
 #endif
         {
@@ -1023,25 +1055,22 @@ void shader::set_uniform4_array(unsigned int i,const float *f,unsigned int count
     }
 
 #else
-    if(m_shdr<0)
+    if(!shdr.program || !f)
         return;
 
     set_shader(m_shdr);
-
-    if(!shader_obj::get(m_shdr).program || !f)
-        return;
-
     glUniform4fvARB(i,count,f);
 #endif
 }
 
 void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int count,bool transpose) const
 {
-#ifdef DIRECTX11
     if(m_shdr<0)
         return;
 
     shader_obj &shdr=shader_obj::get(m_shdr);
+
+#ifdef DIRECTX11
     if(i>=(int)shdr.uniforms.size())
         return;
 
@@ -1052,7 +1081,7 @@ void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int coun
     if(u.vs_offset>=0)
     {
         const size_t size=sizeof(float)*16*count;
-#ifdef CACHE_UNIFORM_CHANGES
+#ifdef CACHE_UNIFORM_ARRAY_CHANGES
         if(memcmp(&shdr.vertex_uniforms.buffer[u.vs_offset],f,size)!=0)
 #endif
         {
@@ -1063,7 +1092,7 @@ void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int coun
     if(u.ps_offset>=0)
     {
         const size_t size=sizeof(float)*16*count;
-#ifdef CACHE_UNIFORM_CHANGES
+#ifdef CACHE_UNIFORM_ARRAY_CHANGES
         if(memcmp(&shdr.pixel_uniforms.buffer[u.ps_offset],f,size)!=0)
 #endif
         {
@@ -1073,14 +1102,10 @@ void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int coun
     }
 
 #else
-    if(m_shdr<0)
+    if(!shdr.program || !f)
         return;
 
     set_shader(m_shdr);
-
-    if(!shader_obj::get(m_shdr).program || !f)
-        return;
-
     glUniformMatrix4fvARB(i,count,transpose,f);
 #endif
 }
@@ -1123,11 +1148,11 @@ void shader::release()
         return;
 
     OPENGL_ONLY(if(m_shdr==active_shader) set_shader(-1));
-    if(m_shdr==active_shader) active_shader=-1;
-    if(m_shdr==current_shader) current_shader=-1;
+    if(m_shdr==active_shader) active_shader= -1;
+    if(m_shdr==current_shader) current_shader= -1;
 
     shader_obj::remove(m_shdr);
-    m_shdr=-1;
+    m_shdr= -1;
 }
 
 void shader::set_shaders_validation(bool enable) { shaders_validation=enable; }

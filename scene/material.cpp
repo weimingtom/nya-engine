@@ -363,7 +363,7 @@ void material_internal::pass::update_pass_params()
     for(int i=0;i<(int)m_pass_params.size();++i)
     {
         pass_param &pp=m_pass_params[i];
-        pp.uniform_idx=-1;
+        pp.uniform_idx= -1;
 
         for(int uniform_idx=0;uniform_idx<m_shader.internal().get_uniforms_count();++uniform_idx)
         {
@@ -385,7 +385,7 @@ void material_internal::pass::update_maps(const material_internal &m) const
     {
         const std::string &name=m_shader.internal().get_uniform(uniform_idx).name;
         // don't use m.get_param_idx(name.c_str()) as it calls rebuil_maps
-        int param_idx=-1;
+        int param_idx= -1;
         for(int i=0;i<(int)m.m_params.size();++i)
         {
             if(m.m_params[i].name==name)
@@ -490,7 +490,7 @@ void material_internal::update_passes_maps() const
         {
             const std::string name = sh.internal().get_uniform(uniform_idx).name;
             //don't use get_param_idx_for_name(name.c_str()) as it calls rebuild_passes_map
-            int param_idx=-1;
+            int param_idx= -1;
             for(int i=0;i<(int)m_params.size();++i)
             {
                 if(m_params[i].name==name)
@@ -590,7 +590,7 @@ bool material::load(const char *name)
     if(!internal().m_shared.is_valid())
         return false;
 
-    m_internal.m_last_set_pass_idx=-1;
+    m_internal.m_last_set_pass_idx= -1;
     m_internal.m_should_rebuild_passes_maps=true;
 
     m_internal.m_name=m_internal.m_shared->m_name;

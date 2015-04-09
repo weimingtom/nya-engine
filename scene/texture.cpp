@@ -145,7 +145,7 @@ bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
                 cf=nya_render::texture::color_rgba;
                 dds.pf=nya_formats::dds::bgra;
                 if(mipmap_count>1)
-                    mipmap_count=-1;
+                    mipmap_count= -1;
             }
 
             if(m_load_dds_flip)
@@ -170,7 +170,7 @@ bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
                 cf=nya_render::texture::color_rgba;
                 dds.pf=nya_formats::dds::bgra;
                 if(mipmap_count>1)
-                    mipmap_count=-1;
+                    mipmap_count= -1;
             }
 
             const void *data[6];

@@ -38,7 +38,7 @@ public:
 
 public:
     int add_bone(const char *name,const nya_math::vec3 &pos,
-                 const nya_math::quat &rot=nya_math::quat(),int parent_bone_idx=-1,bool allow_doublicate=false);
+                 const nya_math::quat &rot=nya_math::quat(),int parent_bone_idx= -1,bool allow_doublicate=false);
 
 public:
     int add_ik(int target_bone_idx,int effect_bone_idx,int count,float fact,bool allow_invalid=false);

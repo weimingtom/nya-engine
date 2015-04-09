@@ -121,7 +121,7 @@ struct fbo_obj
         attachment(): tex_idx(-1),cubemap_side(-1)
         {
             OPENGL_ONLY(last_target_idx=0);
-            OPENGL_ONLY(last_gl_type=-1);
+            OPENGL_ONLY(last_gl_type= -1);
         }
     };
 
@@ -227,7 +227,7 @@ void fbo::release()
 #endif
 
     fbo_obj::remove(m_fbo_idx);
-    m_fbo_idx=-1;
+    m_fbo_idx= -1;
 }
 
 void fbo::bind() const
@@ -387,7 +387,7 @@ unsigned int fbo::get_max_color_attachments()
 #ifdef DIRECTX11
     return 1; //D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT; //ToDo
 #else
-    static int max_attachments=-1;
+    static int max_attachments= -1;
     if(max_attachments<0)
         glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &max_attachments);
 

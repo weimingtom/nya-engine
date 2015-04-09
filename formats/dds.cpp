@@ -486,7 +486,7 @@ size_t dds::decode_header(const void *data,size_t size)
     reader.seek(128);
     if(!reader.check_remained(this->data_size))
     {
-        this->mipmap_count=-1;
+        this->mipmap_count= -1;
         this->data_size=this->mip0_data_size;
         //probably broken, try load at least first mipmap
         if(!reader.check_remained(this->data_size))

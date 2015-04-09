@@ -441,7 +441,7 @@ void mesh::set_anim(const animation_proxy & anim,int layer)
     if(!internal().m_shared.is_valid() || layer<0)
         return;
 
-    int idx=-1;
+    int idx= -1;
     for(int i=0;i<int(internal().m_anims.size());++i)
     {
         if(m_internal.m_anims[i].layer==layer)

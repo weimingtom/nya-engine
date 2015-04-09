@@ -201,7 +201,7 @@ void postprocess::update_shader_param(int param_idx)
 
     for(size_t i=0;i<m_op_set_shader.size();++i)
     {
-        int idx=-1;
+        int idx= -1;
         for(int j=0;j<m_op_set_shader[i].sh.internal().get_uniforms_count();++j)
         {
             if(m_op_set_shader[i].sh.internal().get_uniform(j).name!=m_shader_params[param_idx].first)

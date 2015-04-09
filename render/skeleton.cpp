@@ -46,7 +46,7 @@ int skeleton::add_bone(const char *name,const nya_math::vec3 &pos,const nya_math
         if(parent>=0)
         {
             nya_math::quat pq=m_rot_org[parent].rot_org;
-            pq.v=-pq.v;
+            pq.v= -pq.v;
             m_rot_org[bone_idx].offset=pq*m_rot_org[bone_idx].rot_org;
             b.offset=pq.rotate(b.offset);
         }

@@ -50,10 +50,10 @@ namespace nya_render
 
 namespace
 {
-    int current_verts=-1;
-    int active_verts=-1;
-    int current_inds=-1;
-    int active_inds=-1;
+    int current_verts= -1;
+    int active_verts= -1;
+    int current_inds= -1;
+    int active_inds= -1;
 
     struct vbo_obj_atributes
     {
@@ -269,7 +269,7 @@ bool check_init_vbo()
 }
 
 int invalidate_vbos() { return vbo_obj::invalidate_all(); }
-int release_vbos() { return vbo_obj::release_all(); reset_vbo_state(); current_verts=current_inds=-1; }
+int release_vbos() { return vbo_obj::release_all(); reset_vbo_state(); current_verts=current_inds= -1; }
 
 void vbo_obj::release()
 {
@@ -287,7 +287,7 @@ void vbo_obj::release()
 
 void vbo::bind_verts() const { current_verts=m_verts; }
 void vbo::bind_indices() const { current_inds=m_indices; }
-void vbo::unbind() { current_verts=current_inds=-1; }
+void vbo::unbind() { current_verts=current_inds= -1; }
 
 void reset_vbo_state()
 {
@@ -306,7 +306,7 @@ void reset_vbo_state()
     glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
 
-    static int max_tex_coord=-1;
+    static int max_tex_coord= -1;
     if(max_tex_coord<0)
         glGetIntegerv(GL_MAX_TEXTURE_COORDS,&max_tex_coord);
     for(int i=0;i<max_tex_coord;++i)
@@ -323,7 +323,7 @@ void reset_vbo_state()
 #endif
 
     OPENGL_ONLY(active_attributes=vbo_obj_atributes());
-    active_verts=active_inds=-1;
+    active_verts=active_inds= -1;
     return;
 }
 
@@ -635,20 +635,20 @@ void vbo::release()
     if(m_verts>=0)
     {
         if(active_verts==m_verts) reset_vbo_state();
-        if(current_verts==m_verts) current_verts=-1;
+        if(current_verts==m_verts) current_verts= -1;
         DIRECTX11_ONLY(remove_layout(m_verts));
         vbo_obj::remove(m_verts);
     }
 
     if(active_inds==m_indices)
     {
-        active_inds=-1;
+        active_inds= -1;
         OPENGL_ONLY(if(m_indices>=0) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0));
     }
 
-    if(current_inds==m_indices) current_inds=-1;
+    if(current_inds==m_indices) current_inds= -1;
 
-    m_indices=m_verts=-1;
+    m_indices=m_verts= -1;
 }
 
 #ifndef DIRECTX11
@@ -757,7 +757,7 @@ bool vbo::set_vertex_data(const void*data,unsigned int vert_stride,unsigned int 
     if(!obj.vertices.has)
         set_vertices(0,3);
     
-    active_verts=-1;
+    active_verts= -1;
 
     return true;
 }
@@ -850,7 +850,7 @@ bool vbo::set_index_data(const void*data,index_size size,unsigned int indices_co
 #endif
 
     obj.element_count=indices_count;
-    active_inds=-1;
+    active_inds= -1;
 
     return true;
 }
@@ -867,7 +867,7 @@ void vbo::set_vertices(unsigned int offset,unsigned int dimension,vertex_atrib_t
 #endif
 
     DIRECTX11_ONLY(remove_layout(m_verts));
-    OPENGL_ONLY(if(m_verts==active_verts) active_verts=-1);
+    OPENGL_ONLY(if(m_verts==active_verts) active_verts= -1);
 
     if(dimension==0 || dimension>4)
     {
@@ -893,7 +893,7 @@ void vbo::set_normals(unsigned int offset,vertex_atrib_type type)
 #endif
 
     DIRECTX11_ONLY(remove_layout(m_verts));
-    OPENGL_ONLY(if(m_verts==active_verts) active_verts=-1);
+    OPENGL_ONLY(if(m_verts==active_verts) active_verts= -1);
 
     obj.normals.has=true;
     obj.normals.offset=offset;
@@ -915,7 +915,7 @@ void vbo::set_tc(unsigned int tc_idx,unsigned int offset,unsigned int dimension,
 #endif
 
     DIRECTX11_ONLY(remove_layout(m_verts));
-    OPENGL_ONLY(if(m_verts==active_verts) active_verts=-1);
+    OPENGL_ONLY(if(m_verts==active_verts) active_verts= -1);
 
     vbo_obj::attribute &tc=obj.tcs[tc_idx];
     if(dimension==0 || dimension>4)
@@ -942,7 +942,7 @@ void vbo::set_colors(unsigned int offset,unsigned int dimension,vertex_atrib_typ
 #endif
 
     DIRECTX11_ONLY(remove_layout(m_verts));
-    OPENGL_ONLY(if(m_verts==active_verts) active_verts=-1);
+    OPENGL_ONLY(if(m_verts==active_verts) active_verts= -1);
 
     if(dimension==0 || dimension>4)
     {
@@ -984,7 +984,7 @@ bool vbo::get_vertex_data( nya_memory::tmp_buffer_ref &data ) const
 #else
     data.allocate(vbo_size);
     glBindBuffer(GL_ARRAY_BUFFER,vobj.vertex_loc);
-    current_verts=-1;
+    current_verts= -1;
 
 #ifdef OPENGL_ES
   #ifdef __ANDROID__
@@ -1031,7 +1031,7 @@ bool vbo::get_index_data( nya_memory::tmp_buffer_ref &data ) const
 #else
     data.allocate(ind_size);
     glBindBuffer(GL_ARRAY_BUFFER,obj.index_loc);
-    current_inds=-1;
+    current_inds= -1;
 
   #ifdef OPENGL_ES
   #ifdef __ANDROID__

@@ -82,8 +82,8 @@ const nya_math::mat4 &camera::get_view_matrix() const
         m_recalc_view=false;
 
         nya_math::quat rot=m_rot;
-        rot.v.x=-rot.v.x;
-        rot.v.y=-rot.v.y;
+        rot.v.x= -rot.v.x;
+        rot.v.y= -rot.v.y;
         m_view=nya_math::mat4(rot);
         m_view.transpose();
         m_view.translate(-m_pos);

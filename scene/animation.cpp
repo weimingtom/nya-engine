@@ -160,10 +160,10 @@ bool animation::load_vmd(shared_animation &res,resource_data &data,const char* n
         bone_frame.frame=reader.read<uint>();
         bone_frame.pos.x=reader.read<float>();
         bone_frame.pos.y=reader.read<float>();
-        bone_frame.pos.z=-reader.read<float>();
+        bone_frame.pos.z= -reader.read<float>();
 
-        bone_frame.rot.v.x=-reader.read<float>();
-        bone_frame.rot.v.y=-reader.read<float>();
+        bone_frame.rot.v.x= -reader.read<float>();
+        bone_frame.rot.v.y= -reader.read<float>();
         bone_frame.rot.v.z=reader.read<float>();
         bone_frame.rot.w=reader.read<float>();
 

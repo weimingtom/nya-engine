@@ -356,7 +356,7 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
 
 #ifdef __ANDROID__
     if(format==color_bgra && mip_count>1 && data) //ToDo
-        mip_count=-1;
+        mip_count= -1;
 #endif
 
     if(!data)
@@ -377,7 +377,7 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
         release();
 
     if((format==color_rgb || format==greyscale) && data && mip_count>1) //ToDo
-        mip_count=-1;
+        mip_count= -1;
 
     D3D11_TEXTURE2D_DESC desc;
     memset(&desc,0,sizeof(desc));
@@ -672,7 +672,7 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
     }
 
     glBindTexture(gl_type,texture_obj::get(m_tex).tex_id);
-    active_layers[active_layer]=-1;
+    active_layers[active_layer]= -1;
 
     const bool bad_alignment=!pot && (width*source_bpp/8)%4!=0;
     if(bad_alignment)
@@ -772,7 +772,7 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
 
 void texture::bind(unsigned int layer) const { if(layer>=max_layers) return; current_layers[layer]=m_tex; }
 
-void texture::unbind(unsigned int layer) { if(layer>=max_layers) return; current_layers[layer]=-1; }
+void texture::unbind(unsigned int layer) { if(layer>=max_layers) return; current_layers[layer]= -1; }
 
 void texture::apply(bool ignore_cache)
 {
@@ -793,7 +793,7 @@ void texture::apply(bool ignore_cache)
             get_context()->PSSetShaderResources(i,1,srv_null);
             ID3D11SamplerState *ss_null[]={0};
             get_context()->PSSetSamplers(i,1,ss_null);
-            active_layers[i]=-1;
+            active_layers[i]= -1;
             continue;
         }
 
@@ -809,7 +809,7 @@ void texture::apply(bool ignore_cache)
                 continue;
 
             glBindTexture(texture_obj::get(active_layers[i]).gl_type,0);
-            active_layers[i]=-1;
+            active_layers[i]= -1;
             continue;
         }
 
@@ -878,7 +878,7 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
 
     gl_select_multitex_layer(0);
     glBindTexture(tex.gl_type,tex.tex_id);
-    active_layers[0]=-1;
+    active_layers[0]= -1;
 
     GLint prev_fbo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING,&prev_fbo);
@@ -922,7 +922,7 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
 
     gl_select_multitex_layer(0);
     glBindTexture(tex.gl_type,tex.tex_id);
-    active_layers[0]=-1;
+    active_layers[0]= -1;
 
     switch(format)
     {
@@ -953,7 +953,7 @@ void texture::set_wrap(bool repeat_s,bool repeat_t)
     glBindTexture(tex.gl_type,tex.tex_id);
     glTexParameteri(tex.gl_type,GL_TEXTURE_WRAP_S,repeat_s&&pot?GL_REPEAT:GL_CLAMP_TO_EDGE);
     glTexParameteri(tex.gl_type,GL_TEXTURE_WRAP_T,repeat_t&&pot?GL_REPEAT:GL_CLAMP_TO_EDGE);
-    active_layers[0]=-1;
+    active_layers[0]= -1;
 #endif
 }
 
@@ -976,7 +976,7 @@ void texture::set_aniso(unsigned int level)
 #else
     glBindTexture(tex.gl_type,tex.tex_id);
     glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MAX_ANISOTROPY_EXT,float(level));
-    active_layers[0]=-1;
+    active_layers[0]= -1;
 #endif
 }
 
@@ -990,7 +990,7 @@ void texture::set_filter(filter minification,filter magnification,filter mipmap)
 #ifndef DIRECTX11
     glBindTexture(tex.gl_type,tex.tex_id);
     gl_setup_filtration(tex.gl_type,tex.has_mipmaps,minification,magnification,mipmap);
-    active_layers[0]=-1;
+    active_layers[0]= -1;
 #endif
 }
 
@@ -1091,11 +1091,11 @@ void texture::release()
             get_context()->PSSetShaderResources(i,1,srv_null);
             ID3D11SamplerState *ss_null[]={0};
             get_context()->PSSetSamplers(i,1,ss_null);
-            active_layers[i]=-1;
+            active_layers[i]= -1;
         }
 
         if(current_layers[i]==m_tex)
-            current_layers[i]=-1;
+            current_layers[i]= -1;
     }
 #else
     for(unsigned int i=0;i<max_layers;++i)
@@ -1104,16 +1104,16 @@ void texture::release()
         {
             gl_select_multitex_layer(i);
             glBindTexture(texture_obj::get(m_tex).gl_type,0);
-            active_layers[i]=-1;
+            active_layers[i]= -1;
         }
 
         if(current_layers[i]==m_tex)
-            current_layers[i]=-1;
+            current_layers[i]= -1;
     }
 #endif
     texture_obj::remove(m_tex);
 
-    m_tex=-1;
+    m_tex= -1;
     m_width=m_height=0;
 }
 

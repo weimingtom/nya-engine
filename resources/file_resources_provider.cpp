@@ -144,7 +144,7 @@ bool file_resources_provider::set_folder(const char*name,bool recursive,bool ign
     if(!ignore_nonexistent)
     {
         struct stat sb;
-        if(stat(m_path.c_str(),&sb)==-1)
+        if(stat(m_path.c_str(),&sb)== -1)
         {
             log()<<"warning: unable to stat at path "<<name<<", probably does not exist\n";
             m_path.push_back('/');

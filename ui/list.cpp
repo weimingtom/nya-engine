@@ -84,7 +84,7 @@ bool list::on_mouse_move(uint x,uint y)
 
     if(mleft && m_mover>=0)
     {
-        m_mover=-1;
+        m_mover= -1;
         send_to_parent("mleft_elements");
     }
 

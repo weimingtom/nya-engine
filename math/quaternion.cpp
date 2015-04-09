@@ -20,12 +20,12 @@ quat quat::slerp(const quat &q1,const quat &q2,float t)
             const float omega=acosf(-cosom);
             const float sinom_inv=1.0f/sinf(omega);
             scale0=sinf((1.0f-t)*omega)*sinom_inv;
-            scale1=-sinf(t*omega)*sinom_inv;
+            scale1= -sinf(t*omega)*sinom_inv;
         }
         else
         {
             scale0=1.0f-t;
-            scale1=-t;
+            scale1= -t;
         }
     }
     else
@@ -61,8 +61,8 @@ vec3 quat::get_euler() const
     float temp=wx2-yz2;
     if(temp>=1.0f)
         temp=1.0f;
-    else if(temp<=-1.0f)
-        temp=-1.0f;
+    else if(temp<= -1.0f)
+        temp= -1.0f;
     
     const float pitch=asinf(temp);
     
@@ -135,8 +135,8 @@ quat &quat::limit_pitch(float from,float to)
     float temp=w*x2-v.y*z2;
     if(temp>=1.0f)
         temp=1.0f;
-    else if(temp<=-1.0f)
-        temp=-1.0f;
+    else if(temp<= -1.0f)
+        temp= -1.0f;
 
     float pitch=asinf(temp);
     if(pitch<from)

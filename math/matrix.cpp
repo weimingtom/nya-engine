@@ -39,7 +39,7 @@ mat4 &mat4::translate(const vec3 &v)
 mat4 &mat4::rotate(float angle,float x,float y,float z)
 {
     const float mag=sqrtf(x*x+y*y+z*z);
-    const float ang_rad=-angle*constants::pi/180.0f;
+    const float ang_rad= -angle*constants::pi/180.0f;
     const float sin_a=sinf(ang_rad);
     const float cos_a=cosf(ang_rad);
 
