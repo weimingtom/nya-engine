@@ -34,10 +34,6 @@ public:
 
         m_shared=get_shared_resources().access(final_name.c_str());
 
-#ifdef DEBUG
-        m_debug_name=final_name;
-#endif
-
         return m_shared.is_valid();
     }
 
@@ -213,10 +209,6 @@ private:
 
 protected:
     shared_resource_ref m_shared;
-
-#ifdef DEBUG
-private: std::string m_debug_name;
-#endif
 };
 
 }
