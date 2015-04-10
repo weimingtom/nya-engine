@@ -21,8 +21,8 @@ public:
     };
 
 public:
-    void set_color_target(const texture &tex,unsigned int attachment_idx=0);
-    void set_color_target(const texture &tex,cubemap_side side,unsigned int attachment_idx=0);
+    void set_color_target(const texture &tex,unsigned int attachment_idx=0,unsigned int samples=1);
+    void set_color_target(const texture &tex,cubemap_side side,unsigned int attachment_idx=0,unsigned int samples=1);
     void set_depth_target(const texture &tex);
 
 public:

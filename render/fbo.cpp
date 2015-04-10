@@ -4,7 +4,7 @@
 #include "render.h"
 #include "platform_specific_gl.h"
 
-//ToDo: mrt on dx11
+//ToDo: mrt on dx11, multisample on dx11, multisample depth support
 
 namespace nya_render
 {
@@ -13,6 +13,7 @@ namespace
 {
     DIRECTX11_ONLY(dx_target default_target,target);
     OPENGL_ONLY(int default_fbo_idx=0);
+    int current_fbo= -1;
 }
 
 #ifdef DIRECTX11
@@ -66,6 +67,10 @@ namespace
 	PFNGLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2D;
   #endif
 
+#ifndef GL_MULTISAMPLE
+    #define GL_MULTISAMPLE GL_MULTISAMPLE_ARB
+#endif
+
 bool check_init_fbo()
 {
     static bool initialised=false;
@@ -115,13 +120,16 @@ struct fbo_obj
     {
         int tex_idx;
         int cubemap_side;
+        int samples;
         OPENGL_ONLY(unsigned int last_target_idx);
         OPENGL_ONLY(int last_gl_type);
+        OPENGL_ONLY(unsigned int multisample_buf,multisample_fbo);
 
-        attachment(): tex_idx(-1),cubemap_side(-1)
+        attachment(): tex_idx(-1),cubemap_side(-1),samples(1)
         {
             OPENGL_ONLY(last_target_idx=0);
             OPENGL_ONLY(last_gl_type= -1);
+            OPENGL_ONLY(multisample_buf=multisample_fbo=0);
         }
     };
 
@@ -143,7 +151,23 @@ public:
     static int invalidate_all() { return get_fbo_objs().invalidate_all(); }
 
 public:
-    void release() { OPENGL_ONLY(if(fbo_idx) glDeleteFramebuffers(1,&fbo_idx)); *this=fbo_obj(); }
+    void release()
+    {
+#ifndef DIRECTX11
+        for(size_t i=0;i<color_attachments.size();++i)
+        {
+            fbo_obj::attachment &a=color_attachments[i];
+            if(a.multisample_buf)
+                glDeleteRenderbuffers(1,&a.multisample_buf);
+            if(a.multisample_fbo)
+                glDeleteFramebuffers(1,&a.multisample_fbo);
+        }
+
+        if(fbo_idx)
+            glDeleteFramebuffers(1,&fbo_idx);
+#endif
+        *this=fbo_obj();
+    }
 
 private:
     typedef render_objects<fbo_obj> fbo_objs;
@@ -156,10 +180,10 @@ private:
 
 }
 
-int release_fbos() { return fbo_obj::release_all(); }
-int invalidate_fbos() { return fbo_obj::invalidate_all(); }
+int release_fbos() { fbo::unbind(); return fbo_obj::release_all(); }
+int invalidate_fbos() { current_fbo= -1; return fbo_obj::invalidate_all(); }
 
-void fbo::set_color_target(const texture &tex,cubemap_side side,unsigned int attachment_idx)
+void fbo::set_color_target(const texture &tex,cubemap_side side,unsigned int attachment_idx,unsigned int samples)
 {
     if(attachment_idx>=get_max_color_attachments())
         return;
@@ -184,12 +208,49 @@ void fbo::set_color_target(const texture &tex,cubemap_side side,unsigned int att
 
         glGenFramebuffers(1,&fbo.fbo_idx);
     }
+
+#if defined OPENGL_ES && !defined __APPLE__ //ToDo
+    samples=1;
 #endif
+
+    if(a.multisample_buf)
+    {
+        glDeleteRenderbuffers(1,&a.multisample_buf);
+        a.multisample_buf=0;
+    }
+
+    if(a.multisample_fbo)
+    {
+        glDeleteFramebuffers(1,&a.multisample_fbo);
+        a.multisample_fbo=0;
+    }
+
+    if(samples>1)
+    {
+        glGenRenderbuffers(1,&a.multisample_buf);
+        glBindRenderbuffer(GL_RENDERBUFFER,a.multisample_buf);
+#ifdef OPENGL_ES
+    #ifdef __APPLE__
+        glRenderbufferStorageMultisampleAPPLE(GL_RENDERBUFFER,samples,GL_RGB5_A1,tex.get_width(),tex.get_height());
+    #endif
+#else
+        glRenderbufferStorageMultisample(GL_RENDERBUFFER,samples,GL_RGBA,tex.get_width(),tex.get_height());
+#endif
+        glBindRenderbuffer(GL_FRAMEBUFFER,0);
+
+        glGenFramebuffers(1,&a.multisample_fbo);
+    }
+#endif
+
+    a.samples=samples;
+
+    if(m_fbo_idx==current_fbo)
+        bind();
 }
 
-void fbo::set_color_target(const texture &tex,unsigned int attachment_idx)
+void fbo::set_color_target(const texture &tex,unsigned int attachment_idx,unsigned int samples)
 {
-    set_color_target(tex,cubemap_side(-1),attachment_idx);
+    set_color_target(tex,cubemap_side(-1),attachment_idx,samples);
 }
 
 void fbo::set_depth_target(const texture &tex)
@@ -209,12 +270,18 @@ void fbo::set_depth_target(const texture &tex)
         glGenFramebuffers(1,&fbo.fbo_idx);
     }
 #endif
+
+    if(m_fbo_idx==current_fbo)
+        bind();
 }
 
 void fbo::release()
 {
 	if(m_fbo_idx<0)
 		return;
+
+    if(m_fbo_idx==current_fbo)
+        unbind();
 
     fbo_obj &fbo=fbo_obj::get(m_fbo_idx);
 
@@ -232,12 +299,13 @@ void fbo::release()
 
 void fbo::bind() const
 {
-	if(m_fbo_idx<0)
-    {
+    if(current_fbo>=0)
         unbind();
-		return;
-    }
 
+	if(m_fbo_idx<0)
+		return;
+
+    current_fbo=m_fbo_idx;
     fbo_obj &fbo=fbo_obj::get(m_fbo_idx);
 
 #ifdef DIRECTX11
@@ -304,31 +372,46 @@ void fbo::bind() const
     {
         fbo_obj::attachment &a=fbo.color_attachments[i];
 
-#ifndef OPENGL_ES
+    #ifndef OPENGL_ES
         const bool color_target_was_invalid=a.last_target_idx==0;
-#endif
+    #endif
         const texture_obj &tex=texture_obj::get(a.tex_idx);
 
-        const int gl_type=a.cubemap_side<0?tex.gl_type:gl_target(a.cubemap_side);
-        if(gl_type!=a.last_gl_type && a.last_gl_type>=0)
+        const int gl_type=a.samples>1?GL_RENDERBUFFER:(a.cubemap_side<0?tex.gl_type:gl_target(a.cubemap_side));
+        if(gl_type!=a.last_gl_type)
         {
-            glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0+int(i),a.last_gl_type,0,0);
-            a.last_gl_type=tex.tex_id?gl_type:-1;
+            if(a.last_gl_type>=0)
+                glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0+int(i),a.last_gl_type,0,0);
+
+            if(a.samples>1)
+            {
+    #ifndef OPENGL_ES
+                if(a.samples>1)
+                    glEnable(GL_MULTISAMPLE); //ToDo
+    #endif
+                glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0+int(i),GL_RENDERBUFFER,a.multisample_buf);
+                a.last_gl_type=GL_RENDERBUFFER;
+            }
+            else
+            {
+                a.last_target_idx=0;
+                a.last_gl_type=tex.tex_id?gl_type:-1;
+            }
         }
 
-        if(tex.tex_id!=a.last_target_idx)
+        if(a.samples<=1 && tex.tex_id!=a.last_target_idx)
         {
             glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0+int(i),gl_type,tex.tex_id,0);
             a.last_target_idx=tex.tex_id;
         }
 
-#ifndef OPENGL_ES
+    #ifndef OPENGL_ES
         if(color_target_was_invalid && tex.tex_id && fbo.depth_target_idx)
         {
             glDrawBuffer(GL_COLOR_ATTACHMENT0);
             glReadBuffer(GL_COLOR_ATTACHMENT0);
         }
-#endif
+    #endif
         if(tex.tex_id)
             has_color_target=true;
     }
@@ -350,13 +433,13 @@ void fbo::bind() const
             {
                 glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,tex.tex_id,0);
                 fbo.depth_target_idx=tex.tex_id;
-#ifndef OPENGL_ES
+    #ifndef OPENGL_ES
                 if(!has_color_target && fbo.depth_target_idx)
                 {
                     glDrawBuffer(GL_NONE);
                     glReadBuffer(GL_NONE);
                 }
-#endif
+    #endif
             }
         }
     }
@@ -379,7 +462,59 @@ void fbo::unbind()
         return;
 
     glBindFramebuffer(GL_FRAMEBUFFER,default_fbo_idx);
+
+    if(current_fbo<0)
+        return;
+
+    fbo_obj &fbo=fbo_obj::get(current_fbo);
+    bool was_blit=false;
+    for(size_t i=0;i<fbo.color_attachments.size();++i)
+    {
+        fbo_obj::attachment &a=fbo.color_attachments[i];
+        if(a.samples<=1 || a.tex_idx<0)
+            continue;
+
+        const texture_obj &tex=texture_obj::get(a.tex_idx);
+
+        //ToDo: cache
+        glBindFramebuffer(GL_FRAMEBUFFER,a.multisample_fbo);
+        const int gl_type=a.cubemap_side<0?tex.gl_type:gl_target(a.cubemap_side);
+        glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0+int(i),gl_type,tex.tex_id,0);
+        glBindFramebuffer(GL_FRAMEBUFFER,default_fbo_idx);
+
+#ifdef OPENGL_ES
+    #ifdef __APPLE__
+        glBindFramebuffer(GL_READ_FRAMEBUFFER_APPLE,fbo.fbo_idx);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER_APPLE,a.multisample_fbo);
+        glResolveMultisampleFramebufferAPPLE();
+    #endif
+#else
+        glBindFramebuffer(GL_READ_FRAMEBUFFER,fbo.fbo_idx);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER,a.multisample_fbo);
+
+        glReadBuffer(GL_COLOR_ATTACHMENT0+int(i));
+
+        glBlitFramebuffer(0,0,tex.width,tex.height,0,0,tex.width,tex.height,GL_COLOR_BUFFER_BIT,GL_NEAREST);
 #endif
+        was_blit=true;
+    }
+
+    if(was_blit)
+    {
+#ifdef OPENGL_ES
+    #ifdef __APPLE__
+        glBindFramebuffer(GL_READ_FRAMEBUFFER_APPLE,default_fbo_idx);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER_APPLE,default_fbo_idx);
+    #endif
+#else
+        glReadBuffer(GL_COLOR_ATTACHMENT0);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER,default_fbo_idx);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER,default_fbo_idx);
+#endif
+    }
+
+#endif
+    current_fbo=-1;
 }
 
 unsigned int fbo::get_max_color_attachments()
