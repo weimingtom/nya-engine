@@ -78,9 +78,9 @@ public:
 
 public:
     bool get_data( nya_memory::tmp_buffer_ref &data ) const;
-    unsigned int get_width() const { return m_width; }
-    unsigned int get_height() const { return m_height; }
-    color_format get_color_format() const { return m_format; }
+    unsigned int get_width() const;
+    unsigned int get_height() const;
+    color_format get_color_format() const;
     bool is_cubemap() const;
 
     static void get_default_filter(filter &minification,filter &magnification,filter &mipmap);
@@ -93,7 +93,7 @@ public:
     static unsigned int get_used_vmem_size();
 
 public:
-    texture(): m_tex(-1),m_width(0),m_height(0) {}
+    texture(): m_tex(-1) {}
 
 private:
     bool build_texture(const void *data[6],bool is_cubemap,unsigned int width,unsigned int height,
@@ -101,11 +101,6 @@ private:
 
 private:
     int m_tex;
-
-    unsigned int m_width;
-    unsigned int m_height;
-
-	color_format m_format;
 };
 
 }

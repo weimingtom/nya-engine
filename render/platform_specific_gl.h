@@ -6,6 +6,7 @@
 //#define NYA_OPENGL3
 
 #include "render_objects.h"
+#include "texture.h"
 
 #ifdef _WIN32
     #include <windows.h>
@@ -102,8 +103,11 @@ namespace nya_render
 
     struct texture_obj
     {
+        unsigned int width,height;
         unsigned int size;
+        bool has_mipmaps;
         bool is_cubemap;
+        texture::color_format format;
 
 #ifdef DIRECTX11
         ID3D11Texture2D *tex;
@@ -112,20 +116,21 @@ namespace nya_render
         ID3D11RenderTargetView *color_targets[6];
         ID3D11DepthStencilView *depth_target;
         DXGI_FORMAT dx_format;
-        bool has_mipmaps;
+#else
+        unsigned int tex_id,gl_type;
+#endif
 
-        texture_obj(): tex(0),srv(0),sampler_state(0),size(0),is_cubemap(false),depth_target(0),has_mipmaps(false)
+        texture_obj(): width(0),height(0),size(0),is_cubemap(false),has_mipmaps(false)
         {
+#ifdef DIRECTX11
+            tex=0,srv=0,sampler_state=0,depth_target=0;
             for(int i=0;i<6;++i)
                 color_targets[i]=0;
-        }
 #else
-        unsigned int tex_id;
-        unsigned int gl_type;
-        bool has_mipmaps;
-
-        texture_obj(): size(0),is_cubemap(false),tex_id(0),gl_type(0),has_mipmaps(false) {}
+            tex_id=0,gl_type=0;
 #endif
+        }
+
     public:
         static int add() { return get_texture_objs().add(); }
         static texture_obj &get(int idx) { return get_texture_objs().get(idx); }

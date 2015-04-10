@@ -374,7 +374,12 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
     }
 
     if(m_tex>=0)
-        release();
+        release(); //ToDo: reuse
+
+    if(m_tex<0)
+        m_tex=texture_obj::add();
+
+    texture_obj &t=texture_obj::get(m_tex);
 
     if((format==color_rgb || format==greyscale) && data && mip_count>1) //ToDo
         mip_count= -1;
@@ -390,15 +395,15 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
     if(need_generate_mips)
         desc.MipLevels=get_tex_mips_count(width,height);
     desc.ArraySize=is_cubemap?6:1;
-    
-    m_format=format;
+
+    t.format=format;
 
     switch(format)
     {
         case greyscale:
         case color_rgb:
         case color_rgba:
-            m_format=color_rgba;
+            t.format=color_rgba;
             desc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;
         break;
 
@@ -423,9 +428,9 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
             auto &l=srdata[f*desc.MipLevels+i];
             l.pSysMem=data_a?data_a[f]:0;
             if(format>=dxt1)
-                l.SysMemPitch=(width>4?width:4)/4 * get_bpp(m_format)*2;
+                l.SysMemPitch=(width>4?width:4)/4 * get_bpp(t.format)*2;
             else
-                l.SysMemPitch=width*get_bpp(m_format)/8;
+                l.SysMemPitch=width*get_bpp(t.format)/8;
             l.SysMemSlicePitch=0;
         }
 
@@ -437,12 +442,12 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
                 srdata[s].pSysMem=mem_data;
                 if(format>=dxt1)
                 {
-                    srdata[s].SysMemPitch=(w>4?w:4)/4 * get_bpp(m_format)*2;
+                    srdata[s].SysMemPitch=(w>4?w:4)/4 * get_bpp(t.format)*2;
                     mem_data+=(h>4?h:4)/4 * srdata[s].SysMemPitch+mip_padding;
                 }
                 else
                 {
-                    srdata[s].SysMemPitch=w*get_bpp(m_format)/8;
+                    srdata[s].SysMemPitch=w*get_bpp(t.format)/8;
                     mem_data+=srdata[s].SysMemPitch*h+mip_padding;
                 }
             }
@@ -526,10 +531,9 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
             get_context()->GenerateMips(srv);
     }
 
-    m_tex=texture_obj::add();
-    texture_obj::get(m_tex).tex=tex;
-    texture_obj::get(m_tex).dx_format=desc.Format;
-    texture_obj::get(m_tex).srv=srv;
+    t.tex=tex;
+    t.dx_format=desc.Format;
+    t.srv=srv;
 
     auto sdesc=dx_setup_filtration();
 
@@ -545,11 +549,7 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
     sdesc.MaxLOD=mip_count>=1?mip_count:has_mipmap?D3D11_FLOAT32_MAX:1;
 #endif
 
-    get_device()->CreateSamplerState(&sdesc,&texture_obj::get(m_tex).sampler_state);
-
-    m_width=width;
-    m_height=height;
-
+    get_device()->CreateSamplerState(&sdesc,&t.sampler_state);
 #else
     if(width>gl_get_max_tex_size() || height>gl_get_max_tex_size())
     {
@@ -613,41 +613,40 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
         return false;
     }
 
+    const int gl_type=is_cubemap?GL_TEXTURE_CUBE_MAP:GL_TEXTURE_2D;
+
     if(m_tex<0)
         m_tex=texture_obj::add();
 
-    const int gl_type=is_cubemap?GL_TEXTURE_CUBE_MAP:GL_TEXTURE_2D;
+    texture_obj &t=texture_obj::get(m_tex);
 
-    bool need_create=m_width!=width || m_height!=height || m_format!=format;
-    if(!texture_obj::get(m_tex).tex_id)
+    bool need_create=t.width!=width || t.height!=height || t.format!=format;
+    if(!t.tex_id)
     {
-        glGenTextures(1,&texture_obj::get(m_tex).tex_id);
+        glGenTextures(1,&t.tex_id);
         need_create=true;
     }
-    else if(texture_obj::get(m_tex).gl_type!=gl_type)
+    else if(t.gl_type!=gl_type)
     {
-        glDeleteTextures(1,&texture_obj::get(m_tex).tex_id);
-        glGenTextures(1,&texture_obj::get(m_tex).tex_id);
+        glDeleteTextures(1,&t.tex_id);
+        glGenTextures(1,&t.tex_id);
         need_create=true;
     }
 
-    m_width=width;
-    m_height=height;
-    texture_obj::get(m_tex).gl_type=gl_type;
-    m_format=format;
+    t.gl_type=gl_type;
 
 #ifdef OPENGL_ES
-    if(m_format==depth24)
-        m_format=depth32;
+    if(t.format==depth24)
+        t.format=depth32;
 
-    if(m_format==color_rgb)
-        m_format=color_rgba;
+    if(t.format==color_rgb)
+        t.format=color_rgba;
 
   #ifdef __ANDROID__
     nya_memory::tmp_buffer_ref temp_buf;
-    if(m_format==color_bgra)
+    if(t.format==color_bgra)
     {
-        m_format=color_rgba;
+        t.format=color_rgba;
         if(data)
         {
             const size_t size=width*height*4;
@@ -671,7 +670,7 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
             glBindTexture(texture_obj::get(active_layers[active_layer]).gl_type,0);
     }
 
-    glBindTexture(gl_type,texture_obj::get(m_tex).tex_id);
+    glBindTexture(gl_type,t.tex_id);
     active_layers[active_layer]= -1;
 
     const bool bad_alignment=!pot && (width*source_bpp/8)%4!=0;
@@ -750,10 +749,13 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
   #endif
     glBindTexture(gl_type,0);
 #endif
+    t.width=width;
+    t.height=height;
+    t.format=format;
 
-    texture_obj::get(m_tex).size=get_tex_memory_size(m_width,m_height,m_format,mip_count)*(is_cubemap?6:1);
-    texture_obj::get(m_tex).is_cubemap=is_cubemap;
-    texture_obj::get(m_tex).has_mipmaps=has_mipmap;
+    t.size=get_tex_memory_size(t.width,t.height,t.format,mip_count)*(is_cubemap?6:1);
+    t.is_cubemap=is_cubemap;
+    t.has_mipmaps=has_mipmap;
 
     return true;
 }
@@ -833,7 +835,7 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
         return false;
 
     const texture_obj &tex=texture_obj::get(m_tex);
-    unsigned int size=m_width*m_height*get_bpp(m_format)/8*(is_cubemap()?6:1);
+    unsigned int size=tex.width*tex.height*get_bpp(tex.format)/8*(is_cubemap()?6:1);
     if(!size)
         return false;
 
@@ -841,7 +843,7 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
     if(!get_context() || !get_device())
         return false;
 
-    if(m_format>=dxt1)
+    if(tex.format>=dxt1)
         return false;
 
     ID3D11Texture2D* copy_tex=0;
@@ -871,7 +873,7 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
     return true;
 #else
   #ifdef OPENGL_ES
-    if(m_format>=dxt1)
+    if(tex.format>=dxt1)
         return false;
 
     data.allocate(size);
@@ -891,16 +893,16 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
     glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,tex.tex_id,0);
 
     rect prev_vp=get_viewport();
-    set_viewport(0,0,m_width,m_height);
+    set_viewport(0,0,tex.width,tex.height);
 
-    switch(m_format)
+    switch(tex.format)
     {
-        case color_rgb: glReadPixels(0,0,m_width,m_height,GL_RGB,GL_UNSIGNED_BYTE,data.get_data()); break;
-        case color_rgba: glReadPixels(0,0,m_width,m_height,GL_RGBA,GL_UNSIGNED_BYTE,data.get_data()); break;
+        case color_rgb: glReadPixels(0,0,tex.width,tex.height,GL_RGB,GL_UNSIGNED_BYTE,data.get_data()); break;
+        case color_rgba: glReadPixels(0,0,tex.width,tex.height,GL_RGBA,GL_UNSIGNED_BYTE,data.get_data()); break;
 #ifndef __ANDROID__
-        case color_bgra: glReadPixels(0,0,m_width,m_height,GL_BGRA,GL_UNSIGNED_BYTE,data.get_data()); break;
+        case color_bgra: glReadPixels(0,0,tex.width,tex.height,GL_BGRA,GL_UNSIGNED_BYTE,data.get_data()); break;
 #endif
-        case greyscale: glReadPixels(0,0,m_width,m_height,GL_LUMINANCE,GL_UNSIGNED_BYTE,data.get_data()); break;
+        case greyscale: glReadPixels(0,0,tex.width,tex.height,GL_LUMINANCE,GL_UNSIGNED_BYTE,data.get_data()); break;
 
         default:
             glBindFramebuffer(GL_FRAMEBUFFER, prev_fbo);
@@ -911,10 +913,10 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
     glBindFramebuffer(GL_FRAMEBUFFER, prev_fbo);
     set_viewport(prev_vp);
   #else
-    color_format format=m_format;
+    color_format format=tex.format;
     if(format>=dxt1)
     {
-        size=m_width*m_height*4*(is_cubemap()?6:1);
+        size=tex.width*tex.height*4*(is_cubemap()?6:1);
         format=color_bgra;
     }
 
@@ -940,6 +942,10 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
     return true;
 }
 
+unsigned int texture::get_width() const { return m_tex<0?0:texture_obj::get(m_tex).width; }
+unsigned int texture::get_height() const { return m_tex<0?0:texture_obj::get(m_tex).height; }
+texture::color_format texture::get_color_format() const { return m_tex<0?color_rgb:texture_obj::get(m_tex).format; }
+
 void texture::set_wrap(bool repeat_s,bool repeat_t)
 {
     if(m_tex<0)
@@ -948,7 +954,7 @@ void texture::set_wrap(bool repeat_s,bool repeat_t)
     const texture_obj &tex=texture_obj::get(m_tex);
 
 #ifndef DIRECTX11
-    const bool pot=((m_width&(m_width-1))==0 && (m_height&(m_height-1))==0);
+    const bool pot=((tex.width&(tex.width-1))==0 && (tex.height&(tex.height-1))==0);
 
     glBindTexture(tex.gl_type,tex.tex_id);
     glTexParameteri(tex.gl_type,GL_TEXTURE_WRAP_S,repeat_s&&pot?GL_REPEAT:GL_CLAMP_TO_EDGE);
@@ -1112,9 +1118,7 @@ void texture::release()
     }
 #endif
     texture_obj::remove(m_tex);
-
     m_tex= -1;
-    m_width=m_height=0;
 }
 
 }
