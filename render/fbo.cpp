@@ -65,6 +65,12 @@ namespace
 	PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
 	PFNGLDELETEFRAMEBUFFERSPROC glDeleteFramebuffers;
 	PFNGLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2D;
+
+    PFNGLGENRENDERBUFFERSPROC glGenRenderbuffers;
+    PFNGLNIMDRENDERBUFFERPROC glBindRenderbuffer;
+    PFNGLDELETERENDERBUFFERSPROC glDeleteRenderbuffers;
+    PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC glRenderbufferStorageMultisample;
+    PFNGLFRAMEBUFFERRENDERBUFFERPROC glFramebufferRenderbuffer;
   #endif
 
 #ifndef GL_MULTISAMPLE
@@ -86,6 +92,12 @@ bool check_init_fbo()
 	if(!(glBindFramebuffer=(PFNGLBINDFRAMEBUFFERPROC)get_extension("glBindFramebuffer"))) return false;
 	if(!(glDeleteFramebuffers=(PFNGLDELETEFRAMEBUFFERSPROC)get_extension("glDeleteFramebuffers"))) return false;
 	if(!(glFramebufferTexture2D=(PFNGLFRAMEBUFFERTEXTURE2DPROC)get_extension("glFramebufferTexture2D"))) return false;
+
+    if(!(glGenRenderbuffers=(PFNGLGENRENDERBUFFERSPROC)get_extension("glGenRenderbuffers"))) return false;
+	if(!(glBindRenderbuffer=(PFNGLNIMDRENDERBUFFERPROC)get_extension("glBindRenderbuffer"))) return false;
+	if(!(glDeleteRenderbuffers=(PFNGLDELETERENDERBUFFERSPROC)get_extension("glDeleteRenderbuffers"))) return false;
+	if(!(glRenderbufferStorageMultisample=(PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC)get_extension("glRenderbufferStorageMultisample"))) return false;
+	if(!(glFramebufferRenderbuffer=(PFNGLFRAMEBUFFERRENDERBUFFERPROC)get_extension("glFramebufferRenderbuffer"))) return false;
   #endif
 
     glGetIntegerv(GL_FRAMEBUFFER_BINDING,&default_fbo_idx);
@@ -209,8 +221,13 @@ void fbo::set_color_target(const texture &tex,cubemap_side side,unsigned int att
         glGenFramebuffers(1,&fbo.fbo_idx);
     }
 
-#if defined OPENGL_ES && !defined __APPLE__ //ToDo
-    samples=1;
+#if defined OPENGL_ES
+    #ifndef __APPLE__
+        samples=1; //ToDo
+    #endif
+#elif defined OPENGL
+    if(!glRenderbufferStorageMultisample)
+        samples=1;
 #endif
 
     if(a.multisample_buf)
@@ -237,7 +254,6 @@ void fbo::set_color_target(const texture &tex,cubemap_side side,unsigned int att
         glRenderbufferStorageMultisample(GL_RENDERBUFFER,samples,GL_RGBA,tex.get_width(),tex.get_height());
 #endif
         glBindRenderbuffer(GL_FRAMEBUFFER,0);
-
         glGenFramebuffers(1,&a.multisample_fbo);
     }
 #endif
