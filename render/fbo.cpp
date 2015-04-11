@@ -66,8 +66,9 @@ namespace
 	PFNGLDELETEFRAMEBUFFERSPROC glDeleteFramebuffers;
 	PFNGLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2D;
 
+    PFNGLBLITFRAMEBUFFERPROC glBlitFramebuffer
     PFNGLGENRENDERBUFFERSPROC glGenRenderbuffers;
-    PFNGLNIMDRENDERBUFFERPROC glBindRenderbuffer;
+    PFNGLBINDRENDERBUFFERPROC glBindRenderbuffer;
     PFNGLDELETERENDERBUFFERSPROC glDeleteRenderbuffers;
     PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC glRenderbufferStorageMultisample;
     PFNGLFRAMEBUFFERRENDERBUFFERPROC glFramebufferRenderbuffer;
@@ -93,11 +94,13 @@ bool check_init_fbo()
 	if(!(glDeleteFramebuffers=(PFNGLDELETEFRAMEBUFFERSPROC)get_extension("glDeleteFramebuffers"))) return false;
 	if(!(glFramebufferTexture2D=(PFNGLFRAMEBUFFERTEXTURE2DPROC)get_extension("glFramebufferTexture2D"))) return false;
 
-    if(!(glGenRenderbuffers=(PFNGLGENRENDERBUFFERSPROC)get_extension("glGenRenderbuffers"))) return false;
-	if(!(glBindRenderbuffer=(PFNGLNIMDRENDERBUFFERPROC)get_extension("glBindRenderbuffer"))) return false;
-	if(!(glDeleteRenderbuffers=(PFNGLDELETERENDERBUFFERSPROC)get_extension("glDeleteRenderbuffers"))) return false;
-	if(!(glRenderbufferStorageMultisample=(PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC)get_extension("glRenderbufferStorageMultisample"))) return false;
-	if(!(glFramebufferRenderbuffer=(PFNGLFRAMEBUFFERRENDERBUFFERPROC)get_extension("glFramebufferRenderbuffer"))) return false;
+    //multisample
+	glBlitFramebuffer=(PFNGLBLITFRAMEBUFFERPROC)get_extension("glBlitFramebuffer");
+    glGenRenderbuffers=(PFNGLGENRENDERBUFFERSPROC)get_extension("glGenRenderbuffers");
+	glBindRenderbuffer=(PFNGLBINDRENDERBUFFERPROC)get_extension("glBindRenderbuffer");
+	glDeleteRenderbuffers=(PFNGLDELETERENDERBUFFERSPROC)get_extension("glDeleteRenderbuffers");
+	glRenderbufferStorageMultisample=(PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC)get_extension("glRenderbufferStorageMultisample");
+	glFramebufferRenderbuffer=(PFNGLFRAMEBUFFERRENDERBUFFERPROC)get_extension("glFramebufferRenderbuffer");
   #endif
 
     glGetIntegerv(GL_FRAMEBUFFER_BINDING,&default_fbo_idx);
