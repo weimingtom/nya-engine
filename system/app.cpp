@@ -552,7 +552,7 @@ public:
             wglMakeCurrent(m_hdc,m_hglrc);
         }
 
-        if(antialiasing>0)
+        if(antialiasing>1)
             glEnable(GL_MULTISAMPLE_ARB);
   #endif
         SetWindowTextA(m_hwnd,m_title.c_str());
@@ -964,7 +964,7 @@ public:
                         GLX_SAMPLE_BUFFERS_ARB,1,GLX_SAMPLES,antialiasing,None};
 
         XVisualInfo *vi=0;
-        if(antialiasing>0)
+        if(antialiasing>1)
         {
             vi=glXChooseVisual(m_dpy,DefaultScreen(m_dpy),dbl_buf_aniso);
             if(!vi)
@@ -974,7 +974,7 @@ public:
             }
         }
 
-        if(antialiasing<=0)
+        if(antialiasing<=1)
             vi=glXChooseVisual(m_dpy,DefaultScreen(m_dpy),dbl_buf);
 
         if(!vi)
@@ -1012,7 +1012,7 @@ public:
         glXMakeCurrent(m_dpy,m_win,m_cx);
         XMapWindow(m_dpy,m_win);
 
-        if(antialiasing>0)
+        if(antialiasing>1)
             glEnable(GL_MULTISAMPLE_ARB);
 
         app.on_resize(w,h);

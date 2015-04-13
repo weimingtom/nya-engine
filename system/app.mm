@@ -536,7 +536,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorRenderbuffer);
 
         const int aa=shared_app::get_app().get_antialiasing();
-        if(aa>0)
+        if(aa>1)
         {
             glGenFramebuffers(1, &msaaFramebuffer);
             glBindFramebuffer(GL_FRAMEBUFFER, msaaFramebuffer);
@@ -1027,7 +1027,7 @@ private:
 
     NSOpenGLPixelFormat *format=0;
 
-    if(m_antialiasing>0)
+    if(m_antialiasing>1)
         format=[[NSOpenGLPixelFormat alloc] initWithAttributes:attrs_aniso];
     else
         format=[[NSOpenGLPixelFormat alloc] initWithAttributes:attrs];
@@ -1046,7 +1046,7 @@ private:
     if([view openGLContext]==nil) 
         return;
 
-    if(m_antialiasing)
+    if(m_antialiasing>1)
 #ifdef GL_MULTISAMPLE
         glEnable(GL_MULTISAMPLE);
 #else
@@ -1054,7 +1054,6 @@ private:
 #endif
 
     [view reshape];
-
     [view initView];
 }
 

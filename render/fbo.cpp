@@ -4,7 +4,7 @@
 #include "render.h"
 #include "platform_specific_gl.h"
 
-//ToDo: mrt on dx11, multisample on dx11, multisample depth support
+//ToDo: mrt on dx11, multisample on dx11
 
 namespace nya_render
 {
@@ -127,6 +127,77 @@ int gl_target(int side)
     return GL_TEXTURE_2D;
 }
 
+struct gl_ms_buffer
+{
+    unsigned int buf,fbo;
+    unsigned int width,height,samples;
+    texture::color_format format;
+
+    void create(unsigned int w,unsigned int h,texture::color_format f,unsigned int s)
+    {
+        if(!w || !h || s<=1)
+            return;
+
+        if(w==width && h==height && s==samples && f==format)
+            return;
+
+        int gl_format;
+        switch(f)
+        {
+#ifdef OPENGL_ES
+            case texture::color_rgba: gl_format=GL_RGB5_A1; break; //ToDo
+#else
+            case texture::color_rgba: gl_format=GL_RGBA; break;
+#endif
+            case texture::color_rgb: gl_format=GL_RGB; break;
+            case texture::color_bgra: gl_format=GL_BGRA; break;
+
+            case texture::depth16: gl_format=GL_DEPTH_COMPONENT16; break;
+#ifdef OPENGL_ES
+            case texture::depth24: gl_format=GL_DEPTH_COMPONENT16; break; //ToDo
+            case texture::depth32: gl_format=GL_DEPTH_COMPONENT16; break;
+#else
+            case texture::depth24: gl_format=GL_DEPTH_COMPONENT24; break;
+            case texture::depth32: gl_format=GL_DEPTH_COMPONENT32; break;
+#endif
+            default: return;
+        };
+
+#if defined OPENGL_ES
+#ifndef __APPLE__
+        return;
+#endif
+#else
+        if(!glRenderbufferStorageMultisample)
+            return;
+#endif
+        if(!buf)
+            glGenRenderbuffers(1,&buf);
+
+        glBindRenderbuffer(GL_RENDERBUFFER,buf);
+#ifdef OPENGL_ES
+#ifdef __APPLE__
+        glRenderbufferStorageMultisampleAPPLE(GL_RENDERBUFFER,s,gl_format,w,h);
+#endif
+#else
+        glRenderbufferStorageMultisample(GL_RENDERBUFFER,s,gl_format,w,h);
+#endif
+        glBindRenderbuffer(GL_RENDERBUFFER,0);
+        glGenFramebuffers(1,&fbo);
+
+        width=w,height=h,samples=s,format=f;
+    }
+
+    void release()
+    {
+        if(buf) glDeleteRenderbuffers(1,&buf);
+        if(fbo) glDeleteFramebuffers(1,&fbo);
+        *this=gl_ms_buffer();
+    }
+    
+    gl_ms_buffer(): buf(0),fbo(0),width(0),height(0),samples(0) {}
+};
+
 #endif
 
 struct fbo_obj
@@ -138,13 +209,12 @@ struct fbo_obj
         int samples;
         OPENGL_ONLY(unsigned int last_target_idx);
         OPENGL_ONLY(int last_gl_type);
-        OPENGL_ONLY(unsigned int multisample_buf,multisample_fbo);
+        OPENGL_ONLY(gl_ms_buffer multisample);
 
         attachment(): tex_idx(-1),cubemap_side(-1),samples(1)
         {
             OPENGL_ONLY(last_target_idx=0);
             OPENGL_ONLY(last_gl_type= -1);
-            OPENGL_ONLY(multisample_buf=multisample_fbo=0);
         }
     };
 
@@ -152,6 +222,7 @@ struct fbo_obj
     int depth_tex_idx;
     OPENGL_ONLY(unsigned int fbo_idx);
     OPENGL_ONLY(int depth_target_idx);
+    OPENGL_ONLY(gl_ms_buffer multisample_depth);
 
     fbo_obj(): depth_tex_idx(-1)
     {
@@ -170,13 +241,9 @@ public:
     {
 #ifndef DIRECTX11
         for(size_t i=0;i<color_attachments.size();++i)
-        {
-            fbo_obj::attachment &a=color_attachments[i];
-            if(a.multisample_buf)
-                glDeleteRenderbuffers(1,&a.multisample_buf);
-            if(a.multisample_fbo)
-                glDeleteFramebuffers(1,&a.multisample_fbo);
-        }
+            color_attachments[i].multisample.release();
+
+        multisample_depth.release();
 
         if(fbo_idx)
             glDeleteFramebuffers(1,&fbo_idx);
@@ -224,40 +291,30 @@ void fbo::set_color_target(const texture &tex,cubemap_side side,unsigned int att
         glGenFramebuffers(1,&fbo.fbo_idx);
     }
 
-#if defined OPENGL_ES
-    #ifndef __APPLE__
-        samples=1; //ToDo
-    #endif
-#elif defined OPENGL
-    if(!glRenderbufferStorageMultisample)
-        samples=1;
-#endif
-
-    if(a.multisample_buf)
-    {
-        glDeleteRenderbuffers(1,&a.multisample_buf);
-        a.multisample_buf=0;
-    }
-
-    if(a.multisample_fbo)
-    {
-        glDeleteFramebuffers(1,&a.multisample_fbo);
-        a.multisample_fbo=0;
-    }
-
     if(samples>1)
+        a.multisample.create(tex.get_width(),tex.get_height(),tex.get_color_format(),samples);
+    else
+        a.multisample.release();
+
+    if(fbo.depth_tex_idx>=0)
     {
-        glGenRenderbuffers(1,&a.multisample_buf);
-        glBindRenderbuffer(GL_RENDERBUFFER,a.multisample_buf);
-#ifdef OPENGL_ES
-    #ifdef __APPLE__
-        glRenderbufferStorageMultisampleAPPLE(GL_RENDERBUFFER,samples,GL_RGB5_A1,tex.get_width(),tex.get_height());
-    #endif
-#else
-        glRenderbufferStorageMultisample(GL_RENDERBUFFER,samples,GL_RGBA,tex.get_width(),tex.get_height());
-#endif
-        glBindRenderbuffer(GL_FRAMEBUFFER,0);
-        glGenFramebuffers(1,&a.multisample_fbo);
+        texture_obj &dtex=texture_obj::get(fbo.depth_tex_idx);
+        if(dtex.width==tex.get_width() && dtex.height==tex.get_height())
+        {
+            int samples_count=0;
+            for(size_t i=0;i<fbo.color_attachments.size();++i)
+            {
+                fbo_obj::attachment &a=fbo.color_attachments[i];
+                if(a.multisample.samples>samples_count)
+                    samples_count=a.multisample.samples;
+            }
+
+            if(samples_count>1)
+            {
+                fbo.multisample_depth.create(dtex.width,dtex.height,dtex.format,samples_count);
+                fbo.depth_target_idx=0;
+            }
+        }
     }
 #endif
 
@@ -288,6 +345,17 @@ void fbo::set_depth_target(const texture &tex)
 
         glGenFramebuffers(1,&fbo.fbo_idx);
     }
+
+    int samples_count=0;
+    for(size_t i=0;i<fbo.color_attachments.size();++i)
+    {
+        fbo_obj::attachment &a=fbo.color_attachments[i];
+        if(a.multisample.samples>samples_count)
+            samples_count=a.multisample.samples;
+    }
+
+    if(samples_count>1)
+        fbo.multisample_depth.create(tex.get_width(),tex.get_height(),tex.get_color_format(),samples_count);
 #endif
 
     if(m_fbo_idx==current_fbo)
@@ -404,12 +472,16 @@ void fbo::bind() const
 
             if(a.samples>1)
             {
+                if(a.multisample.buf)
+                {
     #ifndef OPENGL_ES
-                if(a.samples>1)
                     glEnable(GL_MULTISAMPLE); //ToDo
     #endif
-                glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0+int(i),GL_RENDERBUFFER,a.multisample_buf);
-                a.last_gl_type=GL_RENDERBUFFER;
+                    glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0+int(i),GL_RENDERBUFFER,a.multisample.buf);
+                    a.last_gl_type=GL_RENDERBUFFER;
+                }
+                else
+                    a.last_gl_type=0;
             }
             else
             {
@@ -440,25 +512,33 @@ void fbo::bind() const
         const texture_obj &tex=texture_obj::get(fbo.depth_tex_idx);
         if(fbo.depth_target_idx!=tex.tex_id)
         {
-            if(tex.gl_type!=GL_TEXTURE_2D)
+            if(fbo.multisample_depth.buf)
             {
-                if(fbo.depth_target_idx)
-                {
-                    glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,tex.tex_id,0);
-                    fbo.depth_target_idx=0;
-                }
+                glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,fbo.multisample_depth.buf);
+                fbo.depth_target_idx=tex.tex_id;
             }
             else
             {
-                glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,tex.tex_id,0);
-                fbo.depth_target_idx=tex.tex_id;
-    #ifndef OPENGL_ES
-                if(!has_color_target && fbo.depth_target_idx)
+                if(tex.gl_type!=GL_TEXTURE_2D)
                 {
-                    glDrawBuffer(GL_NONE);
-                    glReadBuffer(GL_NONE);
+                    if(fbo.depth_target_idx)
+                    {
+                        glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,tex.tex_id,0);
+                        fbo.depth_target_idx=0;
+                    }
                 }
-    #endif
+                else
+                {
+                    glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,tex.tex_id,0);
+                    fbo.depth_target_idx=tex.tex_id;
+        #ifndef OPENGL_ES
+                    if(!has_color_target && fbo.depth_target_idx)
+                    {
+                        glDrawBuffer(GL_NONE);
+                        glReadBuffer(GL_NONE);
+                    }
+        #endif
+                }
             }
         }
     }
@@ -496,7 +576,7 @@ void fbo::unbind()
         const texture_obj &tex=texture_obj::get(a.tex_idx);
 
         //ToDo: cache
-        glBindFramebuffer(GL_FRAMEBUFFER,a.multisample_fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER,a.multisample.fbo);
         const int gl_type=a.cubemap_side<0?tex.gl_type:gl_target(a.cubemap_side);
         glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0+int(i),gl_type,tex.tex_id,0);
         glBindFramebuffer(GL_FRAMEBUFFER,default_fbo_idx);
@@ -504,12 +584,12 @@ void fbo::unbind()
 #ifdef OPENGL_ES
     #ifdef __APPLE__
         glBindFramebuffer(GL_READ_FRAMEBUFFER_APPLE,fbo.fbo_idx);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER_APPLE,a.multisample_fbo);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER_APPLE,a.multisample.fbo);
         glResolveMultisampleFramebufferAPPLE();
     #endif
 #else
         glBindFramebuffer(GL_READ_FRAMEBUFFER,fbo.fbo_idx);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER,a.multisample_fbo);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER,a.multisample.fbo);
 
         glReadBuffer(GL_COLOR_ATTACHMENT0+int(i));
 
