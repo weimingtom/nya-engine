@@ -112,6 +112,10 @@ bool check_init_fbo()
     #define GL_MAX_COLOR_ATTACHMENTS 0x8CDF
 #endif
 
+#ifndef GL_MAX_SAMPLES
+    #define GL_MAX_SAMPLES 0x8D57
+#endif
+
 int gl_target(int side)
 {
     switch(side)
@@ -135,6 +139,13 @@ struct gl_ms_buffer
 
     void create(unsigned int w,unsigned int h,texture::color_format f,unsigned int s)
     {
+        static int max_ms=-1;
+        if(max_ms<0)
+            glGetIntegerv(GL_MAX_SAMPLES,&max_ms);
+
+        if(s>max_ms)
+            s=max_ms;
+
         if(!w || !h || s<=1)
             return;
 
