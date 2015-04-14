@@ -328,6 +328,7 @@ void postprocess::update()
         {
             const char *color=l.get_value("color"),*depth=l.get_value("depth");
             const char *width=l.get_value("width"),*height=l.get_value("height");
+            const char *samples=l.get_value("samples");
 
             nya_formats::math_expr_parser p;
             p.set_var("screen_width",float(m_width));
@@ -337,6 +338,7 @@ void postprocess::update()
 
             const unsigned int w=p.parse(width)?(unsigned int)p.calculate():m_width;
             const unsigned int h=p.parse(height)?(unsigned int)p.calculate():m_height;
+            const unsigned int s=p.parse(samples)?(unsigned int)p.calculate():1;
 
             if(targets.find(l.name)==targets.end())
             {
@@ -369,7 +371,7 @@ void postprocess::update()
                     m_textures.push_back(std::make_pair(color,tex_holder(false,t)));
                 }
 
-                m_targets.back().fbo->set_color_target(t->internal().get_shared_data()->tex);
+                m_targets.back().fbo->set_color_target(t->internal().get_shared_data()->tex,0,s);
             }
 
             if(depth)
