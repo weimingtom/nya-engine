@@ -324,7 +324,7 @@ void fbo::set_color_target(const texture &tex,cubemap_side side,unsigned int att
         texture_obj &dtex=texture_obj::get(fbo.depth_tex_idx);
         if(dtex.width==tex.get_width() && dtex.height==tex.get_height())
         {
-            int samples_count=0;
+            unsigned int samples_count=0;
             for(size_t i=0;i<fbo.color_attachments.size();++i)
             {
                 fbo_obj::attachment &a=fbo.color_attachments[i];
@@ -335,7 +335,7 @@ void fbo::set_color_target(const texture &tex,cubemap_side side,unsigned int att
             if(samples_count>1)
             {
                 fbo.multisample_depth.create(dtex.width,dtex.height,dtex.format,samples_count);
-                fbo.depth_target_idx=0;
+                OPENGL_ONLY(fbo.depth_target_idx=0);
             }
         }
     }
@@ -367,7 +367,7 @@ void fbo::set_depth_target(const texture &tex)
     }
 #endif
 
-    int samples_count=0;
+    unsigned int samples_count=0;
     for(size_t i=0;i<fbo.color_attachments.size();++i)
     {
         fbo_obj::attachment &a=fbo.color_attachments[i];
