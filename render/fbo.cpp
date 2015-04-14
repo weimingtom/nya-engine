@@ -154,7 +154,7 @@ struct ms_buffer
     void create(unsigned int w,unsigned int h,texture::color_format f,unsigned int s)
     {
 #ifdef DIRECTX11
-        //ToDo
+        return; //ToDo
 #else
         if(!glRenderbufferStorageMultisample)
             return;
