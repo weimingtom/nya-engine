@@ -59,6 +59,7 @@
 
 #elif __ANDROID__
     #include <GLES2/gl2.h>
+    #defind GL_GLEXT_PROTOTYPES
     #include <GLES2/gl2ext.h>
     #define OPENGL_ES
 #else
