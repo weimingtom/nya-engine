@@ -11,6 +11,7 @@ namespace nya_scene
 
 bool postprocess::load(const char *name)
 {
+    unload();
     if(!scene_shared::load(name))
         return false;
 
@@ -334,7 +335,7 @@ void postprocess::update()
             p.set_var("screen_width",float(m_width));
             p.set_var("screen_height",float(m_height));
             for(size_t i=0;i<m_variables.size();++i)
-                p.set_var(m_conditions[i].first.c_str(),m_conditions[i].second);
+                p.set_var(m_variables[i].first.c_str(),m_variables[i].second);
 
             const unsigned int w=p.parse(width)?(unsigned int)p.calculate():m_width;
             const unsigned int h=p.parse(height)?(unsigned int)p.calculate():m_height;
