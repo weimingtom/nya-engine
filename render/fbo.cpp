@@ -24,6 +24,10 @@ void init_default_target()
     if(default_target.color)
         return;
 //#endif
+
+    if(!get_context())
+        return;
+
     ID3D11RenderTargetView *color=0;
     ID3D11DepthStencilView *depth=0;
     get_context()->OMGetRenderTargets(1,&color,&depth);
@@ -438,10 +442,11 @@ void fbo::bind() const
     if(current_fbo>=0)
         unbind();
 
+    current_fbo=m_fbo_idx;
+
 	if(m_fbo_idx<0)
 		return;
 
-    current_fbo=m_fbo_idx;
     fbo_obj &fbo=fbo_obj::get(m_fbo_idx);
 
 #ifdef DIRECTX11
