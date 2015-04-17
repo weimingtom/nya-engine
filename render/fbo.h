@@ -27,6 +27,7 @@ public:
 
 public:
     static unsigned int get_max_color_attachments();
+    static unsigned int get_max_msaa();
 
 public:
     void release();

@@ -4,7 +4,7 @@
 #include "render.h"
 #include "platform_specific_gl.h"
 
-//ToDo: mrt on dx11, multisample on dx11
+//ToDo: mrt on dx11
 
 namespace nya_render
 {
@@ -147,35 +147,54 @@ int gl_target(int side)
 
 struct ms_buffer
 {
-    unsigned int buf,fbo;
+    OPENGL_ONLY(unsigned int fbo);
+    OPENGL_ONLY(unsigned int buf);
+    DIRECTX11_ONLY(ID3D11Texture2D *buf);
+    DIRECTX11_ONLY(ID3D11RenderTargetView *rtv);
+    DIRECTX11_ONLY(ID3D11DepthStencilView *dsv);
     unsigned int width,height,samples;
     texture::color_format format;
 
     void create(unsigned int w,unsigned int h,texture::color_format f,unsigned int s)
     {
-#ifdef DIRECTX11
-        return; //ToDo
-#else
+#ifndef DIRECTX11
         if(!glRenderbufferStorageMultisample)
             return;
 
-  #if defined OPENGL_ES && !defined __APPLE__ //ToDo
+  #if defined OPENGL_ES && !defined __APPLE__ //ToDo: remove when finish android blit
         return;
   #endif
-
-        static int max_ms=-1;
-        if(max_ms<0)
-            glGetIntegerv(GL_MAX_SAMPLES,&max_ms);
-
-        if(s>max_ms)
-            s=max_ms;
-
-        if(!w || !h || s<=1)
+#endif
+        if(!w || !h || s<1)
             return;
 
         if(w==width && h==height && s==samples && f==format)
             return;
 
+#ifdef DIRECTX11
+        if(!get_device())
+            return;
+
+        if(f==texture::depth16 || f==texture::depth24 || f==texture::depth32)
+        {
+            auto dx_format=(f==texture::depth32)?DXGI_FORMAT_D32_FLOAT:
+                           (f==texture::depth24)?DXGI_FORMAT_D24_UNORM_S8_UINT:
+                                                 DXGI_FORMAT_D16_UNORM;
+
+            CD3D11_TEXTURE2D_DESC dsd(dx_format,w,h,1,1,D3D11_BIND_DEPTH_STENCIL,D3D11_USAGE_DEFAULT,0,s,0);
+            get_device()->CreateTexture2D(&dsd,nullptr,&buf);
+            CD3D11_DEPTH_STENCIL_VIEW_DESC dsvd(D3D11_DSV_DIMENSION_TEXTURE2DMS);
+            get_device()->CreateDepthStencilView(buf,&dsvd,&dsv);
+        }
+        else
+        {
+            auto dx_format=(f==texture::color_bgra)?DXGI_FORMAT_B8G8R8A8_UNORM:DXGI_FORMAT_R8G8B8A8_UNORM;
+            CD3D11_TEXTURE2D_DESC ssd(dx_format,w,h,1,1,D3D11_BIND_RENDER_TARGET,D3D11_USAGE_DEFAULT,0,s,0,0);
+            get_device()->CreateTexture2D(&ssd,nullptr,&buf);
+            CD3D11_RENDER_TARGET_VIEW_DESC rtvd(D3D11_RTV_DIMENSION_TEXTURE2DMS);
+            get_device()->CreateRenderTargetView(buf,&rtvd,&rtv);
+        }
+#else
         int gl_format;
         switch(f)
         {
@@ -212,15 +231,22 @@ struct ms_buffer
     void release()
     {
 #ifdef DIRECTX11
-        //ToDo
+        if(buf) buf->Release();
+        if(rtv) rtv->Release();
+        if(dsv) dsv->Release();
 #else
         if(buf) glDeleteRenderbuffers(1,&buf);
         if(fbo) glDeleteFramebuffers(1,&fbo);
 #endif
         *this=ms_buffer();
     }
-    
-    ms_buffer(): buf(0),fbo(0),width(0),height(0),samples(0) {}
+
+    ms_buffer(): buf(0),width(0),height(0),samples(0)
+    {
+        OPENGL_ONLY(fbo=0);
+        DIRECTX11_ONLY(rtv=0);
+        DIRECTX11_ONLY(dsv=0);
+    }
 };
 
 struct fbo_obj
@@ -291,6 +317,9 @@ void fbo::set_color_target(const texture &tex,cubemap_side side,unsigned int att
 {
     if(attachment_idx>=get_max_color_attachments())
         return;
+
+    if(samples>get_max_msaa())
+        samples = get_max_msaa();
 
     if(m_fbo_idx<0)
         m_fbo_idx=fbo_obj::add();
@@ -425,42 +454,49 @@ void fbo::bind() const
     if(!fbo.color_attachments.empty() && fbo.color_attachments[0].tex_idx>=0)
     {
         fbo_obj::attachment &a=fbo.color_attachments[0];
-
-        texture_obj &tex=texture_obj::get(a.tex_idx);
-        ID3D11RenderTargetView *&tex_color=tex.color_targets[a.cubemap_side>=0?a.cubemap_side:0];
-        if(!tex_color && tex.tex)
+        color=a.multisample.rtv;
+        if(!color)
         {
-            D3D11_RENDER_TARGET_VIEW_DESC rtvd;
-            rtvd.Format=tex.dx_format;
-            if(a.cubemap_side<0)
+            texture_obj &tex=texture_obj::get(a.tex_idx);
+            ID3D11RenderTargetView *&tex_color=tex.color_targets[a.cubemap_side>=0?a.cubemap_side:0];
+            if(!tex_color && tex.tex)
             {
-	            rtvd.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2D;
-	            rtvd.Texture2D.MipSlice=0;
-            }
-            else
-            {
-                rtvd.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
-                rtvd.Texture2DArray.FirstArraySlice=a.cubemap_side;
-                rtvd.Texture2DArray.ArraySize=1;
-                rtvd.Texture2DArray.MipSlice=0;
-            }
+                D3D11_RENDER_TARGET_VIEW_DESC rtvd;
+                rtvd.Format=tex.dx_format;
+                if(a.cubemap_side<0)
+                {
+                    rtvd.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2D;
+                    rtvd.Texture2D.MipSlice=0;
+                }
+                else
+                {
+                    rtvd.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
+                    rtvd.Texture2DArray.FirstArraySlice=a.cubemap_side;
+                    rtvd.Texture2DArray.ArraySize=1;
+                    rtvd.Texture2DArray.MipSlice=0;
+                }
 
-            get_device()->CreateRenderTargetView(tex.tex,&rtvd,&tex_color);
+                get_device()->CreateRenderTargetView(tex.tex,&rtvd,&tex_color);
+            }
+            color=tex_color;
         }
-        color=tex_color;
     }
 
     if(fbo.depth_tex_idx>=0)
     {
-        texture_obj &tex=texture_obj::get(fbo.depth_tex_idx);
-        if(!tex.depth_target && tex.tex)
+        depth=fbo.multisample_depth.dsv;
+        if(!depth)
         {
-            CD3D11_DEPTH_STENCIL_VIEW_DESC dsvd(D3D11_DSV_DIMENSION_TEXTURE2D);
-            dsvd.Format=tex.dx_format;
-            dsvd.Texture2D.MipSlice=0;
-            get_device()->CreateDepthStencilView(tex.tex,&dsvd,&tex.depth_target);
+            texture_obj &tex=texture_obj::get(fbo.depth_tex_idx);
+            if(!tex.depth_target && tex.tex)
+            {
+                CD3D11_DEPTH_STENCIL_VIEW_DESC dsvd(D3D11_DSV_DIMENSION_TEXTURE2D);
+                dsvd.Format=tex.dx_format;
+                dsvd.Texture2D.MipSlice=0;
+                get_device()->CreateDepthStencilView(tex.tex,&dsvd,&tex.depth_target);
+            }
+            depth=tex.depth_target;
         }
-        depth=tex.depth_target;
     }
 
     set_target(color,depth);
@@ -571,6 +607,23 @@ void fbo::unbind()
 #ifdef DIRECTX11
     dx_target target=get_default_target();
     set_target(target.color,target.depth);
+
+    if(current_fbo<0)
+        return;
+
+    fbo_obj &fbo=fbo_obj::get(current_fbo);
+    for(size_t i=0;i<fbo.color_attachments.size();++i)
+    {
+        fbo_obj::attachment &a=fbo.color_attachments[i];
+        if(!a.multisample.buf || a.tex_idx<0 || !get_context())
+            continue;
+
+        texture_obj &tex=texture_obj::get(a.tex_idx);
+        ID3D11RenderTargetView *tex_color=tex.color_targets[a.cubemap_side>=0?a.cubemap_side:0];
+
+        unsigned int sub = D3D11CalcSubresource(0, 0, 1);
+        get_context()->ResolveSubresource(tex.tex,sub,a.multisample.buf,sub,DXGI_FORMAT_R8G8B8A8_UNORM);
+    }
 #else
     if(!check_init_fbo())
         return;
@@ -602,7 +655,7 @@ void fbo::unbind()
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER_APPLE,a.multisample.fbo);
         glResolveMultisampleFramebufferAPPLE();
     #else
-        //ToDo
+        //ToDo: android blit
     #endif
 #else
         glBindFramebuffer(GL_READ_FRAMEBUFFER,fbo.fbo_idx);
@@ -644,6 +697,39 @@ unsigned int fbo::get_max_color_attachments()
 
     return max_attachments;
 #endif
+}
+
+unsigned int fbo::get_max_msaa()
+{
+    static int max_ms=-1;
+
+#ifdef DIRECTX11
+    if(max_ms<0)
+    {
+        if(!get_device())
+            return 1;
+
+        max_ms=1;
+        const int max_samples_check=32;
+        for(unsigned int i=1;i<max_samples_check;++i)
+        {
+            UINT numQualityFlags;
+            HRESULT test = get_device()->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM,i,&numQualityFlags);
+            if(SUCCEEDED(test) && (numQualityFlags>0))
+                max_ms=i;
+        }
+    }
+#else
+
+#if defined OPENGL_ES && !defined __APPLE__ //ToDo: remove when finish android blit
+    return 0;
+#endif
+
+    if(max_ms<0)
+        glGetIntegerv(GL_MAX_SAMPLES,&max_ms);
+#endif
+
+    return max_ms>1?max_ms:1;
 }
 
 }
