@@ -309,6 +309,14 @@ unsigned int texture::get_height() const
     return internal().get_shared_data()->tex.get_height();
 }
 
+texture::color_format texture::get_format() const
+{
+    if(!internal().get_shared_data().is_valid())
+        return nya_render::texture::color_rgba;
+
+    return internal().get_shared_data()->tex.get_color_format();
+}
+
 bool texture::is_cubemap() const
 {
     if(!internal().get_shared_data().is_valid())

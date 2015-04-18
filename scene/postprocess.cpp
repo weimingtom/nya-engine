@@ -274,7 +274,7 @@ void postprocess::update()
         {
             if(ifs.empty())
             {
-                log()<<"postprocess: syntax error - else without if in file "<<m_shared.get_name()<<"\n";
+                log()<<"warning: postprocess: syntax error - else without if in file "<<m_shared.get_name()<<"\n";
                 return;
             }
 
@@ -285,7 +285,7 @@ void postprocess::update()
         {
             if(ifs.empty())
             {
-                log()<<"postprocess: syntax error - else without if in file "<<m_shared.get_name()<<"\n";
+                log()<<"warning: postprocess: syntax error - else without if in file "<<m_shared.get_name()<<"\n";
                 return;
             }
 
@@ -304,7 +304,7 @@ void postprocess::update()
         {
             if(ifs.empty())
             {
-                log()<<"postprocess: syntax error - end without if in file "<<m_shared.get_name()<<"\n";
+                log()<<"warning: postprocess: syntax error - end without if in file "<<m_shared.get_name()<<"\n";
                 return;
             }
             else
@@ -350,7 +350,7 @@ void postprocess::update()
             }
             else
             {
-                log()<<"postprocess: target "<<l.name<<" redifinition in file "<<m_shared.get_name()<<"\n";
+                log()<<"warning: postprocess: target "<<l.name<<" redifinition in file "<<m_shared.get_name()<<"\n";
                 continue;
             }
 
@@ -359,16 +359,37 @@ void postprocess::update()
 
             if(color)
             {
+                nya_render::texture::color_format f=nya_render::texture::color_rgba;
+                const char *format=l.get_value("color_format");
+                if(format)
+                {
+                    if(strcmp(format,"rgba")==0 || strcmp(format,"rgba8")==0)
+                        f=nya_render::texture::color_rgba;
+                    else if(strcmp(format,"rgb")==0 || strcmp(format,"rgb8")==0)
+                        f=nya_render::texture::color_rgb;
+                    else if(strcmp(format,"rgba32f")==0)
+                        f=nya_render::texture::color_rgba32f;
+                    else if(strcmp(format,"rgb32f")==0)
+                        f=nya_render::texture::color_rgb32f;
+                    else
+                    {
+                        log()<<"warning: postprocess: invalid texture "<<color<<" format"<<format<<"in file "<<m_shared.get_name()<<"\n";
+                        log()<<"available formats: rgba, rgb, rgba32f, rgb32f\n";
+                    }
+                }
+
                 texture_proxy t=get_texture(color);
                 if(t.is_valid())
                 {
                     if(t->get_width()!=w || t->get_height()!=h)
-                        log()<<"postprocess: texture "<<color<<" with different size in file "<<m_shared.get_name()<<"\n";
+                        log()<<"warning: postprocess: texture "<<color<<" with different size in file "<<m_shared.get_name()<<"\n";
+                    if(t->get_format()!=f)
+                        log()<<"warning: postprocess: texture "<<color<<" with different format in file "<<m_shared.get_name()<<"\n";
                 }
                 else
                 {
                     t.create();
-                    t->build(0,w,h,nya_render::texture::color_rgba);
+                    t->build(0,w,h,f);
                     m_textures.push_back(std::make_pair(color,tex_holder(false,t)));
                 }
 
@@ -377,16 +398,35 @@ void postprocess::update()
 
             if(depth)
             {
+                nya_render::texture::color_format f=nya_render::texture::depth16;
+                const char *format=l.get_value("depth_format");
+                if(format)
+                {
+                    if(strcmp(format,"depth16")==0)
+                        f=nya_render::texture::depth16;
+                    else if(strcmp(format,"depth24")==0)
+                        f=nya_render::texture::depth24;
+                    else if(strcmp(format,"depth32")==0)
+                        f=nya_render::texture::depth32;
+                    else
+                    {
+                        log()<<"warning: postprocess: invalid texture "<<depth<<" format"<<format<<"in file "<<m_shared.get_name()<<"\n";
+                        log()<<"available formats: depth16, depth24, depth32\n";
+                    }
+                }
+
                 texture_proxy t=get_texture(depth);
                 if(t.is_valid())
                 {
                     if(t->get_width()!=w || t->get_height()!=h)
-                        log()<<"postprocess: texture "<<depth<<" with different size in file "<<m_shared.get_name()<<"\n";
+                        log()<<"warning: postprocess: texture "<<depth<<" with different size in file "<<m_shared.get_name()<<"\n";
+                    if(t->get_format()!=f)
+                        log()<<"warning: postprocess: texture "<<depth<<" with different format in file "<<m_shared.get_name()<<"\n";
                 }
                 else
                 {
                     t.create();
-                    t->build(0,w,h,nya_render::texture::depth24);
+                    t->build(0,w,h,f);
                     m_textures.push_back(std::make_pair(depth,tex_holder(false,t)));
                 }
 
@@ -453,7 +493,7 @@ void postprocess::update()
             m_op.back().type=type_draw_quad;
         }
         else
-            log()<<"postprocess: unknown operation "<<l.type<<" in file "<<m_shared.get_name()<<"\n";
+            log()<<"warning: postprocess: unknown operation "<<l.type<<" in file "<<m_shared.get_name()<<"\n";
     }
 
     for(int i=0;i<(int)m_shader_params.size();++i)

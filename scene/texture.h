@@ -49,13 +49,15 @@ public:
     static void register_load_function(texture_internal::load_function function,bool clear_default=true) { texture_internal::register_load_function(function,clear_default); }
 
 public:
+    typedef nya_render::texture::color_format color_format;
+
     const char *get_name() const { return internal().get_name(); }
     unsigned int get_width() const;
     unsigned int get_height() const;
+    color_format get_format() const;
     bool is_cubemap() const;
 
 public:
-    typedef nya_render::texture::color_format color_format;
     bool build(const void *data,unsigned int width,unsigned int height,color_format format);
 
 public:
