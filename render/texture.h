@@ -63,7 +63,14 @@ public:
     static void apply(bool ignore_cache=false);
 
 public:
-    void set_wrap(bool repeat_s,bool repeat_t);
+    enum wrap
+    {
+        wrap_clamp,
+        wrap_repeat,
+        wrap_repeat_mirror
+    };
+
+    void set_wrap(wrap s,wrap t);
 
     enum filter
     {

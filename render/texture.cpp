@@ -946,19 +946,29 @@ unsigned int texture::get_width() const { return m_tex<0?0:texture_obj::get(m_te
 unsigned int texture::get_height() const { return m_tex<0?0:texture_obj::get(m_tex).height; }
 texture::color_format texture::get_color_format() const { return m_tex<0?color_rgb:texture_obj::get(m_tex).format; }
 
-void texture::set_wrap(bool repeat_s,bool repeat_t)
+void texture::set_wrap(wrap s,wrap t)
 {
     if(m_tex<0)
         return;
 
     const texture_obj &tex=texture_obj::get(m_tex);
+    const bool pot=((tex.width&(tex.width-1))==0 && (tex.height&(tex.height-1))==0);
+    if(!pot)
+        s=t=wrap_clamp;
 
 #ifndef DIRECTX11
-    const bool pot=((tex.width&(tex.width-1))==0 && (tex.height&(tex.height-1))==0);
-
     glBindTexture(tex.gl_type,tex.tex_id);
-    glTexParameteri(tex.gl_type,GL_TEXTURE_WRAP_S,repeat_s&&pot?GL_REPEAT:GL_CLAMP_TO_EDGE);
-    glTexParameteri(tex.gl_type,GL_TEXTURE_WRAP_T,repeat_t&&pot?GL_REPEAT:GL_CLAMP_TO_EDGE);
+    for(int i=0;i<2;++i)
+    {
+        const int st=i==0?GL_TEXTURE_WRAP_S:GL_TEXTURE_WRAP_T;
+        switch(s)
+        {
+            case wrap_clamp:glTexParameteri(tex.gl_type,st,GL_CLAMP_TO_EDGE);break;
+            case wrap_repeat:glTexParameteri(tex.gl_type,st,GL_REPEAT);break;
+            case wrap_repeat_mirror:glTexParameteri(tex.gl_type,st,GL_MIRRORED_REPEAT);break;
+        }
+    }
+
     active_layers[0]= -1;
 #endif
 }
