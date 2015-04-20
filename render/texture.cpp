@@ -636,17 +636,17 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
     t.gl_type=gl_type;
 
 #ifdef OPENGL_ES
-    if(t.format==depth24)
-        t.format=depth32;
+    if(format==depth24)
+        format=depth32;
 
-    if(t.format==color_rgb)
-        t.format=color_rgba;
+    if(format==color_rgb)
+        format=color_rgba;
 
   #ifdef __ANDROID__
     nya_memory::tmp_buffer_ref temp_buf;
-    if(t.format==color_bgra)
+    if(format==color_bgra)
     {
-        t.format=color_rgba;
+        format=color_rgba;
         if(data)
         {
             const size_t size=width*height*4;
