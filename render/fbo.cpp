@@ -334,6 +334,9 @@ void fbo::set_color_target(const texture &tex,cubemap_side side,unsigned int att
         fbo.color_attachments.resize(attachment_idx+1);
 
     fbo_obj::attachment &a=fbo.color_attachments[attachment_idx];
+    if(a.tex_idx==tex.m_tex && a.cubemap_side==side && a.multisample.samples==samples)
+        return;
+
     a.tex_idx=tex.m_tex;
     a.cubemap_side=side;
 
@@ -347,28 +350,31 @@ void fbo::set_color_target(const texture &tex,cubemap_side side,unsigned int att
     }
 #endif
 
-    if(samples>1)
-        a.multisample.create(tex.get_width(),tex.get_height(),tex.get_color_format(),samples);
-    else
-        a.multisample.release();
-
-    if(fbo.depth_tex_idx>=0)
+    if(a.multisample.samples!=samples)
     {
-        texture_obj &dtex=texture_obj::get(fbo.depth_tex_idx);
-        if(dtex.width==tex.get_width() && dtex.height==tex.get_height())
-        {
-            unsigned int samples_count=0;
-            for(size_t i=0;i<fbo.color_attachments.size();++i)
-            {
-                fbo_obj::attachment &a=fbo.color_attachments[i];
-                if(a.multisample.samples>samples_count)
-                    samples_count=a.multisample.samples;
-            }
+        if(samples>1)
+            a.multisample.create(tex.get_width(),tex.get_height(),tex.get_color_format(),samples);
+        else
+            a.multisample.release();
 
-            if(samples_count>1)
+        if(fbo.depth_tex_idx>=0)
+        {
+            texture_obj &dtex=texture_obj::get(fbo.depth_tex_idx);
+            if(dtex.width==tex.get_width() && dtex.height==tex.get_height())
             {
-                fbo.multisample_depth.create(dtex.width,dtex.height,dtex.format,samples_count);
-                OPENGL_ONLY(fbo.depth_target_idx=0);
+                unsigned int samples_count=0;
+                for(size_t i=0;i<fbo.color_attachments.size();++i)
+                {
+                    fbo_obj::attachment &a=fbo.color_attachments[i];
+                    if(a.multisample.samples>samples_count)
+                        samples_count=a.multisample.samples;
+                }
+
+                if(samples_count>1)
+                {
+                    fbo.multisample_depth.create(dtex.width,dtex.height,dtex.format,samples_count);
+                    OPENGL_ONLY(fbo.depth_target_idx=0);
+                }
             }
         }
     }
@@ -388,6 +394,9 @@ void fbo::set_depth_target(const texture &tex)
         m_fbo_idx=fbo_obj::add();
 
     fbo_obj &fbo=fbo_obj::get(m_fbo_idx);
+    if(fbo.depth_tex_idx==tex.m_tex)
+        return;
+
     fbo.depth_tex_idx=tex.m_tex;
 
 #ifndef DIRECTX11

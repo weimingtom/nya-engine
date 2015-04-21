@@ -125,6 +125,10 @@ private:
     {
         nya_memory::shared_ptr<nya_render::fbo> fbo;
         nya_render::rect rect;
+        int color_idx, depth_idx;
+        int samples;
+
+        op_target(): color_idx(-1),depth_idx(-1),samples(1) {}
     };
 
     std::vector<op_target> m_targets;

@@ -53,8 +53,26 @@ void postprocess::draw(int dt)
                 break;
 
             case type_set_target:
-                nya_render::set_viewport(m_targets[idx].rect);
-                m_targets[idx].fbo->bind();
+                {
+                    op_target &t=m_targets[idx];
+                    nya_render::set_viewport(t.rect);
+
+                    if(t.color_idx>=0)
+                    {
+                        nya_scene::texture_proxy &tp=m_textures[t.color_idx].second.tex;
+                        if(tp.is_valid() && tp->internal().get_shared_data().is_valid())
+                            t.fbo->set_color_target(tp->internal().get_shared_data()->tex,0,t.samples);
+                    }
+
+                    if(t.depth_idx>=0)
+                    {
+                        nya_scene::texture_proxy &tp=m_textures[t.depth_idx].second.tex;
+                        if(tp.is_valid() && tp->internal().get_shared_data().is_valid())
+                            t.fbo->set_depth_target(tp->internal().get_shared_data()->tex);
+                    }
+
+                    t.fbo->bind();
+                }
                 break;
 
             case type_set_texture:
@@ -168,7 +186,6 @@ float postprocess::get_variable(const char *name) const
 void postprocess::set_texture(const char *name,const texture_proxy &tex)
 {
     set_value(m_textures,name,tex_holder(true,tex));
-    update(); //ToDo: update targets only
 }
 
 const texture_proxy &postprocess::get_texture(const char *name) const
@@ -430,7 +447,8 @@ void postprocess::update()
                     m_textures.push_back(std::make_pair(color,tex_holder(false,t)));
                 }
 
-                m_targets.back().fbo->set_color_target(t->internal().get_shared_data()->tex,0,s);
+                m_targets.back().color_idx=get_idx(m_textures, color);
+                m_targets.back().samples=s;
             }
 
             if(depth)
@@ -467,7 +485,7 @@ void postprocess::update()
                     m_textures.push_back(std::make_pair(depth,tex_holder(false,t)));
                 }
 
-                m_targets.back().fbo->set_depth_target(t->internal().get_shared_data()->tex);
+                m_targets.back().depth_idx=get_idx(m_textures, depth);
             }
         }
         else if(l.type=="set_shader")
