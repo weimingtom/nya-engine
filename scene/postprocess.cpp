@@ -210,7 +210,6 @@ void postprocess::set_shader_param(const char *name,const nya_math::vec4 &value)
     const int idx=(int)m_shader_params.size();
     m_shader_params.push_back(std::make_pair(name,value));
     update_shader_param(idx);
-    update();
 }
 
 void postprocess::update_shader_param(int param_idx)
