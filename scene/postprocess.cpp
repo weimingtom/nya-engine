@@ -2,6 +2,7 @@
 
 #include "postprocess.h"
 #include "formats/text_parser.h"
+#include "formats/string_convert.h"
 #include "formats/math_expr_parser.h"
 #include "memory/invalid_object.h"
 #include "scene.h"
@@ -388,8 +389,44 @@ void postprocess::update()
                 }
                 else
                 {
+                    const char *init_color=l.get_value("init_color");
+                    nya_memory::tmp_buffer_ref color_buf;
+                    if(init_color)
+                    {
+                        nya_math::vec4 cf=nya_formats::vec4_from_string(init_color);
+                        nya_math::vec4 cfc=cf.min(cf.max(cf, nya_math::vec4(0.0,0.0,0.0,0.0)), nya_math::vec4(1.0,1.0,1.0,1.0))/255.0;
+                        unsigned char c[4]={cfc.x,cfc.y,cfc.z,cfc.w};
+                        switch(f)
+                        {
+                            case nya_render::texture::color_rgba:
+                            case nya_render::texture::color_rgb:
+                            {
+                                unsigned int bpp=f==nya_render::texture::color_rgba?4:3;
+                                color_buf.allocate(w*h*bpp);
+                                for(unsigned int i=0;i<w*h*bpp;i+=bpp)
+                                    memcpy(color_buf.get_data(i),c,bpp);
+                            }
+                            break;
+
+                            case nya_render::texture::color_rgba32f:
+                            case nya_render::texture::color_rgb32f:
+                            {
+                                unsigned int bpp=f==nya_render::texture::color_rgba32f?4*4:3*4;
+                                color_buf.allocate(w*h*bpp);
+                                for(unsigned int i=0;i<w*h*bpp;i+=bpp)
+                                    memcpy(color_buf.get_data(i),&cf,bpp);
+                                break;
+                            }
+
+                            default:
+                                log()<<"warning: postprocess: texture "<<color<<" invalid color format initialisation "<<m_shared.get_name()<<"\n";
+                        }
+                    }
+
                     t.create();
-                    t->build(0,w,h,f);
+                    t->build(color_buf.get_data(),w,h,f);
+                    color_buf.free();
+
                     m_textures.push_back(std::make_pair(color,tex_holder(false,t)));
                 }
 
