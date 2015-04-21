@@ -394,7 +394,7 @@ void postprocess::update()
                     if(init_color)
                     {
                         nya_math::vec4 cf=nya_formats::vec4_from_string(init_color);
-                        nya_math::vec4 cfc=cf.min(cf.max(cf, nya_math::vec4(0.0,0.0,0.0,0.0)), nya_math::vec4(1.0,1.0,1.0,1.0))/255.0;
+                        nya_math::vec4 cfc=cf.min(cf.max(cf, nya_math::vec4(0.0,0.0,0.0,0.0)), nya_math::vec4(1.0,1.0,1.0,1.0))*255.0;
                         unsigned char c[4]={cfc.x,cfc.y,cfc.z,cfc.w};
                         switch(f)
                         {
