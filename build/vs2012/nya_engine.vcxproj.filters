@@ -93,6 +93,9 @@
     <ClCompile Include="..\..\math\matrix.cpp">
       <Filter>math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\math\quadtree.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\math\quaternion.cpp">
       <Filter>math</Filter>
     </ClCompile>
@@ -250,6 +253,9 @@
     </ClInclude>
     <ClInclude Include="..\..\math\matrix.h">
       <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\math\quadtree.h">
+        <Filter>math</Filter>
     </ClInclude>
     <ClInclude Include="..\..\math\quaternion.h">
       <Filter>math</Filter>

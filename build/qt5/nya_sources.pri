@@ -24,6 +24,7 @@ SOURCES += \
     $${NYA_ENGINE_PATH}/math/constants.cpp \
     $${NYA_ENGINE_PATH}/math/frustum.cpp \
     $${NYA_ENGINE_PATH}/math/matrix.cpp \
+    $${NYA_ENGINE_PATH}/math/quadtree.cpp \
     $${NYA_ENGINE_PATH}/math/quaternion.cpp \
     $${NYA_ENGINE_PATH}/memory/memory.cpp \
     $${NYA_ENGINE_PATH}/memory/tmp_buffer.cpp \
@@ -84,6 +85,7 @@ HEADERS += \
     $${NYA_ENGINE_PATH}/math/constants.h \
     $${NYA_ENGINE_PATH}/math/frustum.h \
     $${NYA_ENGINE_PATH}/math/matrix.h \
+    $${NYA_ENGINE_PATH}/math/quadtree.h \
     $${NYA_ENGINE_PATH}/math/quaternion.h \
     $${NYA_ENGINE_PATH}/math/vector.h \
     $${NYA_ENGINE_PATH}/memory/indexed_map.h \

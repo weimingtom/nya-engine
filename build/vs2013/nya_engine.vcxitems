@@ -28,6 +28,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\math\constants.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\math\frustum.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\math\matrix.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\math\quadtree.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\math\quaternion.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\memory\memory.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\memory\tmp_buffer.cpp" />
@@ -92,6 +93,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\math\constants.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\math\frustum.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\math\matrix.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\math\quadtree.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\math\quaternion.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\math\scalar.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\math\vector.h" />

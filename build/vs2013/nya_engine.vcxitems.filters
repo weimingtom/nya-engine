@@ -34,6 +34,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\math\matrix.cpp">
       <Filter>math</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\math\quadtree.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\math\quaternion.cpp">
       <Filter>math</Filter>
     </ClCompile>
@@ -181,6 +184,9 @@
       <Filter>math</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\math\matrix.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\math\quadtree.h">
       <Filter>math</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\math\quaternion.h">

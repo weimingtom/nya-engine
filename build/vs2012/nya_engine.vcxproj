@@ -325,6 +325,7 @@
     <ClCompile Include="..\..\math\constants.cpp" />
     <ClCompile Include="..\..\math\frustum.cpp" />
     <ClCompile Include="..\..\math\matrix.cpp" />
+    <ClCompile Include="..\..\math\quadtree.cpp" />
     <ClCompile Include="..\..\math\quaternion.cpp" />
     <ClCompile Include="..\..\memory\memory.cpp" />
     <ClCompile Include="..\..\memory\tmp_buffer.cpp" />
@@ -389,6 +390,7 @@
     <ClInclude Include="..\..\math\constants.h" />
     <ClInclude Include="..\..\math\frustum.h" />
     <ClInclude Include="..\..\math\matrix.h" />
+    <ClInclude Include="..\..\math\quadtree.h" />
     <ClInclude Include="..\..\math\quaternion.h" />
     <ClInclude Include="..\..\math\scalar.h" />
     <ClInclude Include="..\..\math\vector.h" />
