@@ -53,11 +53,11 @@ template<typename t> void add_object(const quad &obj,int obj_idx,float min_y,flo
     int center_x=leaf.x+child.size_x;
     int center_z=leaf.z+child.size_z;
 
-    if(obj.x<center_x)
+    if(obj.x<=center_x)
     {
         child.x=leaf.x;
 
-        if(obj.z<center_z)
+        if(obj.z<=center_z)
         {
             child.z=leaf.z;
             add_object(obj,obj_idx,min_y,max_y,child,leaves[leaf_idx].leaves[0][0],leaves,level);
@@ -74,7 +74,7 @@ template<typename t> void add_object(const quad &obj,int obj_idx,float min_y,flo
     {
         child.x=center_x;
 
-        if(obj.z<center_z)
+        if(obj.z<=center_z)
         {
             child.z=leaf.z;
             add_object(obj,obj_idx,min_y,max_y,child,leaves[leaf_idx].leaves[1][0],leaves,level);
@@ -179,11 +179,11 @@ template<typename t> bool get_objects(quad search,quad leaf,int leaf_idx,const s
     int center_x=leaf.x+child.size_x;
     int center_z=leaf.z+child.size_z;
 
-    if(search.x<center_x)
+    if(search.x<=center_x)
     {
         child.x=leaf.x;
 
-        if(search.z<center_z)
+        if(search.z<=center_z)
         {
             child.z=leaf.z;
             get_objects(search,child,leaves[leaf_idx].leaves[0][0],leaves,result);
@@ -200,7 +200,7 @@ template<typename t> bool get_objects(quad search,quad leaf,int leaf_idx,const s
     {
         child.x=center_x;
 
-        if(search.z<center_z)
+        if(search.z<=center_z)
         {
             child.z=leaf.z;
             get_objects(search,child,leaves[leaf_idx].leaves[1][0],leaves,result);
