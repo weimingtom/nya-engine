@@ -24,7 +24,7 @@ struct quad
 
 }
 
-template<typename t> void add_object(const quad &obj,int obj_idx,float min_y,float max_y,const quad &leaf,int &leaf_idx,std::vector<t> &leaves,int level)
+template<typename t> int add_object(const quad &obj,int obj_idx,float min_y,float max_y,const quad &leaf,int leaf_idx,std::vector<t> &leaves,int level)
 {
     if(leaf_idx<0)
     {
@@ -41,7 +41,7 @@ template<typename t> void add_object(const quad &obj,int obj_idx,float min_y,flo
     if(level<=0)
     {
         leaves[leaf_idx].objects.push_back(obj_idx);
-        return;
+        return leaf_idx;
     }
 
     --level;
@@ -60,13 +60,13 @@ template<typename t> void add_object(const quad &obj,int obj_idx,float min_y,flo
         if(obj.z<=center_z)
         {
             child.z=leaf.z;
-            add_object(obj,obj_idx,min_y,max_y,child,leaves[leaf_idx].leaves[0][0],leaves,level);
+            leaves[leaf_idx].leaves[0][0] = add_object(obj,obj_idx,min_y,max_y,child,leaves[leaf_idx].leaves[0][0],leaves,level);
         }
 
         if(obj.z+obj.size_z>center_z)
         {
             child.z=center_z;
-            add_object(obj,obj_idx,min_y,max_y,child,leaves[leaf_idx].leaves[0][1],leaves,level);
+            leaves[leaf_idx].leaves[0][1] = add_object(obj,obj_idx,min_y,max_y,child,leaves[leaf_idx].leaves[0][1],leaves,level);
         }
     }
 
@@ -77,15 +77,17 @@ template<typename t> void add_object(const quad &obj,int obj_idx,float min_y,flo
         if(obj.z<=center_z)
         {
             child.z=leaf.z;
-            add_object(obj,obj_idx,min_y,max_y,child,leaves[leaf_idx].leaves[1][0],leaves,level);
+            leaves[leaf_idx].leaves[1][0] = add_object(obj,obj_idx,min_y,max_y,child,leaves[leaf_idx].leaves[1][0],leaves,level);
         }
 
         if(obj.z+obj.size_z>center_z)
         {
             child.z=center_z;
-            add_object(obj,obj_idx,min_y,max_y,child,leaves[leaf_idx].leaves[1][1],leaves,level);
+            leaves[leaf_idx].leaves[1][1] = add_object(obj,obj_idx,min_y,max_y,child,leaves[leaf_idx].leaves[1][1],leaves,level);
         }
     }
+
+    return leaf_idx;
 }
 
 void quadtree::add_object(const aabb &box,int idx)
