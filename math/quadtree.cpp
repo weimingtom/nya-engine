@@ -220,6 +220,9 @@ template<typename t> bool get_objects(quad search,quad leaf,int leaf_idx,const s
 
 bool quadtree::get_objects(int x,int z, std::vector<int> &result) const
 {
+    if(m_leaves.empty())
+        return false;
+
     result.clear();
     quad search;search.x=x;search.z=z;search.size_x=search.size_z=0;
     quad leaf;leaf.x=m_x,leaf.z=m_z,leaf.size_x=m_size_x,leaf.size_z=m_size_z;
@@ -228,6 +231,9 @@ bool quadtree::get_objects(int x,int z, std::vector<int> &result) const
 
 bool quadtree::get_objects(int x,int z,int size_x,int size_z, std::vector<int> &result) const
 {
+    if(m_leaves.empty())
+        return false;
+
     result.clear();
     quad search;search.x=x;search.z=z;search.size_x=size_x,search.size_z=size_z;
     quad leaf;leaf.x=m_x,leaf.z=m_z,leaf.size_x=m_size_x,leaf.size_z=m_size_z;
