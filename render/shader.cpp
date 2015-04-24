@@ -12,6 +12,10 @@
     #define CACHE_UNIFORM_CHANGES
 #endif
 
+#ifdef CACHE_UNIFORM_CHANGES
+    #include "math/vector.h"
+#endif
+
 #ifdef OPENGL_ES
     #define GLhandleARB GLuint
 #endif
@@ -108,9 +112,7 @@ namespace
         {
             std::string name;
             int array_size;
-#ifdef CACHE_UNIFORM_CHANGES
-            int value_offset;
-#endif
+
             shader::uniform_type type;
 
             uniform(): array_size(1) {}
@@ -124,7 +126,7 @@ namespace
         std::vector<uniform> uniforms;
 
 #ifdef CACHE_UNIFORM_CHANGES
-        std::vector<float> values_buffer;
+        std::vector<nya_math::vec4> uniforms_cache;
 #endif
         uniform &add_uniform(const std::string &name)
         {
@@ -579,6 +581,10 @@ bool shader::add_program(program_type type,const char*code)
 
     shader_obj &shdr=shader_obj::get(m_shdr);
 
+#ifdef CACHE_UNIFORM_CHANGES
+    shdr.uniforms_cache.clear();
+#endif
+
     if(!shdr.program)
         shdr.program=glCreateProgramObjectARB();
 
@@ -652,28 +658,6 @@ bool shader::add_program(program_type type,const char*code)
     }
 
 #ifndef DIRECTX11
-  #ifdef CACHE_UNIFORM_CHANGES
-    shdr.values_buffer.clear();
-    for(size_t i=0;i<shdr.uniforms.size();++i)
-    {
-        shader_obj::uniform &u=shdr.uniforms[i];
-        if(u.type>uniform_mat4)
-            continue;
-
-    #ifndef CACHE_UNIFORM_ARRAY_CHANGES
-        if(u.array_size>1)
-        {
-            u.value_offset= -1;
-            continue;
-        }
-    #endif
-
-        const int size=(u.type==uniform_mat4?16:4)*u.array_size;
-        u.value_offset=(int)shdr.values_buffer.size();
-        shdr.values_buffer.resize(u.value_offset+size,0.0f);
-    }
-  #endif
-
   #ifdef OPENGL_ES
     shdr.objects[type]=object;
     if(shdr.program && shdr.objects[vertex] && shdr.objects[pixel])
@@ -923,9 +907,9 @@ int shader::get_handler(const char *name) const
 #endif
 }
 
-void shader::set_uniform(unsigned int i,float f0,float f1,float f2,float f3) const
+void shader::set_uniform(int i,float f0,float f1,float f2,float f3) const
 {
-    if(m_shdr<0)
+    if(m_shdr<0 || i<0)
         return;
 
     shader_obj &shdr=shader_obj::get(m_shdr);
@@ -957,7 +941,14 @@ void shader::set_uniform(unsigned int i,float f0,float f1,float f2,float f3) con
         return;
 
   #ifdef CACHE_UNIFORM_CHANGES
-    //ToDo
+    if(i>=shdr.uniforms_cache.size())
+        shdr.uniforms_cache.resize(i+1);
+
+    nya_math::vec4 &v=shdr.uniforms_cache[i];
+    if(v.x==f0 && v.y==f1 && v.z==f2 &&v.w==f3)
+        return;
+
+    v.x=f0,v.y=f1,v.z=f2,v.w=f3;
   #endif
 
     set_shader(m_shdr);
@@ -965,9 +956,9 @@ void shader::set_uniform(unsigned int i,float f0,float f1,float f2,float f3) con
 #endif
 }
 
-void shader::set_uniform3_array(unsigned int i,const float *f,unsigned int count) const
+void shader::set_uniform3_array(int i,const float *f,unsigned int count) const
 {
-    if(m_shdr<0)
+    if(m_shdr<0 || i<0)
         return;
 
     shader_obj &shdr=shader_obj::get(m_shdr);
@@ -1016,9 +1007,9 @@ void shader::set_uniform3_array(unsigned int i,const float *f,unsigned int count
 #endif
 }
 
-void shader::set_uniform4_array(unsigned int i,const float *f,unsigned int count) const
+void shader::set_uniform4_array(int i,const float *f,unsigned int count) const
 {
-    if(m_shdr<0)
+    if(m_shdr<0 || i<0)
         return;
 
     shader_obj &shdr=shader_obj::get(m_shdr);
@@ -1063,9 +1054,9 @@ void shader::set_uniform4_array(unsigned int i,const float *f,unsigned int count
 #endif
 }
 
-void shader::set_uniform16_array(unsigned int i,const float *f,unsigned int count,bool transpose) const
+void shader::set_uniform16_array(int i,const float *f,unsigned int count,bool transpose) const
 {
-    if(m_shdr<0)
+    if(m_shdr<0 || i<0)
         return;
 
     shader_obj &shdr=shader_obj::get(m_shdr);

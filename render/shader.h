@@ -30,10 +30,10 @@ public:
 
 public:
     int get_handler(const char*name) const;
-    void set_uniform(unsigned int handler,float f0,float f1=0.0f,float f2=0.0f,float f3=0.0f) const;
-    void set_uniform3_array(unsigned int handler,const float *f,unsigned int count) const;
-    void set_uniform4_array(unsigned int handler,const float *f,unsigned int count) const;
-    void set_uniform16_array(unsigned int handler,const float *f,unsigned int count,bool transpose=false) const;
+    void set_uniform(int handler,float f0,float f1=0.0f,float f2=0.0f,float f3=0.0f) const;
+    void set_uniform3_array(int handler,const float *f,unsigned int count) const;
+    void set_uniform4_array(int handler,const float *f,unsigned int count) const;
+    void set_uniform16_array(int handler,const float *f,unsigned int count,bool transpose=false) const;
 
 public:
     int get_sampler_layer(const char *name) const;
