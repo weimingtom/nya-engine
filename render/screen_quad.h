@@ -24,10 +24,15 @@ public:
         m_mesh.set_vertex_data(verts,sizeof(verts[0]),4);
         m_mesh.set_vertices(0,2);
         m_mesh.set_tc(0,2*4,2);
-        m_mesh.set_element_type(vbo::triangle_strip);
     }
 
-    void draw() const { m_mesh.bind(); m_mesh.draw(); m_mesh.unbind(); }
+    void draw(unsigned int instances_count=1) const
+    {
+        m_mesh.bind();
+        vbo::draw(0,m_mesh.get_verts_count(),vbo::triangle_strip,instances_count);
+        m_mesh.unbind();
+    }
+
     void release() { m_mesh.release(); }
 
 private:
