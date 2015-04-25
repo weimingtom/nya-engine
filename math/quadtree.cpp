@@ -1,6 +1,7 @@
 //https://code.google.com/p/nya-engine/
 
 #include "quadtree.h"
+#include <algorithm>
 
 namespace nya_math
 {
