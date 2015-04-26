@@ -3,6 +3,7 @@
 #include "shader_code_parser.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <algorithm>
 
 //ToDo: DX11 instance id (SV_InstanceID)
