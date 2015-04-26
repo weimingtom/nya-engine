@@ -6,6 +6,7 @@
 #include "formats/math_expr_parser.h"
 #include "memory/invalid_object.h"
 #include "scene.h"
+#include <string.h>
 
 #ifdef min
     #undef min
