@@ -7,6 +7,11 @@
 #include "memory/invalid_object.h"
 #include "scene.h"
 
+#ifdef min
+    #undef min
+    #undef max
+#endif
+
 namespace nya_scene
 {
 
@@ -409,9 +414,10 @@ void postprocess::update()
                     nya_memory::tmp_buffer_ref color_buf;
                     if(init_color)
                     {
+                        typedef unsigned char uchar;
                         nya_math::vec4 cf=nya_formats::vec4_from_string(init_color);
                         nya_math::vec4 cfc=cf.min(cf.max(cf, nya_math::vec4(0.0,0.0,0.0,0.0)), nya_math::vec4(1.0,1.0,1.0,1.0))*255.0;
-                        unsigned char c[4]={cfc.x,cfc.y,cfc.z,cfc.w};
+                        uchar c[4]={uchar(cfc.x),uchar(cfc.y),uchar(cfc.z),uchar(cfc.w)};
                         switch(f)
                         {
                             case nya_render::texture::color_rgba:
