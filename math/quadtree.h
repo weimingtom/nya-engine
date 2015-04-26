@@ -5,6 +5,7 @@
 #include "frustum.h"
 #include <map>
 #include <vector>
+#include <float.h>
 
 namespace nya_math
 {
@@ -38,7 +39,7 @@ private:
         float min_y;
         float max_y;
 
-        leaf() { leaves[0][0]=leaves[0][1]=leaves[1][0]=leaves[1][1]=-1; min_y=INFINITY; max_y=-INFINITY; }
+        leaf() { leaves[0][0]=leaves[0][1]=leaves[1][0]=leaves[1][1]=-1; min_y=FLT_MAX; max_y=-FLT_MAX; }
     };
 
     int m_x,m_z,m_size_x,m_size_z;
