@@ -6,9 +6,10 @@
 #include "render.h"
 
 //#define CACHE_UNIFORM_CHANGES
+//#define CACHE_MATRIX_CHANGES
 //#define CACHE_UNIFORM_ARRAY_CHANGES
 
-#ifdef CACHE_UNIFORM_ARRAY_CHANGES
+#if defined CACHE_UNIFORM_ARRAY_CHANGES || defined CACHE_MATRIX_CHANGES
     #define CACHE_UNIFORM_CHANGES
 #endif
 
@@ -311,6 +312,21 @@ bool check_init_shaders()
     initialised=true;
     return true;
 }
+
+void gl_set_matrix(shader_obj &shdr,int idx,const float *m)
+{
+#ifdef CACHE_MATRIX_CHANGES
+    if(idx+4>shdr.uniforms_cache.size())
+        shdr.uniforms_cache.resize(idx + 4 + 1);
+
+    if(memcmp(&shdr.uniforms_cache[idx],m,4*16)==0)
+        return;
+
+    memcpy(&shdr.uniforms_cache[idx],m,4*16);
+#endif
+    glUniformMatrix4fvARB(idx,1,false,m);
+}
+
 #endif
 }
 
@@ -835,14 +851,13 @@ void shader::apply(bool ignore_cache)
     if(current_shader<0)
         return;
 
-    const shader_obj &shdr=shader_obj::get(current_shader);
-
+    shader_obj &shdr=shader_obj::get(current_shader);
     if(shdr.mat_mvp>=0)
-        glUniformMatrix4fvARB(shdr.mat_mvp,1,false,transform::get().get_modelviewprojection_matrix().m[0]);
+        gl_set_matrix(shdr,shdr.mat_mvp,transform::get().get_modelviewprojection_matrix().m[0]);
     if(shdr.mat_mv>=0)
-        glUniformMatrix4fvARB(shdr.mat_mv,1,false,transform::get().get_modelview_matrix().m[0]);
+        gl_set_matrix(shdr,shdr.mat_mv,transform::get().get_modelview_matrix().m[0]);
     if(shdr.mat_p>=0)
-        glUniformMatrix4fvARB(shdr.mat_p,1,false,transform::get().get_projection_matrix().m[0]);
+        gl_set_matrix(shdr,shdr.mat_p,transform::get().get_projection_matrix().m[0]);
   #endif
 #endif
 }
