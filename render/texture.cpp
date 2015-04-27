@@ -910,10 +910,11 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
     glBindFramebuffer(GL_FRAMEBUFFER,copy_fbo);
     if(is_cubemap())
     {
+        unsigned int size=tex.width*tex.height*get_bpp(tex.format)/8;
         for(int i=0;i<6;++i)
         {
             glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,cube_faces[i],tex.tex_id,0);
-            glReadPixels(0,0,tex.width,tex.height,gl_format,GL_UNSIGNED_BYTE,data.get_data());
+            glReadPixels(0,0,tex.width,tex.height,gl_format,GL_UNSIGNED_BYTE,data.get_data(size*i));
         }
     }
     else
