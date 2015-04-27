@@ -16,7 +16,10 @@ typedef material_internal shared_material;
 class material_internal: public scene_shared<shared_material>
 {
 public:
-    void set(const char *pass_name) const;
+    static const char *default_pass;
+
+public:
+    void set(const char *pass_name=default_pass) const;
     void unset() const;
     void skeleton_changed(const nya_render::skeleton *skeleton) const;
     int get_param_idx(const char *name) const;
@@ -87,7 +90,7 @@ private:
         const nya_render::state &get_state() const {return m_render_state;}
         const shader &get_shader() const {return m_shader;}
         void set_shader(const shader &shader);
-        void set_pass_param(const char *name,const param &value); //material param override
+        void set_pass_param(const char *name,const param &value); //overrides material param
 
     public:
         pass(): m_shader_changed(false) { }
@@ -152,7 +155,7 @@ public:
     const char *get_name() const { return internal().m_name.c_str(); }
     void set_name(const char*name) { m_internal.m_name.assign(name?name:""); }
 
-    int add_pass(const char *pass_name) { return m_internal.add_pass(pass_name); }
+    int add_pass(const char *pass_name) { return m_internal.add_pass(pass_name); } //returns existing if already present
     int get_passes_count() const {return (int)m_internal.m_passes.size();}
     int get_pass_idx(const char *pass_name) const { return m_internal.get_pass_idx(pass_name); }
     const char *get_pass_name(int idx) const { return m_internal.m_passes[idx].m_name.c_str(); }
@@ -160,6 +163,7 @@ public:
     const pass &get_pass(const char *pass_name) const { return m_internal.get_pass(m_internal.get_pass_idx(pass_name)); }
     pass &get_pass(int idx) { return m_internal.get_pass(idx); }
     const pass &get_pass(int idx) const { return m_internal.get_pass(idx); }
+    pass &get_default_pass() { return get_pass(add_pass(default_pass)); } //adds the default pass if it is not present
 
     void set_texture(const char *semantics,const texture &tex);
     void set_texture(const char *semantics,const texture_proxy &proxy);

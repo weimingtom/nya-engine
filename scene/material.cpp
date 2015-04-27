@@ -17,6 +17,7 @@ namespace nya_scene
 {
 
 const char *material::default_pass="default";
+const char *material_internal::default_pass=material::default_pass;
 
 namespace
 {
