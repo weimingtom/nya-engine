@@ -872,70 +872,62 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
 
     return true;
 #else
+    color_format format=tex.format;
+    if(format>=dxt1)
+    {
   #ifdef OPENGL_ES
-    if(tex.format>=dxt1)
         return false;
+  #endif
+        size=tex.width*tex.height*4*(is_cubemap()?6:1);
+        format=color_bgra;
+    }
+
+    int gl_format=0;
+    switch(tex.format)
+    {
+        case color_rgb:gl_format=GL_RGB;break;
+        case color_rgba:gl_format=GL_RGBA;break;
+  #ifndef __ANDROID__
+        case color_bgra:gl_format=GL_BGRA;break;
+  #endif
+        case greyscale:gl_format=GL_LUMINANCE;break;
+        default: return false;
+    }
 
     data.allocate(size);
 
-    gl_select_multitex_layer(0);
-    glBindTexture(tex.gl_type,tex.tex_id);
-    active_layers[0]= -1;
-
-    GLint prev_fbo;
+  #ifdef OPENGL_ES
+    GLint prev_fbo=0;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING,&prev_fbo);
 
     static GLuint copy_fbo=0;
     if(!copy_fbo)
         glGenFramebuffers(1,&copy_fbo);
 
-    glBindFramebuffer(GL_FRAMEBUFFER,copy_fbo);
-    glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,tex.tex_id,0);
-
     rect prev_vp=get_viewport();
     set_viewport(0,0,tex.width,tex.height);
 
-    switch(tex.format)
+    glBindFramebuffer(GL_FRAMEBUFFER,copy_fbo);
+    if(is_cubemap())
     {
-        case color_rgb: glReadPixels(0,0,tex.width,tex.height,GL_RGB,GL_UNSIGNED_BYTE,data.get_data()); break;
-        case color_rgba: glReadPixels(0,0,tex.width,tex.height,GL_RGBA,GL_UNSIGNED_BYTE,data.get_data()); break;
-#ifndef __ANDROID__
-        case color_bgra: glReadPixels(0,0,tex.width,tex.height,GL_BGRA,GL_UNSIGNED_BYTE,data.get_data()); break;
-#endif
-        case greyscale: glReadPixels(0,0,tex.width,tex.height,GL_LUMINANCE,GL_UNSIGNED_BYTE,data.get_data()); break;
-
-        default:
-            glBindFramebuffer(GL_FRAMEBUFFER, prev_fbo);
-            set_viewport(prev_vp);
-            return false;
-    };
-
+        for(int i=0;i<6;++i)
+        {
+            glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,cube_faces[i],tex.tex_id,0);
+            glReadPixels(0,0,tex.width,tex.height,gl_format,GL_UNSIGNED_BYTE,data.get_data());
+        }
+    }
+    else
+    {
+        glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,tex.tex_id,0);
+        glReadPixels(0,0,tex.width,tex.height,gl_format,GL_UNSIGNED_BYTE,data.get_data());
+    }
     glBindFramebuffer(GL_FRAMEBUFFER, prev_fbo);
     set_viewport(prev_vp);
   #else
-    color_format format=tex.format;
-    if(format>=dxt1)
-    {
-        size=tex.width*tex.height*4*(is_cubemap()?6:1);
-        format=color_bgra;
-    }
-
-    data.allocate(size);
-
     gl_select_multitex_layer(0);
     glBindTexture(tex.gl_type,tex.tex_id);
     active_layers[0]= -1;
-
-    switch(format)
-    {
-        case color_rgb: glGetTexImage(tex.gl_type,0,GL_RGB,GL_UNSIGNED_BYTE,data.get_data()); break;
-        case color_rgba: glGetTexImage(tex.gl_type,0,GL_RGBA,GL_UNSIGNED_BYTE,data.get_data()); break;
-        case color_bgra: glGetTexImage(tex.gl_type,0,GL_BGRA,GL_UNSIGNED_BYTE,data.get_data()); break;
-        case greyscale: glGetTexImage(tex.gl_type,0,GL_LUMINANCE,GL_UNSIGNED_BYTE,data.get_data()); break;
-
-        default: return false;
-            //glGetTexImage(tex.gl_type,0,GL_DEPTH_COMPONENT,GL_DEPTH_COMPONENT,data.get_data()); break;
-    };
+    glGetTexImage(tex.gl_type,0,gl_format,GL_UNSIGNED_BYTE,data.get_data());
   #endif
 #endif
 
