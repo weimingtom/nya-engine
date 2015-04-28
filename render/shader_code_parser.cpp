@@ -6,8 +6,6 @@
 #include <stdio.h>
 #include <algorithm>
 
-//ToDo: DX11 instance id (SV_InstanceID)
-
 namespace nya_render
 {
 
@@ -176,6 +174,11 @@ bool shader_code_parser::convert_to_hlsl()
                     prefix.append(buf);
                 }
             }
+
+            std::string instance_var=m_replace_str+"InstanceID";
+            if(replace_variable("gl_InstanceID",(input_var+"."+instance_var).c_str()))
+                prefix.append("uint "+instance_var+":SV_InstanceID;");
+
             prefix.append("};\n");
         }
 
