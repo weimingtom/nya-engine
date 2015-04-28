@@ -311,6 +311,8 @@ bool shader_code_parser::convert_to_glsl3()
     for(int i=0;i<(int)m_uniforms.size();++i)
         prefix.append("uniform mat4 "+m_uniforms[i].name+";\n");
 
+    parse_uniforms(false);
+
     for(int i=0;i<(int)m_attributes.size();++i)
     {
         prefix.append("in ");
