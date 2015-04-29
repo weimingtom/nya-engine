@@ -231,6 +231,9 @@ namespace
     PFNGLGETOBJECTPARAMETERIVARBPROC glGetObjectParameterivARB = NULL;
     PFNGLGETINFOLOGARBPROC glGetInfoLogARB = NULL;
     PFNGLGETUNIFORMLOCATIONARBPROC glGetUniformLocationARB = NULL;
+    #ifdef OPENGL3
+        PFNGLBINDATTRIBLOCATIONARBPROC glBindAttribLocationARB = NULL;
+    #endif
   #endif
 
   #ifdef OPENGL_ES
@@ -307,6 +310,9 @@ bool check_init_shaders()
     if(!(glGetObjectParameterivARB =(PFNGLGETOBJECTPARAMETERIVARBPROC) get_extension("glGetObjectParameteriv"))) return false;
     if(!(glGetInfoLogARB           =(PFNGLGETINFOLOGARBPROC)           get_extension("glGetInfoLog"))) return false;
     if(!(glGetUniformLocationARB   =(PFNGLGETUNIFORMLOCATIONARBPROC)   get_extension("glGetUniformLocation"))) return false;
+    #ifdef OPENGL3
+      if(!(glBindAttribLocationARB =(PFNGLBINDATTRIBLOCATIONARBPROC)   get_extension("glBindAttribLocation"))) return false;
+    #endif
   #endif
     failed=false;
     initialised=true;
@@ -316,7 +322,7 @@ bool check_init_shaders()
 void gl_set_matrix(shader_obj &shdr,int idx,const float *m)
 {
 #ifdef CACHE_MATRIX_CHANGES
-    if(idx+4>shdr.uniforms_cache.size())
+    if(idx+4>(int)shdr.uniforms_cache.size())
         shdr.uniforms_cache.resize(idx + 4 + 1);
 
     if(memcmp(&shdr.uniforms_cache[idx],m,4*16)==0)
@@ -956,7 +962,7 @@ void shader::set_uniform(int i,float f0,float f1,float f2,float f3) const
         return;
 
   #ifdef CACHE_UNIFORM_CHANGES
-    if(i>=shdr.uniforms_cache.size())
+    if(i>=(int)shdr.uniforms_cache.size())
         shdr.uniforms_cache.resize(i+1);
 
     nya_math::vec4 &v=shdr.uniforms_cache[i];

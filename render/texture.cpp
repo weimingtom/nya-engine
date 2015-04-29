@@ -31,6 +31,9 @@ namespace
   #endif
 
   #ifdef OPENGL3
+    #ifdef GL_LUMINANCE
+        #undef GL_LUMINANCE
+    #endif
     #define GL_LUMINANCE GL_RED
     #define GL_TEXTURE_SWIZZLE_RGBA 0x8E46
   #endif

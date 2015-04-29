@@ -207,15 +207,20 @@ int get_gl_element_type(vbo::vertex_atrib_type type)
 }
 
   #ifndef NO_EXTENSIONS_INIT
-    PFNGLGENBUFFERSARBPROC glGenBuffers;
-    PFNGLBINDBUFFERARBPROC glBindBuffer;
-    PFNGLBUFFERDATAARBPROC glBufferData;
-    PFNGLBUFFERSUBDATAARBPROC glBufferSubData;
-    PFNGLGETBUFFERSUBDATAARBPROC glGetBufferSubData;
-    PFNGLDELETEBUFFERSARBPROC glDeleteBuffers;
-    PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTexture;
-    PFNGLDRAWELEMENTSINSTANCEDARBPROC glDrawElementsInstancedARB;
-    PFNGLDRAWARRAYSINSTANCEDARBPROC glDrawArraysInstancedARB;
+    PFNGLGENBUFFERSARBPROC glGenBuffers=NULL;
+    PFNGLBINDBUFFERARBPROC glBindBuffer=NULL;
+    PFNGLBUFFERDATAARBPROC glBufferData=NULL;
+    PFNGLBUFFERSUBDATAARBPROC glBufferSubData=NULL;
+    PFNGLGETBUFFERSUBDATAARBPROC glGetBufferSubData=NULL;
+    PFNGLDELETEBUFFERSARBPROC glDeleteBuffers=NULL;
+    PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTexture=NULL;
+    PFNGLDRAWELEMENTSINSTANCEDARBPROC glDrawElementsInstancedARB=NULL;
+    PFNGLDRAWARRAYSINSTANCEDARBPROC glDrawArraysInstancedARB=NULL;
+    #ifdef OPENGL3
+      PFNGLVERTEXATTRIBPOINTERARBPROC glVertexAttribPointer=NULL;
+      PFNGLENABLEVERTEXATTRIBARRAYARBPROC glEnableVertexAttribArray=NULL;
+      PFNGLDISABLEVERTEXATTRIBARRAYARBPROC glDisableVertexAttribArray=NULL;
+    #endif
   #endif
 
   #ifndef GL_ARRAY_BUFFER
@@ -248,7 +253,7 @@ bool check_init_vbo()
     //if(!has_extension("GL_ARB_vertex_buffer_object"))
     //    return false;
 
-#ifndef NO_EXTENSIONS_INIT
+  #ifndef NO_EXTENSIONS_INIT
     if(!(glGenBuffers=(PFNGLGENBUFFERSARBPROC)get_extension("glGenBuffers"))) return false;
     if(!(glBindBuffer=(PFNGLBINDBUFFERARBPROC)get_extension("glBindBuffer"))) return false;
     if(!(glBufferData=(PFNGLBUFFERDATAARBPROC)get_extension("glBufferData"))) return false;
@@ -256,10 +261,16 @@ bool check_init_vbo()
     if(!(glGetBufferSubData=(PFNGLGETBUFFERSUBDATAARBPROC)get_extension("glGetBufferSubData"))) return false;
     if(!(glDeleteBuffers=(PFNGLDELETEBUFFERSARBPROC)get_extension("glDeleteBuffers"))) return false;
     if(!(glClientActiveTexture=(PFNGLCLIENTACTIVETEXTUREARBPROC)get_extension("glClientActiveTexture"))) return false;
+    #ifdef OPENGL3
+      if(!(glVertexAttribPointer=(PFNGLVERTEXATTRIBPOINTERARBPROC)get_extension("glVertexAttribPointer"))) return false;
+      if(!(glEnableVertexAttribArray=(PFNGLENABLEVERTEXATTRIBARRAYARBPROC)get_extension("glEnableVertexAttribArray"))) return false;
+      if(!(glDisableVertexAttribArray=(PFNGLDISABLEVERTEXATTRIBARRAYARBPROC)get_extension("glDisableVertexAttribArray"))) return false;
+    #endif
 
+    //optional
     glDrawElementsInstancedARB=(PFNGLDRAWELEMENTSINSTANCEDARBPROC)get_extension("glDrawElementsInstanced");
     glDrawArraysInstancedARB=(PFNGLDRAWARRAYSINSTANCEDARBPROC)get_extension("glDrawArraysInstanced");
-#endif
+  #endif
 
     initialised=true,failed=false;
     return true;

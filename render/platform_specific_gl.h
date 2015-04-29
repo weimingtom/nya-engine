@@ -34,6 +34,10 @@
     #else
         #include <gl/gl.h>
         #include <gl/glext.h>
+
+        #ifdef NYA_OPENGL3
+            #define OPENGL3
+        #endif
     #endif
 #elif defined __APPLE__
     #include "TargetConditionals.h"
@@ -68,9 +72,13 @@
     #include <GL/glext.h>
 #endif
 
-#if defined OPENGL_ES || defined OPENGL3
+#ifdef OPENGL_ES
     #define ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
     #define NO_EXTENSIONS_INIT
+#endif
+
+#ifdef OPENGL3
+    #define ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
 #endif
 
 #ifdef DIRECTX11

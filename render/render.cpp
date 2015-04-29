@@ -596,11 +596,16 @@ void apply_state(bool ignore_cache)
     if(c.color[0]!=a.color[0] || c.color[1]!=a.color[1] || c.color[2]!=a.color[2]
                                         || c.color[3]!=a.color[3] || ignore_cache)
     {
-#ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+  #ifdef ATTRIBUTES_INSTEAD_OF_CLIENTSTATES
+    #ifndef NO_EXTENSIONS_INIT
+        static PFNGLVERTEXATTRIB4FARBPROC glVertexAttrib4f=NULL;
+        if(!glVertexAttrib4f)
+            glVertexAttrib4f=(PFNGLVERTEXATTRIB4FARBPROC)get_extension("glVertexAttrib4f");
+    #endif
         glVertexAttrib4f(color_attribute,c.color[0],c.color[1],c.color[2],c.color[3]);
-#else
+  #else
         glColor4f(c.color[0],c.color[1],c.color[2],c.color[3]);
-#endif
+  #endif
     }
 
     if(c.blend!=a.blend || ignore_cache)
