@@ -319,7 +319,7 @@ void bgra_to_rgba(const unsigned char *from,unsigned char *to,size_t data_size)
 }
 
 bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int width,unsigned int height,
-                            color_format format,int mip_count,unsigned int mip_padding)
+                            color_format format,int mip_count)
 {
     if(width==0 || height==0)
     {
@@ -446,12 +446,12 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
                 if(format>=dxt1)
                 {
                     srdata[s].SysMemPitch=(w>4?w:4)/4 * get_bpp(t.format)*2;
-                    mem_data+=(h>4?h:4)/4 * srdata[s].SysMemPitch+mip_padding;
+                    mem_data+=(h>4?h:4)/4 * srdata[s].SysMemPitch;
                 }
                 else
                 {
                     srdata[s].SysMemPitch=w*get_bpp(t.format)/8;
-                    mem_data+=srdata[s].SysMemPitch*h+mip_padding;
+                    mem_data+=srdata[s].SysMemPitch*h;
                 }
             }
         }
@@ -505,7 +505,7 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
             prev_data=srdata[i+1].pSysMem=mem_data;
             w=w>1?w/2:1,h=h>1?h/2:1;
             srdata[i+1].SysMemPitch=w*4;
-            mem_data+=srdata[i+1].SysMemPitch*h+mip_padding;
+            mem_data+=srdata[i+1].SysMemPitch*h;
         }
     }
 
@@ -736,7 +736,7 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
                 glCompressedTexImage2D(gl_type,i,gl_format,w,h,0,size,data_pointer);
             }
 
-            data_pointer+=(size+mip_padding);
+            data_pointer+=size;
         }
     }
 
@@ -768,16 +768,16 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
     return true;
 }
 
-bool texture::build_texture(const void *data,unsigned int width,unsigned int height,color_format format,int mip_count,unsigned int mip_padding)
+bool texture::build_texture(const void *data,unsigned int width,unsigned int height,color_format format,int mip_count)
 {
     const void *data_a[6]={data};
 
-    return build_texture(data_a,false,width,height,format,mip_count,mip_padding);
+    return build_texture(data_a,false,width,height,format,mip_count);
 }
 
-bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int height,color_format format,int mip_count,unsigned int mip_padding)
+bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int height,color_format format,int mip_count)
 {
-    return build_texture(data,true,width,height,format,mip_count,mip_padding);
+    return build_texture(data,true,width,height,format,mip_count);
 }
 
 void texture::bind(unsigned int layer) const { if(layer>=max_layers) return; current_layers[layer]=m_tex; }

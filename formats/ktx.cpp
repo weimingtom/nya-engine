@@ -99,9 +99,7 @@ size_t ktx::decode_header(const void *data,size_t size)
             data_size += ((w+3)>>2) * ((h+3)>>2) * (pf==etc2_eac?16:8);
     }
 
-    reader.skip(4);
-
-    data_size+=(header.mipmap_count-1)*4;
+    data_size+=header.mipmap_count*4;
 
     if(!reader.check_remained(data_size))
         return 0;

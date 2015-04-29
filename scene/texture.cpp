@@ -64,7 +64,17 @@ bool texture::load_ktx(shared_texture &res,resource_data &data,const char* name)
         default: nya_log::log()<<"unable to load ktx: unsupported color format in file "<<name<<"\n"; return false;
     }
 
-    return res.tex.build_texture(ktx.data,ktx.width,ktx.height,cf,ktx.mipmap_count,4);
+    char *d=(char *)ktx.data;
+    nya_memory::memory_reader r(ktx.data,ktx.data_size);
+    for(int i=0;i<ktx.mipmap_count;++i)
+    {
+        const unsigned int size=r.read<unsigned int>();
+        memmove(d,r.get_data(),size);
+        r.skip(size);
+        d+=size;
+    }
+
+    return res.tex.build_texture(ktx.data,ktx.width,ktx.height,cf,ktx.mipmap_count);
 }
 
 bool texture::m_load_dds_flip=false;

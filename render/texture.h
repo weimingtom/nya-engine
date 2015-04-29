@@ -50,11 +50,11 @@ public:
 public:
     //mip_count= -1 means "generate mipmaps". You have to provide a single mip or a complete mipmap pyramid instead
     bool build_texture(const void *data,unsigned int width,unsigned int height,color_format format,
-                       int mip_count= -1,unsigned int mip_padding=0);
+                       int mip_count= -1);
 
 	//order: positive_x,negative_x,positive_y,negative_y,positive_z,negative_z
 	bool build_cubemap(const void *data[6],unsigned int width,unsigned int height,color_format format,
-                       int mip_count= -1,unsigned int mip_padding=0);
+                       int mip_count= -1);
 
 public:
     void bind(unsigned int layer) const;
@@ -104,7 +104,7 @@ public:
 
 private:
     bool build_texture(const void *data[6],bool is_cubemap,unsigned int width,unsigned int height,
-                       color_format format,int mip_count= -1,unsigned int mip_padding=0);
+                       color_format format,int mip_count= -1);
 
 private:
     int m_tex;
