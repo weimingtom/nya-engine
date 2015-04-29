@@ -19,7 +19,7 @@
     #include "shader.h"
 #endif
 
-#ifdef __APPLE__
+#if defined OPENGL3 || defined __APPLE__
     #define USE_VAO
 #endif
 
@@ -54,6 +54,30 @@ namespace
     int active_verts= -1;
     int current_inds= -1;
     int active_inds= -1;
+
+#ifndef NO_EXTENSIONS_INIT
+    PFNGLGENBUFFERSARBPROC glGenBuffers=NULL;
+    PFNGLBINDBUFFERARBPROC glBindBuffer=NULL;
+    PFNGLBUFFERDATAARBPROC glBufferData=NULL;
+    PFNGLBUFFERSUBDATAARBPROC glBufferSubData=NULL;
+    PFNGLGETBUFFERSUBDATAARBPROC glGetBufferSubData=NULL;
+    PFNGLDELETEBUFFERSARBPROC glDeleteBuffers=NULL;
+    PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTexture=NULL;
+    PFNGLDRAWELEMENTSINSTANCEDARBPROC glDrawElementsInstancedARB=NULL;
+    PFNGLDRAWARRAYSINSTANCEDARBPROC glDrawArraysInstancedARB=NULL;
+
+  #ifdef OPENGL3
+    PFNGLVERTEXATTRIBPOINTERPROC glVertexAttribPointer=NULL;
+    PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray=NULL;
+    PFNGLDISABLEVERTEXATTRIBARRAYPROC glDisableVertexAttribArray=NULL;
+  #endif
+
+  #ifdef USE_VAO
+    PFNGLBINDVERTEXARRAYPROC glBindVertexArray=NULL;
+    PFNGLGENVERTEXARRAYSPROC glGenVertexArrays=NULL;
+    PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays=NULL;
+  #endif
+#endif
 
     struct vbo_obj_atributes
     {
@@ -206,23 +230,6 @@ int get_gl_element_type(vbo::vertex_atrib_type type)
     return GL_FLOAT;
 }
 
-  #ifndef NO_EXTENSIONS_INIT
-    PFNGLGENBUFFERSARBPROC glGenBuffers=NULL;
-    PFNGLBINDBUFFERARBPROC glBindBuffer=NULL;
-    PFNGLBUFFERDATAARBPROC glBufferData=NULL;
-    PFNGLBUFFERSUBDATAARBPROC glBufferSubData=NULL;
-    PFNGLGETBUFFERSUBDATAARBPROC glGetBufferSubData=NULL;
-    PFNGLDELETEBUFFERSARBPROC glDeleteBuffers=NULL;
-    PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTexture=NULL;
-    PFNGLDRAWELEMENTSINSTANCEDARBPROC glDrawElementsInstancedARB=NULL;
-    PFNGLDRAWARRAYSINSTANCEDARBPROC glDrawArraysInstancedARB=NULL;
-    #ifdef OPENGL3
-      PFNGLVERTEXATTRIBPOINTERARBPROC glVertexAttribPointer=NULL;
-      PFNGLENABLEVERTEXATTRIBARRAYARBPROC glEnableVertexAttribArray=NULL;
-      PFNGLDISABLEVERTEXATTRIBARRAYARBPROC glDisableVertexAttribArray=NULL;
-    #endif
-  #endif
-
   #ifndef GL_ARRAY_BUFFER
     #define GL_ARRAY_BUFFER GL_ARRAY_BUFFER_ARB
   #endif
@@ -253,7 +260,7 @@ bool check_init_vbo()
     //if(!has_extension("GL_ARB_vertex_buffer_object"))
     //    return false;
 
-  #ifndef NO_EXTENSIONS_INIT
+#ifndef NO_EXTENSIONS_INIT
     if(!(glGenBuffers=(PFNGLGENBUFFERSARBPROC)get_extension("glGenBuffers"))) return false;
     if(!(glBindBuffer=(PFNGLBINDBUFFERARBPROC)get_extension("glBindBuffer"))) return false;
     if(!(glBufferData=(PFNGLBUFFERDATAARBPROC)get_extension("glBufferData"))) return false;
@@ -261,16 +268,22 @@ bool check_init_vbo()
     if(!(glGetBufferSubData=(PFNGLGETBUFFERSUBDATAARBPROC)get_extension("glGetBufferSubData"))) return false;
     if(!(glDeleteBuffers=(PFNGLDELETEBUFFERSARBPROC)get_extension("glDeleteBuffers"))) return false;
     if(!(glClientActiveTexture=(PFNGLCLIENTACTIVETEXTUREARBPROC)get_extension("glClientActiveTexture"))) return false;
+
     #ifdef OPENGL3
-      if(!(glVertexAttribPointer=(PFNGLVERTEXATTRIBPOINTERARBPROC)get_extension("glVertexAttribPointer"))) return false;
-      if(!(glEnableVertexAttribArray=(PFNGLENABLEVERTEXATTRIBARRAYARBPROC)get_extension("glEnableVertexAttribArray"))) return false;
-      if(!(glDisableVertexAttribArray=(PFNGLDISABLEVERTEXATTRIBARRAYARBPROC)get_extension("glDisableVertexAttribArray"))) return false;
+        if(!(glVertexAttribPointer=(PFNGLVERTEXATTRIBPOINTERPROC)get_extension("glVertexAttribPointer"))) return false;
+        if(!(glEnableVertexAttribArray=(PFNGLENABLEVERTEXATTRIBARRAYPROC)get_extension("glEnableVertexAttribArray"))) return false;
+        if(!(glDisableVertexAttribArray=(PFNGLDISABLEVERTEXATTRIBARRAYPROC)get_extension("glDisableVertexAttribArray"))) return false;
     #endif
 
-    //optional
+    #ifdef USE_VAO
+        if(!(glBindVertexArray=(PFNGLBINDVERTEXARRAYPROC)get_extension("glBindVertexArray"))) return false;
+        if(!(glGenVertexArrays=(PFNGLGENVERTEXARRAYSPROC)get_extension("glGenVertexArrays"))) return false;
+        if(!(glDeleteVertexArrays=(PFNGLDELETEVERTEXARRAYSPROC)get_extension("glDeleteVertexArrays"))) return false;
+    #endif
+
     glDrawElementsInstancedARB=(PFNGLDRAWELEMENTSINSTANCEDARBPROC)get_extension("glDrawElementsInstanced");
     glDrawArraysInstancedARB=(PFNGLDRAWARRAYSINSTANCEDARBPROC)get_extension("glDrawArraysInstanced");
-  #endif
+#endif
 
     initialised=true,failed=false;
     return true;
