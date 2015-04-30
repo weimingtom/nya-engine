@@ -232,6 +232,8 @@ struct ms_buffer
         width=w,height=h,samples=s,format=f;
     }
 
+    void resolve(int tex_idx,int cubemap_side,int attachment_idx);
+
     void release()
     {
 #ifdef DIRECTX11
@@ -311,6 +313,58 @@ private:
         return objs;
     }
 };
+
+
+void ms_buffer::resolve(int tex_idx,int cubemap_side,int attachment_idx)
+{
+    if(tex_idx<0)
+        return;
+
+    texture_obj &tex=texture_obj::get(tex_idx);
+
+#ifdef DIRECTX11
+    if(!buf || !get_context())
+        return;
+
+    ID3D11RenderTargetView *tex_color=tex.color_targets[cubemap_side>=0?cubemap_side:0];
+
+    unsigned int sub = D3D11CalcSubresource(0, 0, 1);
+    get_context()->ResolveSubresource(tex.tex,sub,buf,sub,DXGI_FORMAT_R8G8B8A8_UNORM);
+#else
+    if(!fbo)
+        return;
+
+    glBindFramebuffer(GL_FRAMEBUFFER,fbo);
+    const int gl_type=cubemap_side<0?tex.gl_type:gl_target(cubemap_side);
+    glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,gl_type,tex.tex_id,0);
+    glBindFramebuffer(GL_FRAMEBUFFER,default_fbo_idx);
+
+  #ifdef OPENGL_ES
+    #ifdef __APPLE__
+      if(attachment_idx!=0) //ToDo
+          return;
+
+      glBindFramebuffer(GL_READ_FRAMEBUFFER_APPLE,fbo_obj::get(current_fbo).fbo_idx);
+      glBindFramebuffer(GL_DRAW_FRAMEBUFFER_APPLE,fbo);
+      glResolveMultisampleFramebufferAPPLE();
+      glBindFramebuffer(GL_READ_FRAMEBUFFER_APPLE,default_fbo_idx);
+      glBindFramebuffer(GL_DRAW_FRAMEBUFFER_APPLE,default_fbo_idx);
+    #else
+    //ToDo: android blit
+    #endif
+  #else
+    glBindFramebuffer(GL_READ_FRAMEBUFFER,fbo_obj::get(current_fbo).fbo_idx);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER,fbo);
+
+    glReadBuffer(GL_COLOR_ATTACHMENT0+attachment_idx);
+
+    glBlitFramebuffer(0,0,tex.width,tex.height,0,0,tex.width,tex.height,GL_COLOR_BUFFER_BIT,GL_NEAREST);
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER,default_fbo_idx);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER,default_fbo_idx);
+  #endif
+#endif
+}
 
 }
 
@@ -621,82 +675,23 @@ void fbo::unbind()
 #ifdef DIRECTX11
     dx_target target=get_default_target();
     set_target(target.color,target.depth);
-
-    if(current_fbo<0)
-        return;
-
-    fbo_obj &fbo=fbo_obj::get(current_fbo);
-    for(size_t i=0;i<fbo.color_attachments.size();++i)
-    {
-        fbo_obj::attachment &a=fbo.color_attachments[i];
-        if(!a.multisample.buf || a.tex_idx<0 || !get_context())
-            continue;
-
-        texture_obj &tex=texture_obj::get(a.tex_idx);
-        ID3D11RenderTargetView *tex_color=tex.color_targets[a.cubemap_side>=0?a.cubemap_side:0];
-
-        unsigned int sub = D3D11CalcSubresource(0, 0, 1);
-        get_context()->ResolveSubresource(tex.tex,sub,a.multisample.buf,sub,DXGI_FORMAT_R8G8B8A8_UNORM);
-    }
 #else
     if(!check_init_fbo())
         return;
 
     glBindFramebuffer(GL_FRAMEBUFFER,default_fbo_idx);
+#endif
 
     if(current_fbo<0)
         return;
 
     fbo_obj &fbo=fbo_obj::get(current_fbo);
-    bool was_blit=false;
     for(size_t i=0;i<fbo.color_attachments.size();++i)
     {
         fbo_obj::attachment &a=fbo.color_attachments[i];
-        if(!a.multisample.fbo || a.tex_idx<0)
-            continue;
-
-        const texture_obj &tex=texture_obj::get(a.tex_idx);
-
-        //ToDo: cache
-        glBindFramebuffer(GL_FRAMEBUFFER,a.multisample.fbo);
-        const int gl_type=a.cubemap_side<0?tex.gl_type:gl_target(a.cubemap_side);
-        glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0+int(i),gl_type,tex.tex_id,0);
-        glBindFramebuffer(GL_FRAMEBUFFER,default_fbo_idx);
-
-#ifdef OPENGL_ES
-    #ifdef __APPLE__
-        glBindFramebuffer(GL_READ_FRAMEBUFFER_APPLE,fbo.fbo_idx);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER_APPLE,a.multisample.fbo);
-        glResolveMultisampleFramebufferAPPLE();
-    #else
-        //ToDo: android blit
-    #endif
-#else
-        glBindFramebuffer(GL_READ_FRAMEBUFFER,fbo.fbo_idx);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER,a.multisample.fbo);
-
-        glReadBuffer(GL_COLOR_ATTACHMENT0+int(i));
-
-        glBlitFramebuffer(0,0,tex.width,tex.height,0,0,tex.width,tex.height,GL_COLOR_BUFFER_BIT,GL_NEAREST);
-#endif
-        was_blit=true;
+        a.multisample.resolve(a.tex_idx,a.cubemap_side,int(i));
     }
 
-    if(was_blit)
-    {
-#ifdef OPENGL_ES
-    #ifdef __APPLE__
-        glBindFramebuffer(GL_READ_FRAMEBUFFER_APPLE,default_fbo_idx);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER_APPLE,default_fbo_idx);
-    #endif
-#else
-        glReadBuffer(GL_COLOR_ATTACHMENT0);
-        glBindFramebuffer(GL_READ_FRAMEBUFFER,default_fbo_idx);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER,default_fbo_idx);
-#endif
-    }
-
-#endif
     current_fbo=-1;
 }
 
