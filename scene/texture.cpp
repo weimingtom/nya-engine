@@ -66,7 +66,7 @@ bool texture::load_ktx(shared_texture &res,resource_data &data,const char* name)
 
     char *d=(char *)ktx.data;
     nya_memory::memory_reader r(ktx.data,ktx.data_size);
-    for(int i=0;i<ktx.mipmap_count;++i)
+    for(unsigned int i=0;i<ktx.mipmap_count;++i)
     {
         const unsigned int size=r.read<unsigned int>();
         memmove(d,r.get_data(),size);
