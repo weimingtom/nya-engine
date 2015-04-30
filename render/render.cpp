@@ -600,7 +600,7 @@ void apply_state(bool ignore_cache)
     #ifndef NO_EXTENSIONS_INIT
         static PFNGLVERTEXATTRIB4FARBPROC glVertexAttrib4f=NULL;
         if(!glVertexAttrib4f)
-            glVertexAttrib4f=(PFNGLVERTEXATTRIB4FARBPROC)get_extension("glVertexAttrib4f");
+            glVertexAttrib4f=(PFNGLVERTEXATTRIB4FARBPROC)get_extension("glVertexAttrib4fARB");
     #endif
         glVertexAttrib4f(color_attribute,c.color[0],c.color[1],c.color[2],c.color[3]);
   #else

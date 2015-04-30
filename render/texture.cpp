@@ -197,7 +197,7 @@ bool init_compressed_extension()
 {
 #ifndef NO_EXTENSIONS_INIT
     if(!glCompressedTexImage2D)
-        glCompressedTexImage2D=(PFNGLCOMPRESSEDTEXIMAGE2DARBPROC)get_extension("glCompressedTexImage2D");
+        glCompressedTexImage2D=(PFNGLCOMPRESSEDTEXIMAGE2DARBPROC)get_extension("glCompressedTexImage2DARB");
     return glCompressedTexImage2D!=0;
 #else
     return true;
@@ -228,7 +228,7 @@ void gl_select_multitex_layer(int idx)
     if(initialised)
         return;
 
-    tex_glActiveTexture=(PFNGLACTIVETEXTUREARBPROC)get_extension("glActiveTexture");
+    tex_glActiveTexture=(PFNGLACTIVETEXTUREARBPROC)get_extension("glActiveTextureARB");
     initialised=true;
     gl_select_multitex_layer(idx);
 #endif

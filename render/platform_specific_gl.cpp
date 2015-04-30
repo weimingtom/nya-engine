@@ -4,6 +4,10 @@
 #include "render.h"
 #include <string>
 
+#if defined OPENGL_ES && !defined __APPLE__
+    #include <EGL/egl.h>
+#endif
+
 namespace nya_render
 {
 
@@ -19,18 +23,6 @@ bool has_extension(const char *name)
     
     return true;
 }
-#endif
-
-#ifndef NO_EXTENSIONS_INIT
-
-void *get_exact_extension(const char*ext_name)
-{
-    #ifdef _WIN32
-        return (void*)wglGetProcAddress(ext_name);
-    #else
-        return (void*)glXGetProcAddressARB((const GLubyte *)ext_name);
-    #endif
-}
 
 void *get_extension(const char*ext_name)
 {
@@ -40,25 +32,18 @@ void *get_extension(const char*ext_name)
         return 0;
     }
 
-    void *extention = get_exact_extension(ext_name);
-    if(extention)
-        return extention;
-
-    const static std::string arb("ARB");
-    const std::string ext_name_arb = std::string(ext_name)+arb;
-    extention = get_exact_extension(ext_name_arb.c_str());
-    if(extention)
-        return extention;
-
-    const static std::string ext("EXT");
-    const std::string ext_name_ext = std::string(ext_name)+ext;
-    extention = get_exact_extension(ext_name_ext.c_str());
-    if(!extention)
-        log()<<"unable to initialise extension "<<ext_name<<"\n";
-
-    return extention;
+#if defined __APPLE__
+    return 0;
+#else
+  #if defined OPENGL_ES
+    return (void*)eglGetProcAddress(ext_name);
+  #elif defined _WIN32
+    return (void*)wglGetProcAddress(ext_name);
+  #else
+    return (void*)glXGetProcAddressARB((const GLubyte *)ext_name);
+  #endif
+#endif
 }
-
 #endif
 
 namespace { bool ignore_platform_restrictions=false; }

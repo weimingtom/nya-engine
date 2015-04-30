@@ -261,13 +261,13 @@ bool check_init_vbo()
     //    return false;
 
 #ifndef NO_EXTENSIONS_INIT
-    if(!(glGenBuffers=(PFNGLGENBUFFERSARBPROC)get_extension("glGenBuffers"))) return false;
-    if(!(glBindBuffer=(PFNGLBINDBUFFERARBPROC)get_extension("glBindBuffer"))) return false;
-    if(!(glBufferData=(PFNGLBUFFERDATAARBPROC)get_extension("glBufferData"))) return false;
-    if(!(glBufferSubData=(PFNGLBUFFERSUBDATAARBPROC)get_extension("glBufferSubData"))) return false;
-    if(!(glGetBufferSubData=(PFNGLGETBUFFERSUBDATAARBPROC)get_extension("glGetBufferSubData"))) return false;
-    if(!(glDeleteBuffers=(PFNGLDELETEBUFFERSARBPROC)get_extension("glDeleteBuffers"))) return false;
-    if(!(glClientActiveTexture=(PFNGLCLIENTACTIVETEXTUREARBPROC)get_extension("glClientActiveTexture"))) return false;
+    if(!(glGenBuffers=(PFNGLGENBUFFERSARBPROC)get_extension("glGenBuffersARB"))) return false;
+    if(!(glBindBuffer=(PFNGLBINDBUFFERARBPROC)get_extension("glBindBufferARB"))) return false;
+    if(!(glBufferData=(PFNGLBUFFERDATAARBPROC)get_extension("glBufferDataARB"))) return false;
+    if(!(glBufferSubData=(PFNGLBUFFERSUBDATAARBPROC)get_extension("glBufferSubDataARB"))) return false;
+    if(!(glGetBufferSubData=(PFNGLGETBUFFERSUBDATAARBPROC)get_extension("glGetBufferSubDataARB"))) return false;
+    if(!(glDeleteBuffers=(PFNGLDELETEBUFFERSARBPROC)get_extension("glDeleteBuffersARB"))) return false;
+    if(!(glClientActiveTexture=(PFNGLCLIENTACTIVETEXTUREARBPROC)get_extension("glClientActiveTextureARB"))) return false;
 
     #ifdef OPENGL3
         if(!(glVertexAttribPointer=(PFNGLVERTEXATTRIBPOINTERPROC)get_extension("glVertexAttribPointer"))) return false;
@@ -281,8 +281,11 @@ bool check_init_vbo()
         if(!(glDeleteVertexArrays=(PFNGLDELETEVERTEXARRAYSPROC)get_extension("glDeleteVertexArrays"))) return false;
     #endif
 
-    glDrawElementsInstancedARB=(PFNGLDRAWELEMENTSINSTANCEDARBPROC)get_extension("glDrawElementsInstanced");
-    glDrawArraysInstancedARB=(PFNGLDRAWARRAYSINSTANCEDARBPROC)get_extension("glDrawArraysInstanced");
+    if(has_extension("GL_ARB_draw_instanced"))
+    {
+        glDrawElementsInstancedARB=(PFNGLDRAWELEMENTSINSTANCEDARBPROC)get_extension("glDrawElementsInstancedARB");
+        glDrawArraysInstancedARB=(PFNGLDRAWARRAYSINSTANCEDARBPROC)get_extension("glDrawArraysInstancedARB");
+    }
 #endif
 
     initialised=true,failed=false;
