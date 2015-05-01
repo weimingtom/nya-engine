@@ -13,6 +13,8 @@ class tmp_buffer;
 
 class tmp_buffer_ref
 {
+    friend class tmp_buffer_scoped;
+
 public:
     bool copy_from(const void*data,size_t size,size_t offset=0); //from data to buffer
     bool copy_to(void*data,size_t size,size_t offset=0) const; //from buffer to data
@@ -49,6 +51,7 @@ public:
 
 public:
     tmp_buffer_scoped(size_t size);
+    tmp_buffer_scoped(const tmp_buffer_ref &buf): m_buf(buf.m_buf) {}
     ~tmp_buffer_scoped();
 
     // non copyable
