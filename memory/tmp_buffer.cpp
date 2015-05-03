@@ -201,13 +201,13 @@ void tmp_buffer_ref::free()
     m_buf=0;
 }
 
-void *tmp_buffer_scoped::get_data(size_t offset) const { return m_buf->get_data(offset); }
-size_t tmp_buffer_scoped::get_size() const { return m_buf->get_size();}
-bool tmp_buffer_scoped::copy_from(const void*data,size_t size,size_t offset) { return m_buf->copy_from(data,size,offset); }
-bool tmp_buffer_scoped::copy_to(void*data,size_t size,size_t offset) const { return m_buf->copy_to(data,size,offset); }
+void *tmp_buffer_scoped::get_data(size_t offset) const { return m_buf?m_buf->get_data(offset):0; }
+size_t tmp_buffer_scoped::get_size() const { return m_buf?m_buf->get_size():0;}
+bool tmp_buffer_scoped::copy_from(const void*data,size_t size,size_t offset) { return m_buf?m_buf->copy_from(data,size,offset):0; }
+bool tmp_buffer_scoped::copy_to(void*data,size_t size,size_t offset) const { return m_buf?m_buf->copy_to(data,size,offset):0; }
 
 tmp_buffer_scoped::tmp_buffer_scoped(size_t size): m_buf(tmp_buffer::allocate_new(size)) {}
-tmp_buffer_scoped::~tmp_buffer_scoped() { m_buf->free(); }
+tmp_buffer_scoped::~tmp_buffer_scoped() { if(m_buf) m_buf->free(); }
 
 void tmp_buffers::force_free() { tmp_buffer::force_free(); }
 size_t tmp_buffers::get_total_size() { return tmp_buffer::get_total_size(); }
