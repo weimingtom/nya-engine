@@ -49,7 +49,7 @@ public:
         return (t_data*)n.data;
     }
 
-    bool free(t_data *data )
+    bool free(const t_data *data )
     {
         if(!data)
             return false;
