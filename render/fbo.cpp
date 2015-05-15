@@ -86,7 +86,14 @@ namespace
   #ifdef __APPLE__
     #define glRenderbufferStorageMultisample glRenderbufferStorageMultisampleAPPLE
   #else
-    #define glRenderbufferStorageMultisample glRenderbufferStorageMultisampleIMG
+    typedef void (*PFNGLBLITFRAMEBUFFERPROC)(GLint,GLint,GLint,GLint,GLint,GLint,GLint,GLint,GLbitfield,GLenum);
+    typedef void (*PFNGLREADBUFFERPROC) (GLenum);
+    typedef void (*PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC)(GLenum,GLsizei,GLenum,GLsizei,GLsizei);
+    PFNGLBLITFRAMEBUFFERPROC glBlitFramebuffer=0;
+    PFNGLREADBUFFERPROC glReadBuffer=0;
+    PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC glRenderbufferStorageMultisample=0;
+    #define GL_READ_FRAMEBUFFER 0x8CA8
+    #define GL_DRAW_FRAMEBUFFER 0x8CA9
   #endif
 #endif
 
@@ -115,6 +122,17 @@ bool check_init_fbo()
 	glFramebufferRenderbuffer=(PFNGLFRAMEBUFFERRENDERBUFFERPROC)get_extension("glFramebufferRenderbuffer");
   #endif
 
+#if defined OPENGL_ES && !defined __APPLE__
+    const char *gl_version=(const char *)glGetString(GL_VERSION);
+    const bool es3=gl_version!=0 && strncmp(gl_version,"OpenGL ES 3.",12)==0;
+    if(es3)
+    {
+        glBlitFramebuffer=(PFNGLBLITFRAMEBUFFERPROC)get_extension("glBlitFramebuffer");
+        glReadBuffer=(PFNGLREADBUFFERPROC)get_extension("glReadBuffer");
+        glRenderbufferStorageMultisample=(PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC)get_extension("glRenderbufferStorageMultisample");
+    }
+#endif
+
     glGetIntegerv(GL_FRAMEBUFFER_BINDING,&default_fbo_idx);
     initialised=true,failed=false;
     return true;
@@ -125,11 +143,7 @@ bool check_init_fbo()
 #endif
 
 #ifndef GL_MAX_SAMPLES
-    #if defined OPENGL_ES && !defined __APPLE__
-        #define GL_MAX_SAMPLES GL_MAX_SAMPLES_IMG
-    #else
-        #define GL_MAX_SAMPLES 0x8D57
-    #endif
+    #define GL_MAX_SAMPLES 0x8D57
 #endif
 
 int gl_target(int side)
@@ -164,10 +178,6 @@ struct ms_buffer
 #ifndef DIRECTX11
         if(!glRenderbufferStorageMultisample)
             return;
-
-  #if defined OPENGL_ES && !defined __APPLE__ //ToDo: remove when finish android blit
-        return;
-  #endif
 #endif
         if(!w || !h || s<1)
             return;
@@ -339,29 +349,28 @@ void ms_buffer::resolve(int tex_idx,int cubemap_side,int attachment_idx)
     glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,gl_type,tex.tex_id,0);
     glBindFramebuffer(GL_FRAMEBUFFER,default_fbo_idx);
 
-  #ifdef OPENGL_ES
-    #ifdef __APPLE__
-      if(attachment_idx!=0) //ToDo
-          return;
+  #if defined OPENGL_ES && defined __APPLE__
+    if(attachment_idx!=0) //ToDo
+       return;
 
-      glBindFramebuffer(GL_READ_FRAMEBUFFER_APPLE,fbo_obj::get(current_fbo).fbo_idx);
-      glBindFramebuffer(GL_DRAW_FRAMEBUFFER_APPLE,fbo);
-      glResolveMultisampleFramebufferAPPLE();
-      glBindFramebuffer(GL_READ_FRAMEBUFFER_APPLE,default_fbo_idx);
-      glBindFramebuffer(GL_DRAW_FRAMEBUFFER_APPLE,default_fbo_idx);
-    #else
-    //ToDo: android blit
-    #endif
+    glBindFramebuffer(GL_READ_FRAMEBUFFER_APPLE,fbo_obj::get(current_fbo).fbo_idx);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER_APPLE,fbo);
+    glResolveMultisampleFramebufferAPPLE();
+    glBindFramebuffer(GL_READ_FRAMEBUFFER_APPLE,default_fbo_idx);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER_APPLE,default_fbo_idx);
   #else
-    glBindFramebuffer(GL_READ_FRAMEBUFFER,fbo_obj::get(current_fbo).fbo_idx);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER,fbo);
-
-    glReadBuffer(GL_COLOR_ATTACHMENT0+attachment_idx);
-
-    glBlitFramebuffer(0,0,tex.width,tex.height,0,0,tex.width,tex.height,GL_COLOR_BUFFER_BIT,GL_NEAREST);
-    glReadBuffer(GL_COLOR_ATTACHMENT0);
-    glBindFramebuffer(GL_READ_FRAMEBUFFER,default_fbo_idx);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER,default_fbo_idx);
+   #ifdef OPENGL_ES
+    if(glBindFramebuffer)
+   #endif
+    {
+        glBindFramebuffer(GL_READ_FRAMEBUFFER,fbo_obj::get(current_fbo).fbo_idx);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER,fbo);
+        glReadBuffer(GL_COLOR_ATTACHMENT0+attachment_idx);
+        glBlitFramebuffer(0,0,tex.width,tex.height,0,0,tex.width,tex.height,GL_COLOR_BUFFER_BIT,GL_NEAREST);
+        glReadBuffer(GL_COLOR_ATTACHMENT0);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER,default_fbo_idx);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER,default_fbo_idx);
+    }
   #endif
 #endif
 }
@@ -729,10 +738,13 @@ unsigned int fbo::get_max_msaa()
         }
     }
 #else
+  #if defined OPENGL_ES && !defined __APPLE__
+    if (!check_init_fbo())
+        return 0;
 
-#if defined OPENGL_ES && !defined __APPLE__ //ToDo: remove when finish android blit
-    return 0;
-#endif
+    if (!glBlitFramebuffer || !glReadBuffer || !glRenderbufferStorageMultisample)
+        return 1;
+  #endif
 
     if(max_ms<0)
         glGetIntegerv(GL_MAX_SAMPLES,&max_ms);
