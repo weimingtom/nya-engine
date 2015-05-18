@@ -632,6 +632,10 @@ bool shader::add_program(program_type type,const char*code)
         return false;
     }
 
+   #ifndef __APPLE__
+    parser.fix_per_component_functions(); //some droids despise glsl specs
+   #endif
+
   #else
     if(!parser.convert_to_glsl3())
     {

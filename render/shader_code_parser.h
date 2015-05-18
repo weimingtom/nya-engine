@@ -53,6 +53,9 @@ public:
     variable get_attribute(int idx) const;
 
 public:
+    bool fix_per_component_functions();
+
+public:
     shader_code_parser(const char *text,const char *replace_prefix_str="_nya_"):
                        m_code(text?text:""),m_replace_str(replace_prefix_str?replace_prefix_str:"") { remove_comments(); }
 private:

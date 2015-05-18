@@ -379,6 +379,50 @@ shader_code_parser::variable shader_code_parser::get_attribute(int idx) const
     return m_attributes[idx];
 }
 
+bool shader_code_parser::fix_per_component_functions()
+{
+    const char *functions[]={"pow","sqrt"}; //ToDo
+    int functions_args[]={2,1};
+
+    std::string prefix;
+    char buf[255];
+    for(size_t i=0;i<sizeof(functions)/sizeof(functions[0]);++i)
+    {
+        const char *f=functions[i];
+        if(!replace_variable(f,(m_replace_str+f).c_str()))
+            continue;
+
+        const char *types[]={"float","vec2","vec3","vec4"};
+        for(int j=0;j<4;++j)
+        {
+            const char *t=types[j];
+            prefix.append(t+(" "+m_replace_str)+f+"(");
+            for(int k=0;k<functions_args[i];++k)
+            {
+                sprintf(buf,"%s%s a%d",k==0?"":",",t,k);
+                prefix.append(buf);
+            }
+
+            prefix.append(std::string("){return ")+(j==0?"":t)+"(");
+            const char *components[]={".x",".y",".z",".w"};
+            for(int k=0;k<j+1;++k)
+            {
+                prefix.append(std::string(k==0?"":",")+f+"(");
+                for(int l=0;l<functions_args[i];++l)
+                {
+                    sprintf(buf,"%sa%d%s",l==0?"":",",l,j==0?"":components[k]);
+                    prefix.append(buf);
+                }
+                prefix.append(")");
+            }
+            prefix.append(");}\n");
+        }
+    }
+
+    m_code.insert(0,prefix);
+    return true;
+}
+
 void shader_code_parser::remove_comments()
 {
     while(m_code.find("//")!=std::string::npos)
