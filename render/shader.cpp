@@ -625,16 +625,16 @@ bool shader::add_program(program_type type,const char*code)
 
 #ifdef SUPPORT_OLD_SHADERS
   #ifdef OPENGL_ES
+   #ifndef __APPLE__
+    parser.fix_per_component_functions(); //some droids despise glsl specs
+   #endif
+
     if(!parser.convert_to_glsl_es2())
     {
         log()<<"Unable to add shader program: cannot convert shader code to glsl for es2\n";
         log()<<parser.get_error()<<"\n";
         return false;
     }
-
-   #ifndef __APPLE__
-    parser.fix_per_component_functions(); //some droids despise glsl specs
-   #endif
 
   #else
     if(!parser.convert_to_glsl3())
