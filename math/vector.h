@@ -38,7 +38,8 @@ struct vec2
     vec2 operator += (const vec2 &v) { x+=v.x; y+=v.y; return *this; }
     vec2 operator -= (const vec2 &v) { x-=v.x; y-=v.y; return *this; }
 
-    float length() const { return sqrtf(x*x+y*y); }
+    float length() const { return sqrtf(length_sq()); }
+    float length_sq() const { return x*x+y*y; }
 
     vec2 &abs() { x=fabsf(x); y=fabsf(y); return *this; }
 
@@ -80,7 +81,8 @@ struct vec3
     vec3 operator += (const vec3 &v) { x+=v.x; y+=v.y; z+=v.z; return *this; }
     vec3 operator -= (const vec3 &v) { x-=v.x; y-=v.y; z-=v.z; return *this; }
 
-    float length() const { return sqrtf(x*x+y*y+z*z); }
+    float length() const { return sqrtf(length_sq()); }
+    float length_sq() const { return x*x+y*y+z*z; }
 
     vec3 &abs() { x=fabsf(x); y=fabsf(y); z=fabsf(z); return *this; }
 
@@ -131,7 +133,8 @@ struct vec4
     vec4 operator += (const vec4 &v) { x+=v.x; y+=v.y; z+=v.z; w+=v.w; return *this; }
     vec4 operator -= (const vec4 &v) { x-=v.x; y-=v.y; z-=v.z; w+=v.w; return *this; }
 
-    float length() const { return sqrtf(x*x+y*y+z*z+w*w); }
+    float length() const { return sqrtf(length_sq()); }
+    float length_sq() const { return x*x+y*y+z*z+w*w; }
 
     vec4 &abs() { x=fabsf(x); y=fabsf(y); z=fabsf(z); w=fabsf(w); return *this; }
 
