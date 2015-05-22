@@ -837,13 +837,14 @@ void texture::apply(bool ignore_cache)
     }
 }
 
-bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
+bool texture::get_data(nya_memory::tmp_buffer_ref &data) const
 {
     if(m_tex<0)
         return false;
 
     const texture_obj &tex=texture_obj::get(m_tex);
-    unsigned int size=tex.width*tex.height*get_bpp(tex.format)/8*(is_cubemap()?6:1);
+    unsigned int pitch=tex.width*get_bpp(tex.format)/8;
+    unsigned int size=pitch*tex.height*(is_cubemap()?6:1);
     if(!size)
         return false;
 
@@ -873,7 +874,17 @@ bool texture::get_data( nya_memory::tmp_buffer_ref &data ) const
         return false;
 
     data.allocate(size);
-    data.copy_from(resource.pData,size);
+    const char *from=(char *)resource.pData;
+    char *to=(char *)data.get_data();
+    for(int i=0;i<(is_cubemap()?6:1);++i)
+    {
+        for(unsigned int j=0;j<tex.height;++j)
+        {
+            memcpy(to,from,pitch);
+            from+=resource.RowPitch;
+            to+=pitch;
+        }
+    }
 
     get_context()->Unmap(copy_tex,0);
     copy_tex->Release();
