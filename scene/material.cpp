@@ -507,7 +507,7 @@ void material_internal::update_passes_maps() const
                 parameters_to_add.push_back(std::make_pair(name,sh.internal().get_uniform(uniform_idx).default_value));
         }
     }
-
+/*
     // delete unused parameters
     int param_idx = 0;
     for(std::vector<bool>::iterator iter=used_parameters.begin();iter!=used_parameters.end();++iter)
@@ -517,7 +517,7 @@ void material_internal::update_passes_maps() const
         else
             ++param_idx;
     }
-
+*/
     // add missing parameters
     for(std::list<std::pair<std::string,nya_math::vec4> >::iterator iter=parameters_to_add.begin();iter!=parameters_to_add.end();++iter)
     {
@@ -551,7 +551,7 @@ void material_internal::update_passes_maps() const
             m_textures.back().semantics.assign(iter->first.c_str());
         }
     }
-
+/*
     int tex_count=(int)m_textures.size();
     for(int i=0;i<tex_count;++i)
     {
@@ -561,7 +561,7 @@ void material_internal::update_passes_maps() const
         m_textures.erase(m_textures.begin()+i);
         --i; --tex_count;
     }
-
+*/
     for(std::vector<pass>::const_iterator iter=m_passes.begin();iter!=m_passes.end();++iter)
         iter->update_maps(*this);
 
