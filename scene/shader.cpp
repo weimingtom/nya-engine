@@ -259,12 +259,13 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
 
 namespace
 {
-    void build_bones_texture(texture &tex,const void *data,unsigned int count,nya_render::texture::color_format format)
+    void build_bones_texture(nya_render::texture &tex,const void *data,unsigned int count,nya_render::texture::color_format format)
     {
         nya_render::texture::filter f[3];
         nya_render::texture::get_default_filter(f[0],f[1],f[2]);
         nya_render::texture::set_default_filter(nya_render::texture::filter_nearest,nya_render::texture::filter_nearest,nya_render::texture::filter_nearest);
-        tex.build(data,count,1,format);
+        tex.build_texture(data,count,1,format);
+        //tex.set_filter(nya_render::texture::filter_nearest,nya_render::texture::filter_nearest,nya_render::texture::filter_nearest);
         nya_render::texture::set_default_filter(f[0],f[1],f[2]);
     }
 }
@@ -373,7 +374,7 @@ void shader_internal::set() const
                     m_shared->texture_buffers->last_skeleton_pos_texture=m_skeleton;
                 }
 
-                m_shared->texture_buffers->skeleton_pos_texture.internal().set(p.location);
+                m_shared->texture_buffers->skeleton_pos_texture.bind(p.location);
             }
             break;
 
@@ -394,7 +395,7 @@ void shader_internal::set() const
                     m_shared->texture_buffers->last_skeleton_pos_texture=m_skeleton;
                 }
 
-                m_shared->texture_buffers->skeleton_pos_texture.internal().set(p.location);
+                m_shared->texture_buffers->skeleton_pos_texture.bind(p.location);
             }
             break;
 
@@ -410,7 +411,7 @@ void shader_internal::set() const
                     m_shared->texture_buffers->last_skeleton_rot_texture=m_skeleton;
                 }
 
-                m_shared->texture_buffers->skeleton_rot_texture.internal().set(p.location);
+                m_shared->texture_buffers->skeleton_rot_texture.bind(p.location);
             }
             break;
 
