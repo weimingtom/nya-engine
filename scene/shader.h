@@ -87,12 +87,15 @@ struct shared_shader
 
     struct texture_buffers
     {
+        unsigned int skeleton_pos_max_count;
+        unsigned int skeleton_rot_max_count;
         nya_render::texture skeleton_pos_texture;
         nya_render::texture skeleton_rot_texture;
         const nya_render::skeleton *last_skeleton_pos_texture;
         const nya_render::skeleton *last_skeleton_rot_texture;
 
-        texture_buffers():last_skeleton_pos_texture(0),last_skeleton_rot_texture(0) {}
+        texture_buffers():skeleton_pos_max_count(0),skeleton_rot_max_count(0),
+                          last_skeleton_pos_texture(0),last_skeleton_rot_texture(0) {}
     };
 
     mutable nya_memory::optional<texture_buffers> texture_buffers;

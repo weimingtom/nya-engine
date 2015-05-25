@@ -162,6 +162,18 @@ bool load_nya_shader_internal(shared_shader &res,shader_description &desc,resour
                 {
                     desc.predefines[i].name=name;
                     desc.predefines[i].transform=transform_from_string(parser.get_section_option(section_idx));
+
+                    if(i==shared_shader::bones_pos_tex || i==shared_shader::bones_pos_tr_tex)
+                    {
+                        res.texture_buffers.allocate();
+                        res.texture_buffers->skeleton_pos_max_count=int(parser.get_section_value_vector(section_idx).x);
+                    }
+                    else if(i==shared_shader::bones_rot_tex)
+                    {
+                        res.texture_buffers.allocate();
+                        res.texture_buffers->skeleton_rot_max_count=int(parser.get_section_value_vector(section_idx).x);
+                    }
+
                     break;
                 }
             }
@@ -259,14 +271,26 @@ bool shader::load_nya_shader(shared_shader &res,resource_data &data,const char* 
 
 namespace
 {
-    void build_bones_texture(nya_render::texture &tex,const void *data,unsigned int count,nya_render::texture::color_format format)
+    void build_bones_texture(nya_render::texture &tex,const void *data,unsigned int count,unsigned int buf_count,nya_render::texture::color_format format)
     {
-        nya_render::texture::filter f[3];
-        nya_render::texture::get_default_filter(f[0],f[1],f[2]);
-        nya_render::texture::set_default_filter(nya_render::texture::filter_nearest,nya_render::texture::filter_nearest,nya_render::texture::filter_nearest);
-        tex.build_texture(data,count,1,format);
-        //tex.set_filter(nya_render::texture::filter_nearest,nya_render::texture::filter_nearest,nya_render::texture::filter_nearest);
-        nya_render::texture::set_default_filter(f[0],f[1],f[2]);
+        if(buf_count>0)
+        {
+            if(tex.get_width()!=buf_count)
+            {
+                tex.build_texture(0,buf_count,1,format);
+                tex.set_filter(nya_render::texture::filter_nearest,nya_render::texture::filter_nearest,nya_render::texture::filter_nearest);
+            }
+
+            tex.update_region(data,0,0,count,1);
+        }
+        else
+        {
+            nya_render::texture::filter f[3];
+            nya_render::texture::get_default_filter(f[0],f[1],f[2]);
+            nya_render::texture::set_default_filter(nya_render::texture::filter_nearest,nya_render::texture::filter_nearest,nya_render::texture::filter_nearest);
+            tex.build_texture(data,count,1,format);
+            nya_render::texture::set_default_filter(f[0],f[1],f[2]);
+        }
     }
 }
 
@@ -369,8 +393,8 @@ void shader_internal::set() const
 
                 if(m_skeleton && m_shared->texture_buffers->last_skeleton_pos_texture!=m_skeleton && m_skeleton->get_bones_count()>0)
                 {
-                    build_bones_texture(m_shared->texture_buffers->skeleton_pos_texture,
-                                        m_skeleton->get_pos_buffer(),m_skeleton->get_bones_count(),nya_render::texture::color_rgb32f);
+                    build_bones_texture(m_shared->texture_buffers->skeleton_pos_texture,m_skeleton->get_pos_buffer(),
+                                        m_skeleton->get_bones_count(),m_shared->texture_buffers->skeleton_pos_max_count,nya_render::texture::color_rgb32f);
                     m_shared->texture_buffers->last_skeleton_pos_texture=m_skeleton;
                 }
 
@@ -390,8 +414,8 @@ void shader_internal::set() const
                     for(int i=0;i<m_skeleton->get_bones_count();++i)
                         pos[i]=m_skeleton->get_bone_pos(i)+m_skeleton->get_bone_rot(i).rotate(-m_skeleton->get_bone_original_pos(i));
 
-                    build_bones_texture(m_shared->texture_buffers->skeleton_pos_texture,
-                                        tmp.get_data(),m_skeleton->get_bones_count(),nya_render::texture::color_rgb32f);
+                    build_bones_texture(m_shared->texture_buffers->skeleton_pos_texture,tmp.get_data(),
+                                        m_skeleton->get_bones_count(),m_shared->texture_buffers->skeleton_pos_max_count,nya_render::texture::color_rgb32f);
                     m_shared->texture_buffers->last_skeleton_pos_texture=m_skeleton;
                 }
 
@@ -406,8 +430,8 @@ void shader_internal::set() const
 
                 if(m_skeleton && m_shared->texture_buffers->last_skeleton_rot_texture!=m_skeleton && m_skeleton->get_bones_count()>0)
                 {
-                    build_bones_texture(m_shared->texture_buffers->skeleton_rot_texture,
-                                        m_skeleton->get_rot_buffer(),m_skeleton->get_bones_count(),nya_render::texture::color_rgba32f);
+                    build_bones_texture(m_shared->texture_buffers->skeleton_rot_texture,m_skeleton->get_rot_buffer(),
+                                        m_skeleton->get_bones_count(),m_shared->texture_buffers->skeleton_rot_max_count,nya_render::texture::color_rgba32f);
                     m_shared->texture_buffers->last_skeleton_rot_texture=m_skeleton;
                 }
 

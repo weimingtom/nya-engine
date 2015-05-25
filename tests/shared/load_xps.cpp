@@ -377,6 +377,8 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
     if(groups_count>4096) //sanity check
         return false;
 
+    const int max_bones_count=4096;
+
     for(uint i=0;i<groups_count;++i)
     {
         if(!reader.get_remained())
@@ -450,7 +452,7 @@ template<typename reader_t>bool load_mesh(nya_scene::shared_mesh &res,reader_t &
                     s.weights[0]=1.0f;
 
                 for(int k=0;k<4;++k)
-                    v.bone_idx[k]=(float(s.inds[k])+0.5f)/bones_count, v.bone_weight[k]=s.weights[k];
+                    v.bone_idx[k]=(float(s.inds[k])+0.5f)/max_bones_count, v.bone_weight[k]=s.weights[k];
             }
         }
 

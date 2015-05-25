@@ -787,7 +787,7 @@ void texture::update_region(const void *data,unsigned int x,unsigned int y,unsig
         return;
 
     const texture_obj &t=texture_obj::get(m_tex);
-    if(t.width>=x+width || t.height>=y+height)
+    if(x+width>t.width || y+height>t.height)
         return;
 
     if(!t.has_mipmaps && mip>0)
