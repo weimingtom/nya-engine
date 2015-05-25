@@ -756,6 +756,7 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
     temp_buf.free();
   #endif
     glBindTexture(gl_type,0);
+    t.gl_format=gl_format;
 #endif
     t.width=width;
     t.height=height;
@@ -778,6 +779,32 @@ bool texture::build_texture(const void *data,unsigned int width,unsigned int hei
 bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int height,color_format format,int mip_count)
 {
     return build_texture(data,true,width,height,format,mip_count);
+}
+
+void texture::update_region(const void *data,unsigned int x,unsigned int y,unsigned int width,unsigned int height,unsigned int mip)
+{
+    if(m_tex<0)
+        return;
+
+    const texture_obj &t=texture_obj::get(m_tex);
+    if(t.width>=x+width || t.height>=y+height)
+        return;
+
+    if(!t.has_mipmaps && mip>0)
+        return;
+
+    if(t.format>=depth16)
+        return;
+
+#ifdef DIRECTX11
+    //ToDo
+#else
+    glBindTexture(t.gl_type,t.tex_id);
+    active_layers[active_layer]=m_tex;
+
+    const int precision=(t.format==color_rgb32f || t.format==color_rgba32f)?GL_FLOAT:GL_UNSIGNED_BYTE;
+    glTexSubImage2D(t.gl_type,mip,x,y,width,height,t.gl_format,precision,data);
+#endif
 }
 
 void texture::bind(unsigned int layer) const { if(layer>=max_layers) return; current_layers[layer]=m_tex; }

@@ -126,7 +126,7 @@ namespace nya_render
         ID3D11DepthStencilView *depth_target;
         DXGI_FORMAT dx_format;
 #else
-        unsigned int tex_id,gl_type;
+        unsigned int tex_id,gl_type,gl_format;
 #endif
 
         texture_obj(): width(0),height(0),size(0),is_cubemap(false),has_mipmaps(false)
@@ -136,7 +136,7 @@ namespace nya_render
             for(int i=0;i<6;++i)
                 color_targets[i]=0;
 #else
-            tex_id=0,gl_type=0;
+            tex_id=0,gl_type=0,gl_format=0;
 #endif
         }
 
