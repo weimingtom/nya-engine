@@ -50,6 +50,18 @@ quat quat::slerp(const quat &q1,const quat &q2,float t)
                 scale0*q1.w+scale1*q2.w);
 }
 
+quat quat::nlerp(const quat &q1,const quat &q2,float t)
+{
+    const float t2=1.0-t;
+    if(q1.v*q2.v+q1.w*q2.w<0)
+        t=-t;
+
+    return quat(t2*q1.v.x+t*q2.v.x,
+         t2*q1.v.y+t*q2.v.y,
+         t2*q1.v.z+t*q2.v.z,
+         t2*q1.w+t*q2.w).normalize();
+}
+
 vec3 quat::get_euler() const
 {
     const float x2=v.x+v.x;

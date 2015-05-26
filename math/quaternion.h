@@ -44,6 +44,7 @@ struct quat
     vec3 rotate_inv(const vec3 &v) const;
 
     static quat slerp(const quat &from,const quat &to,float t);
+    static quat nlerp(const quat &from,const quat &to,float t);
 };
 
 }
