@@ -32,16 +32,7 @@ template<typename t_list,typename t_frame> void add_frame(t_list &seq,const t_fr
     if(time>duration)
         duration=time;
 
-    for(int i=(int)seq.size()-1;i>=0;--i)
-    {
-        if(seq[i].time<time)
-        {
-            seq.insert(seq.begin()+i+1,f);
-            return;
-        }
-    }
-
-    seq.push_back(f);
+    seq[time]=f;
 }
 
 template<typename t_map> int get_idx(const char *name,t_map &map)
@@ -62,6 +53,8 @@ template<typename t_value,typename t_data,typename t_frame> t_value get_value(in
     if(idx<0 || idx>=(int)data.size())
         return t_value();
 
+    const t_data &seq=data[idx];
+
     if(time>duration)
     {
         if(looped)
@@ -74,35 +67,23 @@ template<typename t_value,typename t_data,typename t_frame> t_value get_value(in
         else
             time=duration;
     }
-    
-    //ToDo: faster frame search, start with non-first frame
-    // via additional frames map with constant quantity
-    
-    const t_data &seq=data[idx];
 
-    const unsigned int frames_count=(unsigned int)seq.size();
-    for(unsigned int i=frames_count;i>0;--i)
-    {
-        const t_frame &prev=seq[i-1];
-        if(prev.time<=time)
-        {
-            if(i==frames_count)
-                return prev.value;
+    typename t_data::const_iterator it_next=seq.lower_bound(time);
+    if(it_next==seq.end())
+        return seq.empty()?t_value():seq.rbegin()->second.value;
 
-            const t_frame &next=seq[i];
-            const int time_diff=next.time-prev.time;
-            
-            if(time_diff==0)
-                return next.value;
+    if(it_next==seq.begin())
+        return it_next->second.value;
 
-            return next.interpolate(prev,float(time-prev.time)/time_diff);
-        }
-    }
+    typename t_data::const_iterator it=it_next;
+    --it;
 
-    if(frames_count)
-        return seq[0].value;
+    const int time_diff=it_next->first-it->first;
 
-    return t_value();
+    if(time_diff==0)
+        return it_next->second.value;
+
+    return it_next->second.interpolate(it->second,float(time-it->first)/time_diff);
 }
 
 

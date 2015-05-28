@@ -65,9 +65,8 @@ private:
     struct pos_frame: public frame<nya_math::vec3,pos_interpolation> { nya_math::vec3 interpolate(const pos_frame &prev,float k) const; };
     struct rot_frame: public frame<nya_math::quat,nya_math::bezier> { nya_math::quat interpolate(const rot_frame &prev,float k) const; };
 
-    typedef std::vector<pos_frame> pos_sequence;
-    typedef std::vector<rot_frame> rot_sequence;
-
+    typedef std::map<unsigned int,pos_frame> pos_sequence;
+    typedef std::map<unsigned int,rot_frame> rot_sequence;
 
     typedef std::map<std::string,unsigned int> index_map;
     index_map m_bones_map;
@@ -85,7 +84,7 @@ private:
         curve_frame(): time(0),value(0.0f) {}
     };
 
-    typedef std::vector<curve_frame> curve_sequence;
+    typedef std::map<unsigned int,curve_frame> curve_sequence;
 
     index_map m_curves_map;
     std::vector<curve_sequence> m_curves;
