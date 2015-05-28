@@ -74,10 +74,7 @@ private:
     struct curve_frame
     {
         float value;
-
         float interpolate(const curve_frame &prev,float k) const;
-
-        curve_frame(): value(0.0f) {}
     };
 
     typedef std::map<unsigned int,curve_frame> curve_sequence;

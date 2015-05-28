@@ -106,25 +106,17 @@ nya_math::quat animation::get_bone_rot(int idx,unsigned int time,bool looped) co
 
 nya_math::vec3 animation::pos_frame::interpolate(const pos_frame &prev,float k) const
 {
-    nya_math::vec3 p;
-
-    float lerp=inter.x.get(k);
-    p.x=value.x*lerp+prev.value.x*(1.0f-lerp);
-
-    lerp=inter.y.get(k);
-    p.y=value.y*lerp+prev.value.y*(1.0f-lerp);
-
-    lerp=inter.z.get(k);
-    p.z=value.z*lerp+prev.value.z*(1.0f-lerp);
-
-    return p;
+    return prev.value+nya_math::vec3(inter.x.get(k)*(value.x-prev.value.x),
+                                     inter.y.get(k)*(value.y-prev.value.y),
+                                     inter.z.get(k)*(value.z-prev.value.z));
 }
 
 nya_math::quat animation::rot_frame::interpolate(const rot_frame &prev,float k) const
-               { return nya_math::quat::slerp(prev.value,value,inter.get(k)); }
+{
+    return nya_math::quat::slerp(prev.value,value,inter.get(k));
+}
 
-float animation::curve_frame::interpolate(const curve_frame &prev,float k) const
-                                   { return value*k+prev.value*(1.0f-k); }
+float animation::curve_frame::interpolate(const curve_frame &prev,float k) const { return prev.value+k*(value-prev.value); }
 
 const char *animation::get_bone_name(int idx) const
 {
@@ -189,7 +181,6 @@ void animation::add_curve_frame(int idx,unsigned int time,float value)
 
     curve_frame f;
     f.value=value;
-
     add_frame(m_curves[idx],f,time,m_duration);
 }
 
