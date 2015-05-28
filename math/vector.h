@@ -52,7 +52,7 @@ struct vec2
 
     static vec2 abs(const vec2 &v) { return vec2(fabsf(v.x),fabsf(v.y)); }
 
-    static vec2 lerp(const vec2 &from,const vec2 &to,float t) { return from*(1.0f-t)+to*t; }
+    static vec2 lerp(const vec2 &from,const vec2 &to,float t) { return from+(to-from)*t; }
 };
 
 inline vec2 operator * ( float a, const vec2& v ) { return vec2(v.x*a,v.y*a); }
@@ -100,7 +100,7 @@ struct vec3
 
     static vec3 abs(const vec3 &v) { return vec3(fabsf(v.x),fabsf(v.y),fabsf(v.z)); }
 
-    static vec3 lerp(const vec3 &from,const vec3 &to,float t) { return from*(1.0f-t)+to*t; }
+    static vec3 lerp(const vec3 &from,const vec3 &to,float t) { return from+(to-from)*t; }
 };
 
 inline vec3 operator * ( float a, const vec3& v ) { return vec3(v.x*a,v.y*a,v.z*a); }
@@ -154,7 +154,7 @@ struct vec4
 
     static vec4 abs(const vec4 &v) { return vec4(fabsf(v.x),fabsf(v.y),fabsf(v.z),fabsf(v.w)); }
 
-    static vec4 lerp(const vec4 &from,const vec4 &to,float t) { return from*(1.0f-t)+to*t; }
+    static vec4 lerp(const vec4 &from,const vec4 &to,float t) { return from+(to-from)*t; }
 };
 
 inline vec4 operator * ( float a, const vec4& v ) { return vec4(v.x*a,v.y*a,v.z*a,v.w*a); }
