@@ -164,7 +164,6 @@ void animation::add_bone_pos_frame(int bone_idx,unsigned int time,const nya_math
         return;
 
     pos_frame pf;
-    pf.time=time;
     pf.value=pos;
     pf.inter=interpolation;
     add_frame(m_pos_sequences[bone_idx],pf,time,m_duration);
@@ -176,7 +175,6 @@ void animation::add_bone_rot_frame(int bone_idx,unsigned int time,const nya_math
         return;
 
     rot_frame rf;
-    rf.time=time;
     rf.value=rot;
     rf.inter=interpolation;
     add_frame(m_rot_sequences[bone_idx],rf,time,m_duration);
@@ -190,7 +188,6 @@ void animation::add_curve_frame(int idx,unsigned int time,float value)
         return;
 
     curve_frame f;
-    f.time=time;
     f.value=value;
 
     add_frame(m_curves[idx],f,time,m_duration);

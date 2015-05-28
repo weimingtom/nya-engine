@@ -55,11 +55,8 @@ public:
 private:
     template<typename t,typename interpolation>struct frame
     {
-        unsigned int time;
         t value;
         interpolation inter;
-
-        frame(): time(0) {}
     };
 
     struct pos_frame: public frame<nya_math::vec3,pos_interpolation> { nya_math::vec3 interpolate(const pos_frame &prev,float k) const; };
@@ -76,12 +73,11 @@ private:
 
     struct curve_frame
     {
-        unsigned int time;
         float value;
 
         float interpolate(const curve_frame &prev,float k) const;
 
-        curve_frame(): time(0),value(0.0f) {}
+        curve_frame(): value(0.0f) {}
     };
 
     typedef std::map<unsigned int,curve_frame> curve_sequence;
