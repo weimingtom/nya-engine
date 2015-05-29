@@ -27,9 +27,12 @@ const rect &get_viewport();
 
 struct scissor
 {
-    static void enable(int x,int y,int w,int h);
-    static inline void enable(const rect &r) { enable(r.x,r.y,r.width,r.height); }
-    static void disable();
+    static void enable(int x,int y,int w,int h,bool ignore_cache=false);
+    static inline void enable(const rect &r,bool ignore_cache=false) { enable(r.x,r.y,r.width,r.height,ignore_cache); }
+    static void disable(bool ignore_cache=false);
+
+    static bool is_enabled();
+    const rect &get();
 };
 
 void set_projection_matrix(const nya_math::mat4 &mat);

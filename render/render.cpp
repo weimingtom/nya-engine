@@ -22,6 +22,8 @@ namespace
     bool has_state_override=false;
 
     rect viewport_rect;
+    rect scissor_rect;
+    bool scissor_enabled=false;
 
 	float clear_color[4]={0.0f};
 	float clear_depth=1.0f;
@@ -264,22 +266,46 @@ void color_write::disable()
     current_state.color_write=false;
 }
 
-void scissor::enable(int x,int y,int w,int h)
+void scissor::enable(int x,int y,int w,int h,bool ignore_cache)
 {
+    if(!ignore_cache && scissor_enabled &&
+       x==scissor_rect.x && y==scissor_rect.y &&
+       w==scissor_rect.width && w==scissor_rect.height )
+        return;
+
 #ifdef DIRECTX11
+    if(!get_context())
+        return;
+
+    //ToDo
 #else
     glEnable(GL_SCISSOR_TEST);
     glScissor(x,y,w,h);
 #endif
+
+    scissor_rect.x=x,scissor_rect.y=y,scissor_rect.width=w,scissor_rect.height=h;
+    scissor_enabled=true;
 }
 
-void scissor::disable()
+void scissor::disable(bool ignore_cache)
 {
+    if(!ignore_cache && !scissor_enabled)
+        return;
+
 #ifdef DIRECTX11
+    if(!get_context())
+        return;
+
+    //ToDo
 #else
     glDisable(GL_SCISSOR_TEST);
 #endif
+
+    scissor_enabled=false;
 }
+
+bool scissor::is_enabled() { return scissor_enabled; }
+const rect &scissor::get() { return scissor_rect; }
 
 void set_state(const state &s) { current_state=s; }
 const state &get_state() { return current_state; }
