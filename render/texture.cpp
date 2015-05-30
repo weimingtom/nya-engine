@@ -61,6 +61,10 @@ namespace
     #endif
   #endif
 
+  #if !defined OPENGL_ES || defined __APPLE__
+    #define USE_BGRA
+  #endif
+
 #endif
 
 int get_bpp(texture::color_format format)
@@ -357,7 +361,7 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
         return false;
     }
 
-#ifdef __ANDROID__
+#ifndef USE_BGRA
     if(format==color_bgra && mip_count>1 && data) //ToDo
         mip_count= -1;
 #endif
@@ -566,10 +570,10 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
     {
         case color_rgb: source_format=gl_format=GL_RGB; break; //in es stored internally as rgba
         case color_rgba: source_format=gl_format=GL_RGBA; break;
-#ifdef __ANDROID__
-        case color_bgra: source_format=GL_RGBA; gl_format=GL_RGBA; break;
-#else
+#ifdef USE_BGRA
         case color_bgra: source_format=GL_RGBA; gl_format=GL_BGRA; break;
+#else
+        case color_bgra: source_format=GL_RGBA; gl_format=GL_RGBA; break;
 #endif
         case greyscale: source_format=gl_format=GL_LUMINANCE; break;
 #ifdef OPENGL_ES
@@ -645,7 +649,7 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
     if(format==color_rgb)
         format=color_rgba;
 
-  #ifdef __ANDROID__
+  #ifndef USE_BGRA
     nya_memory::tmp_buffer_ref temp_buf;
     if(format==color_bgra)
     {
@@ -933,7 +937,7 @@ bool texture::get_data(nya_memory::tmp_buffer_ref &data) const
     {
         case color_rgb:gl_format=GL_RGB;break;
         case color_rgba:gl_format=GL_RGBA;break;
-  #ifndef __ANDROID__
+  #ifdef USE_BGRA
         case color_bgra:gl_format=GL_BGRA;break;
   #endif
         case greyscale:gl_format=GL_LUMINANCE;break;
