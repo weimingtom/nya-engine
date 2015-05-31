@@ -100,6 +100,8 @@ private:
         nya_render::clear(true,true);
 
 		m_rot+=dt*0.05f;
+        if(m_rot>360)
+            m_rot=0;
 
 		nya_math::mat4 mv;
 		mv.translate(0,0,-2.0f);

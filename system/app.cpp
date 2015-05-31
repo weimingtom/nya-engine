@@ -921,6 +921,77 @@ public:
 };
 
 #elif defined __APPLE__ //implemented in app.mm
+
+#elif defined EMSCRIPTEN
+
+#include "render/render.h"
+#include <emscripten/emscripten.h>
+#include <GLFW/glfw3.h>
+
+namespace
+{
+
+class shared_app
+{
+public:
+    static shared_app &get_app()
+    {
+        static shared_app app;
+        return app;
+    }
+
+public:
+    void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing,nya_system::app &app)
+    {
+        if(m_window)
+            return;
+
+        m_app = &app;
+
+        glfwInit();
+        m_window=glfwCreateWindow(w,h,"Nya engine",NULL,NULL);
+        //glfwMakeContextCurrent(m_window);
+
+        m_app->on_init();
+        nya_render::set_viewport(0,0,w,h);
+        m_app->on_resize(w,h);
+
+        emscripten_set_main_loop(&main_loop,0,NULL);
+        emscripten_exit_with_live_runtime();
+    }
+
+    void do_frame()
+    {
+        glfwPollEvents();
+
+        const unsigned long time=nya_system::get_time();
+        const unsigned int dt=(unsigned int)(time-m_time);
+        m_time=time;
+        m_app->on_frame(dt);
+        glfwSwapBuffers(m_window);
+    }
+
+    void start_fullscreen(unsigned int w,unsigned int h,nya_system::app &app)
+    {
+        start_windowed(0,0,w,h,0,app);
+    }
+
+    void finish(nya_system::app &app) {}
+    void set_title(const char *title) {}
+
+private:
+    static void main_loop() { shared_app::get_app().do_frame(); }
+
+public:
+    shared_app(): m_window(0),m_time(0) {}
+
+private:
+    GLFWwindow *m_window;
+    unsigned long m_time;
+    nya_system::app *m_app;
+};
+
+}
 #else
 
 //  fullscreen:
@@ -1102,8 +1173,8 @@ public:
                 };
             }
 
-            unsigned long time=nya_system::get_time();
-            unsigned int dt=(unsigned)(time-m_time);
+            const unsigned long time=nya_system::get_time();
+            const unsigned int dt=(unsigned int)(time-m_time);
             m_time=time;
 
             app.on_frame(dt);

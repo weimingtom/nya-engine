@@ -61,7 +61,7 @@
         #define NO_EXTENSIONS_INIT
     #endif
 
-#elif __ANDROID__
+#elif __ANDROID__ || EMSCRIPTEN
     #include <GLES2/gl2.h>
     #define GL_GLEXT_PROTOTYPES
     #include <GLES2/gl2ext.h>
