@@ -23,6 +23,10 @@
     #define USE_VAO
 #endif
 
+#if !defined OPENGL_ES || defined __APPLE__
+    #define USE_INSTANCING
+#endif
+
 #ifdef OPENGL_ES
     #define glGenVertexArrays glGenVertexArraysOES
     #define glBindVertexArray glBindVertexArrayOES
@@ -623,7 +627,7 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type,unsig
         }
 #endif
         const unsigned int gl_elem_type=(iobj.element_size==index4b?GL_UNSIGNED_INT:GL_UNSIGNED_SHORT);
-    #ifndef __ANDROID__
+    #ifdef USE_INSTANCING
         if(instances>1 && glDrawElementsInstancedARB)
             glDrawElementsInstancedARB(gl_elem,count,gl_elem_type,(void*)(ptrdiff_t)(offset*iobj.element_size),instances);
         else
@@ -635,7 +639,7 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type,unsig
         if(offset+count>vobj.verts_count)
             return;
 
-    #ifndef __ANDROID__
+    #ifdef USE_INSTANCING
         if(instances>1 && glDrawArraysInstancedARB)
             glDrawArraysInstancedARB(gl_elem,offset,count,instances);
         else
