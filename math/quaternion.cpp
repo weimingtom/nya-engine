@@ -1,6 +1,7 @@
 //https://code.google.com/p/nya-engine/
 
 #include "quaternion.h"
+#include "matrix.h"
 #include "constants.h"
 #include <math.h>
 
@@ -116,6 +117,49 @@ quat::quat(float pitch,float yaw,float roll)
     v.y=cos_x*sin_y*cos_z - sin_x*cos_y*sin_z;
     v.z=cos_x*cos_y*sin_z - sin_x*sin_y*cos_z;
     w  =cos_x*cos_y*cos_z + sin_x*sin_y*sin_z;
+}
+
+quat::quat(const mat4 &m)
+{
+    const float t=m[0][0]+m[1][1]+m[2][2];
+    if(t>0)
+    {
+        const float s=0.5f/sqrtf(t+1.0f);
+        v.x=(m[1][2]-m[2][1])*s;
+        v.y=(m[2][0]-m[0][2])*s;
+        v.z=(m[0][1]-m[1][0])*s;
+        w=0.25f/s;
+    }
+    else
+    {
+        if(m[0][0]>m[1][1] && m[0][0]>m[2][2])
+        {
+            const float s=2.0f*sqrtf(1.0f+m[0][0]-m[1][1]-m[2][2]);
+            const float is=1.0f/s;
+            v.x=0.25f*s;
+            v.y=(m[1][0]+m[0][1])*is;
+            v.z=(m[2][0]+m[0][2])*is;
+            w=(m[1][2]-m[2][1])*is;
+        }
+        else if(m[1][1] > m[2][2])
+        {
+            const float s=2.0f*sqrtf(1.0f+m[1][1]-m[0][0]-m[2][2]);
+            const float is=1.0f/s;
+            v.x=(m[1][0]+m[0][1])*is;
+            v.y=0.25f*s;
+            v.z=(m[2][1]+m[1][2])*is;
+            w=(m[2][0]-m[0][2])*is;
+        }
+        else
+        {
+            const float s=2.0f*sqrtf(1.0f+m[2][2]-m[0][0]-m[1][1]);
+            const float is=1.0f/s;
+            v.x=(m[2][0]+m[0][2])*is;
+            v.y=(m[2][1]+m[1][2])*is;
+            v.z=0.25f*s;
+            w=(m[0][1]-m[1][0])*is;
+        }
+    }
 }
 
 quat::quat(const vec3 &axis,float angle)

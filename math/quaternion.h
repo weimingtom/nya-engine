@@ -7,6 +7,8 @@
 namespace nya_math
 {
 
+struct mat4;
+
 struct quat
 {
     vec3 v;
@@ -19,6 +21,8 @@ struct quat
         v.x=x; v.y=y;
         v.z=z; this->w=w;
     }
+
+    quat(const mat4 &m);
 
     quat(float pitch,float yaw,float roll); //angles in radians
 
