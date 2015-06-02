@@ -12,6 +12,10 @@
     #undef max
 #endif
 
+//warning: vec * vec deprecated, use dot instead
+//will be removed
+//after some time, * will be used as per-component multiply
+
 namespace nya_math
 {
 
@@ -39,19 +43,18 @@ struct vec2
     vec2 operator -= (const vec2 &v) { x-=v.x; y-=v.y; return *this; }
 
     float length() const { return sqrtf(length_sq()); }
-    float length_sq() const { return x*x+y*y; }
+    float length_sq() const { return dot(*this); }
 
-    vec2 &abs() { x=fabsf(x); y=fabsf(y); return *this; }
-
+    float dot(const vec2 &v) const { return dot(*this,v); }
     vec2 &normalize() { return *this=normalize(*this); }
+    vec2 &abs() { x=fabsf(x); y=fabsf(y); return *this; }
 
     static vec2 max(const vec2 &a,const vec2 &b) { return vec2(a.x>b.x?a.x:b.x, a.y>b.y?a.y:b.y); }
     static vec2 min(const vec2 &a,const vec2 &b) { return vec2(a.x<b.x?a.x:b.x, a.y<b.y?a.y:b.y); }
 
+    static float dot(const vec2 &a,const vec2 &b) { return a.x*b.x+a.y*b.y; }
     static vec2 normalize(const vec2 &v) { float len=v.length(); return len<0.00001f? vec2(1.0f,0.0f): v*(1.0f/len); }
-
     static vec2 abs(const vec2 &v) { return vec2(fabsf(v.x),fabsf(v.y)); }
-
     static vec2 lerp(const vec2 &from,const vec2 &to,float t) { return from+(to-from)*t; }
 };
 
@@ -69,7 +72,7 @@ struct vec3
 
     vec3 operator + (const vec3 &v) const { return vec3(x+v.x,y+v.y,z+v.z); }
     vec3 operator - (const vec3 &v) const { return vec3(x-v.x,y-v.y,z-v.z); }
-    float operator * (const vec3 &v) const { return x*v.x+y*v.y+z*v.z; }
+    float operator * (const vec3 &v) const { return dot(v); }
     vec3 operator * (const float a) const { return vec3(x*a,y*a,z*a); }
     vec3 operator / (const float a) const { return vec3(x/a,y/a,z/a); }
 
@@ -82,24 +85,23 @@ struct vec3
     vec3 operator -= (const vec3 &v) { x-=v.x; y-=v.y; z-=v.z; return *this; }
 
     float length() const { return sqrtf(length_sq()); }
-    float length_sq() const { return x*x+y*y+z*z; }
+    float length_sq() const { return dot(*this); }
 
-    vec3 &abs() { x=fabsf(x); y=fabsf(y); z=fabsf(z); return *this; }
-
+    float dot(const vec3 &v) const { return dot(*this,v); }
+    vec3 cross(const vec3 &v) const { return cross(*this,v); }
     vec3 &normalize() { return *this=normalize(*this); }
+    vec3 &abs() { x=fabsf(x); y=fabsf(y); z=fabsf(z); return *this; }
 
     const vec2 &xy() const { return *(vec2*)&x; }
     vec2 &xy() { return *(vec2*)&x; }
 
-    static vec3 cross(const vec3 &a,const vec3 &b) { return vec3(a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x); }
-
     static vec3 max(const vec3 &a,const vec3 &b) { return vec3(a.x>b.x?a.x:b.x, a.y>b.y?a.y:b.y, a.z>b.z?a.z:b.z); }
     static vec3 min(const vec3 &a,const vec3 &b) { return vec3(a.x<b.x?a.x:b.x, a.y<b.y?a.y:b.y, a.z<b.z?a.z:b.z); }
 
+    static float dot(const vec3 &a,const vec3 &b) { return a.x*b.x+a.y*b.y+a.z*b.z; }
+    static vec3 cross(const vec3 &a,const vec3 &b) { return vec3(a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x); }
     static vec3 normalize(const vec3 &v) { float len=v.length(); return len<0.00001f? vec3(1.0f,0.0f,0.0f): v*(1.0f/len); }
-
     static vec3 abs(const vec3 &v) { return vec3(fabsf(v.x),fabsf(v.y),fabsf(v.z)); }
-
     static vec3 lerp(const vec3 &from,const vec3 &to,float t) { return from+(to-from)*t; }
 };
 
@@ -134,11 +136,11 @@ struct vec4
     vec4 operator -= (const vec4 &v) { x-=v.x; y-=v.y; z-=v.z; w+=v.w; return *this; }
 
     float length() const { return sqrtf(length_sq()); }
-    float length_sq() const { return x*x+y*y+z*z+w*w; }
+    float length_sq() const { return dot(*this); }
 
-    vec4 &abs() { x=fabsf(x); y=fabsf(y); z=fabsf(z); w=fabsf(w); return *this; }
-
+    float dot(const vec4 &v) const { return dot(*this,v); }
     vec4 &normalize() { return *this=normalize(*this); }
+    vec4 &abs() { x=fabsf(x); y=fabsf(y); z=fabsf(z); w=fabsf(w); return *this; }
 
     const vec3 &xyz() const { return *(vec3*)&x; }
     vec3 &xyz() { return *(vec3*)&x; }
@@ -150,10 +152,9 @@ struct vec4
     static vec4 max(const vec4 &a,const vec4 &b) { return vec4(a.x>b.x?a.x:b.x, a.y>b.y?a.y:b.y, a.z>b.z?a.z:b.z, a.w>b.w?a.w:b.w); }
     static vec4 min(const vec4 &a,const vec4 &b) { return vec4(a.x<b.x?a.x:b.x, a.y<b.y?a.y:b.y, a.z<b.z?a.z:b.z, a.w<b.w?a.w:b.w); }
 
+    static float dot(const vec4 &a,const vec4 &b) { return a.x*b.x+a.y*b.y+a.z*b.z+a.w*b.w; }
     static vec4 normalize(const vec4 &v) { float len=v.length(); return len<0.00001f? vec4(1.0f,0.0f,0.0f,0.0): v*(1.0f/len); }
-
     static vec4 abs(const vec4 &v) { return vec4(fabsf(v.x),fabsf(v.y),fabsf(v.z),fabsf(v.w)); }
-
     static vec4 lerp(const vec4 &from,const vec4 &to,float t) { return from+(to-from)*t; }
 };
 
