@@ -223,11 +223,11 @@ bool mesh_internal::init_from_shared()
         m_shared->materials[i].internal().skeleton_changed(&m_skeleton);
 
     m_recalc_aabb=true;
-    m_has_aabb=m_shared->aabb.delta*m_shared->aabb.delta>0.0001f;
+    m_has_aabb=m_shared->aabb.delta.length_sq()>0.0001f;
 
     m_groups.resize(m_shared->groups.size());
     for(int i=0;i<(int)m_groups.size();++i)
-        m_groups[i].has_aabb=m_shared->groups[i].aabb.delta*m_shared->groups[i].aabb.delta>0.0001f;
+        m_groups[i].has_aabb=m_shared->groups[i].aabb.delta.length_sq()>0.0001f;
 
     return true;
 }
