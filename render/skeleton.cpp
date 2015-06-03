@@ -24,7 +24,7 @@ int skeleton::add_bone(const char *name,const nya_math::vec3 &pos,const nya_math
     m_pos_tr.resize(bone_idx+1);
     m_rot_tr.resize(bone_idx+1);
 
-    if(!m_rot_org.empty() || rot.v*rot.v>0.001f)
+    if(!m_rot_org.empty() || rot.v.length_sq()>0.001f)
         m_rot_org.resize(m_bones.size());
 
     bone &b=m_bones[bone_idx];
@@ -275,13 +275,13 @@ void skeleton::update_ik(int idx)
             const float eps=0.0001f;
 
             const nya_math::vec3 diff=eff_pos-target_pos;
-            if(diff*diff<eps)
+            if(diff.length_sq()<eps)
                 return;
 
             eff_pos.normalize();
             target_pos.normalize();
 
-            float ang=acosf(eff_pos*target_pos);
+            float ang=acosf(eff_pos.dot(target_pos));
             if(fabsf(ang)<eps)
                 return;
 

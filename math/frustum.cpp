@@ -47,7 +47,7 @@ bool frustum::test_intersect(const aabb &box) const
 	for(int i=0;i<6;++i)
 	{
         const plane &p=m_planes[i];
-		if(box.origin*p.n+(box.delta*p.abs_n+p.d)<0.0f)
+		if(box.origin.dot(p.n)+(box.delta.dot(p.abs_n)+p.d)<0.0f)
 			return false;
 	}
 
@@ -60,7 +60,7 @@ bool frustum::test_intersect(const vec3 &v) const
 	for(int i=0;i<6;++i)
     {
         const plane &p=m_planes[i];
-        if((p.n*(p.n*p.d+v) )< -eps)
+        if((p.n.dot(p.n*p.d+v) )< -eps)
             return false;
     }
 

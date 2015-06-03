@@ -337,8 +337,8 @@ template<typename vert_t,typename ind_t> void calculate_tangents(vert_t *verts,u
         v.tangent.normalize();
         v.bitangent.normalize();
 
-        v.tangent=(v.tangent-v.normal*(v.normal*v.tangent)).normalize();
-        v.bitangent=(v.bitangent-v.normal*(v.normal*v.bitangent)).normalize();
+        v.tangent=(v.tangent-v.normal*(v.normal.dot(v.tangent))).normalize();
+        v.bitangent=(v.bitangent-v.normal*(v.normal.dot(v.bitangent))).normalize();
     }
 }
 

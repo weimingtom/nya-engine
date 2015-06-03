@@ -13,7 +13,7 @@ quat quat::slerp(const quat &q1,const quat &q2,float t)
     const float eps=0.001f;
     float scale0,scale1;
 
-    const float cosom=q1.v*q2.v+q1.w*q2.w;
+    const float cosom=q1.v.dot(q2.v)+q1.w*q2.w;
     if(cosom<0.0f)
     {
         if(1.0f+cosom>eps)
@@ -54,7 +54,7 @@ quat quat::slerp(const quat &q1,const quat &q2,float t)
 quat quat::nlerp(const quat &q1,const quat &q2,float t)
 {
     const float t2=1.0-t;
-    if(q1.v*q2.v+q1.w*q2.w<0)
+    if(q1.v.dot(q2.v)+q1.w*q2.w<0)
         t=-t;
 
     return quat(t2*q1.v.x+t*q2.v.x,
@@ -172,14 +172,14 @@ quat::quat(const vec3 &axis,float angle)
 
 quat::quat(const vec3 &from,const vec3 &to)
 {
-    float len=sqrtf(from*from * to*to);
+    float len=sqrtf(from.length_sq() * to.length_sq());
     if(len<0.0001f)
     {
         w=1.0f;
         return;
     }
 
-    w=sqrtf(0.5f*(1.0f + from*to/len));
+    w=sqrtf(0.5f*(1.0f + from.dot(to)/len));
     v=vec3::cross(from,to)/(len*2.0f*w);
 }
 
@@ -210,7 +210,7 @@ quat &quat::limit_pitch(float from,float to)
 
 quat &quat::normalize()
 {
-    const float len=sqrtf(v*v+w*w);
+    const float len=sqrtf(v.length_sq()+w*w);
     if(len>0.00001f)
     {
         const float len_inv=1.0f/len;
