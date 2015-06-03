@@ -239,6 +239,27 @@ void layout::move(int x,int y)
     }
 }
 
+void layout::remove_widget(const char *name)
+{
+    if(!name)
+        return;
+
+    for(widgets_list::iterator it=m_widgets.begin();
+        it!=m_widgets.end();)
+    {
+        const char *n=it->get_id();
+        if(n && strcmp(name,n)==0)
+        {
+            widgets_list::iterator itn=it;
+            ++itn;
+            m_widgets.erase(it);
+            it=itn;
+        }
+        else
+            ++it;
+    }
+}
+
 bool layout::mouse_button(enum mouse_button button,bool pressed)
 {
     bool processed=false;

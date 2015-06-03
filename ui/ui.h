@@ -321,6 +321,7 @@ public:
     virtual void process_widgets(uint dt,layout &l);
     virtual void resize(uint width,uint height);
     virtual void move(int x,int y);
+    virtual void remove_widget(const char *name);
     virtual void remove_widgets() { m_widgets.clear(); }
 
 public:
