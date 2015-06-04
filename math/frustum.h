@@ -17,7 +17,7 @@ struct aabb
     aabb(const vec3 &aabb_min,const vec3 &aabb_max);
     aabb(const aabb &source,const vec3 &pos,const quat &rot,const vec3 &scale);
 
-    float sq_dist(const vec3 &p) { return (vec3::abs(origin-p)-delta).length_sq(); }
+    float sq_dist(const vec3 &p) const { return (vec3::abs(origin-p)-delta).length_sq(); }
 };
 
 class frustum
