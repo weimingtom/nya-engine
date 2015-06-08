@@ -12,8 +12,6 @@
     #undef max
 #endif
 
-//warning: vec * vec will be used as per-component multiply
-
 namespace nya_math
 {
 
@@ -28,7 +26,7 @@ struct vec2
 
     vec2 operator + (const vec2 &v) const { return vec2(x+v.x,y+v.y); }
     vec2 operator - (const vec2 &v) const { return vec2(x-v.x,y-v.y); }
-    //vec2 operator * (const vec2 &v) const { return vec2(x*v.x,y*v.y); }
+    vec2 operator * (const vec2 &v) const { return vec2(x*v.x,y*v.y); }
     vec2 operator * (const float a) const { return vec2(x*a,y*a); }
     vec2 operator / (const float a) const { return vec2(x/a,y/a); }
 
@@ -70,7 +68,7 @@ struct vec3
 
     vec3 operator + (const vec3 &v) const { return vec3(x+v.x,y+v.y,z+v.z); }
     vec3 operator - (const vec3 &v) const { return vec3(x-v.x,y-v.y,z-v.z); }
-    //vec3 operator * (const vec3 &v) const { return vec3(x*v.x,y*v.y,z*v.z); }
+    vec3 operator * (const vec3 &v) const { return vec3(x*v.x,y*v.y,z*v.z); }
     vec3 operator * (const float a) const { return vec3(x*a,y*a,z*a); }
     vec3 operator / (const float a) const { return vec3(x/a,y/a,z/a); }
 
@@ -121,7 +119,7 @@ struct vec4
     vec4 operator + (const vec4 &v) const { return vec4(x+v.x,y+v.y,z+v.z,w+v.w); }
 
     vec4 operator - (const vec4 &v) const { return vec4(x-v.x,y-v.y,z-v.z,w-v.w); }
-    //vec4 operator * (const vec4 &v) const { return vec4(x*v.x,y*v.y,z*v.z,w*v.w); }
+    vec4 operator * (const vec4 &v) const { return vec4(x*v.x,y*v.y,z*v.z,w*v.w); }
     vec4 operator * (const float a) const { return vec4(x*a,y*a,z*a,w*a); }
     vec4 operator / (const float a) const { return vec4(x/a,y/a,z/a,w/a); }
 
