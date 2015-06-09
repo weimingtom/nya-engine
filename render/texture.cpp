@@ -933,7 +933,7 @@ bool texture::get_data(nya_memory::tmp_buffer_ref &data) const
     }
 
     int gl_format=0;
-    switch(tex.format)
+    switch(format)
     {
         case color_rgb:gl_format=GL_RGB;break;
         case color_rgba:gl_format=GL_RGBA;break;
@@ -960,7 +960,7 @@ bool texture::get_data(nya_memory::tmp_buffer_ref &data) const
     glBindFramebuffer(GL_FRAMEBUFFER,copy_fbo);
     if(is_cubemap())
     {
-        unsigned int size=tex.width*tex.height*get_bpp(tex.format)/8;
+        unsigned int size=tex.width*tex.height*get_bpp(format)/8;
         for(int i=0;i<6;++i)
         {
             glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,cube_faces[i],tex.tex_id,0);
