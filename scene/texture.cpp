@@ -354,4 +354,32 @@ bool texture::build(const void *data,unsigned int width,unsigned int height,colo
     return ref->tex.build_texture(data,width,height,format);
 }
 
+bool texture::update_region(const void *data,unsigned int x,unsigned int y,unsigned int width,unsigned int height)
+{
+    texture_internal::shared_resources::shared_resource_mutable_ref ref;
+    if(m_internal.m_shared.get_ref_count()==1 && !m_internal.m_shared.get_name())  //was created and unique
+    {
+        ref=texture_internal::shared_resources::modify(m_internal.m_shared);
+        return ref->tex.update_region(data,x,y,width,height);
+    }
+
+    if(!m_internal.m_shared.is_valid())
+        return false;
+
+    nya_render::texture::color_format f=m_internal.m_shared->tex.get_color_format();
+    unsigned int w=m_internal.m_shared->tex.get_width();
+    unsigned int h=m_internal.m_shared->tex.get_height();
+
+    nya_memory::tmp_buffer_ref buf;
+    if(!m_internal.m_shared->tex.get_data(buf))
+        return false;
+
+    nya_memory::tmp_buffer_scoped sbuf(buf);
+    m_internal.unload();
+    if(!build(sbuf.get_data(),w,h,f))
+        return false;
+
+    return update_region(data,x,y,width,height);
+}
+
 }

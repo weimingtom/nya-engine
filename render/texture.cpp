@@ -785,23 +785,23 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     return build_texture(data,true,width,height,format,mip_count);
 }
 
-void texture::update_region(const void *data,unsigned int x,unsigned int y,unsigned int width,unsigned int height,unsigned int mip)
+bool texture::update_region(const void *data,unsigned int x,unsigned int y,unsigned int width,unsigned int height,unsigned int mip)
 {
     if(m_tex<0)
-        return;
+        return false;
 
     const texture_obj &t=texture_obj::get(m_tex);
     if(x+width>t.width || y+height>t.height)
-        return;
+        return false;
 
     if(!t.has_mipmaps && mip>0)
-        return;
+        return false;
 
     if(t.format>=depth16)
-        return;
+        return false;
 
 #ifdef DIRECTX11
-    //ToDo
+    return false; //ToDo
 #else
     glBindTexture(t.gl_type,t.tex_id);
     active_layers[active_layer]=m_tex;
@@ -809,6 +809,8 @@ void texture::update_region(const void *data,unsigned int x,unsigned int y,unsig
     const int precision=(t.format==color_rgb32f || t.format==color_rgba32f)?GL_FLOAT:GL_UNSIGNED_BYTE;
     glTexSubImage2D(t.gl_type,mip,x,y,width,height,t.gl_format,precision,data);
 #endif
+
+    return true;
 }
 
 void texture::bind(unsigned int layer) const { if(layer>=max_layers) return; current_layers[layer]=m_tex; }
