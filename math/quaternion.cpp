@@ -53,7 +53,7 @@ quat quat::slerp(const quat &q1,const quat &q2,float t)
 
 quat quat::nlerp(const quat &q1,const quat &q2,float t)
 {
-    const float t2=1.0-t;
+    const float t2=1.0f-t;
     if(q1.v.dot(q2.v)+q1.w*q2.w<0)
         t=-t;
 
