@@ -56,7 +56,8 @@ public:
 	bool build_cubemap(const void *data[6],unsigned int width,unsigned int height,color_format format,
                        int mip_count= -1);
 public:
-    bool update_region(const void *data,unsigned int x,unsigned int y,unsigned int width,unsigned int height,unsigned int mip=0);
+    //ToDo: -1 as default value, update all mips on negative values
+    bool update_region(const void *data,unsigned int x,unsigned int y,unsigned int width,unsigned int height,int mip=0);
 
 public:
     void bind(unsigned int layer) const;

@@ -785,23 +785,37 @@ bool texture::build_cubemap(const void *data[6],unsigned int width,unsigned int 
     return build_texture(data,true,width,height,format,mip_count);
 }
 
-bool texture::update_region(const void *data,unsigned int x,unsigned int y,unsigned int width,unsigned int height,unsigned int mip)
+bool texture::update_region(const void *data,unsigned int x,unsigned int y,unsigned int width,unsigned int height,int mip)
 {
     if(m_tex<0)
         return false;
 
     const texture_obj &t=texture_obj::get(m_tex);
-    if(x+width>t.width || y+height>t.height)
+
+    if(x+width>t.width || y+height>t.height) //ToDo: mip size check
         return false;
 
-    if(!t.has_mipmaps && mip>0)
+    if(!t.has_mipmaps && mip!=0) //ToDo: mip count
         return false;
 
     if(t.format>=depth16)
         return false;
 
 #ifdef DIRECTX11
-    return false; //ToDo
+    if(!get_context())
+        return false;
+
+    D3D11_BOX dest_region;
+    dest_region.left=x;
+    dest_region.right=x+width;
+    dest_region.top=y;
+    dest_region.bottom=y+height;
+    dest_region.front=0;
+    dest_region.back=1;
+
+    const unsigned int pitch=t.width*get_bpp(t.format)/8;
+
+    get_context()->UpdateSubresource(t.tex,0,&dest_region,data,pitch,0);
 #else
     glBindTexture(t.gl_type,t.tex_id);
     active_layers[active_layer]=m_tex;
@@ -891,7 +905,7 @@ bool texture::get_data(nya_memory::tmp_buffer_ref &data) const
     ID3D11Texture2D* copy_tex=0;
 
     D3D11_TEXTURE2D_DESC description;
-    tex.tex->GetDesc( &description );
+    tex.tex->GetDesc(&description);
     description.BindFlags=0;
     description.CPUAccessFlags=D3D11_CPU_ACCESS_READ;
     description.Usage=D3D11_USAGE_STAGING;
@@ -902,7 +916,7 @@ bool texture::get_data(nya_memory::tmp_buffer_ref &data) const
 
     get_context()->CopyResource(copy_tex,tex.tex);
     D3D11_MAPPED_SUBRESOURCE resource;
-    hr = get_context()->Map(copy_tex,0,D3D11_MAP_READ,0,&resource );
+    hr=get_context()->Map(copy_tex,0,D3D11_MAP_READ,0,&resource);
     if(FAILED(hr))
         return false;
 
