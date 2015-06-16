@@ -747,7 +747,9 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
     if(bad_alignment)
         glPixelStorei(GL_UNPACK_ALIGNMENT,4);
 
-  #if !defined GL_GENERATE_MIPMAP || defined OPENGL3
+  #if defined GL_GENERATE_MIPMAP && !defined OPENGL3
+    if(has_mipmap && mip_count<0) glTexParameteri(gl_type,GL_GENERATE_MIPMAP,GL_FALSE);
+  #else
     #ifndef NO_EXTENSIONS_INIT
       static PFNGLGENERATEMIPMAPPROC glGenerateMipmap=NULL;
       if(!glGenerateMipmap)
