@@ -775,10 +775,10 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
   #endif
     glBindTexture(gl_type,0);
     t.gl_format=gl_format;
+    t.format=format;
 #endif
     t.width=width;
     t.height=height;
-    t.format=format;
 
     t.size=get_tex_memory_size(t.width,t.height,t.format,mip_count)*(is_cubemap?6:1);
     t.is_cubemap=is_cubemap;
@@ -835,10 +835,26 @@ bool texture::update_region(const void *data,unsigned int x,unsigned int y,unsig
     dest_region.back=1;
 
     const unsigned int pitch=width*get_bpp(t.format)/8;
-
-    //ToDo: update_all_mips
-
     get_context()->UpdateSubresource(t.tex,0,&dest_region,data,pitch,0);
+
+    if(update_all_mips)
+    {
+        nya_memory::tmp_buffer_scoped buf(width*pitch);
+        const void *prev_data=data;
+        for(int i=1;i<t.mip_count;++i)
+        {
+            downsample(prev_data,buf.get_data(),dest_region.right-dest_region.left,dest_region.bottom-dest_region.top,get_bpp(t.format)/8);
+            prev_data=buf.get_data();
+
+            dest_region.left/=2;
+            dest_region.right/=2;
+            dest_region.top/=2;
+            dest_region.bottom/=2;
+            const unsigned int pitch=(dest_region.right-dest_region.left)*get_bpp(t.format)/8;
+            get_context()->UpdateSubresource(t.tex,D3D11CalcSubresource(i,0,t.mip_count),&dest_region,buf.get_data(),pitch,0);
+        }
+    }
+
 #else
     glBindTexture(t.gl_type,t.tex_id);
     active_layers[active_layer]=m_tex;
