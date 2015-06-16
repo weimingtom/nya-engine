@@ -292,6 +292,27 @@ void gl_setup_texture(int target,bool clamp,bool has_mips)
         glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MAX_ANISOTROPY_EXT,float(default_aniso));
 }
 
+void gl_generate_mips_pre(int gl_type)
+{
+#if defined GL_GENERATE_MIPMAP && !defined OPENGL3
+    glTexParameteri(gl_type,GL_GENERATE_MIPMAP,GL_TRUE);
+#endif
+}
+
+void gl_generate_mips_post(int gl_type)
+{
+#if defined GL_GENERATE_MIPMAP && !defined OPENGL3
+    glTexParameteri(gl_type,GL_GENERATE_MIPMAP,GL_FALSE);
+#else
+  #ifndef NO_EXTENSIONS_INIT
+    static PFNGLGENERATEMIPMAPPROC glGenerateMipmap=NULL;
+    if(!glGenerateMipmap)
+        glGenerateMipmap=(PFNGLGENERATEMIPMAPPROC)get_extension("glGenerateMipmap");
+  #endif
+    glGenerateMipmap(gl_type);
+#endif
+}
+
 unsigned int gl_get_max_tex_size()
 {
     static unsigned int max_tex_size=0;
@@ -702,9 +723,8 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
         glTexParameteri(gl_type,GL_TEXTURE_MAX_LEVEL,mip_count-1);
 #endif
 
-  #if defined GL_GENERATE_MIPMAP && !defined OPENGL3
-    if(has_mipmap && mip_count<0) glTexParameteri(gl_type,GL_GENERATE_MIPMAP,GL_TRUE);
-  #endif
+    if(has_mipmap && mip_count<0)
+        gl_generate_mips_pre(gl_type);
 
     for(int j=0;j<(is_cubemap?6:1);++j)
     {
@@ -747,16 +767,8 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
     if(bad_alignment)
         glPixelStorei(GL_UNPACK_ALIGNMENT,4);
 
-  #if defined GL_GENERATE_MIPMAP && !defined OPENGL3
-    if(has_mipmap && mip_count<0) glTexParameteri(gl_type,GL_GENERATE_MIPMAP,GL_FALSE);
-  #else
-    #ifndef NO_EXTENSIONS_INIT
-      static PFNGLGENERATEMIPMAPPROC glGenerateMipmap=NULL;
-      if(!glGenerateMipmap)
-          glGenerateMipmap=(PFNGLGENERATEMIPMAPPROC)get_extension("glGenerateMipmap");
-    #endif
-    if(has_mipmap && mip_count<0) glGenerateMipmap(gl_type);
-  #endif
+    if(has_mipmap && mip_count<0)
+        gl_generate_mips_post(gl_type);
 
   #ifdef __ANDROID__
     temp_buf.free();
@@ -770,7 +782,7 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
 
     t.size=get_tex_memory_size(t.width,t.height,t.format,mip_count)*(is_cubemap?6:1);
     t.is_cubemap=is_cubemap;
-    t.has_mipmaps=has_mipmap;
+    t.mip_count=mip_count;
 
     return true;
 }
@@ -794,10 +806,17 @@ bool texture::update_region(const void *data,unsigned int x,unsigned int y,unsig
 
     const texture_obj &t=texture_obj::get(m_tex);
 
-    if(x+width>t.width || y+height>t.height) //ToDo: mip size check
+    if(mip>t.mip_count)
         return false;
 
-    if(!t.has_mipmaps && mip!=0) //ToDo: mip count
+    const bool update_all_mips=mip<0;
+    if(update_all_mips) mip=0;
+
+    unsigned int mip_width=t.width>>mip, mip_height=t.height>>mip;
+    if(!mip_width) mip_width=1;
+    if(!mip_height) mip_height=1;
+
+    if(x+width>mip_width || y+height>mip_height)
         return false;
 
     if(t.format>=depth16)
@@ -817,13 +836,21 @@ bool texture::update_region(const void *data,unsigned int x,unsigned int y,unsig
 
     const unsigned int pitch=width*get_bpp(t.format)/8;
 
+    //ToDo: update_all_mips
+
     get_context()->UpdateSubresource(t.tex,0,&dest_region,data,pitch,0);
 #else
     glBindTexture(t.gl_type,t.tex_id);
     active_layers[active_layer]=m_tex;
 
+    if(update_all_mips)
+        gl_generate_mips_pre(t.gl_type);
+
     const int precision=(t.format==color_rgb32f || t.format==color_rgba32f)?GL_FLOAT:GL_UNSIGNED_BYTE;
     glTexSubImage2D(t.gl_type,mip,x,y,width,height,t.gl_format,precision,data);
+
+    if(update_all_mips)
+        gl_generate_mips_post(t.gl_type);
 #endif
 
     return true;
@@ -1066,7 +1093,7 @@ void texture::set_filter(filter minification,filter magnification,filter mipmap)
 
 #ifndef DIRECTX11
     glBindTexture(tex.gl_type,tex.tex_id);
-    gl_setup_filtration(tex.gl_type,tex.has_mipmaps,minification,magnification,mipmap);
+    gl_setup_filtration(tex.gl_type,tex.mip_count>1,minification,magnification,mipmap);
     active_layers[0]= -1;
 #endif
 }

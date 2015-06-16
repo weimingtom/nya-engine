@@ -59,7 +59,7 @@ public:
 
 public:
     bool build(const void *data,unsigned int width,unsigned int height,color_format format);
-    bool update_region(const void *data,unsigned int x,unsigned int y,unsigned int width,unsigned int height);
+    bool update_region(const void *data,unsigned int x,unsigned int y,unsigned int width,unsigned int height,int mip=-1);
 
 public:
     texture() { texture_internal::default_load_function(load_tga);

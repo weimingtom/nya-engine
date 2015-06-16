@@ -354,7 +354,7 @@ bool texture::build(const void *data,unsigned int width,unsigned int height,colo
     return ref->tex.build_texture(data,width,height,format);
 }
 
-bool texture::update_region(const void *data,unsigned int x,unsigned int y,unsigned int width,unsigned int height)
+bool texture::update_region(const void *data,unsigned int x,unsigned int y,unsigned int width,unsigned int height,int mip)
 {
     texture_internal::shared_resources::shared_resource_mutable_ref ref;
     if(m_internal.m_shared.get_ref_count()==1 && !m_internal.m_shared.get_name())  //was created and unique
@@ -379,7 +379,7 @@ bool texture::update_region(const void *data,unsigned int x,unsigned int y,unsig
     if(!build(sbuf.get_data(),w,h,f))
         return false;
 
-    return update_region(data,x,y,width,height);
+    return update_region(data,x,y,width,height,mip);
 }
 
 }

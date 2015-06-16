@@ -114,7 +114,7 @@ namespace nya_render
     {
         unsigned int width,height;
         unsigned int size;
-        bool has_mipmaps;
+        unsigned short mip_count;
         bool is_cubemap;
         texture::color_format format;
 
@@ -129,7 +129,7 @@ namespace nya_render
         unsigned int tex_id,gl_type,gl_format;
 #endif
 
-        texture_obj(): width(0),height(0),size(0),is_cubemap(false),has_mipmaps(false)
+        texture_obj(): width(0),height(0),size(0),is_cubemap(false),mip_count(0)
         {
 #ifdef DIRECTX11
             tex=0,srv=0,sampler_state=0,depth_target=0;

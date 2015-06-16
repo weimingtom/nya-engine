@@ -49,6 +49,7 @@ public:
 
 public:
     //mip_count= -1 means "generate mipmaps". You have to provide a single mip or a complete mipmap pyramid instead
+    //resulting format may vary on different platforms, allways use get_color_format() to get actual texture format
     bool build_texture(const void *data,unsigned int width,unsigned int height,color_format format,
                        int mip_count= -1);
 
@@ -56,8 +57,8 @@ public:
 	bool build_cubemap(const void *data[6],unsigned int width,unsigned int height,color_format format,
                        int mip_count= -1);
 public:
-    //ToDo: -1 as default value, update all mips on negative values
-    bool update_region(const void *data,unsigned int x,unsigned int y,unsigned int width,unsigned int height,int mip=0);
+    //mip= -1 means "update all mipmaps"
+    bool update_region(const void *data,unsigned int x,unsigned int y,unsigned int width,unsigned int height,int mip=-1);
 
 public:
     void bind(unsigned int layer) const;
