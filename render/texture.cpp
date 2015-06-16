@@ -813,7 +813,7 @@ bool texture::update_region(const void *data,unsigned int x,unsigned int y,unsig
     dest_region.front=0;
     dest_region.back=1;
 
-    const unsigned int pitch=t.width*get_bpp(t.format)/8;
+    const unsigned int pitch=width*get_bpp(t.format)/8;
 
     get_context()->UpdateSubresource(t.tex,0,&dest_region,data,pitch,0);
 #else
