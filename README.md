@@ -1,3 +1,14 @@
+-----
+
+Bitbucket migration experiment
+
+The main project's page is still https://code.google.com/p/nya-engine/
+
+Will migrate permanently in August, 1.
+
+-----
+
+
 Nya engine is a lightweight cross-platform 3d graphics engine without dependencies.
 
 Supported platforms: Linux, Mac, iOS, Windows, Windows Phone 8 and Android (except nya_system::app, tested with SDL)
