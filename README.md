@@ -1,11 +1,5 @@
 -----
 
-Bitbucket migration of https://code.google.com/p/nya-engine/
-
-Will migrate permanently on August, 1.
-
------
-
 
 Nya engine is a lightweight cross-platform 3d graphics engine without dependencies.
 
@@ -14,6 +8,12 @@ Supported platforms: Linux, Mac, iOS, Windows, Windows Phone 8 and Android (exce
 Experimental support: HTML5(via Emscripten) 
 
 It uses the same api for OpenGL, OpenGL 3, OpenGL ES2, DirectX 11 and allows to use GLSL 1.10 shaders for all platforms
+
+-----
+
+Bitbucket migration of https://code.google.com/p/nya-engine/
+
+Will migrate permanently on August, 1.
 
 -----
 
