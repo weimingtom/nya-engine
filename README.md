@@ -4,7 +4,7 @@ Bitbucket migration experiment
 
 The main project's page is still https://code.google.com/p/nya-engine/
 
-Will migrate permanently in August, 1.
+Will migrate permanently on August, 1.
 
 -----
 
