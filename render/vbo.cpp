@@ -1,17 +1,13 @@
 //https://code.google.com/p/nya-engine/
 
-/*
-    ToDo:
-          is_valid function
-          log
-*/
-
 #include "vbo.h"
 #include "render.h"
 #include "texture.h"
 #include "shader.h"
 #include "platform_specific_gl.h"
 #include "statistics.h"
+
+//ToDo: get_data on dx11 and android
 
 #include "memory/tmp_buffer.h"
 
