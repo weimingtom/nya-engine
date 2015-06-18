@@ -846,7 +846,7 @@ bool vbo::set_index_data(const void*data,index_size size,unsigned int indices_co
     {
         if(!check_init_vbo())
         {
-            log()<<"Unable to gen vertex data: vbo unsupported\n";
+            log()<<"Unable to gen index data: vbo unsupported\n";
             return false;
         }
 
