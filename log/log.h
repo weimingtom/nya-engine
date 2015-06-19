@@ -9,12 +9,13 @@ namespace nya_log
 
 class log_base: public ostream_base
 {
-public:
-    virtual void scope_inc() {}
-    virtual void scope_dec() {}
+protected:
+    virtual void output(const char *string) {}
 
+public:
     virtual void set_tag(const char* tag) {};
-    
+
+public:
     ~log_base() {}
 };
 

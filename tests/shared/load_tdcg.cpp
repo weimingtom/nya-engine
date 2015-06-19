@@ -4,6 +4,7 @@
 #include "scene/mesh.h"
 #include "memory/memory_reader.h"
 #include <zlib.h>
+#include <sstream>
 
 inline unsigned int swap_byte_order(unsigned int ui) { return (ui >> 24) | ((ui<<8) & 0x00FF0000) | ((ui>>8) & 0x0000FF00) | (ui << 24); }
 

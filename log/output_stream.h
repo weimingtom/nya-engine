@@ -3,47 +3,28 @@
 #pragma once
 
 #include <string>
-#include <sstream>
 
 namespace nya_log
 {
 
 class ostream_base
 {
+protected:
+    virtual void output(const char *str) {}
+
 public:
-    virtual ostream_base &operator << (long int) { return *this; }
-    virtual ostream_base &operator << (unsigned long int) { return *this; }
-    virtual ostream_base &operator << (float) { return *this; }
-    virtual ostream_base &operator << (const char *) { return *this; }
+    ostream_base &operator << (long int);
+    ostream_base &operator << (unsigned long int);
+    ostream_base &operator << (float);
+    ostream_base &operator << (const char *);
 
-    virtual ostream_base &operator << (int a) { return operator<<((long int)a); }
-    virtual ostream_base &operator << (unsigned int a) { return operator<<((unsigned long int)a); }
-    virtual ostream_base &operator << (short int a) { return operator<<((long int)a); }
-    virtual ostream_base &operator << (unsigned short int a) { return operator<<((unsigned long int)a); }
-    virtual ostream_base &operator << (unsigned long long int a) { return operator<<((unsigned long int)a); } //ToDo
-    virtual ostream_base &operator << (const std::string &a) { return operator<<(a.c_str()); }
-
-    virtual ~ostream_base() {}
-};
-
-class memory_ostream: public ostream_base
-{
-public:
-    memory_ostream() {}
-    memory_ostream(const memory_ostream &s) { m_sstream<<s.m_sstream.str(); }
-    memory_ostream &operator=(const memory_ostream &s) {m_sstream.str(s.m_sstream.str()); return *this;}
-
-    virtual ostream_base &operator << (long int a) { m_sstream<<a; return *this; }
-    virtual ostream_base &operator << (unsigned long int a) { m_sstream<<a; return *this; }
-    virtual ostream_base &operator << (float a) { m_sstream<<a; return *this; }
-    virtual ostream_base &operator << (const char *a) { m_sstream<<(a?a:"NULL"); return *this; }
-
-    const char *get_text() const { m_text_str=m_sstream.str(); return m_text_str.c_str(); }
-    void clear() { m_sstream.str(""); }
-
-private:
-    std::ostringstream m_sstream;
-    mutable std::string m_text_str;
+    ostream_base &operator << (int a);
+    ostream_base &operator << (unsigned int a);
+    ostream_base &operator << (short int a);
+    ostream_base &operator << (unsigned short int a);
+    ostream_base &operator << (long long int a);
+    ostream_base &operator << (unsigned long long int a);
+    ostream_base &operator << (const std::string &a);
 };
 
 }

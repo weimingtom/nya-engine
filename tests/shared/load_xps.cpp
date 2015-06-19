@@ -4,8 +4,9 @@
 #include "scene/mesh.h"
 #include "memory/memory_reader.h"
 #include "memory/invalid_object.h"
-
 #include "resources/resources.h"
+
+#include <sstream>
 
 namespace
 {

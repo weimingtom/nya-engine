@@ -30,7 +30,7 @@ private:
     bool m_ignore_warnings;
 };
 
-class warning_ostream: public memory_ostream
+class warning_ostream: public ostream_base
 {
 public:
     warning_ostream(warnings_counter &counter): m_counter(counter) {}
@@ -39,6 +39,10 @@ public:
     void flush();
 
 private:
+    virtual void output(const char *str);
+
+private:
+    std::string m_buf;
     warnings_counter &m_counter;
 };
 

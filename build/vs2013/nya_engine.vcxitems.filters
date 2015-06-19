@@ -115,6 +115,12 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\log\log.cpp">
       <Filter>log</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\log\composite_log.cpp">
+        <Filter>log</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\log\output_stream.cpp">
+        <Filter>log</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\scene\material.cpp">
       <Filter>scene</Filter>
     </ClCompile>
@@ -320,6 +326,9 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\log\log.h">
       <Filter>log</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\log\composite_log.h">
+        <Filter>log</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\scene\material.h">
       <Filter>scene</Filter>

@@ -36,6 +36,12 @@
     <ClCompile Include="..\..\log\plain_file_log.cpp">
       <Filter>log</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\log\composite_log.cpp">
+        <Filter>log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\log\output_stream.cpp">
+        <Filter>log</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\log\stdout_log.cpp">
       <Filter>log</Filter>
     </ClCompile>
@@ -187,6 +193,9 @@
     </ClInclude>
     <ClInclude Include="..\..\log\plain_file_log.h">
       <Filter>log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\log\composite_log.h">
+        <Filter>log</Filter>
     </ClInclude>
     <ClInclude Include="..\..\log\stdout_log.h">
       <Filter>log</Filter>

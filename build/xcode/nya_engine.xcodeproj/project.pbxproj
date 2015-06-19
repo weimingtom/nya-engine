@@ -11,6 +11,12 @@
 		3D0F0BE41A716C5000FEF7EC /* scalar.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D0F0BE21A716C5000FEF7EC /* scalar.h */; };
 		3D0F0BE71A72881100FEF7EC /* app.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D0F0BE61A72881100FEF7EC /* app.cpp */; };
 		3D0F0BE81A72881100FEF7EC /* app.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D0F0BE61A72881100FEF7EC /* app.cpp */; };
+		3D5641061B347B3C0025673F /* composite_log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D5641041B347B3C0025673F /* composite_log.cpp */; };
+		3D5641071B347B3C0025673F /* composite_log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D5641041B347B3C0025673F /* composite_log.cpp */; };
+		3D5641081B347B3C0025673F /* composite_log.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D5641051B347B3C0025673F /* composite_log.h */; };
+		3D5641091B347B3C0025673F /* composite_log.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D5641051B347B3C0025673F /* composite_log.h */; };
+		3D56410B1B3481B80025673F /* output_stream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D56410A1B3481B80025673F /* output_stream.cpp */; };
+		3D56410C1B3481B80025673F /* output_stream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D56410A1B3481B80025673F /* output_stream.cpp */; };
 		3D6D5F41196ABCB3008C1041 /* nms.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D6D5F3F196ABCB3008C1041 /* nms.h */; };
 		3D6D5F42196ABCB3008C1041 /* nms.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D6D5F3F196ABCB3008C1041 /* nms.h */; };
 		3D6D5F43196ABCB3008C1041 /* nms.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D6D5F40196ABCB3008C1041 /* nms.cpp */; };
@@ -256,6 +262,9 @@
 /* Begin PBXFileReference section */
 		3D0F0BE21A716C5000FEF7EC /* scalar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scalar.h; path = ../../math/scalar.h; sourceTree = "<group>"; };
 		3D0F0BE61A72881100FEF7EC /* app.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = app.cpp; sourceTree = "<group>"; };
+		3D5641041B347B3C0025673F /* composite_log.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = composite_log.cpp; sourceTree = "<group>"; };
+		3D5641051B347B3C0025673F /* composite_log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = composite_log.h; sourceTree = "<group>"; };
+		3D56410A1B3481B80025673F /* output_stream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = output_stream.cpp; sourceTree = "<group>"; };
 		3D6D5F3F196ABCB3008C1041 /* nms.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nms.h; path = ../../formats/nms.h; sourceTree = "<group>"; };
 		3D6D5F40196ABCB3008C1041 /* nms.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = nms.cpp; path = ../../formats/nms.cpp; sourceTree = "<group>"; };
 		3D6D5F4D196C3347008C1041 /* memory_writer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = memory_writer.h; sourceTree = "<group>"; };
@@ -537,8 +546,11 @@
 		F259321715D858140092C7D8 /* log */ = {
 			isa = PBXGroup;
 			children = (
+				3D5641041B347B3C0025673F /* composite_log.cpp */,
+				3D5641051B347B3C0025673F /* composite_log.h */,
 				F259321A15D858140092C7D8 /* log.cpp */,
 				F259321B15D858140092C7D8 /* log.h */,
+				3D56410A1B3481B80025673F /* output_stream.cpp */,
 				3D8681361965B7F9008B8929 /* output_stream.h */,
 				F259321C15D858140092C7D8 /* plain_file_log.cpp */,
 				F259321D15D858140092C7D8 /* plain_file_log.h */,
@@ -662,6 +674,7 @@
 				F5A0B0781A4E16520074854E /* tag_list.h in Headers */,
 				3DE732E5195D9186008D6765 /* invalid_object.h in Headers */,
 				F573FBF41AE93500000AC240 /* quadtree.h in Headers */,
+				3D5641091B347B3C0025673F /* composite_log.h in Headers */,
 				3D76260F1A127EC9004E033C /* app_internal.h in Headers */,
 				F2F0A0AA1695A794007245BC /* quaternion.h in Headers */,
 				F2F0A0AE1695A794007245BC /* bezier.h in Headers */,
@@ -740,6 +753,7 @@
 				F5A0B0771A4E16520074854E /* tag_list.h in Headers */,
 				3DE732E4195D9186008D6765 /* invalid_object.h in Headers */,
 				F573FBF31AE93500000AC240 /* quadtree.h in Headers */,
+				3D5641081B347B3C0025673F /* composite_log.h in Headers */,
 				3D76260E1A127EC9004E033C /* app_internal.h in Headers */,
 				F2F0A0A91695A794007245BC /* quaternion.h in Headers */,
 				F2F0A0AD1695A794007245BC /* bezier.h in Headers */,
@@ -845,6 +859,7 @@
 				F2221A5C1696F49600640820 /* texture.cpp in Sources */,
 				F22082C6168DE9D200454C62 /* shader.cpp in Sources */,
 				F2AB83DE168DC6C000C23817 /* vbo.cpp in Sources */,
+				3D56410C1B3481B80025673F /* output_stream.cpp in Sources */,
 				F23AB50C168DBA16004B116E /* platform_specific_gl.cpp in Sources */,
 				F23AB50D168DBA16004B116E /* render.cpp in Sources */,
 				F23AB511168DBA16004B116E /* composite_resources_provider.cpp in Sources */,
@@ -879,6 +894,7 @@
 				3D6D5F44196ABCB3008C1041 /* nms.cpp in Sources */,
 				3D8681231965B0C0008B8929 /* string_convert.cpp in Sources */,
 				F5528B11189AC6FA001FE865 /* tga.cpp in Sources */,
+				3D5641071B347B3C0025673F /* composite_log.cpp in Sources */,
 				F2BFD322169C1AF400ED4A9E /* constants.cpp in Sources */,
 				F2FF5FDA16C15CCE00C6A705 /* transform.cpp in Sources */,
 				F22F864116D1A4C5000EAEA6 /* ui.cpp in Sources */,
@@ -903,6 +919,7 @@
 				F259322A15D858140092C7D8 /* shader.cpp in Sources */,
 				F259322E15D858140092C7D8 /* texture.cpp in Sources */,
 				F259323215D858140092C7D8 /* vbo.cpp in Sources */,
+				3D56410B1B3481B80025673F /* output_stream.cpp in Sources */,
 				F259323415D858140092C7D8 /* composite_resources_provider.cpp in Sources */,
 				F259323615D858140092C7D8 /* file_resources_provider.cpp in Sources */,
 				F259323815D858140092C7D8 /* resources.cpp in Sources */,
@@ -937,6 +954,7 @@
 				3D8681221965B0C0008B8929 /* string_convert.cpp in Sources */,
 				F5528B10189AC6FA001FE865 /* tga.cpp in Sources */,
 				F20E2D8016999B7000395A1B /* shader.cpp in Sources */,
+				3D5641061B347B3C0025673F /* composite_log.cpp in Sources */,
 				F20E2D8216999B7000395A1B /* texture.cpp in Sources */,
 				F5A6D40B1A856B6100C8952B /* platform_specific_gl.cpp in Sources */,
 				F20E2D8416999B7000395A1B /* material.cpp in Sources */,

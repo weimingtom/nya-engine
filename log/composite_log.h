@@ -3,22 +3,21 @@
 #pragma once
 
 #include "log.h"
+#include <vector>
 
 namespace nya_log
 {
 
-class plain_file_log: public log_base
+class composite_log: public log_base
 {
 public:
-    bool open(const char*file_name);
-    void close();
+    void add_log(log_base *l);
 
 private:
     virtual void output(const char *string);
 
 private:
-    std::string m_file_name;
-    std::string m_scope_tab;
+    std::vector<log_base *> m_logs;
 };
 
 }

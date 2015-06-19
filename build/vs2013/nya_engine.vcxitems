@@ -21,6 +21,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\formats\text_parser.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\formats\tga.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\log\log.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\log\composite_log.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\log\output_stream.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\log\plain_file_log.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\log\stdout_log.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\log\warning.cpp" />

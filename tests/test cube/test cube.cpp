@@ -7,6 +7,7 @@
 #include "render/render.h"
 #include "system/shaders_cache_provider.h"
 #include "log/log.h"
+#include <sstream>
 
 #ifdef _WIN32
   #include "render/platform_specific_gl.h" //for WINDOWS_METRO define
@@ -120,9 +121,10 @@ private:
 	    fps_update_timer+=dt;
 	    if(fps_update_timer>1000)
 	    {
-            nya_log::memory_ostream str;
-            str<<"test cube "<<fps_counter<<" fps";
-            set_title(str.get_text());
+            std::ostringstream os;
+            os<<"test cube "<<fps_counter<<" fps";
+            std::string str=os.str();
+            set_title(str.c_str());
 
             fps_update_timer%=1000;
             fps_counter=0;

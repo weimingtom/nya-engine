@@ -47,8 +47,13 @@ unsigned int warnings_counter::get_total_warnings_count()
 
 void warning_ostream::flush()
 {
-    if(get_text()[0])
-        m_counter.add_warning(get_text());
+    if(!m_buf.empty())
+        m_counter.add_warning(m_buf.c_str());
+}
+
+void warning_ostream::output(const char *str)
+{
+    m_buf.append(str?str:"NULL");
 }
 
 warnings_counter &get_warnings_counter() { static warnings_counter wc; return wc; }

@@ -17,6 +17,8 @@ SOURCES += \
     $${NYA_ENGINE_PATH}/formats/text_parser.cpp \
     $${NYA_ENGINE_PATH}/formats/tga.cpp \
     $${NYA_ENGINE_PATH}/log/log.cpp \
+    $${NYA_ENGINE_PATH}/log/composite_log.cpp \
+    $${NYA_ENGINE_PATH}/log/output_stream.cpp \
     $${NYA_ENGINE_PATH}/log/plain_file_log.cpp \
     $${NYA_ENGINE_PATH}/log/stdout_log.cpp \
     $${NYA_ENGINE_PATH}/log/warning.cpp \
@@ -77,6 +79,7 @@ HEADERS += \
     $${NYA_ENGINE_PATH}/gl/glext.h \
     $${NYA_ENGINE_PATH}/gl/wglext.h \
     $${NYA_ENGINE_PATH}/log/log.h \
+    $${NYA_ENGINE_PATH}/log/composite_log.h \
     $${NYA_ENGINE_PATH}/log/output_stream.h \
     $${NYA_ENGINE_PATH}/log/plain_file_log.h \
     $${NYA_ENGINE_PATH}/log/stdout_log.h \
