@@ -12,11 +12,38 @@ namespace nya_render
 namespace
 {
     DIRECTX11_ONLY(dx_target default_target,target);
+    DIRECTX11_ONLY(int default_target_height=0);
     OPENGL_ONLY(int default_fbo_idx=0);
     int current_fbo= -1;
 }
 
 #ifdef DIRECTX11
+void update_default_target_height()
+{
+    default_target_height=0;
+    if(!target.color)
+        return;
+
+    D3D11_RENDER_TARGET_VIEW_DESC target_desc;
+    target.color->GetDesc(&target_desc);
+    if(target_desc.ViewDimension!=D3D11_RTV_DIMENSION_TEXTURE2D)
+        return;
+
+    ID3D11Resource *pResource=0;
+    target.color->GetResource(&pResource);
+    if(!pResource)
+        return;
+
+    ID3D11Texture2D* tex=0;
+    HRESULT hr=pResource->QueryInterface(__uuidof(ID3D11Texture2D),(void **)&tex);
+    if(FAILED(hr) || !tex)
+        return;
+
+    D3D11_TEXTURE2D_DESC description;
+    tex->GetDesc(&description);
+    default_target_height=description.Height;
+}
+
 void init_default_target()
 {
     //ToDo
@@ -36,6 +63,8 @@ void init_default_target()
 
     if(depth)
         target.depth=default_target.depth=depth;
+
+    update_default_target_height();
 }
 
 dx_target get_default_target() { init_default_target(); return default_target; }
@@ -51,7 +80,10 @@ void set_target(ID3D11RenderTargetView *color,ID3D11DepthStencilView *depth,bool
     target.color=color;
     target.depth=depth;
     if(is_default)
+    {
         default_target=target;
+        update_default_target_height();
+    }
 
     if(color)
         get_context()->OMSetRenderTargets(1,&color,depth);
@@ -324,6 +356,27 @@ private:
     }
 };
 
+#ifdef DIRECTX11
+int get_target_height()
+{
+    if(current_fbo<0)
+        return default_target_height;
+
+    fbo_obj &obj=fbo_obj::get(current_fbo);
+    for(auto &a:obj.color_attachments)
+    {
+        if(a.tex_idx<0)
+            continue;
+
+        return texture_obj::get(a.tex_idx).height;
+    }
+
+    if(obj.depth_tex_idx<0)
+        return 0;
+
+    return texture_obj::get(obj.depth_tex_idx).height;
+}
+#endif
 
 void ms_buffer::resolve(int tex_idx,int cubemap_side,int attachment_idx)
 {
