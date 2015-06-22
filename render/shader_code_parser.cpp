@@ -119,7 +119,7 @@ bool shader_code_parser::convert_to_hlsl()
         prefix.append("static float4 "+ps_out_var+";\n");
 
         const std::string main=std::string("void ")+m_replace_str+"main()";
-        if(replace_main_function_header(main.c_str()))
+        if(!replace_main_function_header(main.c_str()))
         {
             m_error.append("main function not found\n");
             return false;

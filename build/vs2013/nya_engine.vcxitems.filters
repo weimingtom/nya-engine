@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\formats\ktx.cpp">
@@ -8,7 +8,7 @@
       <Filter>formats</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\formats\math_expr_parser.cpp">
-        <Filter>formats</Filter>
+      <Filter>formats</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\formats\nms.cpp">
       <Filter>formats</Filter>
@@ -116,16 +116,16 @@
       <Filter>log</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\log\composite_log.cpp">
-        <Filter>log</Filter>
+      <Filter>log</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\log\output_stream.cpp">
-        <Filter>log</Filter>
+      <Filter>log</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\scene\material.cpp">
       <Filter>scene</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\scene\mesh.cpp">
-        <Filter>scene</Filter>
+      <Filter>scene</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\scene\postprocess.cpp">
       <Filter>scene</Filter>
@@ -166,7 +166,7 @@
       <Filter>formats</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\formats\math_expr_parser.h">
-        <Filter>formats</Filter>
+      <Filter>formats</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\formats\nms.h">
       <Filter>formats</Filter>
@@ -327,9 +327,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\log\log.h">
       <Filter>log</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\log\composite_log.h">
-        <Filter>log</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\scene\material.h">
       <Filter>scene</Filter>
     </ClInclude>
@@ -337,7 +334,7 @@
       <Filter>scene</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\scene\postprocess.h">
-        <Filter>log</Filter>
+      <Filter>log</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\log\plain_file_log.h">
       <Filter>log</Filter>
