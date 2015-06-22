@@ -8,6 +8,8 @@
 
 #include <map>
 
+//ToDo: fix set_viewport and set_scissor dx/gl vertical coordinate align difference
+
 namespace nya_render
 {
 
@@ -23,7 +25,6 @@ namespace
 
     rect viewport_rect;
     rect scissor_rect;
-    bool scissor_enabled=false;
 
 	float clear_color[4]={0.0f};
 	float clear_depth=1.0f;
@@ -268,7 +269,7 @@ void color_write::disable()
 
 void scissor::enable(int x,int y,int w,int h,bool ignore_cache)
 {
-    if(!ignore_cache && scissor_enabled &&
+    if(!ignore_cache &&
        x==scissor_rect.x && y==scissor_rect.y &&
        w==scissor_rect.width && w==scissor_rect.height )
         return;
@@ -277,34 +278,27 @@ void scissor::enable(int x,int y,int w,int h,bool ignore_cache)
     if(!get_context())
         return;
 
-    //ToDo
+    D3D11_RECT r;
+    r.left=x;
+    r.right=x+w;
+    r.top=y;
+    r.bottom=y+h;
+
+    get_context()->RSSetScissorRects(1,&r);
 #else
-    glEnable(GL_SCISSOR_TEST);
     glScissor(x,y,w,h);
 #endif
 
     scissor_rect.x=x,scissor_rect.y=y,scissor_rect.width=w,scissor_rect.height=h;
-    scissor_enabled=true;
+    current_state.scissor_test=true;
 }
 
 void scissor::disable(bool ignore_cache)
 {
-    if(!ignore_cache && !scissor_enabled)
-        return;
-
-#ifdef DIRECTX11
-    if(!get_context())
-        return;
-
-    //ToDo
-#else
-    glDisable(GL_SCISSOR_TEST);
-#endif
-
-    scissor_enabled=false;
+    current_state.scissor_test=false;
 }
 
-bool scissor::is_enabled() { return scissor_enabled; }
+bool scissor::is_enabled() { return current_state.scissor_test; }
 const rect &scissor::get() { return scissor_rect; }
 
 void set_state(const state &s) { current_state=s; }
@@ -341,68 +335,86 @@ state get_overriden_state(const state &s)
 
 #ifdef DIRECTX11
 
-class cull_face_state_class
+class rasterizer_state_class
 {
+    struct rdesc;
+
+    ID3D11RasterizerState *get(const rdesc &d)
+    {
+        cache_map::iterator it=m_map.find(d);
+        if(it!=m_map.end())
+            return it->second;
+
+        D3D11_RASTERIZER_DESC desc;
+        ZeroMemory(&desc,sizeof(desc));
+        if(d.cull)
+        {
+            if(d.cull_order==cull_face::cw)
+                desc.CullMode=D3D11_CULL_BACK;
+            else
+                desc.CullMode=D3D11_CULL_FRONT;
+        }
+        else 
+            desc.CullMode=D3D11_CULL_NONE;
+
+        desc.FillMode=D3D11_FILL_SOLID;
+        desc.DepthClipEnable=true;
+        desc.ScissorEnable=d.scissor;
+        ID3D11RasterizerState *state;
+        get_device()->CreateRasterizerState(&desc,&state);
+        m_map[d]=state;
+        return state;
+    }
+
 public:
     void apply()
     {
         if(!get_device() || !get_context())
             return;
 
-        if(!m_cull_enabled)
-        {
-            D3D11_RASTERIZER_DESC desc;
-            ZeroMemory(&desc,sizeof(desc));
-            if(current_state.cull_order==cull_face::cw)
-                desc.CullMode=D3D11_CULL_BACK;
-            else
-                desc.CullMode=D3D11_CULL_FRONT;
+        rdesc d;
+        d.cull=current_state.cull_face;
+        d.cull_order=current_state.cull_order;
+        d.scissor=current_state.scissor_test;
 
-            desc.FillMode=D3D11_FILL_SOLID;
-            desc.DepthClipEnable=true;
-            get_device()->CreateRasterizerState(&desc,&m_cull_enabled);
-        }
-
-        if(!m_cull_disabled)
-        {
-            D3D11_RASTERIZER_DESC desc;
-            ZeroMemory(&desc,sizeof(desc));
-            desc.CullMode=D3D11_CULL_NONE;
-            desc.FillMode=D3D11_FILL_SOLID;
-            desc.DepthClipEnable=true;
-            get_device()->CreateRasterizerState(&desc,&m_cull_disabled);
-        }
-
-        if(current_state.cull_face)
-        {
-            if(m_cull_enabled)
-                get_context()->RSSetState(m_cull_enabled);
-        }
-        else
-        {
-            if(m_cull_disabled)
-                get_context()->RSSetState(m_cull_disabled);
-        }
+        get_context()->RSSetState(get(d));
     }
-
-    cull_face_state_class(): m_cull_enabled(0), m_cull_disabled(0) {}
 
     void release()
     {
-        if(m_cull_enabled)
-            m_cull_enabled->Release();
+        if(get_context())
+            get_context()->RSSetState(0);
 
-        if(m_cull_disabled)
-            m_cull_disabled->Release();
-
-        m_cull_enabled=m_cull_disabled=0;
+        for(auto &s:m_map) if(s.second) s.second->Release();
+        m_map.clear();
     }
 
 private:
-    ID3D11RasterizerState *m_cull_enabled;
-    ID3D11RasterizerState *m_cull_disabled;
+    struct rdesc
+    {
+        bool operator < (const rdesc &d) const
+        {
+            if(cull < d.cull)
+                return true;
 
-} cull_face_state;
+            if(scissor < d.scissor)
+                return true;
+            
+            if(cull_order < d.cull_order)
+                return true;
+
+            return false;
+        }
+
+        bool cull;
+        cull_face::order cull_order;
+        bool scissor;
+    };
+
+    typedef std::map<rdesc,ID3D11RasterizerState*> cache_map;
+    cache_map m_map;
+
+} rasterizer_state;
 
 namespace
 {
@@ -608,8 +620,9 @@ void apply_state(bool ignore_cache)
 #ifdef DIRECTX11
     //ToDo: color
 
-    if(c.cull_order!=a.cull_order || c.cull_face!=a.cull_face || ignore_cache)
-        cull_face_state.apply();
+    if(c.cull_order!=a.cull_order || c.cull_face!=a.cull_face
+        || c.scissor_test!=a.scissor_test || ignore_cache)
+        rasterizer_state.apply();
 
     if(c.blend!=a.blend || c.blend_src!=a.blend_src || c.blend_dst!=a.blend_dst
                                 || c.color_write!=a.color_write || ignore_cache)
@@ -669,6 +682,14 @@ void apply_state(bool ignore_cache)
             glDisable(GL_DEPTH_TEST);
     }
 
+    if(c.scissor_test!=a.scissor_test || ignore_cache)
+    {
+        if(c.scissor_test)
+            glEnable(GL_SCISSOR_TEST);
+        else
+            glDisable(GL_SCISSOR_TEST);
+    }
+
     if(c.depth_comparsion!=a.depth_comparsion || ignore_cache)
     {
         switch(c.depth_comparsion)
@@ -719,7 +740,7 @@ void discard_state()
     invalidate_resources();
     applied_state=current_state=state();
 
-    cull_face_state=cull_face_state_class();
+    rasterizer_state=rasterizer_state_class();
     depth_state=decltype(depth_state)();
     blend_state=decltype(blend_state)();
 }
@@ -729,7 +750,7 @@ void discard_state()
 void release_states()
 {
     depth_state.release();
-    cull_face_state.release();
+    rasterizer_state.release();
     blend_state.release();
 }
 
