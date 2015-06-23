@@ -5,10 +5,7 @@
 #include "shader.h"
 #include "transform.h"
 #include "platform_specific_gl.h"
-
 #include <map>
-
-//ToDo: fix set_viewport and set_scissor dx/gl vertical coordinate align difference
 
 namespace nya_render
 {
@@ -24,6 +21,7 @@ namespace
     bool has_state_override=false;
 
     rect viewport_rect;
+    DIRECTX11_ONLY(rect viewport_applied_rect);
     rect scissor_rect;
 
 	float clear_color[4]={0.0f};
@@ -79,22 +77,10 @@ void log_gl_errors(const char *place)
 
 void set_viewport(int x,int y,int w,int h,bool ignore_cache)
 {
+#ifndef DIRECTX11
     if(!(viewport_rect.width!=w || viewport_rect.height!=h || viewport_rect.x!=x || viewport_rect.y!=y || ignore_cache))
         return;
 
-#ifdef DIRECTX11
-	if(!get_context())
-		return;
-
-    D3D11_VIEWPORT vp;
-    vp.Width = (FLOAT)w;
-    vp.Height = (FLOAT)h;
-    vp.MinDepth = 0.0f;
-    vp.MaxDepth = 1.0f;
-    vp.TopLeftX = (FLOAT)x;
-    vp.TopLeftY = (FLOAT)y;
-    get_context()->RSSetViewports(1,&vp);
-#else
 	glViewport(x,y,w,h);
 #endif
 
@@ -174,13 +160,17 @@ void set_clear_depth(float value,bool ignore_cache)
 #endif
 }
 
+void apply_viewport_scissor(bool ignore_cache);
+
 void clear(bool color,bool depth)
 {
+    apply_viewport_scissor(false);
+
 #ifdef DIRECTX11
 	if(!get_context())
 		return;
 
-    dx_target target=get_target();
+    dx_target target=dx_get_target();
 
     if(color && target.color)
 		get_context()->ClearRenderTargetView(target.color,clear_color);
@@ -269,23 +259,12 @@ void color_write::disable()
 
 void scissor::enable(int x,int y,int w,int h,bool ignore_cache)
 {
+#ifndef DIRECTX11
     if(!ignore_cache &&
        x==scissor_rect.x && y==scissor_rect.y &&
        w==scissor_rect.width && w==scissor_rect.height )
         return;
 
-#ifdef DIRECTX11
-    if(!get_context())
-        return;
-
-    D3D11_RECT r;
-    r.left=x;
-    r.right=x+w;
-    r.top=y;
-    r.bottom=y+h;
-
-    get_context()->RSSetScissorRects(1,&r);
-#else
     glScissor(x,y,w,h);
 #endif
 
@@ -293,7 +272,7 @@ void scissor::enable(int x,int y,int w,int h,bool ignore_cache)
     current_state.scissor_test=true;
 }
 
-void scissor::disable(bool ignore_cache)
+void scissor::disable()
 {
     current_state.scissor_test=false;
 }
@@ -617,12 +596,10 @@ void apply_state(bool ignore_cache)
         ignore_cache=true;
     }
 
+    apply_viewport_scissor(ignore_cache);
+
 #ifdef DIRECTX11
     //ToDo: color
-
-    if(c.cull_order!=a.cull_order || c.cull_face!=a.cull_face
-        || c.scissor_test!=a.scissor_test || ignore_cache)
-        rasterizer_state.apply();
 
     if(c.blend!=a.blend || c.blend_src!=a.blend_src || c.blend_dst!=a.blend_dst
                                 || c.color_write!=a.color_write || ignore_cache)
@@ -682,14 +659,6 @@ void apply_state(bool ignore_cache)
             glDisable(GL_DEPTH_TEST);
     }
 
-    if(c.scissor_test!=a.scissor_test || ignore_cache)
-    {
-        if(c.scissor_test)
-            glEnable(GL_SCISSOR_TEST);
-        else
-            glDisable(GL_SCISSOR_TEST);
-    }
-
     if(c.depth_comparsion!=a.depth_comparsion || ignore_cache)
     {
         switch(c.depth_comparsion)
@@ -711,7 +680,6 @@ void apply_state(bool ignore_cache)
     if(c.color_write!=a.color_write || ignore_cache)
         glColorMask(c.color_write,c.color_write,c.color_write,c.color_write);
 #endif
-
     if(ignore_cache)
     {
         set_viewport(viewport_rect,true);
@@ -728,6 +696,60 @@ void apply_state(bool ignore_cache)
     a=c;
 }
 
+void apply_viewport_scissor(bool ignore_cache)
+{
+    DIRECTX11_ONLY(if(!get_context() || !get_device()) return);
+
+    const state &c=has_state_override?get_overriden_state(current_state):current_state;
+    state &a=applied_state;
+
+#ifdef DIRECTX11
+    int h=dx_get_target_height();
+    const int vp_y=h-viewport_rect.y-viewport_rect.height;
+    if(viewport_rect.x!=viewport_applied_rect.x || vp_y!=viewport_applied_rect.y
+       || viewport_rect.width!=viewport_applied_rect.width || viewport_rect.height!=viewport_applied_rect.height
+       || ignore_cache)
+    {
+        D3D11_VIEWPORT vp;
+        vp.Width=FLOAT(viewport_applied_rect.width=viewport_rect.width);
+        viewport_applied_rect.height = vp.Height = (FLOAT)viewport_rect.height;
+        vp.MinDepth = 0.0f;
+        vp.MaxDepth = 1.0f;
+        viewport_applied_rect.x = vp.TopLeftX = (FLOAT)viewport_rect.x;
+        viewport_applied_rect.y = vp.TopLeftY = (FLOAT)vp_y;
+        get_context()->RSSetViewports(1,&vp);
+    }
+
+    if(c.scissor_test || ignore_cache) //ToDo: cache
+    {
+        D3D11_RECT r;
+        r.left=scissor_rect.x;
+        r.right=scissor_rect.x+scissor_rect.width;
+        r.top=h-scissor_rect.y-scissor_rect.height;
+        r.bottom=h-scissor_rect.y;
+        get_context()->RSSetScissorRects(1,&r);
+    }
+
+    if(c.cull_order!=a.cull_order || c.cull_face!=a.cull_face
+       || c.scissor_test!=a.scissor_test || ignore_cache)
+    {
+        rasterizer_state.apply();
+        a.cull_order=c.cull_order;
+        a.cull_face=c.cull_face;
+        a.scissor_test=c.scissor_test;
+    }
+#else
+    if(c.scissor_test!=a.scissor_test || ignore_cache)
+    {
+        if(c.scissor_test)
+            glEnable(GL_SCISSOR_TEST);
+        else
+            glDisable(GL_SCISSOR_TEST);
+
+        a.scissor_test=c.scissor_test;
+    }
+#endif
+}
 
 #ifdef DIRECTX11
 namespace
@@ -807,6 +829,11 @@ unsigned int invalidate_resources()
     count+=invalidate_vbos();
     count+=invalidate_fbos();
     return count;
+}
+
+void set_default_target(ID3D11RenderTargetView *color,ID3D11DepthStencilView *depth)
+{
+    DIRECTX11_ONLY(dx_set_target(color,depth,true));
 }
 
 }

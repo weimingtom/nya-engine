@@ -7,6 +7,8 @@
 
 struct ID3D11Device;
 struct ID3D11DeviceContext;
+struct ID3D11RenderTargetView;
+struct ID3D11DepthStencilView;
 
 namespace nya_render
 {
@@ -29,7 +31,7 @@ struct scissor
 {
     static void enable(int x,int y,int w,int h,bool ignore_cache=false);
     static inline void enable(const rect &r,bool ignore_cache=false) { enable(r.x,r.y,r.width,r.height,ignore_cache); }
-    static void disable(bool ignore_cache=false);
+    static void disable();
 
     static bool is_enabled();
     const rect &get();
@@ -198,4 +200,6 @@ void set_device(ID3D11Device *device);
 
 ID3D11DeviceContext *get_context();
 void set_context(ID3D11DeviceContext *context);
+
+void set_default_target(ID3D11RenderTargetView *color,ID3D11DepthStencilView *depth);
 }

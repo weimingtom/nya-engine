@@ -373,7 +373,7 @@ void shader_obj::release()
 void set_compiled_shaders_provider(compiled_shaders_provider *csp) { render_csp=csp; }
 
 #ifdef DIRECTX11
-ID3D11InputLayout *get_layout(int mesh_idx)
+ID3D11InputLayout *dx_get_layout(int mesh_idx)
 {
     if(current_shader<0)
         return 0;
@@ -385,7 +385,7 @@ ID3D11InputLayout *get_layout(int mesh_idx)
     return it->second;
 }
 
-ID3D11InputLayout *add_layout(int mesh_idx,const D3D11_INPUT_ELEMENT_DESC*desc,size_t desc_size)
+ID3D11InputLayout *dx_add_layout(int mesh_idx,const D3D11_INPUT_ELEMENT_DESC*desc,size_t desc_size)
 {
     if(current_shader<0)
         return 0;
@@ -406,7 +406,7 @@ ID3D11InputLayout *add_layout(int mesh_idx,const D3D11_INPUT_ELEMENT_DESC*desc,s
     return out;
 }
 
-void remove_layout(int mesh_idx) { shader_obj::remove_layout(mesh_idx); }
+void dx_remove_layout(int mesh_idx) { shader_obj::remove_layout(mesh_idx); }
 #else
     void set_shader(int idx,bool ignore_cache=false)
     {

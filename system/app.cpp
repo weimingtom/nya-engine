@@ -251,8 +251,7 @@ protected:
         if(m_device->CreateDepthStencilView(depthStencil,&depthStencilViewDesc,&m_depthStencilView)<0)
             return;
 
-        m_context->OMSetRenderTargets(1,&m_renderTargetView,m_depthStencilView);
-
+        nya_render::set_default_target(m_renderTargetView,m_depthStencilView);
         nya_render::set_viewport(0,0,(int)m_renderTargetSize.Width,(int)m_renderTargetSize.Height);
     }
 
@@ -434,11 +433,10 @@ public:
         if(FAILED(hr))
             return;
 
-        recreate_targets(w,h);
-
         nya_render::set_context(m_context);
         nya_render::set_device(m_device);
         nya_render::cull_face::disable();
+        recreate_targets(w,h);
   #else
         m_hdc=GetDC(m_hwnd);
 
@@ -669,7 +667,7 @@ private:
     {
         HRESULT hr=S_OK;
 
-        m_context->OMSetRenderTargets(0,0,0);
+        nya_render::set_default_target(0,0);
 
         if(m_color_target)
         {
@@ -707,9 +705,8 @@ private:
         CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc(D3D11_DSV_DIMENSION_TEXTURE2D);
         m_device->CreateDepthStencilView(depthStencil,&depthStencilViewDesc,&m_depth_target);
         depthStencil->Release();
-
-        m_context->OMSetRenderTargets(1,&m_color_target,m_depth_target);
-
+        
+        nya_render::set_default_target(m_color_target,m_depth_target);
         return true;
     }
   #endif

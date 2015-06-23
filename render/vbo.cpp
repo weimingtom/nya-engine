@@ -392,7 +392,7 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type,unsig
         return;
 
 #ifdef DIRECTX11
-    ID3D11InputLayout *layout=get_layout(current_verts);
+    ID3D11InputLayout *layout=dx_get_layout(current_verts);
     if(!layout)
     {
         std::vector<D3D11_INPUT_ELEMENT_DESC> desc;
@@ -439,7 +439,7 @@ void vbo::draw(unsigned int offset,unsigned int count,element_type el_type,unsig
         if(desc.empty())
             return;
 
-        layout=add_layout(current_verts,&desc[0],desc.size());
+        layout=dx_add_layout(current_verts,&desc[0],desc.size());
 
         if(!layout)
             return;
@@ -663,7 +663,7 @@ void vbo::release()
     {
         if(active_verts==m_verts) reset_vbo_state();
         if(current_verts==m_verts) current_verts= -1;
-        DIRECTX11_ONLY(remove_layout(m_verts));
+        DIRECTX11_ONLY(dx_remove_layout(m_verts));
         vbo_obj::remove(m_verts);
     }
 
@@ -893,7 +893,7 @@ void vbo::set_vertices(unsigned int offset,unsigned int dimension,vertex_atrib_t
     obj.release_vao();
 #endif
 
-    DIRECTX11_ONLY(remove_layout(m_verts));
+    DIRECTX11_ONLY(dx_remove_layout(m_verts));
     OPENGL_ONLY(if(m_verts==active_verts) active_verts= -1);
 
     if(dimension==0 || dimension>4)
@@ -919,7 +919,7 @@ void vbo::set_normals(unsigned int offset,vertex_atrib_type type)
     obj.release_vao();
 #endif
 
-    DIRECTX11_ONLY(remove_layout(m_verts));
+    DIRECTX11_ONLY(dx_remove_layout(m_verts));
     OPENGL_ONLY(if(m_verts==active_verts) active_verts= -1);
 
     obj.normals.has=true;
@@ -941,7 +941,7 @@ void vbo::set_tc(unsigned int tc_idx,unsigned int offset,unsigned int dimension,
     obj.release_vao();
 #endif
 
-    DIRECTX11_ONLY(remove_layout(m_verts));
+    DIRECTX11_ONLY(dx_remove_layout(m_verts));
     OPENGL_ONLY(if(m_verts==active_verts) active_verts= -1);
 
     vbo_obj::attribute &tc=obj.tcs[tc_idx];
@@ -968,7 +968,7 @@ void vbo::set_colors(unsigned int offset,unsigned int dimension,vertex_atrib_typ
     obj.release_vao();
 #endif
 
-    DIRECTX11_ONLY(remove_layout(m_verts));
+    DIRECTX11_ONLY(dx_remove_layout(m_verts));
     OPENGL_ONLY(if(m_verts==active_verts) active_verts= -1);
 
     if(dimension==0 || dimension>4)

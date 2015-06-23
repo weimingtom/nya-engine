@@ -36,11 +36,13 @@ void update_default_target_height()
 
     ID3D11Texture2D* tex=0;
     HRESULT hr=pResource->QueryInterface(__uuidof(ID3D11Texture2D),(void **)&tex);
+    pResource->Release();
     if(FAILED(hr) || !tex)
         return;
 
     D3D11_TEXTURE2D_DESC description;
     tex->GetDesc(&description);
+    tex->Release();
     default_target_height=description.Height;
 }
 
@@ -67,10 +69,10 @@ void init_default_target()
     update_default_target_height();
 }
 
-dx_target get_default_target() { init_default_target(); return default_target; }
-dx_target get_target() { init_default_target(); return target; }
+dx_target dx_get_default_target() { init_default_target(); return default_target; }
+dx_target dx_get_target() { init_default_target(); return target; }
 
-void set_target(ID3D11RenderTargetView *color,ID3D11DepthStencilView *depth,bool is_default)
+void dx_set_target(ID3D11RenderTargetView *color,ID3D11DepthStencilView *depth,bool is_default)
 {
     if(!get_context())
         return;
@@ -85,10 +87,7 @@ void set_target(ID3D11RenderTargetView *color,ID3D11DepthStencilView *depth,bool
         update_default_target_height();
     }
 
-    if(color)
-        get_context()->OMSetRenderTargets(1,&color,depth);
-    else
-        get_context()->OMSetRenderTargets(0,0,depth);
+    get_context()->OMSetRenderTargets(1,&color,depth);
 }
 #endif
 
@@ -356,28 +355,6 @@ private:
     }
 };
 
-#ifdef DIRECTX11
-int get_target_height()
-{
-    if(current_fbo<0)
-        return default_target_height;
-
-    fbo_obj &obj=fbo_obj::get(current_fbo);
-    for(auto &a:obj.color_attachments)
-    {
-        if(a.tex_idx<0)
-            continue;
-
-        return texture_obj::get(a.tex_idx).height;
-    }
-
-    if(obj.depth_tex_idx<0)
-        return 0;
-
-    return texture_obj::get(obj.depth_tex_idx).height;
-}
-#endif
-
 void ms_buffer::resolve(int tex_idx,int cubemap_side,int attachment_idx)
 {
     if(tex_idx<0)
@@ -429,6 +406,28 @@ void ms_buffer::resolve(int tex_idx,int cubemap_side,int attachment_idx)
 }
 
 }
+
+#ifdef DIRECTX11
+int dx_get_target_height()
+{
+    if(current_fbo<0)
+        return default_target_height;
+
+    fbo_obj &obj=fbo_obj::get(current_fbo);
+    for(auto &a:obj.color_attachments)
+    {
+        if(a.tex_idx<0)
+            continue;
+
+        return texture_obj::get(a.tex_idx).height;
+    }
+
+    if(obj.depth_tex_idx<0)
+        return 0;
+        
+    return texture_obj::get(obj.depth_tex_idx).height;
+}
+#endif
 
 int release_fbos() { fbo::unbind(); return fbo_obj::release_all(); }
 int invalidate_fbos() { current_fbo= -1; return fbo_obj::invalidate_all(); }
@@ -629,7 +628,7 @@ void fbo::bind() const
         }
     }
 
-    set_target(color,depth);
+    dx_set_target(color,depth);
 #else
     if(!fbo.fbo_idx)
     {
@@ -735,8 +734,8 @@ void fbo::bind() const
 void fbo::unbind()
 {
 #ifdef DIRECTX11
-    dx_target target=get_default_target();
-    set_target(target.color,target.depth);
+    dx_target target=dx_get_default_target();
+    dx_set_target(target.color,target.depth);
 #else
     if(!check_init_fbo())
         return;

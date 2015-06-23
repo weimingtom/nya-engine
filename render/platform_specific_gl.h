@@ -161,10 +161,10 @@ namespace nya_render
     };
 
 #ifdef DIRECTX11
-    ID3D11InputLayout *get_layout(int mesh_idx);
-    ID3D11InputLayout *add_layout(int mesh_idx,
+    ID3D11InputLayout *dx_get_layout(int mesh_idx);
+    ID3D11InputLayout *dx_add_layout(int mesh_idx,
                                   const D3D11_INPUT_ELEMENT_DESC*desc,size_t desc_size);
-    void remove_layout(int mesh_idx);
+    void dx_remove_layout(int mesh_idx);
 
     struct dx_target
     {
@@ -174,12 +174,13 @@ namespace nya_render
         dx_target(): color(0),depth(0) {}
     };
 
-    dx_target get_default_target();
-    dx_target get_target();
-    int get_target_height();
+    dx_target dx_get_default_target();
+    dx_target dx_get_target();
+    int dx_get_target_height();
 
-    void set_target(ID3D11RenderTargetView *color,ID3D11DepthStencilView *depth,bool default=false);
+    void dx_set_target(ID3D11RenderTargetView *color,ID3D11DepthStencilView *depth,bool default=false);
 #endif
+
     void reset_vbo_state();
 
     inline int release_textures() { return texture_obj::release_all(); }

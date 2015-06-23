@@ -19,7 +19,7 @@ private:
 	bool on_splash()
 	{
         /*
-         nya_log::plain_file_log log;
+         static nya_log::plain_file_log log;
          log.open((std::string(nya_system::get_app_path())+"log.txt").c_str());
 
          nya_log::set_log(&log);
