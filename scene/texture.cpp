@@ -78,6 +78,7 @@ bool texture::load_ktx(shared_texture &res,resource_data &data,const char* name)
 }
 
 bool texture::m_load_dds_flip=false;
+int texture::m_load_dds_mip_offset=0;
 
 bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
 {
@@ -96,6 +97,19 @@ bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
     {
         nya_log::log()<<"unable to load dds: invalid or unsupported dds header in file "<<name<<"\n";
         return false;
+    }
+
+    if(dds.pf!=nya_formats::dds::palette8_rgba && dds.pf!=nya_formats::dds::palette4_rgba) //ToDo
+    {
+        for(int i=0;i<m_load_dds_mip_offset && dds.mipmap_count > 1;++i)
+        {
+            dds.data=(char *)dds.data+dds.get_mip_size(0);
+            if(dds.width>1)
+                dds.width/=2;
+            if(dds.height>1)
+                dds.height/=2;
+            --dds.mipmap_count;
+        }
     }
 
     nya_memory::tmp_buffer_ref tmp_buf;
@@ -146,7 +160,7 @@ bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
     {
         case nya_formats::dds::texture_2d:
         {
-            if(!nya_render::texture::is_dxt_supported())
+            if(cf>=nya_render::texture::dxt1 && !nya_render::texture::is_dxt_supported())
             {
                 tmp_buf.allocate(dds.get_decoded_size());
                 dds.decode_dxt(tmp_buf.get_data());
@@ -171,7 +185,7 @@ bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
 
         case nya_formats::dds::texture_cube:
         {
-            if(!nya_render::texture::is_dxt_supported())
+            if(cf>=nya_render::texture::dxt1 && !nya_render::texture::is_dxt_supported())
             {
                 tmp_buf.allocate(dds.get_decoded_size());
                 dds.decode_dxt(tmp_buf.get_data());

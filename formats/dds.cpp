@@ -125,7 +125,7 @@ static void flip_dxt(int width,int height,dds::pixel_format format,const void *f
     }
 }
 
-void dds::flip_vertical(const void *from_data,void *to_data)
+void dds::flip_vertical(const void *from_data,void *to_data) const
 {
     if(!from_data || !to_data || !height)
         return;
@@ -437,7 +437,6 @@ size_t dds::decode_header(const void *data,size_t size)
         for(uint i=0,w=width,h=height;i<mipmap_count;++i,w/=2,h/=2)
         {
             uint s=(w>4?w:4)/4 * (h>4?h:4)/4 * (this->pf==dxt1?8:16);
-            if(i==0) this->mip0_data_size=s;
             this->data_size+=s;
         }
     }
@@ -467,7 +466,6 @@ size_t dds::decode_header(const void *data,size_t size)
         else
             return 0;
 
-        this->mip0_data_size=width*height*(pf.bpp/8);
         for(uint i=0,w=width,h=height;i<mipmap_count;++i,w>1?w=w/2:w=1,h>1?h/=2:h=1)
             this->data_size+=w*h*(pf.bpp/8);
     }
@@ -479,7 +477,6 @@ size_t dds::decode_header(const void *data,size_t size)
     if(caps2 & dds_cubemap)
     {
         type=texture_cube;
-        this->mip0_data_size*=6;
         this->data_size*=6;
     }
 
@@ -487,7 +484,6 @@ size_t dds::decode_header(const void *data,size_t size)
     if(!reader.check_remained(this->data_size))
     {
         this->mipmap_count= -1;
-        this->data_size=this->mip0_data_size;
         //probably broken, try load at least first mipmap
         if(!reader.check_remained(this->data_size))
             return 0;
@@ -496,6 +492,18 @@ size_t dds::decode_header(const void *data,size_t size)
     this->data=reader.get_data();
 
     return reader.get_offset();
+}
+
+size_t dds::get_mip_size(int mip_idx) const
+{
+    if(mip_idx<0 || mip_idx>=mipmap_count)
+       return 0;
+
+    const unsigned int w1=width>>mip_idx, h1=height>>mip_idx;
+    if(pf<=dxt5)
+        return (w1>4?w1:4)/4 * (h1>4?h1:4)/4 * (pf==dxt1?8:16) * (type==texture_cube?6:1);
+
+    return (w1>1?w1:1) * (h1>1?h1:1) * (pf==bgra?4:(pf==bgr?3:1)) * (type==texture_cube?6:1);
 }
 
 }

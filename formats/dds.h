@@ -41,14 +41,14 @@ struct dds
 
     const void *data;
     size_t data_size;
-    size_t mip0_data_size;
 
     dds(): width(0),height(0),mipmap_count(0),need_generate_mipmaps(false),
-           data(0),data_size(0),mip0_data_size(0) {}
+           data(0),data_size(0) {}
 
 public:
     size_t decode_header(const void *data,size_t size); //0 if invalid
-    void flip_vertical(const void *from_data,void *to_data);
+    void flip_vertical(const void *from_data,void *to_data) const;
+    size_t get_mip_size(int mip_idx) const;
 
     size_t get_decoded_size() const;
     void decode_palette8_rgba(void *decoded_data) const; //width*height*4 to_data buf required
