@@ -8,6 +8,9 @@ namespace nya_scene
 
 bool animation::load(const char *name)
 {
+    default_load_function(load_vmd);
+    default_load_function(load_nan);
+
     if(!scene_shared<shared_animation>::load(name))
         return false;
 

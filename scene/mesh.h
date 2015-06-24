@@ -205,7 +205,7 @@ public:
     void set_anim_time(unsigned int time,int layer=0);
 
 public:
-    mesh() { mesh_internal::default_load_function(load_nms); }
+    mesh() {}
     mesh(const char *name) { *this=mesh(); load(name); }
 
 public:

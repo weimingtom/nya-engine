@@ -585,6 +585,8 @@ bool material_internal::release()
 
 bool material::load(const char *name)
 {
+    material_internal::default_load_function(load_text);
+
     if(!m_internal.load(name))
         return false;
 

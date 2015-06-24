@@ -133,7 +133,7 @@ private:
 class shader
 {
 public:
-    bool load(const char *name) { m_internal.reset_skeleton(); return m_internal.load(name); }
+    bool load(const char *name);
     void unload() { return m_internal.unload(); }
 
 public:
@@ -147,7 +147,7 @@ public:
     const char *get_name() const { return m_internal.get_name(); }
 
 public:
-    shader() { shader_internal::default_load_function(load_nya_shader); }
+    shader() {}
     shader(const char *name) { *this=shader(); load(name); }
 
 public:

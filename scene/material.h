@@ -190,7 +190,7 @@ public:
     const param_array_proxy &get_param_array(int idx) const;
 
 public:
-    material() { material_internal::default_load_function(load_text); }
+    material() {}
     material(const char *name) { *this=material(); load(name); }
 
 public:

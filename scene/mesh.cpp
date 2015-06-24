@@ -234,6 +234,8 @@ bool mesh_internal::init_from_shared()
 
 bool mesh::load(const char *name)
 {
+    mesh_internal::default_load_function(load_nms);
+
     if(!m_internal.load(name))
         return false;
 

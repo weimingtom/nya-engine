@@ -294,6 +294,13 @@ namespace
     }
 }
 
+bool shader::load(const char *name)
+{
+    shader_internal::default_load_function(load_nya_shader);
+    m_internal.reset_skeleton();
+    return m_internal.load(name);
+}
+
 void shader_internal::set() const
 {
     if(!m_shared.is_valid())
