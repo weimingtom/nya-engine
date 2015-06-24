@@ -24,6 +24,8 @@ void bgr_to_rgb(unsigned char *data,size_t data_size)
     }
 }
 
+int texture::m_load_ktx_mip_offset=0;
+
 bool texture::load_ktx(shared_texture &res,resource_data &data,const char* name)
 {
     if(!data.get_size())
@@ -69,12 +71,16 @@ bool texture::load_ktx(shared_texture &res,resource_data &data,const char* name)
     for(unsigned int i=0;i<ktx.mipmap_count;++i)
     {
         const unsigned int size=r.read<unsigned int>();
-        memmove(d,r.get_data(),size);
+        if(i>=m_load_ktx_mip_offset || i+1==ktx.mipmap_count)
+        {
+            memmove(d,r.get_data(),size);
+            d+=size;
+        }
         r.skip(size);
-        d+=size;
     }
 
-    return res.tex.build_texture(ktx.data,ktx.width,ktx.height,cf,ktx.mipmap_count);
+    const int mip_count=ktx.mipmap_count>m_load_ktx_mip_offset?ktx.mipmap_count-m_load_ktx_mip_offset:1;
+    return res.tex.build_texture(ktx.data,ktx.width,ktx.height,cf,mip_count);
 }
 
 bool texture::m_load_dds_flip=false;

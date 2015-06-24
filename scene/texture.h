@@ -75,6 +75,7 @@ public:
 
     static void set_load_dds_flip(bool flip) { m_load_dds_flip=flip; }
     static void set_dds_mip_offset(int off) { m_load_dds_mip_offset=off; }
+    static void set_ktx_mip_offset(int off) { m_load_ktx_mip_offset=off; }
 
 public:
     static void set_resources_prefix(const char *prefix) { texture_internal::set_resources_prefix(prefix); }
@@ -87,6 +88,7 @@ private:
     texture_internal m_internal;
     static bool m_load_dds_flip;
     static int m_load_dds_mip_offset;
+    static int m_load_ktx_mip_offset;
 };
 
 typedef proxy<texture> texture_proxy;
