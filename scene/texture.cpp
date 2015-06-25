@@ -66,12 +66,13 @@ bool texture::load_ktx(shared_texture &res,resource_data &data,const char* name)
         default: nya_log::log()<<"unable to load ktx: unsupported color format in file "<<name<<"\n"; return false;
     }
 
+    const int mip_off=m_load_ktx_mip_offset>=ktx.mipmap_count?0:m_load_ktx_mip_offset;
     char *d=(char *)ktx.data;
     nya_memory::memory_reader r(ktx.data,ktx.data_size);
     for(unsigned int i=0;i<ktx.mipmap_count;++i)
     {
         const unsigned int size=r.read<unsigned int>();
-        if(i>=m_load_ktx_mip_offset || i+1==ktx.mipmap_count)
+        if(i>=mip_off)
         {
             memmove(d,r.get_data(),size);
             d+=size;
@@ -79,8 +80,9 @@ bool texture::load_ktx(shared_texture &res,resource_data &data,const char* name)
         r.skip(size);
     }
 
-    const int mip_count=ktx.mipmap_count>m_load_ktx_mip_offset?ktx.mipmap_count-m_load_ktx_mip_offset:1;
-    return res.tex.build_texture(ktx.data,ktx.width,ktx.height,cf,mip_count);
+    const int width=ktx.width>>mip_off;
+    const int height=ktx.height>>mip_off;
+    return res.tex.build_texture(ktx.data,width>0?width:1,height>0?height:1,cf,ktx.mipmap_count-mip_off);
 }
 
 bool texture::m_load_dds_flip=false;
