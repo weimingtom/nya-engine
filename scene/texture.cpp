@@ -412,6 +412,26 @@ bool texture::update_region(const void *data,unsigned int x,unsigned int y,unsig
     return update_region(data,x,y,width,height,mip);
 }
 
+inline void rgba_to_rgb(unsigned char *data,size_t data_size)
+{
+    const unsigned char *src=data;
+    unsigned char *dst=data;
+
+    data_size/=4;
+    for(size_t i=0;i<data_size;++i,src+=4,dst+=3)
+        memcpy(dst,src,3);
+}
+
+inline void rgb_to_rgba(const unsigned char *src,unsigned char *dst,size_t data_size)
+{
+    data_size/=3;
+    for(size_t i=0;i<data_size;++i,src+=3,dst+=4)
+    {
+        memcpy(dst,src,3);
+        dst[3]=255;
+    }
+}
+
 bool texture::update_region(const texture_proxy &source,unsigned int x,unsigned int y,int mip)
 {
     if(!source.is_valid())
@@ -424,19 +444,34 @@ bool texture::update_region(const texture_proxy &source,unsigned int x,unsigned 
     if(!buf.get_size())
         return false;
 
-    const void *data=buf.get_data();
-
     if(source->get_format()!=get_format())
     {
+        if(get_format()>=nya_render::texture::greyscale || source->get_format()>=nya_render::texture::greyscale)
+            return false; //ToDo?
+
         if((get_format()==nya_render::texture::color_bgra && source->get_format()==nya_render::texture::color_rgba)
            || (get_format()==nya_render::texture::color_rgba && source->get_format()==nya_render::texture::color_bgra))
-            bgr_to_rgb((unsigned char *)data,buf.get_size(),4);
-        //ToDo
+            bgr_to_rgb((unsigned char *)buf.get_data(),buf.get_size(),4);
+        else if(get_format()==nya_render::texture::color_rgb)
+        {
+            if(source->get_format()==nya_render::texture::color_bgra)
+                bgr_to_rgb((unsigned char *)buf.get_data(),buf.get_size(),4);
+            rgba_to_rgb((unsigned char *)buf.get_data(),buf.get_size());
+        }
+        else if(source->get_format()==nya_render::texture::color_rgb)
+        {
+            if(get_format()==nya_render::texture::color_bgra)
+                bgr_to_rgb((unsigned char *)buf.get_data(),buf.get_size(),3);
+
+            nya_memory::tmp_buffer_scoped buf2(source->get_width()*source->get_height()*4);
+            rgb_to_rgba((unsigned char *)buf.get_data(),(unsigned char *)buf2.get_data(),buf.get_size());
+            return update_region(buf2.get_data(),x,y,source->get_width(),source->get_height(),mip);
+        }
         else
             return false;
     }
 
-    return update_region(data,x,y,source->get_width(),source->get_height(),mip);
+    return update_region(buf.get_data(),x,y,source->get_width(),source->get_height(),mip);
 }
 
 bool texture::update_region(const texture &source,unsigned int x,unsigned int y,int mip)
