@@ -186,8 +186,10 @@ bool tmp_buffer_ref::copy_to(void*data,size_t size,size_t offset) const
 
 void tmp_buffer_ref::allocate(size_t size)
 {
-    if(m_buf)
-        m_buf->free();
+    free();
+
+    if(!size)
+        return;
 
     m_buf=tmp_buffer::allocate_new(size);
 }

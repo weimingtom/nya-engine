@@ -35,6 +35,10 @@ private:
     mutable int m_last_slot;
 };
 
+class texture;
+
+typedef proxy<texture> texture_proxy;
+
 class texture
 {
 public:
@@ -58,11 +62,13 @@ public:
     unsigned int get_width() const;
     unsigned int get_height() const;
     color_format get_format() const;
+    nya_memory::tmp_buffer_ref get_data() const;
     bool is_cubemap() const;
 
 public:
     bool build(const void *data,unsigned int width,unsigned int height,color_format format);
     bool update_region(const void *data,unsigned int x,unsigned int y,unsigned int width,unsigned int height,int mip=-1);
+    bool update_region(const texture_proxy &source,unsigned int x,unsigned int y,int mip=-1);
 
 public:
     texture() {}
@@ -90,7 +96,5 @@ private:
     static int m_load_dds_mip_offset;
     static int m_load_ktx_mip_offset;
 };
-
-typedef proxy<texture> texture_proxy;
 
 }

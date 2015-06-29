@@ -349,6 +349,14 @@ texture::color_format texture::get_format() const
     return internal().get_shared_data()->tex.get_color_format();
 }
 
+nya_memory::tmp_buffer_ref texture::get_data() const
+{
+    nya_memory::tmp_buffer_ref result;
+    if(internal().get_shared_data().is_valid())
+        internal().get_shared_data()->tex.get_data(result);
+    return result;
+}
+
 bool texture::is_cubemap() const
 {
     if(!internal().get_shared_data().is_valid())
@@ -389,8 +397,8 @@ bool texture::update_region(const void *data,unsigned int x,unsigned int y,unsig
         return false;
 
     nya_render::texture::color_format f=m_internal.m_shared->tex.get_color_format();
-    unsigned int w=m_internal.m_shared->tex.get_width();
-    unsigned int h=m_internal.m_shared->tex.get_height();
+    const unsigned int w=m_internal.m_shared->tex.get_width();
+    const unsigned int h=m_internal.m_shared->tex.get_height();
 
     nya_memory::tmp_buffer_ref buf;
     if(!m_internal.m_shared->tex.get_data(buf))
@@ -402,6 +410,24 @@ bool texture::update_region(const void *data,unsigned int x,unsigned int y,unsig
         return false;
 
     return update_region(data,x,y,width,height,mip);
+}
+
+bool texture::update_region(const texture_proxy &source,unsigned int x,unsigned int y,int mip)
+{
+    if(!source.is_valid())
+        return false;
+
+    if(source->get_format()!=get_format())
+        return false;
+
+    if(x+source->get_width()>get_width() || y+source->get_height()>get_height())
+        return false;
+
+    const nya_memory::tmp_buffer_scoped buf(source->get_data());
+    if(!buf.get_size())
+        return false;
+
+    return update_region(buf.get_data(),x,y,source->get_width(),source->get_height(),mip);
 }
 
 }

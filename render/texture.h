@@ -88,7 +88,7 @@ public:
     static void set_default_aniso(unsigned int level);
 
 public:
-    bool get_data( nya_memory::tmp_buffer_ref &data ) const;
+    bool get_data(nya_memory::tmp_buffer_ref &data) const;
     unsigned int get_width() const;
     unsigned int get_height() const;
     color_format get_color_format() const;
