@@ -430,4 +430,9 @@ bool texture::update_region(const texture_proxy &source,unsigned int x,unsigned 
     return update_region(buf.get_data(),x,y,source->get_width(),source->get_height(),mip);
 }
 
+bool texture::update_region(const texture &source,unsigned int x,unsigned int y,int mip)
+{
+    return update_region(nya_scene::texture_proxy(source),x,y,mip);
+}
+
 }
