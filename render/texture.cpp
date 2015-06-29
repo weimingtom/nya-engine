@@ -779,8 +779,6 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
 #endif
     t.width=width;
     t.height=height;
-
-    t.size=get_tex_memory_size(t.width,t.height,t.format,mip_count)*(is_cubemap?6:1);
     t.is_cubemap=is_cubemap;
     t.mip_count=mip_count;
 
@@ -1168,8 +1166,10 @@ namespace
 struct size_counter
 {
     unsigned int size;
-    void apply(const texture_obj &obj) {
-        size+=obj.size; }
+    void apply(const texture_obj &obj)
+    {
+        size+=get_tex_memory_size(obj.width,obj.height,obj.format,obj.mip_count)*(obj.is_cubemap?6:1);
+    }
     size_counter(): size(0) {}
 };
 
