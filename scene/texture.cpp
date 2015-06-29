@@ -10,13 +10,13 @@
 namespace nya_scene
 {
 
-void bgr_to_rgb(unsigned char *data,size_t data_size)
+inline void bgr_to_rgb(unsigned char *data,size_t data_size,int channels)
 {
     if(!data)
         return;
 
     unsigned char *data2=data+2;
-    for(size_t i=0;i<data_size;i+=3)
+    for(size_t i=0;i<data_size;i+=channels)
     {
         unsigned char tmp=data[i];
         data[i]=data2[i];
@@ -137,7 +137,7 @@ bool texture::load_dds(shared_texture &res,resource_data &data,const char* name)
 
         case nya_formats::dds::bgr:
         {
-            bgr_to_rgb((unsigned char*)dds.data,dds.data_size);
+            bgr_to_rgb((unsigned char*)dds.data,dds.data_size,3);
             cf=nya_render::texture::color_rgb;
         }
         break;
@@ -294,7 +294,7 @@ bool texture::load_tga(shared_texture &res,resource_data &data,const char* name)
         }
 
         if(tga.channels==3)
-            bgr_to_rgb((uchar*)color_data,tga.uncompressed_size);
+            bgr_to_rgb((uchar*)color_data,tga.uncompressed_size,3);
     }
 
     const bool result=res.tex.build_texture(color_data,tga.width,tga.height,color_format);
@@ -417,9 +417,6 @@ bool texture::update_region(const texture_proxy &source,unsigned int x,unsigned 
     if(!source.is_valid())
         return false;
 
-    if(source->get_format()!=get_format())
-        return false;
-
     if(x+source->get_width()>get_width() || y+source->get_height()>get_height())
         return false;
 
@@ -427,7 +424,19 @@ bool texture::update_region(const texture_proxy &source,unsigned int x,unsigned 
     if(!buf.get_size())
         return false;
 
-    return update_region(buf.get_data(),x,y,source->get_width(),source->get_height(),mip);
+    const void *data=buf.get_data();
+
+    if(source->get_format()!=get_format())
+    {
+        if((get_format()==nya_render::texture::color_bgra && source->get_format()==nya_render::texture::color_rgba)
+           || (get_format()==nya_render::texture::color_bgra && source->get_format()==nya_render::texture::color_rgba))
+            bgr_to_rgb((unsigned char *)data,buf.get_size(),4);
+        //ToDo
+        else
+            return false;
+    }
+
+    return update_region(data,x,y,source->get_width(),source->get_height(),mip);
 }
 
 bool texture::update_region(const texture &source,unsigned int x,unsigned int y,int mip)
