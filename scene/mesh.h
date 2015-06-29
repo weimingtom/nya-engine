@@ -72,10 +72,10 @@ class mesh_internal: public scene_shared<shared_mesh>
 
 public:
     const transform &get_transform() const { return m_transform; }
-    const nya_render::skeleton &get_skeleton() const { return m_skeleton; }
+    const nya_render::skeleton &get_skeleton() const { update_skeleton(); return m_skeleton; }
 
 private:
-    mesh_internal(): m_recalc_aabb(true), m_has_aabb(false) {}
+    mesh_internal(): m_recalc_aabb(true), m_has_aabb(false), need_update_skeleton(true) {}
 
     void draw_group(int idx, const char *pass_name) const;
     bool init_from_shared();
@@ -101,6 +101,7 @@ private:
     bool is_anim_finished(int layer=0) const;
 
     void update(unsigned int dt);
+    void update_skeleton() const;
 
     void update_aabb_transform() const;
 
@@ -124,7 +125,8 @@ private:
 
     transform m_transform;
 
-    nya_render::skeleton m_skeleton;
+    mutable bool need_update_skeleton;
+    mutable nya_render::skeleton m_skeleton;
     std::vector<applied_anim> m_anims;
     typedef std::map<int,bone_control> bone_control_map;
     bone_control_map m_bone_controls;
@@ -183,15 +185,15 @@ public:
     bool set_material(int group_idx,const material &mat);
 
     // skeleton
-    const nya_render::skeleton &get_skeleton() const { return internal().m_skeleton; }
+    const nya_render::skeleton &get_skeleton() const { return internal().get_skeleton(); }
     int get_bones_count() const { return get_skeleton().get_bones_count(); }
     const char *get_bone_name(int idx) const { return get_skeleton().get_bone_name(idx); }
-    int get_bone_idx(const char *name) { return internal().m_skeleton.get_bone_idx(name); }
-    nya_math::vec3 get_bone_pos(int bone_idx,bool local=false,bool ignore_animations=false);
-    nya_math::quat get_bone_rot(int bone_idx,bool local=false);
-    nya_math::vec3 get_bone_pos(const char *name,bool local=false,bool ignore_animations=false)
+    int get_bone_idx(const char *name) const { return internal().get_skeleton().get_bone_idx(name); }
+    nya_math::vec3 get_bone_pos(int bone_idx,bool local=false,bool ignore_animations=false) const;
+    nya_math::quat get_bone_rot(int bone_idx,bool local=false) const;
+    nya_math::vec3 get_bone_pos(const char *name,bool local=false,bool ignore_animations=false) const
                    { return get_bone_pos(get_bone_idx(name),local,ignore_animations); }
-    nya_math::quat get_bone_rot(const char *name,bool local=false) { return get_bone_rot(get_bone_idx(name),local); }
+    nya_math::quat get_bone_rot(const char *name,bool local=false) const { return get_bone_rot(get_bone_idx(name),local); }
     void set_bone_pos(int bone_idx,const nya_math::vec3 &pos,bool additive);
     void set_bone_rot(int bone_idx,const nya_math::quat &rot,bool additive);
 

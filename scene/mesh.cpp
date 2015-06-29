@@ -309,6 +309,8 @@ void mesh_internal::draw_group(int idx, const char *pass_name) const
     if(idx<0 || idx>=(int)m_shared->groups.size())
         return;
 
+    update_skeleton();
+
     int mat_idx=get_mat_idx(idx);
     if(mat_idx<0)
     {
@@ -318,12 +320,17 @@ void mesh_internal::draw_group(int idx, const char *pass_name) const
 
     const shared_mesh::group &g=m_shared->groups[idx];
 
+    transform::set(m_transform);
+    shader_internal::set_skeleton(&m_skeleton);
+
     const material &m=mat(mat_idx);
     m.internal().set(pass_name);
     m_shared->vbo.bind();
     m_shared->vbo.draw(g.offset,g.count,g.elem_type);
     m_shared->vbo.unbind();
     m.internal().unset();
+
+    shader_internal::set_skeleton(0);
 }
 
 void mesh::draw(const char *pass_name) const
@@ -362,12 +369,7 @@ void mesh::draw_group(int idx,const char *pass_name) const
             return;
     }
 
-    transform::set(internal().m_transform);
-    shader_internal::set_skeleton(&internal().m_skeleton);
-
     internal().draw_group(idx,pass_name);
-
-    shader_internal::set_skeleton(0);
 }
 
 int mesh::get_groups_count() const
@@ -615,19 +617,19 @@ bool mesh_internal::is_anim_finished(int layer) const
 
 bool mesh::is_anim_finished(int layer) const { return internal().is_anim_finished(layer); }
 
-nya_math::vec3 mesh::get_bone_pos(int bone_idx,bool local,bool ignore_animations)
+nya_math::vec3 mesh::get_bone_pos(int bone_idx,bool local,bool ignore_animations) const
 {
-    const nya_math::vec3 pos=ignore_animations?internal().m_skeleton.get_bone_original_pos(bone_idx):
-                                               internal().m_skeleton.get_bone_pos(bone_idx);
+    const nya_math::vec3 pos=ignore_animations?internal().get_skeleton().get_bone_original_pos(bone_idx):
+                                               internal().get_skeleton().get_bone_pos(bone_idx);
     if(local)
         return pos;
 
     return internal().get_transform().transform_vec( pos );
 }
 
-nya_math::quat mesh::get_bone_rot(int bone_idx,bool local)
+nya_math::quat mesh::get_bone_rot(int bone_idx,bool local) const
 {
-    const nya_math::quat rot=internal().m_skeleton.get_bone_rot(bone_idx);
+    const nya_math::quat rot=internal().get_skeleton().get_bone_rot(bone_idx);
     if(local)
         return rot;
 
@@ -636,7 +638,7 @@ nya_math::quat mesh::get_bone_rot(int bone_idx,bool local)
 
 void mesh::set_bone_pos(int bone_idx,const nya_math::vec3 &pos,bool additive)
 {
-    if(bone_idx<0 || bone_idx>=internal().m_skeleton.get_bones_count())
+    if(bone_idx<0 || bone_idx>=internal().get_skeleton().get_bones_count())
         return;
 
     mesh_internal::bone_control &b=m_internal.m_bone_controls[bone_idx];
@@ -646,7 +648,7 @@ void mesh::set_bone_pos(int bone_idx,const nya_math::vec3 &pos,bool additive)
 
 void mesh::set_bone_rot(int bone_idx,const nya_math::quat &rot,bool additive)
 {
-    if(bone_idx<0 || bone_idx>=internal().m_skeleton.get_bones_count())
+    if(bone_idx<0 || bone_idx>=internal().get_skeleton().get_bones_count())
         return;
 
     mesh_internal::bone_control &b=m_internal.m_bone_controls[bone_idx];
@@ -677,6 +679,16 @@ void mesh_internal::update(unsigned int dt)
         const float eps=0.0001f;
         a.full_weight=(fabsf(1.0f-a.anim->m_weight)<eps);
     }
+
+    need_update_skeleton=true;
+}
+
+void mesh_internal::update_skeleton() const
+{
+    if(!need_update_skeleton)
+        return;
+
+    need_update_skeleton=false;
 
     for(int i=0;i<m_skeleton.get_bones_count();++i)
     {
