@@ -429,7 +429,7 @@ bool texture::update_region(const texture_proxy &source,unsigned int x,unsigned 
     if(source->get_format()!=get_format())
     {
         if((get_format()==nya_render::texture::color_bgra && source->get_format()==nya_render::texture::color_rgba)
-           || (get_format()==nya_render::texture::color_bgra && source->get_format()==nya_render::texture::color_rgba))
+           || (get_format()==nya_render::texture::color_rgba && source->get_format()==nya_render::texture::color_bgra))
             bgr_to_rgb((unsigned char *)data,buf.get_size(),4);
         //ToDo
         else
