@@ -143,11 +143,18 @@ void composite_resources_provider::enable_cache()
     if(m_cache_entries)
         return;
 
+    m_cache_entries=true;
+    rebuild_cache();
+}
+
+void composite_resources_provider::rebuild_cache()
+{
+    if(!m_cache_entries)
+        return;
+
     m_cached_entries.clear();
     for(int i=0;i<(int)m_providers.size();++i)
         cache_provider(i);
-
-    m_cache_entries=true;
 }
 
 int composite_resources_provider::get_resources_count()

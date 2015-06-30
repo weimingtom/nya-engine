@@ -15,6 +15,7 @@ class composite_resources_provider: public resources_provider
 public:
     void add_provider(resources_provider *provider);
     void enable_cache();
+    void rebuild_cache();
     void set_ignore_case(bool ignore); //enables cache if true
 
 public:
