@@ -15,6 +15,16 @@ void composite_resources_provider::add_provider(resources_provider *provider)
         return;
     }
 
+    for(size_t i=0;i<m_providers.size();++i)
+    {
+        if(m_providers[i]!=provider)
+            continue;
+
+        std::swap(m_providers[i],m_providers.back());
+        rebuild_cache();
+        return;
+    }
+
     m_resource_names.clear();
     m_providers.push_back(provider);
     if(m_cache_entries)
