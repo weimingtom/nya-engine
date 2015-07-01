@@ -2,40 +2,14 @@
 
 #include "composite_resources_provider.h"
 #include "memory/pool.h"
+#include <set>
 #include <algorithm>
 
 namespace nya_resources
 {
 
-void composite_resources_provider::add_provider(resources_provider *provider)
+inline std::string fix_name(const std::string &name)
 {
-    if(!provider)
-    {
-        log()<<"unable to add provider: invalid provider\n";
-        return;
-    }
-
-    for(size_t i=0;i<m_providers.size();++i)
-    {
-        if(m_providers[i]!=provider)
-            continue;
-
-        std::swap(m_providers[i],m_providers.back());
-        rebuild_cache();
-        return;
-    }
-
-    m_resource_names.clear();
-    m_providers.push_back(provider);
-    if(m_cache_entries)
-        cache_provider((int)m_providers.size()-1);
-}
-
-inline std::string fix_name(const char *name)
-{
-    if(!name)
-        return std::string();
-
     std::string name_str(name);
     for(size_t i=0;i<name_str.size();++i)
     {
@@ -57,19 +31,43 @@ inline std::string fix_name(const char *name)
     return out;
 }
 
+void composite_resources_provider::add_provider(resources_provider *provider,const char *folder)
+{
+    if(!provider)
+    {
+        log()<<"unable to add provider: invalid provider\n";
+        return;
+    }
+
+    for(size_t i=0;i<m_providers.size();++i)
+    {
+        if(m_providers[i].first!=provider)
+            continue;
+
+        std::swap(m_providers[i],m_providers.back());
+        rebuild_cache();
+        return;
+    }
+
+    m_resource_names.clear();
+    m_providers.push_back(std::make_pair(provider,folder?fix_name(std::string(folder)+"/"):""));
+    if(m_cache_entries)
+        cache_provider((int)m_providers.size()-1);
+}
+
 void composite_resources_provider::cache_provider(int idx)
 {
     if(idx<0 || idx>=(int)m_providers.size())
         return;
 
-    resources_provider *provider=m_providers[idx];
+    resources_provider *provider=m_providers[idx].first;
     for(int i=0;i<provider->get_resources_count();++i)
     {
         const char *name=provider->get_resource_name(i);
         if(!name)
             continue;
 
-        std::string name_str=fix_name(name);
+        std::string name_str=fix_name(m_providers[idx].second+name);
 
         if(m_ignore_case)
             std::transform(name_str.begin(),name_str.end(),name_str.begin(),::tolower);
@@ -92,10 +90,18 @@ resource_data *composite_resources_provider::access(const char *resource_name)
     {
         for(size_t i=0;i<m_providers.size();++i)
         {
-            if(m_providers[i]->has(resource_name))
-                return m_providers[i]->access(resource_name);
-        }
+            const char *name=resource_name;
+            if(!m_providers[i].second.empty())
+            {
+                if(strncmp(resource_name,m_providers[i].second.c_str(),m_providers[i].second.size())==0)
+                    continue;
 
+                name+=m_providers[i].second.size();
+            }
+
+            if(m_providers[i].first->has(name))
+                return m_providers[i].first->access(name);
+        }
         return 0;
     }
 
@@ -118,7 +124,7 @@ resource_data *composite_resources_provider::access(const char *resource_name)
         return 0;
     }
 
-    return m_providers[it->second.prov_idx]->access(it->second.original_name.c_str());
+    return m_providers[it->second.prov_idx].first->access(it->second.original_name.c_str());
 }
 
 bool composite_resources_provider::has(const char *resource_name)
@@ -130,7 +136,16 @@ bool composite_resources_provider::has(const char *resource_name)
     {
         for(size_t i=0;i<m_providers.size();++i)
         {
-            if(m_providers[i]->has(resource_name))
+            const char *name=resource_name;
+            if(!m_providers[i].second.empty())
+            {
+                if(strncmp(resource_name,m_providers[i].second.c_str(),m_providers[i].second.size())==0)
+                    continue;
+
+                name+=m_providers[i].second.size();
+            }
+
+            if(m_providers[i].first->has(name))
                 return true;
         }
 
@@ -159,6 +174,8 @@ void composite_resources_provider::enable_cache()
 
 void composite_resources_provider::rebuild_cache()
 {
+    m_resource_names.clear();
+
     if(!m_cache_entries)
         return;
 
@@ -179,20 +196,22 @@ int composite_resources_provider::get_resources_count()
         }
         else
         {
-            std::map<std::string,bool> already_has;
+            std::set<std::string> already_has;
             for(size_t i=0;i<m_providers.size();++i)
             {
-                for(int j=0;j<m_providers[i]->get_resources_count();++j)
+                for(int j=0;j<m_providers[i].first->get_resources_count();++j)
                 {
-                    const char *name=m_providers[i]->get_resource_name(j);
+                    const char *name=m_providers[i].first->get_resource_name(j);
                     if(!name)
                         continue;
 
-                    if(already_has.find(name)!=already_has.end())
+                    std::string name_str=fix_name(m_providers[i].second+name);
+
+                    if(already_has.find(name_str)!=already_has.end())
                         continue;
 
-                    m_resource_names.push_back(name);
-                    already_has[name]=true;
+                    m_resource_names.push_back(name_str);
+                    already_has.insert(name_str);
                 }
             }
         }

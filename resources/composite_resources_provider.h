@@ -13,7 +13,7 @@ namespace nya_resources
 class composite_resources_provider: public resources_provider
 {
 public:
-    void add_provider(resources_provider *provider);
+    void add_provider(resources_provider *provider,const char *folder=0);
     void enable_cache();
     void rebuild_cache();
     void set_ignore_case(bool ignore); //enables cache if true
@@ -33,7 +33,7 @@ private:
     void cache_provider(int idx);
 
 private:
-    std::vector<resources_provider*> m_providers;
+    std::vector<std::pair<resources_provider*,std::string> > m_providers;
     std::vector<std::string> m_resource_names;
 
     struct entry
