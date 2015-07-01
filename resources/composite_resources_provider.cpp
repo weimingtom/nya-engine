@@ -93,7 +93,7 @@ resource_data *composite_resources_provider::access(const char *resource_name)
             const char *name=resource_name;
             if(!m_providers[i].second.empty())
             {
-                if(strncmp(resource_name,m_providers[i].second.c_str(),m_providers[i].second.size())==0)
+                if(strncmp(resource_name,m_providers[i].second.c_str(),m_providers[i].second.size())!=0)
                     continue;
 
                 name+=m_providers[i].second.size();
@@ -139,7 +139,7 @@ bool composite_resources_provider::has(const char *resource_name)
             const char *name=resource_name;
             if(!m_providers[i].second.empty())
             {
-                if(strncmp(resource_name,m_providers[i].second.c_str(),m_providers[i].second.size())==0)
+                if(strncmp(resource_name,m_providers[i].second.c_str(),m_providers[i].second.size())!=0)
                     continue;
 
                 name+=m_providers[i].second.size();
