@@ -1,0 +1,43 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 14
+    buildToolsVersion "22.0.1"
+
+    defaultConfig {
+        applicationId "nya.test_cube"
+        minSdkVersion 14
+        targetSdkVersion 22
+
+        ndk {
+            moduleName "test_cube_native"
+        }
+    }
+
+    sourceSets.main {
+        jni.srcDirs = []
+        jniLibs.srcDirs = ['src/main/libs']
+    }
+
+    task buildNative(type: Exec, description: 'Compile JNI source via NDK') {
+        def ndkDir = plugins.getPlugin('com.android.application').sdkHandler.getNdkFolder()
+        commandLine "$ndkDir/ndk-build",'-C', file('src/main/jni').absolutePath,'-j', Runtime.runtime.availableProcessors(),'all'
+    }
+
+    task cleanNative(type: Exec, description: 'Clean JNI object files') {
+        def ndkDir = plugins.getPlugin('com.android.application').sdkHandler.getNdkFolder()
+        commandLine "$ndkDir/ndk-build",'-C', file('src/main/jni').absolutePath,'clean'
+    }
+
+    clean.dependsOn 'cleanNative'
+
+    tasks.withType(JavaCompile) {
+        compileTask -> compileTask.dependsOn buildNative
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
