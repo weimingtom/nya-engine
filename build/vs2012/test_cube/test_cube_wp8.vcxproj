@@ -25,7 +25,7 @@
     <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
     <XapOutputs>true</XapOutputs>
     <XapFilename>test_cube_$(Configuration)_$(Platform).xap</XapFilename>
-    <XnaWindowsPhoneManifestTemplate>..\..\..\tests\test cube\test cube manifest.xml</XnaWindowsPhoneManifestTemplate>
+    <XnaWindowsPhoneManifestTemplate>..\..\..\tests\test_cube\test cube manifest.xml</XnaWindowsPhoneManifestTemplate>
     <WinMDAssembly>true</WinMDAssembly>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -135,7 +135,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\tests\test cube\test cube.cpp" />
+    <ClCompile Include="..\..\..\tests\test_cube\test_cube.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\nya_engine.vcxproj">
@@ -146,13 +146,13 @@
     <Xml Include="WMAppManifest.xml" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\tests\test cube\AlignmentGrid.png" />
-    <Image Include="..\..\..\tests\test cube\ApplicationIcon.png" />
-    <Image Include="..\..\..\tests\test cube\tiles\FlipCycleTileLarge.png" />
-    <Image Include="..\..\..\tests\test cube\tiles\FlipCycleTileMedium.png" />
-    <Image Include="..\..\..\tests\test cube\tiles\FlipCycleTileSmall.png" />
-    <Image Include="..\..\..\tests\test cube\tiles\IconicTileMediumLarge.png" />
-    <Image Include="..\..\..\tests\test cube\tiles\IconicTileSmall.png" />
+    <Image Include="..\..\..\tests\test_cube\AlignmentGrid.png" />
+    <Image Include="..\..\..\tests\test_cube\ApplicationIcon.png" />
+    <Image Include="..\..\..\tests\test_cube\tiles\FlipCycleTileLarge.png" />
+    <Image Include="..\..\..\tests\test_cube\tiles\FlipCycleTileMedium.png" />
+    <Image Include="..\..\..\tests\test_cube\tiles\FlipCycleTileSmall.png" />
+    <Image Include="..\..\..\tests\test_cube\tiles\IconicTileMediumLarge.png" />
+    <Image Include="..\..\..\tests\test_cube\tiles\IconicTileSmall.png" />
   </ItemGroup>
   <ItemGroup>
     <Media Include="2450442300d.nsc" />

@@ -7,31 +7,31 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\tests\test cube\test cube.cpp" />
+    <ClCompile Include="..\..\..\tests\test_cube\test_cube.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="WMAppManifest.xml" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\tests\test cube\AlignmentGrid.png">
+    <Image Include="..\..\..\tests\test_cube\AlignmentGrid.png">
       <Filter>Assets</Filter>
     </Image>
-    <Image Include="..\..\..\tests\test cube\ApplicationIcon.png">
+    <Image Include="..\..\..\tests\test_cube\ApplicationIcon.png">
       <Filter>Assets</Filter>
     </Image>
-    <Image Include="..\..\..\tests\test cube\tiles\FlipCycleTileLarge.png">
+    <Image Include="..\..\..\tests\test_cube\tiles\FlipCycleTileLarge.png">
       <Filter>Assets</Filter>
     </Image>
-    <Image Include="..\..\..\tests\test cube\tiles\FlipCycleTileMedium.png">
+    <Image Include="..\..\..\tests\test_cube\tiles\FlipCycleTileMedium.png">
       <Filter>Assets</Filter>
     </Image>
-    <Image Include="..\..\..\tests\test cube\tiles\FlipCycleTileSmall.png">
+    <Image Include="..\..\..\tests\test_cube\tiles\FlipCycleTileSmall.png">
       <Filter>Assets</Filter>
     </Image>
-    <Image Include="..\..\..\tests\test cube\tiles\IconicTileMediumLarge.png">
+    <Image Include="..\..\..\tests\test_cube\tiles\IconicTileMediumLarge.png">
       <Filter>Assets</Filter>
     </Image>
-    <Image Include="..\..\..\tests\test cube\tiles\IconicTileSmall.png">
+    <Image Include="..\..\..\tests\test_cube\tiles\IconicTileSmall.png">
       <Filter>Assets</Filter>
     </Image>
   </ItemGroup>

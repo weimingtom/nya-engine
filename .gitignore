@@ -15,4 +15,6 @@ xcschememanagement.plist
 *.vcxproj.user
 *.pro.user
 *.pyc
+.idea
+.gradle
 *~.*

@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F51A29221A684014002472F2 /* test cube.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51A29211A684014002472F2 /* test cube.cpp */; };
+		F51A29221A684014002472F2 /* test_cube.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51A29211A684014002472F2 /* test_cube.cpp */; };
 		F51A29241A6840F8002472F2 /* test-cube-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F51A29231A6840F8002472F2 /* test-cube-Info.plist */; };
 		F51A29281A684137002472F2 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F51A29271A684137002472F2 /* OpenGL.framework */; };
 		F51A29321A684446002472F2 /* libnya_engine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F51A292F1A68443F002472F2 /* libnya_engine.a */; };
@@ -32,8 +32,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		F51A29211A684014002472F2 /* test cube.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "test cube.cpp"; path = "../../tests/test cube/test cube.cpp"; sourceTree = "<group>"; };
-		F51A29231A6840F8002472F2 /* test-cube-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "test-cube-Info.plist"; path = "../../tests/test cube/test-cube-Info.plist"; sourceTree = "<group>"; };
+		F51A29211A684014002472F2 /* test_cube.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "test_cube.cpp"; path = "../../tests/test_cube/test_cube.cpp"; sourceTree = "<group>"; };
+		F51A29231A6840F8002472F2 /* test-cube-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "test-cube-Info.plist"; path = "../../tests/test_cube/test-cube-Info.plist"; sourceTree = "<group>"; };
 		F51A29251A684120002472F2 /* libnya_engine.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libnya_engine.a; path = ../../bin/mac_debug/libnya_engine.a; sourceTree = "<group>"; };
 		F51A29271A684137002472F2 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		F51A29291A68443F002472F2 /* nya_engine.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = nya_engine.xcodeproj; sourceTree = "<group>"; };
@@ -72,7 +72,7 @@
 			isa = PBXGroup;
 			children = (
 				F51A29291A68443F002472F2 /* nya_engine.xcodeproj */,
-				F51A29211A684014002472F2 /* test cube.cpp */,
+				F51A29211A684014002472F2 /* test_cube.cpp */,
 				F51A29231A6840F8002472F2 /* test-cube-Info.plist */,
 				F52FEB031A651C8000C09F52 /* Frameworks */,
 				F52FEB021A651C8000C09F52 /* Products */,
@@ -195,7 +195,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F51A29221A684014002472F2 /* test cube.cpp in Sources */,
+				F51A29221A684014002472F2 /* test_cube.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

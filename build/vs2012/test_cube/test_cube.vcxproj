@@ -91,7 +91,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\tests\test cube\test cube.cpp" />
+    <ClCompile Include="..\..\..\tests\test_cube\test_cube.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
