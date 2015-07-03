@@ -2,6 +2,7 @@
 
 #include "app.h"
 #include "system.h"
+#include "render/render.h"
 
 #include <string>
 
@@ -11,8 +12,6 @@
 #include "render/platform_specific_gl.h"
 
   #ifdef WINDOWS_METRO
-    #include "render/render.h"
-
     #include <wrl/client.h>
     #include <ppl.h>
     #include <agile.h>
@@ -336,7 +335,6 @@ public:
   #else
 
     #include <windowsx.h>
-    #include "render/render.h"
 
   #ifndef DIRECTX11
     #include <gl/wglext.h>
@@ -892,6 +890,118 @@ private:
 }
   #endif
 #elif __ANDROID__ //unimplemented
+#include <android/native_window.h>
+#include <EGL/egl.h>
+
+class egl_renderer
+{
+public:
+    bool init(ANativeWindow *window)
+    {
+        if(!window)
+            return false;
+
+        if(m_display!=EGL_NO_DISPLAY)
+            return true;
+
+        m_display=eglGetDisplay(EGL_DEFAULT_DISPLAY);
+        if(m_display==EGL_NO_DISPLAY)
+            return false;
+
+        if(!eglInitialize(m_display,NULL,NULL))
+            return false;
+
+        const EGLint RGBX_8888_ATTRIBS[] =
+        {
+            EGL_RENDERABLE_TYPE,EGL_OPENGL_ES2_BIT,
+            EGL_SURFACE_TYPE,EGL_WINDOW_BIT,
+            EGL_BLUE_SIZE,8,EGL_GREEN_SIZE,8,EGL_RED_SIZE,8,
+            EGL_DEPTH_SIZE,24,
+            EGL_NONE
+        };
+
+        const EGLint RGB_565_ATTRIBS[] =
+        {
+            EGL_RENDERABLE_TYPE,EGL_OPENGL_ES2_BIT,
+            EGL_SURFACE_TYPE,EGL_WINDOW_BIT,
+            EGL_BLUE_SIZE,5,EGL_GREEN_SIZE,6,EGL_RED_SIZE,5,
+            EGL_DEPTH_SIZE,24,
+            EGL_NONE
+        };
+
+        const EGLint* attrib_list;
+
+        int window_format=ANativeWindow_getFormat(window);
+        if(window_format==WINDOW_FORMAT_RGBA_8888 || window_format==WINDOW_FORMAT_RGBX_8888)
+            attrib_list=RGBX_8888_ATTRIBS;
+        else
+            attrib_list=RGB_565_ATTRIBS;
+
+        EGLConfig config;
+        EGLint num_configs;
+        if(!eglChooseConfig(m_display,attrib_list,&config,1,&num_configs))
+            return false;
+
+        EGLint format;
+        if(!eglGetConfigAttrib(m_display,config,EGL_NATIVE_VISUAL_ID,&format))
+            return false;
+
+        if(ANativeWindow_setBuffersGeometry(window,0,0,format)!=0)
+            return false;
+
+        m_renderSurface=eglCreateWindowSurface(m_display,config,window,NULL);
+        if(m_renderSurface==EGL_NO_SURFACE)
+            return false;
+
+        EGLint context_attribs[]={EGL_CONTEXT_CLIENT_VERSION,2,EGL_NONE};
+        m_context=eglCreateContext(m_display,config,EGL_NO_CONTEXT,context_attribs);
+        if(m_context==EGL_NO_CONTEXT)
+            return false;
+
+        if(!eglMakeCurrent(m_display,m_renderSurface,m_renderSurface,m_context))
+            return false;
+
+        if(!eglQuerySurface(m_display,m_renderSurface,EGL_WIDTH,&m_width))
+            return false;
+
+        if(!eglQuerySurface(m_display,m_renderSurface,EGL_HEIGHT,&m_height))
+            return false;
+
+        return true;
+    }
+
+    void end_frame() { eglSwapBuffers(m_display,m_renderSurface); }
+
+    void destroy()
+    {
+        if(m_display!=EGL_NO_DISPLAY)
+        {
+            eglMakeCurrent(m_display,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT);
+            if(m_context!=EGL_NO_CONTEXT)
+                eglDestroyContext(m_display,m_context);
+            if(m_renderSurface!=EGL_NO_SURFACE)
+                eglDestroySurface(m_display,m_renderSurface);
+            eglTerminate(m_display);
+        }
+
+        m_display=EGL_NO_DISPLAY;
+        m_context=EGL_NO_CONTEXT;
+        m_renderSurface=EGL_NO_SURFACE;
+    }
+
+    int get_width() const { return (int)m_width; }
+    int get_height() const { return (int)m_height; }
+
+public:
+    egl_renderer(): m_display(EGL_NO_DISPLAY),m_renderSurface(EGL_NO_SURFACE),m_context(EGL_NO_CONTEXT),
+                    m_width(0),m_height(0) {}
+
+private:
+    EGLDisplay  m_display;
+    EGLSurface  m_renderSurface;
+    EGLContext m_context;
+    EGLint m_width, m_height;
+};
 
 class shared_app
 {
@@ -915,13 +1025,15 @@ public:
         static shared_app app;
         return app;
     }
+
+private:
+    egl_renderer m_renderer;
 };
 
 #elif defined __APPLE__ //implemented in app.mm
 
 #elif defined EMSCRIPTEN
 
-#include "render/render.h"
 #include <emscripten/emscripten.h>
 #include <GLFW/glfw3.h>
 
