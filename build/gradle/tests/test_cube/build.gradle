@@ -10,11 +10,12 @@ android {
         targetSdkVersion 22
 
         ndk {
-            moduleName "test_cube_native"
+            moduleName "nya_native"
         }
     }
 
     sourceSets.main {
+        java.srcDirs = ['../../../../system/']
         jni.srcDirs = []
         jniLibs.srcDirs = ['src/main/libs']
     }
