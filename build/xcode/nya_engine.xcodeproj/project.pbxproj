@@ -43,6 +43,10 @@
 		3D942ABD1A8109760078DC1D /* ktx.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D942ABA1A8109760078DC1D /* ktx.h */; };
 		3D942ABE1A8109760078DC1D /* ktx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D942ABB1A8109760078DC1D /* ktx.cpp */; };
 		3D942ABF1A8109760078DC1D /* ktx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D942ABB1A8109760078DC1D /* ktx.cpp */; };
+		3DAEBA141B470097004B3A96 /* android_log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DAEBA121B470097004B3A96 /* android_log.cpp */; };
+		3DAEBA151B470097004B3A96 /* android_log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DAEBA121B470097004B3A96 /* android_log.cpp */; };
+		3DAEBA161B470097004B3A96 /* android_log.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DAEBA131B470097004B3A96 /* android_log.h */; };
+		3DAEBA171B470097004B3A96 /* android_log.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DAEBA131B470097004B3A96 /* android_log.h */; };
 		3DE732E2195D9186008D6765 /* indexed_map.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DE732E0195D9186008D6765 /* indexed_map.h */; };
 		3DE732E3195D9186008D6765 /* indexed_map.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DE732E0195D9186008D6765 /* indexed_map.h */; };
 		3DE732E4195D9186008D6765 /* invalid_object.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DE732E1195D9186008D6765 /* invalid_object.h */; };
@@ -278,6 +282,8 @@
 		3D8681381965B7F9008B8929 /* warning.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = warning.cpp; sourceTree = "<group>"; };
 		3D942ABA1A8109760078DC1D /* ktx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ktx.h; path = ../../formats/ktx.h; sourceTree = "<group>"; };
 		3D942ABB1A8109760078DC1D /* ktx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ktx.cpp; path = ../../formats/ktx.cpp; sourceTree = "<group>"; };
+		3DAEBA121B470097004B3A96 /* android_log.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = android_log.cpp; sourceTree = "<group>"; };
+		3DAEBA131B470097004B3A96 /* android_log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = android_log.h; sourceTree = "<group>"; };
 		3DE732E0195D9186008D6765 /* indexed_map.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = indexed_map.h; sourceTree = "<group>"; };
 		3DE732E1195D9186008D6765 /* invalid_object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = invalid_object.h; sourceTree = "<group>"; };
 		3DE7961F1A28AF7300BF18C7 /* shader_code_parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shader_code_parser.cpp; sourceTree = "<group>"; };
@@ -546,6 +552,8 @@
 		F259321715D858140092C7D8 /* log */ = {
 			isa = PBXGroup;
 			children = (
+				3DAEBA121B470097004B3A96 /* android_log.cpp */,
+				3DAEBA131B470097004B3A96 /* android_log.h */,
 				3D5641041B347B3C0025673F /* composite_log.cpp */,
 				3D5641051B347B3C0025673F /* composite_log.h */,
 				F259321A15D858140092C7D8 /* log.cpp */,
@@ -677,6 +685,7 @@
 				3D5641091B347B3C0025673F /* composite_log.h in Headers */,
 				3D76260F1A127EC9004E033C /* app_internal.h in Headers */,
 				F2F0A0AA1695A794007245BC /* quaternion.h in Headers */,
+				3DAEBA171B470097004B3A96 /* android_log.h in Headers */,
 				F2F0A0AE1695A794007245BC /* bezier.h in Headers */,
 				F2F0A0B41695F809007245BC /* matrix.h in Headers */,
 				F23997931696406D00170768 /* transform.h in Headers */,
@@ -756,6 +765,7 @@
 				3D5641081B347B3C0025673F /* composite_log.h in Headers */,
 				3D76260E1A127EC9004E033C /* app_internal.h in Headers */,
 				F2F0A0A91695A794007245BC /* quaternion.h in Headers */,
+				3DAEBA161B470097004B3A96 /* android_log.h in Headers */,
 				F2F0A0AD1695A794007245BC /* bezier.h in Headers */,
 				F2F0A0B31695F809007245BC /* matrix.h in Headers */,
 				F23997921696406D00170768 /* transform.h in Headers */,
@@ -905,6 +915,7 @@
 				F25216A116EC14F400A1B2A6 /* animation.cpp in Sources */,
 				F29B460116F3821500C4CC36 /* frustum.cpp in Sources */,
 				F2CA6768172D92CE00965F9F /* shaders_cache_provider.cpp in Sources */,
+				3DAEBA151B470097004B3A96 /* android_log.cpp in Sources */,
 				F5C139101A8776E20058A171 /* postprocess.cpp in Sources */,
 				F55C5720180623B100FF6163 /* debug_draw.cpp in Sources */,
 				F5DFDFE919C9A8E9006CC734 /* statistics.cpp in Sources */,
@@ -965,6 +976,7 @@
 				F25216A016EC14F400A1B2A6 /* animation.cpp in Sources */,
 				F29B460016F3821500C4CC36 /* frustum.cpp in Sources */,
 				F2CA6767172D92CE00965F9F /* shaders_cache_provider.cpp in Sources */,
+				3DAEBA141B470097004B3A96 /* android_log.cpp in Sources */,
 				F5C1390F1A8776E20058A171 /* postprocess.cpp in Sources */,
 				F55C571F180623B100FF6163 /* debug_draw.cpp in Sources */,
 				F5DFDFE819C9A8E9006CC734 /* statistics.cpp in Sources */,

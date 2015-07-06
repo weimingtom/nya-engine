@@ -7,6 +7,7 @@
 #include "render/render.h"
 #include "system/shaders_cache_provider.h"
 #include "log/log.h"
+#include "log/android_log.h"
 #include <sstream>
 
 #ifdef _WIN32
@@ -25,6 +26,9 @@ private:
          nya_log::set_log(&log);
          */
 
+#ifdef __ANDROID__
+        nya_log::set_log(new nya_log::android_log("test_cube"));
+#endif
 	    nya_log::log()<<"on_splash\n";
 
 		nya_render::set_clear_color(0.0f,0.6f,0.7f,1.0f);
