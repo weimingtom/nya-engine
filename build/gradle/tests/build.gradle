@@ -9,6 +9,8 @@ buildscript {
 }
 
 allprojects {
+    buildDir = "../../../obj/android/"
+
     repositories {
         jcenter()
     }
