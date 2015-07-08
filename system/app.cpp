@@ -889,9 +889,97 @@ private:
 
 }
   #endif
-#elif __ANDROID__ //unimplemented
+#elif __ANDROID__
+#include <jni.h>
 #include <android/native_window.h>
+#include <android/native_window_jni.h>
 #include <EGL/egl.h>
+#include <pthread.h>
+#include <unistd.h>
+
+int main(int argc,char **argv);
+
+class native_process
+{
+public:
+    static native_process &get() { static native_process p; return p; }
+
+public:
+    native_process() { pthread_mutex_init(&m_mutex,0); }
+    ~native_process() { pthread_mutex_destroy(&m_mutex); }
+
+    void start() { pthread_create(&m_thread,0,thread_callback,0); }
+    void stop() { pthread_join(m_thread,0); }
+
+    void lock() { pthread_mutex_lock(&m_mutex); }
+    void unlock() { pthread_mutex_unlock(&m_mutex); }
+
+    void sleep(unsigned int msec) { usleep(msec); }
+
+private:
+    static void* thread_callback(void *) { main(0,0); pthread_exit(0); return 0; }
+
+private:
+    pthread_t m_thread;
+    pthread_mutex_t m_mutex;
+};
+
+namespace
+{
+    ANativeWindow *window=0;
+    bool native_paused=false;
+    bool should_exit=false;
+}
+
+extern "C"
+{
+    JNIEXPORT void JNICALL Java_nya_native_1activity_native_1spawn_1main(JNIEnv *jenv,jobject obj)
+    {
+        native_process::get().start();
+    }
+
+    JNIEXPORT void JNICALL Java_nya_native_1activity_native_1pause(JNIEnv *jenv,jobject obj)
+    {
+        native_process::get().lock();
+        native_paused=true;
+        native_process::get().unlock();
+    }
+
+    JNIEXPORT void JNICALL Java_nya_native_1activity_native_1resume(JNIEnv *jenv,jobject obj)
+    {
+        native_process::get().lock();
+        native_paused=false;
+        native_process::get().unlock();
+    }
+
+    JNIEXPORT void JNICALL Java_nya_native_1activity_native_1exit(JNIEnv *jenv,jobject obj)
+    {
+        native_process::get().lock();
+        should_exit=true;
+        native_process::get().unlock();
+        native_process::get().stop();
+    }
+
+    JNIEXPORT void JNICALL Java_nya_native_1activity_native_1set_1surface(JNIEnv *jenv,jobject obj,jobject surface)
+    {
+        if(surface)
+        {
+            native_process::get().lock();
+            if(window)
+                ANativeWindow_release(window);
+            window=ANativeWindow_fromSurface(jenv,surface);
+            native_process::get().unlock();
+        }
+        else
+        {
+            native_process::get().lock();
+            if(window)
+                ANativeWindow_release(window);
+            window=0;
+            native_process::get().unlock();
+        }
+    }
+};
 
 class egl_renderer
 {
@@ -911,7 +999,7 @@ public:
         if(!eglInitialize(m_display,NULL,NULL))
             return false;
 
-        const EGLint RGBX_8888_ATTRIBS[] =
+        const EGLint RGBX_8888_ATTRIBS[]=
         {
             EGL_RENDERABLE_TYPE,EGL_OPENGL_ES2_BIT,
             EGL_SURFACE_TYPE,EGL_WINDOW_BIT,
@@ -920,7 +1008,7 @@ public:
             EGL_NONE
         };
 
-        const EGLint RGB_565_ATTRIBS[] =
+        const EGLint RGB_565_ATTRIBS[]=
         {
             EGL_RENDERABLE_TYPE,EGL_OPENGL_ES2_BIT,
             EGL_SURFACE_TYPE,EGL_WINDOW_BIT,
@@ -995,12 +1083,11 @@ public:
 public:
     egl_renderer(): m_display(EGL_NO_DISPLAY),m_renderSurface(EGL_NO_SURFACE),m_context(EGL_NO_CONTEXT),
                     m_width(0),m_height(0) {}
-
 private:
     EGLDisplay  m_display;
     EGLSurface  m_renderSurface;
     EGLContext m_context;
-    EGLint m_width, m_height;
+    EGLint m_width,m_height;
 };
 
 class shared_app
@@ -1008,7 +1095,76 @@ class shared_app
 public:
     void start_windowed(int x,int y,unsigned int w,unsigned int h,int antialiasing,nya_system::app &app)
     {
-         //ToDo
+        bool initialised=false;
+        bool running=true;
+        bool paused=false;
+        ANativeWindow *last_window=0;
+
+        while(running)
+        {
+            native_process::get().lock();
+
+            if(!should_exit)
+            {
+                if(initialised)
+                {
+                    if(last_window!=window)
+                    {
+                        //ToDo
+
+                        if(last_window)
+                            m_renderer.destroy();
+                        if(window)
+                            m_renderer.init(window);
+                    }
+                }
+                else if(window)
+                {
+                    m_renderer.init(window);
+                    app.on_init();
+                    nya_render::set_viewport(0,0,m_renderer.get_width(),m_renderer.get_height());
+                    app.on_resize(m_renderer.get_width(),m_renderer.get_height());
+
+                    if(app.on_splash())
+                        m_renderer.end_frame();
+
+                    m_time=nya_system::get_time();
+                    initialised=true;
+                }
+
+                last_window=window;
+            }
+            else
+                running=false;
+
+            if(paused!=native_paused)
+            {
+                paused=native_paused;
+                if(native_paused)
+                    app.on_suspend();
+                else
+                    app.on_restore();
+            }
+            native_process::get().unlock();
+
+            if(paused)
+            {
+                native_process::get().sleep(500);
+                continue;
+            }
+
+            if(!initialised)
+                continue;
+
+            const unsigned long time=nya_system::get_time();
+            const unsigned int dt=(unsigned int)(time-m_time);
+            m_time=time;
+
+            app.on_frame(dt);
+            m_renderer.end_frame();
+        }
+
+        finish(app);
     }
 
     void start_fullscreen(unsigned int w,unsigned int h,nya_system::app &app)
@@ -1016,7 +1172,12 @@ public:
         start_windowed(0,0,w,h,0,app);
     }
 
-    void finish(nya_system::app &app) {}
+    void finish(nya_system::app &app)
+    {
+        app.on_free();
+        m_renderer.destroy();
+    }
+
     void set_title(const char *title) {}
 
 public:
@@ -1027,6 +1188,7 @@ public:
     }
 
 private:
+    unsigned long m_time;
     egl_renderer m_renderer;
 };
 

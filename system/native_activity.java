@@ -16,13 +16,13 @@ public class native_activity extends Activity implements SurfaceHolder.Callback
         setContentView(R.layout.main);
         SurfaceView surfaceView = (SurfaceView)findViewById(R.id.surfaceview);
         surfaceView.getHolder().addCallback(this);
+        native_spawn_main();
     }
 
     @Override
     protected void onStart()
     {
         super.onStart();
-        native_spawn_main();
     }
 
     @Override
@@ -43,8 +43,15 @@ public class native_activity extends Activity implements SurfaceHolder.Callback
     protected void onStop()
     {
         super.onStop();
-        native_exit();
     }
+
+    @Override
+    protected void onDestroy()
+    {
+        native_exit();
+        super.onDestroy();
+    }
+
 
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h)
     {
