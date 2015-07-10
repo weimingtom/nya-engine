@@ -1107,6 +1107,10 @@ public:
         m_context=EGL_NO_CONTEXT;
         if(!eglMakeCurrent(m_display,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT))
             return;
+
+        if(m_renderSurface!=EGL_NO_SURFACE)
+            eglDestroySurface(m_display,m_renderSurface);
+        m_renderSurface=EGL_NO_SURFACE;
     }
 
     void destroy()
