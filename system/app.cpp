@@ -929,6 +929,7 @@ namespace
     ANativeWindow *window=0;
     bool native_paused=false;
     bool should_exit=false;
+    bool suspend_ready=false;
 }
 
 extern "C"
@@ -941,8 +942,21 @@ extern "C"
     JNIEXPORT void JNICALL Java_nya_native_1activity_native_1pause(JNIEnv *jenv,jobject obj)
     {
         native_process::get().lock();
+        suspend_ready=false;
         native_paused=true;
         native_process::get().unlock();
+
+        bool not_ready=true;
+        while(not_ready)
+        {
+            native_process::get().lock();
+            if(suspend_ready)
+                not_ready=false;
+            native_process::get().unlock();
+
+            if(not_ready)
+                native_process::get().sleep(10);
+        }
     }
 
     JNIEXPORT void JNICALL Java_nya_native_1activity_native_1resume(JNIEnv *jenv,jobject obj)
@@ -989,7 +1003,7 @@ public:
         if(!window)
             return false;
 
-        if(m_display!=EGL_NO_DISPLAY)
+        if(m_context!=EGL_NO_CONTEXT)
             return true;
 
         m_display=eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -1028,37 +1042,72 @@ public:
         EGLConfig config;
         EGLint num_configs;
         if(!eglChooseConfig(m_display,attrib_list,&config,1,&num_configs))
+        {
+            nya_system::log()<<"ERROR: unable to choose egl config\n";
             return false;
+        }
 
         EGLint format;
         if(!eglGetConfigAttrib(m_display,config,EGL_NATIVE_VISUAL_ID,&format))
+        {
+            nya_system::log()<<"ERROR: unable to get egl config attributes\n";
             return false;
+        }
 
         if(ANativeWindow_setBuffersGeometry(window,0,0,format)!=0)
+        {
+            nya_system::log()<<"ERROR: unable to set egl buffers geometry\n";
             return false;
+        }
 
         m_renderSurface=eglCreateWindowSurface(m_display,config,window,NULL);
         if(m_renderSurface==EGL_NO_SURFACE)
+        {
+            nya_system::log()<<"ERROR: unable to create egl surface\n";
             return false;
+        }
 
         EGLint context_attribs[]={EGL_CONTEXT_CLIENT_VERSION,2,EGL_NONE};
-        m_context=eglCreateContext(m_display,config,EGL_NO_CONTEXT,context_attribs);
+        m_context=eglCreateContext(m_display,config,m_saved_context,context_attribs);
         if(m_context==EGL_NO_CONTEXT)
+        {
+            nya_system::log()<<"ERROR: unable to create egl context\n";
             return false;
+        }
 
         if(!eglMakeCurrent(m_display,m_renderSurface,m_renderSurface,m_context))
+        {
+            nya_system::log()<<"ERROR: unable to make egl context current\n";
             return false;
+        }
 
         if(!eglQuerySurface(m_display,m_renderSurface,EGL_WIDTH,&m_width))
+        {
+            nya_system::log()<<"ERROR: unable to querry egl surface width\n";
             return false;
+        }
 
         if(!eglQuerySurface(m_display,m_renderSurface,EGL_HEIGHT,&m_height))
+        {
+            nya_system::log()<<"ERROR: unable to querry egl surface height\n";
             return false;
+        }
 
         return true;
     }
 
     void end_frame() { eglSwapBuffers(m_display,m_renderSurface); }
+
+    void suspend()
+    {
+        if(m_display==EGL_NO_DISPLAY)
+            return;
+
+        m_saved_context=m_context;
+        m_context=EGL_NO_CONTEXT;
+        if(!eglMakeCurrent(m_display,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT))
+            return;
+    }
 
     void destroy()
     {
@@ -1081,13 +1130,15 @@ public:
     int get_height() const { return (int)m_height; }
 
 public:
-    egl_renderer(): m_display(EGL_NO_DISPLAY),m_renderSurface(EGL_NO_SURFACE),m_context(EGL_NO_CONTEXT),
+    egl_renderer(): m_display(EGL_NO_DISPLAY),m_renderSurface(EGL_NO_SURFACE),
+                    m_context(EGL_NO_CONTEXT),m_saved_context(EGL_NO_CONTEXT),
                     m_width(0),m_height(0) {}
 private:
     EGLDisplay  m_display;
     EGLSurface  m_renderSurface;
     EGLContext m_context;
     EGLint m_width,m_height;
+    EGLContext m_saved_context;
 };
 
 class shared_app
@@ -1098,6 +1149,7 @@ public:
         bool initialised=false;
         bool running=true;
         bool paused=false;
+        bool need_restore=false;
         ANativeWindow *last_window=0;
 
         while(running)
@@ -1108,14 +1160,21 @@ public:
             {
                 if(initialised)
                 {
-                    if(last_window!=window)
+                    if(need_restore)
+                    {
+                        if(window)
+                        {
+                            m_renderer.init(window);
+                            nya_render::apply_state(true);
+                            app.on_restore();
+                            need_restore=false;
+                            last_window=window;
+                        }
+                    }
+                    else if(!paused && last_window!=window)
                     {
                         //ToDo
-
-                        if(last_window)
-                            m_renderer.destroy();
-                        if(window)
-                            m_renderer.init(window);
+                        nya_system::log()<<"ERROR: unexpected window change\n";
                     }
                 }
                 else if(window)
@@ -1141,9 +1200,13 @@ public:
             {
                 paused=native_paused;
                 if(native_paused)
+                {
                     app.on_suspend();
+                    m_renderer.suspend();
+                    suspend_ready=true;
+                }
                 else
-                    app.on_restore();
+                    need_restore=true;
             }
             native_process::get().unlock();
 
@@ -1153,8 +1216,11 @@ public:
                 continue;
             }
 
-            if(!initialised)
+            if(!initialised || need_restore)
+            {
+                native_process::get().sleep(10);
                 continue;
+            }
 
             const unsigned long time=nya_system::get_time();
             const unsigned int dt=(unsigned int)(time-m_time);
