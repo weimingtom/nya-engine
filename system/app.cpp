@@ -1100,7 +1100,7 @@ public:
 
     void suspend()
     {
-        if(m_display==EGL_NO_DISPLAY)
+        if(m_context==EGL_NO_CONTEXT)
             return;
 
         m_saved_context=m_context;
