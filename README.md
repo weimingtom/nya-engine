@@ -3,7 +3,7 @@
 
 Nya engine is a lightweight cross-platform 3d graphics engine without dependencies.
 
-Supported platforms: Linux, Mac, iOS, Windows, Windows Phone 8 and Android (except nya_system::app, tested with SDL)
+Supported platforms: Linux, Mac, iOS, Windows, Windows Phone 8 and Android
 
 Experimental support: HTML5(via Emscripten) 
 
