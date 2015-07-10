@@ -966,6 +966,13 @@ extern "C"
         native_process::get().unlock();
     }
 
+    JNIEXPORT void JNICALL Java_nya_native_1activity_native_1touch(JNIEnv *jenv,jobject obj,int x,int y,int id,bool pressed)
+    {
+        native_process::get().lock();
+        //ToDo
+        native_process::get().unlock();
+    }
+
     JNIEXPORT void JNICALL Java_nya_native_1activity_native_1exit(JNIEnv *jenv,jobject obj)
     {
         native_process::get().lock();
