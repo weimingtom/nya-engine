@@ -1076,6 +1076,10 @@ public:
             return false;
         }
 
+        if(m_saved_context!=EGL_NO_CONTEXT)
+            eglDestroyContext(m_display,m_saved_context);
+        m_saved_context=EGL_NO_CONTEXT;
+
         if(!eglMakeCurrent(m_display,m_surface,m_surface,m_context))
         {
             nya_system::log()<<"ERROR: unable to make egl context current\n";
