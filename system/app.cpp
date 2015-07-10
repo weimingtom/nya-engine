@@ -1006,7 +1006,8 @@ public:
         if(m_context!=EGL_NO_CONTEXT)
             return true;
 
-        m_display=eglGetDisplay(EGL_DEFAULT_DISPLAY);
+        if(m_display==EGL_NO_DISPLAY)
+            m_display=eglGetDisplay(EGL_DEFAULT_DISPLAY);
         if(m_display==EGL_NO_DISPLAY)
             return false;
 
@@ -1060,8 +1061,8 @@ public:
             return false;
         }
 
-        m_renderSurface=eglCreateWindowSurface(m_display,config,window,NULL);
-        if(m_renderSurface==EGL_NO_SURFACE)
+        m_surface=eglCreateWindowSurface(m_display,config,window,NULL);
+        if(m_surface==EGL_NO_SURFACE)
         {
             nya_system::log()<<"ERROR: unable to create egl surface\n";
             return false;
@@ -1075,19 +1076,19 @@ public:
             return false;
         }
 
-        if(!eglMakeCurrent(m_display,m_renderSurface,m_renderSurface,m_context))
+        if(!eglMakeCurrent(m_display,m_surface,m_surface,m_context))
         {
             nya_system::log()<<"ERROR: unable to make egl context current\n";
             return false;
         }
 
-        if(!eglQuerySurface(m_display,m_renderSurface,EGL_WIDTH,&m_width))
+        if(!eglQuerySurface(m_display,m_surface,EGL_WIDTH,&m_width))
         {
             nya_system::log()<<"ERROR: unable to querry egl surface width\n";
             return false;
         }
 
-        if(!eglQuerySurface(m_display,m_renderSurface,EGL_HEIGHT,&m_height))
+        if(!eglQuerySurface(m_display,m_surface,EGL_HEIGHT,&m_height))
         {
             nya_system::log()<<"ERROR: unable to querry egl surface height\n";
             return false;
@@ -1096,7 +1097,7 @@ public:
         return true;
     }
 
-    void end_frame() { eglSwapBuffers(m_display,m_renderSurface); }
+    void end_frame() { eglSwapBuffers(m_display,m_surface); }
 
     void suspend()
     {
@@ -1108,9 +1109,9 @@ public:
         if(!eglMakeCurrent(m_display,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT))
             return;
 
-        if(m_renderSurface!=EGL_NO_SURFACE)
-            eglDestroySurface(m_display,m_renderSurface);
-        m_renderSurface=EGL_NO_SURFACE;
+        if(m_surface!=EGL_NO_SURFACE)
+            eglDestroySurface(m_display,m_surface);
+        m_surface=EGL_NO_SURFACE;
     }
 
     void destroy()
@@ -1120,26 +1121,26 @@ public:
             eglMakeCurrent(m_display,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT);
             if(m_context!=EGL_NO_CONTEXT)
                 eglDestroyContext(m_display,m_context);
-            if(m_renderSurface!=EGL_NO_SURFACE)
-                eglDestroySurface(m_display,m_renderSurface);
+            if(m_surface!=EGL_NO_SURFACE)
+                eglDestroySurface(m_display,m_surface);
             eglTerminate(m_display);
         }
 
         m_display=EGL_NO_DISPLAY;
         m_context=EGL_NO_CONTEXT;
-        m_renderSurface=EGL_NO_SURFACE;
+        m_surface=EGL_NO_SURFACE;
     }
 
     int get_width() const { return (int)m_width; }
     int get_height() const { return (int)m_height; }
 
 public:
-    egl_renderer(): m_display(EGL_NO_DISPLAY),m_renderSurface(EGL_NO_SURFACE),
+    egl_renderer(): m_display(EGL_NO_DISPLAY),m_surface(EGL_NO_SURFACE),
                     m_context(EGL_NO_CONTEXT),m_saved_context(EGL_NO_CONTEXT),
                     m_width(0),m_height(0) {}
 private:
     EGLDisplay  m_display;
-    EGLSurface  m_renderSurface;
+    EGLSurface  m_surface;
     EGLContext m_context;
     EGLint m_width,m_height;
     EGLContext m_saved_context;
