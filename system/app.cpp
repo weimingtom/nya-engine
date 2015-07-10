@@ -896,6 +896,7 @@ private:
 #include <EGL/egl.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <vector>
 
 int main(int argc,char **argv);
 
@@ -930,6 +931,9 @@ namespace
     bool native_paused=false;
     bool should_exit=false;
     bool suspend_ready=false;
+
+    struct input_event { int x,y,id; bool pressed; };
+    std::vector<input_event> input_events;
 }
 
 extern "C"
@@ -969,7 +973,8 @@ extern "C"
     JNIEXPORT void JNICALL Java_nya_native_1activity_native_1touch(JNIEnv *jenv,jobject obj,int x,int y,int id,bool pressed)
     {
         native_process::get().lock();
-        //ToDo
+        input_event e; e.x=x; e.y=y; e.id=id; e.pressed=pressed;
+        input_events.push_back(e);
         native_process::get().unlock();
     }
 
@@ -1224,6 +1229,20 @@ public:
                 else
                     need_restore=true;
             }
+
+            for(size_t i=0;i<input_events.size();++i)
+            {
+                input_event &e=input_events[i];
+                int y=m_renderer.get_height()-e.y;
+                app.on_touch(e.x,y,e.id,e.pressed);
+                if(e.id!=0)
+                    continue;
+
+                app.on_mouse_move(e.x,y);
+                app.on_mouse_button(nya_system::mouse_left,e.pressed);
+            }
+            input_events.clear();
+
             native_process::get().unlock();
 
             if(paused)
