@@ -644,6 +644,7 @@ void mesh::set_bone_pos(int bone_idx,const nya_math::vec3 &pos,bool additive)
     mesh_internal::bone_control &b=m_internal.m_bone_controls[bone_idx];
     b.pos=pos;
     b.pos_ctrl=additive?mesh_internal::bone_additive:mesh_internal::bone_override;
+    internal().need_update_skeleton=true;
 }
 
 void mesh::set_bone_rot(int bone_idx,const nya_math::quat &rot,bool additive)
@@ -654,6 +655,7 @@ void mesh::set_bone_rot(int bone_idx,const nya_math::quat &rot,bool additive)
     mesh_internal::bone_control &b=m_internal.m_bone_controls[bone_idx];
     b.rot=rot;
     b.rot_ctrl=additive?mesh_internal::bone_additive:mesh_internal::bone_override;
+    internal().need_update_skeleton=true;
 }
 
 void mesh::update(unsigned int dt) { m_internal.update(dt); }
