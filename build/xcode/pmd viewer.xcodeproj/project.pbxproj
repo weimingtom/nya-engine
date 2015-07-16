@@ -10,6 +10,7 @@
 		3D4FEDB619C711A400A01168 /* shaders in Resources */ = {isa = PBXBuildFile; fileRef = 3D4FEDB419C711A400A01168 /* shaders */; };
 		3D4FEDB719C711A400A01168 /* toon in Resources */ = {isa = PBXBuildFile; fileRef = 3D4FEDB519C711A400A01168 /* toon */; };
 		3D4FEDB919C7230700A01168 /* materials in Resources */ = {isa = PBXBuildFile; fileRef = 3D4FEDB819C7230700A01168 /* materials */; };
+		3DF7BA171B57F8FD008637A2 /* viewer_camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7BA151B57F8FD008637A2 /* viewer_camera.cpp */; };
 		F20FADB7177CBF6500330FA5 /* load_pmd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F20FADB6177CBF6400330FA5 /* load_pmd.cpp */; };
 		F20FADBA177CC06F00330FA5 /* load_pmx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F20FADB8177CC06F00330FA5 /* load_pmx.cpp */; };
 		F261EA56151E698D00C195DA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F261EA55151E698D00C195DA /* Cocoa.framework */; };
@@ -53,6 +54,8 @@
 		3D4FEDB419C711A400A01168 /* shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; name = shaders; path = "../../tests/pmd viewer/shaders"; sourceTree = "<group>"; };
 		3D4FEDB519C711A400A01168 /* toon */ = {isa = PBXFileReference; lastKnownFileType = folder; name = toon; path = "../../tests/pmd viewer/toon"; sourceTree = "<group>"; };
 		3D4FEDB819C7230700A01168 /* materials */ = {isa = PBXFileReference; lastKnownFileType = folder; name = materials; path = "../../tests/pmd viewer/materials"; sourceTree = "<group>"; };
+		3DF7BA151B57F8FD008637A2 /* viewer_camera.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = viewer_camera.cpp; path = "../../tests/pmd viewer/viewer_camera.cpp"; sourceTree = "<group>"; };
+		3DF7BA161B57F8FD008637A2 /* viewer_camera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = viewer_camera.h; path = "../../tests/pmd viewer/viewer_camera.h"; sourceTree = "<group>"; };
 		F20FADB5177CBF6400330FA5 /* load_pmd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = load_pmd.h; path = ../../tests/shared/load_pmd.h; sourceTree = "<group>"; };
 		F20FADB6177CBF6400330FA5 /* load_pmd.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = load_pmd.cpp; path = ../../tests/shared/load_pmd.cpp; sourceTree = "<group>"; };
 		F20FADB8177CC06F00330FA5 /* load_pmx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = load_pmx.cpp; path = ../../tests/shared/load_pmx.cpp; sourceTree = "<group>"; };
@@ -170,6 +173,8 @@
 				F28DAD8F15D9AF4E0030D67B /* PmdView.mm */,
 				F5D869B11809A303000C8791 /* string_encoding.cpp */,
 				F5D869B21809A303000C8791 /* string_encoding.h */,
+				3DF7BA151B57F8FD008637A2 /* viewer_camera.cpp */,
+				3DF7BA161B57F8FD008637A2 /* viewer_camera.h */,
 				F28DAD9D15D9AF6B0030D67B /* Supporting files */,
 			);
 			name = "pmd viewer";
@@ -297,6 +302,7 @@
 				F28DAD9C15D9AF4E0030D67B /* main.m in Sources */,
 				F20FADB7177CBF6500330FA5 /* load_pmd.cpp in Sources */,
 				F20FADBA177CC06F00330FA5 /* load_pmx.cpp in Sources */,
+				3DF7BA171B57F8FD008637A2 /* viewer_camera.cpp in Sources */,
 				F51A29661A6DA172002472F2 /* mmd_mesh.cpp in Sources */,
 				F5D869B41809A303000C8791 /* string_encoding.cpp in Sources */,
 				F5D869B91809A551000C8791 /* load_vmd.cpp in Sources */,
