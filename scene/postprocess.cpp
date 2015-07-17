@@ -120,7 +120,7 @@ void postprocess::draw(int dt)
 bool postprocess::load_text(shared_postprocess &res,resource_data &data,const char* name)
 {
     nya_formats::text_parser parser;
-    if(!parser.load_from_data((char *)data.get_data()))
+    if(!parser.load_from_data((char *)data.get_data(),data.get_size()))
         return false;
 
     res.lines.resize(parser.get_sections_count());
