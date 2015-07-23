@@ -2,6 +2,7 @@
 
 #include "texture.h"
 #include "render.h"
+#include "fbo.h"
 #include "platform_specific_gl.h"
 
 #include "memory/tmp_buffer.h"
@@ -1028,17 +1029,18 @@ bool texture::get_data(nya_memory::tmp_buffer_ref &data,unsigned int x,unsigned 
     }
   #endif
 
-    GLint prev_fbo=0;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING,&prev_fbo);
+    //ToDo: restore previous fbo bind
 
-    static GLuint copy_fbo=0; //ToDo
-    if(!copy_fbo)
-        glGenFramebuffers(1,&copy_fbo);
+    //GLint prev_fbo=0;
+    //glGetIntegerv(GL_FRAMEBUFFER_BINDING,&prev_fbo);
+
+    nya_render::fbo copy_fbo;
+    copy_fbo.set_color_target(*this);
 
     rect prev_vp=get_viewport();
     set_viewport(0,0,tex.width,tex.height);
 
-    glBindFramebuffer(GL_FRAMEBUFFER,copy_fbo);
+    copy_fbo.bind();
     if(is_cubemap())
     {
         unsigned int size=tex.width*tex.height*get_bpp(format)/8;
@@ -1053,7 +1055,11 @@ bool texture::get_data(nya_memory::tmp_buffer_ref &data,unsigned int x,unsigned 
         glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,tex.tex_id,0);
         glReadPixels(x,y,w,h,gl_format,GL_UNSIGNED_BYTE,data.get_data());
     }
-    glBindFramebuffer(GL_FRAMEBUFFER, prev_fbo);
+    copy_fbo.unbind();
+    copy_fbo.release();
+
+    //glBindFramebuffer(GL_FRAMEBUFFER,prev_fbo);
+
     set_viewport(prev_vp);
 #endif
 
