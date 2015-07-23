@@ -89,6 +89,7 @@ public:
 
 public:
     bool get_data(nya_memory::tmp_buffer_ref &data) const;
+    bool get_data(nya_memory::tmp_buffer_ref &data,unsigned int x,unsigned int y,unsigned int w,unsigned int h) const;
     unsigned int get_width() const;
     unsigned int get_height() const;
     color_format get_color_format() const;

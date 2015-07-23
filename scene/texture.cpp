@@ -6,6 +6,11 @@
 #include "formats/tga.h"
 #include "formats/dds.h"
 #include "formats/ktx.h"
+#include "render/fbo.h"
+#include "render/shader.h"
+#include "render/screen_quad.h"
+
+//ToDo: dont't transfer data gpu<->cpu in crop and update_region with texture source
 
 namespace nya_scene
 {
@@ -357,6 +362,14 @@ nya_memory::tmp_buffer_ref texture::get_data() const
     return result;
 }
 
+nya_memory::tmp_buffer_ref texture::get_data(int x,int y,int width,int height) const
+{
+    nya_memory::tmp_buffer_ref result;
+    if(internal().get_shared_data().is_valid())
+        internal().get_shared_data()->tex.get_data(result,x,y,width,height);
+    return result;
+}
+
 bool texture::is_cubemap() const
 {
     if(!internal().get_shared_data().is_valid())
@@ -384,7 +397,29 @@ bool texture::build(const void *data,unsigned int width,unsigned int height,colo
     return ref->tex.build_texture(data,width,height,format);
 }
 
-bool texture::update_region(const void *data,unsigned int x,unsigned int y,unsigned int width,unsigned int height,int mip)
+bool texture::crop(uint x,uint y,uint width,uint height)
+{
+    if(!width || !height)
+    {
+        unload();
+        return true;
+    }
+
+    if(!m_internal.m_shared.is_valid())
+        return false;
+
+    nya_render::texture::color_format f=get_format();
+    const nya_memory::tmp_buffer_scoped buf(get_data(x,y,width,height));
+    if(!buf.get_size())
+        return false;
+
+    if(!build(buf.get_data(),width,height,f))
+        return false;
+
+    return true;
+}
+
+bool texture::update_region(const void *data,uint x,uint y,uint width,uint height,int mip)
 {
     texture_internal::shared_resources::shared_resource_mutable_ref ref;
     if(m_internal.m_shared.get_ref_count()==1 && !m_internal.m_shared.get_name())  //was created and unique
@@ -397,8 +432,8 @@ bool texture::update_region(const void *data,unsigned int x,unsigned int y,unsig
         return false;
 
     nya_render::texture::color_format f=m_internal.m_shared->tex.get_color_format();
-    const unsigned int w=m_internal.m_shared->tex.get_width();
-    const unsigned int h=m_internal.m_shared->tex.get_height();
+    const uint w=m_internal.m_shared->tex.get_width();
+    const uint h=m_internal.m_shared->tex.get_height();
 
     nya_memory::tmp_buffer_ref buf;
     if(!m_internal.m_shared->tex.get_data(buf))
@@ -432,7 +467,7 @@ inline void rgb_to_rgba(const unsigned char *src,unsigned char *dst,size_t data_
     }
 }
 
-bool texture::update_region(const texture_proxy &source,unsigned int x,unsigned int y,int mip)
+bool texture::update_region(const texture_proxy &source,uint x,uint y,int mip)
 {
     if(!source.is_valid())
         return false;
@@ -477,6 +512,38 @@ bool texture::update_region(const texture_proxy &source,unsigned int x,unsigned 
 bool texture::update_region(const texture &source,unsigned int x,unsigned int y,int mip)
 {
     return update_region(nya_scene::texture_proxy(source),x,y,mip);
+}
+
+bool texture::update_region(const texture_proxy &source,uint src_x,uint src_y,uint src_width,uint src_height,
+                       uint dst_x,uint dst_y,int mip)
+{
+    if(!source.is_valid())
+        return false;
+
+    //ToDo: current implementation is highly ineffective
+
+    texture region=*source.operator->();
+    if(!region.crop(src_x,src_y,src_width,src_height))
+        return false;
+
+    return update_region(region,dst_x,dst_y,mip);
+}
+
+bool texture::update_region(const texture &source,uint src_x,uint src_y,uint src_width,uint src_height,
+                       uint dst_x,uint dst_y,int mip)
+{
+    return update_region(nya_scene::texture_proxy(source),src_x,src_y,src_width,src_height,dst_x,dst_y,mip);
+}
+
+
+void texture::set_resources_prefix(const char *prefix)
+{
+    texture_internal::set_resources_prefix(prefix);
+}
+
+void texture::register_load_function(texture_internal::load_function function,bool clear_default)
+{
+    texture_internal::register_load_function(function,clear_default);
 }
 
 }

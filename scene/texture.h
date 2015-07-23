@@ -63,14 +63,20 @@ public:
     unsigned int get_height() const;
     color_format get_format() const;
     nya_memory::tmp_buffer_ref get_data() const;
+    nya_memory::tmp_buffer_ref get_data(int x,int y,int width,int height) const;
     bool is_cubemap() const;
 
 public:
-    bool build(const void *data,unsigned int width,unsigned int height,color_format format);
-    bool update_region(const void *data,unsigned int x,unsigned int y,unsigned int width,unsigned int height,int mip=-1);
-    bool update_region(const texture_proxy &source,unsigned int x,unsigned int y,int mip=-1);
-    bool update_region(const texture &source,unsigned int x,unsigned int y,int mip=-1);
-
+    typedef unsigned int uint;
+    bool build(const void *data,uint width,uint height,color_format format);
+    bool crop(uint x,uint y,uint width,uint height);
+    bool update_region(const void *data,uint x,uint y,uint width,uint height,int mip=-1);
+    bool update_region(const texture_proxy &source,uint x,uint y,int mip=-1);
+    bool update_region(const texture &source,uint x,uint y,int mip=-1);
+    bool update_region(const texture_proxy &source,uint src_x,uint src_y,uint src_width,uint src_height,
+                                                   uint dst_x,uint dst_y,int mip=-1);
+    bool update_region(const texture &source,uint src_x,uint src_y,uint src_width,uint src_height,
+                                             uint dst_x,uint dst_y,int mip=-1);
 public:
     texture() {}
     texture(const char *name) { *this=texture(); load(name); }
@@ -85,8 +91,8 @@ public:
     static void set_ktx_mip_offset(int off) { m_load_ktx_mip_offset=off; }
 
 public:
-    static void set_resources_prefix(const char *prefix) { texture_internal::set_resources_prefix(prefix); }
-    static void register_load_function(texture_internal::load_function function,bool clear_default=true) { texture_internal::register_load_function(function,clear_default); }
+    static void set_resources_prefix(const char *prefix);
+    static void register_load_function(texture_internal::load_function function,bool clear_default=true);
 
 public:
     const texture_internal &internal() const { return m_internal; }

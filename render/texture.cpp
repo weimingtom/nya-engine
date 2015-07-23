@@ -929,13 +929,25 @@ void texture::apply(bool ignore_cache)
 
 bool texture::get_data(nya_memory::tmp_buffer_ref &data) const
 {
+    return get_data(data,0,0,get_width(),get_height());
+}
+
+bool texture::get_data(nya_memory::tmp_buffer_ref &data,unsigned int x,unsigned int y,unsigned int w,unsigned int h) const
+{
     if(m_tex<0)
         return false;
 
     const texture_obj &tex=texture_obj::get(m_tex);
-    unsigned int pitch=tex.width*get_bpp(tex.format)/8;
-    unsigned int size=pitch*tex.height*(is_cubemap()?6:1);
+    if(!w || !h || x+w>tex.width || y+h>tex.height)
+        return false;
+
+    unsigned int pitch=w*get_bpp(tex.format)/8;
+    unsigned int size=pitch*h*(is_cubemap()?6:1);
     if(!size)
+        return false;
+
+    const bool full_size=(x==0 && y==0 && w==tex.width && h==tex.height);
+    if(!full_size && is_cubemap())
         return false;
 
 #ifdef DIRECTX11
@@ -964,11 +976,11 @@ bool texture::get_data(nya_memory::tmp_buffer_ref &data) const
         return false;
 
     data.allocate(size);
-    const char *from=(char *)resource.pData;
+    const char *from=(char *)resource.pData+x*get_bpp(tex.format)/8+y*resource.RowPitch;
     char *to=(char *)data.get_data();
     for(int i=0;i<(is_cubemap()?6:1);++i)
     {
-        for(unsigned int j=0;j<tex.height;++j)
+        for(unsigned int j=0;j<h;++j)
         {
             memcpy(to,from,pitch);
             from+=resource.RowPitch;
@@ -987,7 +999,7 @@ bool texture::get_data(nya_memory::tmp_buffer_ref &data) const
   #ifdef OPENGL_ES
         return false;
   #endif
-        size=tex.width*tex.height*4*(is_cubemap()?6:1);
+        size=w*h*4*(is_cubemap()?6:1);
         format=color_bgra;
     }
 
@@ -1005,11 +1017,21 @@ bool texture::get_data(nya_memory::tmp_buffer_ref &data) const
 
     data.allocate(size);
 
-  #ifdef OPENGL_ES
+  #ifndef OPENGL_ES
+    if(full_size)
+    {
+        gl_select_multitex_layer(0);
+        glBindTexture(tex.gl_type,tex.tex_id);
+        active_layers[0]= -1;
+        glGetTexImage(tex.gl_type,0,gl_format,GL_UNSIGNED_BYTE,data.get_data());
+        return true;
+    }
+  #endif
+
     GLint prev_fbo=0;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING,&prev_fbo);
 
-    static GLuint copy_fbo=0;
+    static GLuint copy_fbo=0; //ToDo
     if(!copy_fbo)
         glGenFramebuffers(1,&copy_fbo);
 
@@ -1029,16 +1051,10 @@ bool texture::get_data(nya_memory::tmp_buffer_ref &data) const
     else
     {
         glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,tex.tex_id,0);
-        glReadPixels(0,0,tex.width,tex.height,gl_format,GL_UNSIGNED_BYTE,data.get_data());
+        glReadPixels(x,y,w,h,gl_format,GL_UNSIGNED_BYTE,data.get_data());
     }
     glBindFramebuffer(GL_FRAMEBUFFER, prev_fbo);
     set_viewport(prev_vp);
-  #else
-    gl_select_multitex_layer(0);
-    glBindTexture(tex.gl_type,tex.tex_id);
-    active_layers[0]= -1;
-    glGetTexImage(tex.gl_type,0,gl_format,GL_UNSIGNED_BYTE,data.get_data());
-  #endif
 #endif
 
     return true;
