@@ -33,6 +33,8 @@ public:
         m_mesh.unbind();
     }
 
+    bool is_valid() const { return m_mesh.get_verts_count()>0; }
+
     void release() { m_mesh.release(); }
 
 private:
