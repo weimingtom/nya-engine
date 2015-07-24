@@ -269,7 +269,6 @@ void scissor::enable(int x,int y,int w,int h,bool ignore_cache)
 
     glScissor(x,y,w,h);
 #endif
-
     scissor_rect.x=x,scissor_rect.y=y,scissor_rect.width=w,scissor_rect.height=h;
 }
 
