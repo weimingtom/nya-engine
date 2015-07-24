@@ -499,6 +499,13 @@ void postprocess::update()
             op_set_shader &o=add_op(m_op,m_op_set_shader,type_set_shader);
             o.sh.load(l.name.c_str());
         }
+        else if(l.type=="texture")
+        {
+            if(l.values.empty())
+                continue;
+
+            set_value(m_textures,l.name.c_str(),tex_holder(false,texture_proxy(texture(l.values.front().first.c_str()))));
+        }
         else if(l.type=="set_target")
         {
             m_op.resize(m_op.size()+1);
