@@ -259,6 +259,8 @@ void color_write::disable()
 
 void scissor::enable(int x,int y,int w,int h,bool ignore_cache)
 {
+    current_state.scissor_test=true;
+
 #ifndef DIRECTX11
     if(!ignore_cache &&
        x==scissor_rect.x && y==scissor_rect.y &&
@@ -267,9 +269,7 @@ void scissor::enable(int x,int y,int w,int h,bool ignore_cache)
 
     glScissor(x,y,w,h);
 #endif
-
     scissor_rect.x=x,scissor_rect.y=y,scissor_rect.width=w,scissor_rect.height=h;
-    current_state.scissor_test=true;
 }
 
 void scissor::disable()
