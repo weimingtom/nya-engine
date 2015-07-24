@@ -262,7 +262,7 @@ void scissor::enable(int x,int y,int w,int h,bool ignore_cache)
 #ifndef DIRECTX11
     if(!ignore_cache &&
        x==scissor_rect.x && y==scissor_rect.y &&
-       w==scissor_rect.width && w==scissor_rect.height )
+       w==scissor_rect.width && h==scissor_rect.height )
         return;
 
     glScissor(x,y,w,h);
