@@ -1035,7 +1035,6 @@ bool texture::get_data(nya_memory::tmp_buffer_ref &data,unsigned int x,unsigned 
     //glGetIntegerv(GL_FRAMEBUFFER_BINDING,&prev_fbo);
 
     nya_render::fbo copy_fbo;
-    copy_fbo.set_color_target(*this);
 
     rect prev_vp=get_viewport();
     set_viewport(0,0,tex.width,tex.height);
@@ -1046,13 +1045,13 @@ bool texture::get_data(nya_memory::tmp_buffer_ref &data,unsigned int x,unsigned 
         unsigned int size=tex.width*tex.height*get_bpp(format)/8;
         for(int i=0;i<6;++i)
         {
-            glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,cube_faces[i],tex.tex_id,0);
+            copy_fbo.set_color_target(*this,fbo::cubemap_side(fbo::cube_positive_x+i));
             glReadPixels(0,0,tex.width,tex.height,gl_format,GL_UNSIGNED_BYTE,data.get_data(size*i));
         }
     }
     else
     {
-        glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,tex.tex_id,0);
+        copy_fbo.set_color_target(*this);
         glReadPixels(x,y,w,h,gl_format,GL_UNSIGNED_BYTE,data.get_data());
     }
     copy_fbo.unbind();
