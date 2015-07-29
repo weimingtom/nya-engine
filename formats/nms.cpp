@@ -243,7 +243,7 @@ size_t nms_mesh_chunk::read_header(const void *data, size_t size, int version)
     return reader.get_offset();
 }
 
-size_t nms_mesh_chunk::write_to_buf(void *to_data,size_t to_size)
+size_t nms_mesh_chunk::write_to_buf(void *to_data,size_t to_size) const
 {
     nya_memory::memory_writer writer(to_data,to_size);
 
@@ -253,7 +253,7 @@ size_t nms_mesh_chunk::write_to_buf(void *to_data,size_t to_size)
     writer.write_ubyte((unsigned char)elements.size());
     for(size_t i=0;i<elements.size();++i)
     {
-        element &e=elements[i];
+        const element &e=elements[i];
         writer.write_ubyte(e.type);
         writer.write_ubyte(e.dimension);
         writer.write_ubyte(e.data_type);
@@ -272,11 +272,11 @@ size_t nms_mesh_chunk::write_to_buf(void *to_data,size_t to_size)
     writer.write_ushort((unsigned short)lods.size());
     for(size_t i=0;i<lods.size();++i)
     {
-        lod &l=lods[i];
+        const lod &l=lods[i];
         writer.write_ushort((unsigned short)l.groups.size());
         for(size_t j=0;j<l.groups.size();++j)
         {
-            group &g=l.groups[j];
+            const group &g=l.groups[j];
             writer.write_string(g.name);
 
             writer.write(g.aabb_min);
@@ -342,13 +342,13 @@ bool nms_material_chunk::read(const void *data,size_t size,int version)
     return true;
 }
 
-size_t nms_material_chunk::write_to_buf(void *to_data,size_t to_size)
+size_t nms_material_chunk::write_to_buf(void *to_data,size_t to_size) const
 {
     nya_memory::memory_writer writer(to_data,to_size);
     writer.write_ushort((unsigned short)materials.size());
     for(size_t i=0;i<materials.size();++i)
     {
-        material_info &m=materials[i];
+        const material_info &m=materials[i];
         writer.write_string(m.name);
 
         writer.write_ushort((unsigned short)m.textures.size());
@@ -484,13 +484,13 @@ bool nms_skeleton_chunk::read(const void *data,size_t size,int version)
     return true;
 }
 
-size_t nms_skeleton_chunk::write_to_buf(void *to_data,size_t to_size)
+size_t nms_skeleton_chunk::write_to_buf(void *to_data,size_t to_size) const
 {
     nya_memory::memory_writer writer(to_data,to_size);
     writer.write_uint((unsigned int)bones.size());
     for(size_t i=0;i<bones.size();++i)
     {
-        bone &b=bones[i];
+        const bone &b=bones[i];
         writer.write_string(b.name);
         writer.write(b.rot);
         writer.write(b.pos);

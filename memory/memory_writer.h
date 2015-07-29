@@ -29,17 +29,27 @@ public:
 
     bool write(const void *data,size_t size)
     {
-        if(!data || !size || size>m_size-m_offset)
+        if(!data || !size)
             return false;
 
-        memcpy(m_data+m_offset,data,size);
+        if(size>m_size-m_offset)
+        {
+            if(m_data)
+                return false;
+
+            m_size=m_offset+size;
+        }
+
+        if(m_data)
+            memcpy(m_data+m_offset,data,size);
+
         m_offset+=size;
         return true;
     }
 
     bool seek(size_t offset)
     {
-        if(offset>=m_size)
+        if(m_data && offset>=m_size)
         {
             m_offset=m_size;
             return false;
@@ -49,22 +59,14 @@ public:
         return true;
     }
 
-    size_t get_offset() { return m_offset; }
+    size_t get_offset() const { return m_offset; }
+    size_t get_size() const { return m_size; }
 
 public:
-    memory_writer(void *data,size_t size)
+    memory_writer(void *data,size_t size) //only counts size if data==0
     {
-        if(data)
-        {
-            m_data=(char*)data;
-            m_size=size;
-        }
-        else
-        {
-            m_data=0;
-            m_size=0;
-        }
-
+        m_data=(char*)data;
+        m_size=size;
         m_offset=0;
     }
 

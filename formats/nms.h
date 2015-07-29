@@ -151,8 +151,8 @@ public:
     size_t read_header(const void *data,size_t size,int version); //0 if invalid
 
 public:
-    //size_t get_chunk_size();
-    size_t write_to_buf(void *to_data,size_t to_size);
+    size_t get_chunk_size() const { return write_to_buf(0,0); }
+    size_t write_to_buf(void *to_data,size_t to_size) const;
 };
 
 struct nms_material_chunk
@@ -204,8 +204,8 @@ public:
     bool read(const void *data,size_t size,int version);
 
 public:
-    //size_t get_chunk_size();
-    size_t write_to_buf(void *to_data,size_t to_size);
+    size_t get_chunk_size() const { return write_to_buf(0,0); }
+    size_t write_to_buf(void *to_data,size_t to_size) const;
 };
 
 struct nms_skeleton_chunk
@@ -230,8 +230,8 @@ public:
     bool read(const void *data,size_t size,int version);
 
 public:
-    //size_t get_chunk_size();
-    size_t write_to_buf(void *to_data,size_t to_size);
+    size_t get_chunk_size() const { return write_to_buf(0,0); }
+    size_t write_to_buf(void *to_data,size_t to_size) const;
 };
 
 }
