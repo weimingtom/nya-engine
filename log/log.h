@@ -16,7 +16,7 @@ public:
     virtual void set_tag(const char* tag) {};
 
 public:
-    ~log_base() {}
+    virtual ~log_base() {}
 };
 
 log_base &no_log();
