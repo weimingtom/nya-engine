@@ -53,6 +53,10 @@ public:
     const nya_math::vec4 &get_shader_param(const char *name) const;
 
 public:
+    unsigned int get_width() const { return m_width; };
+    unsigned int get_height() const { return m_height; };
+
+public:
     postprocess(): m_width(0),m_height(0) { default_load_function(load_text); }
     ~postprocess() { unload(); }
 
