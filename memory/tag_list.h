@@ -11,7 +11,7 @@ template<class t> class tag_list
 {
 public:
     t &add() { return add(0,0); }
-    t &add(const char *tag) { return add(tag,1); }
+    t &add(const char *tag) { return tag?add(&tag,1):add(0,0); }
 
     t &add(const char **tags,size_t tags_count)
     {
