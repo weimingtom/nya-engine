@@ -3,7 +3,7 @@
 #pragma once
 
 #include "vbo.h"
-#include "platform_specific_gl.h"
+#include "render.h"
 
 namespace nya_render
 {
@@ -18,7 +18,8 @@ public:
         {
             verts[i].x=i>1?-1.0f:1.0f,verts[i].y=i%2?1.0f:-1.0f;
             verts[i].s=i>1? 0.0f:1.0f,verts[i].t=i%2?1.0f:0.0f;
-            DIRECTX11_ONLY(verts[i].t=1.0f-verts[i].t);
+            if(get_render_api()==render_api_directx11)
+                verts[i].t=1.0f-verts[i].t;
         }
 
         m_mesh.set_vertex_data(verts,sizeof(verts[0]),4);
