@@ -167,6 +167,8 @@ bool material::load_text(shared_material &res,resource_data &data,const char* na
                     p.get_state().zwrite=nya_formats::bool_from_string(subsection_value);
                 else if(strcmp(subsection_type,"cull")==0)
                     p.get_state().cull_face=nya_formats::cull_face_from_string(subsection_value,p.get_state().cull_order);
+                else if(strcmp(subsection_type,"depth_test")==0)
+                    p.get_state().depth_test=nya_formats::bool_from_string(subsection_value);
                 else
                     p.set_pass_param(subsection_type,param(nya_formats::vec4_from_string(subsection_value)));
             }
