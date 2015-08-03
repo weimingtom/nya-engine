@@ -1201,13 +1201,12 @@ public:
                 else if(window)
                 {
                     m_renderer.init(window);
-                    app.on_init();
                     nya_render::set_viewport(0,0,m_renderer.get_width(),m_renderer.get_height());
                     app.on_resize(m_renderer.get_width(),m_renderer.get_height());
-
                     if(app.on_splash())
                         m_renderer.end_frame();
 
+                    app.on_init();
                     m_time=nya_system::get_time();
                     initialised=true;
                 }
