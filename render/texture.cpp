@@ -1039,22 +1039,24 @@ bool texture::get_data(nya_memory::tmp_buffer_ref &data,unsigned int x,unsigned 
     rect prev_vp=get_viewport();
     set_viewport(0,0,tex.width,tex.height);
 
-    copy_fbo.bind();
     if(is_cubemap())
     {
         unsigned int size=tex.width*tex.height*get_bpp(format)/8;
         for(int i=0;i<6;++i)
         {
             copy_fbo.set_color_target(*this,fbo::cubemap_side(fbo::cube_positive_x+i));
+            copy_fbo.bind();
             glReadPixels(0,0,tex.width,tex.height,gl_format,GL_UNSIGNED_BYTE,data.get_data(size*i));
+            copy_fbo.unbind();
         }
     }
     else
     {
         copy_fbo.set_color_target(*this);
+        copy_fbo.bind();
         glReadPixels(x,y,w,h,gl_format,GL_UNSIGNED_BYTE,data.get_data());
+        copy_fbo.unbind();
     }
-    copy_fbo.unbind();
     copy_fbo.release();
 
     //glBindFramebuffer(GL_FRAMEBUFFER,prev_fbo);
