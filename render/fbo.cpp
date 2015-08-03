@@ -764,6 +764,8 @@ unsigned int fbo::get_max_color_attachments()
     static int max_attachments= -1;
     if(max_attachments<0)
         glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &max_attachments);
+    if(max_attachments<0)
+        max_attachments=1;
 
     return max_attachments;
 #endif
