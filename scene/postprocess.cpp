@@ -471,7 +471,7 @@ void postprocess::update()
                         f=nya_render::texture::depth32;
                     else
                     {
-                        log()<<"warning: postprocess: invalid texture "<<depth<<" format"<<format<<"in file "<<m_shared.get_name()<<"\n";
+                        log()<<"warning: postprocess: invalid texture "<<depth<<" format "<<format<<" in file "<<m_shared.get_name()<<"\n";
                         log()<<"available formats: depth16, depth24, depth32\n";
                     }
                 }

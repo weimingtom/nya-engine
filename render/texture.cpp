@@ -438,9 +438,9 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
 
         case color_bgra: desc.Format=DXGI_FORMAT_B8G8R8A8_UNORM; break;
 
-        case depth16: desc.Format=DXGI_FORMAT_D16_UNORM; break;
-        case depth24: desc.Format=DXGI_FORMAT_D24_UNORM_S8_UINT; break; //ToDo if data != 0
-        case depth32: desc.Format=DXGI_FORMAT_D32_FLOAT; break;
+        case depth16: desc.Format=DXGI_FORMAT_R16_TYPELESS; break;
+        case depth24: desc.Format=DXGI_FORMAT_R24G8_TYPELESS; break; //ToDo if data != 0
+        case depth32: desc.Format=DXGI_FORMAT_R32_TYPELESS; break;
 
         case dxt1: desc.Format=DXGI_FORMAT_BC1_UNORM; break;
         case dxt3: desc.Format=DXGI_FORMAT_BC2_UNORM; break;
@@ -483,10 +483,12 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
         }
     }
 
+    const bool is_format_depth = format==depth16 || format==depth24 || format==depth32;
+
     desc.SampleDesc.Count=1;
     desc.Usage=D3D11_USAGE_DEFAULT;
-    if(format==depth16 || format==depth24 || format==depth32)
-        desc.BindFlags=D3D11_BIND_DEPTH_STENCIL;//ToDo: D3D11_BIND_SHADER_RESOURCE
+    if(is_format_depth)
+        desc.BindFlags=D3D11_BIND_DEPTH_STENCIL|D3D11_BIND_SHADER_RESOURCE;
     else if(format>=dxt1)
         desc.BindFlags=D3D11_BIND_SHADER_RESOURCE;
     else
@@ -547,22 +549,43 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
     }
 
     ID3D11ShaderResourceView *srv=0;
-    if(format<depth16 || format>depth32) //ToDo
+    D3D11_SHADER_RESOURCE_VIEW_DESC *sr_desc_ptr=0;
+    if(is_format_depth)
     {
-        get_device()->CreateShaderResourceView(tex,0,&srv);
-        if(!srv)
+        D3D11_SHADER_RESOURCE_VIEW_DESC sr_desc;
+        sr_desc_ptr=&sr_desc;
+        sr_desc.ViewDimension=D3D11_SRV_DIMENSION_TEXTURE2D;
+        sr_desc.Texture2D.MostDetailedMip=0;
+        sr_desc.Texture2D.MipLevels=1;
+        switch(format)
         {
-            log()<<"Unable to build texture: unable to create shader resource view\n";
-            return false;
+            case depth16: sr_desc.Format=DXGI_FORMAT_R16_UNORM; break;
+            case depth24: sr_desc.Format=DXGI_FORMAT_R24_UNORM_X8_TYPELESS; break;
+            case depth32: sr_desc.Format=DXGI_FORMAT_R32_FLOAT; break;
+            default: break;
         }
-
-        if(need_generate_mips && width==height)
-            get_context()->GenerateMips(srv);
     }
 
+    get_device()->CreateShaderResourceView(tex,sr_desc_ptr,&srv);
+    if(!srv)
+    {
+        log()<<"Unable to build texture: unable to create shader resource view\n";
+        return false;
+    }
+
+    if(need_generate_mips && width==height)
+        get_context()->GenerateMips(srv);
+
     t.tex=tex;
-    t.dx_format=desc.Format;
     t.srv=srv;
+
+    switch(format)
+    {
+        case depth16: t.dx_format=DXGI_FORMAT_D16_UNORM; break;
+        case depth24: t.dx_format=DXGI_FORMAT_D24_UNORM_S8_UINT; break;
+        case depth32: t.dx_format=DXGI_FORMAT_D32_FLOAT; break;
+        default: t.dx_format=desc.Format; break;
+    }
 
     auto sdesc=dx_setup_filtration();
 
