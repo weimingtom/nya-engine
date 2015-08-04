@@ -325,37 +325,33 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
 - (void)applicationWillResignActive:(NSNotification *)notification
 {
-    if([self isViewLoaded] && self.view.window)
-    {
-        nya_system::app *responder=shared_app::get_app().get_responder();
-        if(responder)
-            responder->on_suspend();
+    nya_system::app *responder=shared_app::get_app().get_responder();
+    if(responder)
+        responder->on_suspend();
 
+    if([self isViewLoaded])
         [self stopAnimation];
-    }
 }
 
 - (void)applicationDidBecomeActive:(NSNotification *)notification
 {
-    if([self isViewLoaded] && self.view.window)
+    static bool ignore_first=true;
+    if(!ignore_first)
     {
-        static bool ignore_first=true;
-        if(!ignore_first)
-        {
-            nya_system::app *responder=shared_app::get_app().get_responder();
-            if(responder)
-                responder->on_restore();
-        }
-        else
-            ignore_first=false;
-
-        [self startAnimation];
+        nya_system::app *responder=shared_app::get_app().get_responder();
+        if(responder)
+            responder->on_restore();
     }
+    else
+        ignore_first=false;
+
+    if([self isViewLoaded])
+        [self startAnimation];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)notification
 {
-    if([self isViewLoaded] && self.view.window)
+    if([self isViewLoaded])
         [self stopAnimation];
 }
 
@@ -372,7 +368,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
         [EAGLContext setCurrentContext:nil];
     }
-    
+
     [super dealloc];
 }
 
