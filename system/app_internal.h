@@ -21,6 +21,7 @@
 
     EAGLContext *context;
     BOOL animating;
+    BOOL is_background;
     float scale;
     __weak CADisplayLink *displayLink;
 }

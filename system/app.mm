@@ -304,7 +304,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillResignActive:) name:UIApplicationWillResignActiveNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminateActive:) name:UIApplicationWillTerminateNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:UIApplicationWillTerminateNotification object:nil];
     }
 
     [(EAGLView *)self.view setContext:context];
@@ -331,10 +331,14 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
     if([self isViewLoaded])
         [self stopAnimation];
+
+    is_background = true;
 }
 
 - (void)applicationDidBecomeActive:(NSNotification *)notification
 {
+    is_background = false;
+
     static bool ignore_first=true;
     if(!ignore_first)
     {
@@ -345,7 +349,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
     else
         ignore_first=false;
 
-    if([self isViewLoaded])
+    if([self isViewLoaded] && self.view.window)
         [self startAnimation];
 }
 
@@ -377,7 +381,7 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
     [super didReceiveMemoryWarning];
     // Release any cached data, images, etc. that aren't in use.
 
-    nya_log::log()<<"app recieved memory warning, ";
+    nya_log::log()<<"app received memory warning, ";
 
     size_t tmp_buffers_size=nya_memory::tmp_buffers::get_total_size();
     nya_memory::tmp_buffers::force_free();
@@ -387,14 +391,16 @@ static inline NSString *NSStringFromUIInterfaceOrientation(UIInterfaceOrientatio
 
 - (void)viewWillAppear:(BOOL)animated
 {
-    [self startAnimation];
+    if(!is_background)
+        [self startAnimation];
 
     [super viewWillAppear:animated];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
 {
-    [self stopAnimation];
+    if(!is_background)
+        [self stopAnimation];
 
     [super viewWillDisappear:animated];
 }
