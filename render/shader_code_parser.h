@@ -56,8 +56,9 @@ public:
     bool fix_per_component_functions();
 
 public:
-    shader_code_parser(const char *text,const char *replace_prefix_str="_nya_"):
-                       m_code(text?text:""),m_replace_str(replace_prefix_str?replace_prefix_str:"") { remove_comments(); }
+    shader_code_parser(const char *text,const char *replace_prefix_str="_nya_",const char *flip_y_uniform=0):
+                       m_code(text?text:""),m_replace_str(replace_prefix_str?replace_prefix_str:""),
+                       m_flip_y_uniform(flip_y_uniform?flip_y_uniform:"") { remove_comments(); }
 private:
     void remove_comments();
 
@@ -74,7 +75,7 @@ private:
     bool find_variable(const char *str,size_t start_pos=0);
 
 private:
-    std::string m_code,m_replace_str,m_error;
+    std::string m_code,m_replace_str,m_flip_y_uniform,m_error;
     std::vector<variable> m_uniforms,m_attributes,m_varying;
 };
 

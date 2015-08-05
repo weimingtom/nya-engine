@@ -18,8 +18,6 @@ public:
         {
             verts[i].x=i>1?-1.0f:1.0f,verts[i].y=i%2?1.0f:-1.0f;
             verts[i].s=i>1? 0.0f:1.0f,verts[i].t=i%2?1.0f:0.0f;
-            if(get_render_api()==render_api_directx11)
-                verts[i].t=1.0f-verts[i].t;
         }
 
         m_mesh.set_vertex_data(verts,sizeof(verts[0]),4);

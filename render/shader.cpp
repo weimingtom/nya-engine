@@ -63,10 +63,10 @@ namespace
         struct constants_buffer
         {
             mutable std::vector<float> buffer;
-            int mvp_matrix,mv_matrix,p_matrix;
+            int mvp_matrix,mv_matrix,p_matrix,y_flip;
             ID3D11Buffer *dx_buffer;
 
-            constants_buffer(): mvp_matrix(-1),mv_matrix(-1),p_matrix(-1),dx_buffer(0) {}
+            constants_buffer(): mvp_matrix(-1),mv_matrix(-1),p_matrix(-1),y_flip(-1),dx_buffer(0) {}
         };
 
         constants_buffer constants;
@@ -448,7 +448,7 @@ bool shader::add_program(program_type type,const char*code)
 
     const static char type_str[][12]={"vertex","pixel","geometry","tesselation"};
 
-    shader_code_parser parser(code);
+    shader_code_parser parser(code,"_nya_" DIRECTX11_ONLY(,type==vertex?"_nya_flip_y_":0));
 
     //ToDo: release or reuse if already exists
 
@@ -524,7 +524,11 @@ bool shader::add_program(program_type type,const char*code)
         {
             const shader_code_parser::variable v=parser.get_uniform(i);
             if(v.type!=shader_code_parser::type_mat4)
+            {
+                if(v.type==shader_code_parser::type_float && v.name=="_nya_flip_y_")
+                    shdr.constants.y_flip=size,size+=4; //minimal float4
                 continue;
+            }
 
             if(v.name=="_nya_ModelViewProjectionMatrix") shdr.constants.mvp_matrix=size,size+=16;
             else if(v.name=="_nya_ModelViewMatrix") shdr.constants.mv_matrix=size,size+=16;
@@ -557,6 +561,9 @@ bool shader::add_program(program_type type,const char*code)
             if(v.name=="_nya_ModelViewMatrix") continue;
             if(v.name=="_nya_ProjectionMatrix") continue;
         }
+
+        if(v.type==shader_code_parser::type_float && v.name=="_nya_flip_y_")
+            continue;
 
         if(v.type==shader_code_parser::type_sampler2d || v.type==shader_code_parser::type_sampler_cube)
             continue;
@@ -820,6 +827,11 @@ void shader::apply(bool ignore_cache)
             if(shdr.constants.p_matrix>=0)
                 memcpy(&shdr.constants.buffer[shdr.constants.p_matrix],
                        transform::get().get_projection_matrix().m[0],16*sizeof(float));
+
+            if(shdr.constants.y_flip>=0)
+                shdr.constants.buffer[shdr.constants.y_flip]=dx_is_default_target()?1.0f:-1.0f;
+
+printf("%d %f\n",shdr.constants.y_flip,shdr.constants.buffer[shdr.constants.y_flip]);
 
             get_context()->UpdateSubresource(shdr.constants.dx_buffer,0,NULL,&shdr.constants.buffer[0],0,0);
         }

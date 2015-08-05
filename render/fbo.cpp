@@ -89,6 +89,9 @@ void dx_set_target(ID3D11RenderTargetView *color,ID3D11DepthStencilView *depth,b
 
     get_context()->OMSetRenderTargets(1,&color,depth);
 }
+
+bool dx_is_default_target() { return current_fbo==-1; }
+
 #endif
 
 namespace

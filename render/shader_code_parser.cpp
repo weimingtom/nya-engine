@@ -9,6 +9,20 @@
 namespace nya_render
 {
 
+template<typename t> static void push_unique_to_vec(std::vector<t> &v,const t &e)
+{
+    for(size_t i=0;i<v.size();++i)
+    {
+        if(v[i].name==e.name)
+        {
+            v[i]=e;
+            return;
+        }
+    }
+
+    v.push_back(e);
+}
+
 bool shader_code_parser::convert_to_hlsl()
 {
     m_uniforms.clear();
@@ -23,7 +37,10 @@ bool shader_code_parser::convert_to_hlsl()
 
         prefix.append("cbuffer "+m_replace_str+"constant_buffer:register(b0){");
         for(size_t i=0;i<m_uniforms.size();++i)
-            prefix.append("matrix "+m_uniforms[i].name+";");
+        {
+            std::string type=m_uniforms[i].type==type_float?"float":"matrix";
+            prefix.append(type+" "+m_uniforms[i].name+";");
+        }
         prefix.append("}\n");
     }
 
@@ -207,6 +224,9 @@ bool shader_code_parser::convert_to_hlsl()
             out_var_assign.append(out_var+"."+m_varying[i].name+"="+m_varying[i].name+";");
         }
         prefix.append("\n");
+
+        if(!m_flip_y_uniform.empty())
+            out_var_assign.append(out_var+"."+vs_pos_out+".y*="+m_flip_y_uniform+";");
 
         m_code.append("\n"+m_replace_str+"vsout main("+m_replace_str+"vsin "+input_var+"_){"+input_var+"="+input_var+"_;"+
                       m_replace_str+"main();"+m_replace_str+"vsout "+out_var+";"+out_var_assign+"return "+out_var+";}\n");
@@ -505,20 +525,6 @@ template<typename t> static bool parse_vars(std::string &code,std::string &error
 bool shader_code_parser::parse_uniforms(bool remove) { return parse_vars(m_code,m_error,m_uniforms,"uniform",remove); }
 bool shader_code_parser::parse_varying(bool remove) { return parse_vars(m_code,m_error,m_varying,"varying",remove); }
 
-template<typename t> static void push_unique_to_vec(std::vector<t> &v,const t &e)
-{
-    for(size_t i=0;i<v.size();++i)
-    {
-        if(v[i].name==e.name)
-        {
-            v[i]=e;
-            return;
-        }
-    }
-
-    v.push_back(e);
-}
-
 bool shader_code_parser::parse_predefined_uniforms(const char *replace_prefix_str,bool replace)
 {
     if(!replace_prefix_str)
@@ -537,6 +543,9 @@ bool shader_code_parser::parse_predefined_uniforms(const char *replace_prefix_st
         else if(find_variable(gl_matrix_names[i]))
             push_unique_to_vec(m_uniforms,variable(type_mat4,to.c_str(),1));
     }
+
+    if(!m_flip_y_uniform.empty())
+        push_unique_to_vec(m_uniforms,variable(type_float,m_flip_y_uniform.c_str(),1));
 
     return true;
 }

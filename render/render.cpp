@@ -354,6 +354,11 @@ public:
         rdesc d;
         d.cull=current_state.cull_face;
         d.cull_order=current_state.cull_order;
+
+        //flip cull order when flipping y
+        if(!dx_is_default_target())
+            d.cull_order=(current_state.cull_order==cull_face::ccw?cull_face::cw:cull_face::ccw);
+
         d.scissor=current_state.scissor_test;
 
         get_context()->RSSetState(get(d));
@@ -705,7 +710,7 @@ void apply_viewport_scissor(bool ignore_cache)
 
 #ifdef DIRECTX11
     int h=dx_get_target_height();
-    const int vp_y=h-viewport_rect.y-viewport_rect.height;
+    const int vp_y=dx_is_default_target()?(h-viewport_rect.y-viewport_rect.height):viewport_rect.y;
     if(viewport_rect.x!=viewport_applied_rect.x || vp_y!=viewport_applied_rect.y
        || viewport_rect.width!=viewport_applied_rect.width || viewport_rect.height!=viewport_applied_rect.height
        || ignore_cache)
@@ -725,19 +730,25 @@ void apply_viewport_scissor(bool ignore_cache)
         D3D11_RECT r;
         r.left=scissor_rect.x;
         r.right=scissor_rect.x+scissor_rect.width;
-        r.top=h-scissor_rect.y-scissor_rect.height;
+        r.top=dx_is_default_target()?(h-scissor_rect.y-scissor_rect.height):scissor_rect.y;
         r.bottom=h-scissor_rect.y;
         get_context()->RSSetScissorRects(1,&r);
     }
 
-    if(c.cull_order!=a.cull_order || c.cull_face!=a.cull_face
+    //flip cull order when flipping y
+    cull_face::order cull_order=c.cull_order;
+    if(!dx_is_default_target())
+        cull_order=(c.cull_order==cull_face::ccw?cull_face::cw:cull_face::ccw);
+
+    if(cull_order!=a.cull_order || c.cull_face!=a.cull_face
        || c.scissor_test!=a.scissor_test || ignore_cache)
     {
         rasterizer_state.apply();
-        a.cull_order=c.cull_order;
+        a.cull_order=cull_order;
         a.cull_face=c.cull_face;
         a.scissor_test=c.scissor_test;
     }
+
 #else
     if(c.scissor_test!=a.scissor_test || ignore_cache)
     {

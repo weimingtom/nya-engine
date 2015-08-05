@@ -175,6 +175,7 @@ namespace nya_render
 
     dx_target dx_get_default_target();
     dx_target dx_get_target();
+    bool dx_is_default_target();
     int dx_get_target_height();
 
     void dx_set_target(ID3D11RenderTargetView *color,ID3D11DepthStencilView *depth,bool default=false);
