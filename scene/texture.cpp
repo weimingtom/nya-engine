@@ -71,13 +71,13 @@ bool texture::load_ktx(shared_texture &res,resource_data &data,const char* name)
         default: nya_log::log()<<"unable to load ktx: unsupported color format in file "<<name<<"\n"; return false;
     }
 
-    const int mip_off=m_load_ktx_mip_offset>=ktx.mipmap_count?0:m_load_ktx_mip_offset;
+    const int mip_off=m_load_ktx_mip_offset>=int(ktx.mipmap_count)?0:m_load_ktx_mip_offset;
     char *d=(char *)ktx.data;
     nya_memory::memory_reader r(ktx.data,ktx.data_size);
     for(unsigned int i=0;i<ktx.mipmap_count;++i)
     {
         const unsigned int size=r.read<unsigned int>();
-        if(i>=mip_off)
+        if(int(i)>=mip_off)
         {
             memmove(d,r.get_data(),size);
             d+=size;

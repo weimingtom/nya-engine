@@ -496,7 +496,7 @@ size_t dds::decode_header(const void *data,size_t size)
 
 size_t dds::get_mip_size(int mip_idx) const
 {
-    if(mip_idx<0 || mip_idx>=mipmap_count)
+    if(mip_idx<0 || mip_idx>=int(mipmap_count))
        return 0;
 
     const unsigned int w1=width>>mip_idx, h1=height>>mip_idx;

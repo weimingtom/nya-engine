@@ -320,7 +320,8 @@ class rasterizer_state_class
 
     ID3D11RasterizerState *get(const rdesc &d)
     {
-        cache_map::iterator it=m_map.find(d);
+        const unsigned int hsh=d.cull?1:0 + d.scissor?2:0 + d.cull_order*4;
+        cache_map::iterator it=m_map.find(hsh);
         if(it!=m_map.end())
             return it->second;
 
@@ -341,7 +342,7 @@ class rasterizer_state_class
         desc.ScissorEnable=d.scissor;
         ID3D11RasterizerState *state;
         get_device()->CreateRasterizerState(&desc,&state);
-        m_map[d]=state;
+        m_map[hsh]=state;
         return state;
     }
 
@@ -376,26 +377,12 @@ public:
 private:
     struct rdesc
     {
-        bool operator < (const rdesc &d) const
-        {
-            if(cull < d.cull)
-                return true;
-
-            if(scissor < d.scissor)
-                return true;
-            
-            if(cull_order < d.cull_order)
-                return true;
-
-            return false;
-        }
-
         bool cull;
         cull_face::order cull_order;
         bool scissor;
     };
 
-    typedef std::map<rdesc,ID3D11RasterizerState*> cache_map;
+    typedef std::map<unsigned int,ID3D11RasterizerState*> cache_map;
     cache_map m_map;
 
 } rasterizer_state;
@@ -717,11 +704,11 @@ void apply_viewport_scissor(bool ignore_cache)
     {
         D3D11_VIEWPORT vp;
         vp.Width=FLOAT(viewport_applied_rect.width=viewport_rect.width);
-        viewport_applied_rect.height = vp.Height = (FLOAT)viewport_rect.height;
+        viewport_applied_rect.height = int(vp.Height = (FLOAT)viewport_rect.height);
         vp.MinDepth = 0.0f;
         vp.MaxDepth = 1.0f;
-        viewport_applied_rect.x = vp.TopLeftX = (FLOAT)viewport_rect.x;
-        viewport_applied_rect.y = vp.TopLeftY = (FLOAT)vp_y;
+        viewport_applied_rect.x = int(vp.TopLeftX = (FLOAT)viewport_rect.x);
+        viewport_applied_rect.y = int(vp.TopLeftY = (FLOAT)vp_y);
         get_context()->RSSetViewports(1,&vp);
     }
 

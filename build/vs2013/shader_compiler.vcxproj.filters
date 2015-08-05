@@ -34,5 +34,13 @@
     <ClCompile Include="..\..\resources\resources.cpp">
       <Filter>Source Files\nya</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\log\output_stream.cpp">
+      <Filter>Source Files\nya</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\log\output_stream.h">
+      <Filter>Source Files\nya</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
