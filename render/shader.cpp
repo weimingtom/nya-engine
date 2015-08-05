@@ -831,8 +831,6 @@ void shader::apply(bool ignore_cache)
             if(shdr.constants.y_flip>=0)
                 shdr.constants.buffer[shdr.constants.y_flip]=dx_is_default_target()?1.0f:-1.0f;
 
-printf("%d %f\n",shdr.constants.y_flip,shdr.constants.buffer[shdr.constants.y_flip]);
-
             get_context()->UpdateSubresource(shdr.constants.dx_buffer,0,NULL,&shdr.constants.buffer[0],0,0);
         }
 
