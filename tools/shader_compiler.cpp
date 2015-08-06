@@ -161,7 +161,7 @@ bool generate_cache( const char* dir_from,  const char* dir_to, bool recursive )
 
         for(int j=0;j<2;++j)
         {
-            nya_render::shader_code_parser parser(code[j].c_str());
+            nya_render::shader_code_parser parser(code[j].c_str(),"_nya_","_nya_flip_y_");
             if(!parser.convert_to_hlsl())
             {
                 fprintf(stderr,"Error: cannot convert to hlsl\n");
@@ -228,7 +228,7 @@ int main(int argc, char* argv[])
 
     if(strcmp(argv[1],"glsl2hlsl")==0)
     {
-        nya_render::shader_code_parser parser(shader_code.c_str());
+        nya_render::shader_code_parser parser(shader_code.c_str(),"_nya_","_nya_flip_y_");
         if(!parser.convert_to_hlsl())
         {
             fprintf(stderr,"Error: cannot convert to hlsl\n");
