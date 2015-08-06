@@ -312,6 +312,26 @@ state get_overriden_state(const state &s)
     return r;
 }
 
+inline const state &get_current_state()
+{
+#ifdef DIRECTX11
+    static state s;
+    s=has_state_override?get_overriden_state(current_state):current_state;
+
+    //flip cull order when flipping y
+    if(!dx_is_default_target())
+        s.cull_order=(s.cull_order==cull_face::ccw ? cull_face::cw : cull_face::ccw);
+#else
+    if(!has_state_override)
+        return current_state;
+
+    static state s;
+    s=get_overriden_state(current_state);
+#endif
+
+    return s;
+}
+
 #ifdef DIRECTX11
 
 class rasterizer_state_class
@@ -352,15 +372,12 @@ public:
         if(!get_device() || !get_context())
             return;
 
+        auto &c=get_current_state();
+
         rdesc d;
-        d.cull=current_state.cull_face;
-        d.cull_order=current_state.cull_order;
-
-        //flip cull order when flipping y
-        if(!dx_is_default_target())
-            d.cull_order=(current_state.cull_order==cull_face::ccw?cull_face::cw:cull_face::ccw);
-
-        d.scissor=current_state.scissor_test;
+        d.cull=c.cull_face;
+        d.cull_order=c.cull_order;
+        d.scissor=c.scissor_test;
 
         get_context()->RSSetState(get(d));
     }
@@ -449,16 +466,18 @@ public:
         if(!get_device() || !get_context())
             return;
 
-        if(!current_state.blend)
+        auto &c=get_current_state();
+
+        if(!c.blend)
         {
-            get_context()->OMSetBlendState(0,0,current_state.color_write?0xffffffff:0);
+            get_context()->OMSetBlendState(0,0,c.color_write?0xffffffff:0);
             return;
         }
 
-        ID3D11BlendState *state=get(dx_blend_mode(current_state.blend_src),
-                                                        dx_blend_mode(current_state.blend_dst));
+        ID3D11BlendState *state=get(dx_blend_mode(c.blend_src),
+                                                        dx_blend_mode(c.blend_dst));
         const float blend_factor[]={1.0f,1.0f,1.0f,1.0f};
-        get_context()->OMSetBlendState(state,blend_factor,current_state.color_write?0xffffffff:0);
+        get_context()->OMSetBlendState(state,blend_factor,c.color_write?0xffffffff:0);
     }
 
     void release()
@@ -519,8 +538,10 @@ public:
         if(!get_device() || !get_context())
             return;
 
+        auto &c=get_current_state();
+
         D3D11_COMPARISON_FUNC dx_depth_comparsion=D3D11_COMPARISON_ALWAYS;
-        switch(current_state.depth_comparsion)
+        switch(c.depth_comparsion)
         {
             case depth_test::never: dx_depth_comparsion=D3D11_COMPARISON_NEVER; break;
             case depth_test::less: dx_depth_comparsion=D3D11_COMPARISON_LESS; break;
@@ -532,7 +553,7 @@ public:
             case depth_test::allways: dx_depth_comparsion=D3D11_COMPARISON_ALWAYS; break;
         }
 
-        ID3D11DepthStencilState *state=get(current_state.depth_test,current_state.zwrite,dx_depth_comparsion);
+        ID3D11DepthStencilState *state=get(c.depth_test,c.zwrite,dx_depth_comparsion);
         get_context()->OMSetDepthStencilState(state,1);
     }
 
@@ -578,7 +599,7 @@ void apply_state(bool ignore_cache)
 {
     DIRECTX11_ONLY(if(!get_context() || !get_device()) return);
 
-    const state &c=has_state_override?get_overriden_state(current_state):current_state;
+    const state &c=get_current_state();
     state &a=applied_state;
 
     static bool first_time=true;
@@ -690,13 +711,14 @@ void apply_state(bool ignore_cache)
 
 void apply_viewport_scissor(bool ignore_cache)
 {
-    DIRECTX11_ONLY(if(!get_context() || !get_device()) return);
-
-    const state &c=has_state_override?get_overriden_state(current_state):current_state;
+    const state &c=get_current_state();
     state &a=applied_state;
 
 #ifdef DIRECTX11
-    int h=dx_get_target_height();
+    if(!get_context() || !get_device())
+        return;
+
+    const int h=dx_get_target_height();
     const int vp_y=dx_is_default_target()?(h-viewport_rect.y-viewport_rect.height):viewport_rect.y;
     if(viewport_rect.x!=viewport_applied_rect.x || vp_y!=viewport_applied_rect.y
        || viewport_rect.width!=viewport_applied_rect.width || viewport_rect.height!=viewport_applied_rect.height
@@ -722,16 +744,11 @@ void apply_viewport_scissor(bool ignore_cache)
         get_context()->RSSetScissorRects(1,&r);
     }
 
-    //flip cull order when flipping y
-    cull_face::order cull_order=c.cull_order;
-    if(!dx_is_default_target())
-        cull_order=(c.cull_order==cull_face::ccw?cull_face::cw:cull_face::ccw);
-
-    if(cull_order!=a.cull_order || c.cull_face!=a.cull_face
+    if(c.cull_order!=a.cull_order || c.cull_face!=a.cull_face
        || c.scissor_test!=a.scissor_test || ignore_cache)
     {
         rasterizer_state.apply();
-        a.cull_order=cull_order;
+        a.cull_order=c.cull_order;
         a.cull_face=c.cull_face;
         a.scissor_test=c.scissor_test;
     }
