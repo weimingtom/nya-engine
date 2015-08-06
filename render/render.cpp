@@ -340,7 +340,7 @@ class rasterizer_state_class
 
     ID3D11RasterizerState *get(const rdesc &d)
     {
-        const unsigned int hsh=d.cull?1:0 + d.scissor?2:0 + d.cull_order*4;
+        const unsigned int hsh=(d.cull?1:0) + (d.scissor?2:0) + d.cull_order*4;
         cache_map::iterator it=m_map.find(hsh);
         if(it!=m_map.end())
             return it->second;
