@@ -40,6 +40,8 @@ namespace
   #endif
 
   #ifdef OPENGL_ES
+    #define MANUAL_MIPMAP_GENERATION
+
     #define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT 0x83F1
     #define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT 0x83F2
     #define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83F3
@@ -747,52 +749,79 @@ bool texture::build_texture(const void *data_a[6],bool is_cubemap,unsigned int w
         glTexParameteri(gl_type,GL_TEXTURE_MAX_LEVEL,mip_count-1);
 #endif
 
+#ifndef MANUAL_MIPMAP_GENERATION
     if(has_mipmap && mip_count<0)
         gl_generate_mips_pre(gl_type);
+#endif
 
     for(int j=0;j<(is_cubemap?6:1);++j)
     {
         const char *data_pointer=data_a?(const char*)data_a[j]:0;
         unsigned int w=width,h=height;
-        for(int i=0;i<(mip_count<=0?1:mip_count);++i,w=w>1?w/2:1,h=h>1?h/2:1)
+        const int gl_type=is_cubemap?cube_faces[j]:GL_TEXTURE_2D;
+
+#ifdef MANUAL_MIPMAP_GENERATION
+        if(format<dxt1 && mip_count<0 && data_pointer)
         {
-            const int gl_type=is_cubemap?cube_faces[j]:GL_TEXTURE_2D;
-            unsigned int size=0;
-            if(format<dxt1)
+            nya_memory::tmp_buffer_scoped buf(w*h*(source_bpp/8)/2);
+            for(int i=0;;++i,w=w>1?w/2:1,h=h>1?h/2:1)
             {
-                size=w*h*(source_bpp/8);
                 if(need_create || is_cubemap)
                     glTexImage2D(gl_type,i,source_format,w,h,0,gl_format,precision,data_pointer);
                 else
                     glTexSubImage2D(gl_type,i,0,0,w,h,gl_format,precision,data_pointer);
-            }
-            else
-            {
-                if(is_pvrtc)
-                {
-                    if(format==pvr_rgb2b || format==pvr_rgba2b)
-                        size=((w>16?w:16)*(h>8?h:8)*2 + 7)/8;
-                    else
-                        size=((w>8?w:8)*(h>8?h:8)*4 + 7)/8;
 
-                    if(size<32)
-                        break;
+                if(w==1 && h==1)
+                    break;
+
+                downsample(data_pointer,buf.get_data(),w,h,source_bpp/8);
+                data_pointer=(char *)buf.get_data();
+            }
+        }
+        else
+#endif
+        {
+            for(int i=0;i<(mip_count<=0?1:mip_count);++i,w=w>1?w/2:1,h=h>1?h/2:1)
+            {
+                unsigned int size=0;
+                if(format<dxt1)
+                {
+                    size=w*h*(source_bpp/8);
+                    if(need_create || is_cubemap)
+                        glTexImage2D(gl_type,i,source_format,w,h,0,gl_format,precision,data_pointer);
+                    else
+                        glTexSubImage2D(gl_type,i,0,0,w,h,gl_format,precision,data_pointer);
                 }
                 else
-                    size=(w>4?w:4)/4 * (h>4?h:4)/4 * source_bpp*2;
+                {
+                    if(is_pvrtc)
+                    {
+                        if(format==pvr_rgb2b || format==pvr_rgba2b)
+                            size=((w>16?w:16)*(h>8?h:8)*2 + 7)/8;
+                        else
+                            size=((w>8?w:8)*(h>8?h:8)*4 + 7)/8;
 
-                glCompressedTexImage2D(gl_type,i,gl_format,w,h,0,size,data_pointer);
+                        if(size<32)
+                            break;
+                    }
+                    else
+                        size=(w>4?w:4)/4 * (h>4?h:4)/4 * source_bpp*2;
+
+                    glCompressedTexImage2D(gl_type,i,gl_format,w,h,0,size,data_pointer);
+                }
+
+                data_pointer+=size;
             }
-
-            data_pointer+=size;
         }
     }
 
     if(bad_alignment)
         glPixelStorei(GL_UNPACK_ALIGNMENT,4);
 
+#ifndef MANUAL_MIPMAP_GENERATION
     if(has_mipmap && mip_count<0)
         gl_generate_mips_post(gl_type);
+#endif
 
   #ifdef __ANDROID__
     temp_buf.free();
@@ -861,7 +890,7 @@ bool texture::update_region(const void *data,unsigned int x,unsigned int y,unsig
 
     if(update_all_mips)
     {
-        nya_memory::tmp_buffer_scoped buf(width*pitch);
+        nya_memory::tmp_buffer_scoped buf(width*pitch/2);
         const void *prev_data=data;
         for(int i=1;i<t.mip_count;++i)
         {
@@ -883,6 +912,8 @@ bool texture::update_region(const void *data,unsigned int x,unsigned int y,unsig
 
     if(update_all_mips)
         gl_generate_mips_pre(t.gl_type);
+
+    //ToDo: MANUAL_MIPMAP_GENERATION
 
     const int precision=(t.format==color_rgb32f || t.format==color_rgba32f)?GL_FLOAT:GL_UNSIGNED_BYTE;
     glTexSubImage2D(t.gl_type,mip,x,y,width,height,t.gl_format,precision,data);
