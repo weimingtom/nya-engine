@@ -194,6 +194,21 @@ bool text_parser::load_from_data(const char *text,size_t text_size)
     if(!text_size)
         return false;
 
+    //removing comments
+    std::string uncommented_text(text,text_size);
+    while(uncommented_text.find("//")!=std::string::npos)
+    {
+        const size_t from=uncommented_text.find("//");
+        uncommented_text.erase(from,uncommented_text.find_first_of("\n\r",from+1)-from);
+    }
+    while(uncommented_text.find("/*")!=std::string::npos)
+    {
+        const size_t from=uncommented_text.find("/*");
+        uncommented_text.erase(from,(uncommented_text.find("*/",from+2)-from)+2);
+    }
+    text=uncommented_text.c_str();
+    text_size=uncommented_text.size();
+
     size_t global_count=0;
     line l=line::first(text,text_size);
     while(l.next()) if(l.global) ++global_count;
