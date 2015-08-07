@@ -23,9 +23,9 @@ namespace
     rect viewport_rect;
     DIRECTX11_ONLY(rect viewport_applied_rect);
     rect scissor_rect;
+    bool scissor_test=false,applied_scissor_test=false;
 
-	float clear_color[4]={0.0f};
-	float clear_depth=1.0f;
+	float clear_color[4]={0.0f},clear_depth=1.0f;
 }
 
 void set_log(nya_log::log_base *l)
@@ -259,7 +259,7 @@ void color_write::disable()
 
 void scissor::enable(int x,int y,int w,int h,bool ignore_cache)
 {
-    current_state.scissor_test=true;
+    scissor_test=true;
 
 #ifndef DIRECTX11
     if(!ignore_cache &&
@@ -274,10 +274,10 @@ void scissor::enable(int x,int y,int w,int h,bool ignore_cache)
 
 void scissor::disable()
 {
-    current_state.scissor_test=false;
+    scissor_test=false;
 }
 
-bool scissor::is_enabled() { return current_state.scissor_test; }
+bool scissor::is_enabled() { return scissor_test; }
 const rect &scissor::get() { return scissor_rect; }
 
 void set_state(const state &s) { current_state=s; }
@@ -377,7 +377,7 @@ public:
         rdesc d;
         d.cull=c.cull_face;
         d.cull_order=c.cull_order;
-        d.scissor=c.scissor_test;
+        d.scissor=scissor_test;
 
         get_context()->RSSetState(get(d));
     }
@@ -711,12 +711,12 @@ void apply_state(bool ignore_cache)
 
 void apply_viewport_scissor(bool ignore_cache)
 {
-    const state &c=get_current_state();
-    state &a=applied_state;
-
 #ifdef DIRECTX11
     if(!get_context() || !get_device())
         return;
+
+    const state &c=get_current_state();
+    state &a=applied_state;
 
     const int h=dx_get_target_height();
     const int vp_y=dx_is_default_target()?(h-viewport_rect.y-viewport_rect.height):viewport_rect.y;
@@ -734,7 +734,7 @@ void apply_viewport_scissor(bool ignore_cache)
         get_context()->RSSetViewports(1,&vp);
     }
 
-    if(c.scissor_test || ignore_cache) //ToDo: cache
+    if(scissor_test || ignore_cache) //ToDo: cache
     {
         D3D11_RECT r;
         r.left=scissor_rect.x;
@@ -745,23 +745,23 @@ void apply_viewport_scissor(bool ignore_cache)
     }
 
     if(c.cull_order!=a.cull_order || c.cull_face!=a.cull_face
-       || c.scissor_test!=a.scissor_test || ignore_cache)
+       || scissor_test!=applied_scissor_test || ignore_cache)
     {
         rasterizer_state.apply();
         a.cull_order=c.cull_order;
         a.cull_face=c.cull_face;
-        a.scissor_test=c.scissor_test;
+        applied_scissor_test=scissor_test;
     }
 
 #else
-    if(c.scissor_test!=a.scissor_test || ignore_cache)
+    if(scissor_test!=applied_scissor_test || ignore_cache)
     {
-        if(c.scissor_test)
+        if(scissor_test)
             glEnable(GL_SCISSOR_TEST);
         else
             glDisable(GL_SCISSOR_TEST);
 
-        a.scissor_test=c.scissor_test;
+        applied_scissor_test=scissor_test;
     }
 #endif
 }

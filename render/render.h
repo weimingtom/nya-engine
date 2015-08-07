@@ -138,8 +138,6 @@ struct state
     bool depth_test;
     depth_test::comparsion depth_comparsion;
 
-    bool scissor_test;
-
     bool zwrite;
     bool color_write;
 
@@ -153,8 +151,6 @@ struct state
 
         depth_test(true),
         depth_comparsion(depth_test::less),
-
-        scissor_test(false),
 
         zwrite(true),
         color_write(true)
