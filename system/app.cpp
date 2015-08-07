@@ -720,7 +720,8 @@ private:
 
 		case VK_CAPITAL: return nya_system::key_capital;
 		case VK_ESCAPE: return nya_system::key_escape;
-		case VK_RETURN: return nya_system::key_return;
+        case VK_SPACE: return nya_system::key_space;
+        case VK_RETURN: return nya_system::key_return;
 
 		case VK_END: return nya_system::key_end;
 		case VK_HOME: return nya_system::key_home;
